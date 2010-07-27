@@ -4,6 +4,8 @@
 
 from app.config import *
 import sys
+import os, os.path
+import shutil
 sys.path.append(APP_ABS_PATH)
 import pygtk
 pygtk.require('2.0')
@@ -19,6 +21,7 @@ import os
 
 
 XMLFILE = 'default.xml'
+SRCDIR = './fortran_src'
 
 class KMC_Model():
     def __init__(self, meta={}, lattices=[], parameters=[], processes=[], species=[]):
@@ -33,17 +36,32 @@ class KMC_Model():
         reparsed = minidom.parseString(rough_string)
         return reparsed.toprettyxml(indent='    ')
 
-    def export_source(self):
-	pass
+    def export_source(self, dir=''):
+        if not dir:
+            dir = SRCDIR
+        if os.path.exists(dir):
+            shutil.rmtree(dir)
+        os.mkdir(dir)
+
+        # create new files
+        shutil.copy(APP_ABS_PATH + '/libkmc.f90', dir)
+
+        lattice_source = open(APP_ABS_PATH + '/lattice_template.f90').read()
+        lattice_source = lattice_source % {'lattice_name': self.lattices[0]['name'] }
+        # more processing steps ...
+
+        lattice_mod_file = open(dir + '/lattice.f90','w')
+        lattice_mod_file.write(lattice_source)
+        lattice_mod_file.close()
+        # return directory name
+        return dir
 
     def process_list_module_source(self):
-	pass
+        pass
 	
     def lattice_module_source(self):
-	pass
+        pass
 
-    def libkmc_module_source(self):
-	pass
 
 
     def import_xml(self, filename):
@@ -205,18 +223,20 @@ class MainWindow():
         self.new_process = {}
 
     def import_xml(self, widget):
-	self.new_process = {}
-	kmc_model = KMC_Model()
-	kmc_model.import_xml(XMLFILE)
-	self.lattices, self.meta, self.parameters, self.processes, self.species = kmc_model.get_configuration()
+        self.new_process = {}
+        kmc_model = KMC_Model()
+        kmc_model.import_xml(XMLFILE)
+        self.lattices, self.meta, self.parameters, self.processes, self.species = kmc_model.get_configuration()
 
     def export_xml(self, widget):
-	kmc_model = KMC_Model(self.lattices, self.meta, self.parameters, self.processes, self.species)
-	kmc_model.export_xml(XMLFILE)
-        self.statbar.push(1,'Minimal version implemented!')
+        kmc_model = KMC_Model(self.lattices, self.meta, self.parameters, self.processes, self.species)
+        kmc_model.export_xml(XMLFILE)
+        del(kmc_model)
 
 
     def export_source(self, widget):
+        kmc_model = KMC_Model(self.lattices, self.meta, self.parameters, self.processes, self.species)
+        print(kmc_model.export_source())
         self.statbar.push(1,'Not implemented yet!')
 
     def export_program(self, widget):

@@ -9,19 +9,19 @@
         <parameter name="E_oxygen_cus" type="float" value="1.1"/>
     </parameter_list>
     <lattice_list>
-        <lattice name="default" unit_cell_size="1 1">
+        <lattice name="ruo2" unit_cell_size="1 1">
             <site coord="0 0" index="0" type="default"/>
         </lattice>
     </lattice_list>
     <process_list>
-        <process center_site="0 0 0 0" name="oxygen_adsorption" rate_constant="2134">
+        <process center_site="0 0 0 0 0 0" name="oxygen_adsorption" rate_constant="2134">
             <condition coord="0 0 0 0" species="oxygen"/>
             <condition coord="0 0 0 0" species="empty"/>
             <condition coord="1 0 0 0" species="empty"/>
             <action coord="0 0 0 0" species="oxygen"/>
             <action coord="1 0 0 0" species="oxygen"/>
         </process>
-        <process center_site="0 0" name="oxygen_diffusion_left" rate_constant="34634">
+        <process center_site="0 0 0 0" name="oxygen_diffusion_left" rate_constant="34634">
             <condition coord="0 0 0 0" species="oxygen"/>
             <condition coord="-1 0 0 0" species="empty"/>
             <action coord="0 0 0 0" species="empty"/>
