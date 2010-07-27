@@ -45,10 +45,14 @@ class KMC_Model():
 
         # create new files
         shutil.copy(APP_ABS_PATH + '/libkmc.f90', dir)
+        shutil.copy(APP_ABS_PATH + '/kind_values.f90', dir)
 
         lattice_source = open(APP_ABS_PATH + '/lattice_template.f90').read()
-        lattice_source = lattice_source % {'lattice_name': self.lattices[0]['name'] }
         # more processing steps ...
+	species_definition = "integer(kind=iint), public, parameter :: &\n "
+	for species in self.species:
+		species_definition += '    %(species)  %(id), &\n ' % {'species':species['species'],'id':species['id']}
+	#lattice_source = lattice_source % {'lattice_name': self.lattices[0]['name'], 'species_definition':species_definition}
 
         lattice_mod_file = open(dir + '/lattice.f90','w')
         lattice_mod_file.write(lattice_source)

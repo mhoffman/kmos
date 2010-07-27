@@ -83,8 +83,8 @@ end type tuple
 
 integer(kind=iint), dimension(2), public :: system_size
 
-{species_definition}
-{lookup_table_initialization}
+%(species_definition)
+(lookup_table_initialization)
 
 
 contains
