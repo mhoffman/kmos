@@ -9,8 +9,16 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import gtk.glade
+# XML handling
+from lxml import etree as ET
+#Need to pretty print XML
+from xml.dom import minidom
+
 
 import os
+
+
+XMLFILE = 'default.xml'
 
 
 class DrawingArea:
@@ -100,11 +108,11 @@ class DrawingArea:
             if result == gtk.RESPONSE_OK:
                 if data['type'] == 'remove':
                     for site in self.sites:
-                        if site['x'] == data['x'] and site['y'] == data['y']:
+                        if site['coord'][0] == data['coord'][0] and site['coord'][1] == data['coord'][1]:
                             self.sites.remove(site)
                 else:
                     for site in self.sites:
-                        if site['x'] == data['x'] and site['y'] == data['y']:
+                        if site['coord'][0] == data['coord'][0] and site['coord'][1] == data['coord'][1]:
                             self.sites.remove(site)
                     self.sites.append(data)
                 # Redraw dots
@@ -114,7 +122,7 @@ class DrawingArea:
                         center.append(self.corner1[0] + i*(self.corner2[0]-self.corner1[0])/self.unit_cell_size[0] - 5)
                         center.append(self.corner2[1] - j*(self.corner2[1]-self.corner1[1])/self.unit_cell_size[1] - 5)
                         for site in self.sites:
-                            if (i % self.unit_cell_size[0]) == site['x'] and (j % self.unit_cell_size[1]) == site['y']:
+                            if (i % self.unit_cell_size[0]) == site['coord'][0] and (j % self.unit_cell_size[1]) == site['coord'][1]:
                                 self.pixmap.draw_arc(widget.get_style().black_gc, True, center[0], center[1], 10, 10, 0, 64*360)
                                 break
                         else:
@@ -130,6 +138,8 @@ class DrawingArea:
         self.callback(self)
         self.window.destroy()
         #gtk.main_quit()
+
+
 
 
 class DialogAddParameter():
@@ -231,8 +241,7 @@ class DialogDefineSite():
         result = self.dialog_site.run()
         # extract fields
         data = {}
-        data['x'] = site_x.get_value_as_int()
-        data['y'] = site_y.get_value_as_int()
+        data['coord'] = site_x.get_value_as_int(), site_y.get_value_as_int()
         data['index'] = index_field.get_value_as_int()
         data['type'] = type_field.get_text()
         # close
@@ -247,12 +256,8 @@ class MainWindow():
         self.window = self.wtree.get_widget('wndMain')
         self.statbar = self.wtree.get_widget('stb_process_editor')
         self.da_widget = self.wtree.get_widget('dwLattice')
-        self.lattices = []
-        self.processes = []
-        self.parameters = []
+        self.initialize_data()
         self.keywords = ['exp','sin','cos','sqrt','log']
-        self.species = []
-        self.new_process = {}
         dic = {'on_btnAddLattice_clicked' : self.new_lattice ,
                 'on_btnMainQuit_clicked' : lambda w: gtk.main_quit(),
                 'on_btnAddParameter_clicked': self.add_parameter,
@@ -274,11 +279,133 @@ class MainWindow():
         self.statbar.push(1,'Add a new lattice first.')
         self.lattice_ready = False
 
+    def initialize_data(self):
+        self.meta = {}
+        self.lattices = []
+        self.processes = []
+        self.parameters = []
+        self.species = []
+        self.new_process = {}
+
     def import_xml(self, widget):
-        self.statbar.push(1,'Not implemented yet!')
+        self.initialize_data()
+        xmlparser = ET.XMLParser(remove_comments=True)
+        root = ET.parse(XMLFILE, parser=xmlparser).getroot()
+        for child in root:
+            if child.tag == 'meta':
+                for attrib in ['author','email', 'debug','model_name','model_dimension']:
+                    if child.attrib.has_key(attrib):
+                        self.meta[attrib] = child.attrib[attrib]
+            elif child.tag == 'species_list':
+                for species in child:
+                    species_elem = {}
+                    for attrib in ['color','id','species']:
+                        species_elem[attrib] = species.attrib[attrib]
+                    self.species.append(species_elem)
+            elif child.tag == 'parameter_list':
+                for parameter in child:
+                    parameter_elem = {}
+                    for attrib in ['name','type','value']:
+                        parameter_elem[attrib] = parameter.attrib[attrib]
+                    self.parameters.append(parameter_elem)
+            elif child.tag == 'lattice_list':
+                for lattice in child:
+                    lattice_elem = {}
+                    lattice_elem['name'] = lattice.attrib['name']
+                    lattice_elem['unit_cell_size'] = [ int(x) for x in lattice.attrib['unit_cell_size'].split() ]
+                    lattice_elem['sites'] = []
+                    for site in lattice:
+                        site_elem = {}
+                        site_elem['index'] = int(site.attrib['index'])
+                        site_elem['type'] = site.attrib['type']
+                        site_elem['coord'] = [ int(x) for x in site.attrib['coord'].split() ]
+                    lattice_elem['sites'].append(site_elem)
+                    self.lattices.append(lattice_elem)
+
+            elif child.tag == 'process_list':
+                for process in child:
+                    process_elem = {}
+                    process_elem['center_site'] = [0, 0] + [ int(x) for x in  process.attrib['center_site'].split() ]
+                    process_elem['name'] = process.attrib['name']
+                    process_elem['rate_constant'] = process.attrib['rate_constant']
+                    process_elem['conditions'] = []
+                    process_elem['actions'] = []
+                    for sub in process:
+                        if sub.tag == 'action' or sub.tag == 'condition':
+                            sub_elem = [ sub.attrib['species'], [ int(x) for x in sub.attrib['coord'].split() ] ]
+                            if sub.tag == 'action':
+                                process_elem['actions'].append(sub_elem)
+                            elif sub.tag == 'condition':
+                                process_elem['conditions'].append(sub_elem)
+                    self.processes.append(process_elem)
+
+
+        print("META: ", self.meta)
+        print("LATTICES: ", self.lattices)
+        print("SPECIES: ", self.species)
+        print("PARAMETERS: ", self.parameters)
+        print("PROCESSES: ", self.processes)
 
     def export_xml(self, widget):
-        self.statbar.push(1,'Not implemented yet!')
+        # build XML Tree
+        root = ET.Element('kmc')
+        meta = ET.SubElement(root,'meta')
+        for key in self.meta:
+            meta.set(key,str(self.meta[key]))
+        species_list = ET.SubElement(root,'species_list')
+        for species in self.species:
+            species_elem = ET.SubElement(species_list,'species')
+            for attr in species:
+                species_elem.set(attr,species[attr])
+
+        parameter_list = ET.SubElement(root,'parameter_list')
+        for parameter in self.parameters:
+            parameter_elem = ET.SubElement(parameter_list, 'parameter')
+            for attrib in ['name','type','value']:
+                parameter_elem.set(attrib,parameter[attrib])
+        for process in self.processes:
+            pass
+        lattice_list = ET.SubElement(root, 'lattice_list')
+        for lattice in self.lattices:
+            lattice_elem = ET.SubElement(lattice_list,'lattice')
+            lattice_elem.set('unit_cell_size', str(lattice['unit_cell_size'])[1 :-1].replace(',',''))
+            lattice_elem.set('name', lattice['name'])
+            for site in lattice['sites']:
+                site_elem = ET.SubElement(lattice_elem, 'site')
+                site_elem.set('index',str(site['index']))
+                site_elem.set('type',site['type'])
+                site_elem.set('coord',str(site['coord'])[1 :-1].replace(',',''))
+        process_list = ET.SubElement(root, 'process_list')
+        for process in self.processes:
+            process_elem = ET.SubElement(process_list,'process')
+            process_elem.set('rate_constant', process['rate_constant'])
+            process_elem.set('name', process['name'])
+            process_elem.set('center_site', str(process['center_site'])[1 :-1].replace(',',''))
+            for condition in process['conditions']:
+                condition_elem = ET.SubElement(process_elem, 'condition')
+                condition_elem.set('species', condition[0])
+                condition_elem.set('coord', str(condition[1])[1 :-1].replace(',', ''))
+            for action in process['actions']:
+                action_elem = ET.SubElement(process_elem, 'action')
+                action_elem.set('species', action[0])
+                action_elem.set('coord', str(action[1])[1 :-1].replace(',',''))
+
+
+        #Write Out XML File
+        tree = ET.ElementTree(root)
+        outfile = open(XMLFILE,'w')
+        outfile.write(self.prettify_xml(root))
+        outfile.write('<!-- This is an automatically generated XML file, representing one kMC mode ' + \
+                        'please do not change this unless you know what you are doing -->\n')
+        outfile.close()
+        print(self.prettify_xml(root))
+
+        self.statbar.push(1,'Minimal version implemented!')
+
+    def prettify_xml(self, elem):
+        rough_string = ET.tostring(elem,encoding='utf-8')
+        reparsed = minidom.parseString(rough_string)
+        return reparsed.toprettyxml(indent='    ')
 
     def export_source(self, widget):
         self.statbar.push(1,'Not implemented yet!')
@@ -302,7 +429,7 @@ class MainWindow():
                     for x in range(unit_x):
                         for y in range(unit_y):
                             for site in lattice['sites']:
-                                if site['x'] == x and site['y'] == y:
+                                if site['coord'][0] == x and site['coord'][1] == y:
                                     center = []
                                     coordx = int((i+ float(x)/unit_x)*width/zoom)
                                     coordy = int(height - (j+ float(y)/unit_y)*height/zoom)
@@ -321,10 +448,24 @@ class MainWindow():
                                         self.species_menu.popup(None, None, None, event.button, event.time)
 
 
+    def add_meta_information(self):
+        dlg_meta_info = DialogMetaInformation()
+        result, data = dlg_meta_info.run()
+        if result == gtk.RESPONSE_OK:
+            for key in data:
+                self.meta[key] = data[key]
+            self.statbar.push(1,'Meta information added')
+        else:
+            self.statbar.push(1,'Could not complete meta information')
+
     def new_lattice(self, widget):
+        if not self.meta:
+            self.add_meta_information()
         lattice_editor = DrawingArea(self.add_lattice)
 
     def add_species(self, widget):
+        if not self.meta:
+            self.add_meta_information()
         dialog_new_species = DialogNewSpecies()
         result, data = dialog_new_species.run()
         if result == gtk.RESPONSE_OK:
@@ -334,14 +475,13 @@ class MainWindow():
             elif data not in self.species:
                 self.species.append(data)
                 self.statbar.push(1,'Added species "'+ data['species'] + '"')
-                print(self.species)
 
     def add_parameter(self, widget):
+        if not self.meta:
+            self.add_meta_information()
         parameter_editor = DialogAddParameter()
         result, data = parameter_editor.run()
         if result == gtk.RESPONSE_OK:
-            print("Adding new parameter")
-            print(data)
             self.parameters.append(data)
 
 
@@ -363,6 +503,7 @@ class MainWindow():
         lattice['sites'] = data.__dict__['sites']
         lattice['unit_cell_size'] = data.__dict__['unit_cell_size']
         self.lattices.append(lattice)
+        print(self.lattices)
         self.statbar.push(1,'Added lattice "' + data.__dict__['lattice_name'] + '"')
 
     def dw_lattice_configure(self, widget, event):
@@ -377,6 +518,8 @@ class MainWindow():
 
 
     def create_process(self, widget):
+        if not self.meta:
+            self.add_meta_information()
         self.new_process = {}
         self.new_process['conditions'] = []
         self.new_process['actions'] = []
@@ -419,6 +562,9 @@ class MainWindow():
             if not self.new_process['name'] :
                 self.statbar.push(1,'New process has no name')
                 return
+            elif not self.new_process['center_site']:
+                self.statbar.push(1,'No sites defined!')
+                return
             elif not self.new_process['conditions']:
                 self.statbar.push(1,'New process has no conditions')
                 return
@@ -428,26 +574,44 @@ class MainWindow():
 
             if result == gtk.RESPONSE_OK:
                 self.new_process['rate_constant'] = data['rate_constant']
+            center_site = self.new_process['center_site']
+            for condition in self.new_process['conditions'] + self.new_process['actions']:
+                condition[1] = [ x - y for (x, y) in zip(condition[1], center_site) ]
+            self.new_process['center_site'] = self.new_process['center_site'][2 :]
             self.processes.append(self.new_process)
             self.statbar.push(1,'New process "'+ self.new_process['name'] + '" added')
             print(self.new_process)
             self.new_process = {}
-            self.lattice_ready = False
             self.draw_lattices(blank=True)
+            self.lattice_ready = False
 
 
     def add_condition(self, event, data):
+        print(data)
 
-        if data[1][0] == 'condition':
-            data = data[0], data[1][1 :]
-            # if this is the first condition, make it the center site
-            # all other sites will be measure relative to this site
-            if not self.new_process['conditions']:
-                self.new_process['center_site'] = data[1]
+        #Test if point is condition or action
+        condition = data[1][0] == 'condition'
+
+        # weed out data
+        data = [ data[0]['species'], data[1][1 :] ]
+        print(data)
+        # if this is the first condition, make it the center site
+        # all other sites will be measure relative to this site
+        if not self.new_process['conditions']:
+            self.new_process['center_site'] = data[1]
+
+        # Save in appropriate slot
+        if condition :
+            for elem in self.new_process['conditions']:
+                if elem[1] == data[1]:
+                    self.new_process['conditions'].remove(elem)
             self.new_process['conditions'].append(data)
-        elif data[1][0] == 'action':
-            data = data[0], data[1][1 :]
+        else:
+            for elem in self.new_process['actions']:
+                if elem[1] == data[1]:
+                    self.new_process['actions'].remove(elem)
             self.new_process['actions'].append(data)
+
         self.draw_lattices()
 
 
@@ -470,7 +634,7 @@ class MainWindow():
                 for x in range(unit_x):
                     for y in range(unit_y):
                         for site in lattice['sites']:
-                            if site['x'] == x and site['y'] == y:
+                            if site['coord'][0] == x and site['coord'][1] == y:
                                 center = []
                                 coordx = int((sup_i+ float(x)/unit_x)*width/zoom )
                                 coordy = int(height - (sup_j+ float(y)/unit_y)*height/zoom )
@@ -479,16 +643,16 @@ class MainWindow():
                                 if self.new_process.has_key('conditions'):
                                     for entry in self.new_process['conditions']:
                                         if entry[1] == [sup_i, sup_j, x, y ]:
-                                            color = filter((lambda x : x['species'] == entry[0]['species']), self.species)[0]['color']
-                                            gc.set_rgb_fg_color(color)
+                                            color = filter((lambda x : x['species'] == entry[0]), self.species)[0]['color']
+                                            gc.set_rgb_fg_color(gtk.gdk.color_parse(color))
                                             self.pixmap.draw_arc(gc, True, center[0]-15, center[1]-15, 30, 30, 64*90, 64*360)
                                             gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
                                             self.pixmap.draw_arc(gc, False, center[0]-15, center[1]-15, 30, 30, 64*90, 64*360)
                                 if self.new_process.has_key('actions'):
                                     for entry in self.new_process['actions']:
                                         if entry[1] == [sup_i, sup_j, x, y ]:
-                                            color = filter((lambda x : x['species'] == entry[0]['species']), self.species)[0]['color']
-                                            gc.set_rgb_fg_color(color)
+                                            color = filter((lambda x : x['species'] == entry[0]), self.species)[0]['color']
+                                            gc.set_rgb_fg_color(gtk.gdk.color_parse(color))
                                             self.pixmap.draw_arc(gc, True, center[0]-10, center[1]-10, 20, 20, 64*270, 64*360)
                                             gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
                                             self.pixmap.draw_arc(gc, False, center[0]-10, center[1]-10, 20, 20, 64*270, 64*360)
@@ -546,11 +710,13 @@ class DialogNewSpecies():
         self.dialog.show()
         # define fields
         species = self.wtree.get_widget('field_species')
+        species_id = self.wtree.get_widget('species_id')
         #run
         result = self.dialog.run()
         # extract fields
         data = {}
         data['species'] = species.get_text()
+        data['id'] = species_id.get_text()
         data['color'] = self.color
         self.dialog.destroy()
         return result, data
@@ -587,6 +753,33 @@ class DialogRateConstant():
         self.dialog.destroy()
         return result, data
 
+class DialogMetaInformation():
+    def __init__(self):
+        self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
+        self.wtree = gtk.glade.XML(self.gladefile)
+        self.dialog = self.wtree.get_widget('meta_info')
+
+    def run(self):
+        self.dialog.show()
+        # define field
+        author = self.wtree.get_widget('metaAuthor')
+        email = self.wtree.get_widget('metaEmail')
+        model_name = self.wtree.get_widget('metaModelName')
+        model_dimension = self.wtree.get_widget('metaDimension')
+        debug_level = self.wtree.get_widget('metaDebug')
+        # run
+        result = self.dialog.run()
+        # extract fields
+        data = {}
+        data['author'] = author.get_text()
+        data['email'] = email.get_text()
+        data['model_name'] = model_name.get_text()
+        data['model_dimension'] = model_dimension.get_value_as_int()
+        data['debug'] = debug_level.get_value_as_int()
+        self.dialog.destroy()
+        return result, data
+
+
 class DialogColorSelection():
     def __init__(self):
         self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
@@ -602,12 +795,13 @@ class DialogColorSelection():
         color = self.wtree.get_widget('colorsel-color_selection1')
         result = self.dialog.run()
         data = {}
-        data['color'] = color.get_current_color()
+        data['color'] = color.get_current_color().to_string()
         return result, data
 
     def close(self):
         self.dialog.destroy()
         return True
+
 
 
 

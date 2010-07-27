@@ -1,0 +1,67 @@
+<!ELEMENT kmc (meta,site_type_list?,species_list, (process_list|include_list)+,parameter_list?)>
+<!ELEMENT meta EMPTY>
+<!ATTLIST meta
+  name CDATA #REQUIRED
+  dimension CDATA #REQUIRED
+  lattice_module CDATA #REQUIRED
+  debug CDATA #IMPLIED
+  author CDATA #IMPLIED
+  root_lattice CDATA #IMPLIED
+>
+
+<!ELEMENT species_list  (species)+>
+<!ATTLIST species_list
+  empty_species CDATA #IMPLIED
+>
+<!ELEMENT species EMPTY>
+<!ATTLIST species
+  name CDATA #REQUIRED
+  id CDATA #REQUIRED
+  color CDATA #IMPLIED
+>
+<!ELEMENT site_type_list (type)+>
+<!ELEMENT type EMPTY>
+<!ATTLIST type
+  name CDATA #REQUIRED
+  lattice CDATA #IMPLIED
+>
+<!ELEMENT include_list EMPTY>
+<!ATTLIST include_list
+  source CDATA #REQUIRED
+>
+<!ELEMENT process_list (process+)>
+  <!ATTLIST process_list
+    lattice CDATA #REQUIRED
+    xtra_args CDATA #IMPLIED
+  >
+  <!ELEMENT process (condition_list+,action)>
+    <!ATTLIST process
+      name CDATA #REQUIRED
+      rate CDATA #IMPLIED
+    >
+    <!ELEMENT action (replacement)+>
+    <!ELEMENT replacement EMPTY>
+    <!ATTLIST replacement
+      site CDATA #REQUIRED
+      new_species CDATA #REQUIRED
+    >
+
+    <!ELEMENT condition_list (condition)*>
+      <!ATTLIST condition_list
+        suffix CDATA #IMPLIED
+        rate CDATA #IMPLIED
+      >
+      <!ELEMENT condition EMPTY>
+      <!ATTLIST condition
+        species CDATA #REQUIRED
+        site CDATA #REQUIRED
+        coordinate CDATA #REQUIRED
+        type CDATA #REQUIRED
+      >
+      <!ELEMENT parameter_list (parameter+)>
+      <!ELEMENT parameter EMPTY>
+      <!ATTLIST parameter
+        name CDATA #REQUIRED
+        type CDATA #IMPLIED
+        value CDATA #IMPLIED
+      >
