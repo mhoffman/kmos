@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<kmc>
+    <meta author="Max J. Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="2" model_name="RuO2"/>
+    <species_list>
+        <species color="#ffff00000000" id="12" species="oxygen"/>
+        <species color="#ffffffffffff" id="10" species="empty"/>
+    </species_list>
+    <parameter_list>
+        <parameter name="E_oxygen_cus" type="float" value="1.1"/>
+    </parameter_list>
+    <lattice_list>
+        <lattice name="default" unit_cell_size="1 1">
+            <site coord="0 0" index="0" type="default"/>
+        </lattice>
+    </lattice_list>
+    <process_list>
+        <process center_site="0 0 0 0" name="oxygen_adsorption" rate_constant="2134">
+            <condition coord="0 0 0 0" species="oxygen"/>
+            <condition coord="0 0 0 0" species="empty"/>
+            <condition coord="1 0 0 0" species="empty"/>
+            <action coord="0 0 0 0" species="oxygen"/>
+            <action coord="1 0 0 0" species="oxygen"/>
+        </process>
+        <process center_site="0 0" name="oxygen_diffusion_left" rate_constant="34634">
+            <condition coord="0 0 0 0" species="oxygen"/>
+            <condition coord="-1 0 0 0" species="empty"/>
+            <action coord="0 0 0 0" species="empty"/>
+            <action coord="-1 0 0 0" species="oxygen"/>
+        </process>
+    </process_list>
+</kmc>
+<!-- This is an automatically generated XML file, representing one kMC mode please do not change this unless you know what you are doing -->
