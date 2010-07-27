@@ -20,277 +20,35 @@ import os
 
 XMLFILE = 'default.xml'
 
+class KMC_Model():
+    def __init__(self, meta={}, lattices=[], parameters=[], processes=[], species=[]):
+		self.lattices = lattices
+		self.meta = meta
+		self.parameters = parameters
+		self.processes = processes
+		self.species = species
+	
+    def prettify_xml(self, elem):
+        rough_string = ET.tostring(elem,encoding='utf-8')
+        reparsed = minidom.parseString(rough_string)
+        return reparsed.toprettyxml(indent='    ')
 
-class DrawingArea:
-    """Main Dialog set up a lattice and its adsorption sites
-    """
-    def __init__(self, callback):
-        self.callback = callback
-        self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
-        self.wtree = gtk.glade.XML(self.gladefile)
-        self.window = self.wtree.get_widget('wndCellEdit')
-        self.statbar = self.wtree.get_widget('statusbar')
-        self.statbar.push(1, 'Click to select first corner of cell.')
-        self.cell_started = False
-        self.cell_finished = False
+    def export_source(self):
+	pass
 
-        self.sites = []
-        self.unit_cell_size = [1, 1]
+    def process_list_module_source(self):
+	pass
+	
+    def lattice_module_source(self):
+	pass
 
-        dic = {'on_dwMain_button_press_event' : self.lattice_editor_click,
-                'on_wndCellEdit_destroy_event' :self.quit,
-                'on_btnCancel_clicked' : self.quit,
-                'on_dwMain_expose_event' : self.lattice_editor_expose,
-                'on_dwMain_configure_event' : self.lattice_editor_configure,
-                'on_dwMain_motion_notify_event' : self.lattice_editor_motion,
-                }
-        self.wtree.signal_autoconnect(dic)
-        self.window.show()
-
-    def lattice_editor_motion(self, widget, event):
-        """Catches event, if mouse is moving inside drawing area
-        """
-        if self.cell_started and not self.cell_finished:
-            rect = self.corner1[0], self.corner1[1], int(event.x), int(event.y)
-            self.pixmap.draw_rectangle(widget.get_style().white_gc, True, 0, 0, self.lattice_editor_width, self.lattice_editor_height)
-            self.pixmap.draw_line(widget.get_style().black_gc, rect[0], rect[1], rect[2], rect[1])
-            self.pixmap.draw_line(widget.get_style().black_gc, rect[0], rect[1], rect[0], rect[3])
-            self.pixmap.draw_line(widget.get_style().black_gc, rect[2], rect[1], rect[2], rect[3])
-            self.pixmap.draw_line(widget.get_style().black_gc, rect[0], rect[3], rect[2], rect[3])
-            widget.queue_draw_area(0, 0, self.lattice_editor_width, self.lattice_editor_height)
-
-    def lattice_editor_expose(self, widget, event):
-        """Redraws drawing area everytime something changes abot the window
-        """
-        site_x, site_y, self.lattice_editor_width, self.lattice_editor_height = widget.get_allocation()
-        widget.window.draw_drawable(widget.get_style().fg_gc[gtk.STATE_NORMAL], self.pixmap, site_x, site_y, site_x, site_y, self.lattice_editor_width, self.lattice_editor_height)
-
-    def lattice_editor_configure(self, widget, event):
-        """Some initial adjustments, when the drawing area is loaded first
-        """
-        self.lattice_editor_width, self.lattice_editor_height = widget.get_allocation()[2], widget.get_allocation()[3]
-        self.pixmap = gtk.gdk.Pixmap(widget.window, self.lattice_editor_width, self.lattice_editor_height)
-        self.pixmap.draw_rectangle(widget.get_style().white_gc, True, 0, 0, self.lattice_editor_width, self.lattice_editor_height)
-        return True
-
-    def lattice_editor_click(self, widget, event):
-        """Catches event, if user clicks with mouse into drawing area
-        """
-        if not self.cell_started:
-            self.cell_started = True
-            self.statbar.push(1,'Click to select second coner of cell.')
-            self.corner1 = (int(event.x), int(event.y))
-        elif not self.cell_finished:
-            self.cell_finished = True
-            self.statbar.push(1,'Click inside the cell to define sites.')
-            self.corner2 = (int(event.x), int(event.y))
-            #put corners in normal order
-            corner1 = min(self.corner1[0], self.corner2[0]), min(self.corner1[1], self.corner2[1])
-            corner2 = max(self.corner1[0], self.corner2[0]), max(self.corner1[1], self.corner2[1])
-            self.corner1 = corner1
-            self.corner2 = corner2
-            #Call Dialog to get unit cell size
-            cell_size_dialog = DialogCellSize()
-            result, data = cell_size_dialog.run()
-            if result == gtk.RESPONSE_OK:
-                self.unit_cell_size = data['x'], data['y']
-                self.lattice_name = data['name']
-                for i in xrange(data['x']):
-                    xline = self.corner1[0] + i*(self.corner2[0] - self.corner1[0]) / data['x']
-                    self.pixmap.draw_line(widget.get_style().black_gc, xline, self.corner1[1], xline, self.corner2[1])
-                for j in xrange(data['y']):
-                    yline = self.corner1[1] + j*(self.corner2[1] - self.corner1[1]) / data['y']
-                    self.pixmap.draw_line(widget.get_style().black_gc, self.corner1[0], yline, self.corner2[0], yline)
-                self.window.queue_draw_area(0, 0, self.lattice_editor_width, self.lattice_editor_height)
-        else:
-            site_dialog = DialogDefineSite(self, event)
-            result, data = site_dialog.run()
-            if result == gtk.RESPONSE_OK:
-                if data['type'] == 'remove':
-                    for site in self.sites:
-                        if site['coord'][0] == data['coord'][0] and site['coord'][1] == data['coord'][1]:
-                            self.sites.remove(site)
-                else:
-                    for site in self.sites:
-                        if site['coord'][0] == data['coord'][0] and site['coord'][1] == data['coord'][1]:
-                            self.sites.remove(site)
-                    self.sites.append(data)
-                # Redraw dots
-                for i in range(self.unit_cell_size[0]+1):
-                    for j in range(self.unit_cell_size[1]+1):
-                        center = []
-                        center.append(self.corner1[0] + i*(self.corner2[0]-self.corner1[0])/self.unit_cell_size[0] - 5)
-                        center.append(self.corner2[1] - j*(self.corner2[1]-self.corner1[1])/self.unit_cell_size[1] - 5)
-                        for site in self.sites:
-                            if (i % self.unit_cell_size[0]) == site['coord'][0] and (j % self.unit_cell_size[1]) == site['coord'][1]:
-                                self.pixmap.draw_arc(widget.get_style().black_gc, True, center[0], center[1], 10, 10, 0, 64*360)
-                                break
-                        else:
-                            self.pixmap.draw_arc(widget.get_style().white_gc, True, center[0], center[1], 10, 10, 0, 64*360)
-                            self.pixmap.draw_arc(widget.get_style().black_gc, False, center[0], center[1], 10, 10, 0, 64*360)
-                widget.queue_draw_area(0, 0, self.lattice_editor_width, self.lattice_editor_height)
+    def libkmc_module_source(self):
+	pass
 
 
-
-    def quit(self, *a):
-        """Quits main program
-        """
-        self.callback(self)
-        self.window.destroy()
-        #gtk.main_quit()
-
-
-
-
-class DialogAddParameter():
-    """Small dialog that allows to enter a new parameter
-    """
-    def __init__(self):
-        self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
-        self.wtree = gtk.glade.XML(self.gladefile)
-        self.dialog_add_parameter = self.wtree.get_widget('dlgAddParameter')
-
-    def run(self):
-        """Set initial values and send back entries if OK button clicked
-        """
-        self.dialog_add_parameter.show()
-        # define fields
-        parameter_name = self.wtree.get_widget('parameterName')
-        parameter_type = self.wtree.get_widget('parameterType')
-        parameter_value = self.wtree.get_widget('parameterValue')
-        # run
-        result = self.dialog_add_parameter.run()
-        # extract fields
-        data = {}
-        data['name'] = parameter_name.get_text()
-
-        type_model = parameter_type.get_model()
-        type_index = parameter_type.get_active()
-        data['type'] = type_model[type_index][0]
-
-        data['value'] = parameter_value.get_text()
-        # close
-        self.dialog_add_parameter.destroy()
-        return result, data
-
-class DialogCellSize():
-    """Small dialog to obtain the unit cell size from the user
-    """
-    def __init__(self):
-        self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
-        self.wtree = gtk.glade.XML(self.gladefile)
-        self.dialog_cell_size = self.wtree.get_widget('wndCellSize')
-
-    def run(self):
-        """Set initial values and send back entries if OK button clicked
-        """
-        self.dialog_cell_size.show()
-        # define fields
-        site_x = self.wtree.get_widget('spb_cell_size_X')
-        site_y = self.wtree.get_widget('spb_cell_size_Y')
-        lattice_name = self.wtree.get_widget('lattice_name')
-        # run
-        result = self.dialog_cell_size.run()
-        # extract fields
-        data = {}
-        data['x'] = site_x.get_value_as_int()
-        data['y'] = site_y.get_value_as_int()
-        data['name'] = lattice_name.get_text()
-        # close
-        self.dialog_cell_size.destroy()
-        return result, data
-
-
-class DialogDefineSite():
-    """Small dialog to obtain characteristics of an adsorption site from the user
-    """
-    def __init__(self, lattice_dialog, event):
-        self.lattice_dialog = lattice_dialog
-        self.event = event
-        self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
-        self.wtree = gtk.glade.XML(self.gladefile)
-        self.dialog_site = self.wtree.get_widget('wndSite')
-        if event.x < lattice_dialog.corner1[0] or event.x > lattice_dialog.corner2[0] or event.y < lattice_dialog.corner1[1] or event.y > lattice_dialog.corner2[1]:
-            self.coord_x = 0
-            self.coord_y = 0
-        else:
-            self.coord_x = int((event.x-lattice_dialog.corner1[0])/(lattice_dialog.corner2[0]-lattice_dialog.corner1[0])*lattice_dialog.unit_cell_size[0])
-            self.coord_y = lattice_dialog.unit_cell_size[1] - int((event.y-lattice_dialog.corner1[1])/(lattice_dialog.corner2[1]-lattice_dialog.corner1[1])*lattice_dialog.unit_cell_size[1]) - 1
-
-
-    def run(self):
-        """Set initial values and send back entries if OK button clicked
-        """
-        self.dialog_site.show()
-        # define field and set defaults
-        type_field = self.wtree.get_widget('defineSite_type')
-        type_field.set_text('default')
-        index_field = self.wtree.get_widget('defineSite_index')
-        index_adjustment = gtk.Adjustment(value=len(self.lattice_dialog.sites), lower=0, upper=1000, step_incr=1, page_incr=4, page_size=0)
-        index_field.set_adjustment(index_adjustment)
-        index_field.set_value(len(self.lattice_dialog.sites))
-        site_x = self.wtree.get_widget('spb_site_x')
-        x_adjustment = gtk.Adjustment(value=0, lower=0, upper=self.lattice_dialog.unit_cell_size[0]-1, step_incr=1, page_incr=4, page_size=0)
-        site_x.set_adjustment(x_adjustment)
-        site_x.set_value(self.coord_x)
-        site_y = self.wtree.get_widget('spb_site_y')
-        y_adjustment = gtk.Adjustment(value=0, lower=0, upper=self.lattice_dialog.unit_cell_size[1]-1, step_incr=1, page_incr=4, page_size=0)
-        site_y.set_adjustment(y_adjustment)
-        y_adjustment.set_value(self.coord_y)
-        #run dialog
-        result = self.dialog_site.run()
-        # extract fields
-        data = {}
-        data['coord'] = site_x.get_value_as_int(), site_y.get_value_as_int()
-        data['index'] = index_field.get_value_as_int()
-        data['type'] = type_field.get_text()
-        # close
-        self.dialog_site.destroy()
-        return result, data
-
-
-class MainWindow():
-    def __init__(self):
-        self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
-        self.wtree = gtk.glade.XML(self.gladefile)
-        self.window = self.wtree.get_widget('wndMain')
-        self.statbar = self.wtree.get_widget('stb_process_editor')
-        self.da_widget = self.wtree.get_widget('dwLattice')
-        self.initialize_data()
-        self.keywords = ['exp','sin','cos','sqrt','log']
-        dic = {'on_btnAddLattice_clicked' : self.new_lattice ,
-                'on_btnMainQuit_clicked' : lambda w: gtk.main_quit(),
-                'on_btnAddParameter_clicked': self.add_parameter,
-                'on_btnAddSpecies_clicked' : self.add_species,
-                'on_btnAddProcess_clicked' : self.create_process,
-                'on_eventbox1_button_press_event' : self.statbar_clicked,
-                'on_dwLattice_button_press_event' : self.dw_lattice_clicked,
-                'on_dwLattice_configure_event' : self.dw_lattice_configure,
-                'on_dwLattice_expose_event' : self.dw_lattice_expose,
-                'on_btnImportXML_clicked' : self.import_xml,
-                'on_btnExportXML_clicked' : self.export_xml,
-                'on_btnExportSource_clicked': self.export_source,
-                'on_btnExportProgram_clicked' : self.export_program,
-                'on_btnHelp_clicked' : self.display_help,
-                }
-
-        self.wtree.signal_autoconnect(dic)
-        self.window.show()
-        self.statbar.push(1,'Add a new lattice first.')
-        self.lattice_ready = False
-
-    def initialize_data(self):
-        self.meta = {}
-        self.lattices = []
-        self.processes = []
-        self.parameters = []
-        self.species = []
-        self.new_process = {}
-
-    def import_xml(self, widget):
-        self.initialize_data()
+    def import_xml(self, filename):
         xmlparser = ET.XMLParser(remove_comments=True)
-        root = ET.parse(XMLFILE, parser=xmlparser).getroot()
+        root = ET.parse(filename, parser=xmlparser).getroot()
         for child in root:
             if child.tag == 'meta':
                 for attrib in ['author','email', 'debug','model_name','model_dimension']:
@@ -345,11 +103,12 @@ class MainWindow():
         print("SPECIES: ", self.species)
         print("PARAMETERS: ", self.parameters)
         print("PROCESSES: ", self.processes)
-
-    def export_xml(self, widget):
+	
+    def export_xml(self, filename):
         # build XML Tree
         root = ET.Element('kmc')
         meta = ET.SubElement(root,'meta')
+	print(self.meta)
         for key in self.meta:
             meta.set(key,str(self.meta[key]))
         species_list = ET.SubElement(root,'species_list')
@@ -389,23 +148,73 @@ class MainWindow():
                 action_elem = ET.SubElement(process_elem, 'action')
                 action_elem.set('species', action[0])
                 action_elem.set('coord', str(action[1])[1 :-1].replace(',',''))
-
-
         #Write Out XML File
         tree = ET.ElementTree(root)
-        outfile = open(XMLFILE,'w')
+        outfile = open(filename,'w')
         outfile.write(self.prettify_xml(root))
         outfile.write('<!-- This is an automatically generated XML file, representing one kMC mode ' + \
                         'please do not change this unless you know what you are doing -->\n')
         outfile.close()
         print(self.prettify_xml(root))
 
+    def compile():
+	pass
+
+    def export_control_script():
+	pass
+
+    def get_configuration(self):
+	return self.meta, self.lattices, self.parameters, self.processes, self.species
+
+class MainWindow():
+    def __init__(self):
+        self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
+        self.wtree = gtk.glade.XML(self.gladefile)
+        self.window = self.wtree.get_widget('wndMain')
+        self.statbar = self.wtree.get_widget('stb_process_editor')
+        self.da_widget = self.wtree.get_widget('dwLattice')
+        self.initialize_data()
+        self.keywords = ['exp','sin','cos','sqrt','log']
+        dic = {'on_btnAddLattice_clicked' : self.new_lattice ,
+                'on_btnMainQuit_clicked' : lambda w: gtk.main_quit(),
+                'on_btnAddParameter_clicked': self.add_parameter,
+                'on_btnAddSpecies_clicked' : self.add_species,
+                'on_btnAddProcess_clicked' : self.create_process,
+                'on_eventbox1_button_press_event' : self.statbar_clicked,
+                'on_dwLattice_button_press_event' : self.dw_lattice_clicked,
+                'on_dwLattice_configure_event' : self.dw_lattice_configure,
+                'on_dwLattice_expose_event' : self.dw_lattice_expose,
+                'on_btnImportXML_clicked' : self.import_xml,
+                'on_btnExportXML_clicked' : self.export_xml,
+                'on_btnExportSource_clicked': self.export_source,
+                'on_btnExportProgram_clicked' : self.export_program,
+                'on_btnHelp_clicked' : self.display_help,
+                }
+
+        self.wtree.signal_autoconnect(dic)
+        self.window.show()
+        self.statbar.push(1,'Add a new lattice first.')
+        self.lattice_ready = False
+
+    def initialize_data(self):
+        self.meta = {}
+        self.lattices = []
+        self.parameters = []
+        self.processes = []
+        self.species = []
+        self.new_process = {}
+
+    def import_xml(self, widget):
+	self.new_process = {}
+	kmc_model = KMC_Model()
+	kmc_model.import_xml(XMLFILE)
+	self.lattices, self.meta, self.parameters, self.processes, self.species = kmc_model.get_configuration()
+
+    def export_xml(self, widget):
+	kmc_model = KMC_Model(self.lattices, self.meta, self.parameters, self.processes, self.species)
+	kmc_model.export_xml(XMLFILE)
         self.statbar.push(1,'Minimal version implemented!')
 
-    def prettify_xml(self, elem):
-        rough_string = ET.tostring(elem,encoding='utf-8')
-        reparsed = minidom.parseString(rough_string)
-        return reparsed.toprettyxml(indent='    ')
 
     def export_source(self, widget):
         self.statbar.push(1,'Not implemented yet!')
@@ -660,6 +469,237 @@ class MainWindow():
 
 
         self.da_widget.queue_draw_area(0, 0, width, height)
+
+class DrawingArea:
+    """Main Dialog set up a lattice and its adsorption sites
+    """
+    def __init__(self, callback):
+        self.callback = callback
+        self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
+        self.wtree = gtk.glade.XML(self.gladefile)
+        self.window = self.wtree.get_widget('wndCellEdit')
+        self.statbar = self.wtree.get_widget('statusbar')
+        self.statbar.push(1, 'Click to select first corner of cell.')
+        self.cell_started = False
+        self.cell_finished = False
+
+        self.sites = []
+        self.unit_cell_size = [1, 1]
+
+        dic = {'on_dwMain_button_press_event' : self.lattice_editor_click,
+                'on_wndCellEdit_destroy_event' :self.quit,
+                'on_btnCancel_clicked' : self.quit,
+                'on_dwMain_expose_event' : self.lattice_editor_expose,
+                'on_dwMain_configure_event' : self.lattice_editor_configure,
+                'on_dwMain_motion_notify_event' : self.lattice_editor_motion,
+                }
+        self.wtree.signal_autoconnect(dic)
+        self.window.show()
+
+
+    def lattice_editor_motion(self, widget, event):
+        """Catches event, if mouse is moving inside drawing area
+        """
+        if self.cell_started and not self.cell_finished:
+            rect = self.corner1[0], self.corner1[1], int(event.x), int(event.y)
+            self.pixmap.draw_rectangle(widget.get_style().white_gc, True, 0, 0, self.lattice_editor_width, self.lattice_editor_height)
+            self.pixmap.draw_line(widget.get_style().black_gc, rect[0], rect[1], rect[2], rect[1])
+            self.pixmap.draw_line(widget.get_style().black_gc, rect[0], rect[1], rect[0], rect[3])
+            self.pixmap.draw_line(widget.get_style().black_gc, rect[2], rect[1], rect[2], rect[3])
+            self.pixmap.draw_line(widget.get_style().black_gc, rect[0], rect[3], rect[2], rect[3])
+            widget.queue_draw_area(0, 0, self.lattice_editor_width, self.lattice_editor_height)
+
+    def lattice_editor_expose(self, widget, event):
+        """Redraws drawing area everytime something changes abot the window
+        """
+        site_x, site_y, self.lattice_editor_width, self.lattice_editor_height = widget.get_allocation()
+        widget.window.draw_drawable(widget.get_style().fg_gc[gtk.STATE_NORMAL], self.pixmap, site_x, site_y, site_x, site_y, self.lattice_editor_width, self.lattice_editor_height)
+
+    def lattice_editor_configure(self, widget, event):
+        """Some initial adjustments, when the drawing area is loaded first
+        """
+        self.lattice_editor_width, self.lattice_editor_height = widget.get_allocation()[2], widget.get_allocation()[3]
+        self.pixmap = gtk.gdk.Pixmap(widget.window, self.lattice_editor_width, self.lattice_editor_height)
+        self.pixmap.draw_rectangle(widget.get_style().white_gc, True, 0, 0, self.lattice_editor_width, self.lattice_editor_height)
+        return True
+
+    def lattice_editor_click(self, widget, event):
+        """Catches event, if user clicks with mouse into drawing area
+        """
+        if not self.cell_started:
+            self.cell_started = True
+            self.statbar.push(1,'Click to select second coner of cell.')
+            self.corner1 = (int(event.x), int(event.y))
+        elif not self.cell_finished:
+            self.cell_finished = True
+            self.statbar.push(1,'Click inside the cell to define sites.')
+            self.corner2 = (int(event.x), int(event.y))
+            #put corners in normal order
+            corner1 = min(self.corner1[0], self.corner2[0]), min(self.corner1[1], self.corner2[1])
+            corner2 = max(self.corner1[0], self.corner2[0]), max(self.corner1[1], self.corner2[1])
+            self.corner1 = corner1
+            self.corner2 = corner2
+            #Call Dialog to get unit cell size
+            cell_size_dialog = DialogCellSize()
+            result, data = cell_size_dialog.run()
+            if result == gtk.RESPONSE_OK:
+                self.unit_cell_size = data['x'], data['y']
+                self.lattice_name = data['name']
+                for i in xrange(data['x']):
+                    xline = self.corner1[0] + i*(self.corner2[0] - self.corner1[0]) / data['x']
+                    self.pixmap.draw_line(widget.get_style().black_gc, xline, self.corner1[1], xline, self.corner2[1])
+                for j in xrange(data['y']):
+                    yline = self.corner1[1] + j*(self.corner2[1] - self.corner1[1]) / data['y']
+                    self.pixmap.draw_line(widget.get_style().black_gc, self.corner1[0], yline, self.corner2[0], yline)
+                self.window.queue_draw_area(0, 0, self.lattice_editor_width, self.lattice_editor_height)
+        else:
+            site_dialog = DialogDefineSite(self, event)
+            result, data = site_dialog.run()
+            if result == gtk.RESPONSE_OK:
+                if data['type'] == 'remove':
+                    for site in self.sites:
+                        if site['coord'][0] == data['coord'][0] and site['coord'][1] == data['coord'][1]:
+                            self.sites.remove(site)
+                else:
+                    for site in self.sites:
+                        if site['coord'][0] == data['coord'][0] and site['coord'][1] == data['coord'][1]:
+                            self.sites.remove(site)
+                    self.sites.append(data)
+                # Redraw dots
+                for i in range(self.unit_cell_size[0]+1):
+                    for j in range(self.unit_cell_size[1]+1):
+                        center = []
+                        center.append(self.corner1[0] + i*(self.corner2[0]-self.corner1[0])/self.unit_cell_size[0] - 5)
+                        center.append(self.corner2[1] - j*(self.corner2[1]-self.corner1[1])/self.unit_cell_size[1] - 5)
+                        for site in self.sites:
+                            if (i % self.unit_cell_size[0]) == site['coord'][0] and (j % self.unit_cell_size[1]) == site['coord'][1]:
+                                self.pixmap.draw_arc(widget.get_style().black_gc, True, center[0], center[1], 10, 10, 0, 64*360)
+                                break
+                        else:
+                            self.pixmap.draw_arc(widget.get_style().white_gc, True, center[0], center[1], 10, 10, 0, 64*360)
+                            self.pixmap.draw_arc(widget.get_style().black_gc, False, center[0], center[1], 10, 10, 0, 64*360)
+                widget.queue_draw_area(0, 0, self.lattice_editor_width, self.lattice_editor_height)
+
+
+
+    def quit(self, *a):
+        """Quits main program
+        """
+        self.callback(self)
+        self.window.destroy()
+        #gtk.main_quit()
+
+
+
+
+class DialogAddParameter():
+    """Small dialog that allows to enter a new parameter
+    """
+    def __init__(self):
+        self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
+        self.wtree = gtk.glade.XML(self.gladefile)
+        self.dialog_add_parameter = self.wtree.get_widget('dlgAddParameter')
+
+    def run(self):
+        """Set initial values and send back entries if OK button clicked
+        """
+        self.dialog_add_parameter.show()
+        # define fields
+        parameter_name = self.wtree.get_widget('parameterName')
+        parameter_type = self.wtree.get_widget('parameterType')
+        parameter_value = self.wtree.get_widget('parameterValue')
+        # run
+        result = self.dialog_add_parameter.run()
+        # extract fields
+        data = {}
+        data['name'] = parameter_name.get_text()
+
+        type_model = parameter_type.get_model()
+        type_index = parameter_type.get_active()
+        data['type'] = type_model[type_index][0]
+
+        data['value'] = parameter_value.get_text()
+        # close
+        self.dialog_add_parameter.destroy()
+        return result, data
+
+class DialogCellSize():
+    """Small dialog to obtain the unit cell size from the user
+    """
+    def __init__(self):
+        self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
+        self.wtree = gtk.glade.XML(self.gladefile)
+        self.dialog_cell_size = self.wtree.get_widget('wndCellSize')
+
+    def run(self):
+        """Set initial values and send back entries if OK button clicked
+        """
+        self.dialog_cell_size.show()
+        # define fields
+        site_x = self.wtree.get_widget('spb_cell_size_X')
+        site_y = self.wtree.get_widget('spb_cell_size_Y')
+        lattice_name = self.wtree.get_widget('lattice_name')
+        # run
+        result = self.dialog_cell_size.run()
+        # extract fields
+        data = {}
+        data['x'] = site_x.get_value_as_int()
+        data['y'] = site_y.get_value_as_int()
+        data['name'] = lattice_name.get_text()
+        # close
+        self.dialog_cell_size.destroy()
+        return result, data
+
+
+class DialogDefineSite():
+    """Small dialog to obtain characteristics of an adsorption site from the user
+    """
+    def __init__(self, lattice_dialog, event):
+        self.lattice_dialog = lattice_dialog
+        self.event = event
+        self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
+        self.wtree = gtk.glade.XML(self.gladefile)
+        self.dialog_site = self.wtree.get_widget('wndSite')
+        if event.x < lattice_dialog.corner1[0] or event.x > lattice_dialog.corner2[0] or event.y < lattice_dialog.corner1[1] or event.y > lattice_dialog.corner2[1]:
+            self.coord_x = 0
+            self.coord_y = 0
+        else:
+            self.coord_x = int((event.x-lattice_dialog.corner1[0])/(lattice_dialog.corner2[0]-lattice_dialog.corner1[0])*lattice_dialog.unit_cell_size[0])
+            self.coord_y = lattice_dialog.unit_cell_size[1] - int((event.y-lattice_dialog.corner1[1])/(lattice_dialog.corner2[1]-lattice_dialog.corner1[1])*lattice_dialog.unit_cell_size[1]) - 1
+
+
+    def run(self):
+        """Set initial values and send back entries if OK button clicked
+        """
+        self.dialog_site.show()
+        # define field and set defaults
+        type_field = self.wtree.get_widget('defineSite_type')
+        type_field.set_text('default')
+        index_field = self.wtree.get_widget('defineSite_index')
+        index_adjustment = gtk.Adjustment(value=len(self.lattice_dialog.sites), lower=0, upper=1000, step_incr=1, page_incr=4, page_size=0)
+        index_field.set_adjustment(index_adjustment)
+        index_field.set_value(len(self.lattice_dialog.sites))
+        site_x = self.wtree.get_widget('spb_site_x')
+        x_adjustment = gtk.Adjustment(value=0, lower=0, upper=self.lattice_dialog.unit_cell_size[0]-1, step_incr=1, page_incr=4, page_size=0)
+        site_x.set_adjustment(x_adjustment)
+        site_x.set_value(self.coord_x)
+        site_y = self.wtree.get_widget('spb_site_y')
+        y_adjustment = gtk.Adjustment(value=0, lower=0, upper=self.lattice_dialog.unit_cell_size[1]-1, step_incr=1, page_incr=4, page_size=0)
+        site_y.set_adjustment(y_adjustment)
+        y_adjustment.set_value(self.coord_y)
+        #run dialog
+        result = self.dialog_site.run()
+        # extract fields
+        data = {}
+        data['coord'] = site_x.get_value_as_int(), site_y.get_value_as_int()
+        data['index'] = index_field.get_value_as_int()
+        data['type'] = type_field.get_text()
+        # close
+        self.dialog_site.destroy()
+        return result, data
+
+
+
 
 
 class SpeciesMenu():
