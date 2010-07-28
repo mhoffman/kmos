@@ -71,8 +71,8 @@ class ProcessList():
             self.pythonize_plist(plist)
         self.check_consistency()
         self.write_source_code()
-        self._write_io_template()
-        self._write_lattice_template()
+        #self._write_io_template()
+        #self._write_lattice_template()
         #sketches not satisfying yet, deferred
         #self.write_tex_code()
 

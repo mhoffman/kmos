@@ -20,17 +20,24 @@ from xml.dom import minidom
 import os
 
 
-XMLFILE = 'default.xml'
+KMCPROJECT_DTD = '/kmc_project.dtd'
+PROCESSLIST_DTD = '/process_list.dtd'
+XMLFILE = './default.xml'
 SRCDIR = './fortran_src'
 
 class KMC_Model():
-    def __init__(self, meta={}, lattices=[], parameters=[], processes=[], species=[]):
-		self.lattices = lattices
-		self.meta = meta
-		self.parameters = parameters
-		self.processes = processes
-		self.species = species
-	
+    def __init__(self, lattices=[], meta={}, parameters=[], processes=[], species=[]):
+        self.lattices = lattices
+        self.meta = meta
+        self.parameters = parameters
+        self.processes = processes
+        self.species = species
+        print("META: ", self.meta)
+        print("LATTICES: ", self.lattices)
+        print("SPECIES: ", self.species)
+        print("PARAMETERS: ", self.parameters)
+        print("PROCESSES: ", self.processes)
+
     def prettify_xml(self, elem):
         rough_string = ET.tostring(elem,encoding='utf-8')
         reparsed = minidom.parseString(rough_string)
@@ -48,11 +55,48 @@ class KMC_Model():
         shutil.copy(APP_ABS_PATH + '/kind_values.f90', dir)
 
         lattice_source = open(APP_ABS_PATH + '/lattice_template.f90').read()
+        lattice = self.lattices[0]
         # more processing steps ...
-	species_definition = "integer(kind=iint), public, parameter :: &\n "
-	for species in self.species:
-		species_definition += '    %(species)  %(id), &\n ' % {'species':species['species'],'id':species['id']}
-	#lattice_source = lattice_source % {'lattice_name': self.lattices[0]['name'], 'species_definition':species_definition}
+        # SPECIES DEFINITION
+        if not self.species:
+            print('No species defined, yet, cannot complete source')
+            return
+        species_definition = "integer(kind=iint), public, parameter :: &\n "
+        for species in self.species[:-1]:
+            species_definition += '    %(species)s =  %(id)s, &\n' % {'species':species['species'], 'id':species['id']}
+        species_definition += '     %(species)s = %(id)s\n' % {'species':self.species[-1]['species'], 'id':self.species[-1]['id']}
+        # UNIT VECTOR DEFINITION
+        unit_vector_definition = 'integer(kind=iint), dimension(2,2) ::  lattice_%(name)s_matrix = reshape((/%(x)s,0,0,%(y)s/),(/2,2/))' % {'x':lattice['unit_cell_size'][0], 'y':lattice['unit_cell_size'][1],'name':lattice['name']}
+        # LOOKUP TABLE INITIALIZATION
+        indexes = [ x['index'] for x in lattice['sites'] ]
+        lookup_table_init = 'integer(kind=iint), dimension(0:%(x)s, 0:%(y)s) :: lookup_%(lattice)s2nr\n' % {'x':lattice['unit_cell_size'][0]-1,'y':lattice['unit_cell_size'][1]-1,'lattice':lattice['name']}
+        lookup_table_init += 'type(tuple), dimension(%(min)s:%(max)s) :: lookup_nr2%(lattice)s\n' % {'min':min(indexes), 'max':max(indexes), 'lattice':lattice['name']}
+
+        # LOOKUP TABLE DEFINITION
+        lookup_table_definition = ''
+        lookup_table_definition += '! Fill lookup table nr2%(name)s\n' % {'name':lattice['name'] }
+        for site in lattice['sites']:
+            lookup_table_definition += '    lookup_nr2%(name)s(%(index)s)%%t = (/%(x)s,%(y)s/)\n' % {'name': lattice['name'],
+                                                                                                'x':site['coord'][0],
+                                                                                                'y':site['coord'][1],
+                                                                                                'index':site['index']}
+        lookup_table_definition += '\n\n    ! Fill lookup table %(name)s2nr\n' % {'name':lattice['name'] }
+        for site in lattice['sites']:
+            lookup_table_definition += '    lookup_%(name)s2nr(%(x)s, %(y)s) = %(index)s\n'  % {'name': lattice['name'],
+                                                                                                'x':site['coord'][0],
+                                                                                                'y':site['coord'][1],
+                                                                                                'index':site['index']}
+
+
+        #LATTICE MAPPINGS
+
+
+        lattice_source = lattice_source % {'lattice_name': lattice['name'],
+            'species_definition':species_definition,
+            'lookup_table_init':lookup_table_init,
+            'lookup_table_definition':lookup_table_definition,
+            'unit_vector_definition':unit_vector_definition,
+            'sites_per_cell':max(indexes)-min(indexes)+1}
 
         lattice_mod_file = open(dir + '/lattice.f90','w')
         lattice_mod_file.write(lattice_source)
@@ -62,7 +106,7 @@ class KMC_Model():
 
     def process_list_module_source(self):
         pass
-	
+
     def lattice_module_source(self):
         pass
 
@@ -71,6 +115,10 @@ class KMC_Model():
     def import_xml(self, filename):
         xmlparser = ET.XMLParser(remove_comments=True)
         root = ET.parse(filename, parser=xmlparser).getroot()
+        dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_DTD)
+        if not dtd.validate(root):
+            print(dtd.error_log.filter_from_errors()[0])
+            return
         for child in root:
             if child.tag == 'meta':
                 for attrib in ['author','email', 'debug','model_name','model_dimension']:
@@ -99,7 +147,7 @@ class KMC_Model():
                         site_elem['index'] = int(site.attrib['index'])
                         site_elem['type'] = site.attrib['type']
                         site_elem['coord'] = [ int(x) for x in site.attrib['coord'].split() ]
-                    lattice_elem['sites'].append(site_elem)
+                        lattice_elem['sites'].append(site_elem)
                     self.lattices.append(lattice_elem)
 
             elif child.tag == 'process_list':
@@ -125,12 +173,12 @@ class KMC_Model():
         print("SPECIES: ", self.species)
         print("PARAMETERS: ", self.parameters)
         print("PROCESSES: ", self.processes)
-	
+
     def export_xml(self, filename):
         # build XML Tree
         root = ET.Element('kmc')
         meta = ET.SubElement(root,'meta')
-	print(self.meta)
+        print(self.meta)
         for key in self.meta:
             meta.set(key,str(self.meta[key]))
         species_list = ET.SubElement(root,'species_list')
@@ -180,13 +228,13 @@ class KMC_Model():
         print(self.prettify_xml(root))
 
     def compile():
-	pass
+        pass
 
     def export_control_script():
-	pass
+        pass
 
     def get_configuration(self):
-	return self.meta, self.lattices, self.parameters, self.processes, self.species
+        return self.lattices, self.meta, self.parameters, self.processes, self.species
 
 class MainWindow():
     def __init__(self):
@@ -241,7 +289,7 @@ class MainWindow():
     def export_source(self, widget):
         kmc_model = KMC_Model(self.lattices, self.meta, self.parameters, self.processes, self.species)
         print(kmc_model.export_source())
-        self.statbar.push(1,'Not implemented yet!')
+        self.statbar.push(1,'Partially implemented!')
 
     def export_program(self, widget):
         self.statbar.push(1,'Not implemented yet!')
@@ -867,6 +915,14 @@ class DialogColorSelection():
         return True
 
 
+def validate_xml(xml_filename, dtd_filename):
+    """Validate a given XML file with a given external DTD.
+       If the XML file is not valid, an exception will be 
+         printed with an error message.
+    """
+    dtd = et.DTD(dtd_filename)
+    root = et.parse(xml_filename)
+    dtd.assertValid(root)
 
 
 def main():
