@@ -153,7 +153,7 @@ class KMC_Model():
             elif child.tag == 'process_list':
                 for process in child:
                     process_elem = {}
-                    process_elem['center_site'] = [0, 0] + [ int(x) for x in  process.attrib['center_site'].split() ]
+                    process_elem['center_site'] = [ int(x) for x in  process.attrib['center_site'].split() ]
                     process_elem['name'] = process.attrib['name']
                     process_elem['rate_constant'] = process.attrib['rate_constant']
                     process_elem['conditions'] = []
@@ -174,6 +174,14 @@ class KMC_Model():
         print("PARAMETERS: ", self.parameters)
         print("PROCESSES: ", self.processes)
 
+    def export_projectlist_xml(self, filename):
+        root = ET.Element('kmc')
+        site_type_list = ET.SubElement(root,'site_type_list')
+        species_list = ET.SubElement(root,'species_list')
+        process_list = ET.SubElement(root, 'process_list')
+        parameter_list = ET.SubElement(root, 'parameter_list')
+
+        pass
     def export_xml(self, filename):
         # build XML Tree
         root = ET.Element('kmc')
@@ -451,7 +459,6 @@ class MainWindow():
                 return
             elif not self.new_process['actions']:
                 self.statbar.push(1,'New process has no actions')
-
 
             if result == gtk.RESPONSE_OK:
                 self.new_process['rate_constant'] = data['rate_constant']
