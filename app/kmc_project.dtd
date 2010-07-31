@@ -15,7 +15,7 @@
     id CDATA #REQUIRED
     species CDATA #REQUIRED
   >
-  <!ELEMENT parameter_list (parameter)+>
+  <!ELEMENT parameter_list (parameter)*>
   <!ELEMENT parameter EMPTY>
   <!ATTLIST parameter
     name CDATA #REQUIRED

@@ -52,6 +52,8 @@ class ProcessList():
     """
     def __init__(self, options):
         """Constructor method"""
+        if hasattr(options,'dtd_filename'):
+            DTD_FILENAME = options.dtd_filename
         validate_xml(options.xml_filename, DTD_FILENAME)
         self.xmlparser = et.XMLParser(remove_comments=True)
         self.root = et.parse(options.xml_filename, parser=self.xmlparser).getroot()
@@ -268,7 +270,10 @@ class ProcessList():
                     self.meta['lattices'].append(child.attrib['lattice'])
 
 
-                self.meta['source_file'] = 'proclist_' + self.meta['name'] + '.f90'
+                if hasattr(self.options,'proclist_filename'):
+                    self.meta['source_file'] = self.options.proclist_filename
+                else:
+                    self.meta['source_file'] = 'proclist_' + self.meta['name'] + '.f90'
                 self.meta['io_template'] = 'TMPLT_io_' + self.meta['name'] + '.f90'
                 self.meta['tex_file'] = 'proclist_' + self.meta['name'] + '.tex'
                 # Parse xtra args
@@ -947,7 +952,7 @@ if \{condition 1 \} {[} and
         self._out('')
         self._out('use kind_values')
         #self._out('use libkmc, only: null_species')
-        self._out('use lattice_' + self.meta['lattice_module'] + ', only: &')
+        self._out('use lattice, only: &')
         for lattice in self.meta['lattices']:
             for lattice2 in self.meta['lattices'] :
                 if lattice != lattice2:
@@ -1201,7 +1206,6 @@ if \{condition 1 \} {[} and
                     else:
                         print(replacement['old_species'],replacement['new_species'],self.meta['emptys'])
                         print(proc, replacement, "One species must be 'empty' and the other mustn't!")
-                        exit()
 
         # Write the update functions
         for update_function in update_functions:
@@ -1228,7 +1232,6 @@ if \{condition 1 \} {[} and
                 bout('    call ' + update_function.lattice + '_replace_species(site' +  ', ' + update_function.species + ', ' + update_function.other_species + ')')
             else:
                 print('Cannot get here')
-                exit()
 
             # print avail_sites updates
             bout('    ! book keeping updates')

@@ -15,6 +15,7 @@ import gtk.glade
 from lxml import etree as ET
 #Need to pretty print XML
 from xml.dom import minidom
+from kmc_generator import ProcessList
 
 
 import os
@@ -101,11 +102,27 @@ class KMC_Model():
         lattice_mod_file = open(dir + '/lattice.f90','w')
         lattice_mod_file.write(lattice_source)
         lattice_mod_file.close()
+        # generate process list source via existing code
+        proclist_xml = open(dir + '/process_list.xml','w')
+        pretty_xml = self.prettify_xml(self.export_process_list_xml())
+        proclist_xml.write(pretty_xml)
+        print(pretty_xml)
+        proclist_xml.close()
+        class Options():
+            def __init__(self):
+                self.xml_filename = proclist_xml.name
+                self.dtd_filename = APP_ABS_PATH + '/process_list.dtd'
+                self.force_overwrite = True
+                self.proclist_filename = SRCDIR + '/proclist.f90'
+
+        options = Options()
+        ProcessList(options)
+
+
+
         # return directory name
         return dir
 
-    def process_list_module_source(self):
-        pass
 
     def lattice_module_source(self):
         pass
@@ -174,14 +191,63 @@ class KMC_Model():
         print("PARAMETERS: ", self.parameters)
         print("PROCESSES: ", self.processes)
 
-    def export_projectlist_xml(self, filename):
+    def export_process_list_xml(self):
+        lattice = self.lattices[0]
         root = ET.Element('kmc')
+        # extract meta information
+        meta = ET.SubElement(root,'meta')
+        meta.set('name',self.meta['model_name'])
+        meta.set('dimension',self.meta['model_dimension'])
+        meta.set('lattice_module','')
+        # extract site_type information
         site_type_list = ET.SubElement(root,'site_type_list')
+        recorded_types = []
+        # extract species information
         species_list = ET.SubElement(root,'species_list')
-        process_list = ET.SubElement(root, 'process_list')
-        parameter_list = ET.SubElement(root, 'parameter_list')
+        for species in self.species:
+            species_elem = ET.SubElement(species_list, 'species')
+            species_elem.set('name',species['species'])
+            species_elem.set('id',species['id'])
 
-        pass
+        # extract process list
+        process_list = ET.SubElement(root, 'process_list')
+        process_list.set('lattice',lattice['name'])
+        for process in self.processes:
+            process_elem = ET.SubElement(process_list,'process')
+            process_elem.set('name',process['name'])
+            condition_list = ET.SubElement(process_elem, 'condition_list')
+            site_index = 1
+            for condition in process['conditions']:
+                coord = condition[1][0]*lattice['unit_cell_size'][0] + condition[1][2], condition[1][1]*lattice['unit_cell_size'][1] + condition[1][3]
+                local_coord = [ x % y for (x,y) in zip(coord, lattice['unit_cell_size']) ]
+                coord = ' '.join([ str(x) for x in coord ])
+                print(local_coord)
+                type = '_'.join([ str(x) for x in local_coord ])
+                species = condition[0]
+                condition_elem = ET.SubElement(condition_list,'condition')
+                condition_elem.set('site','site_' + str(site_index))
+                site_index += 1
+                condition_elem.set('type', type)
+                condition_elem.set('species', species)
+                condition_elem.set('coordinate', coord)
+                # Also add to site type list if necessary
+                if type not in recorded_types:
+                    site_type_elem = ET.SubElement(site_type_list,'type')
+                    site_type_elem.set('name',type)
+                    recorded_types.append(type)
+            action_elem = ET.SubElement(process_elem,'action')
+            for action in process['actions']:
+                action_coord = action[1][0]*lattice['unit_cell_size'][0] + action[1][2], action[1][1]*lattice['unit_cell_size'][1] + action[1][3]
+                action_coord = ' '.join([ str(x) for x in action_coord ])
+                corresp_condition = filter(lambda x:x.attrib['coordinate'] == action_coord, condition_list.getchildren())[0]
+                site_index = corresp_condition.attrib['site']
+                new_species = action[0]
+                replacement_elem = ET.SubElement(action_elem,'replacement')
+                replacement_elem.set('site', site_index)
+                replacement_elem.set('new_species', new_species)
+
+        return root
+
     def export_xml(self, filename):
         # build XML Tree
         root = ET.Element('kmc')
@@ -233,7 +299,6 @@ class KMC_Model():
         outfile.write('<!-- This is an automatically generated XML file, representing one kMC mode ' + \
                         'please do not change this unless you know what you are doing -->\n')
         outfile.close()
-        print(self.prettify_xml(root))
 
     def compile():
         pass

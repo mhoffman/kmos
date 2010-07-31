@@ -2,30 +2,135 @@
 <kmc>
     <meta author="Max J. Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="2" model_name="RuO2"/>
     <species_list>
-        <species color="#ffff00000000" id="12" species="oxygen"/>
-        <species color="#ffffffffffff" id="10" species="empty"/>
+        <species color="#ffff00000000" id="1" species="oxygen"/>
+        <species color="#000000000000" id="2" species="co"/>
+        <species color="#ffffffffffff" id="0" species="empty"/>
     </species_list>
-    <parameter_list>
-        <parameter name="E_oxygen_cus" type="float" value="1.1"/>
-    </parameter_list>
+    <parameter_list/>
     <lattice_list>
-        <lattice name="ruo2" unit_cell_size="1 1">
+        <lattice name="ruo2" unit_cell_size="2 1">
             <site coord="0 0" index="0" type="default"/>
+            <site coord="1 0" index="1" type="default"/>
         </lattice>
     </lattice_list>
     <process_list>
-        <process center_site="0 0 0 0 0 0" name="oxygen_adsorption" rate_constant="2134">
-            <condition coord="0 0 0 0" species="oxygen"/>
+        <process center_site="0 0" name="oxygen_ads_cus_cus" rate_constant="rate_oxygen_adsorpton_cus_cus">
             <condition coord="0 0 0 0" species="empty"/>
-            <condition coord="1 0 0 0" species="empty"/>
+            <condition coord="0 1 0 0" species="empty"/>
+            <action coord="0 1 0 0" species="oxygen"/>
             <action coord="0 0 0 0" species="oxygen"/>
-            <action coord="1 0 0 0" species="oxygen"/>
         </process>
-        <process center_site="0 0 0 0" name="oxygen_diffusion_left" rate_constant="34634">
+        <process center_site="1 0" name="oxygen_ads_bridge_bridge" rate_constant="rate_oxygen_ads_bridge_bridge">
+            <condition coord="0 0 0 0" species="empty"/>
+            <condition coord="0 1 0 0" species="empty"/>
+            <action coord="0 1 0 0" species="oxygen"/>
+            <action coord="0 0 0 0" species="oxygen"/>
+        </process>
+        <process center_site="0 0" name="oxygen_ads_cus_bridge" rate_constant="rate_oxygen_ads_cus_bridge">
+            <condition coord="0 0 0 0" species="empty"/>
+            <condition coord="0 0 1 0" species="empty"/>
+            <action coord="0 0 0 0" species="oxygen"/>
+            <action coord="0 0 1 0" species="oxygen"/>
+        </process>
+        <process center_site="0 0" name="oxygen_des_cus_cus" rate_constant="rate_oxygen_des_cus_cus">
             <condition coord="0 0 0 0" species="oxygen"/>
-            <condition coord="-1 0 0 0" species="empty"/>
+            <condition coord="0 1 0 0" species="oxygen"/>
+            <action coord="0 1 0 0" species="empty"/>
             <action coord="0 0 0 0" species="empty"/>
-            <action coord="-1 0 0 0" species="oxygen"/>
+        </process>
+        <process center_site="0 0" name="oxygen_des_bridge_bridge" rate_constant="rate_oxygen_des_cus_bridge">
+            <condition coord="0 0 0 0" species="oxygen"/>
+            <condition coord="0 0 1 0" species="oxygen"/>
+            <action coord="0 0 0 0" species="empty"/>
+            <action coord="0 0 1 0" species="empty"/>
+        </process>
+        <process center_site="0 0" name="co_ads_cus" rate_constant="rate_co_ads_cus">
+            <condition coord="0 0 0 0" species="empty"/>
+            <action coord="0 0 0 0" species="co"/>
+        </process>
+        <process center_site="0 0" name="co_des_cus" rate_constant="co_des_cus">
+            <condition coord="0 0 0 0" species="empty"/>
+            <action coord="0 0 0 0" species="co"/>
+        </process>
+        <process center_site="1 0" name="co_ads_bridge" rate_constant="rate_co_ads_bridge">
+            <condition coord="0 0 0 0" species="empty"/>
+            <action coord="0 0 0 0" species="co"/>
+        </process>
+        <process center_site="1 0" name="co_des_bridge" rate_constant="rate_co_des">
+            <condition coord="0 0 0 0" species="co"/>
+            <action coord="0 0 0 0" species="empty"/>
+        </process>
+        <process center_site="0 0" name="oxygen_diff_cus_cus_up" rate_constant="oxygen_diff_cus_cus">
+            <condition coord="0 0 0 0" species="oxygen"/>
+            <condition coord="0 1 0 0" species="empty"/>
+            <action coord="0 0 0 0" species="empty"/>
+            <action coord="0 1 0 0" species="oxygen"/>
+        </process>
+        <process center_site="0 0" name="oxygen_diff_cus_cus_down" rate_constant="oxygen_diff_cus_cus">
+            <condition coord="0 0 0 0" species="oxygen"/>
+            <condition coord="0 -1 0 0" species="empty"/>
+            <action coord="0 0 0 0" species="empty"/>
+            <action coord="0 -1 0 0" species="oxygen"/>
+        </process>
+        <process center_site="1 0" name="oxygen_diff_bridge_bridge_down" rate_constant="rate_oxygen_diff_bridge_bridge">
+            <condition coord="0 0 0 0" species="oxygen"/>
+            <condition coord="0 -1 0 0" species="empty"/>
+            <action coord="0 0 0 0" species="empty"/>
+            <action coord="0 -1 0 0" species="oxygen"/>
+        </process>
+        <process center_site="1 0" name="oxygen_diff_bridge_bridge_up" rate_constant="oxygen_diff_cus_cus">
+            <condition coord="0 1 0 0" species="empty"/>
+            <condition coord="0 0 0 0" species="oxygen"/>
+            <action coord="0 1 0 0" species="oxygen"/>
+            <action coord="0 0 0 0" species="empty"/>
+        </process>
+        <process center_site="0 0" name="oxygen_diff_cus_bridge" rate_constant="rate_oxygen_diff_cus_bridge">
+            <condition coord="0 0 0 0" species="oxygen"/>
+            <condition coord="0 0 1 0" species="empty"/>
+            <action coord="0 0 1 0" species="oxygen"/>
+            <action coord="0 0 0 0" species="empty"/>
+        </process>
+        <process center_site="1 0" name="oxygen_diff_bridge_cus" rate_constant="rate_oxygen_diff_bridge_cus">
+            <condition coord="0 0 0 0" species="oxygen"/>
+            <condition coord="0 0 -1 0" species="empty"/>
+            <action coord="0 0 0 0" species="empty"/>
+            <action coord="0 0 -1 0" species="oxygen"/>
+        </process>
+        <process center_site="0 0" name="react_ocus_cobr_down" rate_constant="rate_react">
+            <condition coord="0 0 0 0" species="oxygen"/>
+            <condition coord="0 -1 0 0" species="co"/>
+            <action coord="0 0 0 0" species="empty"/>
+            <action coord="0 -1 0 0" species="empty"/>
+        </process>
+        <process center_site="0 0" name="oxygen_des_cus_bridge" rate_constant="rate_oxygen_desorption_cus_bridge">
+            <condition coord="0 0 0 0" species="oxygen"/>
+            <condition coord="0 0 1 0" species="oxygen"/>
+            <action coord="0 0 0 0" species="empty"/>
+            <action coord="0 0 1 0" species="empty"/>
+        </process>
+        <process center_site="1 0" name="co_diff_cus_cus" rate_constant="rateco_diffusion_cus_cus">
+            <condition coord="0 0 0 0" species="co"/>
+            <condition coord="0 1 0 0" species="empty"/>
+            <action coord="0 0 0 0" species="empty"/>
+            <action coord="0 1 0 0" species="co"/>
+        </process>
+        <process center_site="0 0" name="co_diffusion_bridge_bridge_up" rate_constant="co_diffusion_bridge_bridge">
+            <condition coord="0 0 0 0" species="co"/>
+            <condition coord="0 1 0 0" species="empty"/>
+            <action coord="0 0 0 0" species="empty"/>
+            <action coord="0 1 0 0" species="co"/>
+        </process>
+        <process center_site="0 0" name="co_diffusion_down" rate_constant="co_diffusion_bridge_bridge">
+            <condition coord="0 0 0 0" species="co"/>
+            <condition coord="0 -1 0 0" species="empty"/>
+            <action coord="0 0 0 0" species="empty"/>
+            <action coord="0 -1 0 0" species="co"/>
+        </process>
+        <process center_site="0 0" name="co_diffusion_bridge_cus" rate_constant="rate_diffusion_cus_bridge">
+            <condition coord="0 0 0 0" species="co"/>
+            <condition coord="0 0 1 0" species="empty"/>
+            <action coord="0 0 0 0" species="empty"/>
+            <action coord="0 0 1 0" species="co"/>
         </process>
     </process_list>
 </kmc>
