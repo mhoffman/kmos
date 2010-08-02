@@ -580,7 +580,6 @@ python script.</property>
                 <signal name="configure_event" handler="on_dwLattice_configure_event"/>
               </widget>
               <packing>
-                <property name="pack_type">end</property>
                 <property name="position">1</property>
               </packing>
             </child>
