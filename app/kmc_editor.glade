@@ -1277,6 +1277,7 @@ boolean</property>
                     <child>
                       <widget class="GtkLabel" id="label21">
                         <property name="visible">True</property>
+                        <property name="tooltip" translatable="yes">Currently  the editor only supports 2-dimensional lattices.</property>
                         <property name="label" translatable="yes">Dimension:</property>
                       </widget>
                       <packing>
@@ -1286,6 +1287,7 @@ boolean</property>
                     <child>
                       <widget class="GtkLabel" id="label20">
                         <property name="visible">True</property>
+                        <property name="tooltip" translatable="yes">This set how verbose, the resulting program will be. Can still be changed later.</property>
                         <property name="label" translatable="yes">Debug level:</property>
                       </widget>
                       <packing>

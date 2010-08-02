@@ -221,7 +221,6 @@ class KMC_Model():
                 coord = condition[1][0]*lattice['unit_cell_size'][0] + condition[1][2], condition[1][1]*lattice['unit_cell_size'][1] + condition[1][3]
                 local_coord = [ x % y for (x,y) in zip(coord, lattice['unit_cell_size']) ]
                 coord = ' '.join([ str(x) for x in coord ])
-                print(local_coord)
                 type = '_'.join([ str(x) for x in local_coord ])
                 species = condition[0]
                 condition_elem = ET.SubElement(condition_list,'condition')
@@ -320,6 +319,7 @@ class MainWindow():
         self.keywords = ['exp','sin','cos','sqrt','log']
         dic = {'on_btnAddLattice_clicked' : self.new_lattice ,
                 'on_btnMainQuit_clicked' : lambda w: gtk.main_quit(),
+                'destroy' : lambda w: gtk.main_quit(),
                 'on_btnAddParameter_clicked': self.add_parameter,
                 'on_btnAddSpecies_clicked' : self.add_species,
                 'on_btnAddProcess_clicked' : self.create_process,
@@ -390,16 +390,24 @@ class MainWindow():
                                     if (coordx - event.x)**2 + (coordy - event.y)**2 < 30 :
                                         self.species_menu = gtk.Menu()
                                         if event.button == 3 :
+                                            menu_header = gtk.MenuItem('Select action')
                                             data = 'action', i, j, x, y
                                         elif event.button == 1 :
+                                            menu_header = gtk.MenuItem('Select condition')
                                             data = 'condition', i, j, x, y
 
+                                        menu_header.set_sensitive(False)
+                                        self.species_menu.append(menu_header)
+                                        self.species_menu.append(gtk.SeparatorMenuItem())
                                         for species in self.species:
                                             menu_item = gtk.MenuItem(species['species'])
                                             self.species_menu.append(menu_item)
                                             menu_item.connect("activate", self.add_condition, (species, list(data)))
                                         self.species_menu.show_all()
-                                        self.species_menu.popup(None, None, None, event.button, event.time)
+                                        if event.button == 1 :
+                                            self.species_menu.popup(None, None, None, event.button, event.time)
+                                        elif event.button == 3 and filter(lambda cond: cond[1] == [i, j, x, y], self.new_process['conditions']):
+                                            self.species_menu.popup(None, None, None, event.button, event.time)
 
 
     def add_meta_information(self):
@@ -418,9 +426,12 @@ class MainWindow():
         lattice_editor = DrawingArea(self.add_lattice)
 
     def add_species(self, widget):
+        if not self.species:
+            empty_species = {'color':'#fff','species':'empty','id':'0'}
+            self.species.append(empty_species)
         if not self.meta:
             self.add_meta_information()
-        dialog_new_species = DialogNewSpecies()
+        dialog_new_species = DialogNewSpecies(len(self.species))
         result, data = dialog_new_species.run()
         if result == gtk.RESPONSE_OK:
 
@@ -429,6 +440,7 @@ class MainWindow():
             elif data not in self.species:
                 self.species.append(data)
                 self.statbar.push(1,'Added species "'+ data['species'] + '"')
+                print(data)
 
     def add_parameter(self, widget):
         if not self.meta:
@@ -527,16 +539,16 @@ class MainWindow():
 
             if result == gtk.RESPONSE_OK:
                 self.new_process['rate_constant'] = data['rate_constant']
-            center_site = self.new_process['center_site']
-            for condition in self.new_process['conditions'] + self.new_process['actions']:
-                condition[1] = [ x - y for (x, y) in zip(condition[1], center_site) ]
-            self.new_process['center_site'] = self.new_process['center_site'][2 :]
-            self.processes.append(self.new_process)
-            self.statbar.push(1,'New process "'+ self.new_process['name'] + '" added')
-            print(self.new_process)
-            self.new_process = {}
-            self.draw_lattices(blank=True)
-            self.lattice_ready = False
+                center_site = self.new_process['center_site']
+                for condition in self.new_process['conditions'] + self.new_process['actions']:
+                    condition[1] = [ x - y for (x, y) in zip(condition[1], center_site) ]
+                self.new_process['center_site'] = self.new_process['center_site'][2 :]
+                self.processes.append(self.new_process)
+                self.statbar.push(1,'New process "'+ self.new_process['name'] + '" added')
+                print(self.new_process)
+                self.new_process = {}
+                self.draw_lattices(blank=True)
+                self.lattice_ready = False
 
 
     def add_condition(self, event, data):
@@ -583,6 +595,7 @@ class MainWindow():
             for i in range(-1,1):
                 self.pixmap.draw_line(gc, 0, i+sup_i*height/zoom, width, i+(sup_i*height/zoom))
                 self.pixmap.draw_line(gc, i+sup_i*width/zoom, 0, i+(sup_i*width/zoom), height)
+        for sup_i in range(zoom+1):
             for sup_j in range(3):
                 for x in range(unit_x):
                     for y in range(unit_y):
@@ -819,10 +832,12 @@ class DialogDefineSite():
         # define field and set defaults
         type_field = self.wtree.get_widget('defineSite_type')
         type_field.set_text('default')
+        type_field.set_sensitive(False)
         index_field = self.wtree.get_widget('defineSite_index')
         index_adjustment = gtk.Adjustment(value=len(self.lattice_dialog.sites), lower=0, upper=1000, step_incr=1, page_incr=4, page_size=0)
         index_field.set_adjustment(index_adjustment)
         index_field.set_value(len(self.lattice_dialog.sites))
+        index_field.set_sensitive(False)
         site_x = self.wtree.get_widget('spb_site_x')
         x_adjustment = gtk.Adjustment(value=0, lower=0, upper=self.lattice_dialog.unit_cell_size[0]-1, step_incr=1, page_incr=4, page_size=0)
         site_x.set_adjustment(x_adjustment)
@@ -872,12 +887,13 @@ class DialogProcessName():
         return result, data
 
 class DialogNewSpecies():
-    def __init__(self):
+    def __init__(self, nr_of_species):
         self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
         self.wtree = gtk.glade.XML(self.gladefile)
         self.dialog = self.wtree.get_widget('dlgNewSpecies')
         dic = {'on_btnSelectColor_clicked' : self.open_dlg_color_selection,}
         self.wtree.signal_autoconnect(dic)
+        self.nr_of_species = nr_of_species
         self.color = ""
 
 
@@ -895,6 +911,8 @@ class DialogNewSpecies():
         # define fields
         species = self.wtree.get_widget('field_species')
         species_id = self.wtree.get_widget('species_id')
+        species_id.set_text(str(self.nr_of_species))
+        species_id.set_sensitive(False)
         #run
         result = self.dialog.run()
         # extract fields
@@ -950,6 +968,7 @@ class DialogMetaInformation():
         email = self.wtree.get_widget('metaEmail')
         model_name = self.wtree.get_widget('metaModelName')
         model_dimension = self.wtree.get_widget('metaDimension')
+        model_dimension.set_sensitive(False)
         debug_level = self.wtree.get_widget('metaDebug')
         # run
         result = self.dialog.run()
@@ -958,7 +977,7 @@ class DialogMetaInformation():
         data['author'] = author.get_text()
         data['email'] = email.get_text()
         data['model_name'] = model_name.get_text()
-        data['model_dimension'] = model_dimension.get_value_as_int()
+        data['model_dimension'] = str(model_dimension.get_value_as_int())
         data['debug'] = debug_level.get_value_as_int()
         self.dialog.destroy()
         return result, data
