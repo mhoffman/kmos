@@ -194,7 +194,8 @@ class KMC_Model():
     def export_projectlist_xml(self, filename):
         """Ok, this is basically a function dealing with 'legacy' code. Since the
         module writing the process list has been tested before but is rather complex
-        I refrain from rewriting this and instead
+        I refrain from rewriting this and instead generate an XML file that fits the old program
+        """
         root = ET.Element('kmc')
         # extract meta information
         meta = ET.SubElement(root,'meta')
@@ -516,7 +517,7 @@ class MainWindow():
         #ui += "</popup>\n</ui>\n"
         #uimanager.add_ui_from_string(ui)
         #self.popup = uimanager.get_widget('/popup')
-#
+        #
         #for elem in self.popup:
             #print(elem)
             #for subelem in elem:
@@ -629,7 +630,7 @@ class MainWindow():
 
         self.da_widget.queue_draw_area(0, 0, width, height)
 
-class DrawingArea:
+class DrawingArea():
     """Main Dialog set up a lattice and its adsorption sites
     """
     def __init__(self, callback):
