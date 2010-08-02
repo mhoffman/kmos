@@ -28,7 +28,7 @@
             <condition coord="0 0 0 0" species="empty"/>
             <action coord="0 0 0 0" species="co"/>
         </process>
-        <process center_site="0 1" name="co_adsorption_3" rate_constant="rate_co_adsorption">
+        <process center_site="0 1" name="co_adsorption_4" rate_constant="rate_co_adsorption">
             <condition coord="0 0 0 0" species="empty"/>
             <action coord="0 0 0 0" species="co"/>
         </process>

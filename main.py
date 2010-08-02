@@ -191,12 +191,13 @@ class KMC_Model():
         print("PARAMETERS: ", self.parameters)
         print("PROCESSES: ", self.processes)
 
-    def export_projectlist_xml(self, filename):
+    def export_process_list_xml(self):
         """Ok, this is basically a function dealing with 'legacy' code. Since the
         module writing the process list has been tested before but is rather complex
         I refrain from rewriting this and instead generate an XML file that fits the old program
         """
         root = ET.Element('kmc')
+        lattice = self.lattices[0]
         # extract meta information
         meta = ET.SubElement(root,'meta')
         meta.set('name',self.meta['model_name'])
