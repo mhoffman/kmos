@@ -20,7 +20,7 @@
 
 
 
-module lattice_%(lattice_name)s
+module lattice
 use kind_values
 ! Import and rename from libkmc
 use libkmc, only: &
@@ -168,10 +168,6 @@ subroutine allocate_system(nr_of_proc, input_system_size, system_name)
     !---------------internal variables---------------
     integer(kind=iint) :: volume
 
-    if(.not.mod(system_size(1),2)==0)then
-        print *,'Error(lattice_%(lattice_name)s/allocate_system): x-component '// &
-            'of system size has to be even'
-    endif
     ! Copy to module wide variable
     system_size = input_system_size
 
@@ -298,4 +294,4 @@ subroutine %(lattice_name)s_get_species(site, return_species)
 end subroutine %(lattice_name)s_get_species
 
 
-end module lattice_%(lattice_name)s
+end module lattice
