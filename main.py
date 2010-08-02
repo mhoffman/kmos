@@ -175,6 +175,9 @@ class KMC_Model():
         print("PROCESSES: ", self.processes)
 
     def export_projectlist_xml(self, filename):
+        """Ok, this is basically a function dealing with 'legacy' code. Since the
+        module writing the process list has been tested before but is rather complex
+        I refrain from rewriting this and instead
         root = ET.Element('kmc')
         site_type_list = ET.SubElement(root,'site_type_list')
         species_list = ET.SubElement(root,'species_list')
