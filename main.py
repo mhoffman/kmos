@@ -373,6 +373,11 @@ class MainWindow():
 
     def display_help(self, widget):
         self.statbar.push(1,'Not implemented yet!')
+        print("META: ", self.meta)
+        print("LATTICES: ", self.lattices)
+        print("SPECIES: ", self.species)
+        print("PARAMETERS: ", self.parameters)
+        print("PROCESSES: ", self.processes)
 
 
     def dw_lattice_clicked(self, widget, event):

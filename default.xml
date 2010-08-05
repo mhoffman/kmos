@@ -1,14 +1,14 @@
 <?xml version="1.0" ?>
 <kmc>
-    <meta author="Max Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="2" model_name="Ruo2"/>
+    <meta author="Max Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="2" model_name="oles_kmc"/>
     <species_list>
         <species color="#fff" id="0" species="empty"/>
-        <species color="#ffff00000000" id="1" species="oxygen"/>
-        <species color="#2d731441ffff" id="2" species="co"/>
+        <species color="#ffff00000000" id="1" species="sauerstoff"/>
+        <species color="#0000ffff0187" id="2" species="nitrogen"/>
     </species_list>
     <parameter_list/>
     <lattice_list>
-        <lattice name="default" unit_cell_size="4 2">
+        <lattice name="graphene" unit_cell_size="4 2">
             <site coord="0 1" index="0" type="default"/>
             <site coord="1 0" index="1" type="default"/>
             <site coord="2 0" index="2" type="default"/>
@@ -16,21 +16,19 @@
         </lattice>
     </lattice_list>
     <process_list>
-        <process center_site="1 0" name="co_adsorption_1" rate_constant="rate_co_adsorption">
+        <process center_site="1 0" name="oxygen_adsorption_1" rate_constant="oxygen_adsorption_rate">
             <condition coord="0 0 0 0" species="empty"/>
-            <action coord="0 0 0 0" species="co"/>
+            <action coord="0 0 0 0" species="sauerstoff"/>
         </process>
-        <process center_site="2 0" name="co_adsorption_2" rate_constant="rate_co_adsorption">
+        <process center_site="2 0" name="oxygen_adsorption_2" rate_constant="oxygen_adsorption_rate">
             <condition coord="0 0 0 0" species="empty"/>
-            <action coord="0 0 0 0" species="co"/>
+            <action coord="0 0 0 0" species="sauerstoff"/>
         </process>
-        <process center_site="3 1" name="co_adsorption_3" rate_constant="rate_co_adsorption">
-            <condition coord="0 0 0 0" species="empty"/>
-            <action coord="0 0 0 0" species="co"/>
-        </process>
-        <process center_site="0 1" name="co_adsorption_4" rate_constant="rate_co_adsorption">
-            <condition coord="0 0 0 0" species="empty"/>
-            <action coord="0 0 0 0" species="co"/>
+        <process center_site="1 0" name="oxygen_diffusion_12" rate_constant="oxygen_diffusion_rate">
+            <condition coord="0 0 1 0" species="empty"/>
+            <condition coord="0 0 0 0" species="sauerstoff"/>
+            <action coord="0 0 0 0" species="empty"/>
+            <action coord="0 0 1 0" species="sauerstoff"/>
         </process>
     </process_list>
 </kmc>
