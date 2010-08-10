@@ -319,6 +319,7 @@ class MainWindow():
         self.window = self.wtree.get_widget('wndMain')
         self.statbar = self.wtree.get_widget('stb_process_editor')
         self.da_widget = self.wtree.get_widget('dwLattice')
+        self.overview_tree = self.wtree.get_widget('overviewtree')
         self.initialize_data()
         self.keywords = ['exp','sin','cos','sqrt','log']
         dic = {'on_btnAddLattice_clicked' : self.new_lattice ,

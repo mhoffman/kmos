@@ -592,6 +592,30 @@ python script.</property>
                 <property name="position">2</property>
               </packing>
             </child>
+            <child>
+              <widget class="GtkVBox" id="vbox16">
+                <property name="visible">True</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <widget class="GtkTreeView" id="overviewtree">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                  </widget>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+              </widget>
+              <packing>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
           </widget>
           <packing>
             <property name="position">0</property>
