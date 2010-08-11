@@ -31,19 +31,51 @@ def prettify_xml(elem):
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent='    ')
 
-class KMC_Model():
+class NotifyingDataStore():
+    """Simple class, that implements to allows to add listeners, which can be notified upon change
+    """
+    def __init__(self):
+        self.listeners = []
+
+    def add_listener(self, listener):
+        self.listeners.append(listener)
+
+    def fire(self):
+        for listener in self.listeners:
+            listener.changed()
+
+class KMC_Model(NotifyingDataStore):
     def __init__(self, lattices=[], meta={}, parameters=[], processes=[], species=[]):
+        NotifyingDataStore.__init__(self)
         self.lattices = lattices
         self.meta = meta
         self.parameters = parameters
         self.processes = processes
         self.species = species
-        print("META: ", self.meta)
-        print("LATTICES: ", self.lattices)
-        print("SPECIES: ", self.species)
-        print("PARAMETERS: ", self.parameters)
-        print("PROCESSES: ", self.processes)
 
+    def has_meta(self):
+        """Transitional method, to comply with devel style GUI
+        """
+        return self.meta != {}
+    def add_meta(self, meta):
+        self.meta = meta
+        print(self.meta)
+
+    def add_lattice(self, lattice):
+        self.lattices.append(lattice)
+        self.fire()
+
+    def add_parameter(self, parameter):
+        self.parameter.append(parameter)
+        self.fire()
+
+    def add_process(self, process):
+        self.processes.append(process)
+        self.fire()
+
+    def add_species(self, species):
+        self.species.append(species)
+        self.fire()
 
     def export_source(self, dir=''):
         if not dir:
@@ -320,9 +352,8 @@ class MainWindow():
         self.window = self.wtree.get_widget('wndMain')
         self.statbar = self.wtree.get_widget('stb_process_editor')
         self.da_widget = self.wtree.get_widget('dwLattice')
-        self.overview_tree = self.wtree.get_widget('overviewtree')
-        self.initialize_data()
         self.keywords = ['exp','sin','cos','sqrt','log']
+        self.kmc_model = KMC_Model()
         dic = {'on_btnAddLattice_clicked' : self.new_lattice ,
                 'on_btnMainQuit_clicked' : lambda w: gtk.main_quit(),
                 'destroy' : lambda w: gtk.main_quit(),
@@ -345,13 +376,14 @@ class MainWindow():
         self.statbar.push(1,'Add a new lattice first.')
         self.lattice_ready = False
 
-    def initialize_data(self):
-        self.meta = {}
-        self.lattices = []
-        self.parameters = []
-        self.processes = []
-        self.species = []
-        self.new_process = {}
+        #setup overview tree
+        self.treeview = self.wtree.get_widget('overviewtree')
+        self.tvcolumn = gtk.TreeViewColumn('Project Data')
+        self.cell = gtk.CellRendererText()
+        self.tvcolumn.pack_start(self.cell, True)
+        self.tvcolumn.add_attribute(self.cell, 'text', 0)
+        self.treeview.append_column(self.tvcolumn)
+
 
     def import_xml(self, widget):
         self.new_process = {}
@@ -425,14 +457,13 @@ class MainWindow():
         dlg_meta_info = DialogMetaInformation()
         result, data = dlg_meta_info.run()
         if result == gtk.RESPONSE_OK:
-            for key in data:
-                self.meta[key] = data[key]
+            self.kmc_model.add_meta(data)
             self.statbar.push(1,'Meta information added')
         else:
             self.statbar.push(1,'Could not complete meta information')
 
     def new_lattice(self, widget):
-        if not self.meta:
+        if not self.kmc_model.has_meta():
             self.add_meta_information()
         lattice_editor = DrawingArea(self.add_lattice)
 
@@ -459,7 +490,7 @@ class MainWindow():
         parameter_editor = DialogAddParameter()
         result, data = parameter_editor.run()
         if result == gtk.RESPONSE_OK:
-            self.parameters.append(data)
+            self.kmc_model.add_parameter(data)
 
 
     def add_lattice(self, data):
@@ -479,8 +510,7 @@ class MainWindow():
         lattice['name'] = data.__dict__['lattice_name']
         lattice['sites'] = data.__dict__['sites']
         lattice['unit_cell_size'] = data.__dict__['unit_cell_size']
-        self.lattices.append(lattice)
-        print(self.lattices)
+        self.kmc_model.add_lattice(lattice)
         self.statbar.push(1,'Added lattice "' + data.__dict__['lattice_name'] + '"')
 
     def dw_lattice_configure(self, widget, event):
@@ -518,18 +548,6 @@ class MainWindow():
         self.lattice_ready = True
         self.statbar.push(1,'Left-click sites for condition, right-click site for changes, click here if finished.')
 
-        #uimanager = gtk.UIManager()
-        #ui = "<ui>\n<popup>\n"
-        #for species in self.species:
-            #ui += "<menuitem name='" + species + "' action='return_species'/>\n"
-        #ui += "</popup>\n</ui>\n"
-        #uimanager.add_ui_from_string(ui)
-        #self.popup = uimanager.get_widget('/popup')
-        #
-        #for elem in self.popup:
-            #print(elem)
-            #for subelem in elem:
-                #print(subelem)
 
     def statbar_clicked(self, widget, event):
         if self.new_process:
@@ -554,7 +572,7 @@ class MainWindow():
                 for condition in self.new_process['conditions'] + self.new_process['actions']:
                     condition[1] = [ x - y for (x, y) in zip(condition[1], center_site) ]
                 self.new_process['center_site'] = self.new_process['center_site'][2 :]
-                self.processes.append(self.new_process)
+                self.kmc_model.add_process(self.new_process)
                 self.statbar.push(1,'New process "'+ self.new_process['name'] + '" added')
                 print(self.new_process)
                 self.new_process = {}
