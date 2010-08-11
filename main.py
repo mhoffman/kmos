@@ -26,6 +26,11 @@ PROCESSLIST_DTD = '/process_list.dtd'
 XMLFILE = './default.xml'
 SRCDIR = './fortran_src'
 
+def prettify_xml(elem):
+    rough_string = ET.tostring(elem,encoding='utf-8')
+    reparsed = minidom.parseString(rough_string)
+    return reparsed.toprettyxml(indent='    ')
+
 class KMC_Model():
     def __init__(self, lattices=[], meta={}, parameters=[], processes=[], species=[]):
         self.lattices = lattices
@@ -39,10 +44,6 @@ class KMC_Model():
         print("PARAMETERS: ", self.parameters)
         print("PROCESSES: ", self.processes)
 
-    def prettify_xml(self, elem):
-        rough_string = ET.tostring(elem,encoding='utf-8')
-        reparsed = minidom.parseString(rough_string)
-        return reparsed.toprettyxml(indent='    ')
 
     def export_source(self, dir=''):
         if not dir:
@@ -104,7 +105,7 @@ class KMC_Model():
         lattice_mod_file.close()
         # generate process list source via existing code
         proclist_xml = open(dir + '/process_list.xml','w')
-        pretty_xml = self.prettify_xml(self.export_process_list_xml())
+        pretty_xml = prettify_xml(self.export_process_list_xml())
         proclist_xml.write(pretty_xml)
         print(pretty_xml)
         proclist_xml.close()
