@@ -44,22 +44,65 @@ class NotifyingDataStore():
         for listener in self.listeners:
             listener.changed()
 
-class KMC_Model(NotifyingDataStore):
-    def __init__(self, lattices=[], meta={}, parameters=[], processes=[], species=[]):
+class KMC_Model(gtk.GenericTreeModel, NotifyingDataStore):
+    def __init__(self, lattices=[], parameters=[], processes=[], species=[]):
         NotifyingDataStore.__init__(self)
-        self.lattices = lattices
-        self.meta = meta
+        gtk.GenericTreeModel.__init__(self)
+        self.lattices = LatticeList()
+        self.meta = Meta()
         self.parameters = parameters
         self.processes = processes
         self.species = species
+        self.column_types = (str,)
+
+    def on_get_flags(self):
+        print("Called on get flags")
+        return 0
+
+    def on_get_n_columns(self):
+        print("Called on_get_n_columns")
+        print(len(self.column_types))
+        return len(self.column_types)
+
+    def on_get_column_type(self, index):
+        print("Called on_get_column_type",index)
+        print(self.column_types[index])
+        return self.column_types[index]
+
+    def on_get_iter(self, path):
+        print("Called  on_get_iter",path)
+        if path == (0,):
+            return self.lattices
+        else:
+            return None
+
+    def on_iter_has_child(self, rowref):
+        print("On  on_iter_has_child", rowref)
+        return False
+
+    def on_iter_next(self, rowref):
+        print("Called  on_iter_next",rowref)
+        return None
+
+    def on_get_value(self, rowref, column):
+        print("Called  on_get_value", rowref, column)
+        if isinstance(rowref, LatticeList):
+            return 'Lattices'
+
+    def on_iter_nth_child(self, parent, n):
+        print("Called  on_iter_nth_child", parent, n)
+        if parent:
+            return None
+        if n == 0 :
+            return self.lattices
 
     def has_meta(self):
         """Transitional method, to comply with devel style GUI
         """
-        return self.meta != {}
+        return self.meta.set()
+
     def add_meta(self, meta):
-        self.meta = meta
-        print(self.meta)
+        self.meta.add(meta)
 
     def add_lattice(self, lattice):
         self.lattices.append(lattice)
@@ -173,7 +216,7 @@ class KMC_Model(NotifyingDataStore):
             if child.tag == 'meta':
                 for attrib in ['author','email', 'debug','model_name','model_dimension']:
                     if child.attrib.has_key(attrib):
-                        self.meta[attrib] = child.attrib[attrib]
+                        self.meta.add({attrib:child.attrib[attrib]})
             elif child.tag == 'species_list':
                 for species in child:
                     species_elem = {}
@@ -372,7 +415,6 @@ class MainWindow():
                 }
 
         self.wtree.signal_autoconnect(dic)
-        self.window.show()
         self.statbar.push(1,'Add a new lattice first.')
         self.lattice_ready = False
 
@@ -383,24 +425,23 @@ class MainWindow():
         self.tvcolumn.pack_start(self.cell, True)
         self.tvcolumn.add_attribute(self.cell, 'text', 0)
         self.treeview.append_column(self.tvcolumn)
+        self.treeview.set_model(self.kmc_model)
+
+        self.window.show()
 
 
     def import_xml(self, widget):
         self.new_process = {}
-        kmc_model = KMC_Model()
-        kmc_model.import_xml(XMLFILE)
-        self.lattices, self.meta, self.parameters, self.processes, self.species = kmc_model.get_configuration()
+        self.kmc_model = KMC_Model()
+        self.kmc_model.import_xml(XMLFILE)
 
     def export_xml(self, widget):
-        kmc_model = KMC_Model(self.lattices, self.meta, self.parameters, self.processes, self.species)
         kmc_model.export_xml(XMLFILE)
-        del(kmc_model)
 
 
     def export_source(self, widget):
-        kmc_model = KMC_Model(self.lattices, self.meta, self.parameters, self.processes, self.species)
         print(kmc_model.export_source())
-        self.statbar.push(1,'Partially implemented!')
+        self.statbar.push(1,'Exported FORTRAN source code!')
 
     def export_program(self, widget):
         self.statbar.push(1,'Not implemented yet!')
@@ -1043,6 +1084,122 @@ def validate_xml(xml_filename, dtd_filename):
     dtd = et.DTD(dtd_filename)
     root = et.parse(xml_filename)
     dtd.assertValid(root)
+
+class SimpleList(gtk.GenericTreeModel):
+    def __init__(self):
+        gtk.GenericTreeModel.__init__(self)
+
+    def append(self, elem):
+        self.data.append(elem)
+
+    def on_get_flags(self):
+        return 0
+
+    def on_get_n_columns(self):
+        return len(self.column_type)
+
+    def on_get_column_type(self, n):
+        return self.column_type[n]
+
+    def on_get_iter(self, path):
+        return self.data[path[0]]
+
+    def on_get_path(self, rowref):
+        return self.data.index(rowref)
+
+    def on_iter_next(self, rowref):
+        print(rowref)
+        print(type(rowref))
+        try:
+            i = self.data.index(rowref) + 1
+            return self.data[i]
+        except IndexError:
+            return None
+
+    def on_iter_children(self, parent):
+        if parent:
+            return None
+        return self.data[0]
+
+    def on_iter_has_child(self, rowref):
+        return False
+
+    def on_iter_n_children(self, rowref):
+        if rowref:
+            return 0
+        return len(self.data)
+
+    def on_iter_nth_child(self, parent, n):
+        if parent:
+            return None
+        try:
+            return self.data[n]
+        except IndexError:
+            return None
+
+    def on_iter_parent(self, child):
+        return None
+
+class LatticeList(SimpleList):
+    def __init__(self):
+        SimpleList.__init__(self)
+        self.column_type = (str, )
+        self.lattices = []
+
+    def on_get_value(self, rowref, column):
+        i = self.lattices.index(rowref)
+        return self.lattices[i].name
+
+class Lattice(NotifyingDataStore):
+    def __init__(self, name, unit_cell_size, size, sites=[]):
+        NotifyingDataStore.__init__(self)
+        self.name = name
+        self.unit_cell_size = unit_cell_size
+        self.sites = sites
+
+    def set_name(self, name):
+        self.name = name
+        self.fire()
+
+    def set_unit_cell_size(self, unit_cell_size):
+        self.unit_cell_size = unit_cell_size
+        self.fire()
+
+
+    def add_site(self, site):
+        self.sites.append(site)
+        self.fire()
+
+class Meta(NotifyingDataStore):
+    def __init__(self):
+        NotifyingDataStore.__init__(self)
+        self.author = ''
+        self.debug = 0
+        self.email = ''
+        self.model_name = ''
+        self.model_dimension = 0
+
+    def add(self, data):
+        if type(data) != dict:
+            raise TypeError
+        if data.has_key('author'):
+            self.author = data['author']
+        if data.has_key('email'):
+            self.email = data['email']
+        if data.has_key('model_name'):
+            self.model_name = data['model_name']
+        if data.has_key('model_dimension'):
+            self.model_dimension = data['model_dimension']
+        if data.has_key('debug'):
+            self.debug = data['debug']
+
+    def set(self):
+        if self.author != '' and self.email != '' and self.model_name != '' and self.model_dimension != 0 :
+            return True
+        else:
+            return False
+
+
 
 
 def main():
