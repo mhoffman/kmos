@@ -401,8 +401,6 @@ class KMC_Model(gtk.GenericTreeModel):
         xmlparser = ET.XMLParser(remove_comments=True)
         root = ET.parse(filename, parser=xmlparser).getroot()
         dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_DTD)
-        s = Species('foobar','red',-1)
-        self.species_list.append(s)
         if not dtd.validate(root):
             print(dtd.error_log.filter_from_errors()[0])
             return
@@ -719,19 +717,19 @@ class MainWindow():
         lattice_editor = DrawingArea(self.add_lattice)
 
     def add_species(self, widget):
-        if not self.species:
+        if not self.kmc_model.species_list.has_elem():
             empty_species = {'color':'#fff','species':'empty','id':'0'}
-            self.species.append(empty_species)
-        if not self.meta:
+            self.species_list.append(empty_species)
+        if not self.kmc_model.meta:
             self.add_meta_information()
-        dialog_new_species = DialogNewSpecies(len(self.species))
+        dialog_new_species = DialogNewSpecies(len(self.kmc_model.species_list))
         result, data = dialog_new_species.run()
         if result == gtk.RESPONSE_OK:
-
             if not data['color']:
                 self.statbar.push(1,'Species not added because no color was specified!')
-            elif data not in self.species:
-                self.species.append(data)
+            elif data not in self.kmc_model.species_list:
+                new_species = Species(name=data['species'],color=data['color'],id=data['id'])
+                self.kmc_model.species_list.append(new_species)
                 self.statbar.push(1,'Added species "'+ data['species'] + '"')
                 print(data)
 
@@ -1308,6 +1306,9 @@ class SimpleList(gtk.GenericTreeModel):
             self.data.append(elem)
             full_path = (self.node_index, self.data.index(elem))
             self.callback('row-inserted', full_path)
+
+    def __len__(self):
+        return len(self.data)
 
     def has_elem(self):
         return len(self.data) > 0
