@@ -401,6 +401,8 @@ class KMC_Model(gtk.GenericTreeModel):
         xmlparser = ET.XMLParser(remove_comments=True)
         root = ET.parse(filename, parser=xmlparser).getroot()
         dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_DTD)
+        s = Species('foobar','red',-1)
+        self.species_list.append(s)
         if not dtd.validate(root):
             print(dtd.error_log.filter_from_errors()[0])
             return
@@ -584,13 +586,18 @@ class KMC_Model(gtk.GenericTreeModel):
         outfile.close()
 
     def compile():
+        """"Should figure out a locally installed fortran compiler and compiler exported
+        source code
+        TODO
+        """
         pass
 
     def export_control_script():
+        """Export a standard python export script useful to run and control a kmc model library
+        TODO
+        """
         pass
 
-    def get_configuration(self):
-        return self.lattices, self.meta, self.parameters, self.processes, self.species
 
 class MainWindow():
     def __init__(self):
@@ -636,7 +643,6 @@ class MainWindow():
 
     def import_xml(self, widget):
         self.new_process = {}
-        self.kmc_model = KMC_Model()
         self.kmc_model.import_xml(XMLFILE)
 
     def export_xml(self, widget):
