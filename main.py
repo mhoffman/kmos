@@ -774,8 +774,6 @@ class MainWindow():
 
 
     def create_process(self, widget):
-        if not self.meta:
-            self.add_meta_information()
         self.new_process = {}
         self.new_process['conditions'] = []
         self.new_process['actions'] = []
@@ -783,7 +781,7 @@ class MainWindow():
         self.new_process['rate_constant'] = 0.
         self.new_process['center_site'] = ()
 
-        if len(self.lattices) < 1 :
+        if len(self.kmc_model.lattice_list) < 1 :
             self.statbar.push(1,'No lattice defined!')
             return
         dlg_process_name = DialogProcessName()
@@ -821,7 +819,7 @@ class MainWindow():
                 for condition in self.new_process['conditions'] + self.new_process['actions']:
                     condition[1] = [ x - y for (x, y) in zip(condition[1], center_site) ]
                 self.new_process['center_site'] = self.new_process['center_site'][2 :]
-                self.kmc_model.add_process(self.new_process)
+                self.kmc_model.append(self.new_process)
                 self.statbar.push(1,'New process "'+ self.new_process['name'] + '" added')
                 print(self.new_process)
                 self.new_process = {}
@@ -861,13 +859,13 @@ class MainWindow():
 
     def draw_lattices(self,blank=False):
         gc = self.da_widget.get_style().black_gc
-        lattice = self.lattices[0]
+        lattice = self.kmc_model.lattice_list[0]
         width, height = self.process_editor_width, self.process_editor_height
         self.pixmap.draw_rectangle(self.da_widget.get_style().white_gc, True, 0, 0, width, height)
         if blank:
             return
-        unit_x = lattice['unit_cell_size'][0]
-        unit_y = lattice['unit_cell_size'][1]
+        unit_x = lattice.unit_cell_size[0]
+        unit_y = lattice.unit_cell_size[1]
         zoom = 3
         for sup_i in range(zoom+1):
             for i in range(-1,1):
@@ -877,8 +875,8 @@ class MainWindow():
             for sup_j in range(3):
                 for x in range(unit_x):
                     for y in range(unit_y):
-                        for site in lattice['sites']:
-                            if site['coord'][0] == x and site['coord'][1] == y:
+                        for site in lattice.sites:
+                            if site.coord[0] == x and site.coord[1] == y:
                                 center = []
                                 coordx = int((sup_i+ float(x)/unit_x)*width/zoom )
                                 coordy = int(height - (sup_j+ float(y)/unit_y)*height/zoom )
@@ -893,7 +891,8 @@ class MainWindow():
                                             gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
                                             self.pixmap.draw_arc(gc, False, center[0]-15, center[1]-15, 30, 30, 64*90, 64*360)
                                 if self.new_process.has_key('actions'):
-                                    for entry in self.new_process['actions']:
+                                    for entry in self.new_process.actions:
+                                        #FIXME
                                         if entry[1] == [sup_i, sup_j, x, y ]:
                                             color = filter((lambda x : x['species'] == entry[0]), self.species)[0]['color']
                                             gc.set_rgb_fg_color(gtk.gdk.color_parse(color))
