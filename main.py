@@ -2,6 +2,7 @@
 """Some small test program to explore the characteristics of a drawing area
 """
 
+import pdb
 from app.config import *
 import sys
 import os, os.path
@@ -15,7 +16,7 @@ import gtk.glade
 from lxml import etree as ET
 #Need to pretty print XML
 from xml.dom import minidom
-from kmc_generator import ProcessList
+from kmc_generator import ProcessList as ProcListWriter
 
 
 import os
@@ -25,100 +26,292 @@ KMCPROJECT_DTD = '/kmc_project.dtd'
 PROCESSLIST_DTD = '/process_list.dtd'
 XMLFILE = './default.xml'
 SRCDIR = './fortran_src'
+def verbose(func):
+        print >>sys.stderr,"monitor %r"%(func.func_name)
+        def f(*args,**kwargs):
+                print >>sys.stderr,"call(\033[0;31m%s.%s\033[0;30m): %r\n"%(type(args[0]).__name__,func.func_name,args[1 :]),
+                sys.stderr.flush()
+                ret=func(*args,**kwargs)
+                print >>sys.stderr,"    ret(%s): \033[0;32m%r\033[0;30m\n"%(func.func_name,ret)
+                return ret
+        return f
+
+
 
 def prettify_xml(elem):
     rough_string = ET.tostring(elem,encoding='utf-8')
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent='    ')
 
-class NotifyingDataStore():
-    """Simple class, that implements to allows to add listeners, which can be notified upon change
-    """
-    def __init__(self):
-        self.listeners = []
+class Attributes:
+    attributes = []
+    def __setattr__(self, attrname, value):
+        if attrname in self.attributes:
+            self.__dict__[attrname] = value
+        else:
+            raise AttributeError
 
-    def add_listener(self, listener):
-        self.listeners.append(listener)
 
-    def fire(self):
-        for listener in self.listeners:
-            listener.changed()
 
-class KMC_Model(gtk.GenericTreeModel, NotifyingDataStore):
-    def __init__(self, lattices=[], parameters=[], processes=[], species=[]):
-        NotifyingDataStore.__init__(self)
+
+class KMC_Model(gtk.GenericTreeModel):
+    def __init__(self, processes=[], species=[]):
         gtk.GenericTreeModel.__init__(self)
-        self.lattices = LatticeList()
-        self.meta = Meta()
-        self.parameters = parameters
-        self.processes = processes
-        self.species = species
+        self.lattice_list = LatticeList(self.callback,node_index=0)
+        self.meta = Meta(self.callback,node_index=1)
+        self.parameter_list = ParameterList(self.callback,node_index=2)
+        self.process_list = ProcessList(self.callback,node_index=3)
+        self.species_list = SpeciesList(self.callback,node_index=4)
         self.column_types = (str,)
 
+
+    @verbose
+    def callback(self, signal, *args, **kwargs):
+        if signal == 'row-inserted':
+            path = args[0]
+            self.row_inserted(path, self.get_iter(path))
+
+
+    #@verbose
     def on_get_flags(self):
-        print("Called on get flags")
         return 0
 
+    #@verbose
     def on_get_n_columns(self):
-        print("Called on_get_n_columns")
-        print(len(self.column_types))
         return len(self.column_types)
 
+    #@verbose
     def on_get_column_type(self, index):
-        print("Called on_get_column_type",index)
-        print(self.column_types[index])
         return self.column_types[index]
 
+    #@verbose
     def on_get_iter(self, path):
-        print("Called  on_get_iter",path)
-        if path == (0,):
-            return self.lattices
-        else:
+        if path == None:
             return None
+        elif path[0] == 0 :
+            if len(path) == 1 :
+                return self.lattice_list
+            else:
+                return self.lattice_list.on_get_iter((path[1], ))
+        elif path[0] == 1 :
+            if len(path) == 1 :
+                return self.meta
+            else:
+                return None
+        elif path[0] == 2 :
+            if len(path) == 1 :
+                return self.parameter_list
+            else:
+                return self.parameter_list.on_get_iter((path[1], ))
+        elif path[0] ==  3 :
+            if len(path) == 1 :
+                return self.process_list
+            else:
+                return self.process_list.on_get_iter((path[1], ))
+        elif path[0] == 4 :
+            if len(path) == 1 :
+                return self.species_list
+            else:
+                return self.species_list.on_get_iter((path[1],))
+        else:
+            return IndexError
 
-    def on_iter_has_child(self, rowref):
-        print("On  on_iter_has_child", rowref)
-        return False
+    #@verbose
+    def on_get_path(self, rowref):
+        if rowref is None:
+            return None
+        elif isinstance(rowref, LatticeList):
+            return (0, )
+        elif isinstance(rowref, Lattice):
+            return (0, self.lattice_list.on_get_path(rowref)[0])
+        elif isinstance(rowref, Meta):
+            return (1,)
+        elif isinstance(rowref, ParameterList):
+            return (2, )
+        elif isinstance(rowref, Parameter):
+            return (2, self.parameter_list.on_get_path(rowref)[0])
+        elif isinstance(rowref, ProcessList):
+            return (3, )
+        elif isinstance(rowref, Process):
+            return (3, self.process_list.on_get_path(rowref)[0])
+        elif isinstance(rowref, SpeciesList):
+            return (4, )
+        elif isinstance(rowref, Species):
+            return (4, self.species_list.on_get_path(rowref)[0])
+        else:
+            raise TypeError
 
-    def on_iter_next(self, rowref):
-        print("Called  on_iter_next",rowref)
-        return None
-
+    #@verbose
     def on_get_value(self, rowref, column):
-        print("Called  on_get_value", rowref, column)
         if isinstance(rowref, LatticeList):
             return 'Lattices'
+        elif  isinstance(rowref, Lattice):
+            return self.lattice_list.on_get_value(rowref, column)
+        elif isinstance(rowref, Meta):
+            return 'Meta'
+        elif isinstance(rowref, ParameterList):
+            return 'Parameters'
+        elif isinstance(rowref, Parameter):
+            return self.parameter_list.on_get_value(rowref, column)
+        elif isinstance(rowref, ProcessList):
+            return 'Processes'
+        elif isinstance(rowref, Process):
+            return self.process_list.on_get_value(rowref, column)
+        elif isinstance(rowref, SpeciesList):
+            return 'Species'
+        elif isinstance(rowref, Species):
+            return self.species_list.on_get_value(rowref, column)
+        else:
+            print(rowref, type(rowref))
+            raise TypeError
 
-    def on_iter_nth_child(self, parent, n):
-        print("Called  on_iter_nth_child", parent, n)
-        if parent:
+    #@verbose
+    def on_iter_next(self, rowref):
+        if rowref is None:
             return None
-        if n == 0 :
-            return self.lattices
+        elif isinstance(rowref, LatticeList):
+            return self.meta
+        elif isinstance(rowref, Lattice):
+            return self.lattice_list.on_iter_next(rowref)
+        elif isinstance(rowref, Meta):
+            return self.parameter_list
+        elif isinstance(rowref, ParameterList):
+            return self.process_list
+        elif isinstance(rowref, Parameter):
+            return self.parameter_list.on_iter_next(rowref)
+        elif isinstance(rowref, ProcessList):
+            return self.species_list
+        elif isinstance(rowref, Process):
+            return self.process_list.on_iter_next(rowref)
+        elif isinstance(rowref, SpeciesList):
+            return None
+        elif isinstance(rowref, Species):
+            return self.species_list.on_iter_next(rowref)
+
+
+
+    #@verbose
+    def on_iter_children(self, rowref):
+        if rowref is None:
+            return self.lattice_list
+        elif isinstance(rowref, LatticeList):
+            return self.lattice_list[0]
+        elif isinstance(rowref, Meta):
+            return None
+        elif isinstance(rowref, ParameterList):
+            return self.parameter_list[0]
+        elif isinstance(rowref, ProcessList):
+            return self.process_list[0]
+        elif isinstance(rowref, SpeciesList):
+            return self.species_list[0]
+
+    @verbose
+    def on_iter_has_child(self, rowref):
+        if rowref is None:
+             return True
+        elif isinstance(rowref, LatticeList):
+            return self.lattice_list.has_elem()
+        elif isinstance(rowref, Lattice):
+            return False
+        elif isinstance(rowref, Meta):
+            return False
+        elif isinstance(rowref, ParameterList):
+            return self.parameter_list.has_elem()
+        elif isinstance(rowref, Parameter):
+            return False
+        elif isinstance(rowref, ProcessList):
+            return self.process_list.has_elem()
+        elif isinstance(rowref, Process):
+            return False
+        elif isinstance(rowref, SpeciesList):
+            return self.species_list.has_elem()
+        elif isinstance(rowref, Species):
+            return False
+        else:
+            raise TypeError
+
+    #@verbose
+    def on_iter_n_children(self, rowref):
+        if rowref is None:
+            return 6
+        elif isinstance(rowref, LatticeList):
+            return len(self.lattice_list)
+        elif isinstance(rowref, Lattice):
+            return 0
+        elif isinstance(rowref, Meta):
+            return 0
+        elif isinstance(rowref, ParameterList):
+            return len(self.parameter_list)
+        elif isinstance(rowref, Parameter):
+            return 0
+        elif isinstance(rowref, ProcessList):
+            return len(self.process_list)
+        elif isinstance(rowref, Process):
+            return 0
+        elif isinstance(rowref, SpeciesList):
+            return len(self.species_list)
+        elif isinstance(rowref, Species):
+            return 0
+        else:
+            raise TypeError
+
+
+    #@verbose
+    def on_iter_nth_child(self, parent, n):
+        if not parent:
+            if n == 0 :
+                return self.lattice_list
+            elif n == 1 :
+                return self.meta
+            elif n == 2 :
+                return self.parameter_list
+            elif n == 3 :
+                return self.process_list
+            elif n == 4 :
+                return self.species_list
+        elif isinstance(parent,LatticeList):
+            return self.lattice_list[n]
+        elif isinstance(parent,Meta):
+            return None
+        elif isinstance(parent, ParameterList):
+            return self.parameter_list[n]
+        elif isinstance(parent, ProcessList):
+            return self.parameter_list[n]
+        elif isinstance(parent,SpeciesList):
+            return self.species_list[n]
+        else:
+            raise TypeError
+
+    #@verbose
+    def on_iter_parent(self, rowref):
+        if rowref is None:
+            return None
+        elif isinstance(rowref, LatticeList):
+            return None
+        elif isinstance(rowref, Lattice):
+            return self.lattice_list
+        elif isinstance(rowref, Meta):
+            return None
+        elif isinstance(rowref, ParameterList):
+            return None
+        elif isinstance(rowref, Parameter):
+            return self.parameter_list
+        elif isinstance(rowref, ProcessList):
+            return None
+        elif isinstance(rowref, Process):
+            return self.process_list
+        elif isinstance(rowref, SpeciesList):
+            return None
+        elif isinstance(rowref, Species):
+            return self.species_list
+        else:
+            raise TypeError
 
     def has_meta(self):
         """Transitional method, to comply with devel style GUI
         """
         return self.meta.set()
 
-    def add_meta(self, meta):
-        self.meta.add(meta)
-
-    def add_lattice(self, lattice):
-        self.lattices.append(lattice)
-        self.fire()
-
-    def add_parameter(self, parameter):
-        self.parameter.append(parameter)
-        self.fire()
-
-    def add_process(self, process):
-        self.processes.append(process)
-        self.fire()
-
-    def add_species(self, species):
-        self.species.append(species)
-        self.fire()
 
     def export_source(self, dir=''):
         if not dir:
@@ -184,15 +377,14 @@ class KMC_Model(gtk.GenericTreeModel, NotifyingDataStore):
         proclist_xml.write(pretty_xml)
         print(pretty_xml)
         proclist_xml.close()
-        class Options():
-            def __init__(self):
-                self.xml_filename = proclist_xml.name
-                self.dtd_filename = APP_ABS_PATH + '/process_list.dtd'
-                self.force_overwrite = True
-                self.proclist_filename = SRCDIR + '/proclist.f90'
-
+        class Options(): pass
         options = Options()
-        ProcessList(options)
+        options.xml_filename = proclist_xml.name
+        options.dtd_filename = APP_ABS_PATH + '/process_list.dtd'
+        options.force_overwrite = True
+        options.proclist_filename = SRCDIR + '/proclist.f90'
+
+        ProcListWriter(options)
 
 
 
@@ -219,53 +411,63 @@ class KMC_Model(gtk.GenericTreeModel, NotifyingDataStore):
                         self.meta.add({attrib:child.attrib[attrib]})
             elif child.tag == 'species_list':
                 for species in child:
-                    species_elem = {}
-                    for attrib in ['color','id','species']:
-                        species_elem[attrib] = species.attrib[attrib]
-                    self.species.append(species_elem)
+                    name = species.attrib['species']
+                    id = species.attrib['id']
+                    color = species.attrib['color']
+                    species_elem = Species(name=name, id=id, color=color)
+                    self.species_list.append(species_elem)
             elif child.tag == 'parameter_list':
                 for parameter in child:
-                    parameter_elem = {}
-                    for attrib in ['name','type','value']:
-                        parameter_elem[attrib] = parameter.attrib[attrib]
-                    self.parameters.append(parameter_elem)
+                    name = parameter.attrib['name']
+                    type = parameter.attrib['type']
+                    value = parameter.attrib['value']
+                    parameter_elem = Parameter(name=name,type=type,value=value)
+                    self.parameter_list.append(parameter_elem)
             elif child.tag == 'lattice_list':
                 for lattice in child:
-                    lattice_elem = {}
-                    lattice_elem['name'] = lattice.attrib['name']
-                    lattice_elem['unit_cell_size'] = [ int(x) for x in lattice.attrib['unit_cell_size'].split() ]
-                    lattice_elem['sites'] = []
+                    name = lattice.attrib['name']
+                    unit_cell_size = [ int(x) for x in lattice.attrib['unit_cell_size'].split() ]
+                    lattice_elem = Lattice(name=name,unit_cell_size=unit_cell_size)
                     for site in lattice:
-                        site_elem = {}
-                        site_elem['index'] = int(site.attrib['index'])
-                        site_elem['type'] = site.attrib['type']
-                        site_elem['coord'] = [ int(x) for x in site.attrib['coord'].split() ]
-                        lattice_elem['sites'].append(site_elem)
-                    self.lattices.append(lattice_elem)
-
+                        index =  int(site.attrib['index'])
+                        name = site.attrib['type']
+                        coord = [ int(x) for x in site.attrib['coord'].split() ]
+                        site_elem = Site(index=index,name=name,coord=coord)
+                        lattice_elem.add_site(site_elem)
+                    self.lattice_list.append(lattice_elem)
             elif child.tag == 'process_list':
                 for process in child:
-                    process_elem = {}
-                    process_elem['center_site'] = [ int(x) for x in  process.attrib['center_site'].split() ]
-                    process_elem['name'] = process.attrib['name']
-                    process_elem['rate_constant'] = process.attrib['rate_constant']
-                    process_elem['conditions'] = []
-                    process_elem['actions'] = []
+                    center_site = [ int(x) for x in  process.attrib['center_site'].split() ]
+                    name = process.attrib['name']
+                    rate_const = process.attrib['rate_constant']
+                    process_elem = Process(name=name, center_site=center_site, rate_const=rate_const)
                     for sub in process:
                         if sub.tag == 'action' or sub.tag == 'condition':
-                            sub_elem = [ sub.attrib['species'], [ int(x) for x in sub.attrib['coord'].split() ] ]
+                            species =  sub.attrib['species']
+                            coord = [ int(x) for x in sub.attrib['coord'].split() ]
+                            condition_action = ConditionAction(species, coord)
                             if sub.tag == 'action':
-                                process_elem['actions'].append(sub_elem)
+                                process_elem.add_action(condition_action)
                             elif sub.tag == 'condition':
-                                process_elem['conditions'].append(sub_elem)
-                    self.processes.append(process_elem)
+                                process_elem.add_condition(condition_action)
+                    self.process_list.append(process_elem)
 
 
-        print("META: ", self.meta)
-        print("LATTICES: ", self.lattices)
-        print("SPECIES: ", self.species)
-        print("PARAMETERS: ", self.parameters)
-        print("PROCESSES: ", self.processes)
+        print(self)
+
+    def __repr__(self):
+        out = ''
+        out += "\nMETA"
+        out += str(self.meta)
+        out += "\nLATTICES"
+        out += str(self.lattice_list)
+        out += "\nPARAMETERS"
+        out += str(self.parameter_list)
+        out += "\nPROCESSES"
+        out += str(self.process_list)
+        out += "\nSPECIES"
+        out += str(self.species_list)
+        return out
 
     def export_process_list_xml(self):
         """Ok, this is basically a function dealing with 'legacy' code. Since the
@@ -335,20 +537,22 @@ class KMC_Model(gtk.GenericTreeModel, NotifyingDataStore):
         for key in self.meta:
             meta.set(key,str(self.meta[key]))
         species_list = ET.SubElement(root,'species_list')
-        for species in self.species:
+        for species in self.species_list:
             species_elem = ET.SubElement(species_list,'species')
             for attr in species:
-                species_elem.set(attr,species[attr])
+                #FIXME
+                species_elem.set(attr,eval('species.'+attr))
+
 
         parameter_list = ET.SubElement(root,'parameter_list')
-        for parameter in self.parameters:
+        for parameter in self.parameter_list:
             parameter_elem = ET.SubElement(parameter_list, 'parameter')
             for attrib in ['name','type','value']:
                 parameter_elem.set(attrib,parameter[attrib])
         for process in self.processes:
             pass
         lattice_list = ET.SubElement(root, 'lattice_list')
-        for lattice in self.lattices:
+        for lattice in self.lattice_list:
             lattice_elem = ET.SubElement(lattice_list,'lattice')
             lattice_elem.set('unit_cell_size', str(lattice['unit_cell_size'])[1 :-1].replace(',',''))
             lattice_elem.set('name', lattice['name'])
@@ -358,7 +562,7 @@ class KMC_Model(gtk.GenericTreeModel, NotifyingDataStore):
                 site_elem.set('type',site['type'])
                 site_elem.set('coord',str(site['coord'])[1 :-1].replace(',',''))
         process_list = ET.SubElement(root, 'process_list')
-        for process in self.processes:
+        for process in self.process_list:
             process_elem = ET.SubElement(process_list,'process')
             process_elem.set('rate_constant', process['rate_constant'])
             process_elem.set('name', process['name'])
@@ -422,7 +626,7 @@ class MainWindow():
         self.treeview = self.wtree.get_widget('overviewtree')
         self.tvcolumn = gtk.TreeViewColumn('Project Data')
         self.cell = gtk.CellRendererText()
-        self.tvcolumn.pack_start(self.cell, True)
+        self.tvcolumn.pack_start(self.cell, expand=True)
         self.tvcolumn.add_attribute(self.cell, 'text', 0)
         self.treeview.append_column(self.tvcolumn)
         self.treeview.set_model(self.kmc_model)
@@ -436,7 +640,7 @@ class MainWindow():
         self.kmc_model.import_xml(XMLFILE)
 
     def export_xml(self, widget):
-        kmc_model.export_xml(XMLFILE)
+        self.kmc_model.export_xml(XMLFILE)
 
 
     def export_source(self, widget):
@@ -927,10 +1131,6 @@ class DialogDefineSite():
         self.dialog_site.destroy()
         return result, data
 
-
-
-
-
 class SpeciesMenu():
     def __init__(self, species):
         self.species = species
@@ -1086,98 +1286,128 @@ def validate_xml(xml_filename, dtd_filename):
     dtd.assertValid(root)
 
 class SimpleList(gtk.GenericTreeModel):
-    def __init__(self):
+    def __init__(self, callback, node_index):
         gtk.GenericTreeModel.__init__(self)
+        self.data = []
+        self.callback = callback
+        self.node_index = node_index
+        self.column_type = (str, )
 
+    def __getitem__(self, i):
+        return self.data[i]
+
+    @verbose
     def append(self, elem):
-        self.data.append(elem)
+        if elem not in self.data:
+            self.data.append(elem)
+            full_path = (self.node_index, self.data.index(elem))
+            self.callback('row-inserted', full_path)
 
+    def has_elem(self):
+        return len(self.data) > 0
+
+    #@verbose
     def on_get_flags(self):
         return 0
 
+    #@verbose
     def on_get_n_columns(self):
         return len(self.column_type)
 
+    #@verbose
     def on_get_column_type(self, n):
         return self.column_type[n]
 
+    #@verbose
     def on_get_iter(self, path):
         return self.data[path[0]]
 
+    #@verbose
     def on_get_path(self, rowref):
         return self.data.index(rowref)
 
+    #@verbose
     def on_iter_next(self, rowref):
-        print(rowref)
-        print(type(rowref))
         try:
             i = self.data.index(rowref) + 1
             return self.data[i]
         except IndexError:
             return None
 
+    #@verbose
     def on_iter_children(self, parent):
-        if parent:
-            return None
         return self.data[0]
 
+    #@verbose
     def on_iter_has_child(self, rowref):
         return False
 
+    #@verbose
     def on_iter_n_children(self, rowref):
-        if rowref:
-            return 0
         return len(self.data)
 
+    #@verbose
     def on_iter_nth_child(self, parent, n):
-        if parent:
-            return None
         try:
             return self.data[n]
         except IndexError:
             return None
 
+    #@verbose
     def on_iter_parent(self, child):
         return None
 
+
+
+class Lattice(Attributes):
+    attributes = ['name','unit_cell_size','sites']
+    def __init__(self, name, unit_cell_size, sites=[]):
+        self.name = name
+        self.unit_cell_size = unit_cell_size
+        self.sites = sites
+
+    def __repr__(self):
+        return '    %s %s' % (self.name, self.unit_cell_size)
+
+    def set_name(self, name):
+        self.name = name
+
+    def set_unit_cell_size(self, unit_cell_size):
+        self.unit_cell_size = unit_cell_size
+
+
+    def add_site(self, site):
+        self.sites.append(site)
+
 class LatticeList(SimpleList):
-    def __init__(self):
-        SimpleList.__init__(self)
-        self.column_type = (str, )
-        self.lattices = []
+    def __init__(self, callback, node_index):
+        SimpleList.__init__(self, callback, node_index)
+        self.lattices = self.data
+
+    def __repr__(self):
+        out = ''
+        for lattice in self.lattices:
+            out += str(lattice) + '\n'
+        return out
 
     def on_get_value(self, rowref, column):
         i = self.lattices.index(rowref)
         return self.lattices[i].name
 
-class Lattice(NotifyingDataStore):
-    def __init__(self, name, unit_cell_size, size, sites=[]):
-        NotifyingDataStore.__init__(self)
-        self.name = name
-        self.unit_cell_size = unit_cell_size
-        self.sites = sites
 
-    def set_name(self, name):
-        self.name = name
-        self.fire()
-
-    def set_unit_cell_size(self, unit_cell_size):
-        self.unit_cell_size = unit_cell_size
-        self.fire()
-
-
-    def add_site(self, site):
-        self.sites.append(site)
-        self.fire()
-
-class Meta(NotifyingDataStore):
-    def __init__(self):
-        NotifyingDataStore.__init__(self)
+class Meta(Attributes):
+    attributes = ['author','debug','email','model_name','model_dimension']
+    def __init__(self, callback, node_index):
         self.author = ''
         self.debug = 0
         self.email = ''
         self.model_name = ''
         self.model_dimension = 0
+        self.__dict__['callback'] = callback
+        self.__dict__['node_index'] = node_index
+
+    def __repr__(self):
+        return '    %s %s %s %s\n' % (self.model_name, self.model_dimension, self.author, self.email)
 
     def add(self, data):
         if type(data) != dict:
@@ -1193,14 +1423,117 @@ class Meta(NotifyingDataStore):
         if data.has_key('debug'):
             self.debug = data['debug']
 
+    def __getitem__(self, key):
+        return eval('self.'+key)
+
+    def __iter__(self):
+        dict = {}
+        for attribute in self.attributes:
+            dict[attribute] = eval('self.'+attribute)
+        return dict.__iter__()
+
+
     def set(self):
         if self.author != '' and self.email != '' and self.model_name != '' and self.model_dimension != 0 :
             return True
         else:
             return False
 
+class Parameter(Attributes):
+    attributes = ['name','type','value']
+    def __init__(self, name='', type='', value=''):
+        self.name = name
+        self.type = type
+        self.value = value
+
+    def __repr__(self):
+        return '%s %s %s' % (self.name, self.value, self.type)
+
+class ParameterList(SimpleList):
+    def __init__(self, callback, node_index):
+        SimpleList.__init__(self, callback, node_index)
+        self.parameters = self.data
+
+    def on_get_value(self, rowref, column):
+        return rowref.name
 
 
+    def __repr__(self):
+        outstr = ''
+        for parameter in self.parameters:
+            outstr +=  parameter.__repr__() + '\n'
+        return outstr
+
+class Process(Attributes):
+    attributes = ['name','center_site', 'rate_const','condition_list','action_list']
+    def __init__(self, name, center_site, rate_const):
+        self.name = name
+        self.center_site = center_site
+        self.rate_const = rate_const
+        self.condition_list = []
+        self.action_list = []
+
+    def __repr__(self):
+        return '    %s %s' % (self.name, self.rate_const)
+
+    def add_action(self, action):
+        self.action_list.append(action)
+
+    def add_condition(self, condition):
+        self.condition_list.append(condition)
+
+class ProcessList(SimpleList):
+    def __init__(self, callback, node_index):
+        SimpleList.__init__(self, callback, node_index)
+        self.processes = self.data
+
+    def __repr__(self):
+        out = ''
+        for process in self.processes:
+            out += process.__repr__() + '\n'
+        return out
+
+    def on_get_value(self, rowref, column):
+        return rowref.name
+
+class Species(Attributes):
+    attributes = ['name','color','id']
+    def __init__(self, name, color, id):
+        self.name = name
+        self.color = color
+        self.id = id
+
+    def __repr__(self):
+        return "    %s %s %s" % (self.name, self.color, self.id)
+
+class SpeciesList(SimpleList):
+    def __init__(self, callback, node_index):
+        SimpleList.__init__(self, callback, node_index)
+        self.species = self.data
+
+    def on_get_value(self, rowref, column):
+        return rowref.name
+
+    def __repr__(self):
+        out = ''
+        for species in self.species:
+            out += str(species) + '\n'
+        return out
+
+class ConditionAction(Attributes):
+    attributes = ['coord','species']
+    def __init__(self, coord, species):
+        self.coord = coord
+        self.species = species
+
+class Site(Attributes):
+    attributes = ['index','name','coord']
+    def __init__(self, index, name, coord):
+        self.index = index
+        self.name = name
+        self.coord = coord
+    def __repr__(self):
+        return '        %s %s %s' % (name, index, cord)
 
 def main():
     """Main function, called if scripts called directly
