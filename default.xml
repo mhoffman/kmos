@@ -1,7 +1,10 @@
 <?xml version="1.0" ?>
 <kmc>
-    <meta author="Max J. Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="2" model_name="my_model"/>
-    <species_list/>
+    <meta author="Max J. Hoffmann" debug="0" email="my_email" model_dimension="2" model_name="foobar"/>
+    <species_list>
+        <species color="#fff" id="0" name="empty"/>
+        <species color="#ffff00000000" id="1" name="oxygen"/>
+    </species_list>
     <parameter_list/>
     <lattice_list>
         <lattice name="graphene" unit_cell_size="4 2">

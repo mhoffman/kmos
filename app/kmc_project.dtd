@@ -13,7 +13,7 @@
   <!ATTLIST species
     color CDATA #REQUIRED
     id CDATA #REQUIRED
-    species CDATA #REQUIRED
+    name CDATA #REQUIRED
   >
   <!ELEMENT parameter_list (parameter)*>
   <!ELEMENT parameter EMPTY>

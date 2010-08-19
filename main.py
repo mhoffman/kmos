@@ -26,6 +26,7 @@ KMCPROJECT_DTD = '/kmc_project.dtd'
 PROCESSLIST_DTD = '/process_list.dtd'
 XMLFILE = './default.xml'
 SRCDIR = './fortran_src'
+
 def verbose(func):
         print >>sys.stderr,"monitor %r"%(func.func_name)
         def f(*args,**kwargs):
@@ -36,13 +37,6 @@ def verbose(func):
                 return ret
         return f
 
-
-
-def prettify_xml(elem):
-    rough_string = ET.tostring(elem,encoding='utf-8')
-    reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent='    ')
-
 class Attributes:
     attributes = []
     def __setattr__(self, attrname, value):
@@ -50,8 +44,6 @@ class Attributes:
             self.__dict__[attrname] = value
         else:
             raise AttributeError
-
-
 
 
 class KMC_Model(gtk.GenericTreeModel):
@@ -63,6 +55,9 @@ class KMC_Model(gtk.GenericTreeModel):
         self.process_list = ProcessList(self.callback,node_index=3)
         self.species_list = SpeciesList(self.callback,node_index=4)
         self.column_types = (str,)
+        self.notifier = Notifier()
+        self.save_changes_view = SaveChangesView()
+        self.notifier.add_listener(self.save_changes_view)
 
 
     @verbose
@@ -70,6 +65,9 @@ class KMC_Model(gtk.GenericTreeModel):
         if signal == 'row-inserted':
             path = args[0]
             self.row_inserted(path, self.get_iter(path))
+            self.notifier('changed')
+        elif signal == 'changed':
+            self.notifier('changed')
 
 
     #@verbose
@@ -411,7 +409,7 @@ class KMC_Model(gtk.GenericTreeModel):
                         self.meta.add({attrib:child.attrib[attrib]})
             elif child.tag == 'species_list':
                 for species in child:
-                    name = species.attrib['species']
+                    name = species.attrib['name']
                     id = species.attrib['id']
                     color = species.attrib['color']
                     species_elem = Species(name=name, id=id, color=color)
@@ -452,8 +450,6 @@ class KMC_Model(gtk.GenericTreeModel):
                                 process_elem.add_condition(condition_action)
                     self.process_list.append(process_elem)
 
-
-        print(self)
 
     def __repr__(self):
         out = ''
@@ -537,10 +533,11 @@ class KMC_Model(gtk.GenericTreeModel):
         for key in self.meta:
             meta.set(key,str(self.meta[key]))
         species_list = ET.SubElement(root,'species_list')
-        for species in self.species_list.species:
+        for species in self.species_list.data:
             species_elem = ET.SubElement(species_list,'species')
-            for attr in species.attributes:
-                species_elem.set(attr,eval('species.'+attr))
+            species_elem.set('name',species.name)
+            species_elem.set('color',species.color)
+            species_elem.set('id',str(species.id))
         parameter_list = ET.SubElement(root,'parameter_list')
         for parameter in self.parameter_list.data:
             parameter_elem = ET.SubElement(parameter_list, 'parameter')
@@ -602,8 +599,8 @@ class MainWindow():
         self.keywords = ['exp','sin','cos','sqrt','log']
         self.kmc_model = KMC_Model()
         dic = {'on_btnAddLattice_clicked' : self.new_lattice ,
-                'on_btnMainQuit_clicked' : lambda w: gtk.main_quit(),
-                'destroy' : lambda w: gtk.main_quit(),
+                'on_btnMainQuit_clicked' : self.close,
+                'destroy' : self.close,
                 'on_btnAddParameter_clicked': self.add_parameter,
                 'on_btnAddSpecies_clicked' : self.add_species,
                 'on_btnAddProcess_clicked' : self.create_process,
@@ -622,6 +619,7 @@ class MainWindow():
         self.statbar.push(1,'Add a new lattice first.')
         self.lattice_ready = False
 
+
         #setup overview tree
         self.treeview = self.wtree.get_widget('overviewtree')
         self.tvcolumn = gtk.TreeViewColumn('Project Data')
@@ -630,16 +628,27 @@ class MainWindow():
         self.tvcolumn.add_attribute(self.cell, 'text', 0)
         self.treeview.append_column(self.tvcolumn)
         self.treeview.set_model(self.kmc_model)
-
         self.window.show()
 
 
-    def import_xml(self, widget):
-        self.new_process = {}
-        self.kmc_model.import_xml(XMLFILE)
 
-    def export_xml(self, widget):
+    def import_xml(self, *args):
+        if self.kmc_model.save_changes_view.unsaved_changes:
+            dialog_save_changes = DialogSaveChanges(self)
+            response = dialog_save_changes.run()
+            if response == gtk.RESPONSE_CANCEL:
+                return
+        self.kmc_model = KMC_Model()
+        self.treeview.set_model(self.kmc_model)
+        self.new_process = Process()
+        self.kmc_model.import_xml(XMLFILE)
+        self.kmc_model.save_changes_view.unsaved_changes = False
+
+
+
+    def export_xml(self, *args):
         self.kmc_model.export_xml(XMLFILE)
+        self.kmc_model.save_changes_view.unsaved_changes = False
 
 
     def export_source(self, widget):
@@ -661,7 +670,7 @@ class MainWindow():
     def dw_lattice_clicked(self, widget, event):
         if self.lattice_ready:
             width, height = self.process_editor_width, self.process_editor_height
-            lattice = self.lattices[0]
+            lattice = self.kmc_model.lattice_list[0]
             unit_x = lattice.unit_cell_size[0]
             unit_y = lattice.unit_cell_size[1]
             zoom = 3
@@ -686,7 +695,7 @@ class MainWindow():
                                         menu_header.set_sensitive(False)
                                         self.species_menu.append(menu_header)
                                         self.species_menu.append(gtk.SeparatorMenuItem())
-                                        for species in self.species:
+                                        for species in self.kmc_model.species_list.data:
                                             menu_item = gtk.MenuItem(species.name)
                                             self.species_menu.append(menu_item)
                                             menu_item.connect("activate", self.add_condition, (species, list(data)))
@@ -713,8 +722,8 @@ class MainWindow():
 
     def add_species(self, widget):
         if not self.kmc_model.species_list.has_elem():
-            empty_species = {'color':'#fff','species':'empty','id':'0'}
-            self.species_list.append(empty_species)
+            empty_species = Species(color='#fff',name='empty',id=0)
+            self.kmc_model.species_list.append(empty_species)
         if not self.kmc_model.meta:
             self.add_meta_information()
         dialog_new_species = DialogNewSpecies(len(self.kmc_model.species_list))
@@ -869,15 +878,14 @@ class MainWindow():
                                 coordy = int(height - (sup_j+ float(y)/unit_y)*height/zoom )
                                 center = [ coordx, coordy ]
                                 self.pixmap.draw_arc(gc, True, center[0]-5, center[1]-5, 10, 10, 0, 64*360)
-                                for entry in self.new_process.conditions:
+                                for entry in self.new_process.condition_list:
                                     if entry.coord == [sup_i, sup_j, x, y ]:
                                         color = filter((lambda x : x.species == entry.species), self.species)[0].color
                                         gc.set_rgb_fg_color(gtk.gdk.color_parse(color))
                                         self.pixmap.draw_arc(gc, True, center[0]-15, center[1]-15, 30, 30, 64*90, 64*360)
                                         gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
                                         self.pixmap.draw_arc(gc, False, center[0]-15, center[1]-15, 30, 30, 64*90, 64*360)
-                                for entry in self.new_process.actions:
-                                    #FIXME
+                                for entry in self.new_process.action_list:
                                     if entry.coord == [sup_i, sup_j, x, y ]:
                                         color = filter((lambda x : x.species == entry.species), self.species)[0].color
                                         gc.set_rgb_fg_color(gtk.gdk.color_parse(color))
@@ -888,6 +896,18 @@ class MainWindow():
 
 
         self.da_widget.queue_draw_area(0, 0, width, height)
+
+    def close(self, *args):
+        if self.kmc_model.save_changes_view.unsaved_changes:
+            dialog_save_changes = DialogSaveChanges(self)
+            response = dialog_save_changes.run()
+            if response == gtk.RESPONSE_OK:
+                self.window.destroy()
+                gtk.main_quit()
+        else:
+            self.window.destroy()
+            gtk.main_quit()
+
 
 class DrawingArea():
     """Main Dialog set up a lattice and its adsorption sites
@@ -1000,7 +1020,6 @@ class DrawingArea():
                 widget.queue_draw_area(0, 0, self.lattice_editor_width, self.lattice_editor_height)
 
 
-
     def quit(self, *a):
         """Quits main program
         """
@@ -1010,6 +1029,31 @@ class DrawingArea():
 
 
 
+
+
+
+class DialogSaveChanges():
+    def __init__(self,main_window):
+        self.main_window = main_window
+        self.dialog = gtk.MessageDialog(
+            parent=self.main_window.window,
+            type=gtk.DIALOG_MODAL,
+            buttons = gtk.BUTTONS_NONE,
+            message_format='Save unsaved changes?'
+        )
+        self.dialog.add_button(gtk.STOCK_DISCARD, gtk.RESPONSE_NO)
+        self.dialog.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
+        self.dialog.add_button(gtk.STOCK_SAVE, gtk.RESPONSE_OK)
+    def run(self):
+        response = self.dialog.run()
+        self.dialog.destroy()
+        if response == gtk.RESPONSE_NO:
+            return gtk.RESPONSE_OK
+        elif response == gtk.RESPONSE_CANCEL:
+            return gtk.RESPONSE_CANCEL
+        elif response == gtk.RESPONSE_OK:
+            self.main_window.export_xml()
+            return gtk.RESPONSE_OK
 
 class DialogAddParameter():
     """Small dialog that allows to enter a new parameter
@@ -1348,7 +1392,6 @@ class SimpleList(gtk.GenericTreeModel):
         return None
 
 
-
 class Lattice(Attributes):
     attributes = ['name','unit_cell_size','sites']
     def __init__(self, name='', unit_cell_size=[], sites=[]):
@@ -1529,6 +1572,42 @@ class Site(Attributes):
 
     def __repr__(self):
         return '        %s %s %s' % (name, index, cord)
+
+
+
+
+def prettify_xml(elem):
+    rough_string = ET.tostring(elem,encoding='utf-8')
+    reparsed = minidom.parseString(rough_string)
+    return reparsed.toprettyxml(indent='    ')
+
+
+class Notifier:
+    def __init__(self):
+        self.listeners = []
+
+    def add_listener(self, listener):
+        self.listeners.append(listener)
+
+    def __call__(self, message):
+        for listener in self.listeners:
+            listener(message)
+
+
+
+class SaveChangesView :
+    def __init__(self ):
+        self.unsaved_changes = False
+
+    def __call__(self, message):
+        if message == 'saved':
+            self.unsaved_changes = False
+        elif message == 'changed':
+            self.unsaved_changes = True
+
+
+
+
 
 def main():
     """Main function, called if scripts called directly
