@@ -333,8 +333,8 @@ class KMC_Model(gtk.GenericTreeModel):
             return
         species_definition = "integer(kind=iint), public, parameter :: &\n "
         for species in self.species[:-1]:
-            species_definition += '    %(species)s =  %(id)s, &\n' % {'species':species['species'], 'id':species['id']}
-        species_definition += '     %(species)s = %(id)s\n' % {'species':self.species[-1]['species'], 'id':self.species[-1]['id']}
+            species_definition += '    %(species)s =  %(id)s, &\n' % {'species':species.name, 'id':species.id}
+        species_definition += '     %(species)s = %(id)s\n' % {'species':self.species[-1].species, 'id':self.species[-1].id}
         # UNIT VECTOR DEFINITION
         unit_vector_definition = 'integer(kind=iint), dimension(2,2) ::  lattice_%(name)s_matrix = reshape((/%(x)s,0,0,%(y)s/),(/2,2/))' % {'x':lattice['unit_cell_size'][0], 'y':lattice['unit_cell_size'][1],'name':lattice['name']}
         # LOOKUP TABLE INITIALIZATION
@@ -439,13 +439,13 @@ class KMC_Model(gtk.GenericTreeModel):
                 for process in child:
                     center_site = [ int(x) for x in  process.attrib['center_site'].split() ]
                     name = process.attrib['name']
-                    rate_const = process.attrib['rate_constant']
-                    process_elem = Process(name=name, center_site=center_site, rate_const=rate_const)
+                    rate_constant = process.attrib['rate_constant']
+                    process_elem = Process(name=name, center_site=center_site, rate_constant=rate_constant)
                     for sub in process:
                         if sub.tag == 'action' or sub.tag == 'condition':
                             species =  sub.attrib['species']
                             coord = [ int(x) for x in sub.attrib['coord'].split() ]
-                            condition_action = ConditionAction(species, coord)
+                            condition_action = ConditionAction(species=species, coord=coord)
                             if sub.tag == 'action':
                                 process_elem.add_action(condition_action)
                             elif sub.tag == 'condition':
@@ -537,48 +537,43 @@ class KMC_Model(gtk.GenericTreeModel):
         for key in self.meta:
             meta.set(key,str(self.meta[key]))
         species_list = ET.SubElement(root,'species_list')
-        for species in self.species_list:
+        for species in self.species_list.species:
             species_elem = ET.SubElement(species_list,'species')
-            for attr in species:
-                #FIXME
+            for attr in species.attributes:
                 species_elem.set(attr,eval('species.'+attr))
-
-
         parameter_list = ET.SubElement(root,'parameter_list')
-        for parameter in self.parameter_list:
+        for parameter in self.parameter_list.data:
             parameter_elem = ET.SubElement(parameter_list, 'parameter')
-            for attrib in ['name','type','value']:
+            for attrib in parameter.attributes:
                 parameter_elem.set(attrib,parameter[attrib])
-        for process in self.processes:
-            pass
         lattice_list = ET.SubElement(root, 'lattice_list')
-        for lattice in self.lattice_list:
+        for lattice in self.lattice_list.data:
             lattice_elem = ET.SubElement(lattice_list,'lattice')
-            lattice_elem.set('unit_cell_size', str(lattice['unit_cell_size'])[1 :-1].replace(',',''))
-            lattice_elem.set('name', lattice['name'])
-            for site in lattice['sites']:
+            lattice_elem.set('unit_cell_size', str(lattice.unit_cell_size)[1 :-1].replace(',',''))
+            lattice_elem.set('name', lattice.name)
+            for site in lattice.sites:
                 site_elem = ET.SubElement(lattice_elem, 'site')
-                site_elem.set('index',str(site['index']))
-                site_elem.set('type',site['type'])
-                site_elem.set('coord',str(site['coord'])[1 :-1].replace(',',''))
+                site_elem.set('index',str(site.index))
+                site_elem.set('type',site.name)
+                site_elem.set('coord',str(site.coord)[1 :-1].replace(',',''))
         process_list = ET.SubElement(root, 'process_list')
-        for process in self.process_list:
+        for process in self.process_list.data:
             process_elem = ET.SubElement(process_list,'process')
-            process_elem.set('rate_constant', process['rate_constant'])
-            process_elem.set('name', process['name'])
-            process_elem.set('center_site', str(process['center_site'])[1 :-1].replace(',',''))
-            for condition in process['conditions']:
+            process_elem.set('rate_constant', process.rate_constant)
+            process_elem.set('name', process.name)
+            process_elem.set('center_site', str(process.center_site)[1 :-1].replace(',',''))
+            for condition in process.condition_list:
                 condition_elem = ET.SubElement(process_elem, 'condition')
-                condition_elem.set('species', condition[0])
-                condition_elem.set('coord', str(condition[1])[1 :-1].replace(',', ''))
-            for action in process['actions']:
+                condition_elem.set('species', condition.species)
+                condition_elem.set('coord', str(condition.coord)[1 :-1].replace(',', ''))
+            for action in process.action_list:
                 action_elem = ET.SubElement(process_elem, 'action')
-                action_elem.set('species', action[0])
-                action_elem.set('coord', str(action[1])[1 :-1].replace(',',''))
+                action_elem.set('species', action.species)
+                action_elem.set('coord', str(action.coord)[1 :-1].replace(',',''))
         #Write Out XML File
         tree = ET.ElementTree(root)
         outfile = open(filename,'w')
-        outfile.write(self.prettify_xml(root))
+        outfile.write(prettify_xml(root))
         outfile.write('<!-- This is an automatically generated XML file, representing one kMC mode ' + \
                         'please do not change this unless you know what you are doing -->\n')
         outfile.close()
@@ -667,15 +662,15 @@ class MainWindow():
         if self.lattice_ready:
             width, height = self.process_editor_width, self.process_editor_height
             lattice = self.lattices[0]
-            unit_x = lattice['unit_cell_size'][0]
-            unit_y = lattice['unit_cell_size'][1]
+            unit_x = lattice.unit_cell_size[0]
+            unit_y = lattice.unit_cell_size[1]
             zoom = 3
             for i in range(zoom+1):
                 for j in range(3):
                     for x in range(unit_x):
                         for y in range(unit_y):
-                            for site in lattice['sites']:
-                                if site['coord'][0] == x and site['coord'][1] == y:
+                            for site in lattice.sites:
+                                if site.coord[0] == x and site.coord[1] == y:
                                     center = []
                                     coordx = int((i+ float(x)/unit_x)*width/zoom)
                                     coordy = int(height - (j+ float(y)/unit_y)*height/zoom)
@@ -692,13 +687,13 @@ class MainWindow():
                                         self.species_menu.append(menu_header)
                                         self.species_menu.append(gtk.SeparatorMenuItem())
                                         for species in self.species:
-                                            menu_item = gtk.MenuItem(species['species'])
+                                            menu_item = gtk.MenuItem(species.name)
                                             self.species_menu.append(menu_item)
                                             menu_item.connect("activate", self.add_condition, (species, list(data)))
                                         self.species_menu.show_all()
                                         if event.button == 1 :
                                             self.species_menu.popup(None, None, None, event.button, event.time)
-                                        elif event.button == 3 and filter(lambda cond: cond[1] == [i, j, x, y], self.new_process['conditions']):
+                                        elif event.button == 3 and filter(lambda cond: cond.coord == [i, j, x, y], self.new_process.conditions):
                                             self.species_menu.popup(None, None, None, event.button, event.time)
 
 
@@ -706,7 +701,7 @@ class MainWindow():
         dlg_meta_info = DialogMetaInformation()
         result, data = dlg_meta_info.run()
         if result == gtk.RESPONSE_OK:
-            self.kmc_model.add_meta(data)
+            self.kmc_model.meta.add(data)
             self.statbar.push(1,'Meta information added')
         else:
             self.statbar.push(1,'Could not complete meta information')
@@ -728,9 +723,9 @@ class MainWindow():
             if not data['color']:
                 self.statbar.push(1,'Species not added because no color was specified!')
             elif data not in self.kmc_model.species_list:
-                new_species = Species(name=data['species'],color=data['color'],id=data['id'])
+                new_species = Species(name=data['name'],color=data['color'],id=data['id'])
                 self.kmc_model.species_list.append(new_species)
-                self.statbar.push(1,'Added species "'+ data['species'] + '"')
+                self.statbar.push(1,'Added species "'+ data['name'] + '"')
                 print(data)
 
     def add_parameter(self, widget):
@@ -743,24 +738,22 @@ class MainWindow():
 
 
     def add_lattice(self, data):
+        #validate new lattice
         if not data.cell_finished:
             self.statbar.push(1,'Could not add lattice: cell not defined!')
             return
-        if 'lattice_name' not in dir(data) or not data.__dict__['lattice_name']:
+        if not hasattr(data.lattice, 'name') or not data.lattice.name:
             self.statbar.push(1,'Could not add lattice: lattice name not specified!')
             return
-        if 'sites' not in dir(data) or not data.__dict__['sites']:
+        if not hasattr(data.lattice, 'sites') or not data.lattice.sites:
             self.statbar.push(1,'Could not add lattice: no sites specified!')
             return
-        if 'unit_cell_size' not in dir(data) or not data.__dict__['unit_cell_size']:
+        if not hasattr(data.lattice, 'unit_cell_size') or not data.lattice.unit_cell_size:
             self.statbar.push(1,'Could not add lattice: no unit cell size specified!')
             return
-        lattice = {}
-        lattice['name'] = data.__dict__['lattice_name']
-        lattice['sites'] = data.__dict__['sites']
-        lattice['unit_cell_size'] = data.__dict__['unit_cell_size']
-        self.kmc_model.add_lattice(lattice)
-        self.statbar.push(1,'Added lattice "' + data.__dict__['lattice_name'] + '"')
+        # if validated, add lattice
+        self.kmc_model.lattice_list.append(data.lattice)
+        self.statbar.push(1,'Added lattice "' + data.lattice.name + '"')
 
     def dw_lattice_configure(self, widget, event):
         self.process_editor_width, self.process_editor_height = widget.get_allocation()[2], widget.get_allocation()[3]
@@ -774,12 +767,7 @@ class MainWindow():
 
 
     def create_process(self, widget):
-        self.new_process = {}
-        self.new_process['conditions'] = []
-        self.new_process['actions'] = []
-        self.new_process['name'] = ''
-        self.new_process['rate_constant'] = 0.
-        self.new_process['center_site'] = ()
+        self.new_process = Process()
 
         if len(self.kmc_model.lattice_list) < 1 :
             self.statbar.push(1,'No lattice defined!')
@@ -789,7 +777,7 @@ class MainWindow():
         if result == gtk.RESPONSE_CANCEL:
             return
         else:
-            self.new_process['name'] = data['process_name']
+            self.new_process.name = data['process_name']
 
         self.draw_lattices()
         self.lattice_ready = True
@@ -801,28 +789,27 @@ class MainWindow():
             dlg_rate_constant = DialogRateConstant(self.parameters, self.keywords)
             result, data = dlg_rate_constant.run()
             #Check if process is sound
-            if not self.new_process['name'] :
+            if not self.new_process.name :
                 self.statbar.push(1,'New process has no name')
                 return
-            elif not self.new_process['center_site']:
+            elif not self.new_process.center_site:
                 self.statbar.push(1,'No sites defined!')
                 return
-            elif not self.new_process['conditions']:
+            elif not self.new_process.conditions:
                 self.statbar.push(1,'New process has no conditions')
                 return
-            elif not self.new_process['actions']:
+            elif not self.new_process.actions:
                 self.statbar.push(1,'New process has no actions')
 
             if result == gtk.RESPONSE_OK:
-                self.new_process['rate_constant'] = data['rate_constant']
-                center_site = self.new_process['center_site']
-                for condition in self.new_process['conditions'] + self.new_process['actions']:
-                    condition[1] = [ x - y for (x, y) in zip(condition[1], center_site) ]
-                self.new_process['center_site'] = self.new_process['center_site'][2 :]
+                self.new_process.rate_constant = data['rate_constant']
+                center_site = self.new_process.center_site
+                for condition in self.new_process.conditions + self.new_process.actions:
+                    condition.coord = [ x - y for (x, y) in zip(condition.coord, center_site) ]
                 self.kmc_model.append(self.new_process)
                 self.statbar.push(1,'New process "'+ self.new_process['name'] + '" added')
                 print(self.new_process)
-                self.new_process = {}
+                del(self.new_process)
                 self.draw_lattices(blank=True)
                 self.lattice_ready = False
 
@@ -882,23 +869,21 @@ class MainWindow():
                                 coordy = int(height - (sup_j+ float(y)/unit_y)*height/zoom )
                                 center = [ coordx, coordy ]
                                 self.pixmap.draw_arc(gc, True, center[0]-5, center[1]-5, 10, 10, 0, 64*360)
-                                if self.new_process.has_key('conditions'):
-                                    for entry in self.new_process['conditions']:
-                                        if entry[1] == [sup_i, sup_j, x, y ]:
-                                            color = filter((lambda x : x['species'] == entry[0]), self.species)[0]['color']
-                                            gc.set_rgb_fg_color(gtk.gdk.color_parse(color))
-                                            self.pixmap.draw_arc(gc, True, center[0]-15, center[1]-15, 30, 30, 64*90, 64*360)
-                                            gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
-                                            self.pixmap.draw_arc(gc, False, center[0]-15, center[1]-15, 30, 30, 64*90, 64*360)
-                                if self.new_process.has_key('actions'):
-                                    for entry in self.new_process.actions:
-                                        #FIXME
-                                        if entry[1] == [sup_i, sup_j, x, y ]:
-                                            color = filter((lambda x : x['species'] == entry[0]), self.species)[0]['color']
-                                            gc.set_rgb_fg_color(gtk.gdk.color_parse(color))
-                                            self.pixmap.draw_arc(gc, True, center[0]-10, center[1]-10, 20, 20, 64*270, 64*360)
-                                            gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
-                                            self.pixmap.draw_arc(gc, False, center[0]-10, center[1]-10, 20, 20, 64*270, 64*360)
+                                for entry in self.new_process.conditions:
+                                    if entry.coord == [sup_i, sup_j, x, y ]:
+                                        color = filter((lambda x : x.species == entry.species), self.species)[0].color
+                                        gc.set_rgb_fg_color(gtk.gdk.color_parse(color))
+                                        self.pixmap.draw_arc(gc, True, center[0]-15, center[1]-15, 30, 30, 64*90, 64*360)
+                                        gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
+                                        self.pixmap.draw_arc(gc, False, center[0]-15, center[1]-15, 30, 30, 64*90, 64*360)
+                                for entry in self.new_process.actions:
+                                    #FIXME
+                                    if entry.coord == [sup_i, sup_j, x, y ]:
+                                        color = filter((lambda x : x.species == entry.species), self.species)[0].color
+                                        gc.set_rgb_fg_color(gtk.gdk.color_parse(color))
+                                        self.pixmap.draw_arc(gc, True, center[0]-10, center[1]-10, 20, 20, 64*270, 64*360)
+                                        gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
+                                        self.pixmap.draw_arc(gc, False, center[0]-10, center[1]-10, 20, 20, 64*270, 64*360)
                                 gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
 
 
@@ -917,8 +902,7 @@ class DrawingArea():
         self.cell_started = False
         self.cell_finished = False
 
-        self.sites = []
-        self.unit_cell_size = [1, 1]
+        self.lattice = Lattice()
 
         dic = {'on_dwMain_button_press_event' : self.lattice_editor_click,
                 'on_wndCellEdit_destroy_event' :self.quit,
@@ -977,8 +961,8 @@ class DrawingArea():
             cell_size_dialog = DialogCellSize()
             result, data = cell_size_dialog.run()
             if result == gtk.RESPONSE_OK:
-                self.unit_cell_size = data['x'], data['y']
-                self.lattice_name = data['name']
+                self.lattice.unit_cell_size = data['x'], data['y']
+                self.lattice.name = data['name']
                 for i in xrange(data['x']):
                     xline = self.corner1[0] + i*(self.corner2[0] - self.corner1[0]) / data['x']
                     self.pixmap.draw_line(widget.get_style().black_gc, xline, self.corner1[1], xline, self.corner2[1])
@@ -990,23 +974,24 @@ class DrawingArea():
             site_dialog = DialogDefineSite(self, event)
             result, data = site_dialog.run()
             if result == gtk.RESPONSE_OK:
-                if data['type'] == 'remove':
-                    for site in self.sites:
-                        if site['coord'][0] == data['coord'][0] and site['coord'][1] == data['coord'][1]:
-                            self.sites.remove(site)
+                if data['name'] == 'remove':
+                    for site in self.lattice.sites:
+                        if site.coord[0] == data['coord'][0] and site.coord[1] == data['coord'][1]:
+                            self.lattice.remove_site(site)
                 else:
-                    for site in self.sites:
-                        if site['coord'][0] == data['coord'][0] and site['coord'][1] == data['coord'][1]:
-                            self.sites.remove(site)
-                    self.sites.append(data)
+                    for site in self.lattice.sites:
+                        if site.coord[0] == data['coord'][0] and site.coord[1] == data['coord'][1]:
+                            self.lattice.remove_site(site)
+                    new_site = Site(name=data['name'], coord=data['coord'], index=data['index'])
+                    self.lattice.add_site(new_site)
                 # Redraw dots
-                for i in range(self.unit_cell_size[0]+1):
-                    for j in range(self.unit_cell_size[1]+1):
+                for i in range(self.lattice.unit_cell_size[0]+1):
+                    for j in range(self.lattice.unit_cell_size[1]+1):
                         center = []
-                        center.append(self.corner1[0] + i*(self.corner2[0]-self.corner1[0])/self.unit_cell_size[0] - 5)
-                        center.append(self.corner2[1] - j*(self.corner2[1]-self.corner1[1])/self.unit_cell_size[1] - 5)
-                        for site in self.sites:
-                            if (i % self.unit_cell_size[0]) == site['coord'][0] and (j % self.unit_cell_size[1]) == site['coord'][1]:
+                        center.append(self.corner1[0] + i*(self.corner2[0]-self.corner1[0])/self.lattice.unit_cell_size[0] - 5)
+                        center.append(self.corner2[1] - j*(self.corner2[1]-self.corner1[1])/self.lattice.unit_cell_size[1] - 5)
+                        for site in self.lattice.sites:
+                            if (i % self.lattice.unit_cell_size[0]) == site.coord[0] and (j % self.lattice.unit_cell_size[1]) == site.coord[1]:
                                 self.pixmap.draw_arc(widget.get_style().black_gc, True, center[0], center[1], 10, 10, 0, 64*360)
                                 break
                         else:
@@ -1098,8 +1083,8 @@ class DialogDefineSite():
             self.coord_x = 0
             self.coord_y = 0
         else:
-            self.coord_x = int((event.x-lattice_dialog.corner1[0])/(lattice_dialog.corner2[0]-lattice_dialog.corner1[0])*lattice_dialog.unit_cell_size[0])
-            self.coord_y = lattice_dialog.unit_cell_size[1] - int((event.y-lattice_dialog.corner1[1])/(lattice_dialog.corner2[1]-lattice_dialog.corner1[1])*lattice_dialog.unit_cell_size[1]) - 1
+            self.coord_x = int((event.x-lattice_dialog.corner1[0])/(lattice_dialog.corner2[0]-lattice_dialog.corner1[0])*lattice_dialog.lattice.unit_cell_size[0])
+            self.coord_y = lattice_dialog.lattice.unit_cell_size[1] - int((event.y-lattice_dialog.corner1[1])/(lattice_dialog.corner2[1]-lattice_dialog.corner1[1])*lattice_dialog.lattice.unit_cell_size[1]) - 1
 
 
     def run(self):
@@ -1107,20 +1092,19 @@ class DialogDefineSite():
         """
         self.dialog_site.show()
         # define field and set defaults
-        type_field = self.wtree.get_widget('defineSite_type')
-        type_field.set_text('default')
-        type_field.set_sensitive(False)
+        name_field = self.wtree.get_widget('defineSite_type')
+        name_field.set_text('default')
         index_field = self.wtree.get_widget('defineSite_index')
-        index_adjustment = gtk.Adjustment(value=len(self.lattice_dialog.sites), lower=0, upper=1000, step_incr=1, page_incr=4, page_size=0)
+        index_adjustment = gtk.Adjustment(value=len(self.lattice_dialog.lattice.sites), lower=0, upper=1000, step_incr=1, page_incr=4, page_size=0)
         index_field.set_adjustment(index_adjustment)
-        index_field.set_value(len(self.lattice_dialog.sites))
+        index_field.set_value(len(self.lattice_dialog.lattice.sites))
         index_field.set_sensitive(False)
         site_x = self.wtree.get_widget('spb_site_x')
-        x_adjustment = gtk.Adjustment(value=0, lower=0, upper=self.lattice_dialog.unit_cell_size[0]-1, step_incr=1, page_incr=4, page_size=0)
+        x_adjustment = gtk.Adjustment(value=0, lower=0, upper=self.lattice_dialog.lattice.unit_cell_size[0]-1, step_incr=1, page_incr=4, page_size=0)
         site_x.set_adjustment(x_adjustment)
         site_x.set_value(self.coord_x)
         site_y = self.wtree.get_widget('spb_site_y')
-        y_adjustment = gtk.Adjustment(value=0, lower=0, upper=self.lattice_dialog.unit_cell_size[1]-1, step_incr=1, page_incr=4, page_size=0)
+        y_adjustment = gtk.Adjustment(value=0, lower=0, upper=self.lattice_dialog.lattice.unit_cell_size[1]-1, step_incr=1, page_incr=4, page_size=0)
         site_y.set_adjustment(y_adjustment)
         y_adjustment.set_value(self.coord_y)
         #run dialog
@@ -1129,7 +1113,7 @@ class DialogDefineSite():
         data = {}
         data['coord'] = site_x.get_value_as_int(), site_y.get_value_as_int()
         data['index'] = index_field.get_value_as_int()
-        data['type'] = type_field.get_text()
+        data['name'] = name_field.get_text()
         # close
         self.dialog_site.destroy()
         return result, data
@@ -1190,7 +1174,7 @@ class DialogNewSpecies():
         result = self.dialog.run()
         # extract fields
         data = {}
-        data['species'] = species.get_text()
+        data['name'] = species.get_text()
         data['id'] = species_id.get_text()
         data['color'] = self.color
         self.dialog.destroy()
@@ -1367,7 +1351,7 @@ class SimpleList(gtk.GenericTreeModel):
 
 class Lattice(Attributes):
     attributes = ['name','unit_cell_size','sites']
-    def __init__(self, name, unit_cell_size, sites=[]):
+    def __init__(self, name='', unit_cell_size=[], sites=[]):
         self.name = name
         self.unit_cell_size = unit_cell_size
         self.sites = sites
@@ -1384,6 +1368,10 @@ class Lattice(Attributes):
 
     def add_site(self, site):
         self.sites.append(site)
+
+    def remove_site(self, site):
+        if site in self.sites:
+            self.sites.remove(site)
 
 class LatticeList(SimpleList):
     def __init__(self, callback, node_index):
@@ -1471,16 +1459,16 @@ class ParameterList(SimpleList):
         return outstr
 
 class Process(Attributes):
-    attributes = ['name','center_site', 'rate_const','condition_list','action_list']
-    def __init__(self, name, center_site, rate_const):
+    attributes = ['name','center_site', 'rate_constant','condition_list','action_list']
+    def __init__(self, name='', center_site=(), rate_constant=0.):
         self.name = name
         self.center_site = center_site
-        self.rate_const = rate_const
+        self.rate_constant = rate_constant
         self.condition_list = []
         self.action_list = []
 
     def __repr__(self):
-        return '    %s %s' % (self.name, self.rate_const)
+        return '    %s %s' % (self.name, self.rate_constant)
 
     def add_action(self, action):
         self.action_list.append(action)
@@ -1538,6 +1526,7 @@ class Site(Attributes):
         self.index = index
         self.name = name
         self.coord = coord
+
     def __repr__(self):
         return '        %s %s %s' % (name, index, cord)
 

@@ -8,7 +8,7 @@
     model_name CDATA #REQUIRED
   >
 
-  <!ELEMENT species_list (species)+>
+  <!ELEMENT species_list (species)*>
   <!ELEMENT species EMPTY>
   <!ATTLIST species
     color CDATA #REQUIRED
@@ -22,8 +22,8 @@
     type CDATA #REQUIRED
     value CDATA #REQUIRED
   >
-  <!ELEMENT lattice_list (lattice)+>
-  <!ELEMENT lattice (site)+>
+  <!ELEMENT lattice_list (lattice)*>
+  <!ELEMENT lattice (site)*>
   <!ATTLIST lattice
     name CDATA #REQUIRED
     unit_cell_size CDATA #REQUIRED
@@ -34,8 +34,8 @@
     index CDATA #REQUIRED
     type CDATA #REQUIRED
   >
-  <!ELEMENT process_list (process)+>
-    <!ELEMENT process (condition+,action+)>
+  <!ELEMENT process_list (process)*>
+    <!ELEMENT process (condition*,action*)>
       <!ATTLIST process
         center_site CDATA #REQUIRED
         name CDATA #REQUIRED

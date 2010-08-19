@@ -168,7 +168,7 @@ typos if you want to reuse the same type.</property>
                             <child>
                               <widget class="GtkLabel" id="label6">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Type:</property>
+                                <property name="label" translatable="yes">Name:</property>
                               </widget>
                               <packing>
                                 <property name="position">0</property>

@@ -1,11 +1,7 @@
 <?xml version="1.0" ?>
 <kmc>
-    <meta author="Max Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="2" model_name="oles_kmc"/>
-    <species_list>
-        <species color="#fff" id="0" species="empty"/>
-        <species color="#ffff00000000" id="1" species="sauerstoff"/>
-        <species color="#0000ffff0187" id="2" species="nitrogen"/>
-    </species_list>
+    <meta author="Max J. Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="2" model_name="my_model"/>
+    <species_list/>
     <parameter_list/>
     <lattice_list>
         <lattice name="graphene" unit_cell_size="4 2">
@@ -15,21 +11,6 @@
             <site coord="3 1" index="3" type="default"/>
         </lattice>
     </lattice_list>
-    <process_list>
-        <process center_site="1 0" name="oxygen_adsorption_1" rate_constant="oxygen_adsorption_rate">
-            <condition coord="0 0 0 0" species="empty"/>
-            <action coord="0 0 0 0" species="sauerstoff"/>
-        </process>
-        <process center_site="2 0" name="oxygen_adsorption_2" rate_constant="oxygen_adsorption_rate">
-            <condition coord="0 0 0 0" species="empty"/>
-            <action coord="0 0 0 0" species="sauerstoff"/>
-        </process>
-        <process center_site="1 0" name="oxygen_diffusion_12" rate_constant="oxygen_diffusion_rate">
-            <condition coord="0 0 1 0" species="empty"/>
-            <condition coord="0 0 0 0" species="sauerstoff"/>
-            <action coord="0 0 0 0" species="empty"/>
-            <action coord="0 0 1 0" species="sauerstoff"/>
-        </process>
-    </process_list>
+    <process_list/>
 </kmc>
 <!-- This is an automatically generated XML file, representing one kMC mode please do not change this unless you know what you are doing -->
