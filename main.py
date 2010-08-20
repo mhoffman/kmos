@@ -944,13 +944,12 @@ class ProcessEditor():
 
     def draw_lattices(self,blank=False):
         gc = self.da_widget.get_style().black_gc
+        gc = gtk.gdk.GC(self.pixmap)
         lattice = self.lattice
         width, height = self.process_editor_width, self.process_editor_height
-        print(type(self.da_widget))
-        print(type(self.da_widget.get_style()))
-        print(dir(self.da_widget.get_style()))
-        print(type(self.da_widget.get_style().white_gc))
-        self.pixmap.draw_rectangle(self.da_widget.get_style().white_gc, True, 0, 0, width, height)
+        gc.set_rgb_fg_color(gtk.gdk.color_parse('#fff'))
+        self.pixmap.draw_rectangle(gc, True, 0, 0, width, height)
+        gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
         if blank:
             return
         unit_x = lattice.unit_cell_size[0]
