@@ -1257,10 +1257,12 @@ boolean</property>
     <child internal-child="vbox">
       <widget class="GtkVBox" id="dialog-vbox10">
         <property name="visible">True</property>
+        <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child>
           <widget class="GtkVBox" id="vbox13">
             <property name="visible">True</property>
+            <property name="orientation">vertical</property>
             <child>
               <widget class="GtkLabel" id="label19">
                 <property name="visible">True</property>
@@ -1277,6 +1279,7 @@ boolean</property>
                 <child>
                   <widget class="GtkVBox" id="vbox14">
                     <property name="visible">True</property>
+                    <property name="orientation">vertical</property>
                     <child>
                       <widget class="GtkLabel" id="label13">
                         <property name="visible">True</property>
@@ -1332,6 +1335,7 @@ boolean</property>
                 <child>
                   <widget class="GtkVBox" id="vbox15">
                     <property name="visible">True</property>
+                    <property name="orientation">vertical</property>
                     <child>
                       <widget class="GtkEntry" id="metaAuthor">
                         <property name="visible">True</property>
