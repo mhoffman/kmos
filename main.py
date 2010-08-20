@@ -656,7 +656,6 @@ class MainWindow():
                 return
         self.kmc_model = KMC_Model()
         self.treeview.set_model(self.kmc_model)
-        self.new_process = Process()
         self.kmc_model.import_xml(XMLFILE)
         self.kmc_model.save_changes_view.unsaved_changes = False
         self.treeview.expand_all()
@@ -671,7 +670,6 @@ class MainWindow():
             self.statbar.push(1,'KMC project saved')
         else:
             self.statbar.push(1,'No changes to save')
-            
 
 
     def export_source(self, widget):
@@ -714,7 +712,7 @@ class MainWindow():
             self.kmc_model.notifier('changed')
 
     def create_process(self, widget):
-        self.new_process = Process()
+        new_process = Process()
 
         if len(self.kmc_model.lattice_list) < 1 :
             self.statbar.push(1,'No lattice defined!')
@@ -724,9 +722,9 @@ class MainWindow():
         if result == gtk.RESPONSE_CANCEL:
             return
         else:
-            self.new_process.name = data['process_name']
+            new_process.name = data['process_name']
 
-        self.draw_lattices()
+        self.process_editor.set_process(new_process, self.kmc_model.lattice_list.data[0])
         self.lattice_ready = True
         self.statbar.push(1,'Left-click sites for condition, right-click site for changes, click here if finished.')
 
@@ -796,35 +794,35 @@ class MainWindow():
 
     # Serves to finish process input
     def statbar_clicked(self, widget, event):
-        if self.new_process:
+        new_process = self.process_editor.get_process()
+        if new_process:
             dlg_rate_constant = DialogRateConstant(self.kmc_model.parameter_list.data, self.keywords)
             result, data = dlg_rate_constant.run()
             #Check if process is sound
-            if not self.new_process.name :
+            if not new_process.name :
                 self.statbar.push(1,'New process has no name')
                 return
-            elif not self.new_process.center_site:
+            elif not new_process.center_site:
                 self.statbar.push(1,'No sites defined!')
                 return
-            elif not self.new_process.condition_list:
+            elif not new_process.condition_list:
                 self.statbar.push(1,'New process has no conditions')
                 return
-            elif not self.new_process.action_list:
+            elif not new_process.action_list:
                 self.statbar.push(1,'New process has no actions')
 
             if result == gtk.RESPONSE_OK:
-                self.new_process.rate_constant = data['rate_constant']
-                center_site = self.new_process.center_site
-                for condition in self.new_process.condition_list + self.new_process.action_list :
+                new_process.rate_constant = data['rate_constant']
+                center_site = new_process.center_site
+                for condition in new_process.condition_list + new_process.action_list :
                     condition.coord = [ x - y for (x, y) in zip(condition.coord, center_site) ]
                 # Re-center center site: it doesnt make sense, to have the enter site in another unit
                 # cell than (0, 0)
-                self.new_process.center_site[0:1] = [0,0]
-                self.kmc_model.process_list.append(self.new_process)
-                self.statbar.push(1,'New process "'+ self.new_process.name + '" added')
-                print(self.new_process)
-                del(self.new_process)
-                self.draw_lattices(blank=True)
+                new_process.center_site[0:1] = [0,0]
+                self.kmc_model.process_list.append(new_process)
+                self.statbar.push(1,'New process "'+ new_process.name + '" added')
+                print(new_process)
+                self.process_editor.draw_lattices(blank=True)
                 self.lattice_ready = False
 
 
@@ -852,7 +850,6 @@ class ProcessEditor():
                 #'on_dwLattice_expose_event' : self.expose,
         #}
         #self.wtree.signal_autoconnect(dic)
-        #self.da_widget.show()
         print("Process editor initialized")
 
     def configure(self, widget, event):
@@ -860,6 +857,14 @@ class ProcessEditor():
         self.pixmap = gtk.gdk.Pixmap(widget.window, self.process_editor_width, self.process_editor_height)
         self.pixmap.draw_rectangle(widget.get_style().white_gc, True, 0, 0, self.process_editor_width, self.process_editor_height)
         return True
+
+    def set_process(self, process, lattice):
+        self.new_process = process
+        self.lattice = lattice
+        self.draw_lattices()
+
+    def get_process(self):
+        return self.new_process
 
     def expose(self, widget, event):
         site_x, site_y, self.process_editor_width, self.process_editor_height = widget.get_allocation()
@@ -939,8 +944,12 @@ class ProcessEditor():
 
     def draw_lattices(self,blank=False):
         gc = self.da_widget.get_style().black_gc
-        lattice = self.kmc_model.lattice_list[0]
+        lattice = self.lattice
         width, height = self.process_editor_width, self.process_editor_height
+        print(type(self.da_widget))
+        print(type(self.da_widget.get_style()))
+        print(dir(self.da_widget.get_style()))
+        print(type(self.da_widget.get_style().white_gc))
         self.pixmap.draw_rectangle(self.da_widget.get_style().white_gc, True, 0, 0, width, height)
         if blank:
             return
