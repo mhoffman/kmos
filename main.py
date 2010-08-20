@@ -408,16 +408,12 @@ class KMC_Model(gtk.GenericTreeModel):
                     name = lattice.attrib['name']
                     unit_cell_size = [ int(x) for x in lattice.attrib['unit_cell_size'].split() ]
                     lattice_elem = Lattice(name=name, unit_cell_size=unit_cell_size)
-
-                    print("Adding sites ... to ...")
-                    print(lattice_elem.sites)
                     for site in lattice:
                         index =  int(site.attrib['index'])
                         name = site.attrib['type']
                         coord = [ int(x) for x in site.attrib['coord'].split() ]
                         site_elem = Site(index=index, name=name, coord=coord)
                         lattice_elem.add_site(site_elem)
-                        print(site_elem)
                     self.lattice_list.append(lattice_elem)
             elif child.tag == 'meta':
                 for attrib in ['author','email', 'debug','model_name','model_dimension']:
@@ -453,8 +449,6 @@ class KMC_Model(gtk.GenericTreeModel):
                     color = species.attrib['color']
                     species_elem = Species(name=name, id=id, color=color)
                     self.species_list.append(species_elem)
-        print(len(self.lattice_list.data))
-        print(len(self.lattice_list.data[0].sites))
 
 
     def __repr__(self):
