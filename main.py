@@ -274,7 +274,7 @@ class KMC_Model(gtk.GenericTreeModel):
         elif isinstance(parent, ParameterList):
             return self.parameter_list[n]
         elif isinstance(parent, ProcessList):
-            return self.parameter_list[n]
+            return self.process_list[n]
         elif isinstance(parent,SpeciesList):
             return self.species_list[n]
         else:
@@ -622,6 +622,7 @@ class MainWindow():
 
         #setup overview tree
         self.treeview = self.wtree.get_widget('overviewtree')
+        self.treeview.connect('row-activated', self.treeitem_clicked)
         self.tvcolumn = gtk.TreeViewColumn('Project Data')
         self.cell = gtk.CellRendererText()
         self.tvcolumn.pack_start(self.cell, expand=True)
@@ -666,6 +667,19 @@ class MainWindow():
         print("PARAMETERS: ", self.parameters)
         print("PROCESSES: ", self.processes)
 
+    def treeitem_clicked(self, widget, row,col):
+        item = self.kmc_model.on_get_iter(row)
+
+        if isinstance(item, Meta):
+            print("You clicked on Meta")
+        elif isinstance(item, Parameter):
+            print("we have a parameter")
+        elif isinstance(item, Species):
+            print("we have a species")
+        elif isinstance(item, Lattice):
+            print("it's a lattice")
+        elif isinstance(item, Process):
+            print("and finally we have a process")
 
     def dw_lattice_clicked(self, widget, event):
         if self.lattice_ready:
@@ -704,6 +718,9 @@ class MainWindow():
                                             self.species_menu.popup(None, None, None, event.button, event.time)
                                         elif event.button == 3 and filter(lambda cond: cond.coord == [i, j, x, y], self.new_process.condition_list):
                                             self.species_menu.popup(None, None, None, event.button, event.time)
+                                    else:
+                                        pass
+                                        #Catch events outside dots
 
 
     def add_meta_information(self):
@@ -793,6 +810,7 @@ class MainWindow():
         self.statbar.push(1,'Left-click sites for condition, right-click site for changes, click here if finished.')
 
 
+    # Serves to finish process input
     def statbar_clicked(self, widget, event):
         if self.new_process:
             dlg_rate_constant = DialogRateConstant(self.kmc_model.parameter_list, self.keywords)
@@ -815,8 +833,11 @@ class MainWindow():
                 center_site = self.new_process.center_site
                 for condition in self.new_process.condition_list + self.new_process.action_list :
                     condition.coord = [ x - y for (x, y) in zip(condition.coord, center_site) ]
+                # Re-center center site: it doesnt make sense, to have the enter site in another unit
+                # cell than (0, 0)
+                self.new_process.center_site[0:1] = [0,0]
                 self.kmc_model.process_list.append(self.new_process)
-                self.statbar.push(1,'New process "'+ self.new_process['name'] + '" added')
+                self.statbar.push(1,'New process "'+ self.new_process.name + '" added')
                 print(self.new_process)
                 del(self.new_process)
                 self.draw_lattices(blank=True)
@@ -1324,10 +1345,11 @@ class SimpleList(gtk.GenericTreeModel):
         self.node_index = node_index
         self.column_type = (str, )
 
+    #@verbose
     def __getitem__(self, i):
         return self.data[i]
 
-    @verbose
+    #@verbose
     def append(self, elem):
         if elem not in self.data:
             self.data.append(elem)
