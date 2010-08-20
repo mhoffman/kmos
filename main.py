@@ -608,20 +608,20 @@ class MainWindow():
         self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
         self.wtree = gtk.glade.XML(self.gladefile)
         self.window = self.wtree.get_widget('wndMain')
+        self.process_editor = ProcessEditor()
         self.statbar = self.wtree.get_widget('stb_process_editor')
-        self.da_widget = self.wtree.get_widget('dwLattice')
         self.keywords = ['exp','sin','cos','sqrt','log']
         self.kmc_model = KMC_Model()
-        dic = {'on_btnAddLattice_clicked' : self.new_lattice ,
+        dic = {
+                'on_btnAddLattice_clicked' : self.new_lattice ,
                 'on_btnMainQuit_clicked' : self.close,
                 'destroy' : self.close,
+                'on_dwLattice_configure_event' : self.process_editor.configure,
+                'on_dwLattice_expose_event' : self.process_editor.expose,
                 'on_btnAddParameter_clicked': self.add_parameter,
                 'on_btnAddSpecies_clicked' : self.add_species,
                 'on_btnAddProcess_clicked' : self.create_process,
                 'on_eventbox1_button_press_event' : self.statbar_clicked,
-                'on_dwLattice_button_press_event' : self.dw_lattice_clicked,
-                'on_dwLattice_configure_event' : self.dw_lattice_configure,
-                'on_dwLattice_expose_event' : self.dw_lattice_expose,
                 'on_btnImportXML_clicked' : self.import_xml,
                 'on_btnExportXML_clicked' : self.export_xml,
                 'on_btnExportSource_clicked': self.export_source,
@@ -632,7 +632,6 @@ class MainWindow():
         self.wtree.signal_autoconnect(dic)
         self.statbar.push(1,'Add a new lattice first.')
         self.lattice_ready = False
-
 
         #setup overview tree
         self.treeview = self.wtree.get_widget('overviewtree')
@@ -731,13 +730,138 @@ class MainWindow():
         self.lattice_ready = True
         self.statbar.push(1,'Left-click sites for condition, right-click site for changes, click here if finished.')
 
-    def dw_lattice_configure(self, widget, event):
+
+    def add_meta_information(self):
+        dlg_meta_info = DialogMetaInformation()
+        result, data = dlg_meta_info.run()
+        if result == gtk.RESPONSE_OK:
+            self.kmc_model.meta.add(data)
+            self.statbar.push(1,'Meta information added')
+        else:
+            self.statbar.push(1,'Could not complete meta information')
+
+    def new_lattice(self, widget):
+        if not self.kmc_model.has_meta():
+            self.add_meta_information()
+        lattice_editor = UnitCellEditor(self.add_lattice)
+
+    def add_species(self, widget):
+        if not self.kmc_model.species_list.has_elem():
+            empty_species = Species(color='#fff',name='empty',id=0)
+            self.kmc_model.species_list.append(empty_species)
+        if not self.kmc_model.meta:
+            self.add_meta_information()
+        dialog_new_species = DialogNewSpecies(len(self.kmc_model.species_list))
+        result, data = dialog_new_species.run()
+        if result == gtk.RESPONSE_OK:
+            if not data['color']:
+                self.statbar.push(1,'Species not added because no color was specified!')
+            elif data not in self.kmc_model.species_list:
+                new_species = Species(name=data['name'],color=data['color'],id=data['id'])
+                self.kmc_model.species_list.append(new_species)
+                self.statbar.push(1,'Added species "'+ data['name'] + '"')
+                print(data)
+
+    def add_parameter(self, widget):
+        parameter_editor = DialogAddParameter()
+        result, data = parameter_editor.run()
+        if result == gtk.RESPONSE_OK:
+            name = data['name']
+            type = data['type']
+            value = data['value']
+            parameter = Parameter(name=name, type=type, value=value)
+            self.kmc_model.parameter_list.append(parameter)
+
+
+    def add_lattice(self, data):
+        #validate new lattice
+        if not data.cell_finished:
+            self.statbar.push(1,'Could not add lattice: cell not defined!')
+            return
+        if not hasattr(data.lattice, 'name') or not data.lattice.name:
+            self.statbar.push(1,'Could not add lattice: lattice name not specified!')
+            return
+        if not hasattr(data.lattice, 'sites') or not data.lattice.sites:
+            self.statbar.push(1,'Could not add lattice: no sites specified!')
+            return
+        if not hasattr(data.lattice, 'unit_cell_size') or not data.lattice.unit_cell_size:
+            self.statbar.push(1,'Could not add lattice: no unit cell size specified!')
+            return
+        # if validated, add lattice
+        self.kmc_model.lattice_list.append(data.lattice)
+        self.statbar.push(1,'Added lattice "' + data.lattice.name + '"')
+
+
+
+
+    # Serves to finish process input
+    def statbar_clicked(self, widget, event):
+        if self.new_process:
+            dlg_rate_constant = DialogRateConstant(self.kmc_model.parameter_list.data, self.keywords)
+            result, data = dlg_rate_constant.run()
+            #Check if process is sound
+            if not self.new_process.name :
+                self.statbar.push(1,'New process has no name')
+                return
+            elif not self.new_process.center_site:
+                self.statbar.push(1,'No sites defined!')
+                return
+            elif not self.new_process.condition_list:
+                self.statbar.push(1,'New process has no conditions')
+                return
+            elif not self.new_process.action_list:
+                self.statbar.push(1,'New process has no actions')
+
+            if result == gtk.RESPONSE_OK:
+                self.new_process.rate_constant = data['rate_constant']
+                center_site = self.new_process.center_site
+                for condition in self.new_process.condition_list + self.new_process.action_list :
+                    condition.coord = [ x - y for (x, y) in zip(condition.coord, center_site) ]
+                # Re-center center site: it doesnt make sense, to have the enter site in another unit
+                # cell than (0, 0)
+                self.new_process.center_site[0:1] = [0,0]
+                self.kmc_model.process_list.append(self.new_process)
+                self.statbar.push(1,'New process "'+ self.new_process.name + '" added')
+                print(self.new_process)
+                del(self.new_process)
+                self.draw_lattices(blank=True)
+                self.lattice_ready = False
+
+
+    def close(self, *args):
+        if self.kmc_model.save_changes_view.unsaved_changes:
+            dialog_save_changes = DialogSaveChanges(self)
+            response = dialog_save_changes.run()
+            if response == gtk.RESPONSE_OK:
+                self.window.destroy()
+                gtk.main_quit()
+        else:
+            self.window.destroy()
+            gtk.main_quit()
+
+
+class ProcessEditor():
+    def __init__(self):
+        self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
+        self.wtree = gtk.glade.XML(self.gladefile)
+        self.da_widget = self.wtree.get_widget('dwLattice')
+        #TODO
+        #dic = {
+                #'on_dwLattice_button_press_event' : self.dw_lattice_clicked,
+                #'on_dwLattice_configure_event' : self.configure,
+                #'on_dwLattice_expose_event' : self.expose,
+        #}
+        #self.wtree.signal_autoconnect(dic)
+        #self.da_widget.show()
+        print("Process editor initialized")
+
+    def configure(self, widget, event):
         self.process_editor_width, self.process_editor_height = widget.get_allocation()[2], widget.get_allocation()[3]
         self.pixmap = gtk.gdk.Pixmap(widget.window, self.process_editor_width, self.process_editor_height)
         self.pixmap.draw_rectangle(widget.get_style().white_gc, True, 0, 0, self.process_editor_width, self.process_editor_height)
         return True
 
-    def dw_lattice_expose(self, widget, event):
+    def expose(self, widget, event):
         site_x, site_y, self.process_editor_width, self.process_editor_height = widget.get_allocation()
         widget.window.draw_drawable(widget.get_style().fg_gc[gtk.STATE_NORMAL], self.pixmap, 0, site_y, 0, site_y, self.process_editor_width, self.process_editor_height)
 
@@ -854,115 +978,6 @@ class MainWindow():
                                         self.pixmap.draw_arc(gc, False, center[0]-10, center[1]-10, 20, 20, 64*270, 64*360)
                                 gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
         self.da_widget.queue_draw_area(0, 0, width, height)
-
-    def add_meta_information(self):
-        dlg_meta_info = DialogMetaInformation()
-        result, data = dlg_meta_info.run()
-        if result == gtk.RESPONSE_OK:
-            self.kmc_model.meta.add(data)
-            self.statbar.push(1,'Meta information added')
-        else:
-            self.statbar.push(1,'Could not complete meta information')
-
-    def new_lattice(self, widget):
-        if not self.kmc_model.has_meta():
-            self.add_meta_information()
-        lattice_editor = UnitCellEditor(self.add_lattice)
-
-    def add_species(self, widget):
-        if not self.kmc_model.species_list.has_elem():
-            empty_species = Species(color='#fff',name='empty',id=0)
-            self.kmc_model.species_list.append(empty_species)
-        if not self.kmc_model.meta:
-            self.add_meta_information()
-        dialog_new_species = DialogNewSpecies(len(self.kmc_model.species_list))
-        result, data = dialog_new_species.run()
-        if result == gtk.RESPONSE_OK:
-            if not data['color']:
-                self.statbar.push(1,'Species not added because no color was specified!')
-            elif data not in self.kmc_model.species_list:
-                new_species = Species(name=data['name'],color=data['color'],id=data['id'])
-                self.kmc_model.species_list.append(new_species)
-                self.statbar.push(1,'Added species "'+ data['name'] + '"')
-                print(data)
-
-    def add_parameter(self, widget):
-        parameter_editor = DialogAddParameter()
-        result, data = parameter_editor.run()
-        if result == gtk.RESPONSE_OK:
-            name = data['name']
-            type = data['type']
-            value = data['value']
-            parameter = Parameter(name=name, type=type, value=value)
-            self.kmc_model.parameter_list.append(parameter)
-
-
-    def add_lattice(self, data):
-        #validate new lattice
-        if not data.cell_finished:
-            self.statbar.push(1,'Could not add lattice: cell not defined!')
-            return
-        if not hasattr(data.lattice, 'name') or not data.lattice.name:
-            self.statbar.push(1,'Could not add lattice: lattice name not specified!')
-            return
-        if not hasattr(data.lattice, 'sites') or not data.lattice.sites:
-            self.statbar.push(1,'Could not add lattice: no sites specified!')
-            return
-        if not hasattr(data.lattice, 'unit_cell_size') or not data.lattice.unit_cell_size:
-            self.statbar.push(1,'Could not add lattice: no unit cell size specified!')
-            return
-        # if validated, add lattice
-        self.kmc_model.lattice_list.append(data.lattice)
-        self.statbar.push(1,'Added lattice "' + data.lattice.name + '"')
-
-
-
-
-    # Serves to finish process input
-    def statbar_clicked(self, widget, event):
-        if self.new_process:
-            dlg_rate_constant = DialogRateConstant(self.kmc_model.parameter_list.data, self.keywords)
-            result, data = dlg_rate_constant.run()
-            #Check if process is sound
-            if not self.new_process.name :
-                self.statbar.push(1,'New process has no name')
-                return
-            elif not self.new_process.center_site:
-                self.statbar.push(1,'No sites defined!')
-                return
-            elif not self.new_process.condition_list:
-                self.statbar.push(1,'New process has no conditions')
-                return
-            elif not self.new_process.action_list:
-                self.statbar.push(1,'New process has no actions')
-
-            if result == gtk.RESPONSE_OK:
-                self.new_process.rate_constant = data['rate_constant']
-                center_site = self.new_process.center_site
-                for condition in self.new_process.condition_list + self.new_process.action_list :
-                    condition.coord = [ x - y for (x, y) in zip(condition.coord, center_site) ]
-                # Re-center center site: it doesnt make sense, to have the enter site in another unit
-                # cell than (0, 0)
-                self.new_process.center_site[0:1] = [0,0]
-                self.kmc_model.process_list.append(self.new_process)
-                self.statbar.push(1,'New process "'+ self.new_process.name + '" added')
-                print(self.new_process)
-                del(self.new_process)
-                self.draw_lattices(blank=True)
-                self.lattice_ready = False
-
-
-    def close(self, *args):
-        if self.kmc_model.save_changes_view.unsaved_changes:
-            dialog_save_changes = DialogSaveChanges(self)
-            response = dialog_save_changes.run()
-            if response == gtk.RESPONSE_OK:
-                self.window.destroy()
-                gtk.main_quit()
-        else:
-            self.window.destroy()
-            gtk.main_quit()
-
 
 class UnitCellEditor():
     """Main Dialog set up a lattice and its adsorption sites
