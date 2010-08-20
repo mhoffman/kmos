@@ -571,7 +571,7 @@ class KMC_Model(gtk.GenericTreeModel):
         tree = ET.ElementTree(root)
         outfile = open(filename,'w')
         outfile.write(prettify_xml(root))
-        outfile.write('<!-- This is an automatically generated XML file, representing one kMC mode ' + \
+        outfile.write('<!-- This is an automatically generated XML file, representing a kMC model ' + \
                         'please do not change this unless you know what you are doing -->\n')
         outfile.close()
 
@@ -702,7 +702,7 @@ class MainWindow():
                                         self.species_menu.show_all()
                                         if event.button == 1 :
                                             self.species_menu.popup(None, None, None, event.button, event.time)
-                                        elif event.button == 3 and filter(lambda cond: cond.coord == [i, j, x, y], self.new_process.conditions):
+                                        elif event.button == 3 and filter(lambda cond: cond.coord == [i, j, x, y], self.new_process.condition_list):
                                             self.species_menu.popup(None, None, None, event.button, event.time)
 
 
@@ -795,7 +795,7 @@ class MainWindow():
 
     def statbar_clicked(self, widget, event):
         if self.new_process:
-            dlg_rate_constant = DialogRateConstant(self.parameters, self.keywords)
+            dlg_rate_constant = DialogRateConstant(self.kmc_model.parameter_list, self.keywords)
             result, data = dlg_rate_constant.run()
             #Check if process is sound
             if not self.new_process.name :
@@ -804,18 +804,18 @@ class MainWindow():
             elif not self.new_process.center_site:
                 self.statbar.push(1,'No sites defined!')
                 return
-            elif not self.new_process.conditions:
+            elif not self.new_process.condition_list:
                 self.statbar.push(1,'New process has no conditions')
                 return
-            elif not self.new_process.actions:
+            elif not self.new_process.action_list:
                 self.statbar.push(1,'New process has no actions')
 
             if result == gtk.RESPONSE_OK:
                 self.new_process.rate_constant = data['rate_constant']
                 center_site = self.new_process.center_site
-                for condition in self.new_process.conditions + self.new_process.actions:
+                for condition in self.new_process.condition_list + self.new_process.action_list :
                     condition.coord = [ x - y for (x, y) in zip(condition.coord, center_site) ]
-                self.kmc_model.append(self.new_process)
+                self.kmc_model.process_list.append(self.new_process)
                 self.statbar.push(1,'New process "'+ self.new_process['name'] + '" added')
                 print(self.new_process)
                 del(self.new_process)
@@ -824,30 +824,30 @@ class MainWindow():
 
 
     def add_condition(self, event, data):
-        print(data)
 
         #Test if point is condition or action
-        condition = data[1][0] == 'condition'
+        is_condition = data[1][0] == 'condition'
 
         # weed out data
-        data = [ data[0]['species'], data[1][1 :] ]
-        print(data)
+        data = [ data[0].name, data[1][1 :] ]
+        # new_ca stands for 'new condition/action'
+        new_ca = ConditionAction(coord=data[1], species=data[0])
         # if this is the first condition, make it the center site
         # all other sites will be measure relative to this site
-        if not self.new_process['conditions']:
-            self.new_process['center_site'] = data[1]
+        if not self.new_process.condition_list:
+            self.new_process.center_site = new_ca.coord
 
         # Save in appropriate slot
-        if condition :
-            for elem in self.new_process['conditions']:
-                if elem[1] == data[1]:
-                    self.new_process['conditions'].remove(elem)
-            self.new_process['conditions'].append(data)
+        if is_condition :
+            for elem in self.new_process.condition_list:
+                if elem.coord == new_ca.coord:
+                    self.new_process.condition_list.remove(elem)
+            self.new_process.condition_list.append(new_ca)
         else:
-            for elem in self.new_process['actions']:
-                if elem[1] == data[1]:
-                    self.new_process['actions'].remove(elem)
-            self.new_process['actions'].append(data)
+            for elem in self.new_process.action_list:
+                if elem.coord == new_ca.coord:
+                    self.new_process.action_list.remove(elem)
+            self.new_process.action_list.append(new_ca)
 
         self.draw_lattices()
 
@@ -880,14 +880,14 @@ class MainWindow():
                                 self.pixmap.draw_arc(gc, True, center[0]-5, center[1]-5, 10, 10, 0, 64*360)
                                 for entry in self.new_process.condition_list:
                                     if entry.coord == [sup_i, sup_j, x, y ]:
-                                        color = filter((lambda x : x.species == entry.species), self.species)[0].color
+                                        color = filter((lambda x : x.name == entry.species), self.kmc_model.species_list.data)[0].color
                                         gc.set_rgb_fg_color(gtk.gdk.color_parse(color))
                                         self.pixmap.draw_arc(gc, True, center[0]-15, center[1]-15, 30, 30, 64*90, 64*360)
                                         gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
                                         self.pixmap.draw_arc(gc, False, center[0]-15, center[1]-15, 30, 30, 64*90, 64*360)
                                 for entry in self.new_process.action_list:
                                     if entry.coord == [sup_i, sup_j, x, y ]:
-                                        color = filter((lambda x : x.species == entry.species), self.species)[0].color
+                                        color = filter((lambda x : x.name == entry.species), self.kmc_model.species_list.data)[0].color
                                         gc.set_rgb_fg_color(gtk.gdk.color_parse(color))
                                         self.pixmap.draw_arc(gc, True, center[0]-10, center[1]-10, 20, 20, 64*270, 64*360)
                                         gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
