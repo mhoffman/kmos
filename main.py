@@ -403,17 +403,26 @@ class KMC_Model(gtk.GenericTreeModel):
             print(dtd.error_log.filter_from_errors()[0])
             return
         for child in root:
-            if child.tag == 'meta':
+            if child.tag == 'lattice_list':
+                for lattice in child:
+                    name = lattice.attrib['name']
+                    unit_cell_size = [ int(x) for x in lattice.attrib['unit_cell_size'].split() ]
+                    lattice_elem = Lattice(name=name, unit_cell_size=unit_cell_size)
+
+                    print("Adding sites ... to ...")
+                    print(lattice_elem.sites)
+                    for site in lattice:
+                        index =  int(site.attrib['index'])
+                        name = site.attrib['type']
+                        coord = [ int(x) for x in site.attrib['coord'].split() ]
+                        site_elem = Site(index=index, name=name, coord=coord)
+                        lattice_elem.add_site(site_elem)
+                        print(site_elem)
+                    self.lattice_list.append(lattice_elem)
+            elif child.tag == 'meta':
                 for attrib in ['author','email', 'debug','model_name','model_dimension']:
                     if child.attrib.has_key(attrib):
                         self.meta.add({attrib:child.attrib[attrib]})
-            elif child.tag == 'species_list':
-                for species in child:
-                    name = species.attrib['name']
-                    id = species.attrib['id']
-                    color = species.attrib['color']
-                    species_elem = Species(name=name, id=id, color=color)
-                    self.species_list.append(species_elem)
             elif child.tag == 'parameter_list':
                 for parameter in child:
                     name = parameter.attrib['name']
@@ -421,18 +430,6 @@ class KMC_Model(gtk.GenericTreeModel):
                     value = parameter.attrib['value']
                     parameter_elem = Parameter(name=name,type=type,value=value)
                     self.parameter_list.append(parameter_elem)
-            elif child.tag == 'lattice_list':
-                for lattice in child:
-                    name = lattice.attrib['name']
-                    unit_cell_size = [ int(x) for x in lattice.attrib['unit_cell_size'].split() ]
-                    lattice_elem = Lattice(name=name,unit_cell_size=unit_cell_size)
-                    for site in lattice:
-                        index =  int(site.attrib['index'])
-                        name = site.attrib['type']
-                        coord = [ int(x) for x in site.attrib['coord'].split() ]
-                        site_elem = Site(index=index,name=name,coord=coord)
-                        lattice_elem.add_site(site_elem)
-                    self.lattice_list.append(lattice_elem)
             elif child.tag == 'process_list':
                 for process in child:
                     center_site = [ int(x) for x in  process.attrib['center_site'].split() ]
@@ -449,6 +446,15 @@ class KMC_Model(gtk.GenericTreeModel):
                             elif sub.tag == 'condition':
                                 process_elem.add_condition(condition_action)
                     self.process_list.append(process_elem)
+            elif child.tag == 'species_list':
+                for species in child:
+                    name = species.attrib['name']
+                    id = species.attrib['id']
+                    color = species.attrib['color']
+                    species_elem = Species(name=name, id=id, color=color)
+                    self.species_list.append(species_elem)
+        print(len(self.lattice_list.data))
+        print(len(self.lattice_list.data[0].sites))
 
 
     def __repr__(self):
@@ -651,9 +657,13 @@ class MainWindow():
 
 
     def export_xml(self, *args):
-        self.kmc_model.export_xml(XMLFILE)
-        self.kmc_model.save_changes_view.unsaved_changes = False
-        self.statbar.push(1,'KMC project saved')
+        if self.kmc_model.save_changes_view.unsaved_changes:
+            self.kmc_model.export_xml(XMLFILE)
+            self.kmc_model.save_changes_view.unsaved_changes = False
+            self.statbar.push(1,'KMC project saved')
+        else:
+            self.statbar.push(1,'No changes to save')
+            
 
 
     def export_source(self, widget):
@@ -1422,10 +1432,10 @@ class SimpleList(gtk.GenericTreeModel):
 
 class Lattice(Attributes):
     attributes = ['name','unit_cell_size','sites']
-    def __init__(self, name='', unit_cell_size=[], sites=[]):
+    def __init__(self, name='', unit_cell_size=[]):
         self.name = name
         self.unit_cell_size = unit_cell_size
-        self.sites = sites
+        self.sites = []
 
     def __repr__(self):
         return '    %s %s' % (self.name, self.unit_cell_size)
@@ -1599,7 +1609,7 @@ class Site(Attributes):
         self.coord = coord
 
     def __repr__(self):
-        return '        %s %s %s' % (name, index, cord)
+        return '        %s %s %s' % (self.name, self.index, self.coord)
 
 
 
