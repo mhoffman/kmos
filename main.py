@@ -783,6 +783,78 @@ class MainWindow():
                                         #Catch events outside dots
 
 
+    def add_condition(self, event, data):
+
+        #Test if point is condition or action
+        is_condition = data[1][0] == 'condition'
+
+        # weed out data
+        data = [ data[0].name, data[1][1 :] ]
+        # new_ca stands for 'new condition/action'
+        new_ca = ConditionAction(coord=data[1], species=data[0])
+        # if this is the first condition, make it the center site
+        # all other sites will be measure relative to this site
+        if not self.new_process.condition_list:
+            self.new_process.center_site = new_ca.coord
+
+        # Save in appropriate slot
+        if is_condition :
+            for elem in self.new_process.condition_list:
+                if elem.coord == new_ca.coord:
+                    self.new_process.condition_list.remove(elem)
+            self.new_process.condition_list.append(new_ca)
+        else:
+            for elem in self.new_process.action_list:
+                if elem.coord == new_ca.coord:
+                    self.new_process.action_list.remove(elem)
+            self.new_process.action_list.append(new_ca)
+
+        self.draw_lattices()
+
+
+
+    def draw_lattices(self,blank=False):
+        gc = self.da_widget.get_style().black_gc
+        lattice = self.kmc_model.lattice_list[0]
+        width, height = self.process_editor_width, self.process_editor_height
+        self.pixmap.draw_rectangle(self.da_widget.get_style().white_gc, True, 0, 0, width, height)
+        if blank:
+            return
+        unit_x = lattice.unit_cell_size[0]
+        unit_y = lattice.unit_cell_size[1]
+        zoom = 3
+        for sup_i in range(zoom+1):
+            for i in range(-1,1):
+                self.pixmap.draw_line(gc, 0, i+sup_i*height/zoom, width, i+(sup_i*height/zoom))
+                self.pixmap.draw_line(gc, i+sup_i*width/zoom, 0, i+(sup_i*width/zoom), height)
+        for sup_i in range(zoom+1):
+            for sup_j in range(3):
+                for x in range(unit_x):
+                    for y in range(unit_y):
+                        for site in lattice.sites:
+                            if site.coord[0] == x and site.coord[1] == y:
+                                center = []
+                                coordx = int((sup_i+ float(x)/unit_x)*width/zoom )
+                                coordy = int(height - (sup_j+ float(y)/unit_y)*height/zoom )
+                                center = [ coordx, coordy ]
+                                self.pixmap.draw_arc(gc, True, center[0]-5, center[1]-5, 10, 10, 0, 64*360)
+                                for entry in self.new_process.condition_list:
+                                    if entry.coord == [sup_i, sup_j, x, y ]:
+                                        color = filter((lambda x : x.name == entry.species), self.kmc_model.species_list.data)[0].color
+                                        gc.set_rgb_fg_color(gtk.gdk.color_parse(color))
+                                        self.pixmap.draw_arc(gc, True, center[0]-15, center[1]-15, 30, 30, 64*90, 64*360)
+                                        gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
+                                        self.pixmap.draw_arc(gc, False, center[0]-15, center[1]-15, 30, 30, 64*90, 64*360)
+                                for entry in self.new_process.action_list:
+                                    if entry.coord == [sup_i, sup_j, x, y ]:
+                                        color = filter((lambda x : x.name == entry.species), self.kmc_model.species_list.data)[0].color
+                                        gc.set_rgb_fg_color(gtk.gdk.color_parse(color))
+                                        self.pixmap.draw_arc(gc, True, center[0]-10, center[1]-10, 20, 20, 64*270, 64*360)
+                                        gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
+                                        self.pixmap.draw_arc(gc, False, center[0]-10, center[1]-10, 20, 20, 64*270, 64*360)
+                                gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
+        self.da_widget.queue_draw_area(0, 0, width, height)
+
     def add_meta_information(self):
         dlg_meta_info = DialogMetaInformation()
         result, data = dlg_meta_info.run()
@@ -795,7 +867,7 @@ class MainWindow():
     def new_lattice(self, widget):
         if not self.kmc_model.has_meta():
             self.add_meta_information()
-        lattice_editor = DrawingArea(self.add_lattice)
+        lattice_editor = UnitCellEditor(self.add_lattice)
 
     def add_species(self, widget):
         if not self.kmc_model.species_list.has_elem():
@@ -880,80 +952,6 @@ class MainWindow():
                 self.lattice_ready = False
 
 
-    def add_condition(self, event, data):
-
-        #Test if point is condition or action
-        is_condition = data[1][0] == 'condition'
-
-        # weed out data
-        data = [ data[0].name, data[1][1 :] ]
-        # new_ca stands for 'new condition/action'
-        new_ca = ConditionAction(coord=data[1], species=data[0])
-        # if this is the first condition, make it the center site
-        # all other sites will be measure relative to this site
-        if not self.new_process.condition_list:
-            self.new_process.center_site = new_ca.coord
-
-        # Save in appropriate slot
-        if is_condition :
-            for elem in self.new_process.condition_list:
-                if elem.coord == new_ca.coord:
-                    self.new_process.condition_list.remove(elem)
-            self.new_process.condition_list.append(new_ca)
-        else:
-            for elem in self.new_process.action_list:
-                if elem.coord == new_ca.coord:
-                    self.new_process.action_list.remove(elem)
-            self.new_process.action_list.append(new_ca)
-
-        self.draw_lattices()
-
-
-
-    def draw_lattices(self,blank=False):
-        gc = self.da_widget.get_style().black_gc
-        lattice = self.kmc_model.lattice_list[0]
-        width, height = self.process_editor_width, self.process_editor_height
-        self.pixmap.draw_rectangle(self.da_widget.get_style().white_gc, True, 0, 0, width, height)
-        if blank:
-            return
-        unit_x = lattice.unit_cell_size[0]
-        unit_y = lattice.unit_cell_size[1]
-        zoom = 3
-        for sup_i in range(zoom+1):
-            for i in range(-1,1):
-                self.pixmap.draw_line(gc, 0, i+sup_i*height/zoom, width, i+(sup_i*height/zoom))
-                self.pixmap.draw_line(gc, i+sup_i*width/zoom, 0, i+(sup_i*width/zoom), height)
-        for sup_i in range(zoom+1):
-            for sup_j in range(3):
-                for x in range(unit_x):
-                    for y in range(unit_y):
-                        for site in lattice.sites:
-                            if site.coord[0] == x and site.coord[1] == y:
-                                center = []
-                                coordx = int((sup_i+ float(x)/unit_x)*width/zoom )
-                                coordy = int(height - (sup_j+ float(y)/unit_y)*height/zoom )
-                                center = [ coordx, coordy ]
-                                self.pixmap.draw_arc(gc, True, center[0]-5, center[1]-5, 10, 10, 0, 64*360)
-                                for entry in self.new_process.condition_list:
-                                    if entry.coord == [sup_i, sup_j, x, y ]:
-                                        color = filter((lambda x : x.name == entry.species), self.kmc_model.species_list.data)[0].color
-                                        gc.set_rgb_fg_color(gtk.gdk.color_parse(color))
-                                        self.pixmap.draw_arc(gc, True, center[0]-15, center[1]-15, 30, 30, 64*90, 64*360)
-                                        gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
-                                        self.pixmap.draw_arc(gc, False, center[0]-15, center[1]-15, 30, 30, 64*90, 64*360)
-                                for entry in self.new_process.action_list:
-                                    if entry.coord == [sup_i, sup_j, x, y ]:
-                                        color = filter((lambda x : x.name == entry.species), self.kmc_model.species_list.data)[0].color
-                                        gc.set_rgb_fg_color(gtk.gdk.color_parse(color))
-                                        self.pixmap.draw_arc(gc, True, center[0]-10, center[1]-10, 20, 20, 64*270, 64*360)
-                                        gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
-                                        self.pixmap.draw_arc(gc, False, center[0]-10, center[1]-10, 20, 20, 64*270, 64*360)
-                                gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
-
-
-        self.da_widget.queue_draw_area(0, 0, width, height)
-
     def close(self, *args):
         if self.kmc_model.save_changes_view.unsaved_changes:
             dialog_save_changes = DialogSaveChanges(self)
@@ -966,7 +964,7 @@ class MainWindow():
             gtk.main_quit()
 
 
-class DrawingArea():
+class UnitCellEditor():
     """Main Dialog set up a lattice and its adsorption sites
     """
     def __init__(self, callback):
@@ -1385,15 +1383,20 @@ class SimpleList(gtk.GenericTreeModel):
     def __getitem__(self, i):
         return self.data[i]
 
+    def sort(self):
+        self.data.sort()
+
     #@verbose
     def append(self, elem):
         if elem not in self.data:
             self.data.append(elem)
             full_path = (self.node_index, self.data.index(elem))
             self.callback('row-inserted', full_path)
+        self.data.sort()
 
     def __len__(self):
         return len(self.data)
+
 
     def has_elem(self):
         return len(self.data) > 0
@@ -1459,6 +1462,14 @@ class Lattice(Attributes):
 
     def __repr__(self):
         return '    %s %s' % (self.name, self.unit_cell_size)
+
+    def __cmp__(self, other):
+        if self.name > other.name :
+            return 1
+        elif self.name == other.name :
+            return 0
+        else:
+            return -1
 
     def set_name(self, name):
         self.name = name
@@ -1544,6 +1555,14 @@ class Parameter(Attributes):
     def __repr__(self):
         return '%s %s %s' % (self.name, self.value, self.type)
 
+    def __cmp__(self, other):
+        if self.name > other.name :
+            return 1
+        elif self.name == other.name :
+            return 0
+        else:
+            return -1
+
 class ParameterList(SimpleList):
     def __init__(self, callback, node_index):
         SimpleList.__init__(self, callback, node_index)
@@ -1600,6 +1619,14 @@ class Species(Attributes):
 
     def __repr__(self):
         return "    %s %s %s" % (self.name, self.color, self.id)
+
+    def __cmp__(self, other):
+        if self.name > other.name :
+            return 1
+        elif self.name == other.name :
+            return 0
+        else:
+            return -1
 
 class SpeciesList(SimpleList):
     def __init__(self, callback, node_index):
