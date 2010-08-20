@@ -525,6 +525,19 @@ class KMC_Model(gtk.GenericTreeModel):
 
         return root
 
+    def check_dependencies(self):
+        pass
+        # check if all  lattice sites are unique
+        # check if all lattice names are unique
+        # check if all parameter names are unique
+        # check if all process names are unique
+        # check if all processes have at least one condition
+        # check if all processes have at least one action
+        # check if all species have a unique name
+        # check if all species have a unique id
+        # check if all species used in condition_action are defined
+        # check if all sites used in processes are defined: actions, conditions, center_site
+
     def export_xml(self, filename):
         # build XML Tree
         root = ET.Element('kmc')
@@ -690,6 +703,7 @@ class MainWindow():
             print("it's a lattice")
         elif isinstance(item, Process):
             print("and finally we have a process")
+
     def treeitem_edited(self, cell, path, new_text):
         path = tuple([int(x) for x in path.split(':')])
         item = self.kmc_model.on_get_iter(path)
@@ -700,6 +714,32 @@ class MainWindow():
             item.name = new_text
             self.kmc_model.notifier('changed')
 
+    def create_process(self, widget):
+        self.new_process = Process()
+
+        if len(self.kmc_model.lattice_list) < 1 :
+            self.statbar.push(1,'No lattice defined!')
+            return
+        dlg_process_name = DialogProcessName()
+        result, data = dlg_process_name.run()
+        if result == gtk.RESPONSE_CANCEL:
+            return
+        else:
+            self.new_process.name = data['process_name']
+
+        self.draw_lattices()
+        self.lattice_ready = True
+        self.statbar.push(1,'Left-click sites for condition, right-click site for changes, click here if finished.')
+
+    def dw_lattice_configure(self, widget, event):
+        self.process_editor_width, self.process_editor_height = widget.get_allocation()[2], widget.get_allocation()[3]
+        self.pixmap = gtk.gdk.Pixmap(widget.window, self.process_editor_width, self.process_editor_height)
+        self.pixmap.draw_rectangle(widget.get_style().white_gc, True, 0, 0, self.process_editor_width, self.process_editor_height)
+        return True
+
+    def dw_lattice_expose(self, widget, event):
+        site_x, site_y, self.process_editor_width, self.process_editor_height = widget.get_allocation()
+        widget.window.draw_drawable(widget.get_style().fg_gc[gtk.STATE_NORMAL], self.pixmap, 0, site_y, 0, site_y, self.process_editor_width, self.process_editor_height)
 
     def dw_lattice_clicked(self, widget, event):
         if self.lattice_ready:
@@ -803,33 +843,7 @@ class MainWindow():
         self.kmc_model.lattice_list.append(data.lattice)
         self.statbar.push(1,'Added lattice "' + data.lattice.name + '"')
 
-    def dw_lattice_configure(self, widget, event):
-        self.process_editor_width, self.process_editor_height = widget.get_allocation()[2], widget.get_allocation()[3]
-        self.pixmap = gtk.gdk.Pixmap(widget.window, self.process_editor_width, self.process_editor_height)
-        self.pixmap.draw_rectangle(widget.get_style().white_gc, True, 0, 0, self.process_editor_width, self.process_editor_height)
-        return True
 
-    def dw_lattice_expose(self, widget, event):
-        site_x, site_y, self.process_editor_width, self.process_editor_height = widget.get_allocation()
-        widget.window.draw_drawable(widget.get_style().fg_gc[gtk.STATE_NORMAL], self.pixmap, 0, site_y, 0, site_y, self.process_editor_width, self.process_editor_height)
-
-
-    def create_process(self, widget):
-        self.new_process = Process()
-
-        if len(self.kmc_model.lattice_list) < 1 :
-            self.statbar.push(1,'No lattice defined!')
-            return
-        dlg_process_name = DialogProcessName()
-        result, data = dlg_process_name.run()
-        if result == gtk.RESPONSE_CANCEL:
-            return
-        else:
-            self.new_process.name = data['process_name']
-
-        self.draw_lattices()
-        self.lattice_ready = True
-        self.statbar.push(1,'Left-click sites for condition, right-click site for changes, click here if finished.')
 
 
     # Serves to finish process input
