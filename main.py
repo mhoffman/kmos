@@ -626,6 +626,8 @@ class MainWindow():
         self.treeview.connect('row-activated', self.treeitem_clicked)
         self.tvcolumn = gtk.TreeViewColumn('Project Data')
         self.cell = gtk.CellRendererText()
+        self.cell.set_property('editable', True)
+        self.cell.connect('edited',self.treeitem_edited)
         self.tvcolumn.pack_start(self.cell, expand=True)
         self.tvcolumn.add_attribute(self.cell, 'text', 0)
         self.treeview.append_column(self.tvcolumn)
@@ -688,6 +690,16 @@ class MainWindow():
             print("it's a lattice")
         elif isinstance(item, Process):
             print("and finally we have a process")
+    def treeitem_edited(self, cell, path, new_text):
+        path = tuple([int(x) for x in path.split(':')])
+        item = self.kmc_model.on_get_iter(path)
+        print(path)
+        print(type(path))
+        print(item)
+        if isinstance(item, Process):
+            item.name = new_text
+            self.kmc_model.notifier('changed')
+
 
     def dw_lattice_clicked(self, widget, event):
         if self.lattice_ready:
@@ -823,7 +835,7 @@ class MainWindow():
     # Serves to finish process input
     def statbar_clicked(self, widget, event):
         if self.new_process:
-            dlg_rate_constant = DialogRateConstant(self.kmc_model.parameter_list, self.keywords)
+            dlg_rate_constant = DialogRateConstant(self.kmc_model.parameter_list.data, self.keywords)
             result, data = dlg_rate_constant.run()
             #Check if process is sound
             if not self.new_process.name :
@@ -1276,7 +1288,7 @@ class DialogRateConstant():
         completion.set_text_column(0)
         #Add text to liststore
         for parameter in self.parameters:
-            liststore.append([parameter['name']])
+            liststore.append([parameter.name])
         for keyword in self.keywords:
             liststore.append([keyword])
         #run
