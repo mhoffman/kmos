@@ -60,7 +60,7 @@ class KMC_Model(gtk.GenericTreeModel):
         self.notifier.add_listener(self.save_changes_view)
 
 
-    @verbose
+    #@verbose
     def callback(self, signal, *args, **kwargs):
         if signal == 'row-inserted':
             path = args[0]
@@ -121,21 +121,21 @@ class KMC_Model(gtk.GenericTreeModel):
         elif isinstance(rowref, LatticeList):
             return (0, )
         elif isinstance(rowref, Lattice):
-            return (0, self.lattice_list.on_get_path(rowref)[0])
+            return (0, self.lattice_list.on_get_path(rowref))
         elif isinstance(rowref, Meta):
             return (1,)
         elif isinstance(rowref, ParameterList):
             return (2, )
         elif isinstance(rowref, Parameter):
-            return (2, self.parameter_list.on_get_path(rowref)[0])
+            return (2, self.parameter_list.on_get_path(rowref))
         elif isinstance(rowref, ProcessList):
             return (3, )
         elif isinstance(rowref, Process):
-            return (3, self.process_list.on_get_path(rowref)[0])
+            return (3, self.process_list.on_get_path(rowref))
         elif isinstance(rowref, SpeciesList):
             return (4, )
         elif isinstance(rowref, Species):
-            return (4, self.species_list.on_get_path(rowref)[0])
+            return (4, self.species_list.on_get_path(rowref))
         else:
             raise TypeError
 
@@ -203,7 +203,7 @@ class KMC_Model(gtk.GenericTreeModel):
         elif isinstance(rowref, SpeciesList):
             return self.species_list[0]
 
-    @verbose
+    #@verbose
     def on_iter_has_child(self, rowref):
         if rowref is None:
              return True
@@ -541,8 +541,9 @@ class KMC_Model(gtk.GenericTreeModel):
         parameter_list = ET.SubElement(root,'parameter_list')
         for parameter in self.parameter_list.data:
             parameter_elem = ET.SubElement(parameter_list, 'parameter')
-            for attrib in parameter.attributes:
-                parameter_elem.set(attrib,parameter[attrib])
+            parameter_elem.set('name', parameter.name)
+            parameter_elem.set('type', parameter.type)
+            parameter_elem.set('value', parameter.value)
         lattice_list = ET.SubElement(root, 'lattice_list')
         for lattice in self.lattice_list.data:
             lattice_elem = ET.SubElement(lattice_list,'lattice')
@@ -644,12 +645,15 @@ class MainWindow():
         self.new_process = Process()
         self.kmc_model.import_xml(XMLFILE)
         self.kmc_model.save_changes_view.unsaved_changes = False
+        self.treeview.expand_all()
+        self.statbar.push(1,'KMC project loaded')
 
 
 
     def export_xml(self, *args):
         self.kmc_model.export_xml(XMLFILE)
         self.kmc_model.save_changes_view.unsaved_changes = False
+        self.statbar.push(1,'KMC project saved')
 
 
     def export_source(self, widget):
@@ -755,12 +759,14 @@ class MainWindow():
                 print(data)
 
     def add_parameter(self, widget):
-        if not self.meta:
-            self.add_meta_information()
         parameter_editor = DialogAddParameter()
         result, data = parameter_editor.run()
         if result == gtk.RESPONSE_OK:
-            self.kmc_model.add_parameter(data)
+            name = data['name']
+            type = data['type']
+            value = data['value']
+            parameter = Parameter(name=name, type=type, value=value)
+            self.kmc_model.parameter_list.append(parameter)
 
 
     def add_lattice(self, data):
