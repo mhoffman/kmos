@@ -823,6 +823,7 @@ boolean</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="invisible_char">&#x25CF;</property>
+                <property name="text" translatable="yes">oces</property>
               </widget>
               <packing>
                 <property name="position">1</property>
@@ -840,7 +841,7 @@ boolean</property>
             <child>
               <widget class="GtkButton" id="button6">
                 <property name="label">gtk-cancel</property>
-                <property name="response_id">-5</property>
+                <property name="response_id">-6</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
