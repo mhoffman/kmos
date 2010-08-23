@@ -608,16 +608,19 @@ class MainWindow():
         self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
         self.wtree = gtk.glade.XML(self.gladefile)
         self.window = self.wtree.get_widget('wndMain')
-        self.process_editor = ProcessEditor()
         self.statbar = self.wtree.get_widget('stb_process_editor')
         self.keywords = ['exp','sin','cos','sqrt','log']
         self.kmc_model = KMC_Model()
+        self.da_widget = self.wtree.get_widget('dwLattice')
+        self.process_editor = ProcessEditor(self.da_widget)
         dic = {
                 'on_btnAddLattice_clicked' : self.new_lattice ,
                 'on_btnMainQuit_clicked' : self.close,
                 'destroy' : self.close,
                 'on_dwLattice_configure_event' : self.process_editor.configure,
                 'on_dwLattice_expose_event' : self.process_editor.expose,
+                'on_dwLattice_button_press_event' : self.process_editor.dw_lattice_clicked,
+                'on_dwLattice_key_press_event' : self.on_da_key_pressed,
                 'on_btnAddParameter_clicked': self.add_parameter,
                 'on_btnAddSpecies_clicked' : self.add_species,
                 'on_btnAddProcess_clicked' : self.create_process,
@@ -631,7 +634,6 @@ class MainWindow():
 
         self.wtree.signal_autoconnect(dic)
         self.statbar.push(1,'Add a new lattice first.')
-        self.lattice_ready = False
 
         #setup overview tree
         self.treeview = self.wtree.get_widget('overviewtree')
@@ -643,7 +645,8 @@ class MainWindow():
         self.tvcolumn.pack_start(self.cell, expand=True)
         self.tvcolumn.add_attribute(self.cell, 'text', 0)
         self.treeview.append_column(self.tvcolumn)
-        self.treeview.set_model(self.kmc_model)
+        self.set_model(self.kmc_model)
+        self.checked_out_process = False
         self.window.show()
 
 
@@ -655,7 +658,7 @@ class MainWindow():
             if response == gtk.RESPONSE_CANCEL:
                 return
         self.kmc_model = KMC_Model()
-        self.treeview.set_model(self.kmc_model)
+        self.set_model(self.kmc_model)
         self.kmc_model.import_xml(XMLFILE)
         self.kmc_model.save_changes_view.unsaved_changes = False
         self.treeview.expand_all()
@@ -699,14 +702,15 @@ class MainWindow():
         elif isinstance(item, Lattice):
             print("it's a lattice")
         elif isinstance(item, Process):
-            print("and finally we have a process")
+            new_process = item
+            self.checked_out_process = True, self.kmc_model.process_list.data.index(item)
+            self.process_editor.set_process(new_process, self.kmc_model.lattice_list.data[0])
+            self.da_widget.grab_focus()
+            self.statbar.push(1,'Left-click sites for condition, right-click site for actions, hit Return when finished.')
 
     def treeitem_edited(self, cell, path, new_text):
         path = tuple([int(x) for x in path.split(':')])
         item = self.kmc_model.on_get_iter(path)
-        print(path)
-        print(type(path))
-        print(item)
         if isinstance(item, Process):
             item.name = new_text
             self.kmc_model.notifier('changed')
@@ -725,8 +729,8 @@ class MainWindow():
             new_process.name = data['process_name']
 
         self.process_editor.set_process(new_process, self.kmc_model.lattice_list.data[0])
-        self.lattice_ready = True
-        self.statbar.push(1,'Left-click sites for condition, right-click site for changes, click here if finished.')
+        self.da_widget.grab_focus()
+        self.statbar.push(1,'Left-click sites for condition, right-click site for actions, hit Return when finished.')
 
 
     def add_meta_information(self):
@@ -789,11 +793,26 @@ class MainWindow():
         self.kmc_model.lattice_list.append(data.lattice)
         self.statbar.push(1,'Added lattice "' + data.lattice.name + '"')
 
+    def set_model(self, kmc_model):
+        self.treeview.set_model(kmc_model)
+        self.process_editor.set_model(kmc_model)
 
+
+
+
+    def on_da_key_pressed(self, widget, event):
+        key = gtk.gdk.keyval_name(event.keyval)
+        if key == 'Return':
+            self.statbar_clicked(widget, event)
+        elif key == 'Escape':
+            self.process_editor.clear()
+            if self.checked_out_process[0]:
+                self.checked_out_process = False
 
 
     # Serves to finish process input
     def statbar_clicked(self, widget, event):
+        self.window.grab_focus()
         new_process = self.process_editor.get_process()
         if new_process:
             dlg_rate_constant = DialogRateConstant(self.kmc_model.parameter_list.data, self.keywords)
@@ -813,15 +832,13 @@ class MainWindow():
 
             if result == gtk.RESPONSE_OK:
                 new_process.rate_constant = data['rate_constant']
-                center_site = new_process.center_site
-                for condition in new_process.condition_list + new_process.action_list :
-                    condition.coord = [ x - y for (x, y) in zip(condition.coord, center_site) ]
-                # Re-center center site: it doesnt make sense, to have the enter site in another unit
-                # cell than (0, 0)
-                new_process.center_site[0:1] = [0,0]
-                self.kmc_model.process_list.append(new_process)
+                if self.checked_out_process[0]:
+                    index = self.checked_out_process[1]
+                    self.kmc_model.process_list.data[index] == new_process
+                    self.checked_out_process = False
+                else:
+                    self.kmc_model.process_list.append(new_process)
                 self.statbar.push(1,'New process "'+ new_process.name + '" added')
-                print(new_process)
                 self.process_editor.draw_lattices(blank=True)
                 self.lattice_ready = False
 
@@ -839,18 +856,12 @@ class MainWindow():
 
 
 class ProcessEditor():
-    def __init__(self):
+    def __init__(self, da_widget):
         self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
         self.wtree = gtk.glade.XML(self.gladefile)
-        self.da_widget = self.wtree.get_widget('dwLattice')
-        #TODO
-        #dic = {
-                #'on_dwLattice_button_press_event' : self.dw_lattice_clicked,
-                #'on_dwLattice_configure_event' : self.configure,
-                #'on_dwLattice_expose_event' : self.expose,
-        #}
-        #self.wtree.signal_autoconnect(dic)
-        print("Process editor initialized")
+        self.da_widget = da_widget
+        self.lattice_ready = False
+        self.zoom = 3.
 
     def configure(self, widget, event):
         self.process_editor_width, self.process_editor_height = widget.get_allocation()[2], widget.get_allocation()[3]
@@ -858,34 +869,38 @@ class ProcessEditor():
         self.pixmap.draw_rectangle(widget.get_style().white_gc, True, 0, 0, self.process_editor_width, self.process_editor_height)
         return True
 
-    def set_process(self, process, lattice):
-        self.new_process = process
-        self.lattice = lattice
-        self.draw_lattices()
-
-    def get_process(self):
-        return self.new_process
-
     def expose(self, widget, event):
         site_x, site_y, self.process_editor_width, self.process_editor_height = widget.get_allocation()
         widget.window.draw_drawable(widget.get_style().fg_gc[gtk.STATE_NORMAL], self.pixmap, 0, site_y, 0, site_y, self.process_editor_width, self.process_editor_height)
 
+    def set_model(self, kmc_model):
+        self.kmc_model = kmc_model
+
+    def set_process(self, process, lattice):
+        self.new_process = process
+        self.lattice = lattice
+        self.draw_lattices()
+        self.lattice_ready = True
+
+    def get_process(self):
+        return self.new_process
+
+
     def dw_lattice_clicked(self, widget, event):
         if self.lattice_ready:
             width, height = self.process_editor_width, self.process_editor_height
-            lattice = self.kmc_model.lattice_list[0]
+            lattice = self.lattice
             unit_x = lattice.unit_cell_size[0]
             unit_y = lattice.unit_cell_size[1]
-            zoom = 3
-            for i in range(zoom+1):
+            for i in range(self.zoom+1):
                 for j in range(3):
                     for x in range(unit_x):
                         for y in range(unit_y):
                             for site in lattice.sites:
                                 if site.coord[0] == x and site.coord[1] == y:
                                     center = []
-                                    coordx = int((i+ float(x)/unit_x)*width/zoom)
-                                    coordy = int(height - (j+ float(y)/unit_y)*height/zoom)
+                                    coordx = int((i+ float(x)/unit_x)*width/self.zoom)
+                                    coordy = int(height - (j+ float(y)/unit_y)*height/self.zoom)
                                     if (coordx - event.x)**2 + (coordy - event.y)**2 < 30 :
                                         self.species_menu = gtk.Menu()
                                         if event.button == 3 :
@@ -913,7 +928,6 @@ class ProcessEditor():
 
 
     def add_condition(self, event, data):
-
         #Test if point is condition or action
         is_condition = data[1][0] == 'condition'
 
@@ -941,6 +955,10 @@ class ProcessEditor():
         self.draw_lattices()
 
 
+    def clear(self):
+        self.new_process = Process()
+        self.draw_lattices(blank=True)
+        self.lattice_ready = False
 
     def draw_lattices(self,blank=False):
         gc = self.da_widget.get_style().black_gc
@@ -951,23 +969,23 @@ class ProcessEditor():
         self.pixmap.draw_rectangle(gc, True, 0, 0, width, height)
         gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
         if blank:
+            self.da_widget.queue_draw_area(0, 0, width, height)
             return
         unit_x = lattice.unit_cell_size[0]
         unit_y = lattice.unit_cell_size[1]
-        zoom = 3
-        for sup_i in range(zoom+1):
+        for sup_i in range(self.zoom+1):
             for i in range(-1,1):
-                self.pixmap.draw_line(gc, 0, i+sup_i*height/zoom, width, i+(sup_i*height/zoom))
-                self.pixmap.draw_line(gc, i+sup_i*width/zoom, 0, i+(sup_i*width/zoom), height)
-        for sup_i in range(zoom+1):
+                self.pixmap.draw_line(gc, 0, i+sup_i*height/self.zoom, width, i+(sup_i*height/self.zoom))
+                self.pixmap.draw_line(gc, i+sup_i*width/self.zoom, 0, i+(sup_i*width/self.zoom), height)
+        for sup_i in range(self.zoom+1):
             for sup_j in range(3):
                 for x in range(unit_x):
                     for y in range(unit_y):
                         for site in lattice.sites:
                             if site.coord[0] == x and site.coord[1] == y:
                                 center = []
-                                coordx = int((sup_i+ float(x)/unit_x)*width/zoom )
-                                coordy = int(height - (sup_j+ float(y)/unit_y)*height/zoom )
+                                coordx = int((sup_i+ float(x)/unit_x)*width/self.zoom )
+                                coordy = int(height - (sup_j+ float(y)/unit_y)*height/self.zoom )
                                 center = [ coordx, coordy ]
                                 self.pixmap.draw_arc(gc, True, center[0]-5, center[1]-5, 10, 10, 0, 64*360)
                                 for entry in self.new_process.condition_list:
@@ -1402,9 +1420,12 @@ class SimpleList(gtk.GenericTreeModel):
         self.node_index = node_index
         self.column_type = (str, )
 
+    def __setitem__(self, key, item):
+        self.data[key] = item
+        self.callback('changed')
     #@verbose
-    def __getitem__(self, i):
-        return self.data[i]
+    def __getitem__(self, key):
+        return self.data[key]
 
     def sort(self):
         self.data.sort()
