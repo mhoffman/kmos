@@ -638,6 +638,7 @@ class MainWindow():
         #setup overview tree
         self.treeview = self.wtree.get_widget('overviewtree')
         self.treeview.connect('row-activated', self.treeitem_clicked)
+        self.treeview.set_enable_tree_lines(True)
         self.tvcolumn = gtk.TreeViewColumn('Project Data')
         self.cell = gtk.CellRendererText()
         self.cell.set_property('editable', True)
@@ -694,13 +695,51 @@ class MainWindow():
         item = self.kmc_model.on_get_iter(row)
 
         if isinstance(item, Meta):
-            print("You clicked on Meta")
+            dlg_meta = DialogMetaInformation()
+            dlg_meta.author.set_text(self.kmc_model.meta.author)
+            dlg_meta.email.set_text(self.kmc_model.meta.email)
+            dlg_meta.model_name.set_text(self.kmc_model.meta.model_name)
+            dlg_meta.model_dimension.set_value(float(self.kmc_model.meta.model_dimension))
+            dlg_meta.debug_level.set_value(float(self.kmc_model.meta.debug))
+
+            result, data = dlg_meta.run()
+            if result == gtk.RESPONSE_OK:
+                self.kmc_model.meta.add(data)
+                self.statbar.push(1,'Meta information added')
+                self.kmc_model.notifier('changed')
         elif isinstance(item, Parameter):
-            print("we have a parameter")
+            parameter_editor = DialogAddParameter()
+            parameter_editor.name_field.set_text(item.name)
+            for i, row in enumerate(parameter_editor.type_field.get_model()):
+                if row[0] == item.type:
+                    active_type = i
+            parameter_editor.type_field.set_active(active_type)
+            parameter_editor.value_field.set_text(item.value)
+            parameter_editor.name_field.set_sensitive(False)
+            result, data = parameter_editor.run()
+            if result == gtk.RESPONSE_OK:
+                name = data['name']
+                type = data['type']
+                value = data['value']
+                parameter = Parameter(name=name, type=type, value=value)
+                for i, elem in enumerate(self.kmc_model.parameter_list.data):
+                    if elem.name == name :
+                        self.kmc_model.parameter_list[i] = parameter
         elif isinstance(item, Species):
-            print("we have a species")
+            dlg_species = DialogNewSpecies(item.id)
+            dlg_species.species_id.set_text(item.id)
+            dlg_species.species_id.set_sensitive(False)
+            dlg_species.species.set_text(item.name)
+            dlg_species.species.set_sensitive(False)
+            dlg_species.color = item.color
+            result, data = dlg_species.run()
+            if result == gtk.RESPONSE_OK:
+                species = Species(name=data['name'],color=data['color'],id=data['id'])
+                for i, elem in enumerate(self.kmc_model.species_list.data):
+                    if elem.name == data['name']:
+                        self.kmc_model.species_list[i] = species
         elif isinstance(item, Lattice):
-            print("it's a lattice")
+            print("Retroactive change of lattice is not supported, yet")
         elif isinstance(item, Process):
             new_process = item
             self.checked_out_process = True, self.kmc_model.process_list.data.index(item)
@@ -986,6 +1025,8 @@ class ProcessEditor():
         gc.set_rgb_fg_color(gtk.gdk.color_parse('#fff'))
         self.pixmap.draw_rectangle(gc, True, 0, 0, width, height)
         gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
+        gc.line_style = gtk.gdk.LINE_ON_OFF_DASH
+        gc.line_width = 1
         if blank:
             self.da_widget.queue_draw_area(0, 0, width, height)
             return
@@ -995,6 +1036,7 @@ class ProcessEditor():
             for i in range(-1,1):
                 self.pixmap.draw_line(gc, 0, i+sup_i*height/self.zoom, width, i+(sup_i*height/self.zoom))
                 self.pixmap.draw_line(gc, i+sup_i*width/self.zoom, 0, i+(sup_i*width/self.zoom), height)
+        gc.line_style = gtk.gdk.LINE_SOLID
         for sup_i in range(self.zoom+1):
             for sup_j in range(self.zoom):
                 for x in range(unit_x):
@@ -1176,26 +1218,25 @@ class DialogAddParameter():
         self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
         self.wtree = gtk.glade.XML(self.gladefile)
         self.dialog_add_parameter = self.wtree.get_widget('dlgAddParameter')
+        # define fields
+        self.name_field = self.wtree.get_widget('parameterName')
+        self.type_field = self.wtree.get_widget('parameterType')
+        self.value_field = self.wtree.get_widget('parameterValue')
 
     def run(self):
         """Set initial values and send back entries if OK button clicked
         """
         self.dialog_add_parameter.show()
-        # define fields
-        parameter_name = self.wtree.get_widget('parameterName')
-        parameter_type = self.wtree.get_widget('parameterType')
-        parameter_value = self.wtree.get_widget('parameterValue')
         # run
         result = self.dialog_add_parameter.run()
         # extract fields
         data = {}
-        data['name'] = parameter_name.get_text()
+        data['name'] = self.name_field.get_text()
 
-        type_model = parameter_type.get_model()
-        type_index = parameter_type.get_active()
+        type_model = self.type_field.get_model()
+        type_index = self.type_field.get_active()
         data['type'] = type_model[type_index][0]
-
-        data['value'] = parameter_value.get_text()
+        data['value'] = self.value_field.get_text()
         # close
         self.dialog_add_parameter.destroy()
         return result, data
@@ -1309,11 +1350,16 @@ class DialogNewSpecies():
         dic = {'on_btnSelectColor_clicked' : self.open_dlg_color_selection,}
         self.wtree.signal_autoconnect(dic)
         self.nr_of_species = nr_of_species
+        # define fields
+        self.species = self.wtree.get_widget('field_species')
+        self.species_id = self.wtree.get_widget('species_id')
+        self.species_id.set_text(str(self.nr_of_species))
+        self.species_id.set_sensitive(False)
         self.color = ""
 
 
     def open_dlg_color_selection(self, widget):
-        dlg_color_selection = DialogColorSelection()
+        dlg_color_selection = DialogColorSelection(self.color)
         result, data = dlg_color_selection.run()
         if result == gtk.RESPONSE_OK:
             self.color = data['color']
@@ -1323,17 +1369,12 @@ class DialogNewSpecies():
         """Set initial values and send back entries if OK button clicked
         """
         self.dialog.show()
-        # define fields
-        species = self.wtree.get_widget('field_species')
-        species_id = self.wtree.get_widget('species_id')
-        species_id.set_text(str(self.nr_of_species))
-        species_id.set_sensitive(False)
         #run
         result = self.dialog.run()
         # extract fields
         data = {}
-        data['name'] = species.get_text()
-        data['id'] = species_id.get_text()
+        data['name'] = self.species.get_text()
+        data['id'] = self.species_id.get_text()
         data['color'] = self.color
         self.dialog.destroy()
         return result, data
@@ -1375,45 +1416,47 @@ class DialogMetaInformation():
         self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
         self.wtree = gtk.glade.XML(self.gladefile)
         self.dialog = self.wtree.get_widget('meta_info')
+        # define field
+        self.author = self.wtree.get_widget('metaAuthor')
+        self.email = self.wtree.get_widget('metaEmail')
+        self.model_name = self.wtree.get_widget('metaModelName')
+        self.model_dimension = self.wtree.get_widget('metaDimension')
+        self.model_dimension.set_sensitive(False)
+        self.debug_level = self.wtree.get_widget('metaDebug')
 
     def run(self):
         self.dialog.show()
-        # define field
-        author = self.wtree.get_widget('metaAuthor')
-        email = self.wtree.get_widget('metaEmail')
-        model_name = self.wtree.get_widget('metaModelName')
-        model_dimension = self.wtree.get_widget('metaDimension')
-        model_dimension.set_sensitive(False)
-        debug_level = self.wtree.get_widget('metaDebug')
         # run
         result = self.dialog.run()
         # extract fields
         data = {}
-        data['author'] = author.get_text()
-        data['email'] = email.get_text()
-        data['model_name'] = model_name.get_text()
-        data['model_dimension'] = str(model_dimension.get_value_as_int())
-        data['debug'] = debug_level.get_value_as_int()
+        data['author'] = self.author.get_text()
+        data['email'] = self.email.get_text()
+        data['model_name'] = self.model_name.get_text()
+        data['model_dimension'] = str(self.model_dimension.get_value_as_int())
+        data['debug'] = self.debug_level.get_value_as_int()
         self.dialog.destroy()
         return result, data
 
 
 class DialogColorSelection():
-    def __init__(self):
+    def __init__(self, color=''):
+            
         self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
         self.wtree = gtk.glade.XML(self.gladefile)
         self.dialog = self.wtree.get_widget('dlgcolorselection')
-        #dic = {'on_btn_colorsel_ok_clicked': (lambda w: self.destroy())}
-        #self.wtree.signal_autoconnect(dic)
+        self.color = color
 
 
 
     def run(self):
         self.dialog.show()
-        color = self.wtree.get_widget('colorsel-color_selection1')
+        color_dlg = self.wtree.get_widget('colorsel-color_selection1')
+        if self.color:
+            color_dlg.set_current_color(gtk.gdk.color_parse(self.color))
         result = self.dialog.run()
         data = {}
-        data['color'] = color.get_current_color().to_string()
+        data['color'] = color_dlg.get_current_color().to_string()
         return result, data
 
     def close(self):
