@@ -911,25 +911,31 @@ class ProcessEditor():
                                     coordy = int(height - (j+ float(y)/unit_y)*height/self.zoom)
                                     if (coordx - event.x)**2 + (coordy - event.y)**2 < 30 :
                                         self.species_menu = gtk.Menu()
-                                        if event.button == 3 :
-                                            menu_header = gtk.MenuItem('Select action')
-                                            data = 'action', i-self.zoom/2, j-self.zoom/2, x, y
-                                        elif event.button == 1 :
-                                            menu_header = gtk.MenuItem('Select condition')
-                                            data = 'condition', i-self.zoom/2, j-self.zoom/2, x, y
-
+                                        menu_header = gtk.MenuItem('Select condition')
                                         menu_header.set_sensitive(False)
                                         self.species_menu.append(menu_header)
                                         self.species_menu.append(gtk.SeparatorMenuItem())
+                                        data = 'condition', i-self.zoom/2, j-self.zoom/2, x, y
                                         for species in self.kmc_model.species_list.data:
-                                            menu_item = gtk.MenuItem(species.name)
+                                            menu_item = gtk.MenuItem(4*' ' + species.name)
                                             self.species_menu.append(menu_item)
                                             menu_item.connect("activate", self.add_condition, (species, list(data)))
+
+                                        if filter(lambda cond: cond.coord == [i-self.zoom/2, j-self.zoom/2, x, y], self.new_process.condition_list) :
+                                            # if already has a condition defined
+                                            self.species_menu.append(gtk.SeparatorMenuItem())
+                                            menu_header = gtk.MenuItem('Select action')
+                                            menu_header.set_sensitive(False)
+                                            self.species_menu.append(menu_header)
+                                            self.species_menu.append(gtk.SeparatorMenuItem())
+                                            data = 'action', i-self.zoom/2, j-self.zoom/2, x, y
+
+                                            for species in self.kmc_model.species_list.data:
+                                                menu_item = gtk.MenuItem(4*' ' + species.name)
+                                                self.species_menu.append(menu_item)
+                                                menu_item.connect("activate", self.add_condition, (species, list(data)))
                                         self.species_menu.show_all()
-                                        if event.button == 1 :
-                                            self.species_menu.popup(None, None, None, event.button, event.time)
-                                        elif event.button == 3 and filter(lambda cond: cond.coord == [i-self.zoom/2, j-self.zoom/2, x, y], self.new_process.condition_list):
-                                            self.species_menu.popup(None, None, None, event.button, event.time)
+                                        self.species_menu.popup(None, None, None, event.button, event.time)
                                     else:
                                         #Catch events outside dots
                                         pass

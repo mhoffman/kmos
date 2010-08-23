@@ -21,10 +21,10 @@
     </lattice_list>
     <process_list>
         <process center_site="0 0 1 0" name="adsorption_o2_12" rate_constant="rate_o2_adsorption">
-            <condition coord="0 0 2 0" species="empty"/>
             <condition coord="0 0 1 0" species="empty"/>
-            <action coord="0 0 2 0" species="oxygen"/>
+            <condition coord="0 0 2 0" species="empty"/>
             <action coord="0 0 1 0" species="oxygen"/>
+            <action coord="0 0 2 0" species="oxygen"/>
         </process>
         <process center_site="0 0 2 0" name="adsorption_o2_23" rate_constant="rate_o2_adsorption">
             <condition coord="0 0 2 0" species="empty"/>
