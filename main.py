@@ -153,11 +153,11 @@ class KMC_Model(gtk.GenericTreeModel):
         elif isinstance(rowref, Parameter):
             return self.parameter_list.on_get_value(rowref, column)
         elif isinstance(rowref, ProcessList):
-            return 'Processes'
+            return 'Processes (%s)' % len(self.process_list.data)
         elif isinstance(rowref, Process):
             return self.process_list.on_get_value(rowref, column)
         elif isinstance(rowref, SpeciesList):
-            return 'Species'
+            return 'Species (%s)' % len(self.species_list.data) 
         elif isinstance(rowref, Species):
             return self.species_list.on_get_value(rowref, column)
         else:
@@ -543,7 +543,6 @@ class KMC_Model(gtk.GenericTreeModel):
         # build XML Tree
         root = ET.Element('kmc')
         meta = ET.SubElement(root,'meta')
-        print(self.meta)
         for key in self.meta:
             meta.set(key,str(self.meta[key]))
         species_list = ET.SubElement(root,'species_list')
@@ -609,10 +608,12 @@ class MainWindow():
         self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
         self.wtree = gtk.glade.XML(self.gladefile)
         self.window = self.wtree.get_widget('wndMain')
+        self.window.set_title('New kMC Project')
         self.statbar = self.wtree.get_widget('stb_process_editor')
         self.keywords = ['exp','sin','cos','sqrt','log']
         self.kmc_model = KMC_Model()
         self.da_widget = self.wtree.get_widget('dwLattice')
+        self.da_widget.props.has_tooltip = True
         self.process_editor = ProcessEditor(self.da_widget)
         dic = {
                 'on_btnAddLattice_clicked' : self.new_lattice ,
@@ -621,6 +622,7 @@ class MainWindow():
                 'on_dwLattice_configure_event' : self.process_editor.configure,
                 'on_dwLattice_expose_event' : self.process_editor.expose,
                 'on_dwLattice_button_press_event' : self.process_editor.dw_lattice_clicked,
+                'on_dwLattice_query_tooltip' : self.process_editor.query_tooltip,
                 'on_dwLattice_key_press_event' : self.on_da_key_pressed,
                 'on_btnAddParameter_clicked': self.add_parameter,
                 'on_btnAddSpecies_clicked' : self.add_species,
@@ -663,6 +665,7 @@ class MainWindow():
         self.set_model(self.kmc_model)
         self.kmc_model.import_xml(XMLFILE)
         self.kmc_model.save_changes_view.unsaved_changes = False
+        self.window.set_title(self.kmc_model.meta.model_name)
         self.treeview.expand_all()
         self.statbar.push(1,'KMC project loaded')
 
@@ -851,9 +854,9 @@ class MainWindow():
             if self.checked_out_process[0]:
                 self.checked_out_process = (False, )
         elif key == 'Up':
-            self.process_editor.change_zoom(1)
+            self.process_editor.change_zoom(2)
         elif key == 'Down':
-            self.process_editor.change_zoom(-1)
+            self.process_editor.change_zoom(-2)
 
 
     # Serves to finish process input
@@ -930,6 +933,28 @@ class ProcessEditor():
         site_x, site_y, self.process_editor_width, self.process_editor_height = widget.get_allocation()
         widget.window.draw_drawable(widget.get_style().fg_gc[gtk.STATE_NORMAL], self.pixmap, 0, site_y, 0, site_y, self.process_editor_width, self.process_editor_height)
 
+    def query_tooltip(self, widget, xcoord, ycoord, foo, tooltip):
+        if self.lattice_ready:
+            width, height = self.process_editor_width, self.process_editor_height
+            lattice = self.lattice
+            unit_x = lattice.unit_cell_size[0]
+            unit_y = lattice.unit_cell_size[1]
+            for i in range(self.zoom+1):
+                for j in range(self.zoom):
+                    for x in range(unit_x):
+                        for y in range(unit_y):
+                            for site in lattice.sites:
+                                if site.coord[0] == x and site.coord[1] == y:
+                                    center = []
+                                    coordx = int((i+ float(x)/unit_x)*width/self.zoom)
+                                    coordy = int(height - (j+ float(y)/unit_y)*height/self.zoom)
+                                    if (coordx - xcoord)**2 + (coordy - ycoord)**2 < 90 :
+                                        for site in lattice.sites:
+                                            if site.coord == list((x, y)):
+                                                site_nick = site.name
+                                                tooltip.set_text(site_nick)
+                                                return True
+
     def set_model(self, kmc_model):
         self.kmc_model = kmc_model
 
@@ -950,7 +975,7 @@ class ProcessEditor():
             unit_x = lattice.unit_cell_size[0]
             unit_y = lattice.unit_cell_size[1]
             for i in range(self.zoom+1):
-                for j in range(3):
+                for j in range(self.zoom):
                     for x in range(unit_x):
                         for y in range(unit_y):
                             for site in lattice.sites:
@@ -959,32 +984,35 @@ class ProcessEditor():
                                     coordx = int((i+ float(x)/unit_x)*width/self.zoom)
                                     coordy = int(height - (j+ float(y)/unit_y)*height/self.zoom)
                                     if (coordx - event.x)**2 + (coordy - event.y)**2 < 30 :
-                                        self.species_menu = gtk.Menu()
-                                        menu_header = gtk.MenuItem('Select condition')
-                                        menu_header.set_sensitive(False)
-                                        self.species_menu.append(menu_header)
-                                        self.species_menu.append(gtk.SeparatorMenuItem())
-                                        data = 'condition', i-self.zoom/2, j-self.zoom/2, x, y
-                                        for species in self.kmc_model.species_list.data:
-                                            menu_item = gtk.MenuItem(4*' ' + species.name)
-                                            self.species_menu.append(menu_item)
-                                            menu_item.connect("activate", self.add_condition, (species, list(data)))
+                                        for site in lattice.sites:
+                                            if site.coord == list((x, y)):
+                                                site_nick = site.name
+                                                self.species_menu = gtk.Menu()
+                                                menu_header = gtk.MenuItem('Select condition (%s)' % site_nick)
+                                                menu_header.set_sensitive(False)
+                                                self.species_menu.append(menu_header)
+                                                self.species_menu.append(gtk.SeparatorMenuItem())
+                                                data = 'condition', i-self.zoom/2, j-self.zoom/2, x, y
+                                                for species in self.kmc_model.species_list.data:
+                                                    menu_item = gtk.MenuItem(4*' ' + species.name)
+                                                    self.species_menu.append(menu_item)
+                                                    menu_item.connect("activate", self.add_condition, (species, list(data)))
 
-                                        if filter(lambda cond: cond.coord == [i-self.zoom/2, j-self.zoom/2, x, y], self.new_process.condition_list) :
-                                            # if already has a condition defined
-                                            self.species_menu.append(gtk.SeparatorMenuItem())
-                                            menu_header = gtk.MenuItem('Select action')
-                                            menu_header.set_sensitive(False)
-                                            self.species_menu.append(menu_header)
-                                            self.species_menu.append(gtk.SeparatorMenuItem())
-                                            data = 'action', i-self.zoom/2, j-self.zoom/2, x, y
+                                                if filter(lambda cond: cond.coord == [i-self.zoom/2, j-self.zoom/2, x, y], self.new_process.condition_list) :
+                                                    # if already has a condition defined
+                                                    self.species_menu.append(gtk.SeparatorMenuItem())
+                                                    menu_header = gtk.MenuItem('Select action (%s)' % site_nick)
+                                                    menu_header.set_sensitive(False)
+                                                    self.species_menu.append(menu_header)
+                                                    self.species_menu.append(gtk.SeparatorMenuItem())
+                                                    data = 'action', i-self.zoom/2, j-self.zoom/2, x, y
 
-                                            for species in self.kmc_model.species_list.data:
-                                                menu_item = gtk.MenuItem(4*' ' + species.name)
-                                                self.species_menu.append(menu_item)
-                                                menu_item.connect("activate", self.add_condition, (species, list(data)))
-                                        self.species_menu.show_all()
-                                        self.species_menu.popup(None, None, None, event.button, event.time)
+                                                    for species in self.kmc_model.species_list.data:
+                                                        menu_item = gtk.MenuItem(4*' ' + species.name)
+                                                        self.species_menu.append(menu_item)
+                                                        menu_item.connect("activate", self.add_condition, (species, list(data)))
+                                                self.species_menu.show_all()
+                                                self.species_menu.popup(None, None, None, event.button, event.time)
                                     else:
                                         #Catch events outside dots
                                         pass
@@ -1818,8 +1846,10 @@ class Notifier:
 
 
 
+
+
 class SaveChangesView :
-    def __init__(self ):
+    def __init__(self):
         self.unsaved_changes = False
 
     def __call__(self, message):
