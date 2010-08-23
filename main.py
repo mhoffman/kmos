@@ -4,6 +4,7 @@
 
 import pdb
 from app.config import *
+from copy import copy
 import sys
 import os, os.path
 import shutil
@@ -739,7 +740,7 @@ class MainWindow():
                     if elem.name == data['name']:
                         self.kmc_model.species_list[i] = species
         elif isinstance(item, Lattice):
-            print("Retroactive change of lattice is not supported, yet")
+            self.statbar.push(1,"Retroactive change of lattice is not supported, yet")
         elif isinstance(item, Process):
             new_process = item
             self.checked_out_process = True, self.kmc_model.process_list.data.index(item)
@@ -878,6 +879,15 @@ class MainWindow():
             elif not new_process.action_list:
                 self.statbar.push(1,'New process has no actions')
 
+            for elem in new_process.action_list + new_process.condition_list :
+                print('%s %s' % (elem, new_process.center_site))
+                for i in range(2):
+                    elem.coord[i] = elem.coord[i] - new_process.center_site[i]
+                print('%s %s' % (elem, new_process.center_site))
+
+            new_process.center_site[0] = 0
+            new_process.center_site[1] = 0
+            print(new_process)
             if self.checked_out_process[0]:
                 index = self.checked_out_process[1]
                 self.kmc_model.process_list[index] = new_process
@@ -995,7 +1005,7 @@ class ProcessEditor():
         # if this is the first condition, make it the center site
         # all other sites will be measure relative to this site
         if not self.new_process.condition_list:
-            self.new_process.center_site = new_ca.coord
+            self.new_process.center_site = copy(data[1])
 
         # Save in appropriate slot
         if is_condition :
@@ -1020,7 +1030,6 @@ class ProcessEditor():
     def draw_lattices(self,blank=False):
         gc = self.da_widget.get_style().black_gc
         gc = gtk.gdk.GC(self.pixmap)
-        lattice = self.lattice
         width, height = self.process_editor_width, self.process_editor_height
         gc.set_rgb_fg_color(gtk.gdk.color_parse('#fff'))
         self.pixmap.draw_rectangle(gc, True, 0, 0, width, height)
@@ -1030,6 +1039,7 @@ class ProcessEditor():
         if blank:
             self.da_widget.queue_draw_area(0, 0, width, height)
             return
+        lattice = self.lattice
         unit_x = lattice.unit_cell_size[0]
         unit_y = lattice.unit_cell_size[1]
         for sup_i in range(self.zoom+1):
@@ -1696,7 +1706,16 @@ class Process(Attributes):
         self.action_list = []
 
     def __repr__(self):
-        return '    %s %s' % (self.name, self.rate_constant)
+        ret = ''
+        ret += 'Process: %s %s\n' % (self.name, self.rate_constant)
+        ret += 'Center Site: %s\n' % self.center_site
+        ret += 'Conditions:\n'
+        for elem in self.condition_list:
+            ret += elem.__repr__()
+        ret += 'Actions:\n'
+        for elem in self.action_list:
+            ret += elem.__repr__()
+        return ret
 
     def __cmp__(self, other):
         if self.name > other.name :
@@ -1764,6 +1783,8 @@ class ConditionAction(Attributes):
     def __init__(self, coord, species):
         self.coord = coord
         self.species = species
+    def __repr__(self):
+        return '    %s %s\n' % (self.coord, self.species)
 
 class Site(Attributes):
     attributes = ['index','name','coord']
