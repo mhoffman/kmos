@@ -646,7 +646,7 @@ class MainWindow():
         self.tvcolumn.add_attribute(self.cell, 'text', 0)
         self.treeview.append_column(self.tvcolumn)
         self.set_model(self.kmc_model)
-        self.checked_out_process = False
+        self.checked_out_process = (False,)
         self.window.show()
 
 
@@ -718,6 +718,8 @@ class MainWindow():
     def create_process(self, widget):
         new_process = Process()
 
+        self.process_editor.clear()
+        self.checked_out_process = (False, )
         if len(self.kmc_model.lattice_list) < 1 :
             self.statbar.push(1,'No lattice defined!')
             return
@@ -807,7 +809,11 @@ class MainWindow():
         elif key == 'Escape':
             self.process_editor.clear()
             if self.checked_out_process[0]:
-                self.checked_out_process = False
+                self.checked_out_process = (False, )
+        elif key == 'Up':
+            self.process_editor.change_zoom(1)
+        elif key == 'Down':
+            self.process_editor.change_zoom(-1)
 
 
     # Serves to finish process input
@@ -815,8 +821,11 @@ class MainWindow():
         self.window.grab_focus()
         new_process = self.process_editor.get_process()
         if new_process:
-            dlg_rate_constant = DialogRateConstant(self.kmc_model.parameter_list.data, self.keywords)
-            result, data = dlg_rate_constant.run()
+            if not new_process.rate_constant:
+                dlg_rate_constant = DialogRateConstant(self.kmc_model.parameter_list.data, self.keywords)
+                result, data = dlg_rate_constant.run()
+                if result == gtk.RESPONSE_OK:
+                    new_process.rate_constant = data['rate_constant']
             #Check if process is sound
             if not new_process.name :
                 self.statbar.push(1,'New process has no name')
@@ -830,17 +839,16 @@ class MainWindow():
             elif not new_process.action_list:
                 self.statbar.push(1,'New process has no actions')
 
-            if result == gtk.RESPONSE_OK:
-                new_process.rate_constant = data['rate_constant']
-                if self.checked_out_process[0]:
-                    index = self.checked_out_process[1]
-                    self.kmc_model.process_list.data[index] == new_process
-                    self.checked_out_process = False
-                else:
-                    self.kmc_model.process_list.append(new_process)
+            if self.checked_out_process[0]:
+                index = self.checked_out_process[1]
+                self.kmc_model.process_list[index] = new_process
+                self.checked_out_process = (False, )
+                self.statbar.push(1,'Process "'+ new_process.name + '" edited')
+            else:
+                self.kmc_model.process_list.append(new_process)
                 self.statbar.push(1,'New process "'+ new_process.name + '" added')
-                self.process_editor.draw_lattices(blank=True)
-                self.lattice_ready = False
+            self.process_editor.draw_lattices(blank=True)
+            self.lattice_ready = False
 
 
     def close(self, *args):
@@ -861,7 +869,7 @@ class ProcessEditor():
         self.wtree = gtk.glade.XML(self.gladefile)
         self.da_widget = da_widget
         self.lattice_ready = False
-        self.zoom = 3.
+        self.zoom = 3
 
     def configure(self, widget, event):
         self.process_editor_width, self.process_editor_height = widget.get_allocation()[2], widget.get_allocation()[3]
@@ -905,10 +913,10 @@ class ProcessEditor():
                                         self.species_menu = gtk.Menu()
                                         if event.button == 3 :
                                             menu_header = gtk.MenuItem('Select action')
-                                            data = 'action', i, j, x, y
+                                            data = 'action', i-self.zoom/2, j-self.zoom/2, x, y
                                         elif event.button == 1 :
                                             menu_header = gtk.MenuItem('Select condition')
-                                            data = 'condition', i, j, x, y
+                                            data = 'condition', i-self.zoom/2, j-self.zoom/2, x, y
 
                                         menu_header.set_sensitive(False)
                                         self.species_menu.append(menu_header)
@@ -920,12 +928,16 @@ class ProcessEditor():
                                         self.species_menu.show_all()
                                         if event.button == 1 :
                                             self.species_menu.popup(None, None, None, event.button, event.time)
-                                        elif event.button == 3 and filter(lambda cond: cond.coord == [i, j, x, y], self.new_process.condition_list):
+                                        elif event.button == 3 and filter(lambda cond: cond.coord == [i-self.zoom/2, j-self.zoom/2, x, y], self.new_process.condition_list):
                                             self.species_menu.popup(None, None, None, event.button, event.time)
                                     else:
-                                        pass
                                         #Catch events outside dots
+                                        pass
 
+    def change_zoom(self, change):
+        if 2 <= self.zoom + change <=  10 :
+            self.zoom += change
+            self.draw_lattices()
 
     def add_condition(self, event, data):
         #Test if point is condition or action
@@ -978,7 +990,7 @@ class ProcessEditor():
                 self.pixmap.draw_line(gc, 0, i+sup_i*height/self.zoom, width, i+(sup_i*height/self.zoom))
                 self.pixmap.draw_line(gc, i+sup_i*width/self.zoom, 0, i+(sup_i*width/self.zoom), height)
         for sup_i in range(self.zoom+1):
-            for sup_j in range(3):
+            for sup_j in range(self.zoom):
                 for x in range(unit_x):
                     for y in range(unit_y):
                         for site in lattice.sites:
@@ -989,14 +1001,14 @@ class ProcessEditor():
                                 center = [ coordx, coordy ]
                                 self.pixmap.draw_arc(gc, True, center[0]-5, center[1]-5, 10, 10, 0, 64*360)
                                 for entry in self.new_process.condition_list:
-                                    if entry.coord == [sup_i, sup_j, x, y ]:
+                                    if entry.coord == [sup_i-self.zoom/2, sup_j-self.zoom/2, x, y ]:
                                         color = filter((lambda x : x.name == entry.species), self.kmc_model.species_list.data)[0].color
                                         gc.set_rgb_fg_color(gtk.gdk.color_parse(color))
                                         self.pixmap.draw_arc(gc, True, center[0]-15, center[1]-15, 30, 30, 64*90, 64*360)
                                         gc.set_rgb_fg_color(gtk.gdk.color_parse('#000'))
                                         self.pixmap.draw_arc(gc, False, center[0]-15, center[1]-15, 30, 30, 64*90, 64*360)
                                 for entry in self.new_process.action_list:
-                                    if entry.coord == [sup_i, sup_j, x, y ]:
+                                    if entry.coord == [sup_i-self.zoom/2, sup_j-self.zoom/2, x, y ]:
                                         color = filter((lambda x : x.name == entry.species), self.kmc_model.species_list.data)[0].color
                                         gc.set_rgb_fg_color(gtk.gdk.color_parse(color))
                                         self.pixmap.draw_arc(gc, True, center[0]-10, center[1]-10, 20, 20, 64*270, 64*360)
@@ -1420,8 +1432,10 @@ class SimpleList(gtk.GenericTreeModel):
         self.node_index = node_index
         self.column_type = (str, )
 
+    #@verbose
     def __setitem__(self, key, item):
         self.data[key] = item
+        self.data.sort()
         self.callback('changed')
     #@verbose
     def __getitem__(self, key):
@@ -1437,6 +1451,7 @@ class SimpleList(gtk.GenericTreeModel):
             full_path = (self.node_index, self.data.index(elem))
             self.callback('row-inserted', full_path)
         self.data.sort()
+        self.callback('changed')
 
     def __len__(self):
         return len(self.data)
@@ -1634,11 +1649,20 @@ class Process(Attributes):
     def __repr__(self):
         return '    %s %s' % (self.name, self.rate_constant)
 
+    def __cmp__(self, other):
+        if self.name > other.name :
+            return 1
+        elif self.name == other.name :
+            return 0
+        else:
+            return -1
+
     def add_action(self, action):
         self.action_list.append(action)
 
     def add_condition(self, condition):
         self.condition_list.append(condition)
+
 
 class ProcessList(SimpleList):
     def __init__(self, callback, node_index):

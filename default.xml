@@ -20,39 +20,35 @@
         </lattice>
     </lattice_list>
     <process_list>
-        <process center_site="0 0 2 3 1" name="CO_adsorption_4" rate_constant="rate_co_adsorption">
-            <condition coord="0 0 0 0" species="empty"/>
-            <action coord="0 0 0 0" species="CO"/>
-        </process>
-        <process center_site="0 0 2 1 0" name="O2_diffusion_12" rate_constant="rate_o_diffusion">
-            <condition coord="0 0 0 0" species="oxygen"/>
+        <process center_site="0 0 1 0" name="adsorption_o2_12" rate_constant="rate_o2_adsorption">
+            <condition coord="0 0 2 0" species="empty"/>
             <condition coord="0 0 1 0" species="empty"/>
-            <action coord="0 0 0 0" species="empty"/>
+            <action coord="0 0 2 0" species="oxygen"/>
             <action coord="0 0 1 0" species="oxygen"/>
         </process>
-        <process center_site="0 0 2 1 0" name="O2_desorption_12" rate_constant="rate_o2_desorption">
-            <condition coord="0 0 0 0" species="oxygen"/>
+        <process center_site="0 0 2 0" name="adsorption_o2_23" rate_constant="rate_o2_adsorption">
+            <condition coord="0 0 2 0" species="empty"/>
+            <condition coord="0 0 3 1" species="empty"/>
+            <action coord="0 0 3 1" species="oxygen"/>
+            <action coord="0 0 2 0" species="oxygen"/>
+        </process>
+        <process center_site="0 0 1 0" name="desorption_o2_12" rate_constant="rate_o2_desorption">
             <condition coord="0 0 1 0" species="oxygen"/>
-            <action coord="0 0 0 0" species="empty"/>
+            <condition coord="0 0 2 0" species="oxygen"/>
             <action coord="0 0 1 0" species="empty"/>
+            <action coord="0 0 2 0" species="empty"/>
         </process>
-        <process center_site="0 0 1 1 0" name="CO_adsorption_1" rate_constant="rate_co_adsorption">
-            <condition coord="0 0 0 0" species="empty"/>
-            <action coord="0 0 0 0" species="CO"/>
+        <process center_site="0 0 1 0" name="diffusion_o_12" rate_constant="rate_o2_diffusion">
+            <condition coord="0 0 1 0" species="oxygen"/>
+            <condition coord="0 0 2 0" species="empty"/>
+            <action coord="0 0 1 0" species="empty"/>
+            <action coord="0 0 2 0" species="oxygen"/>
         </process>
-        <process center_site="0 0 2 1 0" name="O2_adsorption_12" rate_constant="rate_o2_adsorption">
-            <condition coord="0 0 0 0" species="empty"/>
+        <process center_site="0 0 2 0" name="diffusion_o_21" rate_constant="rate_oxgen_diffusion">
+            <condition coord="0 0 2 0" species="oxygen"/>
             <condition coord="0 0 1 0" species="empty"/>
-            <action coord="0 0 0 0" species="oxygen"/>
+            <action coord="0 0 2 0" species="empty"/>
             <action coord="0 0 1 0" species="oxygen"/>
-        </process>
-        <process center_site="0 0 2 2 0" name="CO_adsorption_2" rate_constant="rate_co_adsorption">
-            <condition coord="0 0 0 0" species="empty"/>
-            <action coord="0 0 0 0" species="CO"/>
-        </process>
-        <process center_site="0 0 2 3 1" name="CO_adsorption_3" rate_constant="rate_carbon_adsorption">
-            <condition coord="0 0 0 0" species="empty"/>
-            <action coord="0 0 0 0" species="CO"/>
         </process>
     </process_list>
 </kmc>
