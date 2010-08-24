@@ -1,7 +1,7 @@
 !/* ROBODOC this makes robodoc to document this file */
 module kind_values
 implicit none
-!****h* libkmc/kind_values(dummy)
+!****h* kmos/kind_values(dummy)
 ! FUNCTION
 !    note this file is a very evil duplication, which totally reverses the
 !    idea of having platform independent kind values and a crutch. However

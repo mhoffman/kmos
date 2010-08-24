@@ -1,6 +1,6 @@
 !/* ROBODOC this makes robodoc to document this file */
 module units
-!****h* libkmc/units
+!****h* kmos/units
 ! FUNCTION
 !    Several commonly used constants and conversion factors are offered
 !    by this module, such a pi, the speed of light, the Planck constant,

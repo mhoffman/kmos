@@ -326,7 +326,7 @@ class KMC_Model(gtk.GenericTreeModel):
         os.mkdir(dir)
 
         # create new files
-        shutil.copy(APP_ABS_PATH + '/libkmc.f90', dir)
+        shutil.copy(APP_ABS_PATH + '/base.f90', dir)
         shutil.copy(APP_ABS_PATH + '/kind_values_f2py.f90', dir)
         shutil.copy(APP_ABS_PATH + '/units.f90', dir)
         shutil.copy(APP_ABS_PATH + '/compile_for_f2py', dir)

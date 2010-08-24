@@ -7,7 +7,7 @@
 ifortvars_ia32.sh
 
 module_name=''
-#src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice_pdcombined.f90 proclist_rogal_simplified.f90 io_rogal_simplified.f90'
+#src_files='units.f90 kind_values_f2py.f90 base.f90 lattice_pdcombined.f90 proclist_rogal_simplified.f90 io_rogal_simplified.f90'
 overwrite=''
 intel_extra_flags=' -fpp -DDEBUG -fpe0'
 extra_flags='-xf95-cpp-input -DDEBUG'
@@ -39,16 +39,7 @@ do
     m)
     module_name="${OPTARG}";
     case "${module_name}" in
-      face2) src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice_pdcombined.f90 proclist_pd100.f90 proclist_rogal_simplified.f90 io_rogal_simplified.f90 io_pd100.f90 io_face2.f90'  ;;
-      face3) src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice_pdcombined.f90 proclist_pd100.f90 proclist_rogal_simplified.f90 io_rogal_simplified.f90 io_pd100.f90 io_upper_pd100.f90 io_face3.f90'  ;;
-      first_holes) src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice_pdcombined.f90 proclist_pd100.f90 proclist_rogal_simplified.f90 io_rogal_simplified.f90 io_pd100.f90 io_upper_pd100.f90 io_face3.f90 io_first_holes.f90'  ;;
-      second_holes) src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice_pdcombined.f90 proclist_pd100.f90 proclist_pd100_nucleus.f90 proclist_rogal_simplified.f90 io_rogal_simplified.f90 io_pd100.f90 io_upper_pd100.f90 io_face3.f90 io_second_holes.f90'  ;;
-      third_holes) src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice_pdcombined.f90 proclist_oxide_nucleus.f90  io_third_holes.f90'  ;;
-      pd100) src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice_pdcombined.f90 proclist_pd100.f90 io_pd100.f90'  ;;
-      rogal) src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice_pdcombined.f90 proclist_rogal_simplified.f90 io_rogal_simplified.f90' ;;
-      ruo2) src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice_ruo2.f90 proclist_ruo2.f90 io_ruo2.f90'  ;;
-      upper_pd100) src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice_pdcombined.f90 proclist_pd100.f90 io_pd100.f90 io_upper_pd100.f90'  ;;
-      kmc) src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice.f90 proclist.f90' ;;
+      kmc) src_files='units.f90 kind_values_f2py.f90 base.f90 lattice.f90 proclist.f90' ;;
     esac
     ;;
     h) echo "Usage:${0} -m modulename  [-f create header [-w overwrite signature]] [-I compile with ifort] [ -i compile from header with ifort ] [-G compile with gfortran ] [ -g compile from header with gfortran ]";

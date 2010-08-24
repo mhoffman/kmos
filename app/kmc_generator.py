@@ -4,20 +4,20 @@ code from it
 
  Copyright (C)  2009-2010 Max J. Hoffmann
 
- This file is part of libkmc.
+ This file is part of kmos.
 
- libkmc is free software; you can redistribute it and/or modify
+ kmos is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2 of the License, or
  (at your option) any later version.
 
- libkmc is distributed in the hope that it will be useful,
+ kmos is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with libkmc; if not, write to the Free Software
+ along with kmos; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  USA
 """
@@ -446,29 +446,29 @@ class ProcessList():
         template = open(self.meta['lattice_template'],'w')
         template.write('module lattice_' + self.meta['lattice_module'] + '\n\n')
         template.write('use kind_values\n')
-        template.write("""use libkmc, only: &
+        template.write("""use base, only: &
     assertion_fail, &
     deallocate_system, &
     get_kmc_step, &
     get_kmc_time, &
     get_kmc_time_step, &
-    libkmc_get_rate => get_rate, &
-    libkmc_increment_procstat => increment_procstat, &
+    base_get_rate => get_rate, &
+    base_increment_procstat => increment_procstat, &
     increment_procstat, &
-    libkmc_add_proc => add_proc, &
-    libkmc_allocate_system => allocate_system, &
-    libkmc_can_do => can_do, &
-    libkmc_del_proc => del_proc, &
+    base_add_proc => add_proc, &
+    base_allocate_system => allocate_system, &
+    base_can_do => can_do, &
+    base_del_proc => del_proc, &
     determine_procsite, &
-    libkmc_replace_species => replace_species, &
-    libkmc_get_species => get_species, &
-    libkmc_get_volume  => get_volume, &
-    libkmc_reload_system => reload_system, &
+    base_replace_species => replace_species, &
+    base_get_species => get_species, &
+    base_get_volume  => get_volume, &
+    base_reload_system => reload_system, &
     null_species, &
     reload_system, &
     reset_site, &
     save_system, &
-    libkmc_set_rate => set_rate, &
+    base_set_rate => set_rate, &
     update_accum_rate, &
     update_clocks\n\n""")
         template.write('implicit none\n\n')
@@ -508,7 +508,7 @@ subroutine %(latt)s_add_proc(proc, site)
     integer(kind=iint) :: nr
 
     call %(latt)s2nr(site, nr)
-    call libkmc_add_proc(proc, nr)
+    call base_add_proc(proc, nr)
 
 end subroutine %(latt)s_add_proc
 """
@@ -524,7 +524,7 @@ subroutine %(latt)s_del_proc(proc, site)
     integer(kind=iint) :: nr
 
     call %(latt)s2nr(site, nr)
-    call libkmc_del_proc(proc, nr)
+    call base_del_proc(proc, nr)
 
 end subroutine %(latt)s_del_proc
 """
@@ -540,7 +540,7 @@ subroutine %(latt)s_replace_species(site, old_species, new_species)
     integer(kind=iint) :: nr
 
     call %(latt)s2nr(site, nr)
-    call libkmc_replace_species(nr, old_species, new_species)
+    call base_replace_species(nr, old_species, new_species)
 
 end subroutine %(latt)s_replace_species
 """
@@ -556,7 +556,7 @@ subroutine %(latt)s_get_species(site, return_species)
     integer(kind=iint) :: nr
 
     call %(latt)s2nr(site, nr)
-    call libkmc_get_species(nr, return_species)
+    call base_get_species(nr, return_species)
 
 end subroutine %(latt)s_get_species
 """
@@ -573,7 +573,7 @@ subroutine %(latt)s_can_do(proc, site, can)
     integer(kind=iint) :: nr
 
     call %(latt)s2nr(site, nr)
-    call libkmc_can_do(proc, nr, can)
+    call base_can_do(proc, nr, can)
 
 end subroutine %(latt)s_can_do
 """
@@ -953,7 +953,7 @@ if \{condition 1 \} {[} and
         self._out('module proclist')
         self._out('')
         self._out('use kind_values')
-        #self._out('use libkmc, only: null_species')
+        #self._out('use base, only: null_species')
         self._out('use lattice, only: &')
         for lattice in self.meta['lattices']:
             for lattice2 in self.meta['lattices'] :
@@ -1107,20 +1107,20 @@ if \{condition 1 \} {[} and
         if self.meta.has_key('author') :
             self._out('!  The model was written by ' + self.meta['author'] + '.')
         self._out("""
-!  This file is part of libkmc.
+!  This file is part of kmos.
 !
-!  libkmc is free software; you can redistribute it and/or modify
+!  kmos is free software; you can redistribute it and/or modify
 !  it under the terms of the GNU General Public License as published by
 !  the Free Software Foundation; either version 2 of the License, or
 !  (at your option) any later version.
 !
-!  libkmc is distributed in the hope that it will be useful,
+!  kmos is distributed in the hope that it will be useful,
 !  but WITHOUT ANY WARRANTY; without even the implied warranty of
 !  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 !  GNU General Public License for more details.
 !
 !  You should have received a copy of the GNU General Public License
-!  along with libkmc; if not, write to the Free Software
+!  along with kmos; if not, write to the Free Software
 !  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 !  USA
 """)
