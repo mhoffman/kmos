@@ -822,7 +822,8 @@ class MainWindow():
             return
         dlg_process_name = DialogProcessName()
         result, data = dlg_process_name.run()
-        if result == gtk.RESPONSE_CANCEL:
+        if result == gtk.RESPONSE_CANCEL or result == gtk.RESPONSE_DELETE_EVENT :
+            self.process_editor.clear()
             return
         else:
             new_process.name = data['process_name']
@@ -919,7 +920,8 @@ class MainWindow():
         new_process = self.process_editor.get_process()
         if new_process:
             if not new_process.rate_constant:
-                dlg_rate_constant = DialogRateConstant(self.kmc_model.parameter_list.data, self.keywords)
+                preset = 'rate_' + new_process.name 
+                dlg_rate_constant = DialogRateConstant(self.kmc_model.parameter_list.data, self.keywords, preset)
                 result, data = dlg_rate_constant.run()
                 if result == gtk.RESPONSE_OK:
                     new_process.rate_constant = data['rate_constant']
@@ -1446,18 +1448,19 @@ class DialogProcessName():
         self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
         self.wtree = gtk.glade.XML(self.gladefile)
         self.dialog = self.wtree.get_widget('dlgProcessName')
+        # define fields
+        self.process_name = self.wtree.get_widget('process_name')
+        self.process_name.set_text('')
 
     def run(self):
         """Set initial values and send back entries if OK button clicked
         """
         self.dialog.show()
-        # define fields
-        process_name = self.wtree.get_widget('process_name')
         #run
         result = self.dialog.run()
         # extract fields
         data = {}
-        data['process_name'] = process_name.get_text()
+        data['process_name'] = self.process_name.get_text()
         self.dialog.destroy()
         return result, data
 
@@ -1499,22 +1502,23 @@ class DialogNewSpecies():
         return result, data
 
 class DialogRateConstant():
-    def __init__(self, parameters=[], keywords=[]):
+    def __init__(self, parameters=[], keywords=[], preset = ''):
         self.parameters = parameters
         self.keywords = keywords
         self.gladefile = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
         self.wtree = gtk.glade.XML(self.gladefile)
         self.dialog = self.wtree.get_widget('dlgRateConstant')
+        # define fields
+        self.rate_constant = self.wtree.get_widget('rate_constant')
+        self.rate_constant.set_text(preset)
 
     def run(self):
         """Set initial values and send back entries if OK button clicked
         """
         self.dialog.show()
-        # define fields
-        rate_constant = self.wtree.get_widget('rate_constant')
         completion = gtk.EntryCompletion()
         liststore = gtk.ListStore(str)
-        rate_constant.set_completion(completion)
+        self.rate_constant.set_completion(completion)
         completion.set_model(liststore)
         completion.set_text_column(0)
         #Add text to liststore
@@ -1526,7 +1530,7 @@ class DialogRateConstant():
         result = self.dialog.run()
         # extract fields
         data = {}
-        data['rate_constant'] = rate_constant.get_text()
+        data['rate_constant'] = self.rate_constant.get_text()
         self.dialog.destroy()
         return result, data
 
