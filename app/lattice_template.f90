@@ -91,10 +91,10 @@ integer(kind=iint), dimension(2), public :: system_size
 contains
 
 
-subroutine %(lattice_name)s2nr(site, nr_site)
+subroutine %(lattice_name)s2nr(site, nr)
     !---------------I/O variables---------------
     integer(kind=iint), dimension(2), intent(in) :: site
-    integer(kind=iint), intent(out) :: nr_site
+    integer(kind=iint), intent(out) :: nr
     !---------------internal variables---------------
     integer(kind=iint) , dimension(2) :: folded_site, unit_cell, local_part
     integer(kind=iint) :: cell_nr
@@ -104,7 +104,7 @@ subroutine %(lattice_name)s2nr(site, nr_site)
     ! Determine unit cell
     unit_cell = site/(/lattice_%(lattice_name)s_matrix(1,1),lattice_%(lattice_name)s_matrix(2,2)/)
     ! Determine local part
-    local_part = folded_site - matmul(lattic_%(lattice_name)s_matrix, unit_cell)
+    local_part = folded_site - matmul(lattice_%(lattice_name)s_matrix, unit_cell)
     ! Determine index of cell
     cell_nr = unit_cell(1) + system_size(1)*unit_cell(2)
     ! Put everything together
@@ -114,9 +114,9 @@ subroutine %(lattice_name)s2nr(site, nr_site)
 end subroutine %(lattice_name)s2nr
 
 
-subroutine nr2%(lattice_name)s(nr_site, site)
+subroutine nr2%(lattice_name)s(nr, site)
     !---------------I/O variables---------------
-    integer(kind=iint), intent(in) :: nr_site
+    integer(kind=iint), intent(in) :: nr
     integer(kind=iint), dimension(2), intent(out) :: site
     !---------------internal variables---------------
     integer(kind=iint), dimension(2) :: cell, local_vector
@@ -127,7 +127,7 @@ subroutine nr2%(lattice_name)s(nr_site, site)
     ! Determine number within unit cell
     local_nr = modulo(nr, %(sites_per_cell)s)
     ! Determine unit cell
-    cell(1) = modulo(cell_nr, system_size(1)
+    cell(1) = modulo(cell_nr, system_size(1))
     cell(2) = cell_nr/system_size(1)
     ! Determine vector within unit cell
     local_vector = lookup_nr2%(lattice_name)s(local_nr)%%t

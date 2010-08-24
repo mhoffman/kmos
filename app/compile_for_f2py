@@ -1,0 +1,65 @@
+#!/bin/bash -eu
+
+#  Note: f2py cannot handle the return type of functions correctly.
+#  If one wants to use it, it is neccessary to refactor all functions
+#  into subroutines
+
+ifortvars_ia32.sh
+
+module_name=''
+#src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice_pdcombined.f90 proclist_rogal_simplified.f90 io_rogal_simplified.f90'
+overwrite=''
+intel_extra_flags=' -fpp -DDEBUG -fpe0'
+extra_flags='-xf95-cpp-input -DDEBUG'
+
+#intel_extra_flags=' -fpp'
+extra_flags='-xf95-cpp-input'
+if [ "$(uname -m)" = "i686" ]
+then
+  intel="intel"
+  intel_extra_flags="${intel_extra_flags}  -I/opt/intel/fc/10.1.018/lib"
+else
+  intel="intelem"
+fi
+
+
+
+if [ $# -eq 0 ]
+then
+  ${0} -h
+fi
+
+
+while getopts "lhfiIgGm:we:" optionName
+do
+  case "$optionName" in
+    l) echo -e "Available modules for -m module are:\n\t face2 face3 first_holes second_holes pd100 rogal rou2 upper_pd100"; exit;;
+    w) overwrite=' --overwrite-signature ';;
+    e) extra_flags="${OPTARG}";;
+    m)
+    module_name="${OPTARG}";
+    case "${module_name}" in
+      face2) src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice_pdcombined.f90 proclist_pd100.f90 proclist_rogal_simplified.f90 io_rogal_simplified.f90 io_pd100.f90 io_face2.f90'  ;;
+      face3) src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice_pdcombined.f90 proclist_pd100.f90 proclist_rogal_simplified.f90 io_rogal_simplified.f90 io_pd100.f90 io_upper_pd100.f90 io_face3.f90'  ;;
+      first_holes) src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice_pdcombined.f90 proclist_pd100.f90 proclist_rogal_simplified.f90 io_rogal_simplified.f90 io_pd100.f90 io_upper_pd100.f90 io_face3.f90 io_first_holes.f90'  ;;
+      second_holes) src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice_pdcombined.f90 proclist_pd100.f90 proclist_pd100_nucleus.f90 proclist_rogal_simplified.f90 io_rogal_simplified.f90 io_pd100.f90 io_upper_pd100.f90 io_face3.f90 io_second_holes.f90'  ;;
+      third_holes) src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice_pdcombined.f90 proclist_oxide_nucleus.f90  io_third_holes.f90'  ;;
+      pd100) src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice_pdcombined.f90 proclist_pd100.f90 io_pd100.f90'  ;;
+      rogal) src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice_pdcombined.f90 proclist_rogal_simplified.f90 io_rogal_simplified.f90' ;;
+      ruo2) src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice_ruo2.f90 proclist_ruo2.f90 io_ruo2.f90'  ;;
+      upper_pd100) src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice_pdcombined.f90 proclist_pd100.f90 io_pd100.f90 io_upper_pd100.f90'  ;;
+      kmc) src_files='units.f90 kind_values_f2py.f90 libkmc.f90 lattice.f90 proclist.f90' ;;
+    esac
+    ;;
+    h) echo "Usage:${0} -m modulename  [-f create header [-w overwrite signature]] [-I compile with ifort] [ -i compile from header with ifort ] [-G compile with gfortran ] [ -g compile from header with gfortran ]";
+       echo -e "\n    or simpler: ${0} -m module -action where action \\elem [i,I,g,G], order of arguments matters."
+       echo -e "\n\n    example: ${0} -m pd100 -I";;
+    f) f2py ${overwrite}  ${src_files} -m ${module_name} -h ${module_name}.pyf ; exit;;
+    I) f2py --verbose --f90flags="${intel_extra_flags}"  --fcompiler="${intel}" -c ${src_files} -m ${module_name}; exit;;
+    i) f2py --verbose --f90flags="${intel_extra_flags}"  --fcompiler="${intel}" -c ${src_files} ${module_name}.pyf; exit;;
+    G) f2py --verbose --f90flags="${extra_flags}"  --fcompiler="gnu95" -c ${src_files} -m ${module_name}; exit;;
+    g) f2py --verbose --f90flags="${extra_flags}"  --fcompiler="gnu95" -c ${src_files} ${module_name}.pyf; exit;;
+  esac
+done
+
+mv -fv *.so ../bin

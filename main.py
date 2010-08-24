@@ -3,6 +3,7 @@
 """
 
 import pdb
+from optparse import OptionParser
 from app.config import *
 from copy import copy, deepcopy
 import sys
@@ -316,6 +317,7 @@ class KMC_Model(gtk.GenericTreeModel):
         return self.meta.set()
 
 
+    #@verbose
     def export_source(self, dir=''):
         if not dir:
             dir = SRCDIR
@@ -325,7 +327,10 @@ class KMC_Model(gtk.GenericTreeModel):
 
         # create new files
         shutil.copy(APP_ABS_PATH + '/libkmc.f90', dir)
-        shutil.copy(APP_ABS_PATH + '/kind_values.f90', dir)
+        shutil.copy(APP_ABS_PATH + '/kind_values_f2py.f90', dir)
+        shutil.copy(APP_ABS_PATH + '/units.f90', dir)
+        shutil.copy(APP_ABS_PATH + '/compile_for_f2py', dir)
+        shutil.copy(APP_ABS_PATH + '/assert.ppc', dir)
 
         lattice_source = open(APP_ABS_PATH + '/lattice_template.f90').read()
         lattice = self.lattice_list[0]
@@ -665,7 +670,6 @@ class MainWindow():
         self.treeview.append_column(self.tvcolumn)
         self.set_model(self.kmc_model)
         self.checked_out_process = (False,)
-        self.window.show()
 
 
 
@@ -1953,8 +1957,21 @@ class SaveChangesView :
 def main():
     """Main function, called if scripts called directly
     """
-    MainWindow()
-    gtk.main()
+    parser = OptionParser()
+    parser.add_option('-n','--no-gui', dest='nogui', action='store_true', default=False, help='Runs without opening a GUI')
+    parser.add_option('-i','--import', dest='xml_import', type='string', help='Defines the  kMC project file to import')
+    parser.add_option('-s','--export-source', dest='export_source', action='store_true', default=False)
+    (options, args) = parser.parse_args()
+    if options.nogui:
+        kmc_model = KMC_Model()
+        if hasattr(options,'xml_import'):
+            kmc_model.import_xml(options.xml_import)
+            if options.export_source:
+                kmc_model.export_source()
+    else:
+        main = MainWindow()
+        main.window.show()
+        gtk.main()
 
 if __name__ == "__main__":
     main()

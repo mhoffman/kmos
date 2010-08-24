@@ -950,7 +950,7 @@ if \{condition 1 \} {[} and
             os.system('rm -rf ' + self.meta['tex_file'])
 
         self._print_gpl_message()
-        self._out('module proclist_' + self.meta['name'])
+        self._out('module proclist')
         self._out('')
         self._out('use kind_values')
         #self._out('use libkmc, only: null_species')
@@ -980,7 +980,7 @@ if \{condition 1 \} {[} and
         self.write_atomic_update_functions()
         self.writeTouchupFunction()
         self.write_check_functions()
-        self._out('end module proclist_' + self.meta['name'])
+        self._out('end module proclist')
         print("Wrote module proclist_" + self.meta['name'] + ' to ' + self.meta['source_file'])
 
 
