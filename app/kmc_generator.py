@@ -358,7 +358,8 @@ class ProcessList():
                 raise ConsistencyError('%s is not a well-formed species name'
                     % str(self.species))
         # Int checking already happens when pythonizing
-        for proc in self.procs.values():
+        for procname in self.procs:
+            proc = self.procs[procname]
             site_labels = []
             if len(proc['condition_list']) > 1 :
                 suffix_list = []
@@ -367,6 +368,7 @@ class ProcessList():
                 # Check if there is at least one site with no relative offset
                 if not filter((lambda x: not x['coordinate'].any()),conditions['conditions']):
                     print("Found no site, without relative offset but I need this!")
+                    print(procname)
                     print(conditions); exit()
 
                 if len(proc['condition_list']) > 1 :

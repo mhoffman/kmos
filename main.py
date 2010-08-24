@@ -4,7 +4,7 @@
 
 import pdb
 from app.config import *
-from copy import copy
+from copy import copy, deepcopy
 import sys
 import os, os.path
 import shutil
@@ -68,6 +68,10 @@ class KMC_Model(gtk.GenericTreeModel):
             self.row_inserted(path, self.get_iter(path))
             self.notifier('changed')
         elif signal == 'changed':
+            self.notifier('changed')
+        elif signal == 'row-deleted':
+            path = args[0]
+            self.row_deleted(path)
             self.notifier('changed')
 
 
@@ -324,43 +328,43 @@ class KMC_Model(gtk.GenericTreeModel):
         shutil.copy(APP_ABS_PATH + '/kind_values.f90', dir)
 
         lattice_source = open(APP_ABS_PATH + '/lattice_template.f90').read()
-        lattice = self.lattices[0]
+        lattice = self.lattice_list[0]
         # more processing steps ...
         # SPECIES DEFINITION
-        if not self.species:
+        if not self.species_list:
             print('No species defined, yet, cannot complete source')
             return
         species_definition = "integer(kind=iint), public, parameter :: &\n "
-        for species in self.species[:-1]:
+        for species in self.species_list.data[:-1]:
             species_definition += '    %(species)s =  %(id)s, &\n' % {'species':species.name, 'id':species.id}
-        species_definition += '     %(species)s = %(id)s\n' % {'species':self.species[-1].species, 'id':self.species[-1].id}
+        species_definition += '     %(species)s = %(id)s\n' % {'species':self.species_list.data[-1].name, 'id':self.species_list.data[-1].id}
         # UNIT VECTOR DEFINITION
-        unit_vector_definition = 'integer(kind=iint), dimension(2,2) ::  lattice_%(name)s_matrix = reshape((/%(x)s,0,0,%(y)s/),(/2,2/))' % {'x':lattice['unit_cell_size'][0], 'y':lattice['unit_cell_size'][1],'name':lattice['name']}
+        unit_vector_definition = 'integer(kind=iint), dimension(2,2) ::  lattice_%(name)s_matrix = reshape((/%(x)s,0,0,%(y)s/),(/2,2/))' % {'x':lattice.unit_cell_size[0], 'y':lattice.unit_cell_size[1],'name':lattice.name}
         # LOOKUP TABLE INITIALIZATION
-        indexes = [ x['index'] for x in lattice['sites'] ]
-        lookup_table_init = 'integer(kind=iint), dimension(0:%(x)s, 0:%(y)s) :: lookup_%(lattice)s2nr\n' % {'x':lattice['unit_cell_size'][0]-1,'y':lattice['unit_cell_size'][1]-1,'lattice':lattice['name']}
-        lookup_table_init += 'type(tuple), dimension(%(min)s:%(max)s) :: lookup_nr2%(lattice)s\n' % {'min':min(indexes), 'max':max(indexes), 'lattice':lattice['name']}
+        indexes = [ x.index for x in lattice.sites ]
+        lookup_table_init = 'integer(kind=iint), dimension(0:%(x)s, 0:%(y)s) :: lookup_%(lattice)s2nr\n' % {'x':lattice.unit_cell_size[0]-1,'y':lattice.unit_cell_size[1]-1,'lattice':lattice.name}
+        lookup_table_init += 'type(tuple), dimension(%(min)s:%(max)s) :: lookup_nr2%(lattice)s\n' % {'min':min(indexes), 'max':max(indexes), 'lattice':lattice.name}
 
         # LOOKUP TABLE DEFINITION
         lookup_table_definition = ''
-        lookup_table_definition += '! Fill lookup table nr2%(name)s\n' % {'name':lattice['name'] }
-        for site in lattice['sites']:
-            lookup_table_definition += '    lookup_nr2%(name)s(%(index)s)%%t = (/%(x)s,%(y)s/)\n' % {'name': lattice['name'],
-                                                                                                'x':site['coord'][0],
-                                                                                                'y':site['coord'][1],
-                                                                                                'index':site['index']}
-        lookup_table_definition += '\n\n    ! Fill lookup table %(name)s2nr\n' % {'name':lattice['name'] }
-        for site in lattice['sites']:
-            lookup_table_definition += '    lookup_%(name)s2nr(%(x)s, %(y)s) = %(index)s\n'  % {'name': lattice['name'],
-                                                                                                'x':site['coord'][0],
-                                                                                                'y':site['coord'][1],
-                                                                                                'index':site['index']}
+        lookup_table_definition += '! Fill lookup table nr2%(name)s\n' % {'name':lattice.name }
+        for site in lattice.sites:
+            lookup_table_definition += '    lookup_nr2%(name)s(%(index)s)%%t = (/%(x)s,%(y)s/)\n' % {'name': lattice.name,
+                                                                                                'x':site.coord[0],
+                                                                                                'y':site.coord[1],
+                                                                                                'index':site.index}
+        lookup_table_definition += '\n\n    ! Fill lookup table %(name)s2nr\n' % {'name':lattice.name }
+        for site in lattice.sites:
+            lookup_table_definition += '    lookup_%(name)s2nr(%(x)s, %(y)s) = %(index)s\n'  % {'name': lattice.name,
+                                                                                                'x':site.coord[0],
+                                                                                                'y':site.coord[1],
+                                                                                                'index':site.index}
 
 
         #LATTICE MAPPINGS
 
 
-        lattice_source = lattice_source % {'lattice_name': lattice['name'],
+        lattice_source = lattice_source % {'lattice_name': lattice.name,
             'species_definition':species_definition,
             'lookup_table_init':lookup_table_init,
             'lookup_table_definition':lookup_table_definition,
@@ -374,7 +378,6 @@ class KMC_Model(gtk.GenericTreeModel):
         proclist_xml = open(dir + '/process_list.xml','w')
         pretty_xml = prettify_xml(self.export_process_list_xml())
         proclist_xml.write(pretty_xml)
-        print(pretty_xml)
         proclist_xml.close()
         class Options(): pass
         options = Options()
@@ -472,7 +475,7 @@ class KMC_Model(gtk.GenericTreeModel):
         I refrain from rewriting this and instead generate an XML file that fits the old program
         """
         root = ET.Element('kmc')
-        lattice = self.lattices[0]
+        lattice = self.lattice_list.data[0]
         # extract meta information
         meta = ET.SubElement(root,'meta')
         meta.set('name',self.meta['model_name'])
@@ -483,28 +486,33 @@ class KMC_Model(gtk.GenericTreeModel):
         recorded_types = []
         # extract species information
         species_list = ET.SubElement(root,'species_list')
-        for species in self.species:
+        for species in self.species_list.data:
             species_elem = ET.SubElement(species_list, 'species')
-            species_elem.set('name',species['species'])
-            species_elem.set('id',species['id'])
+            species_elem.set('name',species.name)
+            species_elem.set('id',species.id)
 
         # extract process list
         process_list = ET.SubElement(root, 'process_list')
-        process_list.set('lattice',lattice['name'])
-        for process in self.processes:
+        process_list.set('lattice',lattice.name)
+        for process in self.process_list.data:
             process_elem = ET.SubElement(process_list,'process')
-            process_elem.set('name',process['name'])
+            process_elem.set('name',process.name)
             condition_list = ET.SubElement(process_elem, 'condition_list')
-            site_index = 1
-            for condition in process['conditions']:
-                coord = condition[1][0]*lattice['unit_cell_size'][0] + condition[1][2], condition[1][1]*lattice['unit_cell_size'][1] + condition[1][3]
-                local_coord = [ x % y for (x,y) in zip(coord, lattice['unit_cell_size']) ]
-                coord = ' '.join([ str(x) for x in coord ])
+            center_coord = [None,None]
+            center_coord[0] = process.center_site[0]*lattice.unit_cell_size[0] + process.center_site[2]
+            center_coord[1] = process.center_site[1]*lattice.unit_cell_size[1] + process.center_site[3]
+            for site_index, condition in enumerate(process.condition_list):
+                coord = [None,None]
+                coord[0] = condition.coord[0]*lattice.unit_cell_size[0] + condition.coord[2]
+                coord[1] = condition.coord[1]*lattice.unit_cell_size[1] + condition.coord[3]
+                local_coord = [ x % y for (x,y) in zip(coord, lattice.unit_cell_size) ]
                 type = '_'.join([ str(x) for x in local_coord ])
-                species = condition[0]
+                for i in range(2):
+                    coord[i] = coord[i] - center_coord[i]
+                coord = ' '.join([ str(x) for x in coord ])
+                species = condition.species
                 condition_elem = ET.SubElement(condition_list,'condition')
-                condition_elem.set('site','site_' + str(site_index))
-                site_index += 1
+                condition_elem.set('site','site_' + str(site_index+1))
                 condition_elem.set('type', type)
                 condition_elem.set('species', species)
                 condition_elem.set('coordinate', coord)
@@ -514,12 +522,16 @@ class KMC_Model(gtk.GenericTreeModel):
                     site_type_elem.set('name',type)
                     recorded_types.append(type)
             action_elem = ET.SubElement(process_elem,'action')
-            for action in process['actions']:
-                action_coord = action[1][0]*lattice['unit_cell_size'][0] + action[1][2], action[1][1]*lattice['unit_cell_size'][1] + action[1][3]
+            for action in process.action_list:
+                action_coord = [None, None]
+                action_coord[0] = action.coord[0]*lattice.unit_cell_size[0] + action.coord[2]
+                action_coord[1] = action.coord[1]*lattice.unit_cell_size[1] + action.coord[3]
+                for i in range(2):
+                    action_coord[i] = action_coord[i] - center_coord[i]
                 action_coord = ' '.join([ str(x) for x in action_coord ])
                 corresp_condition = filter(lambda x:x.attrib['coordinate'] == action_coord, condition_list.getchildren())[0]
                 site_index = corresp_condition.attrib['site']
-                new_species = action[0]
+                new_species = action.species
                 replacement_elem = ET.SubElement(action_elem,'replacement')
                 replacement_elem.set('site', site_index)
                 replacement_elem.set('new_species', new_species)
@@ -633,6 +645,8 @@ class MainWindow():
                 'on_btnExportSource_clicked': self.export_source,
                 'on_btnExportProgram_clicked' : self.export_program,
                 'on_btnHelp_clicked' : self.display_help,
+                'on_overviewtree_button_press_event' : self.overview_button_pressed,
+                'on_overviewtree_key_press_event' : self.overview_key_pressed, 
                 }
 
         self.wtree.signal_autoconnect(dic)
@@ -681,7 +695,7 @@ class MainWindow():
 
 
     def export_source(self, widget):
-        print(kmc_model.export_source())
+        print(self.kmc_model.export_source())
         self.statbar.push(1,'Exported FORTRAN source code!')
 
     def export_program(self, widget):
@@ -696,6 +710,7 @@ class MainWindow():
         print("PROCESSES: ", self.processes)
 
     def treeitem_clicked(self, widget, row,col):
+        print(widget, row, col)
         item = self.kmc_model.on_get_iter(row)
 
         if isinstance(item, Meta):
@@ -757,6 +772,45 @@ class MainWindow():
         if isinstance(item, Process):
             item.name = new_text
             self.kmc_model.notifier('changed')
+
+    def overview_button_pressed(self, widget, event):
+        x, y = int(event.x), int(event.y)
+        path, col, cellx, celly = self.treeview.get_path_at_pos(x, y)
+        item = self.kmc_model.on_get_iter(path)
+        if event.button == 3 :
+            if isinstance(item, Process):
+                context_menu = gtk.Menu()
+                menu_item = gtk.MenuItem('Duplicate process')
+                menu_item.connect('activate', self.duplicate_process, item)
+                context_menu.append(menu_item)
+                context_menu.show_all()
+                context_menu.popup(None, None, None, event.button, event.time)
+            
+    def duplicate_process(self, event, process):
+        duplicate = deepcopy(process)
+        # first figure out the 'highest duplicate' made so far
+        others = filter(lambda x: x.name.split('(')[0] == duplicate.name.split('(')[0], self.kmc_model.process_list.data)
+        dupl_nrs = []
+        for other in others:
+            if other.name.endswith(')'):
+                index = other.name.index('(')
+                nr = int(other.name[index+1 : -1])
+                dupl_nrs.append(nr)
+        if dupl_nrs:
+            duplicate.name = duplicate.name[:index] + "(%s)" % (max(dupl_nrs) + 1)
+        else:
+            duplicate.name += '(1)'
+        self.kmc_model.process_list.append(duplicate)
+
+    def overview_key_pressed(self, widget, event):
+        key = gtk.gdk.keyval_name(event.keyval)
+        model, paths = (self.treeview.get_selection().get_selected_rows())
+        for path in paths:
+            item = self.kmc_model.on_get_iter(path)
+            if key == 'Delete':
+                if isinstance(item, Process):
+                    self.kmc_model.process_list.data.remove(item)
+                    self.kmc_model.callback('row-deleted', path)
 
     def create_process(self, widget):
         new_process = Process()
@@ -996,7 +1050,7 @@ class ProcessEditor():
                                                 for species in self.kmc_model.species_list.data:
                                                     menu_item = gtk.MenuItem(4*' ' + species.name)
                                                     self.species_menu.append(menu_item)
-                                                    menu_item.connect("activate", self.add_condition, (species, list(data)))
+                                                    menu_item.connect("activate", self.modify_condition, (species, list(data), True))
 
                                                 if filter(lambda cond: cond.coord == [i-self.zoom/2, j-self.zoom/2, x, y], self.new_process.condition_list) :
                                                     # if already has a condition defined
@@ -1010,7 +1064,16 @@ class ProcessEditor():
                                                     for species in self.kmc_model.species_list.data:
                                                         menu_item = gtk.MenuItem(4*' ' + species.name)
                                                         self.species_menu.append(menu_item)
-                                                        menu_item.connect("activate", self.add_condition, (species, list(data)))
+                                                        menu_item.connect("activate", self.modify_condition, (species, list(data), True))
+                                                    if filter(lambda cond: cond.coord == [i-self.zoom/2, j-self.zoom/2, x, y], self.new_process.action_list) :
+                                                        menu_item = gtk.MenuItem('Remove action')
+                                                        self.species_menu.append(menu_item)
+                                                        menu_item.connect('activate', self.modify_condition, (species, list(data), False))
+                                                    else:
+                                                        data = 'condition', i-self.zoom/2, j-self.zoom/2, x, y
+                                                        menu_item = gtk.MenuItem('Remove condition')
+                                                        self.species_menu.append(menu_item)
+                                                        menu_item.connect('activate', self.modify_condition, (species, list(data), False))
                                                 self.species_menu.show_all()
                                                 self.species_menu.popup(None, None, None, event.button, event.time)
                                     else:
@@ -1022,12 +1085,29 @@ class ProcessEditor():
             self.zoom += change
             self.draw_lattices()
 
-    def add_condition(self, event, data):
+    def modify_condition(self, event, data):
         #Test if point is condition or action
         is_condition = data[1][0] == 'condition'
+        add = data[2]
 
         # weed out data
         data = [ data[0].name, data[1][1 :] ]
+        # remove entry if requested
+        if not add:
+            if is_condition:
+                for condition in self.new_process.condition_list:
+                    if condition.coord == data[1]:
+                        self.new_process.condition_list.remove(condition)
+                    if not self.new_process.condition_list:
+                        self.new_process.center_site = ()
+            else:
+                for action in self.new_process.action_list:
+                    if action.coord == data[1]:
+                        self.new_process.action_list.remove(action)
+                        
+            self.draw_lattices()
+            print(self.new_process)
+            return
         # new_ca stands for 'new condition/action'
         new_ca = ConditionAction(coord=data[1], species=data[0])
         # if this is the first condition, make it the center site
@@ -1048,6 +1128,7 @@ class ProcessEditor():
             self.new_process.action_list.append(new_ca)
 
         self.draw_lattices()
+        print(self.new_process)
 
 
     def clear(self):
@@ -1736,7 +1817,10 @@ class Process(Attributes):
     def __repr__(self):
         ret = ''
         ret += 'Process: %s %s\n' % (self.name, self.rate_constant)
-        ret += 'Center Site: %s\n' % self.center_site
+        if self.center_site:
+            ret += 'Center Site: %s\n' % self.center_site
+        else:
+            ret + 'No center site defined.\n'
         ret += 'Conditions:\n'
         for elem in self.condition_list:
             ret += elem.__repr__()
