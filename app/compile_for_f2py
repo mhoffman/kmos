@@ -27,6 +27,7 @@ fi
 if [ $# -eq 0 ]
 then
   ${0} -h
+  exit
 fi
 
 
@@ -44,7 +45,8 @@ do
     ;;
     h) echo "Usage:${0} -m modulename  [-f create header [-w overwrite signature]] [-I compile with ifort] [ -i compile from header with ifort ] [-G compile with gfortran ] [ -g compile from header with gfortran ]";
        echo -e "\n    or simpler: ${0} -m module -action where action \\elem [i,I,g,G], order of arguments matters."
-       echo -e "\n\n    example: ${0} -m pd100 -I";;
+       echo -e "\n\n    example: ${0} -m pd100 -I"
+       echo -e "\n\nGive arguments in the same order as stated above"; exit;;
     f) f2py ${overwrite}  ${src_files} -m ${module_name} -h ${module_name}.pyf ; exit;;
     I) f2py --verbose --f90flags="${intel_extra_flags}"  --fcompiler="${intel}" -c ${src_files} -m ${module_name}; exit;;
     i) f2py --verbose --f90flags="${intel_extra_flags}"  --fcompiler="${intel}" -c ${src_files} ${module_name}.pyf; exit;;
@@ -52,5 +54,3 @@ do
     g) f2py --verbose --f90flags="${extra_flags}"  --fcompiler="gnu95" -c ${src_files} ${module_name}.pyf; exit;;
   esac
 done
-
-mv -fv *.so ../bin

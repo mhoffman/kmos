@@ -322,9 +322,8 @@ class KMC_Model(gtk.GenericTreeModel):
     def export_source(self, dir=''):
         if not dir:
             dir = SRCDIR
-        if os.path.exists(dir):
-            shutil.rmtree(dir)
-        os.mkdir(dir)
+        if not os.path.exists(dir):
+            os.mkdir(dir)
 
         # create new files
         shutil.copy(APP_ABS_PATH + '/base.f90', dir)
@@ -503,6 +502,7 @@ class KMC_Model(gtk.GenericTreeModel):
         for process in self.process_list.data:
             process_elem = ET.SubElement(process_list,'process')
             process_elem.set('name',process.name)
+            process_elem.set('rate',process.rate_constant)
             condition_list = ET.SubElement(process_elem, 'condition_list')
             center_coord = [None,None]
             center_coord[0] = process.center_site[0]*lattice.unit_cell_size[0] + process.center_site[2]

@@ -953,8 +953,13 @@ if \{condition 1 \} {[} and
         self._out('module proclist')
         self._out('')
         self._out('use kind_values')
-        #self._out('use base, only: null_species')
+        self._out('use base, only: &')
+        self._out('    update_accum_rate, &')
+        self._out('    determine_procsite, &')
+        self._out('    update_clocks, &')
+        self._out('    increment_procstat')
         self._out('use lattice, only: &')
+        self._out('    lattice_allocate_system => allocate_system ,&')
         for lattice in self.meta['lattices']:
             for lattice2 in self.meta['lattices'] :
                 if lattice != lattice2:
@@ -966,7 +971,6 @@ if \{condition 1 \} {[} and
             self._out('    ' + lattice + '_replace_species, &')
             self._out('    ' + lattice + '_del_proc, &')
             self._out('    ' + lattice + '_get_species, &')
-        self._out('    increment_procstat, &')
 
         for species in self.species.keys()[:-1]:
             self._out('    '+species+', &')
@@ -974,8 +978,9 @@ if \{condition 1 \} {[} and
         self._out('\nimplicit none')
         #self.write_interface()
         #self.write_species_definitions()
-        self.write_process_list_constants()
+        self.variable_definitions()
         self._out('\ncontains\n')
+        self.write_init_function()
         self.write_run_proc_nr_function()
         self.write_atomic_update_functions()
         self.writeTouchupFunction()
@@ -983,15 +988,47 @@ if \{condition 1 \} {[} and
         self._out('end module proclist')
         print("Wrote module proclist_" + self.meta['name'] + ' to ' + self.meta['source_file'])
 
+    def write_init_function(self):
+        """This write a convenience function that wraps around lattice.allocate_system
+        and initialize some array, which are useful in the f2py scripts
+        """
+        self._out('subroutine init(input_system_size, system_name)')
+        self._out('    integer(kind=iint), dimension(2), intent(in) :: input_system_size')
+        self._out('    character(len=4000), intent(in) :: system_name\n\n')
+        self._out('    call lattice_allocate_system(nr_of_proc, input_system_size, system_name)\n')
+        for i, proc in enumerate(self.procs):
+            self._out('    processes(' + str(i+1) + ') = \'' + proc + '\'')
+            self._out('    rates(' + str(i+1) + ') = \'' + self.procs[proc]['rate'] + '\'')
+        self._out('end subroutine init')
 
+        self._out('subroutine get_rate_char(process_nr, char_slot, process_name)')
+        self._out('    integer(kind=iint), intent(in) :: process_nr, char_slot')
+        self._out('    character,  intent(out) :: process_name\n\n')
+        self._out('    process_name = rates(process_nr)(char_slot:char_slot)')
+        self._out('end subroutine get_rate_char')
+        self._out('subroutine get_process_char(process_nr, char_slot, process_name)')
+        self._out('    integer(kind=iint), intent(in) :: process_nr, char_slot')
+        self._out('    character,  intent(out) :: process_name\n\n')
+        self._out('    process_name = processes(process_nr)(char_slot:char_slot)')
+        self._out('end subroutine get_process_char')
+        self._out('subroutine kmc_step()')
+        self._out('    !---------------internal variables---------------')
+        self._out('    integer(kind=iint), dimension(2)  :: pdo_site, pd100_site')
+        self._out('    real(kind=rsingle) :: ran_proc, ran_time, ran_site')
+        self._out('    integer(kind=iint) :: nr_site, proc_nr')
+        self._out('    ! Draw 3 random numbers')
+        self._out('    call random_number(ran_time)')
+        self._out('        call random_number(ran_proc)')
+        self._out('    call random_number(ran_site)')
+        self._out('    ! Update the accumulated process rates')
+        self._out('    call update_accum_rate ! @libkmc')
+        self._out('    ! Determine the process and site')
+        self._out('    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site) ! @libkmc\n')
+        self._out('    call run_proc_nr(proc_nr, nr_site)\n')
+        self._out('call update_clocks(ran_time)')
+        self._out('end subroutine kmc_step')
 
-    def write_species_definitions(self):
-        """Write out the list of species, where each one refers to one species in the system"""
-        self._out('\n! Species constants')
-        for species in self.species:
-            self._out('integer(kind=iint), parameter, public :: ' + species + ' = ' + str(self.species[species]))
-
-    def write_process_list_constants(self):
+    def variable_definitions(self):
         """Writes out the list of constants, where each refers to one
         process in the process list."""
         i = 0
@@ -1004,6 +1041,7 @@ if \{condition 1 \} {[} and
                 else:
                     self._out('integer(kind=iint), parameter, public :: ' + proc  + ' = ' + str(i))
         self._out('\ninteger(kind=iint), parameter, public :: nr_of_proc = ' + str(i))
+        self._out('character(len=200), dimension(%s)  :: processes, rates' % i)
 
     def write_interface(self):
         """Writes source code for which subroutines are public and which
