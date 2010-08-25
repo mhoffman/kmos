@@ -1,5 +1,6 @@
 #!/usr/bin/python
-"""Some small test program to explore the characteristics of a drawing area
+"""The main program of KMC Modeling On Steroid (kmos)
+    a GUI program to generate kMC models
 """
 
 import pdb
@@ -348,13 +349,13 @@ class KMC_Model(gtk.GenericTreeModel):
         # LOOKUP TABLE INITIALIZATION
         indexes = [ x.index for x in lattice.sites ]
         lookup_table_init = 'integer(kind=iint), dimension(0:%(x)s, 0:%(y)s) :: lookup_%(lattice)s2nr\n' % {'x':lattice.unit_cell_size[0]-1,'y':lattice.unit_cell_size[1]-1,'lattice':lattice.name}
-        lookup_table_init += 'type(tuple), dimension(%(min)s:%(max)s) :: lookup_nr2%(lattice)s\n' % {'min':min(indexes), 'max':max(indexes), 'lattice':lattice.name}
+        lookup_table_init += 'integer(kind=iint), dimension(%(min)s:%(max)s,2) :: lookup_nr2%(lattice)s\n' % {'min':min(indexes), 'max':max(indexes), 'lattice':lattice.name}
 
         # LOOKUP TABLE DEFINITION
         lookup_table_definition = ''
         lookup_table_definition += '! Fill lookup table nr2%(name)s\n' % {'name':lattice.name }
         for site in lattice.sites:
-            lookup_table_definition += '    lookup_nr2%(name)s(%(index)s)%%t = (/%(x)s,%(y)s/)\n' % {'name': lattice.name,
+            lookup_table_definition += '    lookup_nr2%(name)s(%(index)s,:) = (/%(x)s,%(y)s/)\n' % {'name': lattice.name,
                                                                                                 'x':site.coord[0],
                                                                                                 'y':site.coord[1],
                                                                                                 'index':site.index}

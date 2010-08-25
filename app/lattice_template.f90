@@ -49,37 +49,8 @@ use base, only: &
 
 implicit none
 
-private
-
-! Public subroutines
-public :: allocate_system, &
-    null_species, &
-    assertion_fail, &
-    deallocate_system, &
-    determine_procsite, &
-    get_rate, &
-    get_kmc_step, &
-    get_kmc_time, &
-    get_system_size, &
-    increment_procstat, &
-    reload_system, &
-    save_system, &
-    set_rate, &
-    update_accum_rate, &
-    %(lattice_name)s2nr, &
-    nr2%(lattice_name)s, &
-    %(lattice_name)s_increment_procstat, &
-    %(lattice_name)s_add_proc, &
-    %(lattice_name)s_can_do, &
-    %(lattice_name)s_del_proc, &
-    %(lattice_name)s_replace_species, &
-    %(lattice_name)s_get_species, &
-    update_clocks
 
 
-type tuple
-    integer(kind=iint), dimension(2) :: t
-end type tuple
 
 integer(kind=iint), dimension(2), public :: system_size
 
@@ -130,7 +101,7 @@ subroutine nr2%(lattice_name)s(nr, site)
     cell(1) = modulo(cell_nr, system_size(1))
     cell(2) = cell_nr/system_size(1)
     ! Determine vector within unit cell
-    local_vector = lookup_nr2%(lattice_name)s(local_nr)%%t
+    local_vector = lookup_nr2%(lattice_name)s(local_nr,:)
     ! Put everything together
     site = local_vector + matmul(lattice_%(lattice_name)s_matrix, cell)
 
