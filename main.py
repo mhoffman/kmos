@@ -325,12 +325,9 @@ class KMC_Model(gtk.GenericTreeModel):
         if not os.path.exists(dir):
             os.mkdir(dir)
 
-        # create new files
-        shutil.copy(APP_ABS_PATH + '/base.f90', dir)
-        shutil.copy(APP_ABS_PATH + '/kind_values_f2py.f90', dir)
-        shutil.copy(APP_ABS_PATH + '/units.f90', dir)
-        shutil.copy(APP_ABS_PATH + '/compile_for_f2py', dir)
-        shutil.copy(APP_ABS_PATH + '/assert.ppc', dir)
+        for filename in [ 'base.f90', 'kind_values_f2py.f90', 'units.f90', 'assert.ppc', 'compile_for_f2py', 'run_kmc.py']:
+            # copy files
+            shutil.copy(APP_ABS_PATH + '/%s' % filename, dir)
 
         lattice_source = open(APP_ABS_PATH + '/lattice_template.f90').read()
         lattice = self.lattice_list[0]
@@ -343,8 +340,13 @@ class KMC_Model(gtk.GenericTreeModel):
         for species in self.species_list.data[:-1]:
             species_definition += '    %(species)s =  %(id)s, &\n' % {'species':species.name, 'id':species.id}
         species_definition += '     %(species)s = %(id)s\n' % {'species':self.species_list.data[-1].name, 'id':self.species_list.data[-1].id}
+        species_definition += 'character(len=800), dimension(%s) :: species_list\n' % len(self.species_list.data)
+        species_definition += 'integer(kind=iint), parameter :: nr_of_species = %s\n' % len(self.species_list.data)
+        species_definition += 'integer(kind=iint), parameter :: nr_of_lattices = %s\n' % len(self.lattice_list.data)
+        species_definition += 'character(len=800), dimension(%s) :: lattice_list\n' % len(self.lattice_list.data)
+
         # UNIT VECTOR DEFINITION
-        unit_vector_definition = 'integer(kind=iint), dimension(2,2) ::  lattice_%(name)s_matrix = reshape((/%(x)s,0,0,%(y)s/),(/2,2/))' % {'x':lattice.unit_cell_size[0], 'y':lattice.unit_cell_size[1],'name':lattice.name}
+        unit_vector_definition = 'integer(kind=iint), dimension(2,2) ::  lattice_matrix = reshape((/%(x)s,0,0,%(y)s/),(/2,2/))' % {'x':lattice.unit_cell_size[0], 'y':lattice.unit_cell_size[1],'name':lattice.name}
         # LOOKUP TABLE INITIALIZATION
         indexes = [ x.index for x in lattice.sites ]
         lookup_table_init = 'integer(kind=iint), dimension(0:%(x)s, 0:%(y)s) :: lookup_%(lattice)s2nr\n' % {'x':lattice.unit_cell_size[0]-1,'y':lattice.unit_cell_size[1]-1,'lattice':lattice.name}
@@ -364,6 +366,10 @@ class KMC_Model(gtk.GenericTreeModel):
                                                                                                 'x':site.coord[0],
                                                                                                 'y':site.coord[1],
                                                                                                 'index':site.index}
+        for i,species in enumerate(self.species_list.data):
+            lookup_table_definition +=  '    species_list(%s) = "%s"\n' % (i+1, species.name)
+        for i, lattice_name in enumerate(self.lattice_list.data):
+            lookup_table_definition +=  '    lattice_list(%s) = "%s"\n' % (i+1, lattice_name.name)
 
 
         #LATTICE MAPPINGS
@@ -1420,7 +1426,7 @@ class DialogDefineSite():
         name_field = self.wtree.get_widget('defineSite_type')
         name_field.set_text('default')
         index_field = self.wtree.get_widget('defineSite_index')
-        index_adjustment = gtk.Adjustment(value=len(self.lattice_dialog.lattice.sites), lower=0, upper=1000, step_incr=1, page_incr=4, page_size=0)
+        index_adjustment = gtk.Adjustment(value=len(self.lattice_dialog.lattice.sites + 1), lower=0, upper=1000, step_incr=1, page_incr=4, page_size=0)
         index_field.set_adjustment(index_adjustment)
         index_field.set_value(len(self.lattice_dialog.lattice.sites))
         index_field.set_sensitive(False)

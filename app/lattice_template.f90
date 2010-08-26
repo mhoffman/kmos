@@ -70,16 +70,28 @@ subroutine %(lattice_name)s2nr(site, nr)
     integer(kind=iint) , dimension(2) :: folded_site, unit_cell, local_part
     integer(kind=iint) :: cell_nr
 
-    ! Apply periodic boundary conditions
-    folded_site = modulo(site, matmul(system_size, lattice_%(lattice_name)s_matrix))
     ! Determine unit cell
-    unit_cell = site/(/lattice_%(lattice_name)s_matrix(1,1),lattice_%(lattice_name)s_matrix(2,2)/)
+    unit_cell = site/(/lattice_matrix(1,1),lattice_matrix(2,2)/)
+    !! DEBUGGING
+    !print *,'unit_cell(1)',unit_cell
     ! Determine local part
-    local_part = folded_site - matmul(lattice_%(lattice_name)s_matrix, unit_cell)
+    local_part = modulo(site - matmul(lattice_matrix, unit_cell), (/lattice_matrix(1,1),lattice_matrix(2,2)/))
+    ! Apply periodic boundary conditions
+    folded_site = modulo(site, matmul(system_size, lattice_matrix))
+    unit_cell = modulo(unit_cell, system_size)
     ! Determine index of cell
     cell_nr = unit_cell(1) + system_size(1)*unit_cell(2)
     ! Put everything together
     nr = %(sites_per_cell)s*cell_nr + lookup_%(lattice_name)s2nr(local_part(1), local_part(2))
+
+    !! DEBUGGING
+    !print *,'site',site
+    !print *,'matmul(system_size, lattice_matrix)',matmul(system_size, lattice_matrix)
+    !print *,'folded_site', folded_site
+    !print *,'unit_cell(2)',unit_cell
+    !print *,'local_part',local_part
+    !print *,'cell_nr',cell_nr
+    !print *,'nr', nr
 
 
 end subroutine %(lattice_name)s2nr
@@ -103,7 +115,7 @@ subroutine nr2%(lattice_name)s(nr, site)
     ! Determine vector within unit cell
     local_vector = lookup_nr2%(lattice_name)s(local_nr,:)
     ! Put everything together
-    site = local_vector + matmul(lattice_%(lattice_name)s_matrix, cell)
+    site = local_vector + matmul(lattice_matrix, cell)
 
 end subroutine nr2%(lattice_name)s
 
@@ -144,7 +156,7 @@ subroutine allocate_system(nr_of_proc, input_system_size, system_name)
 
     %(lookup_table_definition)s
 
-    volume = system_size(2)*system_size(1)
+    volume = system_size(2)*system_size(1)*%(sites_per_cell)s
 
     call base_allocate_system(nr_of_proc, volume, system_name)
 
@@ -264,5 +276,20 @@ subroutine %(lattice_name)s_get_species(site, return_species)
     call base_get_species(nr, return_species)
 end subroutine %(lattice_name)s_get_species
 
+subroutine get_species_char(species_nr, char_slot, species_char)
+    integer(kind=iint), intent(in) :: species_nr, char_slot
+    character,  intent(out) :: species_char
+
+
+    species_char = species_list(species_nr)(char_slot:char_slot)
+end subroutine get_species_char
+
+subroutine get_lattice_char(lattice_nr, char_slot, lattice_char)
+    integer(kind=iint), intent(in) :: lattice_nr, char_slot
+    character,  intent(out) :: lattice_char
+
+
+    lattice_char = lattice_list(lattice_nr)(char_slot:char_slot)
+end subroutine get_lattice_char
 
 end module lattice

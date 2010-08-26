@@ -4,13 +4,14 @@
     <species_list>
         <species color="#00000187ffff" id="2" name="CO"/>
         <species color="#fff" id="0" name="empty"/>
+        <species color="#0000ffff00de" id="3" name="nitrogen"/>
         <species color="#ffff00000000" id="1" name="oxygen"/>
     </species_list>
     <parameter_list/>
     <lattice_list>
         <lattice name="RuO2" unit_cell_size="2 1">
-            <site coord="0 0" index="0" type="bridge"/>
-            <site coord="1 0" index="1" type="cus"/>
+            <site coord="0 0" index="1" type="bridge"/>
+            <site coord="1 0" index="2" type="cus"/>
         </lattice>
     </lattice_list>
     <process_list>

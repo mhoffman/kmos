@@ -994,39 +994,43 @@ if \{condition 1 \} {[} and
         """
         self._out('subroutine init(input_system_size, system_name)')
         self._out('    integer(kind=iint), dimension(2), intent(in) :: input_system_size')
-        self._out('    character(len=4000), intent(in) :: system_name\n\n')
+        self._out('    character(len=400), intent(in) :: system_name\n')
         self._out('    call lattice_allocate_system(nr_of_proc, input_system_size, system_name)\n')
         for i, proc in enumerate(self.procs):
             self._out('    processes(' + str(i+1) + ') = \'' + proc + '\'')
             self._out('    rates(' + str(i+1) + ') = \'' + self.procs[proc]['rate'] + '\'')
-        self._out('end subroutine init')
+        self._out('end subroutine init\n\n')
 
         self._out('subroutine get_rate_char(process_nr, char_slot, process_name)')
         self._out('    integer(kind=iint), intent(in) :: process_nr, char_slot')
-        self._out('    character,  intent(out) :: process_name\n\n')
+        self._out('    character,  intent(out) :: process_name\n')
         self._out('    process_name = rates(process_nr)(char_slot:char_slot)')
-        self._out('end subroutine get_rate_char')
+        self._out('\nend subroutine get_rate_char\n\n')
         self._out('subroutine get_process_char(process_nr, char_slot, process_name)')
         self._out('    integer(kind=iint), intent(in) :: process_nr, char_slot')
-        self._out('    character,  intent(out) :: process_name\n\n')
+        self._out('    character,  intent(out) :: process_name\n')
         self._out('    process_name = processes(process_nr)(char_slot:char_slot)')
-        self._out('end subroutine get_process_char')
-        self._out('subroutine kmc_step()')
+        self._out('\nend subroutine get_process_char\n\n')
+        self._out('subroutine do_kmc_step()')
         self._out('    !---------------internal variables---------------')
         self._out('    integer(kind=iint), dimension(2)  :: pdo_site, pd100_site')
         self._out('    real(kind=rsingle) :: ran_proc, ran_time, ran_site')
-        self._out('    integer(kind=iint) :: nr_site, proc_nr')
+        self._out('    integer(kind=iint) :: nr_site, proc_nr\n')
         self._out('    ! Draw 3 random numbers')
         self._out('    call random_number(ran_time)')
         self._out('        call random_number(ran_proc)')
         self._out('    call random_number(ran_site)')
+        #self._out('    print *, ran_time')
+        #self._out('    print *, ran_proc')
+        #self._out('    print *, ran_site')
         self._out('    ! Update the accumulated process rates')
         self._out('    call update_accum_rate ! @libkmc')
         self._out('    ! Determine the process and site')
         self._out('    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site) ! @libkmc\n')
-        self._out('    call run_proc_nr(proc_nr, nr_site)\n')
-        self._out('call update_clocks(ran_time)')
-        self._out('end subroutine kmc_step')
+        self._out('    print * ,proc_nr, nr_site')
+        self._out('    call run_proc_nr(proc_nr, nr_site)')
+        self._out('    call update_clocks(ran_time)\n')
+        self._out('end subroutine do_kmc_step\n\n')
 
     def variable_definitions(self):
         """Writes out the list of constants, where each refers to one
@@ -1041,7 +1045,7 @@ if \{condition 1 \} {[} and
                 else:
                     self._out('integer(kind=iint), parameter, public :: ' + proc  + ' = ' + str(i))
         self._out('\ninteger(kind=iint), parameter, public :: nr_of_proc = ' + str(i))
-        self._out('character(len=200), dimension(%s)  :: processes, rates' % i)
+        self._out('character(len=2000), dimension(%s)  :: processes, rates' % i)
 
     def write_interface(self):
         """Writes source code for which subroutines are public and which

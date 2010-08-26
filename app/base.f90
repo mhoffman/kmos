@@ -1003,7 +1003,9 @@ subroutine get_species(site, return_species)
     integer(kind=iint), intent(in) :: site
     integer(kind=iint), intent(out) :: return_species
 
-    ASSERT(site.ge.1,"kmos/base/get_species was asked for a 0 or negative site")
+    !! DEBUG 
+    !print *, site
+    ASSERT(site.ge.1,"kmos/base/get_species was asked for a zero or negative site")
     ASSERT(site.le.volume,"kmos/base/get_species was asked for a site outside the lattice")
 
     return_species = lattice(site)
