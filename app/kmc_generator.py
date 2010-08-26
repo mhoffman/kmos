@@ -1177,7 +1177,7 @@ if \{condition 1 \} {[} and
             self._out(routine_name + '(site' + self.xtra_args+ ')')
             self._out('    integer(kind=iint), dimension(' + str(self.meta['dimension']) + '), intent(in) :: site')
             self._out(self.xtra_args_def)
-            self._out('\n    logical :: check, can\n\n')
+            self._out('\n    logical :: check\n    logical :: can\n\n')
 
             # Debugging statement
             if self.meta['debug'] > 1 :
