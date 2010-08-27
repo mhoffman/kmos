@@ -1426,7 +1426,7 @@ class DialogDefineSite():
         name_field = self.wtree.get_widget('defineSite_type')
         name_field.set_text('default')
         index_field = self.wtree.get_widget('defineSite_index')
-        index_adjustment = gtk.Adjustment(value=len(self.lattice_dialog.lattice.sites + 1), lower=0, upper=1000, step_incr=1, page_incr=4, page_size=0)
+        index_adjustment = gtk.Adjustment(value=len(self.lattice_dialog.lattice.sites) + 1, lower=0, upper=1000, step_incr=1, page_incr=4, page_size=0)
         index_field.set_adjustment(index_adjustment)
         index_field.set_value(len(self.lattice_dialog.lattice.sites))
         index_field.set_sensitive(False)
