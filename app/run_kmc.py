@@ -57,8 +57,7 @@ class KMC_Run():
 
 
     def run(self):
-        for i in xrange(int(65)):
-            print('STEP %s'%i)
+        for i in xrange(int(1.e6)):
             kmc.proclist.do_kmc_step()
 
     def set_rates(self):
@@ -138,4 +137,4 @@ def get_lattice_name(lattice_nr):
 if __name__ == '__main__':
     kmc_run = KMC_Run()
     kmc_run.set_rates()
-    #kmc_run.run()
+    kmc_run.run()

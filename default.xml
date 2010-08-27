@@ -67,6 +67,54 @@
             <action coord="0 1 1 0" species="empty"/>
             <action coord="0 0 1 0" species="empty"/>
         </process>
+        <process center_site="0 0 0 0" name="reaction_co_bridge_o_bridge_down" rate_constant="rate_reaction_co_cus_o_cus">
+            <condition coord="0 0 0 0" species="oxygen"/>
+            <condition coord="0 -1 0 0" species="CO"/>
+            <action coord="0 0 0 0" species="empty"/>
+            <action coord="0 -1 0 0" species="empty"/>
+        </process>
+        <process center_site="0 1 0 0" name="reaction_co_bridge_o_bridge_up" rate_constant="rate_reaction_co_cus_o_cus">
+            <condition coord="0 1 0 0" species="CO"/>
+            <condition coord="0 0 0 0" species="oxygen"/>
+            <action coord="0 0 0 0" species="empty"/>
+            <action coord="0 1 0 0" species="empty"/>
+        </process>
+        <process center_site="0 0 1 0" name="reaction_co_bridge_o_cus_left" rate_constant="rate_reaction_co_cus_o_cus">
+            <condition coord="0 0 0 0" species="oxygen"/>
+            <condition coord="0 0 1 0" species="CO"/>
+            <action coord="0 0 1 0" species="empty"/>
+            <action coord="0 0 0 0" species="empty"/>
+        </process>
+        <process center_site="-1 0 1 0" name="reaction_co_bridge_o_cus_right" rate_constant="rate_reaction_co_cus_o_cus">
+            <condition coord="0 0 0 0" species="oxygen"/>
+            <condition coord="-1 0 1 0" species="CO"/>
+            <action coord="0 0 0 0" species="empty"/>
+            <action coord="-1 0 1 0" species="empty"/>
+        </process>
+        <process center_site="0 0 1 0" name="reaction_co_cus_o_bridge_right" rate_constant="rate_reaction_co_cus_o_cus">
+            <condition coord="0 0 1 0" species="oxygen"/>
+            <condition coord="1 0 0 0" species="CO"/>
+            <action coord="0 0 1 0" species="empty"/>
+            <action coord="1 0 0 0" species="empty"/>
+        </process>
+        <process center_site="0 0 1 0" name="reaction_co_cus_o_bridge_left" rate_constant="rate_reaction_co_cus_o_cus">
+            <condition coord="0 0 1 0" species="oxygen"/>
+            <condition coord="0 0 0 0" species="CO"/>
+            <action coord="0 0 1 0" species="empty"/>
+            <action coord="0 0 0 0" species="empty"/>
+        </process>
+        <process center_site="0 0 1 0" name="reaction_co_cus_o_cus_down" rate_constant="rate_reaction_co_cus_o_cus">
+            <condition coord="0 0 1 0" species="CO"/>
+            <condition coord="0 1 1 0" species="oxygen"/>
+            <action coord="0 0 1 0" species="empty"/>
+            <action coord="0 1 1 0" species="empty"/>
+        </process>
+        <process center_site="0 0 1 0" name="reaction_co_cus_o_cus_up" rate_constant="rate_reaction_co_cus_o_cus">
+            <condition coord="0 0 1 0" species="CO"/>
+            <condition coord="0 -1 1 0" species="oxygen"/>
+            <action coord="0 0 1 0" species="empty"/>
+            <action coord="0 -1 1 0" species="empty"/>
+        </process>
     </process_list>
 </kmc>
 <!-- This is an automatically generated XML file, representing a kMC model please do not change this unless you know what you are doing -->

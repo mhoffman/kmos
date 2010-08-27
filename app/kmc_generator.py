@@ -1514,7 +1514,7 @@ def is_name_string(string):
     First letter may be a lower or upper case letter,
     the following letters may be a letter, number or underscore
     """
-    if re.match(r'^[A-Za-z][A-Za-z_0-9]{0,30}$', string):
+    if re.match(r'^[A-Za-z][A-Za-z_0-9]{0,62}$', string):
         return True
     else:
         return False
