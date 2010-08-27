@@ -70,28 +70,29 @@ subroutine %(lattice_name)s2nr(site, nr)
     integer(kind=iint) , dimension(2) :: folded_site, unit_cell, local_part
     integer(kind=iint) :: cell_nr
 
-    ! Determine unit cell
-    unit_cell = site/(/lattice_matrix(1,1),lattice_matrix(2,2)/)
-    !! DEBUGGING
-    !print *,'unit_cell(1)',unit_cell
-    ! Determine local part
-    local_part = modulo(site - matmul(lattice_matrix, unit_cell), (/lattice_matrix(1,1),lattice_matrix(2,2)/))
     ! Apply periodic boundary conditions
     folded_site = modulo(site, matmul(system_size, lattice_matrix))
-    unit_cell = modulo(unit_cell, system_size)
+    ! Determine unit cell
+    unit_cell = folded_site/(/lattice_matrix(1,1),lattice_matrix(2,2)/)
     ! Determine index of cell
     cell_nr = unit_cell(1) + system_size(1)*unit_cell(2)
+    ! Determine local part
+    local_part = folded_site - matmul(lattice_matrix, unit_cell)
     ! Put everything together
     nr = %(sites_per_cell)s*cell_nr + lookup_%(lattice_name)s2nr(local_part(1), local_part(2))
 
+
+
     !! DEBUGGING
+    !print *,'LATTICE TO NR-------------------------------',site
     !print *,'site',site
     !print *,'matmul(system_size, lattice_matrix)',matmul(system_size, lattice_matrix)
     !print *,'folded_site', folded_site
-    !print *,'unit_cell(2)',unit_cell
+    !print *,'unit_cell',unit_cell
     !print *,'local_part',local_part
     !print *,'cell_nr',cell_nr
     !print *,'nr', nr
+    !print *,'-------------------------------LATTICE TO NR'
 
 
 end subroutine %(lattice_name)s2nr
@@ -106,9 +107,9 @@ subroutine nr2%(lattice_name)s(nr, site)
     integer(kind=iint) :: local_nr, cell_nr
 
     ! Determine index of unit cell
-    cell_nr = (nr - 1)/%(sites_per_cell)s
+    cell_nr = (nr-1)/%(sites_per_cell)s
     ! Determine number within unit cell
-    local_nr = modulo(nr, %(sites_per_cell)s)
+    local_nr = modulo(nr-1, %(sites_per_cell)s)+1
     ! Determine unit cell
     cell(1) = modulo(cell_nr, system_size(1))
     cell(2) = cell_nr/system_size(1)
@@ -116,6 +117,17 @@ subroutine nr2%(lattice_name)s(nr, site)
     local_vector = lookup_nr2%(lattice_name)s(local_nr,:)
     ! Put everything together
     site = local_vector + matmul(lattice_matrix, cell)
+
+
+    !! DEBUGGING
+    !print *,'NR TO LATTICE---------------------------',nr
+    !print *,'cell_nr',cell_nr
+    !print *,'local_nr',local_nr
+    !print *,'cell', cell
+    !print *,'local_vector',local_vector
+    !print *,'cell_nr',cell_nr
+    !print *,'site', site
+    !print *,'---------------------------NR TO LATTICE'
 
 end subroutine nr2%(lattice_name)s
 

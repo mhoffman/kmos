@@ -138,4 +138,4 @@ def get_lattice_name(lattice_nr):
 if __name__ == '__main__':
     kmc_run = KMC_Run()
     kmc_run.set_rates()
-    kmc_run.run()
+    #kmc_run.run()

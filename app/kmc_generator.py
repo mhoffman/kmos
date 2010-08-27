@@ -1027,7 +1027,6 @@ if \{condition 1 \} {[} and
         self._out('    call update_accum_rate ! @libkmc')
         self._out('    ! Determine the process and site')
         self._out('    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site) ! @libkmc\n')
-        self._out('    print * ,proc_nr, nr_site')
         self._out('    call run_proc_nr(proc_nr, nr_site)')
         self._out('    call update_clocks(ran_time)\n')
         self._out('end subroutine do_kmc_step\n\n')
