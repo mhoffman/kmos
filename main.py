@@ -490,6 +490,7 @@ class KMC_Model(gtk.GenericTreeModel):
         # extract meta information
         meta = ET.SubElement(root,'meta')
         meta.set('name',self.meta['model_name'])
+        meta.set('author', self.meta['author'])
         meta.set('dimension',self.meta['model_dimension'])
         meta.set('debug',self.meta['debug'])
         meta.set('lattice_module','')

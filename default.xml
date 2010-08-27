@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <kmc>
-    <meta author="Max Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="2" model_name="Ruo2"/>
+    <meta author="Karsten Reuter" debug="0" email="reuter@ch.tum.de" model_dimension="2" model_name="Ruo2"/>
     <species_list>
         <species color="#00000187ffff" id="2" name="CO"/>
         <species color="#fff" id="0" name="empty"/>
@@ -91,17 +91,17 @@
             <action coord="0 0 0 0" species="empty"/>
             <action coord="-1 0 1 0" species="empty"/>
         </process>
-        <process center_site="0 0 1 0" name="reaction_co_cus_o_bridge_right" rate_constant="rate_reaction_co_cus_o_cus">
-            <condition coord="0 0 1 0" species="oxygen"/>
-            <condition coord="1 0 0 0" species="CO"/>
-            <action coord="0 0 1 0" species="empty"/>
-            <action coord="1 0 0 0" species="empty"/>
-        </process>
         <process center_site="0 0 1 0" name="reaction_co_cus_o_bridge_left" rate_constant="rate_reaction_co_cus_o_cus">
             <condition coord="0 0 1 0" species="oxygen"/>
             <condition coord="0 0 0 0" species="CO"/>
             <action coord="0 0 1 0" species="empty"/>
             <action coord="0 0 0 0" species="empty"/>
+        </process>
+        <process center_site="0 0 1 0" name="reaction_co_cus_o_bridge_right" rate_constant="rate_reaction_co_cus_o_cus">
+            <condition coord="0 0 1 0" species="oxygen"/>
+            <condition coord="1 0 0 0" species="CO"/>
+            <action coord="0 0 1 0" species="empty"/>
+            <action coord="1 0 0 0" species="empty"/>
         </process>
         <process center_site="0 0 1 0" name="reaction_co_cus_o_cus_down" rate_constant="rate_reaction_co_cus_o_cus">
             <condition coord="0 0 1 0" species="CO"/>
