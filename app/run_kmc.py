@@ -27,6 +27,7 @@ class KMC_Run():
         size = [ int(x) for x in size.split() ]
         name = config.get('standard', 'system_name')
         kmc.proclist.init(size, name)
+        base = eval('kmc.lattice.lookup_nr2%s' % self.lattice_name)
 
         default_species = config.get('standard', 'default_species')
 
@@ -66,20 +67,29 @@ class KMC_Run():
 
     def fill_unit_cell(self, x, y, species):
         species = eval('kmc.lattice.%s' % species)
-        cell_base = eval('kmc.lattice.lookup_nr2%s' % self.lattice_name)
+        base = eval('kmc.lattice.lookup_nr2%s' % self.lattice_name)
         A = kmc.lattice.lattice_matrix
-        for site in cell_base:
+        for site in base:
             current_site = x*A[0] + y*A[1] + site
             old_species = eval('kmc.lattice.%s_get_species' % self.lattice_name)(current_site)
             eval('kmc.lattice.%s_replace_species' % self.lattice_name)(current_site, old_species, species)
 
     def touchup_unit_cell(self, x, y):
-        cell_base = eval('kmc.lattice.lookup_nr2%s' % self.lattice_name)
+        base = eval('kmc.lattice.lookup_nr2%s' % self.lattice_name)
         A = kmc.lattice.lattice_matrix
-        for site in cell_base:
+        for site in base:
             current_site = x*A[0] + y*A[1] + site
             touchup = eval('kmc.proclist.touchup_%s_site' % '_'.join([ str(i) for i in site ] ))
             touchup(current_site)
+
+
+    def get_occupation(self):
+        occupation = {}
+        for species_name in self.species_names:
+            occupation[species_name] = 0
+        for y in range(size[1]):
+            for x in range(size[0]):
+                pass
 
 def get_rate_expression(process_nr):
     """Workaround function for f2py's inability to return character arrays, better known as strings.
