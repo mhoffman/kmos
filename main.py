@@ -502,7 +502,7 @@ class KMC_Model(gtk.GenericTreeModel):
         for species in self.species_list.data:
             species_elem = ET.SubElement(species_list, 'species')
             species_elem.set('name',species.name)
-            species_elem.set('id',species.id)
+            species_elem.set('id',str(species.id))
 
         # extract process list
         process_list = ET.SubElement(root, 'process_list')
@@ -1428,10 +1428,10 @@ class DialogDefineSite():
         name_field = self.wtree.get_widget('defineSite_type')
         name_field.set_text('default')
         index_field = self.wtree.get_widget('defineSite_index')
-        index_adjustment = gtk.Adjustment(value=len(self.lattice_dialog.lattice.sites) + 1, lower=0, upper=1000, step_incr=1, page_incr=4, page_size=0)
+        index_adjustment = gtk.Adjustment(lower=1, upper=1000, step_incr=1, page_incr=4, page_size=0)
         index_field.set_adjustment(index_adjustment)
-        index_field.set_value(len(self.lattice_dialog.lattice.sites))
         index_field.set_sensitive(False)
+        index_field.set_value(len(self.lattice_dialog.lattice.sites)+1)
         site_x = self.wtree.get_widget('spb_site_x')
         x_adjustment = gtk.Adjustment(value=0, lower=0, upper=self.lattice_dialog.lattice.unit_cell_size[0]-1, step_incr=1, page_incr=4, page_size=0)
         site_x.set_adjustment(x_adjustment)
