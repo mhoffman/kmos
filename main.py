@@ -797,7 +797,7 @@ class MainWindow():
                 context_menu.append(menu_item)
                 context_menu.show_all()
                 context_menu.popup(None, None, None, event.button, event.time)
-
+            
     def duplicate_process(self, event, process):
         duplicate = deepcopy(process)
         # first figure out the 'highest duplicate' made so far
@@ -1026,8 +1026,8 @@ class ProcessEditor():
     def set_model(self, kmc_model):
         self.kmc_model = kmc_model
 
-    def set_process(self, process_nr, lattice):
-        self.new_process = 
+    def set_process(self, process, lattice):
+        self.new_process = process
         self.lattice = lattice
         self.draw_lattices()
         self.lattice_ready = True
