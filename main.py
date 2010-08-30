@@ -496,9 +496,13 @@ class KMC_Model(gtk.GenericTreeModel):
         meta.set('lattice_module','')
         # extract site_type information
         site_type_list = ET.SubElement(root,'site_type_list')
-        recorded_types = []
         # extract species information
         species_list = ET.SubElement(root,'species_list')
+        for lattice in self.lattice_list.data:
+            for site in lattice.sites:
+                type = '_'.join([str(x) for x in site.coord])
+                site_type_elem = ET.SubElement(site_type_list,'type')
+                site_type_elem.set('name',type)
         for species in self.species_list.data:
             species_elem = ET.SubElement(species_list, 'species')
             species_elem.set('name',species.name)
@@ -530,11 +534,6 @@ class KMC_Model(gtk.GenericTreeModel):
                 condition_elem.set('type', type)
                 condition_elem.set('species', species)
                 condition_elem.set('coordinate', coord)
-                # Also add to site type list if necessary
-                if type not in recorded_types:
-                    site_type_elem = ET.SubElement(site_type_list,'type')
-                    site_type_elem.set('name',type)
-                    recorded_types.append(type)
             action_elem = ET.SubElement(process_elem,'action')
             for action in process.action_list:
                 action_coord = [None, None]
