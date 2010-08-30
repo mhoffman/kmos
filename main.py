@@ -492,7 +492,7 @@ class KMC_Model(gtk.GenericTreeModel):
         meta.set('name',self.meta['model_name'])
         meta.set('author', self.meta['author'])
         meta.set('dimension',str(self.meta['model_dimension']))
-        meta.set('debug',self.meta['debug'])
+        meta.set('debug',str(self.meta['debug']))
         meta.set('lattice_module','')
         # extract site_type information
         site_type_list = ET.SubElement(root,'site_type_list')
@@ -543,7 +543,7 @@ class KMC_Model(gtk.GenericTreeModel):
                     action_coord[i] = action_coord[i] - center_coord[i]
                 action_coord = ' '.join([ str(x) for x in action_coord ])
                 corresp_condition = filter(lambda x:x.attrib['coordinate'] == action_coord, condition_list.getchildren())[0]
-                site_index = corresp_condition.attrib['site']
+                site_index = str(corresp_condition.attrib['site'])
                 new_species = action.species
                 replacement_elem = ET.SubElement(action_elem,'replacement')
                 replacement_elem.set('site', site_index)
@@ -581,7 +581,7 @@ class KMC_Model(gtk.GenericTreeModel):
             parameter_elem = ET.SubElement(parameter_list, 'parameter')
             parameter_elem.set('name', parameter.name)
             parameter_elem.set('type', parameter.type)
-            parameter_elem.set('value', parameter.value)
+            parameter_elem.set('value', str(parameter.value))
         lattice_list = ET.SubElement(root, 'lattice_list')
         for lattice in self.lattice_list.data:
             lattice_elem = ET.SubElement(lattice_list,'lattice')
