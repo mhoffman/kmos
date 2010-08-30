@@ -53,6 +53,8 @@ class KMC_Run():
             for y in range(size[1]):
                 self.touchup_unit_cell(x, y)
 
+        base = eval('kmc.lattice.lookup_nr2%s' % self.lattice_name)
+
         self.set_rates()
 
 
