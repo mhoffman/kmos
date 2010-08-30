@@ -37,6 +37,12 @@
             <action coord="0 0 1 0" species="O"/>
             <action coord="0 0 0 0" species="empty"/>
         </process>
+        <process center_site="0 0 0 0" name="co_diffusion" rate_constant="rate_co_diffusion">
+            <condition coord="0 0 0 0" species="C"/>
+            <condition coord="0 0 1 0" species="empty"/>
+            <action coord="0 0 0 0" species="empty"/>
+            <action coord="0 0 1 0" species="C"/>
+        </process>
     </process_list>
 </kmc>
 <!-- This is an automatically generated XML file, representing a kMC model please do not change this unless you know what you are doing -->

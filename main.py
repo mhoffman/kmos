@@ -79,18 +79,26 @@ class KMC_Model(gtk.GenericTreeModel):
 
     #@verbose
     def on_get_flags(self):
+        """Return flags about overall kind of treeview
+        """
         return 0
 
     #@verbose
     def on_get_n_columns(self):
+        """Return how many columns the treeview has
+        """
         return len(self.column_types)
 
     #@verbose
     def on_get_column_type(self, index):
+        """Return the type of the nth column
+        """
         return self.column_types[index]
 
     #@verbose
     def on_get_iter(self, path):
+        """Return an iter object corresponding to the path
+        """
         if path == None:
             return None
         elif path[0] == 0 :
@@ -123,6 +131,8 @@ class KMC_Model(gtk.GenericTreeModel):
 
     #@verbose
     def on_get_path(self, rowref):
+        """Return the path corresponding to a certain elemen
+        """
         if rowref is None:
             return None
         elif isinstance(rowref, LatticeList):
@@ -148,6 +158,9 @@ class KMC_Model(gtk.GenericTreeModel):
 
     #@verbose
     def on_get_value(self, rowref, column):
+        """Returns the printed value corresponding to a certain field. We 
+        do not do anything with the column since there is only one.
+        """
         if isinstance(rowref, LatticeList):
             return 'Lattices'
         elif  isinstance(rowref, Lattice):
@@ -172,6 +185,8 @@ class KMC_Model(gtk.GenericTreeModel):
 
     #@verbose
     def on_iter_next(self, rowref):
+        """Given one element, this return the next iter on the same level
+        """
         if rowref is None:
             return None
         elif isinstance(rowref, LatticeList):
@@ -197,6 +212,8 @@ class KMC_Model(gtk.GenericTreeModel):
 
     #@verbose
     def on_iter_children(self, rowref):
+        """Given an element this returns the first child element
+        """
         if rowref is None:
             return self.lattice_list
         elif isinstance(rowref, LatticeList):
@@ -212,6 +229,8 @@ class KMC_Model(gtk.GenericTreeModel):
 
     #@verbose
     def on_iter_has_child(self, rowref):
+        """Returns whether element has a child
+        """
         if rowref is None:
              return True
         elif isinstance(rowref, LatticeList):
@@ -237,6 +256,8 @@ class KMC_Model(gtk.GenericTreeModel):
 
     #@verbose
     def on_iter_n_children(self, rowref):
+        """Returns how many children the given element has
+        """
         if rowref is None:
             return 6
         elif isinstance(rowref, LatticeList):
@@ -263,6 +284,8 @@ class KMC_Model(gtk.GenericTreeModel):
 
     #@verbose
     def on_iter_nth_child(self, parent, n):
+        """Given one element this function returns its nth child
+        """
         if not parent:
             if n == 0 :
                 return self.lattice_list
@@ -289,6 +312,8 @@ class KMC_Model(gtk.GenericTreeModel):
 
     #@verbose
     def on_iter_parent(self, rowref):
+        """Given one element this returns its parent element
+        """
         if rowref is None:
             return None
         elif isinstance(rowref, LatticeList):
@@ -667,11 +692,12 @@ class MainWindow():
 
         #setup overview tree
         self.treeview = self.wtree.get_widget('overviewtree')
-        self.treeview.connect('row-activated', self.treeitem_clicked)
+        #self.treeview.connect('row-activated', self.treeitem_clicked)
+        self.treeview.connect('cursor-changed', self.treeitem_clicked)
         self.treeview.set_enable_tree_lines(True)
         self.tvcolumn = gtk.TreeViewColumn('Project Data')
         self.cell = gtk.CellRendererText()
-        self.cell.set_property('editable', True)
+        #self.cell.set_property('editable', True)
         self.cell.connect('edited',self.treeitem_edited)
         self.tvcolumn.pack_start(self.cell, expand=True)
         self.tvcolumn.add_attribute(self.cell, 'text', 0)
@@ -721,9 +747,10 @@ class MainWindow():
         print("PARAMETERS: ", self.parameters)
         print("PROCESSES: ", self.processes)
 
-    def treeitem_clicked(self, widget, row,col):
-        print(widget, row, col)
-        item = self.kmc_model.on_get_iter(row)
+    def treeitem_clicked(self, widget):
+        iter = self.treeview.get_selection().get_selected()[1]
+        path = self.kmc_model.get_path(iter)
+        item = self.kmc_model.on_get_iter(path)
 
         if isinstance(item, Meta):
             dlg_meta = DialogMetaInformation()
@@ -750,9 +777,9 @@ class MainWindow():
             result, data = parameter_editor.run()
             if result == gtk.RESPONSE_OK:
                 name = data['name']
-                type = data['type']
+                param_type = data['type']
                 value = data['value']
-                parameter = Parameter(name=name, type=type, value=value)
+                parameter = Parameter(name=name, type=param_type, value=value)
                 for i, elem in enumerate(self.kmc_model.parameter_list.data):
                     if elem.name == name :
                         self.kmc_model.parameter_list[i] = parameter
@@ -797,7 +824,7 @@ class MainWindow():
                 context_menu.append(menu_item)
                 context_menu.show_all()
                 context_menu.popup(None, None, None, event.button, event.time)
-            
+
     def duplicate_process(self, event, process):
         duplicate = deepcopy(process)
         # first figure out the 'highest duplicate' made so far
