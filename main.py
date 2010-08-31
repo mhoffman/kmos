@@ -4,6 +4,7 @@
 """
 
 import pdb
+import re
 from optparse import OptionParser
 from app.config import *
 from copy import copy, deepcopy
@@ -1022,6 +1023,30 @@ class ProcessEditor():
                                                 site_nick = site.name
                                                 tooltip.set_text(site_nick)
                                                 return True
+
+    def parse_reaction(self, expr):
+        # remove spaces
+        expr = re.sub(' ', '',expr)
+        if expr.count('->') != 1 :
+            print("ERROR: a reaction expression need to have exactly one arrow")
+        left = expr[:expr.find('->')]
+        right = expr[expr.find('->')+2 :]
+        left = left.split('+')
+        right = right.split('+')
+        for i, term in enumerate(left):
+            species = term[:term.find('@')]
+            site = term[term.find('@')+1 :]
+            term = {'species':species,'site':site}
+            left[i] = term
+        for i, term in enumerate(right):
+            species = term[:term.find('@')]
+            site = term[term.find('@')+1 :]
+            term = {'species':species,'site':site}
+            right[i] = term
+        ret = {}
+        ret['left'] = left
+        ret['right'] = right
+        return ret
 
     def set_model(self, kmc_model):
         self.kmc_model = kmc_model
