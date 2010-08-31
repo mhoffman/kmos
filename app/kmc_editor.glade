@@ -412,14 +412,12 @@ in lattice coordinates (integers).</property>
     <child>
       <widget class="GtkVBox" id="vbox5">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <widget class="GtkHBox" id="hbox10">
             <property name="visible">True</property>
             <child>
               <widget class="GtkVBox" id="vbox6">
                 <property name="visible">True</property>
-                <property name="orientation">vertical</property>
                 <child>
                   <widget class="GtkButton" id="btnAddLattice">
                     <property name="label" translatable="yes">Add Lattice</property>
@@ -593,7 +591,6 @@ python script.</property>
               <widget class="GtkVBox" id="vbox16">
                 <property name="width_request">200</property>
                 <property name="visible">True</property>
-                <property name="orientation">vertical</property>
                 <child>
                   <widget class="GtkScrolledWindow" id="scrolledwindow1">
                     <property name="visible">True</property>
@@ -605,7 +602,9 @@ python script.</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="events">GDK_BUTTON_PRESS_MASK | GDK_KEY_PRESS_MASK | GDK_STRUCTURE_MASK</property>
+                        <property name="extension_events">all</property>
                         <signal name="button_press_event" handler="on_overviewtree_button_press_event"/>
+                        <signal name="select_cursor_row" handler="on_overviewtree_select_cursor_row"/>
                         <signal name="key_press_event" handler="on_overviewtree_key_press_event"/>
                       </widget>
                     </child>
@@ -1263,12 +1262,10 @@ boolean</property>
     <child internal-child="vbox">
       <widget class="GtkVBox" id="dialog-vbox10">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child>
           <widget class="GtkVBox" id="vbox13">
             <property name="visible">True</property>
-            <property name="orientation">vertical</property>
             <child>
               <widget class="GtkLabel" id="label19">
                 <property name="visible">True</property>
@@ -1285,7 +1282,6 @@ boolean</property>
                 <child>
                   <widget class="GtkVBox" id="vbox14">
                     <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
                     <child>
                       <widget class="GtkLabel" id="label13">
                         <property name="visible">True</property>
@@ -1341,7 +1337,6 @@ boolean</property>
                 <child>
                   <widget class="GtkVBox" id="vbox15">
                     <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
                     <child>
                       <widget class="GtkEntry" id="metaAuthor">
                         <property name="visible">True</property>
