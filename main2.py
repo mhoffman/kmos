@@ -257,8 +257,7 @@ class KMC_Editor(GladeDelegate):
     toplevel_name='main_window'
     def __init__(self):
         self.project_tree = ProjectTree(parent=self)
-        GladeDelegate.__init__(self)
-        self.toplevel.connect('delete-event',self.on_btn_quit__clicked)
+        GladeDelegate.__init__(self, delete_handler=self.on_btn_quit__clicked)
         self.attach_slave('overviewtree', self.project_tree)
         self.project_tree.show()
         self.saved_state = str(self.project_tree)
