@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import pdb
 import re
 from optparse import OptionParser
@@ -257,19 +257,52 @@ class KMC_Editor(GladeDelegate):
     toplevel_name='main_window'
     def __init__(self):
         self.project_tree = ProjectTree(parent=self)
-        GladeDelegate.__init__(self, delete_handler=self.on_btn_quit__clicked)
+        GladeDelegate.__init__(self)
+        self.toplevel.connect('delete-event',self.on_btn_quit__clicked)
         self.attach_slave('overviewtree', self.project_tree)
         self.project_tree.show()
         self.saved_state = str(self.project_tree)
 
     
-    def on_btn_quit__clicked(self, button, *args):
-        if self.saved_state != str(self.project_tree):
-            self.get_widget('statbar').push(1,"ERROR: There are unsaved changes")
+    def on_btn_new_project__clicked(self, button):
+        if self.get_slave('workarea'):
+            self.detach_slave('workarea')
+        inline_message = InlineMessage('"New Model" is not implemented, yet.')
+        self.attach_slave('workarea',inline_message)
+        inline_message.show()
+
+    def on_btn_add_species__clicked(self, button):
+        if self.get_slave('workarea'):
+            self.detach_slave('workarea')
+        inline_message = InlineMessage('"Add Species" is not implemented, yet.')
+        self.attach_slave('workarea',inline_message)
+        inline_message.show()
+
+        
+    def on_btn_add_process__clicked(self, button):
+        if self.get_slave('workarea'):
+            self.detach_slave('workarea')
+        inline_message = InlineMessage('"Add Process" is not implemented, yet.')
+        self.attach_slave('workarea',inline_message)
+        inline_message.show()
+
+    def on_btn_add_parameter__clicked(self, button):
+        if self.get_slave('workarea'):
+            self.detach_slave('workarea')
+        inline_message = InlineMessage('"Add Parameter" is not implemented, yet.')
+        self.attach_slave('workarea',inline_message)
+        inline_message.show()
+
+    def on_btn_open_model__clicked(self, button):
+        """Import project from XML
+        """
+        if str(self.project_tree) != self.saved_state:
+            self.get_widget('statbar').push(1,"ERROR: there are unsaved changes")
         else:
-            self.hide_and_quit()
-
-
+            self.import_xml_file(XMLFILE)
+            self.get_widget('statbar').push(1,'Imported model %s' % self.project_tree.meta.model_name)
+            self.saved_state = str(self.project_tree)
+            self.project_tree.focus_topmost()
 
     def on_btn_save_model__clicked(self, button):
         #Write Out XML File
@@ -284,19 +317,40 @@ class KMC_Editor(GladeDelegate):
                             'please do not change this unless you know what you are doing -->\n')
             outfile.close()
             self.get_widget('statbar').push(1,'Saved')
-      
-    def on_btn_open_model__clicked(self, button):
-        """Import project from XML
-        """
-        if str(self.project_tree) != self.saved_state:
-            self.get_widget('statbar').push(1,"ERROR: there are unsaved changes")
-        else:
-            self.import_xml_file(XMLFILE)
-            print(dir(self.project_tree))
-            self.get_widget('statbar').push(1,'Imported model %s' % self.project_tree.meta.model_name)
-            self.saved_state = str(self.project_tree)
-            self.project_tree.focus_topmost()
 
+
+    def on_btn_save_as__clicked(self, button):
+        if self.get_slave('workarea'):
+            self.detach_slave('workarea')
+        inline_message = InlineMessage('"Save As" is not implemented, yet.')
+        self.attach_slave('workarea',inline_message)
+        inline_message.show()
+
+    def on_btn_export_src__clicked(self, button):
+        if self.get_slave('workarea'):
+            self.detach_slave('workarea')
+        inline_message = InlineMessage('"Export Source" is not implemented, yet.')
+        self.attach_slave('workarea',inline_message)
+        inline_message.show()
+
+    def on_btn_help__clicked(self, button):
+        if self.get_slave('workarea'):
+            self.detach_slave('workarea')
+        inline_message = InlineMessage('"Help" is not implemented, yet.')
+        self.attach_slave('workarea',inline_message)
+        inline_message.show()
+
+
+    def on_btn_quit__clicked(self, button, *args):
+        if self.saved_state != str(self.project_tree):
+            self.get_widget('statbar').push(1,"ERROR: There are unsaved changes")
+        else:
+            self.hide_and_quit()
+            gtk.main_quit()
+
+
+
+      
 
     def import_xml_file(self,filename):
         xmlparser = ET.XMLParser(remove_comments=True)
