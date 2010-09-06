@@ -197,6 +197,9 @@ class ProjectTree(SlaveDelegate):
                 action_elem.set('coord', str(action.coord)[1 :-1].replace(',',''))
         return prettify_xml(root)
 
+    def select_meta(self):
+        self.focus_topmost()
+        self.on_project_data_selection_changed(0, self.meta)
     def on_project_data__selection_changed(self, item, elem):
         slave = self.get_parent().get_slave('workarea')
         if slave:
@@ -254,13 +257,13 @@ class KMC_Editor(GladeDelegate):
     toplevel_name='main_window'
     def __init__(self):
         self.project_tree = ProjectTree(parent=self)
-        GladeDelegate.__init__(self, delete_handler=self.quit_if_last)
+        GladeDelegate.__init__(self, delete_handler=self.on_btn_quit__clicked)
         self.attach_slave('overviewtree', self.project_tree)
         self.project_tree.show()
         self.saved_state = str(self.project_tree)
 
     
-    def on_btn_quit__clicked(self, button):
+    def on_btn_quit__clicked(self, button, *args):
         if self.saved_state != str(self.project_tree):
             self.get_widget('statbar').push(1,"ERROR: There are unsaved changes")
         else:
@@ -289,6 +292,7 @@ class KMC_Editor(GladeDelegate):
             self.get_widget('statbar').push(1,"ERROR: there are unsaved changes")
         else:
             self.import_xml_file(XMLFILE)
+            print(dir(self.project_tree))
             self.get_widget('statbar').push(1,'Imported model %s' % self.project_tree.meta.model_name)
             self.saved_state = str(self.project_tree)
             self.project_tree.focus_topmost()
