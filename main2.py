@@ -347,6 +347,9 @@ class KMC_Editor(GladeDelegate):
         else:
             self.hide_and_quit()
             gtk.main_quit()
+        # Need to return true, or otherwise the window manager destroys 
+        # the windows anywas
+        return True
 
 
 
