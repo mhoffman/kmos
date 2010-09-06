@@ -213,9 +213,7 @@ class ProjectTree(SlaveDelegate):
             self.get_parent().attach_slave('workarea', species_form)
             species_form.show()
         else:
-            inline_message = InlineMessage('Not implemented, yet.')
-            self.get_parent().attach_slave('workarea',inline_message)
-            inline_message.show()
+            self.get_parent().toast('Not implemented, yet.')
 
 
 class MetaForm(ProxySlaveDelegate):
@@ -224,8 +222,6 @@ class MetaForm(ProxySlaveDelegate):
     widgets = ['author','email','model_name','model_dimension','debug']
     def __init__(self, model):
         ProxySlaveDelegate.__init__(self, model)
-
-
 
 class InlineMessage(SlaveView):
     gladefile=GLADEFILE
@@ -248,9 +244,6 @@ class SpeciesForm(ProxySlaveDelegate):
         self.project_data.update(self.model)
     
 
-
-
-
 class KMC_Editor(GladeDelegate):
     widgets = ['workarea','statbar']
     gladefile=GLADEFILE
@@ -261,36 +254,28 @@ class KMC_Editor(GladeDelegate):
         self.attach_slave('overviewtree', self.project_tree)
         self.project_tree.show()
         self.saved_state = str(self.project_tree)
+        # Cast initial message
+        self.toast('Start a new project by filling in meta information,\nlattice, species, parameters, and processes or open an existing one\nby opening and kMC XML file')
 
+    def toast(self, toast):
+        if self.get_slave('workarea'):
+            self.detach_slave('workarea')
+        inline_message = InlineMessage(toast)
+        self.attach_slave('workarea',inline_message)
+        inline_message.show()
     
     def on_btn_new_project__clicked(self, button):
-        if self.get_slave('workarea'):
-            self.detach_slave('workarea')
-        inline_message = InlineMessage('"New Model" is not implemented, yet.')
-        self.attach_slave('workarea',inline_message)
-        inline_message.show()
+        self.toast('"New Model" is not implemented, yet.')
 
     def on_btn_add_species__clicked(self, button):
-        if self.get_slave('workarea'):
-            self.detach_slave('workarea')
-        inline_message = InlineMessage('"Add Species" is not implemented, yet.')
-        self.attach_slave('workarea',inline_message)
-        inline_message.show()
+        self.toast('"Add Species" is not implemented, yet.')
 
         
     def on_btn_add_process__clicked(self, button):
-        if self.get_slave('workarea'):
-            self.detach_slave('workarea')
-        inline_message = InlineMessage('"Add Process" is not implemented, yet.')
-        self.attach_slave('workarea',inline_message)
-        inline_message.show()
+        self.toast('"Add Process" is not implemented, yet.')
 
     def on_btn_add_parameter__clicked(self, button):
-        if self.get_slave('workarea'):
-            self.detach_slave('workarea')
-        inline_message = InlineMessage('"Add Parameter" is not implemented, yet.')
-        self.attach_slave('workarea',inline_message)
-        inline_message.show()
+        self.toast('"Add Parameter" is not implemented, yet.')
 
     def on_btn_open_model__clicked(self, button):
         """Import project from XML
@@ -319,25 +304,13 @@ class KMC_Editor(GladeDelegate):
 
 
     def on_btn_save_as__clicked(self, button):
-        if self.get_slave('workarea'):
-            self.detach_slave('workarea')
-        inline_message = InlineMessage('"Save As" is not implemented, yet.')
-        self.attach_slave('workarea',inline_message)
-        inline_message.show()
+        self.toast('"Save As" is not implemented, yet.')
 
     def on_btn_export_src__clicked(self, button):
-        if self.get_slave('workarea'):
-            self.detach_slave('workarea')
-        inline_message = InlineMessage('"Export Source" is not implemented, yet.')
-        self.attach_slave('workarea',inline_message)
-        inline_message.show()
+        self.toast('"Export Source" is not implemented, yet.')
 
     def on_btn_help__clicked(self, button):
-        if self.get_slave('workarea'):
-            self.detach_slave('workarea')
-        inline_message = InlineMessage('"Help" is not implemented, yet.')
-        self.attach_slave('workarea',inline_message)
-        inline_message.show()
+        self.toast('"Help" is not implemented, yet.')
 
 
     def on_btn_quit__clicked(self, button, *args):
