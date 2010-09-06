@@ -89,7 +89,10 @@ class Meta(Settable, object):
 
     def add(self, attrib):
         for key in attrib:
-            self.__setattr__(key, attrib[key])
+            if key in ['debug', 'model_dimension']:
+                self.__setattr__(key, int(attrib[key]))
+            else:
+                self.__setattr__(key, attrib[key])
 
 
 
@@ -111,12 +114,11 @@ class ProjectTree(SlaveDelegate):
 
     def __init__(self, parent):
         self.set_parent(parent)
-        self.lattice_list_iter = self.project_data.append(None, LatticeList())
         self.meta = self.project_data.append(None,Meta())
+        self.lattice_list_iter = self.project_data.append(None, LatticeList())
         self.parameter_list_iter = self.project_data.append(None, ParameterList())
         self.process_list_iter = self.project_data.append(None, ProcessList())
         self.species_list_iter = self.project_data.append(None, SpeciesList())
-        self.meta_form = MetaForm(self.meta)
 
         SlaveDelegate.__init__(self, toplevel=self.project_data)
 
@@ -134,21 +136,82 @@ class ProjectTree(SlaveDelegate):
         else:
             raise AttributeError, attr
 
+    def __repr__(self):
+        return self._get_xml_string()
+
+    def _get_xml_string(self):
+        def prettify_xml(elem):
+            rough_string = ET.tostring(elem,encoding='utf-8')
+            reparsed = minidom.parseString(rough_string)
+            return reparsed.toprettyxml(indent='    ')
+        # build XML Tree
+        root = ET.Element('kmc')
+        meta = ET.SubElement(root,'meta')
+        if hasattr(self.meta, 'author'):
+            meta.set('author', self.meta.author)
+        if hasattr(self.meta, 'email'):
+            meta.set('email', self.meta.email)
+        if hasattr(self.meta, 'model_name'):
+            meta.set('model_name', self.meta.model_name)
+        if hasattr(self.meta, 'model_dimension'):
+            meta.set('model_dimension', str(self.meta.model_dimension))
+        if hasattr(self.meta, 'debug'):
+            meta.set('debug', str(self.meta.debug))
+        species_list = ET.SubElement(root,'species_list')
+        for species in self.species_list:
+            print(species)
+        #for species in self.project_data.species_list:
+            species_elem = ET.SubElement(species_list,'species')
+            species_elem.set('name',species.name)
+            species_elem.set('color',species.color)
+            species_elem.set('id',str(species.id))
+        parameter_list = ET.SubElement(root,'parameter_list')
+        for parameter in self.parameter_list:
+            parameter_elem = ET.SubElement(parameter_list, 'parameter')
+            parameter_elem.set('name', parameter.name)
+            parameter_elem.set('type', parameter.type)
+            parameter_elem.set('value', str(parameter.value))
+        lattice_list = ET.SubElement(root, 'lattice_list')
+        for lattice in self.lattice_list:
+            lattice_elem = ET.SubElement(lattice_list,'lattice')
+            lattice_elem.set('unit_cell_size', str(lattice.unit_cell_size)[1 :-1].replace(',',''))
+            lattice_elem.set('name', lattice.name)
+            for site in lattice.sites:
+                site_elem = ET.SubElement(lattice_elem, 'site')
+                site_elem.set('index',str(site.index))
+                site_elem.set('type',site.name)
+                site_elem.set('coord',str(site.coord)[1 :-1].replace(',',''))
+        process_list = ET.SubElement(root, 'process_list')
+        for process in self.process_list:
+            process_elem = ET.SubElement(process_list,'process')
+            process_elem.set('rate_constant', process.rate_constant)
+            process_elem.set('name', process.name)
+            process_elem.set('center_site', str(process.center_site)[1 :-1].replace(',',''))
+            for condition in process.condition_list:
+                condition_elem = ET.SubElement(process_elem, 'condition')
+                condition_elem.set('species', condition.species)
+                condition_elem.set('coord', str(condition.coord)[1 :-1].replace(',', ''))
+            for action in process.action_list:
+                action_elem = ET.SubElement(process_elem, 'action')
+                action_elem.set('species', action.species)
+                action_elem.set('coord', str(action.coord)[1 :-1].replace(',',''))
+        return prettify_xml(root)
+
     def on_project_data__selection_changed(self, item, elem):
         slave = self.get_parent().get_slave('workarea')
         if slave:
             self.get_parent().detach_slave('workarea')
-
         if isinstance(elem, Meta):
-            self.get_parent().attach_slave('workarea', self.meta_form)
-            self.meta_form.show()
+            meta_form = MetaForm(self.meta)
+            self.get_parent().attach_slave('workarea', meta_form)
+            meta_form.show()
         elif isinstance(elem, Species):
             species_form = SpeciesForm(elem, self.project_data)
             self.get_parent().attach_slave('workarea', species_form)
             species_form.show()
         else:
             inline_message = InlineMessage('Not implemented, yet.')
-            self.get_parent().attach_slave('workarea', inline_message)
+            self.get_parent().attach_slave('workarea',inline_message)
             inline_message.show()
 
 
@@ -165,9 +228,9 @@ class InlineMessage(SlaveView):
     gladefile=GLADEFILE
     toplevel_name = 'inline_message'
     widgets = ['message_label']
-    def __init__(self, message):
-        print(dir(self))
+    def __init__(self, message=''):
         SlaveView.__init__(self)
+        self.get_widget('message_label').set_text(message)
 
 
 class SpeciesForm(ProxySlaveDelegate):
@@ -194,77 +257,46 @@ class KMC_Editor(GladeDelegate):
         GladeDelegate.__init__(self, delete_handler=self.quit_if_last)
         self.attach_slave('overviewtree', self.project_tree)
         self.project_tree.show()
+        self.saved_state = str(self.project_tree)
 
     
     def on_btn_quit__clicked(self, button):
-        self.hide_and_quit()
+        if self.saved_state != str(self.project_tree):
+            self.get_widget('statbar').push(1,"ERROR: There are unsaved changes")
+        else:
+            self.hide_and_quit()
+
 
 
     def on_btn_save_model__clicked(self, button):
-        # build XML Tree
-        root = ET.Element('kmc')
-        meta = ET.SubElement(root,'meta')
-        if hasattr(self.project_tree.meta, 'author'):
-            meta.set('author', self.project_tree.meta.author)
-        if hasattr(self.project_tree.meta, 'email'):
-            meta.set('email', self.project_tree.meta.email)
-        if hasattr(self.project_tree.meta, 'model_name'):
-            meta.set('model_name', self.project_tree.meta.model_name)
-        if hasattr(self.project_tree.meta, 'model_dimension'):
-            meta.set('model_dimension', str(self.project_tree.meta.model_dimension))
-        if hasattr(self.project_tree.meta, 'debug'):
-            meta.set('debug', str(self.project_tree.meta.debug))
-        species_list = ET.SubElement(root,'species_list')
-        for species in self.project_tree.species_list:
-            print(species)
-        #for species in self.project_tree.project_data.species_list:
-            species_elem = ET.SubElement(species_list,'species')
-            species_elem.set('name',species.name)
-            species_elem.set('color',species.color)
-            species_elem.set('id',str(species.id))
-        parameter_list = ET.SubElement(root,'parameter_list')
-        for parameter in self.project_tree.parameter_list:
-            parameter_elem = ET.SubElement(parameter_list, 'parameter')
-            parameter_elem.set('name', parameter.name)
-            parameter_elem.set('type', parameter.type)
-            parameter_elem.set('value', str(parameter.value))
-        lattice_list = ET.SubElement(root, 'lattice_list')
-        for lattice in self.project_tree.lattice_list:
-            lattice_elem = ET.SubElement(lattice_list,'lattice')
-            lattice_elem.set('unit_cell_size', str(lattice.unit_cell_size)[1 :-1].replace(',',''))
-            lattice_elem.set('name', lattice.name)
-            for site in lattice.sites:
-                site_elem = ET.SubElement(lattice_elem, 'site')
-                site_elem.set('index',str(site.index))
-                site_elem.set('type',site.name)
-                site_elem.set('coord',str(site.coord)[1 :-1].replace(',',''))
-        process_list = ET.SubElement(root, 'process_list')
-        for process in self.project_tree.process_list:
-            process_elem = ET.SubElement(process_list,'process')
-            process_elem.set('rate_constant', process.rate_constant)
-            process_elem.set('name', process.name)
-            process_elem.set('center_site', str(process.center_site)[1 :-1].replace(',',''))
-            for condition in process.condition_list:
-                condition_elem = ET.SubElement(process_elem, 'condition')
-                condition_elem.set('species', condition.species)
-                condition_elem.set('coord', str(condition.coord)[1 :-1].replace(',', ''))
-            for action in process.action_list:
-                action_elem = ET.SubElement(process_elem, 'action')
-                action_elem.set('species', action.species)
-                action_elem.set('coord', str(action.coord)[1 :-1].replace(',',''))
         #Write Out XML File
-        tree = ET.ElementTree(root)
-        outfile = open(XMLFILE,'w')
-        outfile.write(prettify_xml(root))
-        outfile.write('<!-- This is an automatically generated XML file, representing a kMC model ' + \
-                        'please do not change this unless you know what you are doing -->\n')
-        outfile.close()
+        xml_string = str(self.project_tree)
+        if xml_string == self.saved_state:
+            self.get_widget('statbar').push(1, 'Nothing to save')
+        else:
+            self.saved_state = xml_string
+            outfile = open(XMLFILE,'w')
+            outfile.write(self.saved_state)
+            outfile.write('<!-- This is an automatically generated XML file, representing a kMC model ' + \
+                            'please do not change this unless you know what you are doing -->\n')
+            outfile.close()
+            self.get_widget('statbar').push(1,'Saved')
       
     def on_btn_open_model__clicked(self, button):
         """Import project from XML
         """
+        if str(self.project_tree) != self.saved_state:
+            self.get_widget('statbar').push(1,"ERROR: there are unsaved changes")
+        else:
+            self.import_xml_file(XMLFILE)
+            self.get_widget('statbar').push(1,'Imported model %s' % self.project_tree.meta.model_name)
+            self.saved_state = str(self.project_tree)
+            self.project_tree.focus_topmost()
+
+
+    def import_xml_file(self,filename):
         xmlparser = ET.XMLParser(remove_comments=True)
-        root = ET.parse(XMLFILE, parser=xmlparser).getroot()
+        root = ET.parse(filename, parser=xmlparser).getroot()
         dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_DTD)
         if not dtd.validate(root):
             print(dtd.error_log.filter_from_errors()[0])
@@ -318,10 +350,6 @@ class KMC_Editor(GladeDelegate):
                     self.project_tree.project_data.append(self.project_tree.species_list, species_elem)
         
 
-def prettify_xml(elem):
-    rough_string = ET.tostring(elem,encoding='utf-8')
-    reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent='    ')
 
 
 if __name__ == '__main__':
