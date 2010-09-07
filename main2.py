@@ -119,6 +119,7 @@ class ProjectTree(SlaveDelegate):
         self.parameter_list_iter = self.project_data.append(None, ParameterList())
         self.process_list_iter = self.project_data.append(None, ProcessList())
         self.species_list_iter = self.project_data.append(None, SpeciesList())
+        self.filename = ''
 
         SlaveDelegate.__init__(self, toplevel=self.project_data)
 
@@ -138,6 +139,63 @@ class ProjectTree(SlaveDelegate):
 
     def __repr__(self):
         return self._get_xml_string()
+
+    def import_xml_file(self,filename):
+        self.filename = filename
+        xmlparser = ET.XMLParser(remove_comments=True)
+        root = ET.parse(filename, parser=xmlparser).getroot()
+        dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_DTD)
+        if not dtd.validate(root):
+            print(dtd.error_log.filter_from_errors()[0])
+            return
+        for child in root:
+            if child.tag == 'lattice_list':
+                for lattice in child:
+                    name = lattice.attrib['name']
+                    unit_cell_size = [ int(x) for x in lattice.attrib['unit_cell_size'].split() ]
+                    lattice_elem = Lattice(name=name, unit_cell_size=unit_cell_size)
+                    for site in lattice:
+                        index =  int(site.attrib['index'])
+                        name = site.attrib['type']
+                        coord = [ int(x) for x in site.attrib['coord'].split() ]
+                        site_elem = Settable(index=index, name=name, coord=coord)
+                        lattice_elem.add_site(site_elem)
+                    self.project_data.append(self.lattice_list, lattice_elem)
+            elif child.tag == 'meta':
+                for attrib in ['author','email', 'debug','model_name','model_dimension']:
+                    if child.attrib.has_key(attrib):
+                        self.meta.add({attrib:child.attrib[attrib]})
+            elif child.tag == 'parameter_list':
+                for parameter in child:
+                    name = parameter.attrib['name']
+                    type = parameter.attrib['type']
+                    value = parameter.attrib['value']
+                    parameter_elem = Settable(name=name,type=type,value=value)
+                    self.parameter_list.append(parameter_elem)
+            elif child.tag == 'process_list':
+                for process in child:
+                    center_site = [ int(x) for x in  process.attrib['center_site'].split() ]
+                    name = process.attrib['name']
+                    rate_constant = process.attrib['rate_constant']
+                    process_elem = Process(name=name, center_site=center_site, rate_constant=rate_constant)
+                    for sub in process:
+                        if sub.tag == 'action' or sub.tag == 'condition':
+                            species =  sub.attrib['species']
+                            coord = [ int(x) for x in sub.attrib['coord'].split() ]
+                            condition_action = Settable(species=species, coord=coord)
+                            if sub.tag == 'action':
+                                process_elem.add_action(condition_action)
+                            elif sub.tag == 'condition':
+                                process_elem.add_condition(condition_action)
+                    self.project_data.append(self.process_list, process_elem)
+            elif child.tag == 'species_list':
+                for species in child:
+                    name = species.attrib['name']
+                    id = species.attrib['id']
+                    color = species.attrib['color']
+                    species_elem = Species(name=name, color=color, id=id)
+                    self.project_data.append(self.species_list, species_elem)
+        self.select_meta()
 
     def _get_xml_string(self):
         def prettify_xml(elem):
@@ -199,7 +257,8 @@ class ProjectTree(SlaveDelegate):
 
     def select_meta(self):
         self.focus_topmost()
-        self.on_project_data_selection_changed(0, self.meta)
+        self.on_project_data__selection_changed(0, self.meta)
+
     def on_project_data__selection_changed(self, item, elem):
         slave = self.get_parent().get_slave('workarea')
         if slave:
@@ -282,29 +341,49 @@ class KMC_Editor(GladeDelegate):
         """
         if str(self.project_tree) != self.saved_state:
             self.get_widget('statbar').push(1,"ERROR: there are unsaved changes")
-        else:
-            self.import_xml_file(XMLFILE)
+            return
+
+        filechooser = gtk.FileChooserDialog(title='Open Project',
+            action = gtk.FILE_CHOOSER_ACTION_OPEN,
+            buttons=(gtk.STOCK_OK, gtk.RESPONSE_OK, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+        resp = filechooser.run()
+        filename = filechooser.get_filename()
+        filechooser.destroy()
+        if resp == gtk.RESPONSE_OK and filename:
+            self.project_tree.import_xml_file(filename)
             self.get_widget('statbar').push(1,'Imported model %s' % self.project_tree.meta.model_name)
             self.saved_state = str(self.project_tree)
-            self.project_tree.focus_topmost()
 
-    def on_btn_save_model__clicked(self, button):
+    def on_btn_save_model__clicked(self, button, force_save=False):
         #Write Out XML File
         xml_string = str(self.project_tree)
-        if xml_string == self.saved_state:
+        if xml_string == self.saved_state and not force_save:
             self.get_widget('statbar').push(1, 'Nothing to save')
         else:
-            self.saved_state = xml_string
-            outfile = open(XMLFILE,'w')
+            if not self.project_tree.filename:
+                self.on_btn_save_as__clicked(None)
+                
+            outfile = open(self.project_tree.filename,'w')
             outfile.write(self.saved_state)
             outfile.write('<!-- This is an automatically generated XML file, representing a kMC model ' + \
                             'please do not change this unless you know what you are doing -->\n')
             outfile.close()
-            self.get_widget('statbar').push(1,'Saved')
+            self.saved_state = xml_string
+            self.get_widget('statbar').push(1,'Saved %s' % self.project_tree.filename)
 
 
     def on_btn_save_as__clicked(self, button):
-        self.toast('"Save As" is not implemented, yet.')
+        filechooser = gtk.FileChooserDialog(title='Save Project As ...',
+            action = gtk.FILE_CHOOSER_ACTION_SAVE,
+            parent=None,
+            buttons=(gtk.STOCK_OK, gtk.RESPONSE_OK, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+        filechooser.set_property('do-overwrite-confirmation',True)
+        print(dir(filechooser))
+        resp = filechooser.run()
+        if resp == gtk.RESPONSE_OK:
+            self.project_tree.filename = filechooser.get_filename()
+            self.on_btn_save_model__clicked(None, force_save=True)
+        filechooser.destroy()
 
     def on_btn_export_src__clicked(self, button):
         self.toast('"Export Source" is not implemented, yet.')
@@ -327,60 +406,6 @@ class KMC_Editor(GladeDelegate):
 
       
 
-    def import_xml_file(self,filename):
-        xmlparser = ET.XMLParser(remove_comments=True)
-        root = ET.parse(filename, parser=xmlparser).getroot()
-        dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_DTD)
-        if not dtd.validate(root):
-            print(dtd.error_log.filter_from_errors()[0])
-            return
-        for child in root:
-            if child.tag == 'lattice_list':
-                for lattice in child:
-                    name = lattice.attrib['name']
-                    unit_cell_size = [ int(x) for x in lattice.attrib['unit_cell_size'].split() ]
-                    lattice_elem = Lattice(name=name, unit_cell_size=unit_cell_size)
-                    for site in lattice:
-                        index =  int(site.attrib['index'])
-                        name = site.attrib['type']
-                        coord = [ int(x) for x in site.attrib['coord'].split() ]
-                        site_elem = Settable(index=index, name=name, coord=coord)
-                        lattice_elem.add_site(site_elem)
-                    self.project_tree.project_data.append(self.project_tree.lattice_list, lattice_elem)
-            elif child.tag == 'meta':
-                for attrib in ['author','email', 'debug','model_name','model_dimension']:
-                    if child.attrib.has_key(attrib):
-                        self.project_tree.meta.add({attrib:child.attrib[attrib]})
-            elif child.tag == 'parameter_list':
-                for parameter in child:
-                    name = parameter.attrib['name']
-                    type = parameter.attrib['type']
-                    value = parameter.attrib['value']
-                    parameter_elem = Settable(name=name,type=type,value=value)
-                    self.parameter_list.append(parameter_elem)
-            elif child.tag == 'process_list':
-                for process in child:
-                    center_site = [ int(x) for x in  process.attrib['center_site'].split() ]
-                    name = process.attrib['name']
-                    rate_constant = process.attrib['rate_constant']
-                    process_elem = Process(name=name, center_site=center_site, rate_constant=rate_constant)
-                    for sub in process:
-                        if sub.tag == 'action' or sub.tag == 'condition':
-                            species =  sub.attrib['species']
-                            coord = [ int(x) for x in sub.attrib['coord'].split() ]
-                            condition_action = Settable(species=species, coord=coord)
-                            if sub.tag == 'action':
-                                process_elem.add_action(condition_action)
-                            elif sub.tag == 'condition':
-                                process_elem.add_condition(condition_action)
-                    self.project_tree.project_data.append(self.project_tree.process_list, process_elem)
-            elif child.tag == 'species_list':
-                for species in child:
-                    name = species.attrib['name']
-                    id = species.attrib['id']
-                    color = species.attrib['color']
-                    species_elem = Species(name=name, color=color, id=id)
-                    self.project_tree.project_data.append(self.project_tree.species_list, species_elem)
         
 
 
