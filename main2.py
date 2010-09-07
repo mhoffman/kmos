@@ -394,6 +394,21 @@ class KMC_Editor(GladeDelegate):
 
     def on_btn_quit__clicked(self, button, *args):
         if self.saved_state != str(self.project_tree):
+            save_changes_dialog = gtk.MessageDialog(buttons=(gtk.STOCK_DISCARD, gtk.RESPONSE_DELETE_EVENT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_SAVE, gtk.RESPONSE_OK), message_format='Saved unsaved changes?')
+            resp = save_changes_dialog()
+            if resp == gtk.RESPONSE_CANCEL:
+                return
+            elif resp == gtk.RESPONSE_DELETE_EVENT:
+                self.hide_and_quit()
+                gtk.main_quit()
+            elif resp == gtk.RESPONSE_OK:
+                if self.project_tree.filename:
+                    self.on_btn_save_model__clicked(None)
+                else:
+                    self.on_btn_save_as__clicked(None)
+                
+                
+
             self.get_widget('statbar').push(1,"ERROR: There are unsaved changes")
         else:
             self.hide_and_quit()
