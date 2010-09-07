@@ -125,6 +125,7 @@ class ProjectTree(SlaveDelegate):
         self.project_data = ObjectTree(Column('name', data_type=str))
         self.set_parent(parent)
         self.meta = self.project_data.append(None,Meta())
+        self.meta.add({'model_dimension':2})
         self.lattice_list_iter = self.project_data.append(None, LatticeList())
         self.parameter_list_iter = self.project_data.append(None, ParameterList())
         self.process_list_iter = self.project_data.append(None, ProcessList())
@@ -312,6 +313,7 @@ class MetaForm(ProxySlaveDelegate):
     widgets = ['author','email','model_name','model_dimension','debug']
     def __init__(self, model):
         ProxySlaveDelegate.__init__(self, model)
+        self.get_widget('model_dimension').set_sensitive(False)
 
 class InlineMessage(SlaveView):
     gladefile=GLADEFILE
@@ -383,6 +385,8 @@ class KMC_Editor(GladeDelegate):
         if str(self.project_tree) != self.saved_state:
             # if there are unsaved changes, ask what to do first
             save_changes_dialog = gtk.Dialog(buttons=(gtk.STOCK_DISCARD, gtk.RESPONSE_DELETE_EVENT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_SAVE, gtk.RESPONSE_OK), title='Saved unsaved changes?')
+            save_changes_dialog.vbox.pack_start(gtk.Label("\nThere are unsaved changes.\nWhat shall we do?\n\n"))
+            save_changes_dialog.show_all()
             resp = save_changes_dialog.run()
             save_changes_dialog.destroy()
             if resp == gtk.RESPONSE_DELETE_EVENT:
@@ -453,6 +457,8 @@ class KMC_Editor(GladeDelegate):
     def on_btn_quit__clicked(self, button, *args):
         if self.saved_state != str(self.project_tree):
             save_changes_dialog = gtk.Dialog(buttons=(gtk.STOCK_DISCARD, gtk.RESPONSE_DELETE_EVENT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_SAVE, gtk.RESPONSE_OK), title='Saved unsaved changes?')
+            save_changes_dialog.vbox.pack_start(gtk.Label("\nThere are unsaved changes.\nWhat shall we do?\n\n"))
+            save_changes_dialog.show_all()
             resp = save_changes_dialog.run()
             save_changes_dialog.destroy()
             if resp == gtk.RESPONSE_CANCEL:
