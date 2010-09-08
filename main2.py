@@ -22,9 +22,10 @@ from kmc_generator import ProcessList as ProcListWriter
 #Kiwi imports
 from kiwi.ui.views import SlaveView, BaseView
 from kiwi.controllers import BaseController
-from kiwi.ui.delegates import Delegate, SlaveDelegate, ProxyDelegate, ProxySlaveDelegate, GladeDelegate
+from kiwi.ui.delegates import Delegate, SlaveDelegate, ProxyDelegate, ProxySlaveDelegate, GladeDelegate, GladeSlaveDelegate
 from kiwi.python import Settable
 from kiwi.ui.objectlist import ObjectTree, Column
+from kiwi.datatypes import ValidationError
 
 
 KMCPROJECT_DTD = '/kmc_project.dtd'
@@ -34,6 +35,27 @@ SRCDIR = './fortran_src'
 GLADEFILE = os.path.join(APP_ABS_PATH, 'kmc_editor2.glade')
 
 
+class Attributes:
+    attributes = []
+    def __init__(self, **kwargs):
+        for attribute in self.attributes:
+            if kwargs.has_key(attribute):
+                self.__dict__[attribute] = kwargs[attribute]
+        for key in kwargs:
+            if key not in self.attributes:
+                raise AttributeError, 'Tried to initialize illegal attribute'
+    def __setattr__(self, attrname, value):
+        if attrname in self.attributes:
+            self.__dict__[attrname] = value
+        else:
+            raise AttributeError, 'Tried to initialize illegal attribute'
+
+class CorrectlyNamed:
+    def on_name__validate(self, widget, name):
+        if ' ' in name:
+            return ValidationError('No spaces allowed')
+        elif name and not name[0].isalpha():
+            return ValidationError('Need to start with a letter')
 
 class Lattice(Settable):
     def __init__(self, **kwargs):
@@ -44,21 +66,10 @@ class Lattice(Settable):
         self.sites.append(site)
 
 
-class Species(Settable):
+class Species(Attributes):
+    attributes = ['name', 'color', 'id']
     def __init__(self, **kwargs):
-        if kwargs.has_key('name'):
-            name = kwargs['name']
-        else:
-            name = ''
-        if kwargs.has_key('id'):
-            id = kwargs['id']
-        else:
-            id = ''
-        if kwargs.has_key('color'):
-            color = kwargs['color']
-        else:
-            color = ''
-        Settable.__init__(self, name=name, id=id, color=color)
+        Attributes.__init__(self, **kwargs)
 
 class SpeciesList(Settable):
     def __init__(self, **kwargs):
@@ -71,7 +82,6 @@ class ProcessList(Settable):
         kwargs['name'] = 'Processes'
         Settable.__init__(self, **kwargs)
 
-    
 class ParameterList(Settable):
     def __init__(self, **kwargs):
         kwargs['name'] = 'Parameters'
@@ -84,9 +94,14 @@ class LatticeList(Settable):
         Settable.__init__(self, **kwargs)
 
 
-class Parameter(Settable):
+class Parameter(Attributes, CorrectlyNamed):
+    attributes = ['name', 'value']
     def __init__(self, **kwargs):
-        Settable.__init__(self, **kwargs)
+        Attributes.__init__(self, **kwargs)
+
+    def on_name__content_changed(self, text):
+        self.project_tree.update(self.process)
+
 
 
 class ParameterList(Settable):
@@ -118,6 +133,7 @@ class Process(Settable):
 
     def add_action(self, action):
         self.action_list.append(action)
+
 
 
 class ProjectTree(SlaveDelegate):
@@ -258,7 +274,6 @@ class ProjectTree(SlaveDelegate):
         for parameter in self.parameter_list:
             parameter_elem = ET.SubElement(parameter_list, 'parameter')
             parameter_elem.set('name', parameter.name)
-            parameter_elem.set('type', parameter.type)
             parameter_elem.set('value', str(parameter.value))
         lattice_list = ET.SubElement(root, 'lattice_list')
         for lattice in self.lattice_list:
@@ -300,20 +315,40 @@ class ProjectTree(SlaveDelegate):
             meta_form.focus_toplevel()
             meta_form.focus_topmost()
         elif isinstance(elem, Species):
-            species_form = SpeciesForm(elem, self.project_data)
-            self.get_parent().attach_slave('workarea', species_form)
-            species_form.focus_topmost()
+            form = SpeciesForm(elem, self.project_data)
+            self.get_parent().attach_slave('workarea', form)
+            form.focus_topmost()
+        elif isinstance(elem, Parameter):
+            form = ParameterForm(elem, self.project_data)
+            self.get_parent().attach_slave('workarea', form)
+            form.focus_topmost()
         else:
             self.get_parent().toast('Not implemented, yet.')
 
 
-class MetaForm(ProxySlaveDelegate):
+
+class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
+    gladefile=GLADEFILE
+    toplevel_name='process_form'
+    widgets = ['process_name','rate_constant']
+    def __init__(self, process, project_tree):
+        self.process = process
+        ProxySlaveDelegate.__init__(self, model)
+
+    def on_name__content_changed(self, text):
+        self.project_tree.update(self.process)
+
+
+class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
     gladefile=GLADEFILE
     toplevel_name='meta_form'
     widgets = ['author','email','model_name','model_dimension','debug']
     def __init__(self, model):
         ProxySlaveDelegate.__init__(self, model)
         self.get_widget('model_dimension').set_sensitive(False)
+
+    def on_model_name__validate(self, widget, model_name):
+        return self.on_name__validate(widget, model_name)
 
 class InlineMessage(SlaveView):
     gladefile=GLADEFILE
@@ -324,7 +359,19 @@ class InlineMessage(SlaveView):
         self.get_widget('message_label').set_text(message)
 
 
-class SpeciesForm(ProxySlaveDelegate):
+class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
+    gladefile=GLADEFILE
+    toplevel_name='parameter_form'
+    widgets = ['parameter_name', 'value']
+    def __init__(self, model, project_tree):
+        self.project_tree = project_tree
+        ProxySlaveDelegate.__init__(self, model)
+        self.get_widget('name').grab_focus()
+
+    def on_parameter_name__content_changed(self, text):
+        self.project_tree.update(self.model)
+
+class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
     gladefile=GLADEFILE
     toplevel_name='species_form'
     widgets = ['name', 'color', 'id']
@@ -336,7 +383,7 @@ class SpeciesForm(ProxySlaveDelegate):
 
 
     def on_name__content_changed(self, text):
-        self.project_tree.project_data.update(self.model)
+        self.project_tree.update(self.model)
 
 class KMC_Editor(GladeDelegate):
     widgets = ['workarea','statbar']
@@ -351,7 +398,7 @@ class KMC_Editor(GladeDelegate):
 
         self.saved_state = str(self.project_tree)
         # Cast initial message
-        self.toast('Start a new project by filling in meta information,\nlattice, species, parameters, and processes or open an existing one\nby opening and kMC XML file')
+        self.toast('Start a new project by filling in meta information,\nlattice, species, parameters, and processes or open an existing one\nby opening a kMC XML file')
 
     def toast(self, toast):
         if self.get_slave('workarea'):
@@ -360,10 +407,30 @@ class KMC_Editor(GladeDelegate):
         self.attach_slave('workarea',inline_message)
         inline_message.show()
     def on_btn_new_project__clicked(self, button):
-        self.toast('"New Model" is not implemented, yet.')
+        if str(self.project_tree) != self.saved_state:
+            # if there are unsaved changes, ask what to do first
+            save_changes_dialog = gtk.Dialog(buttons=(gtk.STOCK_DISCARD, gtk.RESPONSE_DELETE_EVENT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_SAVE, gtk.RESPONSE_OK), title='Saved unsaved changes?')
+            save_changes_dialog.vbox.pack_start(gtk.Label("\nThere are unsaved changes.\nWhat shall we do?\n\n"))
+            save_changes_dialog.show_all()
+            resp = save_changes_dialog.run()
+            save_changes_dialog.destroy()
+            if resp == gtk.RESPONSE_DELETE_EVENT:
+                # nothing to do here
+                pass
+            elif resp == gtk.RESPONSE_CANCEL:
+                return
+            elif resp == gtk.RESPONSE_OK:
+                self.on_btn_save_model__clicked(None)
+        self.project_tree = ProjectTree(parent=self)
+        if self.get_slave('overviewtree'):
+            self.detach_slave('overviewtree')
+        self.attach_slave('overviewtree', self.project_tree)
+        self.set_title(self.project_tree.get_name())
+        self.project_tree.show()
+        self.toast('Start a new project by filling in meta information,\nlattice, species, parameters, and processes or open an existing one\nby opening a kMC XML file')
 
     def on_btn_add_species__clicked(self, button):
-        new_species = Species()
+        new_species = Species(color='#fff', name='')
         self.project_tree.append(self.project_tree.species_list_iter, new_species)
         self.project_tree.expand(self.project_tree.species_list_iter)
         new_species.id = "%s" % (len(self.project_tree.species_list))
@@ -377,7 +444,14 @@ class KMC_Editor(GladeDelegate):
         self.toast('"Add Process" is not implemented, yet.')
 
     def on_btn_add_parameter__clicked(self, button):
-        self.toast('"Add Parameter" is not implemented, yet.')
+        new_parameter = Parameter(name='', value='')
+        self.project_tree.append(self.project_tree.parameter_list_iter, new_parameter)
+        self.project_tree.expand(self.project_tree.parameter_list_iter)
+        parameter_form = ParameterForm(new_parameter, self.project_tree)
+        if self.get_slave('workarea'):
+            self.detach_slave('workarea')
+        self.attach_slave('workarea', parameter_form)
+        parameter_form.focus_topmost()
 
     def on_btn_open_model__clicked(self, button):
         """Import project from XML
@@ -400,7 +474,7 @@ class KMC_Editor(GladeDelegate):
         # choose which file to open next
         filechooser = gtk.FileChooserDialog(title='Open Project',
             action = gtk.FILE_CHOOSER_ACTION_OPEN,
-            buttons=(gtk.STOCK_OK, gtk.RESPONSE_OK, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+            buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OK, gtk.RESPONSE_OK ))
         resp = filechooser.run()
         filename = filechooser.get_filename()
         filechooser.destroy()
@@ -439,7 +513,7 @@ class KMC_Editor(GladeDelegate):
         filechooser = gtk.FileChooserDialog(title='Save Project As ...',
             action = gtk.FILE_CHOOSER_ACTION_SAVE,
             parent=None,
-            buttons=(gtk.STOCK_OK, gtk.RESPONSE_OK, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+            buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OK, gtk.RESPONSE_OK ))
         filechooser.set_property('do-overwrite-confirmation',True)
         resp = filechooser.run()
         if resp == gtk.RESPONSE_OK:
