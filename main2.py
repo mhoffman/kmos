@@ -123,16 +123,23 @@ class Meta(Settable, object):
 
 
 
-class Process(Settable):
+class Process(Attributes):
+    attributes = ['name','center_site', 'rate_constant','condition_list','action_list']
     def __init__(self, **kwargs):
-        Settable.__init__(self, **kwargs)
+        Attributes.__init__(self, **kwargs)
         self.condition_list=[]
         self.action_list=[]
+        self.center_site = ()
+
     def add_condition(self, condition):
         self.condition_list.append(condition)
 
     def add_action(self, action):
         self.action_list.append(action)
+
+class Output():
+    def __init__(self):
+        self.name = 'Output'
 
 
 
@@ -146,6 +153,7 @@ class ProjectTree(SlaveDelegate):
         self.parameter_list_iter = self.project_data.append(None, ParameterList())
         self.process_list_iter = self.project_data.append(None, ProcessList())
         self.species_list_iter = self.project_data.append(None, SpeciesList())
+        self.output_iter = self.project_data.append(None, Output())
 
         self.filename = ''
 
@@ -210,7 +218,6 @@ class ProjectTree(SlaveDelegate):
             elif child.tag == 'parameter_list':
                 for parameter in child:
                     name = parameter.attrib['name']
-                    type = parameter.attrib['type']
                     value = parameter.attrib['value']
                     parameter_elem = Settable(name=name,type=type,value=value)
                     self.project_data.append(self.parameter_list_iter, parameter_elem)
@@ -314,6 +321,10 @@ class ProjectTree(SlaveDelegate):
             self.get_parent().attach_slave('workarea', meta_form)
             meta_form.focus_toplevel()
             meta_form.focus_topmost()
+        elif isinstance(elem, Process):
+            form = ProcessForm(elem, self.project_data)
+            self.get_parent().attach_slave('workarea', form)
+            form.focus_topmost()
         elif isinstance(elem, Species):
             form = SpeciesForm(elem, self.project_data)
             self.get_parent().attach_slave('workarea', form)
@@ -330,13 +341,19 @@ class ProjectTree(SlaveDelegate):
 class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     gladefile=GLADEFILE
     toplevel_name='process_form'
-    widgets = ['process_name','rate_constant']
-    def __init__(self, process, project_tree):
-        self.process = process
+    widgets = ['process_name','rate_constant' ]
+    def __init__(self, model, project_tree):
+        self.model = model
+        self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, model)
 
-    def on_name__content_changed(self, text):
-        self.project_tree.update(self.process)
+    def on_process_name__content_changed(self, text):
+        self.project_tree.update(self.model)
+
+    def on_eval__clicked(self, button):
+        print("CLICKED")
+        eval_text = self.get_widget('chemical_eq').get_text()
+        print("Don't know how to evaluate %s, yet" % eval_text)
 
 
 class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
@@ -381,9 +398,9 @@ class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
         self.get_widget('id').set_sensitive(False)
         self.get_widget('name').grab_focus()
 
-
     def on_name__content_changed(self, text):
         self.project_tree.update(self.model)
+
 
 class KMC_Editor(GladeDelegate):
     widgets = ['workarea','statbar']
@@ -441,7 +458,14 @@ class KMC_Editor(GladeDelegate):
         species_form.focus_topmost()
 
     def on_btn_add_process__clicked(self, button):
-        self.toast('"Add Process" is not implemented, yet.')
+        new_process = Process(name='', rate_constant='')
+        self.project_tree.append(self.project_tree.process_list_iter, new_process)
+        self.project_tree.expand(self.project_tree.process_list_iter)
+        process_form = ProcessForm(new_process, self.project_tree)
+        if self.get_slave('workarea'):
+            self.detach_slave('workarea')
+        self.attach_slave('workarea', process_form)
+        process_form.focus_topmost()
 
     def on_btn_add_parameter__clicked(self, button):
         new_parameter = Parameter(name='', value='')
