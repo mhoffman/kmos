@@ -156,8 +156,8 @@ class ProjectTree(SlaveDelegate):
         self.meta.add({'model_dimension':2})
         self.lattice_list_iter = self.project_data.append(None, LatticeList())
         self.parameter_list_iter = self.project_data.append(None, ParameterList())
-        self.process_list_iter = self.project_data.append(None, ProcessList())
         self.species_list_iter = self.project_data.append(None, SpeciesList())
+        self.process_list_iter = self.project_data.append(None, ProcessList())
         self.output_iter = self.project_data.append(None, Output())
 
         self.filename = ''
@@ -355,10 +355,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     def on_process_name__content_changed(self, text):
         self.project_tree.update(self.model)
 
-    def on_eval__clicked(self, button):
+    def on_btn_chem_eq__clicked(self, button):
         print("CLICKED")
-        eval_text = self.get_widget('chemical_eq').get_text()
-        print("Don't know how to evaluate %s, yet" % eval_text)
 
 
 class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
