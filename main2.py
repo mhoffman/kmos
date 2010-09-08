@@ -66,6 +66,11 @@ class Lattice(Settable):
         self.sites.append(site)
 
 
+class ConditionAction(Attributes):
+    attributes = ['species','coord']
+    def __init__(self, **kwargs):
+        Attributes.__init__(self, **kwargs)
+
 class Species(Attributes):
     attributes = ['name', 'color', 'id']
     def __init__(self, **kwargs):
@@ -231,7 +236,7 @@ class ProjectTree(SlaveDelegate):
                         if sub.tag == 'action' or sub.tag == 'condition':
                             species =  sub.attrib['species']
                             coord = [ int(x) for x in sub.attrib['coord'].split() ]
-                            condition_action = Settable(species=species, coord=coord)
+                            condition_action = ConditionAction(species=species, coord=coord)
                             if sub.tag == 'action':
                                 process_elem.add_action(condition_action)
                             elif sub.tag == 'condition':
