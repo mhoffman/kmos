@@ -664,7 +664,7 @@ class MainWindow():
         self.keywords = ['exp','sin','cos','sqrt','log']
         self.kmc_model = KMC_Model()
         self.da_widget = self.wtree.get_widget('dwLattice')
-        self.da_widget.props.has_tooltip = True
+        #self.da_widget.props.has_tooltip = True
         self.process_editor = ProcessEditor(self.da_widget)
         dic = {
                 'on_btnAddLattice_clicked' : self.new_lattice ,

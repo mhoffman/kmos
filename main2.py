@@ -27,6 +27,11 @@ from kiwi.python import Settable
 from kiwi.ui.objectlist import ObjectTree, Column
 from kiwi.datatypes import ValidationError
 
+# Canvas Import
+from pygtkcanvas.canvas import Canvas
+from pygtkcanvas.canvaslayer import CanvasLayer
+from pygtkcanvas.canvasitem import *
+
 
 KMCPROJECT_DTD = '/kmc_project.dtd'
 PROCESSLIST_DTD = '/process_list.dtd'
@@ -48,7 +53,7 @@ class Attributes:
         if attrname in self.attributes:
             self.__dict__[attrname] = value
         else:
-            raise AttributeError, 'Tried to initialize illegal attribute'
+            raise AttributeError, 'Tried to set illegal attribute'
 
 class CorrectlyNamed:
     def on_name__validate(self, widget, name):
@@ -57,10 +62,13 @@ class CorrectlyNamed:
         elif name and not name[0].isalpha():
             return ValidationError('Need to start with a letter')
 
-class Lattice(Settable):
+class Lattice(Attributes, CorrectlyNamed):
+    attributes = ['name','unit_cell_size','sites']
     def __init__(self, **kwargs):
-        Settable.__init__(self, **kwargs)
+        Attributes.__init__(self, **kwargs)
         self.sites = []
+        self.name = kw['name'] if 'name' in kwargs else ''
+
 
     def add_site(self, site):
         self.sites.append(site)
@@ -338,6 +346,10 @@ class ProjectTree(SlaveDelegate):
             form = ParameterForm(elem, self.project_data)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
+        elif isinstance(elem, Lattice):
+            form = LatticeEditor(elem, self.project_data)
+            self.get_parent().attach_slave('workarea', form)
+            form.focus_topmost()
         else:
             self.get_parent().toast('Not implemented, yet.')
 
@@ -356,7 +368,47 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.project_tree.update(self.model)
 
     def on_btn_chem_eq__clicked(self, button):
-        print("CLICKED")
+        # get chemical expression from user
+        chem_form = gtk.MessageDialog(parent=None, flags=gtk.DIALOG_MODAL, type=gtk.MESSAGE_QUESTION, buttons=gtk.BUTTONS_OK_CANCEL, message_format='Please enter a chemical equation')
+        form_entry = gtk.Entry()
+        chem_form.vbox.pack_start(form_entry)
+        chem_form.vbox.show_all()
+        resp = chem_form.run()
+        eq = form_entry.get_text()
+        chem_form.destroy()
+        print(eq)
+
+
+class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
+    """Widget to define a lattice and the unit cell
+    """
+    gladefile=GLADEFILE
+    toplevel_name='lattice_form'
+    widgets = ['lattice_name']
+    def __init__(self, lattice, project_tree):
+        ProxySlaveDelegate.__init__(self, lattice)
+        self.project_tree = project_tree
+        self.canvas = Canvas()
+        self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
+        self.canvas.grab_focus()
+        self.grid_layer = CanvasLayer()
+        self.site_layer = CanvasLayer()
+        self.canvas.append(self.grid_layer)
+        self.canvas.append(self.site_layer)
+        self.canvas.show()
+        self.get_widget('lattice_pad').add(self.canvas)
+
+    def on_lattice_name__validate(self, widget, lattice_name):
+        return self.on_name__validate(widget, lattice_name)
+
+    def on_lattice_name__content_changed(self, text):
+        self.project_tree.update(self.model)
+
+    def on_lattice_pad__focus(self, widget, event):
+        print(dir(self.get_widget('lattice_pad')))
+        print('PAD FOCUSED')
+        print(event)
+
 
 
 class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
@@ -448,6 +500,16 @@ class KMC_Editor(GladeDelegate):
         self.set_title(self.project_tree.get_name())
         self.project_tree.show()
         self.toast('Start a new project by filling in meta information,\nlattice, species, parameters, and processes or open an existing one\nby opening a kMC XML file')
+
+    def on_btn_add_lattice__clicked(self, button):
+        new_lattice = Lattice()
+        self.project_tree.append(self.project_tree.lattice_list_iter, new_lattice)
+        lattice_form = LatticeEditor(new_lattice, self.project_tree)
+        self.project_tree.expand(self.project_tree.lattice_list_iter)
+        if self.get_slave('workarea'):
+            self.detach_slave('workarea')
+        self.attach_slave('workarea', lattice_form)
+        lattice_form.focus_topmost()
 
     def on_btn_add_species__clicked(self, button):
         new_species = Species(color='#fff', name='')
