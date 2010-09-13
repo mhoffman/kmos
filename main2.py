@@ -62,6 +62,14 @@ class CorrectlyNamed:
         elif name and not name[0].isalpha():
             return ValidationError('Need to start with a letter')
 
+class Site(Attributes):
+    attributes = ['index','name','coord']
+    def __init__(self, index, name, coord):
+        Attributes.__init__(self, **kwargs)
+
+    def __repr__(self):
+        return '        %s %s %s' % (self.name, self.index, self.coord)
+
 class Lattice(Attributes, CorrectlyNamed):
     attributes = ['name','unit_cell_size','sites']
     def __init__(self, **kwargs):
@@ -379,6 +387,19 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         print(eq)
 
 
+class SiteForm(ProxySlaveDelegate):
+    gladefile=GLADEFILE
+    toplevel_name='site_form'
+    widgets=['name','site_index','site_x','site_y']
+    def __init__(self, site, lattice):
+        ProxySlaveDelegate.__init__(self, site)
+        self.lattice = lattice
+
+
+    def on_name__validate(self, widget, site_name):
+        # check if other site already has the name
+        return not filter(lambda x : x.name == site_name)
+
 class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
     """Widget to define a lattice and the unit cell
     """
@@ -395,8 +416,39 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.site_layer = CanvasLayer()
         self.canvas.append(self.grid_layer)
         self.canvas.append(self.site_layer)
-        self.canvas.show()
         self.get_widget('lattice_pad').add(self.canvas)
+        self.model.unit_cell_size = 1, 1
+
+    def on_unit_cell_ok_button__clicked(self, button):
+        if button.get_label() == 'gtk-ok':
+            X, Y = 400, 400
+            button.set_label('Reset')
+            x = self.get_widget('unit_x').get_value_as_int()
+            y = self.get_widget('unit_y').get_value_as_int()
+            self.model.unit_cell_size = x, y
+            self.get_widget('unit_x').set_sensitive(False)
+            self.get_widget('unit_y').set_sensitive(False)
+            self.canvas.show()
+            for i in range(x+1):
+                lx = CanvasLine(self.grid_layer,  i*(X/x), 0, i*(X/x),Y, bg=(0.,0.,0.))
+            for i in range(y+1):
+                ly = CanvasLine(self.grid_layer,0 ,i*(Y/y),X, i*(Y/y), bg=(0.,0.,0.))
+            for i in range(x+1):
+                for j in range(y+1):
+                    o = CanvasOval(self.site_layer, i*(X/x)-5,j*(Y/y)-5,i*(X/x)+5,j*(Y/y)+5, bg=(0.,0.,0.))
+                    o.xy = i % x, (y-j) % y
+                    o.connect('button-press-event', self.site_press_event)
+        elif button.get_label()=='Reset':
+            while self.site_layer:
+                self.site_layer.pop()
+            while self.grid_layer:
+                self.grid_layer.pop()
+            print(len(self.site_layer))
+            button.set_label('gtk-ok')
+            self.get_widget('unit_x').set_sensitive(True)
+            self.get_widget('unit_y').set_sensitive(True)
+            self.canvas.redraw()
+            self.canvas.hide()
 
     def on_lattice_name__validate(self, widget, lattice_name):
         return self.on_name__validate(widget, lattice_name)
@@ -404,10 +456,11 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
     def on_lattice_name__content_changed(self, text):
         self.project_tree.update(self.model)
 
-    def on_lattice_pad__focus(self, widget, event):
-        print(dir(self.get_widget('lattice_pad')))
-        print('PAD FOCUSED')
-        print(event)
+    def site_press_event(self, widget, item, event):
+        site_form = SiteForm(item, self.model)
+        #self.get_widget('lattice_pad').attach_slave(site_form)
+        print(item in item.parent)
+        print(item.xy)
 
 
 
