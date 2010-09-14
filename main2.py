@@ -36,7 +36,6 @@ from pygtkcanvas.canvasitem import *
 
 KMCPROJECT_DTD = '/kmc_project.dtd'
 PROCESSLIST_DTD = '/process_list.dtd'
-XMLFILE = './default.xml'
 SRCDIR = './fortran_src'
 GLADEFILE = os.path.join(APP_ABS_PATH, 'kmc_editor2.glade')
 
@@ -126,6 +125,10 @@ class Parameter(Attributes, CorrectlyNamed):
     def on_name__content_changed(self, text):
         self.project_tree.update(self.process)
 
+    def get_extra(self):
+        return self.value
+
+
 
 
 class ParameterList(Settable):
@@ -169,7 +172,7 @@ class Output():
 
 class ProjectTree(SlaveDelegate):
     def __init__(self, parent):
-        self.project_data = ObjectTree(Column('name', data_type=str))
+        self.project_data = ObjectTree([Column('name', data_type=str),Column('extra',data_type=str)])
         self.set_parent(parent)
         self.meta = self.project_data.append(None,Meta())
         self.meta.add({'model_dimension':2})
@@ -243,7 +246,7 @@ class ProjectTree(SlaveDelegate):
                 for parameter in child:
                     name = parameter.attrib['name']
                     value = parameter.attrib['value']
-                    parameter_elem = Settable(name=name,type=type,value=value)
+                    parameter_elem = Parameter(name=name,value=value)
                     self.project_data.append(self.parameter_list_iter, parameter_elem)
             elif child.tag == 'process_list':
                 for process in child:
@@ -366,6 +369,7 @@ class ProjectTree(SlaveDelegate):
             form.on_unit_cell_ok_button__clicked(form.unit_cell_ok_button)
             form.focus_topmost()
         else:
+            print(elem)
             self.get_parent().toast('Not implemented, yet.')
 
 
@@ -462,7 +466,6 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
             y = self.unit_y.get_value_as_int()
             self.unit_x.set_sensitive(False)
             self.unit_y.set_sensitive(False)
-            self.lattice_name.set_sensitive(False)
             self.canvas.show()
             for i in range(x+1):
                 lx = CanvasLine(self.grid_layer,  i*(X/x), 0, i*(X/x),Y, bg=(0.,0.,0.))
@@ -489,7 +492,6 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
             self.model.sites = []
             self.unit_x.set_sensitive(True)
             self.unit_y.set_sensitive(True)
-            self.lattice_name.set_sensitive(True)
 
             self.canvas.redraw()
             self.canvas.hide()
@@ -548,6 +550,9 @@ class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, model)
         self.name.grab_focus()
+
+    def on_value__content_changed(self, text):
+        self.project_tree.update(self.model)
 
     def on_parameter_name__content_changed(self, text):
         self.project_tree.update(self.model)
