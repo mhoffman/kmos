@@ -22,6 +22,7 @@ from kmc_generator import ProcessList as ProcListWriter
 #Kiwi imports
 from kiwi.ui.views import SlaveView, BaseView
 from kiwi.controllers import BaseController
+import kiwi.ui
 from kiwi.ui.delegates import Delegate, SlaveDelegate, ProxyDelegate, ProxySlaveDelegate, GladeDelegate, GladeSlaveDelegate
 from kiwi.python import Settable
 from kiwi.ui.objectlist import ObjectTree, Column
@@ -48,12 +49,12 @@ class Attributes:
                 self.__dict__[attribute] = kwargs[attribute]
         for key in kwargs:
             if key not in self.attributes:
-                raise AttributeError, 'Tried to initialize illegal attribute'
+                raise AttributeError, 'Tried to initialize illegal attribute %s' % key
     def __setattr__(self, attrname, value):
         if attrname in self.attributes:
             self.__dict__[attrname] = value
         else:
-            raise AttributeError, 'Tried to set illegal attribute'
+            raise AttributeError, 'Tried to set illegal attribute %s' % attrname
 
 class CorrectlyNamed:
     def on_name__validate(self, widget, name):
@@ -63,20 +64,22 @@ class CorrectlyNamed:
             return ValidationError('Need to start with a letter')
 
 class Site(Attributes):
-    attributes = ['index','name','coord']
+    attributes = ['index','name','site_x', 'site_y']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
 
     def __repr__(self):
-        return '        %s %s %s' % (self.name, self.index, self.coord)
+        return '%s %s %s %s' % (self.name, self.index, self.site_x, self.site_y)
 
 class Lattice(Attributes, CorrectlyNamed):
-    attributes = ['name','unit_cell_size','sites']
+    attributes = ['name','unit_cell_size_x','unit_cell_size_y','sites']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
         self.sites = []
-        self.name = kw['name'] if 'name' in kwargs else ''
+        self.name = kwargs['name'] if 'name' in kwargs else ''
 
+    def __repr__(self):
+        return "%s %s %s\n\n%s" % (self.name, self.unit_cell_size_x, self.unit_cell_size_y, self.sites)
 
     def add_site(self, site):
         self.sites.append(site)
@@ -223,13 +226,13 @@ class ProjectTree(SlaveDelegate):
             if child.tag == 'lattice_list':
                 for lattice in child:
                     name = lattice.attrib['name']
-                    unit_cell_size = [ int(x) for x in lattice.attrib['unit_cell_size'].split() ]
-                    lattice_elem = Lattice(name=name, unit_cell_size=unit_cell_size)
+                    size = [ int(x) for x in lattice.attrib['unit_cell_size'].split() ]
+                    lattice_elem = Lattice(name=name, unit_cell_size_x=size[0], unit_cell_size_y=size[1])
                     for site in lattice:
                         index =  int(site.attrib['index'])
                         name = site.attrib['type']
                         coord = [ int(x) for x in site.attrib['coord'].split() ]
-                        site_elem = Settable(index=index, name=name, coord=coord)
+                        site_elem = Site(index=index, name=name, site_x=coord[0], site_y=coord[1])
                         lattice_elem.add_site(site_elem)
                     self.project_data.append(self.lattice_list_iter, lattice_elem)
             elif child.tag == 'meta':
@@ -267,6 +270,7 @@ class ProjectTree(SlaveDelegate):
                     self.project_data.append(self.species_list_iter, species_elem)
         self.expand_all()
         self.select_meta()
+        print(self)
 
     def expand_all(self):
         self.project_data.expand(self.species_list_iter)
@@ -306,13 +310,14 @@ class ProjectTree(SlaveDelegate):
         lattice_list = ET.SubElement(root, 'lattice_list')
         for lattice in self.lattice_list:
             lattice_elem = ET.SubElement(lattice_list,'lattice')
-            lattice_elem.set('unit_cell_size', str(lattice.unit_cell_size)[1 :-1].replace(',',''))
+            size = [lattice.unit_cell_size_x, lattice.unit_cell_size_y ]
+            lattice_elem.set('unit_cell_size', str(size)[1 :-1].replace(',',''))
             lattice_elem.set('name', lattice.name)
             for site in lattice.sites:
                 site_elem = ET.SubElement(lattice_elem, 'site')
                 site_elem.set('index',str(site.index))
                 site_elem.set('type',site.name)
-                site_elem.set('coord',str(site.coord)[1 :-1].replace(',',''))
+                site_elem.set('coord','%s %s' % (site.site_x, site.site_y))
         process_list = ET.SubElement(root, 'process_list')
         for process in self.process_list:
             process_elem = ET.SubElement(process_list,'process')
@@ -356,7 +361,9 @@ class ProjectTree(SlaveDelegate):
             form.focus_topmost()
         elif isinstance(elem, Lattice):
             form = LatticeEditor(elem, self.project_data)
+            #kiwi.ui.dialogs.warning('Changing lattice retro-actively might break processes.\nYou have been warned.')
             self.get_parent().attach_slave('workarea', form)
+            form.on_unit_cell_ok_button__clicked(form.unit_cell_ok_button)
             form.focus_topmost()
         else:
             self.get_parent().toast('Not implemented, yet.')
@@ -384,53 +391,54 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         resp = chem_form.run()
         eq = form_entry.get_text()
         chem_form.destroy()
-        print(eq)
 
 
-class SiteForm(ProxySlaveDelegate):
+class SiteForm(ProxyDelegate):
     gladefile=GLADEFILE
     toplevel_name='site_form'
     widgets=['site_name','site_index','site_x','site_y']
-    def __init__(self, site, lattice):
-        ProxySlaveDelegate.__init__(self, site)
-        self.lattice = lattice
-        self.wtree = gtk.glade.XML(GLADEFILE)
-        self.dialog = self.wtree.get_widget('site_form')
-        self.wtree.get_widget('site_x').set_value(site.coord[0])
-        self.wtree.get_widget('site_y').set_value(site.coord[1])
-        self.wtree.get_widget('site_index').set_text(str(len(lattice.sites)))
-        self.wtree.get_widget('site_index').set_sensitive(False)
-        self.wtree.get_widget('site_ok').set_sensitive(False)
-        self.site_name = self.wtree.get_widget('site_name')
-        self.site_name.connect('content-changed', self.on_site_name__content_changed)
-        self.site_name.connect('validate', self.on_site_name__validate)
+    def __init__(self, site, parent):
+        ProxyDelegate.__init__(self, site)
+        self.site = site
+        self.parent = parent
+        self.site_x.set_value(site.site_x)
+        self.site_y.set_value(site.site_y)
+        self.site_x.set_sensitive(False)
+        self.site_y.set_sensitive(False)
+        self.site_index.set_text(str(len(self.parent.model.sites)))
+        self.site_index.set_sensitive(False)
+        self.show_all()
 
     def on_site_name__validate(self, widget, site_name):
         # check if other site already has the name
-        return not filter(lambda x : x.name == site_name)
-
-    def on_site_name__content_changed(self, widget):
-        if self.site_name.get_text_length() == 0 :
-            self.wtree.get_widget('site_ok').set_sensitive(False)
+        if  filter(lambda x : x.name == site_name, self.parent.model.sites):
+            self.site_ok.set_sensitive(False)
+            return ValidationError('Site name needs to be unique')
         else:
-            self.wtree.get_widget('site_ok').set_sensitive(True)
+            self.site_ok.set_sensitive(True)
 
-    def run(self):
-        self.dialog.show()
-        result = self.dialog.run()
-        coord = self.wtree.get_widget('site_x').get_value_as_int(), self.wtree.get_widget('site_y').get_value_as_int()
-        self.model.coord = coord
-        self.model.name = self.wtree.get_widget('site_name').get_text()
-        self.model.index = self.wtree.get_widget('site_index')
-        self.dialog.destroy()
-        return result
+
+    def on_site_ok__clicked(self, button):
+        if len(self.site_name.get_text()) == 0 :
+            self.parent.model.sites.remove(self.model)
+            for node in self.parent.site_layer:
+                if node.coord[0] == self.site_x.get_value_as_int() and node.coord[1] == self.site_y.get_value_as_int():
+                    node.filled = False
+        else:
+            for node in self.parent.site_layer:
+                if node.coord[0] == self.site_x.get_value_as_int() and node.coord[1] == self.site_y.get_value_as_int():
+                    node.filled = True
+        self.parent.canvas.redraw()
+        self.hide()
+
+
 
 class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
     """Widget to define a lattice and the unit cell
     """
     gladefile=GLADEFILE
     toplevel_name='lattice_form'
-    widgets = ['lattice_name']
+    widgets = ['lattice_name','unit_x','unit_y']
     def __init__(self, lattice, project_tree):
         ProxySlaveDelegate.__init__(self, lattice)
         self.project_tree = project_tree
@@ -442,16 +450,17 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.canvas.append(self.grid_layer)
         self.canvas.append(self.site_layer)
         self.get_widget('lattice_pad').add(self.canvas)
-        self.model.unit_cell_size = 1, 1
+
         self.get_widget('unit_cell_ok_button').set_sensitive(False)
+        self.on_lattice_name__content_changed(self.lattice_name)
 
     def on_unit_cell_ok_button__clicked(self, button):
         if button.get_label() == 'gtk-ok':
             X, Y = 400, 400
             button.set_label('Reset')
+            button.set_tooltip_text('Delete all sites and start anew')
             x = self.get_widget('unit_x').get_value_as_int()
             y = self.get_widget('unit_y').get_value_as_int()
-            self.model.unit_cell_size = x, y
             self.get_widget('unit_x').set_sensitive(False)
             self.get_widget('unit_y').set_sensitive(False)
             self.get_widget('lattice_name').set_sensitive(False)
@@ -462,18 +471,23 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
                 ly = CanvasLine(self.grid_layer,0 ,i*(Y/y),X, i*(Y/y), bg=(0.,0.,0.))
             for i in range(x+1):
                 for j in range(y+1):
-                    o = CanvasOval(self.site_layer, i*(X/x)-5,j*(Y/y)-5,i*(X/x)+5,j*(Y/y)+5, bg=(1.,1.,1.))
+                    r = 10
+                    o = CanvasOval(self.site_layer, i*(X/x)-r,j*(Y/y)-r,i*(X/x)+r,j*(Y/y)+r, bg=(1.,1.,1.))
                     o.coord = i % x, (y-j) % y
                     o.connect('button-press-event', self.site_press_event)
-                    o.set = False
+                    for node in self.model.sites:
+                        if node.site_x == o.coord[0] and node.site_y == o.coord[1]:
+                            o.filled = True
+
             self.canvas.move_all(50,50)
         elif button.get_label()=='Reset':
             while self.site_layer:
                 self.site_layer.pop()
             while self.grid_layer:
                 self.grid_layer.pop()
-            print(len(self.site_layer))
             button.set_label('gtk-ok')
+            button.set_tooltip_text('Add sites')
+            self.model.sites = []
             self.get_widget('unit_x').set_sensitive(True)
             self.get_widget('unit_y').set_sensitive(True)
             self.get_widget('lattice_name').set_sensitive(True)
@@ -492,24 +506,12 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
             self.unit_cell_ok_button.set_sensitive(True)
 
     def site_press_event(self, widget, item, event):
-        print(item.filled)
         if item.filled:
-            new_site = filter(lambda x: x.coord == item.coord, self.model.sites)[0]
-            self.model.sites.append(new_site)
+            new_site = filter(lambda x: (x.site_x, x.site_y) == item.coord, self.model.sites)[0]
         else:
-            new_site = Site(coord=item.coord)
-        site_form = SiteForm(new_site, self.model)
-        resp = site_form.run()
-        print(resp)
-        if resp == gtk.RESPONSE_CANCEL:
-            print("Removing site")
-            self.model.sites.remove(new_site)
-        elif resp == gtk.RESPONSE_OK:
-            print("Filling site")
-            for node in self.site_layer:
-                if node.coord == item.coord:
-                    node.filled = True
-            self.canvas.redraw()
+            new_site = Site(site_x=item.coord[0], site_y=item.coord[1], name='')
+            self.model.sites.append(new_site)
+        site_form = SiteForm(new_site, self)
 
 
 
