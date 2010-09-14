@@ -64,7 +64,7 @@ class CorrectlyNamed:
 
 class Site(Attributes):
     attributes = ['index','name','coord']
-    def __init__(self, index, name, coord):
+    def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
 
     def __repr__(self):
@@ -390,15 +390,40 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 class SiteForm(ProxySlaveDelegate):
     gladefile=GLADEFILE
     toplevel_name='site_form'
-    widgets=['name','site_index','site_x','site_y']
+    widgets=['site_name','site_index','site_x','site_y']
     def __init__(self, site, lattice):
         ProxySlaveDelegate.__init__(self, site)
         self.lattice = lattice
+        self.wtree = gtk.glade.XML(GLADEFILE)
+        self.dialog = self.wtree.get_widget('site_form')
+        self.wtree.get_widget('site_x').set_value(site.coord[0])
+        self.wtree.get_widget('site_y').set_value(site.coord[1])
+        self.wtree.get_widget('site_index').set_text(str(len(lattice.sites)))
+        self.wtree.get_widget('site_index').set_sensitive(False)
+        self.wtree.get_widget('site_ok').set_sensitive(False)
+        self.site_name = self.wtree.get_widget('site_name')
+        self.site_name.connect('content-changed', self.on_site_name__content_changed)
+        self.site_name.connect('validate', self.on_site_name__validate)
 
-
-    def on_name__validate(self, widget, site_name):
+    def on_site_name__validate(self, widget, site_name):
         # check if other site already has the name
         return not filter(lambda x : x.name == site_name)
+
+    def on_site_name__content_changed(self, widget):
+        if self.site_name.get_text_length() == 0 :
+            self.wtree.get_widget('site_ok').set_sensitive(False)
+        else:
+            self.wtree.get_widget('site_ok').set_sensitive(True)
+
+    def run(self):
+        self.dialog.show()
+        result = self.dialog.run()
+        coord = self.wtree.get_widget('site_x').get_value_as_int(), self.wtree.get_widget('site_y').get_value_as_int()
+        self.model.coord = coord
+        self.model.name = self.wtree.get_widget('site_name').get_text()
+        self.model.index = self.wtree.get_widget('site_index')
+        self.dialog.destroy()
+        return result
 
 class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
     """Widget to define a lattice and the unit cell
@@ -418,6 +443,7 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.canvas.append(self.site_layer)
         self.get_widget('lattice_pad').add(self.canvas)
         self.model.unit_cell_size = 1, 1
+        self.get_widget('unit_cell_ok_button').set_sensitive(False)
 
     def on_unit_cell_ok_button__clicked(self, button):
         if button.get_label() == 'gtk-ok':
@@ -428,6 +454,7 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
             self.model.unit_cell_size = x, y
             self.get_widget('unit_x').set_sensitive(False)
             self.get_widget('unit_y').set_sensitive(False)
+            self.get_widget('lattice_name').set_sensitive(False)
             self.canvas.show()
             for i in range(x+1):
                 lx = CanvasLine(self.grid_layer,  i*(X/x), 0, i*(X/x),Y, bg=(0.,0.,0.))
@@ -435,9 +462,11 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
                 ly = CanvasLine(self.grid_layer,0 ,i*(Y/y),X, i*(Y/y), bg=(0.,0.,0.))
             for i in range(x+1):
                 for j in range(y+1):
-                    o = CanvasOval(self.site_layer, i*(X/x)-5,j*(Y/y)-5,i*(X/x)+5,j*(Y/y)+5, bg=(0.,0.,0.))
-                    o.xy = i % x, (y-j) % y
+                    o = CanvasOval(self.site_layer, i*(X/x)-5,j*(Y/y)-5,i*(X/x)+5,j*(Y/y)+5, bg=(1.,1.,1.))
+                    o.coord = i % x, (y-j) % y
                     o.connect('button-press-event', self.site_press_event)
+                    o.set = False
+            self.canvas.move_all(50,50)
         elif button.get_label()=='Reset':
             while self.site_layer:
                 self.site_layer.pop()
@@ -447,20 +476,40 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
             button.set_label('gtk-ok')
             self.get_widget('unit_x').set_sensitive(True)
             self.get_widget('unit_y').set_sensitive(True)
+            self.get_widget('lattice_name').set_sensitive(True)
+
             self.canvas.redraw()
             self.canvas.hide()
 
     def on_lattice_name__validate(self, widget, lattice_name):
         return self.on_name__validate(widget, lattice_name)
 
-    def on_lattice_name__content_changed(self, text):
+    def on_lattice_name__content_changed(self, widget):
         self.project_tree.update(self.model)
+        if  widget.get_text_length() == 0 :
+            self.unit_cell_ok_button.set_sensitive(False)
+        else:
+            self.unit_cell_ok_button.set_sensitive(True)
 
     def site_press_event(self, widget, item, event):
-        site_form = SiteForm(item, self.model)
-        #self.get_widget('lattice_pad').attach_slave(site_form)
-        print(item in item.parent)
-        print(item.xy)
+        print(item.filled)
+        if item.filled:
+            new_site = filter(lambda x: x.coord == item.coord, self.model.sites)[0]
+            self.model.sites.append(new_site)
+        else:
+            new_site = Site(coord=item.coord)
+        site_form = SiteForm(new_site, self.model)
+        resp = site_form.run()
+        print(resp)
+        if resp == gtk.RESPONSE_CANCEL:
+            print("Removing site")
+            self.model.sites.remove(new_site)
+        elif resp == gtk.RESPONSE_OK:
+            print("Filling site")
+            for node in self.site_layer:
+                if node.coord == item.coord:
+                    node.filled = True
+            self.canvas.redraw()
 
 
 
