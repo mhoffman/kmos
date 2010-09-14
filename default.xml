@@ -2,20 +2,20 @@
 <kmc>
     <meta author="Max J. Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="2" model_name="my_model"/>
     <species_list>
-        <species color="#000000" id="3" name="co"/>
-        <species color="#008604" id="4" name="nitrogen"/>
         <species color="#ff0000" id="2" name="oxygen"/>
         <species color="#fff" id="1" name="empty"/>
+        <species color="#000000" id="3" name="co"/>
+        <species color="#008604" id="4" name="nitrogen"/>
     </species_list>
     <parameter_list>
-        <parameter name="lattice_size" value="20 20"/>
         <parameter name="E_co_top" value="0.6"/>
-        <parameter name="E_co_bridge" value="1.1"/>
+        <parameter name="lattice_size" value="20 20"/>
         <parameter name="E_co_cus" value="0.5"/>
+        <parameter name="E_co_bridge" value="1.1"/>
         <parameter name="print_every" value="100000"/>
     </parameter_list>
     <lattice_list>
-        <lattice name="special" unit_cell_size="3 1">
+        <lattice name="ruo2" unit_cell_size="3 1">
             <site coord="2 0" index="1" type="bridge"/>
             <site coord="0 0" index="2" type="cus"/>
             <site coord="1 0" index="3" type="top"/>
