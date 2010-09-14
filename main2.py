@@ -787,4 +787,5 @@ if __name__ == '__main__':
         editor.toast('Imported %s' % options.import_file)
     else:
         editor.add_defaults()
+        editor.saved_state = str(editor.project_tree)
     editor.show_and_loop()
