@@ -186,6 +186,9 @@ class ProjectTree(SlaveDelegate):
 
         SlaveDelegate.__init__(self, toplevel=self.project_data)
 
+    def add_defaults(self):
+        pass
+
     def update(self, model):
         self.project_data.update(model)
 
@@ -689,11 +692,14 @@ class KMC_Editor(GladeDelegate):
             self.attach_slave('overviewtree', self.project_tree)
             self.set_title(self.project_tree.get_name())
             self.project_tree.show()
-            # Import
-            self.project_tree.import_xml_file(filename)
-            self.set_title(self.project_tree.get_name())
-            self.statbar.push(1,'Imported model %s' % self.project_tree.meta.model_name)
-            self.saved_state = str(self.project_tree)
+            self.import_file(filename)
+
+    def import_file(self, filename):
+        # Import
+        self.project_tree.import_xml_file(filename)
+        self.set_title(self.project_tree.get_name())
+        self.statbar.push(1,'Imported model %s' % self.project_tree.meta.model_name)
+        self.saved_state = str(self.project_tree)
 
     def on_btn_save_model__clicked(self, button, force_save=False):
         #Write Out XML File
@@ -761,5 +767,11 @@ class KMC_Editor(GladeDelegate):
 
 
 if __name__ == '__main__':
+    parser = OptionParser()
+    parser.add_option('-o','--import',dest='import_file',help='Immediately import store kmc file')
+    (options, args) = parser.parse_args()
     editor = KMC_Editor()
+    if hasattr(options,'import_file'):
+        editor.import_file(options.import_file)
+        editor.toast('Imported %s' % options.import_file)
     editor.show_and_loop()
