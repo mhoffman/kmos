@@ -405,7 +405,6 @@ class SiteForm(ProxyDelegate):
         self.site_y.set_value(site.site_y)
         self.site_x.set_sensitive(False)
         self.site_y.set_sensitive(False)
-        self.site_index.set_text(str(len(self.parent.model.sites)))
         self.site_index.set_sensitive(False)
         self.show_all()
 
@@ -449,9 +448,9 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.site_layer = CanvasLayer()
         self.canvas.append(self.grid_layer)
         self.canvas.append(self.site_layer)
-        self.get_widget('lattice_pad').add(self.canvas)
+        self.lattice_pad.add(self.canvas)
 
-        self.get_widget('unit_cell_ok_button').set_sensitive(False)
+        self.unit_cell_ok_button.set_sensitive(False)
         self.on_lattice_name__content_changed(self.lattice_name)
 
     def on_unit_cell_ok_button__clicked(self, button):
@@ -459,11 +458,11 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
             X, Y = 400, 400
             button.set_label('Reset')
             button.set_tooltip_text('Delete all sites and start anew')
-            x = self.get_widget('unit_x').get_value_as_int()
-            y = self.get_widget('unit_y').get_value_as_int()
-            self.get_widget('unit_x').set_sensitive(False)
-            self.get_widget('unit_y').set_sensitive(False)
-            self.get_widget('lattice_name').set_sensitive(False)
+            x = self.unit_x.get_value_as_int()
+            y = self.unit_y.get_value_as_int()
+            self.unit_x.set_sensitive(False)
+            self.unit_y.set_sensitive(False)
+            self.lattice_name.set_sensitive(False)
             self.canvas.show()
             for i in range(x+1):
                 lx = CanvasLine(self.grid_layer,  i*(X/x), 0, i*(X/x),Y, bg=(0.,0.,0.))
@@ -488,9 +487,9 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
             button.set_label('gtk-ok')
             button.set_tooltip_text('Add sites')
             self.model.sites = []
-            self.get_widget('unit_x').set_sensitive(True)
-            self.get_widget('unit_y').set_sensitive(True)
-            self.get_widget('lattice_name').set_sensitive(True)
+            self.unit_x.set_sensitive(True)
+            self.unit_y.set_sensitive(True)
+            self.lattice_name.set_sensitive(True)
 
             self.canvas.redraw()
             self.canvas.hide()
@@ -509,7 +508,13 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
         if item.filled:
             new_site = filter(lambda x: (x.site_x, x.site_y) == item.coord, self.model.sites)[0]
         else:
-            new_site = Site(site_x=item.coord[0], site_y=item.coord[1], name='')
+            # choose the smallest number that is not given away
+            indexes = [x.index for x in self.model.sites]
+            for i in range(1,len(indexes)+2):
+                if i not in indexes:
+                    index = i
+                    break
+            new_site = Site(site_x=item.coord[0], site_y=item.coord[1], name='', index=index)
             self.model.sites.append(new_site)
         site_form = SiteForm(new_site, self)
 
@@ -521,7 +526,7 @@ class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
     widgets = ['author','email','model_name','model_dimension','debug']
     def __init__(self, model):
         ProxySlaveDelegate.__init__(self, model)
-        self.get_widget('model_dimension').set_sensitive(False)
+        self.model_dimension.set_sensitive(False)
 
     def on_model_name__validate(self, widget, model_name):
         return self.on_name__validate(widget, model_name)
@@ -532,7 +537,7 @@ class InlineMessage(SlaveView):
     widgets = ['message_label']
     def __init__(self, message=''):
         SlaveView.__init__(self)
-        self.get_widget('message_label').set_text(message)
+        self.message_label.set_text(message)
 
 
 class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
@@ -542,7 +547,7 @@ class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
     def __init__(self, model, project_tree):
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, model)
-        self.get_widget('name').grab_focus()
+        self.name.grab_focus()
 
     def on_parameter_name__content_changed(self, text):
         self.project_tree.update(self.model)
@@ -554,8 +559,8 @@ class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
     def __init__(self, model, project_tree):
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, model)
-        self.get_widget('id').set_sensitive(False)
-        self.get_widget('name').grab_focus()
+        self.id.set_sensitive(False)
+        self.name.grab_focus()
 
     def on_name__content_changed(self, text):
         self.project_tree.update(self.model)
@@ -682,14 +687,14 @@ class KMC_Editor(GladeDelegate):
             # Import
             self.project_tree.import_xml_file(filename)
             self.set_title(self.project_tree.get_name())
-            self.get_widget('statbar').push(1,'Imported model %s' % self.project_tree.meta.model_name)
+            self.statbar.push(1,'Imported model %s' % self.project_tree.meta.model_name)
             self.saved_state = str(self.project_tree)
 
     def on_btn_save_model__clicked(self, button, force_save=False):
         #Write Out XML File
         xml_string = str(self.project_tree)
         if xml_string == self.saved_state and not force_save:
-            self.get_widget('statbar').push(1, 'Nothing to save')
+            self.statbar.push(1, 'Nothing to save')
         else:
             if not self.project_tree.filename:
                 self.on_btn_save_as__clicked(None)
@@ -699,7 +704,7 @@ class KMC_Editor(GladeDelegate):
                             'please do not change this unless you know what you are doing -->\n')
             outfile.close()
             self.saved_state = xml_string
-            self.get_widget('statbar').push(1,'Saved %s' % self.project_tree.filename)
+            self.statbar.push(1,'Saved %s' % self.project_tree.filename)
 
 
     def on_btn_save_as__clicked(self, button):
