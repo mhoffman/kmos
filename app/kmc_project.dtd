@@ -20,7 +20,6 @@
   <!ATTLIST parameter
     name CDATA #REQUIRED
     type CDATA #IMPLIED
-    value CDATA #REQUIRED
   >
   <!ELEMENT lattice_list (lattice)*>
   <!ELEMENT lattice (site)*>

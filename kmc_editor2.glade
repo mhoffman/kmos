@@ -76,7 +76,7 @@
                             <widget class="ProxySpinButton" id="unit_x">
                                 <property name="adjustment">1 1 100 1 10 0</property>
                                 <property name="data_type">int</property>
-                                <property name="model_attribute">x</property>
+                                <property name="model_attribute">unit_cell_size_x</property>
                                 <property name="text" context="yes" translatable="yes">1</property>
                                 <property name="visible">True</property>
                             </widget>
@@ -88,7 +88,7 @@
                             <widget class="ProxySpinButton" id="unit_y">
                                 <property name="adjustment">1 1 100 1 10 0</property>
                                 <property name="data_type">int</property>
-                                <property name="model_attribute">y</property>
+                                <property name="model_attribute">unit_cell_size_y</property>
                                 <property name="text" context="yes" translatable="yes">1</property>
                                 <property name="visible">True</property>
                             </widget>
@@ -127,6 +127,7 @@
         </child>
     </widget>
     <widget class="GtkWindow" id="main_window">
+        <property name="height_request">600</property>
         <child>
             <widget class="GtkVBox" id="vbox1">
                 <property name="visible">True</property>
@@ -732,7 +733,7 @@
                                 <child>
                                     <widget class="ProxyEntry" id="site_name">
                                         <property name="data_type">str</property>
-                                        <property name="model_attribute">site_name</property>
+                                        <property name="model_attribute">name</property>
                                         <property name="visible">True</property>
                                     </widget>
                                 </child>
@@ -767,9 +768,9 @@
                                 </child>
                                 <child>
                                     <widget class="ProxyEntry" id="site_index">
-                                        <property name="data_type">str</property>
+                                        <property name="data_type">int</property>
                                         <property name="is_focus">True</property>
-                                        <property name="model_attribute">site_index</property>
+                                        <property name="model_attribute">index</property>
                                         <property name="visible">True</property>
                                         <property name="xalign">1.0</property>
                                     </widget>
