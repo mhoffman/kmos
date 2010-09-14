@@ -139,7 +139,7 @@ class ParameterList(Settable):
 class Meta(Settable, object):
     name = 'Meta'
     def __init__(self):
-        Settable.__init__(self, email='', author='', debug=0, model_name='', model_dimension = 0)
+        Settable.__init__(self, email='', author='', debug=0, model_name='', model_dimension=0)
 
     def add(self, attrib):
         for key in attrib:
@@ -175,7 +175,6 @@ class ProjectTree(SlaveDelegate):
         self.project_data = ObjectTree([Column('name', data_type=str),Column('extra',data_type=str)])
         self.set_parent(parent)
         self.meta = self.project_data.append(None,Meta())
-        self.meta.add({'model_dimension':2})
         self.lattice_list_iter = self.project_data.append(None, LatticeList())
         self.parameter_list_iter = self.project_data.append(None, ParameterList())
         self.species_list_iter = self.project_data.append(None, SpeciesList())
@@ -186,8 +185,6 @@ class ProjectTree(SlaveDelegate):
 
         SlaveDelegate.__init__(self, toplevel=self.project_data)
 
-    def add_defaults(self):
-        pass
 
     def update(self, model):
         self.project_data.update(model)
@@ -276,7 +273,6 @@ class ProjectTree(SlaveDelegate):
                     self.project_data.append(self.species_list_iter, species_elem)
         self.expand_all()
         self.select_meta()
-        print(self)
 
     def expand_all(self):
         self.project_data.expand(self.species_list_iter)
@@ -589,6 +585,21 @@ class KMC_Editor(GladeDelegate):
         # Cast initial message
         self.toast('Start a new project by filling in meta information,\nlattice, species, parameters, and processes or open an existing one\nby opening a kMC XML file')
 
+    def add_defaults(self):
+        """This function adds some useful defaults that are probably need in every simulation
+        """
+        # add dimension
+        self.project_tree.meta.add({'model_dimension':'2'})
+        # add an empty species
+        empty = Species(name='empty',color='#fff',id='0')
+        self.project_tree.append(self.project_tree.species_list_iter, empty)
+        # add standard parameter
+        param = Parameter(name='lattice_size',value='20 20')
+        self.project_tree.append(self.project_tree.parameter_list_iter, param)
+        param = Parameter(name='print_every',value='100000')
+        self.project_tree.append(self.project_tree.parameter_list_iter, param)
+        self.project_tree.expand_all()
+
     def toast(self, toast):
         if self.get_slave('workarea'):
             self.detach_slave('workarea')
@@ -771,7 +782,9 @@ if __name__ == '__main__':
     parser.add_option('-o','--import',dest='import_file',help='Immediately import store kmc file')
     (options, args) = parser.parse_args()
     editor = KMC_Editor()
-    if hasattr(options,'import_file'):
+    if options.import_file:
         editor.import_file(options.import_file)
         editor.toast('Imported %s' % options.import_file)
+    else:
+        editor.add_defaults()
     editor.show_and_loop()

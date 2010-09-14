@@ -1,48 +1,26 @@
 <?xml version="1.0" ?>
 <kmc>
-    <meta author="sergey" debug="0" email="sergey@fhi-berlin.." model_dimension="2" model_name="sergeys_model"/>
+    <meta author="Max J. Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="2" model_name="my_model"/>
     <species_list>
-        <species color="#863186318631" id="1" name="C"/>
-        <species color="#af6850975097" id="3" name="CO"/>
-        <species color="#d72a100f100f" id="2" name="O"/>
-        <species color="#fff" id="0" name="empty"/>
+        <species color="#000000" id="3" name="co"/>
+        <species color="#008604" id="4" name="nitrogen"/>
+        <species color="#ff0000" id="2" name="oxygen"/>
+        <species color="#fff" id="1" name="empty"/>
     </species_list>
-    <parameter_list/>
+    <parameter_list>
+        <parameter name="lattice_size" value="20 20"/>
+        <parameter name="E_co_top" value="0.6"/>
+        <parameter name="E_co_bridge" value="1.1"/>
+        <parameter name="E_co_cus" value="0.5"/>
+        <parameter name="print_every" value="100000"/>
+    </parameter_list>
     <lattice_list>
-        <lattice name="graphene" unit_cell_size="4 2">
-            <site coord="0 0" index="1" type="top"/>
-            <site coord="1 0" index="2" type="bridge"/>
-            <site coord="2 0" index="3" type="top"/>
-            <site coord="3 0" index="4" type="hollow"/>
+        <lattice name="special" unit_cell_size="3 1">
+            <site coord="2 0" index="1" type="bridge"/>
+            <site coord="0 0" index="2" type="cus"/>
+            <site coord="1 0" index="3" type="top"/>
         </lattice>
     </lattice_list>
-    <process_list>
-        <process center_site="0 0 1 0" name="CO_react" rate_constant="rate_CO_react">
-            <condition coord="0 0 1 0" species="O"/>
-            <condition coord="0 -1 1 0" species="C"/>
-            <action coord="0 0 1 0" species="empty"/>
-            <action coord="0 -1 1 0" species="empty"/>
-        </process>
-        <process center_site="0 0 2 0" name="O_ads" rate_constant="rate_O_ads">
-            <condition coord="0 0 2 0" species="empty"/>
-            <action coord="0 0 2 0" species="O"/>
-        </process>
-        <process center_site="0 0 2 0" name="O_des" rate_constant="rate_O_des">
-            <condition coord="0 0 2 0" species="O"/>
-            <action coord="0 0 2 0" species="empty"/>
-        </process>
-        <process center_site="0 0 0 0" name="O_diff" rate_constant="rate_O_diff">
-            <condition coord="0 0 0 0" species="O"/>
-            <condition coord="0 0 1 0" species="empty"/>
-            <action coord="0 0 1 0" species="O"/>
-            <action coord="0 0 0 0" species="empty"/>
-        </process>
-        <process center_site="0 0 0 0" name="co_diffusion" rate_constant="rate_co_diffusion">
-            <condition coord="0 0 0 0" species="C"/>
-            <condition coord="0 0 1 0" species="empty"/>
-            <action coord="0 0 0 0" species="empty"/>
-            <action coord="0 0 1 0" species="C"/>
-        </process>
-    </process_list>
+    <process_list/>
 </kmc>
 <!-- This is an automatically generated XML file, representing a kMC model please do not change this unless you know what you are doing -->
