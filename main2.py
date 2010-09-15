@@ -211,6 +211,8 @@ class ProjectTree(SlaveDelegate):
             return self.project_data.expand
         elif attr == 'update':
             return self.project_data.update
+        elif attr == 'select':
+            return self.project_data.select
         else:
             raise AttributeError, attr
 
@@ -350,7 +352,7 @@ class ProjectTree(SlaveDelegate):
             meta_form.focus_toplevel()
             meta_form.focus_topmost()
         elif isinstance(elem, Process):
-            form = ProcessForm(elem, self.project_data)
+            form = ProcessForm(elem, self)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
         elif isinstance(elem, Species):
@@ -377,17 +379,54 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     gladefile=GLADEFILE
     toplevel_name='process_form'
     widgets = ['process_name','rate_constant' ]
+    z = 3 # z as in zoom
+    l = 500 # l as in length
     def __init__(self, model, project_tree):
         self.model = model
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, model)
+        self.canvas = Canvas()
+        self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
+        self.canvas.grab_focus()
+        self.canvas.show()
+        self.process_pad.add(self.canvas)
+        self.lattice_layer = CanvasLayer(); self.canvas.append(self.lattice_layer)
+        self.condition_layer = CanvasLayer(); self.canvas.append(self.condition_layer)
+        self.action_layer = CanvasLayer(); self.canvas.append(self.action_layer)
+        self.frame_layer = CanvasLayer(); self.canvas.append(self.frame_layer)
+        self.reservoir_layer = CanvasLayer(); self.canvas.append(self.reservoir_layer)
+        self.motion_layer = CanvasLayer(); self.canvas.append(self.motion_layer)
+
+        # draw lattice
+        for i in range(self.z):
+            CanvasLine(self.lattice_layer,0,i*(self.l/self.z),500,i*(self.l/self.z),line_width=1,fg=(.6,.6,.6))
+        for i in range(self.z):
+            CanvasLine(self.lattice_layer,i*(self.l/self.z),0,i*(self.l/self.z),500,line_width=1,fg=(.6,.6,.6))
+        # draw frame
+        frame_col = (.21,.35,.42)
+        CanvasRect(self.frame_layer,0,0,520,80,fg=frame_col, bg=frame_col,filled=True)
+        CanvasRect(self.frame_layer,0,0,10,580,fg=frame_col, bg=frame_col,filled=True)
+        CanvasRect(self.frame_layer,510,0,520,580,fg=frame_col, bg=frame_col,filled=True)
+        CanvasRect(self.frame_layer,0,580,520,590,fg=frame_col, bg=frame_col,filled=True)
+        CanvasText(self.frame_layer,10,10,size=8,text='Reservoir Area')
+        CanvasText(self.frame_layer,10,570,size=8,text='Lattice Area')
+
+        for k, species in enumerate(self.project_tree.species_list):
+            color = gtk.gdk.Color(species.color)
+            color = (color.red_float, color.green_float, color.blue_float)
+            o = CanvasOval(self.reservoir_layer, 30+k*50,30,50+k*50,50, filled=True, bg=color)
+
+        self.lattice_layer.move_all(10,80)
+
+
+
 
     def on_process_name__content_changed(self, text):
         self.project_tree.update(self.model)
 
     def on_btn_chem_eq__clicked(self, button):
         # get chemical expression from user
-        chem_form = gtk.MessageDialog(parent=None, flags=gtk.DIALOG_MODAL, type=gtk.MESSAGE_QUESTION, buttons=gtk.BUTTONS_OK_CANCEL, message_format='Please enter a chemical equation')
+        chem_form = gtk.MessageDialog(parent=None, flags=gtk.DIALOG_MODAL, type=gtk.MESSAGE_QUESTION, buttons=gtk.BUTTONS_OK_CANCEL, message_format='Please enter a chemical equation, e.g.:\n\nspecies1@site->species2@site')
         form_entry = gtk.Entry()
         chem_form.vbox.pack_start(form_entry)
         chem_form.vbox.show_all()
@@ -410,6 +449,8 @@ class SiteForm(ProxyDelegate):
         self.site_y.set_sensitive(False)
         self.site_index.set_sensitive(False)
         self.show_all()
+
+
 
     def on_site_name__validate(self, widget, site_name):
         # check if other site already has the name
@@ -632,6 +673,7 @@ class KMC_Editor(GladeDelegate):
     def on_btn_add_lattice__clicked(self, button):
         new_lattice = Lattice()
         self.project_tree.append(self.project_tree.lattice_list_iter, new_lattice)
+        self.project_tree.select(new_lattice)
         lattice_form = LatticeEditor(new_lattice, self.project_tree)
         self.project_tree.expand(self.project_tree.lattice_list_iter)
         if self.get_slave('workarea'):
@@ -643,6 +685,7 @@ class KMC_Editor(GladeDelegate):
         new_species = Species(color='#fff', name='')
         self.project_tree.append(self.project_tree.species_list_iter, new_species)
         self.project_tree.expand(self.project_tree.species_list_iter)
+        self.project_tree.select(new_species)
         new_species.id = "%s" % (len(self.project_tree.species_list))
         species_form = SpeciesForm(new_species, self.project_tree)
         if self.get_slave('workarea'):
@@ -654,6 +697,7 @@ class KMC_Editor(GladeDelegate):
         new_process = Process(name='', rate_constant='')
         self.project_tree.append(self.project_tree.process_list_iter, new_process)
         self.project_tree.expand(self.project_tree.process_list_iter)
+        self.project_tree.select(new_process)
         process_form = ProcessForm(new_process, self.project_tree)
         if self.get_slave('workarea'):
             self.detach_slave('workarea')
@@ -664,6 +708,7 @@ class KMC_Editor(GladeDelegate):
         new_parameter = Parameter(name='', value='')
         self.project_tree.append(self.project_tree.parameter_list_iter, new_parameter)
         self.project_tree.expand(self.project_tree.parameter_list_iter)
+        self.project_tree.select(new_parameter)
         parameter_form = ParameterForm(new_parameter, self.project_tree)
         if self.get_slave('workarea'):
             self.detach_slave('workarea')

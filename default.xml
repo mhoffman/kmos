@@ -4,15 +4,17 @@
     <species_list>
         <species color="#ff0000" id="2" name="oxygen"/>
         <species color="#fff" id="1" name="empty"/>
-        <species color="#008604" id="4" name="nitrogen"/>
         <species color="#000000" id="3" name="co"/>
+        <species color="#008604" id="4" name="nitrogen"/>
     </species_list>
     <parameter_list>
+        <parameter name="p_o2" value="1.0"/>
+        <parameter name="p_co" value="1.0"/>
         <parameter name="E_co_cus" value="0.5"/>
-        <parameter name="E_co_top" value="0.6"/>
-        <parameter name="E_co_bridge" value="1.1"/>
-        <parameter name="lattice_size" value="20 20"/>
         <parameter name="print_every" value="100000"/>
+        <parameter name="lattice_size" value="20 20"/>
+        <parameter name="E_co_bridge" value="1.1"/>
+        <parameter name="E_co_top" value="0.6"/>
     </parameter_list>
     <lattice_list>
         <lattice name="ruo2" unit_cell_size="2 1">
