@@ -27,6 +27,7 @@ from kiwi.ui.delegates import Delegate, SlaveDelegate, ProxyDelegate, ProxySlave
 from kiwi.python import Settable
 from kiwi.ui.objectlist import ObjectTree, Column
 from kiwi.datatypes import ValidationError
+import kiwi.ui.dialogs 
 
 # Canvas Import
 from pygtkcanvas.canvas import Canvas
@@ -342,6 +343,15 @@ class ProjectTree(SlaveDelegate):
         self.focus_topmost()
         self.on_project_data__selection_changed(0, self.meta)
 
+    def on_key_press(self, widget, event):
+        selection = self.project_data.get_selected()
+        if gtk.gdk.keyval_name(event.keyval) == 'Delete':
+            if isinstance(selection,Species) or isinstance(selection, Process) or isinstance(selection, Parameter) or isinstance(selection, Lattice):
+                if kiwi.ui.dialogs.yesno("Do you really want to delete '%s'?" % selection.name) == gtk.RESPONSE_YES:
+                    self.project_data.remove(selection)
+                
+            
+
     def on_project_data__selection_changed(self, item, elem):
         slave = self.get_parent().get_slave('workarea')
         if slave:
@@ -370,8 +380,9 @@ class ProjectTree(SlaveDelegate):
             form.on_unit_cell_ok_button__clicked(form.unit_cell_ok_button)
             form.focus_topmost()
         else:
-            print(elem)
             self.get_parent().toast('Not implemented, yet.')
+
+
 
 
 
@@ -384,6 +395,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     def __init__(self, model, project_tree):
         self.model = model
         self.project_tree = project_tree
+        self.lattice = self.project_tree.lattice_list[0]
         ProxySlaveDelegate.__init__(self, model)
         self.canvas = Canvas()
         self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
@@ -402,6 +414,12 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             CanvasLine(self.lattice_layer,0,i*(self.l/self.z),500,i*(self.l/self.z),line_width=1,fg=(.6,.6,.6))
         for i in range(self.z):
             CanvasLine(self.lattice_layer,i*(self.l/self.z),0,i*(self.l/self.z),500,line_width=1,fg=(.6,.6,.6))
+        for i in range(self.z+1):
+            for j in range(self.z+1):
+                for site in self.lattice.sites:
+                    o_site = CanvasOval(self.lattice_layer,0,0,10,10,fg=(.8,.8,.8))
+                    o_site.set_center(self.l/self.z*(i+float(site.site_x)/self.lattice.unit_cell_size_x),self.l/self.z*(j+float(site.site_y)/self.lattice.unit_cell_size_y))
+                    o_site.set_radius(5)
         # draw frame
         frame_col = (.21,.35,.42)
         CanvasRect(self.frame_layer,0,0,520,80,fg=frame_col, bg=frame_col,filled=True)
@@ -788,6 +806,21 @@ class KMC_Editor(GladeDelegate):
 
     def on_btn_export_src__clicked(self, button):
         self.toast('"Export Source" is not implemented, yet.')
+
+    def validate_model(self):
+        pass
+        # check if all  lattice sites are unique
+        # check if all lattice names are unique
+        # check if all parameter names are unique
+        # check if all process names are unique
+        # check if all processes have at least one condition
+        # check if all processes have at least one action
+        # check if all processes have a rate expression 
+        # check if all rate expressions are valid
+        # check if all species have a unique name
+        # check if all species have a unique id
+        # check if all species used in condition_action are defined
+        # check if all sites used in processes are defined: actions, conditions, center_site
 
     def on_btn_help__clicked(self, button):
         self.toast('"Help" is not implemented, yet.')

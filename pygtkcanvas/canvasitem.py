@@ -39,6 +39,19 @@ class CanvasItem(object):
     def get_center(self):
         return (self.coords[2]+self.coords[0])/2, (self.coords[3]+self.coords[1])/2
 
+    def set_center(self, *args):
+        if len(args) == 1 :
+            center = args
+        elif len(args) == 2 :
+            center = args[0], args[1]
+        else:
+            raise TypeError, "Expected either 1 or 2 arguments"
+            
+        old_center = self.get_center()
+        x = center[0] - old_center[0]
+        y = center[1] - old_center[1]
+        self.move(x, y)
+
     def get_bbox(self):
         x0, y0, x1, y1 = self.coords
 
