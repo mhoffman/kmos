@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+"""The main part of the kmc gui project
+"""
 import pdb
 import re
 from optparse import OptionParser
@@ -41,6 +43,9 @@ GLADEFILE = os.path.join(APP_ABS_PATH, 'kmc_editor2.glade')
 
 
 class Attributes:
+    """Handy class that easily allows to define data structures
+    that can only hold a well-defined set of fields
+    """
     attributes = []
     def __init__(self, **kwargs):
         for attribute in self.attributes:
@@ -56,14 +61,24 @@ class Attributes:
             raise AttributeError, 'Tried to set illegal attribute %s' % attrname
 
 class CorrectlyNamed:
+    """Syntactic Sugar class for use with kiwi, that makes sure that the name
+    field of the class has a name field, that always complys with the rules for variables
+    """
+    def __init__(self):
+        pass
+
     def on_name__validate(self, widget, name):
+        """Called by kiwi upon chaning a string
+        """
         if ' ' in name:
             return ValidationError('No spaces allowed')
         elif name and not name[0].isalpha():
             return ValidationError('Need to start with a letter')
 
 class Site(Attributes):
-    attributes = ['index','name','site_x', 'site_y']
+    """A class holding exactly one lattice site
+    """
+    attributes = ['index', 'name', 'site_x', 'site_y']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
 
@@ -71,7 +86,9 @@ class Site(Attributes):
         return '%s %s %s %s' % (self.name, self.index, self.site_x, self.site_y)
 
 class Lattice(Attributes, CorrectlyNamed):
-    attributes = ['name','unit_cell_size_x','unit_cell_size_y','sites']
+    """A class that defines exactly one lattice
+    """
+    attributes = ['name', 'unit_cell_size_x', 'unit_cell_size_y', 'sites']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
         self.sites = []
@@ -85,7 +102,9 @@ class Lattice(Attributes, CorrectlyNamed):
 
 
 class ConditionAction(Attributes):
-    attributes = ['species','coord']
+    """Class that holds either a condition or an action
+    """
+    attributes = ['species', 'coord']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
 
@@ -151,7 +170,7 @@ class Meta(Settable, object):
 
 
 class Process(Attributes):
-    attributes = ['name','center_site', 'rate_constant','condition_list','action_list']
+    attributes = ['name', 'center_site', 'rate_constant', 'condition_list', 'action_list']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
         self.condition_list=[]
@@ -172,9 +191,9 @@ class Output():
 
 class ProjectTree(SlaveDelegate):
     def __init__(self, parent):
-        self.project_data = ObjectTree([Column('name', data_type=str),Column('extra',data_type=str)])
+        self.project_data = ObjectTree([Column('name', data_type=str), Column('extra', data_type=str)])
         self.set_parent(parent)
-        self.meta = self.project_data.append(None,Meta())
+        self.meta = self.project_data.append(None, Meta())
         self.lattice_list_iter = self.project_data.append(None, LatticeList())
         self.parameter_list_iter = self.project_data.append(None, ParameterList())
         self.species_list_iter = self.project_data.append(None, SpeciesList())
@@ -217,7 +236,7 @@ class ProjectTree(SlaveDelegate):
     def __repr__(self):
         return self._get_xml_string()
 
-    def import_xml_file(self,filename):
+    def import_xml_file(self, filename):
         self.filename = filename
         xmlparser = ET.XMLParser(remove_comments=True)
         root = ET.parse(filename, parser=xmlparser).getroot()
@@ -239,14 +258,14 @@ class ProjectTree(SlaveDelegate):
                         lattice_elem.add_site(site_elem)
                     self.project_data.append(self.lattice_list_iter, lattice_elem)
             elif child.tag == 'meta':
-                for attrib in ['author','email', 'debug','model_name','model_dimension']:
+                for attrib in ['author', 'email', 'debug', 'model_name', 'model_dimension']:
                     if child.attrib.has_key(attrib):
                         self.meta.add({attrib:child.attrib[attrib]})
             elif child.tag == 'parameter_list':
                 for parameter in child:
                     name = parameter.attrib['name']
                     value = parameter.attrib['value']
-                    parameter_elem = Parameter(name=name,value=value)
+                    parameter_elem = Parameter(name=name, value=value)
                     self.project_data.append(self.parameter_list_iter, parameter_elem)
             elif child.tag == 'process_list':
                 for process in child:
@@ -282,12 +301,12 @@ class ProjectTree(SlaveDelegate):
 
     def _get_xml_string(self):
         def prettify_xml(elem):
-            rough_string = ET.tostring(elem,encoding='utf-8')
+            rough_string = ET.tostring(elem, encoding='utf-8')
             reparsed = minidom.parseString(rough_string)
             return reparsed.toprettyxml(indent='    ')
         # build XML Tree
         root = ET.Element('kmc')
-        meta = ET.SubElement(root,'meta')
+        meta = ET.SubElement(root, 'meta')
         if hasattr(self.meta, 'author'):
             meta.set('author', self.meta.author)
         if hasattr(self.meta, 'email'):
@@ -298,34 +317,34 @@ class ProjectTree(SlaveDelegate):
             meta.set('model_dimension', str(self.meta.model_dimension))
         if hasattr(self.meta, 'debug'):
             meta.set('debug', str(self.meta.debug))
-        species_list = ET.SubElement(root,'species_list')
+        species_list = ET.SubElement(root, 'species_list')
         for species in self.species_list:
-            species_elem = ET.SubElement(species_list,'species')
-            species_elem.set('name',species.name)
-            species_elem.set('color',species.color)
-            species_elem.set('id',str(species.id))
-        parameter_list = ET.SubElement(root,'parameter_list')
+            species_elem = ET.SubElement(species_list, 'species')
+            species_elem.set('name', species.name)
+            species_elem.set('color', species.color)
+            species_elem.set('id', str(species.id))
+        parameter_list = ET.SubElement(root, 'parameter_list')
         for parameter in self.parameter_list:
             parameter_elem = ET.SubElement(parameter_list, 'parameter')
             parameter_elem.set('name', parameter.name)
             parameter_elem.set('value', str(parameter.value))
         lattice_list = ET.SubElement(root, 'lattice_list')
         for lattice in self.lattice_list:
-            lattice_elem = ET.SubElement(lattice_list,'lattice')
+            lattice_elem = ET.SubElement(lattice_list, 'lattice')
             size = [lattice.unit_cell_size_x, lattice.unit_cell_size_y ]
-            lattice_elem.set('unit_cell_size', str(size)[1 :-1].replace(',',''))
+            lattice_elem.set('unit_cell_size', str(size)[1 :-1].replace(',', ''))
             lattice_elem.set('name', lattice.name)
             for site in lattice.sites:
                 site_elem = ET.SubElement(lattice_elem, 'site')
-                site_elem.set('index',str(site.index))
-                site_elem.set('type',site.name)
-                site_elem.set('coord','%s %s' % (site.site_x, site.site_y))
+                site_elem.set('index', str(site.index))
+                site_elem.set('type', site.name)
+                site_elem.set('coord', '%s %s' % (site.site_x, site.site_y))
         process_list = ET.SubElement(root, 'process_list')
         for process in self.process_list:
-            process_elem = ET.SubElement(process_list,'process')
+            process_elem = ET.SubElement(process_list, 'process')
             process_elem.set('rate_constant', process.rate_constant)
             process_elem.set('name', process.name)
-            process_elem.set('center_site', str(process.center_site)[1 :-1].replace(',',''))
+            process_elem.set('center_site', str(process.center_site)[1 :-1].replace(',', ''))
             for condition in process.condition_list:
                 condition_elem = ET.SubElement(process_elem, 'condition')
                 condition_elem.set('species', condition.species)
@@ -333,7 +352,7 @@ class ProjectTree(SlaveDelegate):
             for action in process.action_list:
                 action_elem = ET.SubElement(process_elem, 'action')
                 action_elem.set('species', action.species)
-                action_elem.set('coord', str(action.coord)[1 :-1].replace(',',''))
+                action_elem.set('coord', str(action.coord)[1 :-1].replace(',', ''))
         return prettify_xml(root)
 
     def select_meta(self):
@@ -376,11 +395,38 @@ class ProjectTree(SlaveDelegate):
 class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     gladefile=GLADEFILE
     toplevel_name='process_form'
-    widgets = ['process_name','rate_constant' ]
+    widgets = ['process_name', 'rate_constant' ]
     def __init__(self, model, project_tree):
+        N=200
         self.model = model
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, model)
+        self.canvas = Canvas()
+        self.get_widget('lattice_pad').add(self.canvas)
+        self.get_widget('lattice_pad').show()
+
+        self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
+        self.canvas.grab_focus()
+        self.canvas.show()
+        self.lattice_layer = CanvasLayer()
+        self.canvas.append(self.lattice_layer)
+        self.site_layer = CanvasLayer()
+        self.canvas.append(self.site_layer)
+        self.frame_layer = CanvasLayer()
+        self.canvas.append(self.frame_layer)
+        self.reservoir_layer = CanvasLayer()
+        self.canvas.append(self.reservoir_layer)
+        self.motion_layer = CanvasLayer()
+        self.canvas.append(self.motion_layer)
+        for i in range(-10, 10):
+            lx = CanvasLine(self.lattice_layer, 0, i*N, 500, i*N)
+        for i in range(-10, 10):
+            ly = CanvasLine(self.lattice_layer, i*N, 0, i*N, 500)
+        for i in range(10):
+            for j in range(10):
+                o = CanvasOval(self.lattice_layer, 20*i-10, 20*j-10, 20*i+i, 20*j+j)
+
+
 
     def on_process_name__content_changed(self, text):
         self.project_tree.update(self.model)
@@ -397,9 +443,9 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 
 
 class SiteForm(ProxyDelegate):
-    gladefile=GLADEFILE
-    toplevel_name='site_form'
-    widgets=['site_name','site_index','site_x','site_y']
+    gladefile = GLADEFILE
+    toplevel_name = 'site_form'
+    widgets = ['site_name', 'site_index', 'site_x', 'site_y']
     def __init__(self, site, parent):
         ProxyDelegate.__init__(self, site)
         self.site = site
@@ -438,9 +484,9 @@ class SiteForm(ProxyDelegate):
 class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
     """Widget to define a lattice and the unit cell
     """
-    gladefile=GLADEFILE
-    toplevel_name='lattice_form'
-    widgets = ['lattice_name','unit_x','unit_y']
+    gladefile = GLADEFILE
+    toplevel_name = 'lattice_form'
+    widgets = ['lattice_name', 'unit_x', 'unit_y']
     def __init__(self, lattice, project_tree):
         ProxySlaveDelegate.__init__(self, lattice)
         self.project_tree = project_tree
@@ -467,20 +513,20 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
             self.unit_y.set_sensitive(False)
             self.canvas.show()
             for i in range(x+1):
-                lx = CanvasLine(self.grid_layer,  i*(X/x), 0, i*(X/x),Y, bg=(0.,0.,0.))
+                lx = CanvasLine(self.grid_layer,  i*(X/x), 0, i*(X/x), Y, bg=(0., 0., 0.))
             for i in range(y+1):
-                ly = CanvasLine(self.grid_layer,0 ,i*(Y/y),X, i*(Y/y), bg=(0.,0.,0.))
+                ly = CanvasLine(self.grid_layer, 0 , i*(Y/y), X, i*(Y/y), bg=(0., 0., 0.))
             for i in range(x+1):
                 for j in range(y+1):
                     r = 10
-                    o = CanvasOval(self.site_layer, i*(X/x)-r,j*(Y/y)-r,i*(X/x)+r,j*(Y/y)+r, bg=(1.,1.,1.))
+                    o = CanvasOval(self.site_layer, i*(X/x)-r, j*(Y/y)-r, i*(X/x)+r, j*(Y/y)+r, bg=(1., 1., 1.))
                     o.coord = i % x, (y-j) % y
                     o.connect('button-press-event', self.site_press_event)
                     for node in self.model.sites:
                         if node.site_x == o.coord[0] and node.site_y == o.coord[1]:
                             o.filled = True
 
-            self.canvas.move_all(50,50)
+            self.canvas.move_all(50, 50)
         elif button.get_label()=='Reset':
             while self.site_layer:
                 self.site_layer.pop()
@@ -511,7 +557,7 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
         else:
             # choose the smallest number that is not given away
             indexes = [x.index for x in self.model.sites]
-            for i in range(1,len(indexes)+2):
+            for i in range(1, len(indexes)+2):
                 if i not in indexes:
                     index = i
                     break
@@ -524,7 +570,7 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
 class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
     gladefile=GLADEFILE
     toplevel_name='meta_form'
-    widgets = ['author','email','model_name','model_dimension','debug']
+    widgets = ['author', 'email', 'model_name', 'model_dimension', 'debug']
     def __init__(self, model):
         ProxySlaveDelegate.__init__(self, model)
         self.model_dimension.set_sensitive(False)
@@ -533,7 +579,9 @@ class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
         return self.on_name__validate(widget, model_name)
 
 class InlineMessage(SlaveView):
-    gladefile=GLADEFILE
+    """Return a nice litte field with a text message on it
+    """
+    gladefile = GLADEFILE
     toplevel_name = 'inline_message'
     widgets = ['message_label']
     def __init__(self, message=''):
@@ -557,8 +605,8 @@ class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
         self.project_tree.update(self.model)
 
 class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
-    gladefile=GLADEFILE
-    toplevel_name='species_form'
+    gladefile = GLADEFILE
+    toplevel_name = 'species_form'
     widgets = ['name', 'color', 'id']
     def __init__(self, model, project_tree):
         self.project_tree = project_tree
@@ -571,7 +619,7 @@ class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
 
 
 class KMC_Editor(GladeDelegate):
-    widgets = ['workarea','statbar']
+    widgets = ['workarea', 'statbar']
     gladefile=GLADEFILE
     toplevel_name='main_window'
     def __init__(self):
@@ -591,12 +639,12 @@ class KMC_Editor(GladeDelegate):
         # add dimension
         self.project_tree.meta.add({'model_dimension':'2'})
         # add an empty species
-        empty = Species(name='empty',color='#fff',id='0')
+        empty = Species(name='empty', color='#fff', id='0')
         self.project_tree.append(self.project_tree.species_list_iter, empty)
         # add standard parameter
-        param = Parameter(name='lattice_size',value='20 20')
+        param = Parameter(name='lattice_size', value='20 20')
         self.project_tree.append(self.project_tree.parameter_list_iter, param)
-        param = Parameter(name='print_every',value='100000')
+        param = Parameter(name='print_every', value='100000')
         self.project_tree.append(self.project_tree.parameter_list_iter, param)
         self.project_tree.expand_all()
 
@@ -604,7 +652,7 @@ class KMC_Editor(GladeDelegate):
         if self.get_slave('workarea'):
             self.detach_slave('workarea')
         inline_message = InlineMessage(toast)
-        self.attach_slave('workarea',inline_message)
+        self.attach_slave('workarea', inline_message)
         inline_message.show()
     def on_btn_new_project__clicked(self, button):
         if str(self.project_tree) != self.saved_state:
@@ -630,14 +678,17 @@ class KMC_Editor(GladeDelegate):
         self.toast('Start a new project by filling in meta information,\nlattice, species, parameters, and processes or open an existing one\nby opening a kMC XML file')
 
     def on_btn_add_lattice__clicked(self, button):
-        new_lattice = Lattice()
-        self.project_tree.append(self.project_tree.lattice_list_iter, new_lattice)
-        lattice_form = LatticeEditor(new_lattice, self.project_tree)
-        self.project_tree.expand(self.project_tree.lattice_list_iter)
-        if self.get_slave('workarea'):
-            self.detach_slave('workarea')
-        self.attach_slave('workarea', lattice_form)
-        lattice_form.focus_topmost()
+        if len(self.project_tree.lattice_list) < 1 :
+            new_lattice = Lattice()
+            self.project_tree.append(self.project_tree.lattice_list_iter, new_lattice)
+            lattice_form = LatticeEditor(new_lattice, self.project_tree)
+            self.project_tree.expand(self.project_tree.lattice_list_iter)
+            if self.get_slave('workarea'):
+                self.detach_slave('workarea')
+            self.attach_slave('workarea', lattice_form)
+            lattice_form.focus_topmost()
+        else:
+            self.toast('Sorry, no multi-lattice support, yet.')
 
     def on_btn_add_species__clicked(self, button):
         new_species = Species(color='#fff', name='')
@@ -709,7 +760,7 @@ class KMC_Editor(GladeDelegate):
         # Import
         self.project_tree.import_xml_file(filename)
         self.set_title(self.project_tree.get_name())
-        self.statbar.push(1,'Imported model %s' % self.project_tree.meta.model_name)
+        self.statbar.push(1, 'Imported model %s' % self.project_tree.meta.model_name)
         self.saved_state = str(self.project_tree)
 
     def on_btn_save_model__clicked(self, button, force_save=False):
@@ -720,13 +771,13 @@ class KMC_Editor(GladeDelegate):
         else:
             if not self.project_tree.filename:
                 self.on_btn_save_as__clicked(None)
-            outfile = open(self.project_tree.filename,'w')
+            outfile = open(self.project_tree.filename, 'w')
             outfile.write(xml_string)
             outfile.write('<!-- This is an automatically generated XML file, representing a kMC model ' + \
                             'please do not change this unless you know what you are doing -->\n')
             outfile.close()
             self.saved_state = xml_string
-            self.statbar.push(1,'Saved %s' % self.project_tree.filename)
+            self.statbar.push(1, 'Saved %s' % self.project_tree.filename)
 
 
     def on_btn_save_as__clicked(self, button):
@@ -734,7 +785,7 @@ class KMC_Editor(GladeDelegate):
             action = gtk.FILE_CHOOSER_ACTION_SAVE,
             parent=None,
             buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OK, gtk.RESPONSE_OK ))
-        filechooser.set_property('do-overwrite-confirmation',True)
+        filechooser.set_property('do-overwrite-confirmation', True)
         resp = filechooser.run()
         if resp == gtk.RESPONSE_OK:
             self.project_tree.filename = filechooser.get_filename()
@@ -779,7 +830,7 @@ class KMC_Editor(GladeDelegate):
 
 if __name__ == '__main__':
     parser = OptionParser()
-    parser.add_option('-o','--import',dest='import_file',help='Immediately import store kmc file')
+    parser.add_option('-o', '--import', dest='import_file', help='Immediately import store kmc file')
     (options, args) = parser.parse_args()
     editor = KMC_Editor()
     if options.import_file:
