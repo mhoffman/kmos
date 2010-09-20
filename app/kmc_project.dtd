@@ -34,7 +34,7 @@
     type CDATA #REQUIRED
   >
   <!ELEMENT process_list (process)*>
-    <!ELEMENT process (condition*,action*)>
+    <!ELEMENT process (condition|action)*>
       <!ATTLIST process
         center_site CDATA #REQUIRED
         name CDATA #REQUIRED

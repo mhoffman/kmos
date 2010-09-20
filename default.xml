@@ -2,29 +2,32 @@
 <kmc>
     <meta author="Max J. Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="2" model_name="my_model"/>
     <species_list>
+        <species color="#525252" id="3" name="co"/>
         <species color="#ff0000" id="2" name="oxygen"/>
-        <species color="#fff" id="1" name="empty"/>
-        <species color="#000000" id="3" name="co"/>
+        <species color="#ffffff" id="1" name="empty"/>
     </species_list>
     <parameter_list>
-        <parameter name="p_co" value="1.0"/>
-        <parameter name="E_co_cus" value="0.5"/>
-        <parameter name="p_o2" value="1.0"/>
-        <parameter name="lattice_size" value="20 20"/>
-        <parameter name="E_co_bridge" value="1.1"/>
-        <parameter name="E_co_top" value="0.6"/>
         <parameter name="print_every" value="100000"/>
+        <parameter name="p_o2" value="1.0"/>
+        <parameter name="E_co_cus" value="0.5"/>
+        <parameter name="p_co" value="1.0"/>
+        <parameter name="E_co_bridge" value="1.1"/>
+        <parameter name="lattice_size" value="20 20"/>
+        <parameter name="E_co_top" value="0.6"/>
     </parameter_list>
     <lattice_list>
-        <lattice name="graphene" unit_cell_size="4 2">
-            <site coord="0 1" index="1" type="a"/>
-            <site coord="1 0" index="2" type="b"/>
-            <site coord="2 0" index="3" type="c"/>
-            <site coord="3 1" index="4" type="d"/>
+        <lattice name="ruo2" unit_cell_size="2 1">
+            <site coord="0 0" index="1" type="bridge"/>
+            <site coord="1 0" index="2" type="cus"/>
         </lattice>
     </lattice_list>
     <process_list>
-        <process center_site="" name="co_adsorption" rate_constant=""/>
+        <process center_site="bridge" name="co_adsorption" rate_constant="">
+            <condition coord="bridge" species="co"/>
+            <condition coord="cus" species="empty"/>
+            <action coord="bridge" species="empty"/>
+            <action coord="cus" species="co"/>
+        </process>
     </process_list>
 </kmc>
 <!-- This is an automatically generated XML file, representing a kMC model please do not change this unless you know what you are doing -->

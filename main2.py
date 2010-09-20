@@ -109,6 +109,21 @@ class ConditionAction(Attributes):
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
 
+    def __repr__(self):
+        return "Species: %s Coord:%s\n" % (self.species, self.coord)
+
+class Coord(Attributes):
+    attributes = ['offset', 'name']
+    def __init__(self, **kwargs):
+        Attributes.__init__(self, **kwargs)
+
+    def __repr__(self):
+        if filter(lambda x:x != 0, self.offset):
+            return '%s+%s' % (self.name, self.offset)
+        else:
+            return '%s' % self.name
+
+
 class Species(Attributes):
     attributes = ['name', 'color', 'id']
     def __init__(self, **kwargs):
@@ -176,7 +191,8 @@ class Process(Attributes):
         Attributes.__init__(self, **kwargs)
         self.condition_list=[]
         self.action_list=[]
-        self.center_site = ()
+    def __repr__(self):
+        return 'Name:%s Rate: %s\nCenter Site: %s\nConditions: %s\nActions: %s' % (self.name, self.rate_constant, self.center_site, self.condition_list, self.action_list)
 
     def add_condition(self, condition):
         self.condition_list.append(condition)
@@ -272,14 +288,14 @@ class ProjectTree(SlaveDelegate):
                     self.project_data.append(self.parameter_list_iter, parameter_elem)
             elif child.tag == 'process_list':
                 for process in child:
-                    center_site = [ int(x) for x in  process.attrib['center_site'].split() ]
+                    center_site = self.parse_coord(process.attrib['center_site'])
                     name = process.attrib['name']
                     rate_constant = process.attrib['rate_constant']
                     process_elem = Process(name=name, center_site=center_site, rate_constant=rate_constant)
                     for sub in process:
                         if sub.tag == 'action' or sub.tag == 'condition':
                             species =  sub.attrib['species']
-                            coord = [ int(x) for x in sub.attrib['coord'].split() ]
+                            coord = self.parse_coord(sub.attrib['coord'])
                             condition_action = ConditionAction(species=species, coord=coord)
                             if sub.tag == 'action':
                                 process_elem.add_action(condition_action)
@@ -295,6 +311,17 @@ class ProjectTree(SlaveDelegate):
                     self.project_data.append(self.species_list_iter, species_elem)
         self.expand_all()
         self.select_meta()
+
+    def parse_coord(self, coord_txt):
+        raw = coord_txt.split('+')
+        if len(raw) == 2 :
+            #print( Coord(name=raw[0], offset=eval(raw[1])))
+            return Coord(name=raw[0], offset=eval(raw[1]))
+        elif len(raw) == 1 :
+            #print( Coord(name=raw[0], offset=[0, 0]))
+            return Coord(name=raw[0], offset=[0, 0])
+        else:
+            raise TypeError, "Coordinate specification %s does not match the expected format" % coord_txt
 
     def expand_all(self):
         self.project_data.expand(self.species_list_iter)
@@ -347,15 +374,15 @@ class ProjectTree(SlaveDelegate):
             process_elem = ET.SubElement(process_list, 'process')
             process_elem.set('rate_constant', process.rate_constant)
             process_elem.set('name', process.name)
-            process_elem.set('center_site', str(process.center_site)[1 :-1].replace(',', ''))
+            process_elem.set('center_site', str(process.center_site))
             for condition in process.condition_list:
                 condition_elem = ET.SubElement(process_elem, 'condition')
                 condition_elem.set('species', condition.species)
-                condition_elem.set('coord', str(condition.coord)[1 :-1].replace(',', ''))
+                condition_elem.set('coord', str(condition.coord))
             for action in process.action_list:
                 action_elem = ET.SubElement(process_elem, 'action')
                 action_elem.set('species', action.species)
-                action_elem.set('coord', str(action.coord)[1 :-1].replace(',', ''))
+                action_elem.set('coord', str(action.coord))
         return prettify_xml(root)
 
     def select_meta(self):
@@ -411,11 +438,11 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     widgets = ['process_name','rate_constant' ]
     z = 3 # z as in zoom
     l = 500 # l as in length
-    def __init__(self, model, project_tree):
-        self.model = model
+    def __init__(self, process, project_tree):
+        self.process = process
         self.project_tree = project_tree
         self.lattice = self.project_tree.lattice_list[0]
-        ProxySlaveDelegate.__init__(self, model)
+        ProxySlaveDelegate.__init__(self, process)
         self.canvas = Canvas()
         self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
         self.canvas.grab_focus()
@@ -436,9 +463,13 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         for i in range(self.z+1):
             for j in range(self.z+1):
                 for site in self.lattice.sites:
-                    o_site = CanvasOval(self.lattice_layer,0,0,10,10,fg=(.8,.8,.8))
-                    o_site.set_center(self.l/self.z*(i+float(site.site_x)/self.lattice.unit_cell_size_x),self.l/self.z*(j+float(site.site_y)/self.lattice.unit_cell_size_y))
-                    o_site.set_radius(5)
+                    l_site = CanvasOval(self.lattice_layer,0,0,10,10,fg=(.8,.8,.8))
+                    l_site.set_center(self.l/self.z*(i+float(site.site_x)/self.lattice.unit_cell_size_x),self.l/self.z*(j+float(site.site_y)/self.lattice.unit_cell_size_y))
+                    l_site.set_radius(5)
+                    l_site.i = i
+                    l_site.j = j
+                    l_site.name = site.name
+
         # draw frame
         frame_col = (.21,.35,.42)
         CanvasRect(self.frame_layer,0,0,520,80,fg=frame_col, bg=frame_col,filled=True)
@@ -454,12 +485,16 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             o = CanvasOval(self.reservoir_layer, 30+k*50,30,50+k*50,50, filled=True, bg=color)
 
         self.lattice_layer.move_all(10,80)
+        self.draw_from_data()
 
 
 
 
+    def draw_from_data(self):
+        print(self.process)
+        
     def on_process_name__content_changed(self, text):
-        self.project_tree.update(self.model)
+        self.project_tree.update(self.process)
 
     def on_btn_chem_eq__clicked(self, button):
         # get chemical expression from user
