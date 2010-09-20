@@ -129,6 +129,9 @@ class Species(Attributes):
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
 
+    def __repr__(self):
+        return 'Name: %s Color: %s ID: %s\n' % (self.name, self.color, self.id)
+
 class SpeciesList(Settable):
     def __init__(self, **kwargs):
         kwargs['name'] = 'Species'
@@ -157,6 +160,9 @@ class Parameter(Attributes, CorrectlyNamed):
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
 
+    def __repr__(self):
+        return 'Name: %s Value: %s\n' % (self.name, self.value)
+
     def on_name__content_changed(self, text):
         self.project_tree.update(self.process)
 
@@ -175,6 +181,9 @@ class Meta(Settable, object):
     name = 'Meta'
     def __init__(self):
         Settable.__init__(self, email='', author='', debug=0, model_name='', model_dimension=0)
+
+
+
 
     def add(self, attrib):
         for key in attrib:
@@ -438,6 +447,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     widgets = ['process_name','rate_constant' ]
     z = 3 # z as in zoom
     l = 500 # l as in length
+    r_cond = 15
+    r_act = 10
     def __init__(self, process, project_tree):
         self.process = process
         self.project_tree = project_tree
@@ -480,8 +491,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         CanvasText(self.frame_layer,10,570,size=8,text='Lattice Area')
 
         for k, species in enumerate(self.project_tree.species_list):
-            color = gtk.gdk.Color(species.color)
-            color = (color.red_float, color.green_float, color.blue_float)
+            color = col_str2tuple(species.color)
             o = CanvasOval(self.reservoir_layer, 30+k*50,30,50+k*50,50, filled=True, bg=color)
 
         self.lattice_layer.move_all(10,80)
@@ -491,7 +501,22 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 
 
     def draw_from_data(self):
-        print(self.process)
+        X = 1; Y = 1
+        for condition in self.process.condition_list:
+            coords = filter(lambda x: isinstance(x, CanvasOval) and x.i==X and x.j==Y and x.name==condition.coord.name, self.lattice_layer)[0].get_coords()
+            color = filter(lambda x: x.name == condition.species, self.project_tree.species_list)[0].color
+            color = col_str2tuple(color)
+            o = CanvasOval(self.condition_layer,bg=color, filled=True)
+            o.coords = coords
+            o.set_radius(self.r_cond)
+
+        for action in self.process.action_list:
+            coords = filter(lambda x: isinstance(x, CanvasOval) and x.i==X and x.j==Y and x.name==action.coord.name, self.lattice_layer)[0].get_coords()
+            color = filter(lambda x: x.name == action.species, self.project_tree.species_list)[0].color
+            color = col_str2tuple(color)
+            o = CanvasOval(self.action_layer,bg=color, filled=True)
+            o.coords = coords
+            o.set_radius(self.r_act)
         
     def on_process_name__content_changed(self, text):
         self.project_tree.update(self.process)
@@ -909,6 +934,9 @@ class KMC_Editor(GladeDelegate):
 
 
 
+def col_str2tuple(hex_string):
+    color = gtk.gdk.Color(hex_string)
+    return (color.red_float, color.green_float, color.blue_float)
 
 
 
