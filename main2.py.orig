@@ -408,15 +408,45 @@ class ProjectTree(SlaveDelegate):
 class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     gladefile=GLADEFILE
     toplevel_name='process_form'
+<<<<<<< HEAD:main2.py
+    widgets = ['process_name', 'rate_constant' ]
+=======
     widgets = ['process_name','rate_constant' ]
     z = 3 # z as in zoom
     l = 500 # l as in length
+>>>>>>> c91ebe7290de9904bec62c7bd8302fb673504ab0:main2.py
     def __init__(self, model, project_tree):
+        N=200
         self.model = model
         self.project_tree = project_tree
         self.lattice = self.project_tree.lattice_list[0]
         ProxySlaveDelegate.__init__(self, model)
         self.canvas = Canvas()
+<<<<<<< HEAD:main2.py
+        self.get_widget('lattice_pad').add(self.canvas)
+        self.get_widget('lattice_pad').show()
+
+        self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
+        self.canvas.grab_focus()
+        self.canvas.show()
+        self.lattice_layer = CanvasLayer()
+        self.canvas.append(self.lattice_layer)
+        self.site_layer = CanvasLayer()
+        self.canvas.append(self.site_layer)
+        self.frame_layer = CanvasLayer()
+        self.canvas.append(self.frame_layer)
+        self.reservoir_layer = CanvasLayer()
+        self.canvas.append(self.reservoir_layer)
+        self.motion_layer = CanvasLayer()
+        self.canvas.append(self.motion_layer)
+        for i in range(-10, 10):
+            lx = CanvasLine(self.lattice_layer, 0, i*N, 500, i*N)
+        for i in range(-10, 10):
+            ly = CanvasLine(self.lattice_layer, i*N, 0, i*N, 500)
+        for i in range(10):
+            for j in range(10):
+                o = CanvasOval(self.lattice_layer, 20*i-10, 20*j-10, 20*i+i, 20*j+j)
+=======
         self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
         self.canvas.grab_focus()
         self.canvas.show()
@@ -455,6 +485,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 
         self.lattice_layer.move_all(10,80)
 
+>>>>>>> c91ebe7290de9904bec62c7bd8302fb673504ab0:main2.py
 
 
 
@@ -710,6 +741,7 @@ class KMC_Editor(GladeDelegate):
         self.toast('Start a new project by filling in meta information,\nlattice, species, parameters, and processes or open an existing one\nby opening a kMC XML file')
 
     def on_btn_add_lattice__clicked(self, button):
+<<<<<<< HEAD:main2.py
         if len(self.project_tree.lattice_list) < 1 :
             new_lattice = Lattice()
             self.project_tree.append(self.project_tree.lattice_list_iter, new_lattice)
@@ -721,6 +753,17 @@ class KMC_Editor(GladeDelegate):
             lattice_form.focus_topmost()
         else:
             self.toast('Sorry, no multi-lattice support, yet.')
+=======
+        new_lattice = Lattice()
+        self.project_tree.append(self.project_tree.lattice_list_iter, new_lattice)
+        self.project_tree.select(new_lattice)
+        lattice_form = LatticeEditor(new_lattice, self.project_tree)
+        self.project_tree.expand(self.project_tree.lattice_list_iter)
+        if self.get_slave('workarea'):
+            self.detach_slave('workarea')
+        self.attach_slave('workarea', lattice_form)
+        lattice_form.focus_topmost()
+>>>>>>> c91ebe7290de9904bec62c7bd8302fb673504ab0:main2.py
 
     def on_btn_add_species__clicked(self, button):
         new_species = Species(color='#fff', name='')

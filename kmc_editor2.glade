@@ -127,7 +127,6 @@
         </child>
     </widget>
     <widget class="GtkWindow" id="main_window">
-        <property name="height_request">600</property>
         <child>
             <widget class="GtkVBox" id="vbox1">
                 <property name="visible">True</property>
@@ -310,16 +309,19 @@
                                 <property name="visible">True</property>
                                 <child>
                                     <widget class="GtkEventBox" id="workarea">
+                                        <property name="height_request">650</property>
                                         <property name="visible">True</property>
+                                        <property name="width_request">520</property>
                                         <child>
                                             <widget class="GtkLabel" id="label2">
-                                                <property name="height_request">500</property>
                                                 <property name="label" context="yes" translatable="yes">workarea</property>
                                                 <property name="visible">True</property>
-                                                <property name="width_request">500</property>
                                             </widget>
                                         </child>
                                     </widget>
+                                    <packing>
+                                        <property name="shrink">False</property>
+                                    </packing>
                                 </child>
                                 <child>
                                     <widget class="GtkEventBox" id="overviewtree">
@@ -637,12 +639,17 @@
                             </packing>
                         </child>
                         <child>
-                            <widget class="GtkDrawingArea" id="process_pad">
-                                <property name="height_request">450</property>
+                            <widget class="GtkEventBox" id="process_pad">
+                                <property name="height_request">590</property>
                                 <property name="visible">True</property>
-                                <property name="width_request">500</property>
+                                <property name="width_request">520</property>
+                                <child>
+                                    <placeholder/>
+                                </child>
                             </widget>
                             <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
                                 <property name="position">1</property>
                             </packing>
                         </child>
@@ -677,6 +684,12 @@
                             <packing>
                                 <property name="expand">False</property>
                                 <property name="position">2</property>
+                            </packing>
+                        </child>
+                        <child>
+                            <placeholder/>
+                            <packing>
+                                <property name="position">3</property>
                             </packing>
                         </child>
                     </widget>

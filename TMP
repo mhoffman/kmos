@@ -1,0 +1,7 @@
+    def __init__(self, **kwargs):
+        for attribute in attributes:
+            if kwargs.has_key(attribute):
+                self.__dict__[attribute] = kwargs[attribute]
+        for key in kwargs:
+            if key not in self.attributes:
+                raise AttributeError, 'Tried to initialize illegal attribute'
