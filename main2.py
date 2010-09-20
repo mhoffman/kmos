@@ -200,6 +200,9 @@ class Process(Attributes):
         Attributes.__init__(self, **kwargs)
         self.condition_list=[]
         self.action_list=[]
+        if not hasattr(self,'center_site'):
+            self.center_site = ''
+            
     def __repr__(self):
         return 'Name:%s Rate: %s\nCenter Site: %s\nConditions: %s\nActions: %s' % (self.name, self.rate_constant, self.center_site, self.condition_list, self.action_list)
 
@@ -502,17 +505,17 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 
     def draw_from_data(self):
         X = 1; Y = 1
-        for condition in self.process.condition_list:
-            coords = filter(lambda x: isinstance(x, CanvasOval) and x.i==X and x.j==Y and x.name==condition.coord.name, self.lattice_layer)[0].get_coords()
-            color = filter(lambda x: x.name == condition.species, self.project_tree.species_list)[0].color
+        for elem in self.process.condition_list:
+            coords = filter(lambda x: isinstance(x, CanvasOval) and x.i==X+elem.coord.offset[0] and x.j==Y+elem.coord.offset[1] and x.name==elem.coord.name, self.lattice_layer)[0].get_coords()
+            color = filter(lambda x: x.name == elem.species, self.project_tree.species_list)[0].color
             color = col_str2tuple(color)
             o = CanvasOval(self.condition_layer,bg=color, filled=True)
             o.coords = coords
             o.set_radius(self.r_cond)
 
-        for action in self.process.action_list:
-            coords = filter(lambda x: isinstance(x, CanvasOval) and x.i==X and x.j==Y and x.name==action.coord.name, self.lattice_layer)[0].get_coords()
-            color = filter(lambda x: x.name == action.species, self.project_tree.species_list)[0].color
+        for elem in self.process.action_list:
+            coords = filter(lambda x: isinstance(x, CanvasOval) and x.i==X+elem.coord.offset[0] and x.j==Y+elem.coord.offset[1] and x.name==elem.coord.name, self.lattice_layer)[0].get_coords()
+            color = filter(lambda x: x.name == elem.species, self.project_tree.species_list)[0].color
             color = col_str2tuple(color)
             o = CanvasOval(self.action_layer,bg=color, filled=True)
             o.coords = coords
