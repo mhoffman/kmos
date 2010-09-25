@@ -461,14 +461,14 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     gladefile=GLADEFILE
     toplevel_name='process_form'
     widgets = ['process_name','rate_constant' ]
-    z = 3 # z as in zoom
+    z = 4 # z as in zoom
     l = 500 # l as in length
     r_cond = 15.
     r_act = 10.
     r_reservoir = 5.
     r_site  = 5.
     # where the center unit cell is in the drawing
-    X = 1; Y = 1
+    X = 2; Y = 2
     def __init__(self, process, project_tree):
         self.process = process
         self.project_tree = project_tree
@@ -494,7 +494,10 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         for i in range(self.z+1):
             for j in range(self.z+1):
                 for site in self.lattice.sites:
-                    l_site = CanvasOval(self.site_layer,0,0,10,10,fg=(.8,.8,.8))
+                    if i == self.X and j == self.Y:
+                        l_site = CanvasOval(self.site_layer,0,0,10,10,fg=(1.,1.,1.))
+                    else:
+                        l_site = CanvasOval(self.site_layer,0,0,10,10,fg=(.6,.6,.6))
 
                     l_site.set_center(self.l/self.z*(i+float(site.site_x)/self.lattice.unit_cell_size_x),500-self.l/self.z*(j+float(site.site_y)/self.lattice.unit_cell_size_y))
                     # 500 - ... for having scientific coordinates and note screen coordinates
@@ -536,7 +539,6 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         return 10 < x < 510 and 80 < y < 580
         
     def button_press(self, widget, item, event):
-        print("PRESS")
         coords = item.get_coords()
         if item.state == 'reservoir':
             o = CanvasOval(self.motion_layer, *coords, filled=True, bg=item.bg)
@@ -558,7 +560,6 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 
     #@verbose
     def button_release(self, widget, item, event):
-        print(self.item.state)
         if self.item.state == 'from_reservoir':
             if not self.on_lattice(event.x, event.y):
                 self.item.delete()
@@ -573,7 +574,6 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                     # we need to set the center of the editor
                         self.X = closest_site.i
                         self.Y = closest_site.j
-                        print(self.X, self.Y)
                     offset = closest_site.i - self.X, closest_site.j - self.Y
                     # name of the site
                     name = closest_site.name
