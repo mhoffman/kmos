@@ -42,6 +42,15 @@ PROCESSLIST_DTD = '/process_list.dtd'
 SRCDIR = './fortran_src'
 GLADEFILE = os.path.join(APP_ABS_PATH, 'kmc_editor2.glade')
 
+def verbose(func):
+        print >>sys.stderr,"monitor %r"%(func.func_name)
+        def f(*args,**kwargs):
+                print >>sys.stderr,"call(\033[0;31m%s.%s\033[0;30m): %r\n"%(type(args[0]).__name__,func.func_name,args[1 :]),
+                sys.stderr.flush()
+                ret=func(*args,**kwargs)
+                print >>sys.stderr,"    ret(%s): \033[0;32m%r\033[0;30m\n"%(func.func_name,ret)
+                return ret
+        return f
 
 class Attributes:
     """Handy class that easily allows to define data structures
@@ -143,6 +152,10 @@ class ProcessList(Settable):
         kwargs['name'] = 'Processes'
         Settable.__init__(self, **kwargs)
 
+    def __lt__(self, other):
+        return self.name < other.name
+        
+
 class ParameterList(Settable):
     def __init__(self, **kwargs):
         kwargs['name'] = 'Parameters'
@@ -220,7 +233,7 @@ class Output():
 
 class ProjectTree(SlaveDelegate):
     def __init__(self, parent):
-        self.project_data = ObjectTree([Column('name', data_type=str), Column('extra', data_type=str)])
+        self.project_data = ObjectTree([Column('name', data_type=str, sorted=True), Column('extra', data_type=str)])
         self.set_parent(parent)
         self.meta = self.project_data.append(None, Meta())
         self.lattice_list_iter = self.project_data.append(None, LatticeList())
@@ -450,8 +463,12 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     widgets = ['process_name','rate_constant' ]
     z = 3 # z as in zoom
     l = 500 # l as in length
-    r_cond = 15
-    r_act = 10
+    r_cond = 15.
+    r_act = 10.
+    r_reservoir = 5.
+    r_site  = 5.
+    # where the center unit cell is in the drawing
+    X = 1; Y = 1
     def __init__(self, process, project_tree):
         self.process = process
         self.project_tree = project_tree
@@ -463,10 +480,10 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.canvas.show()
         self.process_pad.add(self.canvas)
         self.lattice_layer = CanvasLayer(); self.canvas.append(self.lattice_layer)
+        self.site_layer = CanvasLayer(); self.canvas.append(self.site_layer)
         self.condition_layer = CanvasLayer(); self.canvas.append(self.condition_layer)
         self.action_layer = CanvasLayer(); self.canvas.append(self.action_layer)
         self.frame_layer = CanvasLayer(); self.canvas.append(self.frame_layer)
-        self.reservoir_layer = CanvasLayer(); self.canvas.append(self.reservoir_layer)
         self.motion_layer = CanvasLayer(); self.canvas.append(self.motion_layer)
 
         # draw lattice
@@ -477,8 +494,10 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         for i in range(self.z+1):
             for j in range(self.z+1):
                 for site in self.lattice.sites:
-                    l_site = CanvasOval(self.lattice_layer,0,0,10,10,fg=(.8,.8,.8))
-                    l_site.set_center(self.l/self.z*(i+float(site.site_x)/self.lattice.unit_cell_size_x),self.l/self.z*(j+float(site.site_y)/self.lattice.unit_cell_size_y))
+                    l_site = CanvasOval(self.site_layer,0,0,10,10,fg=(.8,.8,.8))
+
+                    l_site.set_center(self.l/self.z*(i+float(site.site_x)/self.lattice.unit_cell_size_x),500-self.l/self.z*(j+float(site.site_y)/self.lattice.unit_cell_size_y))
+                    # 500 - ... for having scientific coordinates and note screen coordinates
                     l_site.set_radius(5)
                     l_site.i = i
                     l_site.j = j
@@ -495,18 +514,89 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 
         for k, species in enumerate(self.project_tree.species_list):
             color = col_str2tuple(species.color)
-            o = CanvasOval(self.reservoir_layer, 30+k*50,30,50+k*50,50, filled=True, bg=color)
+            o = CanvasOval(self.frame_layer, 30+k*50,30,50+k*50,50, filled=True, bg=color)
+            o.species = species.name
+            o.connect('button-press-event', self.button_press)
+            o.connect('motion-notify-event', self.drag_motion)
+            o.connect('button-release-event', self.button_release)
+            o.state = 'reservoir'
 
         self.lattice_layer.move_all(10,80)
+        self.site_layer.move_all(10,80)
         self.draw_from_data()
 
+        # attributes need for moving objects
+        self.item = None
+        self.prev_pos = None
 
+
+    def on_lattice(self, x, y):
+        """Returns True if (x, y) is in lattice box
+        """
+        return 10 < x < 510 and 80 < y < 580
+        
+    def button_press(self, widget, item, event):
+        print("PRESS")
+        coords = item.get_coords()
+        if item.state == 'reservoir':
+            o = CanvasOval(self.motion_layer, *coords, filled=True, bg=item.bg)
+            o.connect('button-press-event', self.button_press)
+            o.connect('motion-notify-event', self.drag_motion)
+            o.connect('button-release-event', self.button_release)
+            o.state = 'from_reservoir'
+            o.species = item.species
+            self.item = o
+            self.item.father = item
+            self.prev_pos = self.item.get_center()
+            self.canvas.redraw()
+
+
+    def drag_motion(self, widget, item, event):
+        d = event.x - self.prev_pos[0],event.y - self.prev_pos[1]
+        self.item.move(*d)
+        self.prev_pos = event.x, event.y
+
+    #@verbose
+    def button_release(self, widget, item, event):
+        print(self.item.state)
+        if self.item.state == 'from_reservoir':
+            if not self.on_lattice(event.x, event.y):
+                self.item.delete()
+            else:
+                close_sites = self.site_layer.find_closest(event.x, event.y, halo=(.2*self.l)/self.z)
+                if close_sites:
+                    closest_site = min(close_sites, key=lambda i : (i.get_center()[0]-event.x)**2 + (i.get_center()[1]-event.y)**2)
+                    coord = closest_site.get_center()
+                    self.item.set_center(*coord)
+                    if not self.process.condition_list + self.process.action_list:
+                    # if no condition or action is defined yet,
+                    # we need to set the center of the editor
+                        self.X = closest_site.i
+                        self.Y = closest_site.j
+                        print(self.X, self.Y)
+                    offset = closest_site.i - self.X, closest_site.j - self.Y
+                    # name of the site
+                    name = closest_site.name
+                    species = self.item.species
+                    condition_action = ConditionAction(species=species, coord=Coord(offset=offset, name=name))
+                    if filter(lambda x: x.get_center() == coord, self.condition_layer):
+                        self.item.new_parent(self.action_layer)
+                        self.item.set_radius(self.r_act)
+                        self.process.action_list.append(condition_action)
+                    else:
+                        self.item.new_parent(self.condition_layer)
+                        self.item.set_radius(self.r_cond)
+                        self.process.condition_list.append(condition_action)
+                else:
+                    self.item.delete()
+
+                    
+        self.canvas.redraw()
 
 
     def draw_from_data(self):
-        X = 1; Y = 1
         for elem in self.process.condition_list:
-            coords = filter(lambda x: isinstance(x, CanvasOval) and x.i==X+elem.coord.offset[0] and x.j==Y+elem.coord.offset[1] and x.name==elem.coord.name, self.lattice_layer)[0].get_coords()
+            coords = filter(lambda x: isinstance(x, CanvasOval) and x.i==self.X+elem.coord.offset[0] and x.j==self.Y+elem.coord.offset[1] and x.name==elem.coord.name, self.site_layer)[0].get_coords()
             color = filter(lambda x: x.name == elem.species, self.project_tree.species_list)[0].color
             color = col_str2tuple(color)
             o = CanvasOval(self.condition_layer,bg=color, filled=True)
@@ -514,7 +604,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             o.set_radius(self.r_cond)
 
         for elem in self.process.action_list:
-            coords = filter(lambda x: isinstance(x, CanvasOval) and x.i==X+elem.coord.offset[0] and x.j==Y+elem.coord.offset[1] and x.name==elem.coord.name, self.lattice_layer)[0].get_coords()
+            coords = filter(lambda x: isinstance(x, CanvasOval) and x.i==self.X+elem.coord.offset[0] and x.j==self.Y+elem.coord.offset[1] and x.name==elem.coord.name, self.site_layer)[0].get_coords()
             color = filter(lambda x: x.name == elem.species, self.project_tree.species_list)[0].color
             color = col_str2tuple(color)
             o = CanvasOval(self.action_layer,bg=color, filled=True)
@@ -522,7 +612,9 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             o.set_radius(self.r_act)
         
     def on_process_name__content_changed(self, text):
+        self.project_tree.project_data.sort_by_attribute('name')
         self.project_tree.update(self.process)
+
 
     def on_btn_chem_eq__clicked(self, button):
         # get chemical expression from user

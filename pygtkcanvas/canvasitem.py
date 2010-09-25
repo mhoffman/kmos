@@ -1,8 +1,19 @@
 __all__ = ['CanvasItem', 'CanvasLine', 'CanvasRect', 'CanvasOval',
 'CanvasArc', 'CanvasText', 'CanvasImage', 'CanvasFunc', 'CanvasGroup']
 
+import sys
 from math import pi
 from canvasmath import *
+
+def verbose(func):
+        print >>sys.stderr,"monitor %r"%(func.func_name)
+        def f(*args,**kwargs):
+                print >>sys.stderr,"call(\033[0;31m%s.%s\033[0;30m): %r\n"%(type(args[0]).__name__,func.func_name,args[1 :]),
+                sys.stderr.flush()
+                ret=func(*args,**kwargs)
+                print >>sys.stderr,"    ret(%s): \033[0;32m%r\033[0;30m\n"%(func.func_name,ret)
+                return ret
+        return f
 
 class CanvasItem(object):
     def __init__(self, parent, *args, **kw):
@@ -27,6 +38,7 @@ class CanvasItem(object):
         new_parent.append(self)
         self.parent = new_parent
 
+    #@verbose
     def delete(self):
         self.parent.remove(self)
 
@@ -45,7 +57,7 @@ class CanvasItem(object):
         elif len(args) == 2 :
             center = args[0], args[1]
         else:
-            raise TypeError, "Expected either 1 or 2 arguments"
+            raise TypeError, "Expected either 1 or 2 arguments, got %s" % len(args)
             
         old_center = self.get_center()
         x = center[0] - old_center[0]
