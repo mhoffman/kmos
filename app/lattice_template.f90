@@ -304,4 +304,12 @@ subroutine get_lattice_char(lattice_nr, char_slot, lattice_char)
     lattice_char = lattice_list(lattice_nr)(char_slot:char_slot)
 end subroutine get_lattice_char
 
+subroutine get_site_char(site_nr, char_slot, site_char)
+    integer(kind=iint), intent(in) :: site_nr, char_slot
+    character,  intent(out) :: site_char
+
+
+    site_char = site_list(site_nr)(char_slot:char_slot)
+end subroutine get_site_char
+
 end module lattice

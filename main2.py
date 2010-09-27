@@ -1081,6 +1081,8 @@ class KMC_Editor(GladeDelegate):
         species_definition += 'integer(kind=iint), parameter :: nr_of_species = %s\n' % len(self.project_tree.species_list)
         species_definition += 'integer(kind=iint), parameter :: nr_of_lattices = %s\n' % len(self.project_tree.lattice_list)
         species_definition += 'character(len=800), dimension(%s) :: lattice_list\n' % len(self.project_tree.lattice_list)
+        species_definition += 'integer(kind=iint), parameter :: nr_of_sites = %s\n' % len(lattice.sites)
+        species_definition += 'character(len=800), dimension(%s) :: site_list\n' % len(lattice.sites)
 
         # UNIT VECTOR DEFINITION
         unit_vector_definition = 'integer(kind=iint), dimension(2,2) ::  lattice_matrix = reshape((/%(x)s,0,0,%(y)s/),(/2,2/))' % {'x':lattice.unit_cell_size_x, 'y':lattice.unit_cell_size_y,'name':lattice.name}
@@ -1092,7 +1094,8 @@ class KMC_Editor(GladeDelegate):
         # LOOKUP TABLE DEFINITION
         lookup_table_definition = ''
         lookup_table_definition += '! Fill lookup table nr2%(name)s\n' % {'name':lattice.name }
-        for site in lattice.sites:
+        for i, site in enumerate(lattice.sites):
+            lookup_table_definition +=  '    site_list(%s) = "%s"\n' % (i+1, site.name)
             lookup_table_definition += '    lookup_nr2%(name)s(%(index)s,:) = (/%(x)s,%(y)s/)\n' % {'name': lattice.name,
                                                                                                 'x':site.site_x,
                                                                                                 'y':site.site_y,
@@ -1107,6 +1110,7 @@ class KMC_Editor(GladeDelegate):
             lookup_table_definition +=  '    species_list(%s) = "%s"\n' % (i+1, species.name)
         for i, lattice_name in enumerate(self.project_tree.lattice_list):
             lookup_table_definition +=  '    lattice_list(%s) = "%s"\n' % (i+1, lattice_name.name)
+
 
 
         #LATTICE MAPPINGS

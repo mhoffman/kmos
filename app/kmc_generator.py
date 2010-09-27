@@ -1000,7 +1000,7 @@ if \{condition 1 \} {[} and
         self._out('    print *,"GNU/GPL Version 3 (C) Max Hoffmann mjhoffmann@gmail.com."')
         self._out('    print *,"Currently kmos is a very alphaish stage and there is"')
         self._out('    print *,"ABSOLUTELY NO WARRANTY for correctness."')
-        self._out('    print *,"Please check back with the author prior to using results in publication"')
+        self._out('    print *,"Please check back with the author prior to using results in publication."')
         self._out('    call lattice_allocate_system(nr_of_proc, input_system_size, system_name)\n')
         for i, proc in enumerate(self.procs):
             self._out('    processes(' + str(i+1) + ') = \'' + proc + '\'')

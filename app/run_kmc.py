@@ -27,7 +27,6 @@ class KMC_Run():
         size = [ int(x) for x in size.split() ]
         name = config.get('standard', 'system_name')
         kmc.proclist.init(size, name)
-        base = eval('kmc.lattice.lookup_nr2%s' % self.lattice_name)
 
         default_species = config.get('standard', 'default_species')
 
@@ -44,6 +43,12 @@ class KMC_Run():
         for i in range(kmc.lattice.nr_of_lattices):
             self.lattice_names.append(get_lattice_name(i+1))
         self.lattice_name = self.lattice_names[0]
+        self.site_names = []
+        for i in range(kmc.lattice.nr_of_sites):
+            self.site_names.append(get_site_name(i+1))
+
+
+        self.base = eval('kmc.lattice.lookup_nr2%s' % self.lattice_name)
 
         for y in range(size[1]):
             for x in range(size[0]):
@@ -53,7 +58,6 @@ class KMC_Run():
             for y in range(size[1]):
                 self.touchup_unit_cell(x, y)
 
-        base = eval('kmc.lattice.lookup_nr2%s' % self.lattice_name)
 
         self.set_rates()
 
@@ -64,6 +68,9 @@ class KMC_Run():
             kmc.proclist.do_kmc_step()
 
     def set_rates(self):
+        """For testing purpose we set all rates to a constant
+        until formula and parameter support is implemented
+        """
         for proc_nr in range(kmc.proclist.nr_of_proc):
             kmc.base.set_rate(proc_nr+1, 50.0)
 
@@ -77,11 +84,10 @@ class KMC_Run():
             eval('kmc.lattice.%s_replace_species' % self.lattice_name)(current_site, old_species, species)
 
     def touchup_unit_cell(self, x, y):
-        base = eval('kmc.lattice.lookup_nr2%s' % self.lattice_name)
         A = kmc.lattice.lattice_matrix
-        for site in base:
-            current_site = x*A[0] + y*A[1] + site
-            touchup = eval('kmc.proclist.touchup_%s_site' % '_'.join([ str(i) for i in site ] ))
+        for i, site in enumerate(self.site_names):
+            current_site = x*A[0] + y*A[1] + self.base[i]
+            touchup = eval('kmc.proclist.touchup_%s_site' % site)
             touchup(current_site)
 
 
@@ -145,6 +151,19 @@ def get_lattice_name(lattice_nr):
         i += 1
     return lattice_name.lower()
 
+
+def get_site_name(site_nr):
+    """Workaround function for f2py's inability to return character arrays, better known as strings.
+    """
+    site_name = ''
+    i = 1
+    while True:
+        new_char= kmc.lattice.get_site_char(site_nr, i)
+        if new_char == ' ':
+            break
+        site_name += new_char
+        i += 1
+    return site_name.lower()
 
 if __name__ == '__main__':
     kmc_run = KMC_Run()

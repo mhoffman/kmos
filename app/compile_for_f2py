@@ -25,7 +25,9 @@ fi
 if [ $# -eq 0 ]
 then
   ${0} -h
-  exit
+  echo "I'll start compiling in a few seconds ..."
+  sleep 3
+  ${0} -m kmc -I
 fi
 
 
