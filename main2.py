@@ -42,6 +42,12 @@ PROCESSLIST_DTD = '/process_list.dtd'
 SRCDIR = './fortran_src'
 GLADEFILE = os.path.join(APP_ABS_PATH, 'kmc_editor2.glade')
 
+def prettify_xml(elem):
+    rough_string = ET.tostring(elem,encoding='utf-8')
+    reparsed = minidom.parseString(rough_string)
+    return reparsed.toprettyxml(indent='    ')
+
+
 def verbose(func):
         print >>sys.stderr,"monitor %r"%(func.func_name)
         def f(*args,**kwargs):
@@ -208,16 +214,14 @@ class Meta(Settable, object):
 
 
 class Process(Attributes):
-    attributes = ['name', 'center_site', 'rate_constant', 'condition_list', 'action_list']
+    attributes = ['name', 'rate_constant', 'condition_list', 'action_list']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
         self.condition_list=[]
         self.action_list=[]
-        if not hasattr(self,'center_site'):
-            self.center_site = ''
             
     def __repr__(self):
-        return 'Name:%s Rate: %s\nCenter Site: %s\nConditions: %s\nActions: %s' % (self.name, self.rate_constant, self.center_site, self.condition_list, self.action_list)
+        return 'Name:%s Rate: %s\nConditions: %s\nActions: %s' % (self.name, self.rate_constant, self.condition_list, self.action_list)
 
     def add_condition(self, condition):
         self.condition_list.append(condition)
@@ -313,10 +317,9 @@ class ProjectTree(SlaveDelegate):
                     self.project_data.append(self.parameter_list_iter, parameter_elem)
             elif child.tag == 'process_list':
                 for process in child:
-                    center_site = self.parse_coord(process.attrib['center_site'])
                     name = process.attrib['name']
                     rate_constant = process.attrib['rate_constant']
-                    process_elem = Process(name=name, center_site=center_site, rate_constant=rate_constant)
+                    process_elem = Process(name=name, rate_constant=rate_constant)
                     for sub in process:
                         if sub.tag == 'action' or sub.tag == 'condition':
                             species =  sub.attrib['species']
@@ -354,6 +357,39 @@ class ProjectTree(SlaveDelegate):
         self.project_data.expand(self.parameter_list_iter)
         self.project_data.expand(self.process_list_iter)
 
+    def _export_process_list_xml(self):
+        root = ET.Element('kmc')
+        lattice = self.lattice_list[0]
+        # extract meta information
+        meta = ET.SubElement(root,'meta')
+        meta.set('name',self.meta.model_name)
+        meta.set('author', self.meta.author)
+        meta.set('dimension',str(self.meta.model_dimension))
+        meta.set('debug',str(self.meta.debug))
+        meta.set('lattice_module','')
+        # extract site_type information
+        site_type_list = ET.SubElement(root,'site_type_list')
+        # extract species information
+        species_list = ET.SubElement(root,'species_list')
+        for lattice in self.lattice_list:
+            for site in lattice.sites:
+                type = site.name
+                site_type_elem = ET.SubElement(site_type_list,'type')
+                site_type_elem.set('name',type)
+        for species in self.species_list:
+            species_elem = ET.SubElement(species_list, 'species')
+            species_elem.set('name',species.name)
+            species_elem.set('id',str(species.id))
+        # extract process list
+        process_list = ET.SubElement(root, 'process_list')
+        process_list.set('lattice',lattice.name)
+        for process in self.process_list:
+            process_elem = ET.SubElement(process_list,'process')
+            process_elem.set('name',process.name)
+            process_elem.set('rate',process.rate_constant)
+            condition_list = ET.SubElement(process_elem, 'condition_list')
+            # CONTINUE HERE
+        return root
     def _get_xml_string(self):
         def prettify_xml(elem):
             rough_string = ET.tostring(elem, encoding='utf-8')
@@ -399,7 +435,6 @@ class ProjectTree(SlaveDelegate):
             process_elem = ET.SubElement(process_list, 'process')
             process_elem.set('rate_constant', process.rate_constant)
             process_elem.set('name', process.name)
-            process_elem.set('center_site', str(process.center_site))
             for condition in process.condition_list:
                 condition_elem = ET.SubElement(process_elem, 'condition')
                 condition_elem.set('species', condition.species)
@@ -409,6 +444,7 @@ class ProjectTree(SlaveDelegate):
                 action_elem.set('species', action.species)
                 action_elem.set('coord', str(action.coord))
         return prettify_xml(root)
+
 
     def select_meta(self):
         self.focus_topmost()
@@ -421,7 +457,6 @@ class ProjectTree(SlaveDelegate):
                 if kiwi.ui.dialogs.yesno("Do you really want to delete '%s'?" % selection.name) == gtk.RESPONSE_YES:
                     self.project_data.remove(selection)
                 
-            
 
     def on_project_data__selection_changed(self, item, elem):
         slave = self.get_parent().get_slave('workarea')
@@ -860,7 +895,6 @@ class KMC_Editor(GladeDelegate):
         if self.get_slave('overviewtree'):
             self.detach_slave('overviewtree')
         self.attach_slave('overviewtree', self.project_tree)
-        self.set_title(self.project_tree.get_name())
         self.project_tree.show()
         self.toast('Start a new project by filling in meta information,\nlattice, species, parameters, and processes or open an existing one\nby opening a kMC XML file')
 
@@ -982,8 +1016,91 @@ class KMC_Editor(GladeDelegate):
             self.on_btn_save_model__clicked(None, force_save=True)
         filechooser.destroy()
 
-    def on_btn_export_src__clicked(self, button):
-        self.toast('"Export Source" is not implemented, yet.')
+    #@verbose
+    def on_btn_export_src__clicked(self, button, dir=''):
+        self.toast('Exporting ...')
+        if not dir:
+            dir = SRCDIR
+        if not os.path.exists(dir):
+            os.mkdir(dir)
+
+        for filename in [ 'base.f90', 'kind_values_f2py.f90', 'units.f90', 'assert.ppc', 'compile_for_f2py', 'run_kmc.py']:
+            # copy files
+            shutil.copy(APP_ABS_PATH + '/%s' % filename, dir)
+
+        lattice_source = open(APP_ABS_PATH + '/lattice_template.f90').read()
+        lattice = self.project_tree.lattice_list[0]
+        # more processing steps ...
+        # SPECIES DEFINITION
+        if not self.project_tree.species_list:
+            print('No species defined, yet, cannot complete source')
+            return
+        species_definition = "integer(kind=iint), public, parameter :: &\n "
+        for species in self.project_tree.species_list[:-1]:
+            species_definition += '    %(species)s =  %(id)s, &\n' % {'species':species.name, 'id':species.id}
+        species_definition += '     %(species)s = %(id)s\n' % {'species':self.project_tree.species_list[-1].name, 'id':self.project_tree.species_list[-1].id}
+        species_definition += 'character(len=800), dimension(%s) :: species_list\n' % len(self.project_tree.species_list)
+        species_definition += 'integer(kind=iint), parameter :: nr_of_species = %s\n' % len(self.project_tree.species_list)
+        species_definition += 'integer(kind=iint), parameter :: nr_of_lattices = %s\n' % len(self.project_tree.lattice_list)
+        species_definition += 'character(len=800), dimension(%s) :: lattice_list\n' % len(self.project_tree.lattice_list)
+
+        # UNIT VECTOR DEFINITION
+        unit_vector_definition = 'integer(kind=iint), dimension(2,2) ::  lattice_matrix = reshape((/%(x)s,0,0,%(y)s/),(/2,2/))' % {'x':lattice.unit_cell_size_x, 'y':lattice.unit_cell_size_y,'name':lattice.name}
+        # LOOKUP TABLE INITIALIZATION
+        indexes = [ x.index for x in lattice.sites ]
+        lookup_table_init = 'integer(kind=iint), dimension(0:%(x)s, 0:%(y)s) :: lookup_%(lattice)s2nr\n' % {'x':lattice.unit_cell_size_x-1,'y':lattice.unit_cell_size_y-1,'lattice':lattice.name}
+        lookup_table_init += 'integer(kind=iint), dimension(%(min)s:%(max)s,2) :: lookup_nr2%(lattice)s\n' % {'min':min(indexes), 'max':max(indexes), 'lattice':lattice.name}
+
+        # LOOKUP TABLE DEFINITION
+        lookup_table_definition = ''
+        lookup_table_definition += '! Fill lookup table nr2%(name)s\n' % {'name':lattice.name }
+        for site in lattice.sites:
+            lookup_table_definition += '    lookup_nr2%(name)s(%(index)s,:) = (/%(x)s,%(y)s/)\n' % {'name': lattice.name,
+                                                                                                'x':site.site_x,
+                                                                                                'y':site.site_y,
+                                                                                                'index':site.index}
+        lookup_table_definition += '\n\n    ! Fill lookup table %(name)s2nr\n' % {'name':lattice.name }
+        for site in lattice.sites:
+            lookup_table_definition += '    lookup_%(name)s2nr(%(x)s, %(y)s) = %(index)s\n'  % {'name': lattice.name,
+                                                                                                'x':site.site_x,
+                                                                                                'y':site.site_y,
+                                                                                                'index':site.index}
+        for i,species in enumerate(self.project_tree.species_list):
+            lookup_table_definition +=  '    species_list(%s) = "%s"\n' % (i+1, species.name)
+        for i, lattice_name in enumerate(self.project_tree.lattice_list):
+            lookup_table_definition +=  '    lattice_list(%s) = "%s"\n' % (i+1, lattice_name.name)
+
+
+        #LATTICE MAPPINGS
+        lattice_source = lattice_source % {'lattice_name': lattice.name,
+            'species_definition':species_definition,
+            'lookup_table_init':lookup_table_init,
+            'lookup_table_definition':lookup_table_definition,
+            'unit_vector_definition':unit_vector_definition,
+            'sites_per_cell':max(indexes)-min(indexes)+1}
+
+        lattice_mod_file = open(dir + '/lattice.f90','w')
+        lattice_mod_file.write(lattice_source)
+        lattice_mod_file.close()
+        # generate process list source via existing code
+        proclist_xml = open(dir + '/process_list.xml','w')
+        pretty_xml = prettify_xml(self.project_tree._export_process_list_xml())
+        proclist_xml.write(pretty_xml)
+        proclist_xml.close()
+        class Options(): pass
+        options = Options()
+        options.xml_filename = proclist_xml.name
+        options.dtd_filename = APP_ABS_PATH + '/process_list.dtd'
+        options.force_overwrite = True
+        options.proclist_filename = SRCDIR + '/proclist.f90'
+
+        ProcListWriter(options)
+
+
+
+        # return directory name
+        self.toast('Wrote FORTRAN sources to %s' % dir)
+
 
     def validate_model(self):
         pass
@@ -998,7 +1115,7 @@ class KMC_Editor(GladeDelegate):
         # check if all species have a unique name
         # check if all species have a unique id
         # check if all species used in condition_action are defined
-        # check if all sites used in processes are defined: actions, conditions, center_site
+        # check if all sites used in processes are defined: actions, conditions
 
     def on_btn_help__clicked(self, button):
         self.toast('"Help" is not implemented, yet.')

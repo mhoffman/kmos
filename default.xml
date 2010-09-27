@@ -2,17 +2,18 @@
 <kmc>
     <meta author="Max J. Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="2" model_name="my_model"/>
     <species_list>
-        <species color="#ff0000" id="2" name="oxygen"/>
         <species color="#ffffff" id="1" name="empty"/>
+        <species color="#0adf10" id="4" name="stickstoff"/>
         <species color="#000000" id="3" name="co"/>
+        <species color="#ff0000" id="2" name="oxygen"/>
     </species_list>
     <parameter_list>
-        <parameter name="lattice_size" value="20 20"/>
-        <parameter name="E_co_bridge" value="1.1"/>
         <parameter name="print_every" value="100000"/>
-        <parameter name="p_o2" value="1.0"/>
+        <parameter name="E_co_bridge" value="1.1"/>
         <parameter name="p_co" value="1.0"/>
         <parameter name="E_co_cus" value="0.5"/>
+        <parameter name="p_o2" value="1.0"/>
+        <parameter name="lattice_size" value="20 20"/>
         <parameter name="E_co_top" value="0.6"/>
     </parameter_list>
     <lattice_list>
@@ -22,213 +23,213 @@
         </lattice>
     </lattice_list>
     <process_list>
-        <process center_site="" name="reaction_oxygen_cus_co_cus_up" rate_constant="">
-            <condition coord="cus" species="oxygen"/>
-            <condition coord="cus+(0, 1)" species="co"/>
-            <action coord="cus" species="empty"/>
-            <action coord="cus+(0, 1)" species="empty"/>
-        </process>
-        <process center_site="" name="co_diffusion_bridge_bridge_up" rate_constant="">
-            <condition coord="bridge" species="co"/>
-            <condition coord="bridge+(0, 1)" species="empty"/>
-            <action coord="bridge+(0, 1)" species="co"/>
-            <action coord="bridge" species="empty"/>
-        </process>
-        <process center_site="" name="co_diffusion_cus_bridge_right" rate_constant="">
+        <process name="co_diffusion_cus_bridge_left" rate_constant="">
             <condition coord="cus" species="co"/>
-            <condition coord="bridge+(1, 0)" species="empty"/>
+            <condition coord="bridge" species="empty"/>
+            <action coord="bridge" species="co"/>
             <action coord="cus" species="empty"/>
-            <action coord="bridge+(1, 0)" species="co"/>
         </process>
-        <process center_site="" name="reaction_oxygen_bridge_co_bridge_down" rate_constant="">
+        <process name="co_adsorption_bridge" rate_constant="">
+            <condition coord="bridge" species="empty"/>
+            <action coord="bridge" species="co"/>
+        </process>
+        <process name="oxygen_diffusion_bridge_cus_right" rate_constant="">
             <condition coord="bridge" species="oxygen"/>
-            <condition coord="bridge+(0, -1)" species="co"/>
+            <condition coord="cus" species="empty"/>
             <action coord="bridge" species="empty"/>
-            <action coord="bridge+(0, -1)" species="empty"/>
+            <action coord="cus" species="oxygen"/>
         </process>
-        <process center_site="None" name="co_diffusion_bridge_bridge_down" rate_constant="">
-            <condition coord="bridge" species="co"/>
-            <condition coord="bridge+(0, -1)" species="empty"/>
-            <action coord="bridge" species="empty"/>
-            <action coord="bridge+(0, -1)" species="co"/>
+        <process name="oxygen_adsorption_bridge_cus_right" rate_constant="">
+            <condition coord="bridge" species="empty"/>
+            <condition coord="cus" species="empty"/>
+            <action coord="bridge" species="oxygen"/>
+            <action coord="cus" species="oxygen"/>
         </process>
-        <process center_site="" name="oxygen_desorption_bridge_cus_right" rate_constant="">
+        <process name="oxygen_adsorption_bridge_cus_left" rate_constant="">
+            <condition coord="bridge" species="empty"/>
+            <condition coord="cus+(-1, 0)" species="empty"/>
+            <action coord="bridge" species="oxygen"/>
+            <action coord="cus+(-1, 0)" species="oxygen"/>
+        </process>
+        <process name="oxygen_desorption_bridge_cus_right" rate_constant="">
             <condition coord="bridge" species="oxygen"/>
             <condition coord="cus" species="oxygen"/>
             <action coord="bridge" species="empty"/>
             <action coord="cus" species="empty"/>
         </process>
-        <process center_site="" name="reaction_oxygen_bridge_co_bridge_up" rate_constant="">
+        <process name="co_adsorption_cus" rate_constant="">
+            <condition coord="cus" species="empty"/>
+            <action coord="cus" species="co"/>
+        </process>
+        <process name="reaction_oxygen_bridge_co_cus_right" rate_constant="">
             <condition coord="bridge" species="oxygen"/>
-            <condition coord="bridge+(0, 1)" species="co"/>
-            <action coord="bridge+(0, 1)" species="empty"/>
+            <condition coord="cus" species="co"/>
             <action coord="bridge" species="empty"/>
-        </process>
-        <process center_site="" name="oxygen_diffusion_cus_cus_up" rate_constant="">
-            <condition coord="cus" species="oxygen"/>
-            <condition coord="cus+(0, 1)" species="empty"/>
-            <action coord="cus+(0, 1)" species="oxygen"/>
             <action coord="cus" species="empty"/>
         </process>
-        <process center_site="" name="reaction_oxygen_cus_co_cus_down" rate_constant="">
-            <condition coord="cus" species="oxygen"/>
-            <condition coord="cus+(0, -1)" species="co"/>
-            <action coord="cus" species="empty"/>
-            <action coord="cus+(0, -1)" species="empty"/>
-        </process>
-        <process center_site="" name="oxygen_diffusion_cus_bridge_left" rate_constant="">
+        <process name="oxygen_diffusion_cus_bridge_left" rate_constant="">
             <condition coord="cus" species="oxygen"/>
             <condition coord="bridge" species="empty"/>
             <action coord="bridge" species="oxygen"/>
             <action coord="cus" species="empty"/>
         </process>
-        <process center_site="" name="oxygen_diffusion_cus_bridge_right" rate_constant="">
+        <process name="oxygen_diffusion_cus_bridge_right" rate_constant="">
             <condition coord="cus" species="oxygen"/>
             <condition coord="bridge+(1, 0)" species="empty"/>
             <action coord="cus" species="empty"/>
             <action coord="bridge+(1, 0)" species="oxygen"/>
         </process>
-        <process center_site="" name="reaction_oxygen_cus_co_bridge_right" rate_constant="">
+        <process name="reaction_oxygen_cus_co_bridge_left" rate_constant="">
             <condition coord="cus" species="oxygen"/>
-            <condition coord="bridge+(1, 0)" species="co"/>
-            <action coord="cus" species="empty"/>
-            <action coord="bridge+(1, 0)" species="empty"/>
-        </process>
-        <process center_site="" name="co_desorption_cus" rate_constant="">
-            <condition coord="cus" species="co"/>
-            <action coord="cus" species="empty"/>
-        </process>
-        <process center_site="" name="co_diffusion_cus_bridge_left" rate_constant="">
-            <condition coord="cus" species="co"/>
-            <condition coord="bridge" species="empty"/>
-            <action coord="bridge" species="co"/>
-            <action coord="cus" species="empty"/>
-        </process>
-        <process center_site="" name="oxygen_diffusion_cus_cus_down" rate_constant="">
-            <condition coord="cus" species="oxygen"/>
-            <condition coord="cus+(0, -1)" species="empty"/>
-            <action coord="cus+(0, -1)" species="oxygen"/>
-            <action coord="cus" species="empty"/>
-        </process>
-        <process center_site="" name="reaction_oxygen_bridge_co_cus_left" rate_constant="">
-            <condition coord="bridge" species="oxygen"/>
-            <condition coord="cus+(-1, 0)" species="co"/>
-            <action coord="bridge" species="empty"/>
-            <action coord="cus+(-1, 0)" species="empty"/>
-        </process>
-        <process center_site="bridge" name="co_diffusion_bridge_cus_right" rate_constant="">
             <condition coord="bridge" species="co"/>
-            <condition coord="cus" species="empty"/>
-            <action coord="bridge" species="empty"/>
-            <action coord="cus" species="co"/>
-        </process>
-        <process center_site="" name="co_desorption_bridge" rate_constant="">
-            <condition coord="bridge" species="co"/>
-            <action coord="bridge" species="empty"/>
-        </process>
-        <process center_site="" name="oxygen_adsorption_bridge_cus_right" rate_constant="">
-            <condition coord="bridge" species="empty"/>
-            <condition coord="cus" species="empty"/>
-            <action coord="bridge" species="oxygen"/>
-            <action coord="cus" species="oxygen"/>
-        </process>
-        <process center_site="" name="oxygen_diffusion_bridge_bridge_up" rate_constant="">
-            <condition coord="bridge" species="oxygen"/>
-            <condition coord="bridge+(0, 1)" species="empty"/>
-            <action coord="bridge" species="empty"/>
-            <action coord="bridge+(0, 1)" species="oxygen"/>
-        </process>
-        <process center_site="" name="oxygen_adsorption_bridge_bridge" rate_constant="">
-            <condition coord="bridge" species="empty"/>
-            <condition coord="bridge+(0, 1)" species="empty"/>
-            <action coord="bridge+(0, 1)" species="oxygen"/>
-            <action coord="bridge" species="oxygen"/>
-        </process>
-        <process center_site="" name="reaction_oxygen_bridge_co_cus_right" rate_constant="">
-            <condition coord="bridge" species="oxygen"/>
-            <condition coord="cus" species="co"/>
-            <action coord="bridge" species="empty"/>
             <action coord="cus" species="empty"/>
+            <action coord="bridge" species="empty"/>
         </process>
-        <process center_site="" name="oxygen_desorption_bridge_cus_left" rate_constant="">
+        <process name="oxygen_desorption_bridge_cus_left" rate_constant="">
             <condition coord="bridge" species="oxygen"/>
             <condition coord="cus+(-1, 0)" species="oxygen"/>
             <action coord="bridge" species="empty"/>
             <action coord="cus+(-1, 0)" species="empty"/>
         </process>
-        <process center_site="" name="co_adsorption_bridge" rate_constant="">
-            <condition coord="bridge" species="empty"/>
-            <action coord="bridge" species="co"/>
-        </process>
-        <process center_site="" name="oxygen_diffusion_bridge_cus_right" rate_constant="">
+        <process name="oxygen_diffusion_bridge_bridge_up" rate_constant="">
             <condition coord="bridge" species="oxygen"/>
-            <condition coord="cus" species="empty"/>
+            <condition coord="bridge+(0, 1)" species="empty"/>
             <action coord="bridge" species="empty"/>
-            <action coord="cus" species="oxygen"/>
+            <action coord="bridge+(0, 1)" species="oxygen"/>
         </process>
-        <process center_site="" name="co_diffusion_cus_cus_down" rate_constant="">
-            <condition coord="cus" species="co"/>
-            <condition coord="cus+(0, -1)" species="empty"/>
-            <action coord="cus+(0, -1)" species="co"/>
-            <action coord="cus" species="empty"/>
-        </process>
-        <process center_site="" name="co_adsorption_cus" rate_constant="">
-            <condition coord="cus" species="empty"/>
-            <action coord="cus" species="co"/>
-        </process>
-        <process center_site="" name="reaction_oxygen_cus_co_bridge_left" rate_constant="">
-            <condition coord="cus" species="oxygen"/>
-            <condition coord="bridge" species="co"/>
-            <action coord="cus" species="empty"/>
-            <action coord="bridge" species="empty"/>
-        </process>
-        <process center_site="" name="oxygen_adsorption_bridge_cus_left" rate_constant="">
-            <condition coord="bridge" species="empty"/>
-            <condition coord="cus+(-1, 0)" species="empty"/>
-            <action coord="bridge" species="oxygen"/>
-            <action coord="cus+(-1, 0)" species="oxygen"/>
-        </process>
-        <process center_site="" name="oxygen_diffusion_bridge_cus_left" rate_constant="">
-            <condition coord="bridge" species="oxygen"/>
-            <condition coord="cus+(-1, 0)" species="empty"/>
-            <action coord="bridge" species="empty"/>
-            <action coord="cus+(-1, 0)" species="oxygen"/>
-        </process>
-        <process center_site="bridge" name="co_diffusion_bridge_cus_left" rate_constant="">
-            <condition coord="bridge" species="co"/>
-            <condition coord="cus+(-1, 0)" species="empty"/>
-            <action coord="bridge" species="empty"/>
-            <action coord="cus+(-1, 0)" species="co"/>
-        </process>
-        <process center_site="" name="oxygen_diffusion_bridge_bridge_down" rate_constant="">
-            <condition coord="bridge" species="oxygen"/>
-            <condition coord="bridge+(0, -1)" species="empty"/>
-            <action coord="bridge+(0, -1)" species="oxygen"/>
-            <action coord="bridge" species="empty"/>
-        </process>
-        <process center_site="" name="oxygen_desorption_cus_cus" rate_constant="">
+        <process name="oxygen_desorption_cus_cus" rate_constant="">
             <condition coord="cus" species="oxygen"/>
             <condition coord="cus+(0, 1)" species="oxygen"/>
             <action coord="cus+(0, 1)" species="empty"/>
             <action coord="cus" species="empty"/>
         </process>
-        <process center_site="" name="oxygen_desorption_bridge_bridge" rate_constant="">
-            <condition coord="bridge" species="oxygen"/>
-            <condition coord="bridge+(0, 1)" species="oxygen"/>
-            <action coord="bridge+(0, 1)" species="empty"/>
+        <process name="co_diffusion_cus_cus_up" rate_constant="">
+            <condition coord="cus" species="co"/>
+            <condition coord="cus+(0, 1)" species="empty"/>
+            <action coord="cus" species="empty"/>
+            <action coord="cus+(0, 1)" species="co"/>
+        </process>
+        <process name="oxygen_diffusion_cus_cus_down" rate_constant="">
+            <condition coord="cus" species="oxygen"/>
+            <condition coord="cus+(0, -1)" species="empty"/>
+            <action coord="cus+(0, -1)" species="oxygen"/>
+            <action coord="cus" species="empty"/>
+        </process>
+        <process name="reaction_oxygen_cus_co_cus_up" rate_constant="">
+            <condition coord="cus" species="oxygen"/>
+            <condition coord="cus+(0, 1)" species="co"/>
+            <action coord="cus" species="empty"/>
+            <action coord="cus+(0, 1)" species="empty"/>
+        </process>
+        <process name="reaction_oxygen_cus_co_bridge_right" rate_constant="">
+            <condition coord="cus" species="oxygen"/>
+            <condition coord="bridge+(1, 0)" species="co"/>
+            <action coord="cus" species="empty"/>
+            <action coord="bridge+(1, 0)" species="empty"/>
+        </process>
+        <process name="co_diffusion_cus_bridge_right" rate_constant="">
+            <condition coord="cus" species="co"/>
+            <condition coord="bridge+(1, 0)" species="empty"/>
+            <action coord="cus" species="empty"/>
+            <action coord="bridge+(1, 0)" species="co"/>
+        </process>
+        <process name="co_diffusion_bridge_bridge_up" rate_constant="">
+            <condition coord="bridge" species="co"/>
+            <condition coord="bridge+(0, 1)" species="empty"/>
+            <action coord="bridge+(0, 1)" species="co"/>
             <action coord="bridge" species="empty"/>
         </process>
-        <process center_site="" name="oxygen_adsorption_cus_cus" rate_constant="">
+        <process name="reaction_oxygen_bridge_co_cus_left" rate_constant="">
+            <condition coord="bridge" species="oxygen"/>
+            <condition coord="cus+(-1, 0)" species="co"/>
+            <action coord="bridge" species="empty"/>
+            <action coord="cus+(-1, 0)" species="empty"/>
+        </process>
+        <process name="oxygen_adsorption_cus_cus" rate_constant="">
             <condition coord="cus" species="empty"/>
             <condition coord="cus+(0, 1)" species="empty"/>
             <action coord="cus" species="oxygen"/>
             <action coord="cus+(0, 1)" species="oxygen"/>
         </process>
-        <process center_site="" name="co_diffusion_cus_cus_up" rate_constant="">
-            <condition coord="cus" species="co"/>
+        <process name="co_diffusion_bridge_bridge_down" rate_constant="">
+            <condition coord="bridge" species="co"/>
+            <condition coord="bridge+(0, -1)" species="empty"/>
+            <action coord="bridge+(0, -1)" species="co"/>
+            <action coord="bridge" species="empty"/>
+        </process>
+        <process name="oxygen_diffusion_cus_cus_up" rate_constant="">
+            <condition coord="cus" species="oxygen"/>
             <condition coord="cus+(0, 1)" species="empty"/>
+            <action coord="cus+(0, 1)" species="oxygen"/>
             <action coord="cus" species="empty"/>
-            <action coord="cus+(0, 1)" species="co"/>
+        </process>
+        <process name="oxygen_adsorption_bridge_bridge" rate_constant="">
+            <condition coord="bridge" species="empty"/>
+            <condition coord="bridge+(0, 1)" species="empty"/>
+            <action coord="bridge+(0, 1)" species="oxygen"/>
+            <action coord="bridge" species="oxygen"/>
+        </process>
+        <process name="reaction_oxygen_cus_co_cus_down" rate_constant="">
+            <condition coord="cus" species="oxygen"/>
+            <condition coord="cus+(0, -1)" species="co"/>
+            <action coord="cus" species="empty"/>
+            <action coord="cus+(0, -1)" species="empty"/>
+        </process>
+        <process name="oxygen_diffusion_bridge_bridge_down" rate_constant="">
+            <condition coord="bridge" species="oxygen"/>
+            <condition coord="bridge+(0, -1)" species="empty"/>
+            <action coord="bridge+(0, -1)" species="oxygen"/>
+            <action coord="bridge" species="empty"/>
+        </process>
+        <process name="co_desorption_cus" rate_constant="">
+            <condition coord="cus" species="co"/>
+            <action coord="cus" species="empty"/>
+        </process>
+        <process name="oxygen_diffusion_bridge_cus_left" rate_constant="">
+            <condition coord="bridge" species="oxygen"/>
+            <condition coord="cus+(-1, 0)" species="empty"/>
+            <action coord="bridge" species="empty"/>
+            <action coord="cus+(-1, 0)" species="oxygen"/>
+        </process>
+        <process name="reaction_oxygen_bridge_co_bridge_down" rate_constant="">
+            <condition coord="bridge" species="oxygen"/>
+            <condition coord="bridge+(0, -1)" species="co"/>
+            <action coord="bridge" species="empty"/>
+            <action coord="bridge+(0, -1)" species="empty"/>
+        </process>
+        <process name="co_diffusion_cus_cus_down" rate_constant="">
+            <condition coord="cus" species="co"/>
+            <condition coord="cus+(0, -1)" species="empty"/>
+            <action coord="cus+(0, -1)" species="co"/>
+            <action coord="cus" species="empty"/>
+        </process>
+        <process name="co_diffusion_bridge_cus_right" rate_constant="">
+            <condition coord="bridge" species="co"/>
+            <condition coord="cus" species="empty"/>
+            <action coord="bridge" species="empty"/>
+            <action coord="cus" species="co"/>
+        </process>
+        <process name="oxygen_desorption_bridge_bridge" rate_constant="">
+            <condition coord="bridge" species="oxygen"/>
+            <condition coord="bridge+(0, 1)" species="oxygen"/>
+            <action coord="bridge+(0, 1)" species="empty"/>
+            <action coord="bridge" species="empty"/>
+        </process>
+        <process name="reaction_oxygen_bridge_co_bridge_up" rate_constant="">
+            <condition coord="bridge" species="oxygen"/>
+            <condition coord="bridge+(0, 1)" species="co"/>
+            <action coord="bridge+(0, 1)" species="empty"/>
+            <action coord="bridge" species="empty"/>
+        </process>
+        <process name="co_diffusion_bridge_cus_left" rate_constant="">
+            <condition coord="bridge" species="co"/>
+            <condition coord="cus+(-1, 0)" species="empty"/>
+            <action coord="bridge" species="empty"/>
+            <action coord="cus+(-1, 0)" species="co"/>
+        </process>
+        <process name="co_desorption_bridge" rate_constant="">
+            <condition coord="bridge" species="co"/>
+            <action coord="bridge" species="empty"/>
         </process>
     </process_list>
 </kmc>
