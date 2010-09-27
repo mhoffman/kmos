@@ -416,8 +416,10 @@ class ProjectTree(SlaveDelegate):
                 condition_elem.set('species', species)
                 condition_elem.set('coordinate', diff_coord)
 
-                # Create corresponding action field
-                action = filter(lambda x: x.coord == condition.coord, process.action_list)[0]
+                # Create corresponding action field, if available
+                actions = filter(lambda x: x.coord == condition.coord, process.action_list)[0]
+                if actions:
+                    action = actions[0]
                 replacement_elem = ET.SubElement(action_elem,'replacement')
                 replacement_elem.set('site', 'site_%s' % index)
                 replacement_elem.set('new_species', action.species)
