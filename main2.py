@@ -116,6 +116,15 @@ class Lattice(Attributes, CorrectlyNamed):
     def add_site(self, site):
         self.sites.append(site)
 
+    def get_coords(self, site):
+        """Return simple numerical representation of coordinates
+        """
+        local_site = filter(lambda x: x.name == site.coord.name, self.sites)[0]
+        local_coords = local_site.site_x, local_site.site_y
+        global_coords = site.coord.offset[0]*self.unit_cell_size_x, site.coord.offset[1]*self.unit_cell_size_y
+        coords = [ x + y for (x, y) in zip(global_coords, local_coords) ]
+        return coords
+
 
 class ConditionAction(Attributes):
     """Class that holds either a condition or an action
@@ -127,6 +136,8 @@ class ConditionAction(Attributes):
     def __repr__(self):
         return "Species: %s Coord:%s\n" % (self.species, self.coord)
 
+
+
 class Coord(Attributes):
     attributes = ['offset', 'name']
     def __init__(self, **kwargs):
@@ -137,6 +148,9 @@ class Coord(Attributes):
             return '%s+%s' % (self.name, self.offset)
         else:
             return '%s' % self.name
+
+    def __eq__(self, other):
+        return str(self) == str(other)
 
 
 class Species(Attributes):
@@ -388,6 +402,30 @@ class ProjectTree(SlaveDelegate):
             process_elem.set('name',process.name)
             process_elem.set('rate',process.rate_constant)
             condition_list = ET.SubElement(process_elem, 'condition_list')
+            action_elem = ET.SubElement(process_elem,'action')
+            center_coord = lattice.get_coords(process.condition_list[0])
+            #condition_list.set('center_site', ' '.join([str(x) for x in center_coord] ))
+            for index, condition in enumerate(process.condition_list):
+                coord = lattice.get_coords(condition)
+                diff_coord = ' '.join([ str(x-y) for (x, y) in zip(coord, center_coord) ])
+                type = condition.coord.name
+                species = condition.species
+                condition_elem = ET.SubElement(condition_list,'condition')
+                condition_elem.set('site', 'site_%s' % index)
+                condition_elem.set('type', type)
+                condition_elem.set('species', species)
+                condition_elem.set('coordinate', diff_coord)
+
+                # Create corresponding action field
+                action = filter(lambda x: x.coord == condition.coord, process.action_list)[0]
+                replacement_elem = ET.SubElement(action_elem,'replacement')
+                replacement_elem.set('site', 'site_%s' % index)
+                replacement_elem.set('new_species', action.species)
+
+
+
+                
+                
             # CONTINUE HERE
         return root
     def _get_xml_string(self):
