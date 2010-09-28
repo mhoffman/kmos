@@ -141,16 +141,29 @@ class ConditionAction(Attributes):
 class Coord(Attributes):
     attributes = ['offset', 'name']
     def __init__(self, **kwargs):
-        Attributes.__init__(self, **kwargs)
+        if kwargs.has_key('string'):
+            raw = kwargs['string'].split('.')
+            if len(raw) == 2 :
+                self.name = raw[0]
+                self.offset = eval(raw[1])
+            elif len(raw) == 1 :
+                self.name = raw[0]
+                self.offset = [0, 0]
+            else:
+                raise TypeError, "Coordinate specification %s does not match the expected format" % coord_txt
+
+        else:
+            Attributes.__init__(self, **kwargs)
 
     def __repr__(self):
         if filter(lambda x:x != 0, self.offset):
-            return '%s+%s' % (self.name, self.offset)
+            return '%s.%s' % (self.name, self.offset)
         else:
             return '%s' % self.name
 
     def __eq__(self, other):
         return str(self) == str(other)
+
 
 
 class Species(Attributes):
@@ -161,10 +174,11 @@ class Species(Attributes):
     def __repr__(self):
         return 'Name: %s Color: %s ID: %s\n' % (self.name, self.color, self.id)
 
-class SpeciesList(Settable):
+class SpeciesList(Attributes):
+    attributes = ['default_species','name']
     def __init__(self, **kwargs):
         kwargs['name'] = 'Species'
-        Settable.__init__(self, **kwargs)
+        Attributes.__init__(self, **kwargs)
 
 
 class ProcessList(Settable):
@@ -337,7 +351,7 @@ class ProjectTree(SlaveDelegate):
                     for sub in process:
                         if sub.tag == 'action' or sub.tag == 'condition':
                             species =  sub.attrib['species']
-                            coord = self.parse_coord(sub.attrib['coord'])
+                            coord = Coord(string=sub.attrib['coord'])
                             condition_action = ConditionAction(species=species, coord=coord)
                             if sub.tag == 'action':
                                 process_elem.add_action(condition_action)
@@ -345,6 +359,7 @@ class ProjectTree(SlaveDelegate):
                                 process_elem.add_condition(condition_action)
                     self.project_data.append(self.process_list_iter, process_elem)
             elif child.tag == 'species_list':
+                self.species_list_iter.default_species = child.attrib['default_species']
                 for species in child:
                     name = species.attrib['name']
                     id = species.attrib['id']
@@ -354,16 +369,6 @@ class ProjectTree(SlaveDelegate):
         self.expand_all()
         self.select_meta()
 
-    def parse_coord(self, coord_txt):
-        raw = coord_txt.split('+')
-        if len(raw) == 2 :
-            #print( Coord(name=raw[0], offset=eval(raw[1])))
-            return Coord(name=raw[0], offset=eval(raw[1]))
-        elif len(raw) == 1 :
-            #print( Coord(name=raw[0], offset=[0, 0]))
-            return Coord(name=raw[0], offset=[0, 0])
-        else:
-            raise TypeError, "Coordinate specification %s does not match the expected format" % coord_txt
 
     def expand_all(self):
         self.project_data.expand(self.species_list_iter)
@@ -417,7 +422,7 @@ class ProjectTree(SlaveDelegate):
                 condition_elem.set('coordinate', diff_coord)
 
                 # Create corresponding action field, if available
-                actions = filter(lambda x: x.coord == condition.coord, process.action_list)[0]
+                actions = filter(lambda x: x.coord == condition.coord, process.action_list)
                 if actions:
                     action = actions[0]
                 replacement_elem = ET.SubElement(action_elem,'replacement')
@@ -430,6 +435,7 @@ class ProjectTree(SlaveDelegate):
                 
             # CONTINUE HERE
         return root
+
     def _get_xml_string(self):
         def prettify_xml(elem):
             rough_string = ET.tostring(elem, encoding='utf-8')
@@ -449,6 +455,11 @@ class ProjectTree(SlaveDelegate):
         if hasattr(self.meta, 'debug'):
             meta.set('debug', str(self.meta.debug))
         species_list = ET.SubElement(root, 'species_list')
+        if hasattr(self.species_list_iter,'default_species'):
+            species_list.set('default_species',self.species_list_iter.default_species)
+        else:
+            species_list.set('default_species','')
+            
         for species in self.species_list:
             species_elem = ET.SubElement(species_list, 'species')
             species_elem.set('name', species.name)
@@ -509,6 +520,10 @@ class ProjectTree(SlaveDelegate):
             meta_form.focus_topmost()
         elif isinstance(elem, Process):
             form = ProcessForm(elem, self)
+            self.get_parent().attach_slave('workarea', form)
+            form.focus_topmost()
+        elif isinstance(elem, SpeciesList):
+            form = SpeciesListForm(elem, self)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
         elif isinstance(elem, Species):
@@ -685,6 +700,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             o = CanvasOval(self.action_layer,bg=color, filled=True)
             o.coords = coords
             o.set_radius(self.r_act)
+
         
     def on_process_name__content_changed(self, text):
         self.project_tree.project_data.sort_by_attribute('name')
@@ -700,6 +716,83 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         resp = chem_form.run()
         eq = form_entry.get_text()
         chem_form.destroy()
+
+        self.parse_chemical_equation(eq)
+
+        self.draw_from_data()
+        self.canvas.redraw()
+
+    def parse_chemical_equation(self, eq):
+        # evaluate expression
+        # remove spaces
+        eq = re.sub(' ','',eq)
+
+        # split at ->
+        if eq.count('->') > 1 :
+            raise StandardError, 'Chemical expression may contain at most one "->"\n%s'  % eq
+        eq = re.split('->',eq)
+        if len(eq) == 2 :
+            left = eq[0]
+            right = eq[1]
+        elif len(eq) == 1 :
+            left = eq[0]
+            right = ''
+
+        # split terms
+        left = left.split('+')
+        right = right.split('+')
+
+        while '' in left:
+            left.remove('')
+
+        while '' in right:
+            right.remove('')
+
+        # small validity checking
+        for term in left+right:
+            if term.count('@') != 1 :
+                print(term)
+                raise StandardError, 'Each term needs to contain exactly one @:\n%s' % term
+
+        # split each term again at @
+        for i, term in enumerate(left):
+            left[i] = term.split('@')
+        for i, term in enumerate(right):
+            right[i] = term.split('@')
+
+        for term in left + right:
+            if not filter(lambda x: x.name == term[0], self.project_tree.species_list):
+                raise StandardError,'Species %s unknown ' % term[0]
+            if not filter(lambda x: x.name == term[1].split('.')[0], self.project_tree.lattice_list[0].sites):
+                raise StandardError, 'Site %s unknown' % term[1]
+
+        condition_list = []
+        action_list = []
+        for term in left:
+            condition_list.append(ConditionAction(species=term[0], coord=Coord(string=term[1])))
+        for term in right:
+            action_list.append(ConditionAction(species=term[0], coord=Coord(string=term[1])))
+
+        default_species = self.project_tree.species_list_iter.default_species
+        # every condition that does not have a corresponding action on the 
+        # same coordinate gets complemented with a 'default_species' action
+        for condition in condition_list:
+            if not filter(lambda x: x.coord == condition.coord, action_list):
+                action_list.append(ConditionAction(species=default_species, coord=Coord(string=str(condition.coord))))
+
+        # every action that does not have a corresponding condition on
+        # the same coordinate gets complemented with a 'default_species'
+        # condition
+        for action in action_list:
+            if not filter(lambda x: x.coord == action.coord, condition_list):
+                condition_list.append(ConditionAction(species=default_species, coord=Coord(string=str(action.coord))))
+        self.process.condition_list += condition_list
+        self.process.action_list += action_list
+            
+
+                
+
+        
 
 
 class SiteForm(ProxyDelegate):
@@ -866,6 +959,21 @@ class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
     def on_parameter_name__content_changed(self, text):
         self.project_tree.update(self.model)
 
+class SpeciesListForm(ProxySlaveDelegate):
+    gladefile = GLADEFILE
+    toplevel_name = 'species_list_form'
+    widgets = ['default_species']
+    def __init__(self, model, project_tree):
+        # this ugly implementation is due to an apparent catch 22 bug in ProxyComboBox:
+        # if the value is set already __init__ expect the value in the list but
+        # you cannot fill the list before calling __init__
+        default_species = model.default_species
+        model.default_species = None
+        ProxySlaveDelegate.__init__(self, model)
+        self.default_species.prefill([ x.name for x in project_tree.species_list], sort=True)
+        self.default_species.select(default_species)
+
+
 class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
     gladefile = GLADEFILE
     toplevel_name = 'species_form'
@@ -875,6 +983,7 @@ class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
         ProxySlaveDelegate.__init__(self, model)
         self.id.set_sensitive(False)
         self.name.grab_focus()
+        self.default_species
 
     def on_name__content_changed(self, text):
         self.project_tree.update(self.model)
@@ -902,6 +1011,8 @@ class KMC_Editor(GladeDelegate):
         self.project_tree.meta.add({'model_dimension':'2'})
         # add an empty species
         empty = Species(name='empty', color='#fff', id='0')
+        # set empty as default species
+        self.project_tree.species_list_iter.default_species = 'empty'
         self.project_tree.append(self.project_tree.species_list_iter, empty)
         # add standard parameter
         param = Parameter(name='lattice_size', value='20 20')

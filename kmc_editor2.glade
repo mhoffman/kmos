@@ -937,4 +937,64 @@
             </widget>
         </child>
     </widget>
+    <widget class="GtkWindow" id="species_list_form">
+        <property name="default_height">250</property>
+        <property name="default_width">440</property>
+        <child>
+            <widget class="GtkHBox" id="hbox13">
+                <property name="visible">True</property>
+                <child>
+                    <widget class="GtkVBox" id="vbox17">
+                        <property name="visible">True</property>
+                        <child>
+                            <widget class="GtkHBox" id="hbox14">
+                                <property name="visible">True</property>
+                                <child>
+                                    <widget class="GtkLabel" id="label20">
+                                        <property name="label" context="yes" translatable="yes">Default species:</property>
+                                        <property name="visible">True</property>
+                                        <property name="xalign">0.0</property>
+                                    </widget>
+                                    <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">False</property>
+                                        <property name="padding">20</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <widget class="ProxyComboBox" id="default_species">
+                                        <property name="data_type">str</property>
+                                        <property name="model_attribute">default_species</property>
+                                        <property name="visible">True</property>
+                                    </widget>
+                                    <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">False</property>
+                                        <property name="position">1</property>
+                                    </packing>
+                                </child>
+                            </widget>
+                            <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="padding">20</property>
+                            </packing>
+                        </child>
+                        <child>
+                            <placeholder/>
+                            <packing>
+                                <property name="position">1</property>
+                            </packing>
+                        </child>
+                    </widget>
+                </child>
+                <child>
+                    <placeholder/>
+                    <packing>
+                        <property name="position">1</property>
+                    </packing>
+                </child>
+            </widget>
+        </child>
+    </widget>
 </glade-interface>

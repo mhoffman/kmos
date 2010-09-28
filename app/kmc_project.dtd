@@ -9,6 +9,9 @@
   >
 
   <!ELEMENT species_list (species)*>
+  <!ATTLIST species_list
+    default_species CDATA #REQUIRED
+  >
   <!ELEMENT species EMPTY>
   <!ATTLIST species
     color CDATA #REQUIRED
