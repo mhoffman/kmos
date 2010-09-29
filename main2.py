@@ -257,6 +257,9 @@ class Process(Attributes):
     def add_action(self, action):
         self.action_list.append(action)
 
+    def get_extra(self):
+        return self.rate_constant
+
 class Output():
     def __init__(self):
         self.name = 'Output'
@@ -547,6 +550,20 @@ class ProjectTree(SlaveDelegate):
 
 
 
+class OutputItem(Attributes):
+    attributes = ['name','output']
+    def __init__(self, *args, **kwargs):
+        Attributes.__init__(self, **kwargs)
+
+class OutputForm(ProxySlaveDelegate):
+    def __init__(self, project_tree):
+        ProxySlaveDelegate.__init__(self.output_list)
+        self.project_tree = project_tree
+        self.output_list = ObjectTree([Column('name', data_type=str, sorted=True), Column('output', data_type=bool)])
+        for species in self.project_tree.species_list:
+            self.output_list.append(OutputItem(name='species', output=False))
+        
+    
 class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     gladefile=GLADEFILE
     toplevel_name='process_form'
@@ -706,6 +723,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.project_tree.project_data.sort_by_attribute('name')
         self.project_tree.update(self.process)
 
+    def on_rate_constant__content_changed(self, text):
+        self.project_tree.update(self.process)
 
     def on_btn_chem_eq__clicked(self, button):
         # get chemical expression from user
