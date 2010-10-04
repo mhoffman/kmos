@@ -27,7 +27,7 @@ from kiwi.controllers import BaseController
 import kiwi.ui
 from kiwi.ui.delegates import Delegate, SlaveDelegate, ProxyDelegate, ProxySlaveDelegate, GladeDelegate, GladeSlaveDelegate
 from kiwi.python import Settable
-from kiwi.ui.objectlist import ObjectTree, Column
+from kiwi.ui.objectlist import ObjectList, ObjectTree, Column
 from kiwi.datatypes import ValidationError
 import kiwi.ui.dialogs 
 
@@ -298,6 +298,7 @@ class ProjectTree(SlaveDelegate):
         self.species_list_iter = self.project_data.append(None, SpeciesList())
         self.process_list_iter = self.project_data.append(None, ProcessList())
         self.output_iter = self.project_data.append(None, Output())
+        self.output_list = ObjectList([Column('name', data_type=str ), Column('output', data_type=bool, editable=True)], sortable=True)
 
         self.filename = ''
 
@@ -320,6 +321,8 @@ class ProjectTree(SlaveDelegate):
             return self.project_data.get_descendants(self.process_list_iter)
         elif attr == 'parameter_list':
             return self.project_data.get_descendants(self.parameter_list_iter)
+        elif attr == 'output_list':
+            return self.output_list
         elif attr == 'meta':
             return self.meta
         elif attr == 'append':
@@ -331,7 +334,7 @@ class ProjectTree(SlaveDelegate):
         elif attr == 'select':
             return self.project_data.select
         else:
-            raise AttributeError, attr
+            raise UserWarning, ('%s not found' % attr)
 
     def __repr__(self):
         return self._get_xml_string()
@@ -567,6 +570,10 @@ class ProjectTree(SlaveDelegate):
             self.get_parent().attach_slave('workarea', meta_form)
             meta_form.focus_toplevel()
             meta_form.focus_topmost()
+        elif isinstance(elem, Output):
+            form = OutputForm(self)
+            self.get_parent().attach_slave('workarea', form)
+            form.focus_topmost()
         elif isinstance(elem, Parameter):
             form = ParameterForm(elem, self.project_data)
             self.get_parent().attach_slave('workarea', form)
@@ -600,13 +607,23 @@ class OutputItem(Attributes):
 class OutputForm(ProxySlaveDelegate):
     """Not implemented yet
     """
+    gladefile = GLADEFILE
+    toplevel_name='output_form'
     def __init__(self, project_tree):
-        ProxySlaveDelegate.__init__(self.output_list)
         self.project_tree = project_tree
-        self.output_list = ObjectTree([Column('name', data_type=str, sorted=True), Column('output', data_type=bool)])
-        for species in self.project_tree.species_list:
-            self.output_list.append(OutputItem(name='species', output=False))
-        
+        #for species in self.project_tree.species_list:
+            #self.output_list.append(OutputItem(name=species.name, output=False))
+        #for species in self.project_tree.species_list:
+            #for site in self.project_tree.lattice_list[0].sites:
+                #self.output_list.append(OutputItem(name=species.name+'@'+site.name, output=False))
+                
+        ProxySlaveDelegate.__init__(self, self.project_tree.output_list)
+        try:
+            self.hbox15.pack_start(self.project_tree.output_list)
+        except:
+            pass
+        self.project_tree.output_list.show()
+        self.project_tree.output_list.grab_focus()
     
 class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     """A form that allows to create and manipulate a process
@@ -1014,7 +1031,7 @@ class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
         return self.on_name__validate(widget, model_name)
 
 class InlineMessage(SlaveView):
-    """Return a nice litte field with a text message on it
+    """Return a nice little field with a text message on it
     """
     gladefile = GLADEFILE
     toplevel_name = 'inline_message'
@@ -1100,7 +1117,14 @@ class KMC_Editor(GladeDelegate):
         self.project_tree.append(self.project_tree.parameter_list_iter, param)
         param = Parameter(name='print_every', value='100000')
         self.project_tree.append(self.project_tree.parameter_list_iter, param)
+
+        # add output entries
+        self.project_tree.output_list.append(OutputItem(name='kmc_time',output=True))
+        self.project_tree.output_list.append(OutputItem(name='walltime',output=False))
+        self.project_tree.output_list.append(OutputItem(name='kmc_step',output=False))
+
         self.project_tree.expand_all()
+
 
     def toast(self, toast):
         if self.get_slave('workarea'):

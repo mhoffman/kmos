@@ -304,7 +304,7 @@
                         </child>
                         <child>
                             <widget class="GtkHPaned" id="hpaned1">
-                                <property name="position">500</property>
+                                <property name="position">520</property>
                                 <property name="position_set">True</property>
                                 <property name="visible">True</property>
                                 <child>
@@ -495,6 +495,19 @@
                         <property name="expand">False</property>
                         <property name="padding">19</property>
                     </packing>
+                </child>
+            </widget>
+        </child>
+    </widget>
+    <widget class="GtkWindow" id="output_form">
+        <property name="default_height">250</property>
+        <property name="default_width">440</property>
+        <child>
+            <widget class="GtkHBox" id="hbox15">
+                <property name="visible">True</property>
+                <child>
+                    <placeholder/>
+                    <packing/>
                 </child>
             </widget>
         </child>
