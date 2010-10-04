@@ -43,20 +43,26 @@ SRCDIR = './fortran_src'
 GLADEFILE = os.path.join(APP_ABS_PATH, 'kmc_editor2.glade')
 
 def prettify_xml(elem):
-    rough_string = ET.tostring(elem,encoding='utf-8')
+    """This function takes an XML document, which can have one or many lines
+    and turns it into a well-breaked, nicely-indented string
+    """
+    rough_string = ET.tostring(elem, encoding='utf-8')
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent='    ')
 
 
 def verbose(func):
-        print >>sys.stderr,"monitor %r"%(func.func_name)
-        def f(*args,**kwargs):
-                print >>sys.stderr,"call(\033[0;31m%s.%s\033[0;30m): %r\n"%(type(args[0]).__name__,func.func_name,args[1 :]),
-                sys.stderr.flush()
-                ret=func(*args,**kwargs)
-                print >>sys.stderr,"    ret(%s): \033[0;32m%r\033[0;30m\n"%(func.func_name,ret)
-                return ret
-        return f
+    """Debugging helper that allows to track input and output of function
+    via decoration"""
+    print >> sys.stderr, "monitor %r" % (func.func_name)
+    def wrapper_func(*args, **kwargs):
+        """The wrapping function
+        """
+        print >> sys.stderr, "call(\033[0;31m%s.%s\033[0;30m): %r\n" % (type(args[0]).__name__, func.func_name, args[1 :]), sys.stderr.flush()
+        ret = func(*args, **kwargs)
+        print >> sys.stderr, "    ret(%s): \033[0;32m%r\033[0;30m\n" % (func.func_name, ret)
+        return ret
+    return wrapper_func
 
 class Attributes:
     """Handy class that easily allows to define data structures
@@ -114,6 +120,8 @@ class Lattice(Attributes, CorrectlyNamed):
         return "%s %s %s\n\n%s" % (self.name, self.unit_cell_size_x, self.unit_cell_size_y, self.sites)
 
     def add_site(self, site):
+        """Add a new site to a lattice
+        """
         self.sites.append(site)
 
     def get_coords(self, site):
@@ -139,6 +147,9 @@ class ConditionAction(Attributes):
 
 
 class Coord(Attributes):
+    """Class that hold exactly one coordinate as used in the description
+    of a process
+    """
     attributes = ['offset', 'name']
     def __init__(self, **kwargs):
         if kwargs.has_key('string'):
@@ -150,7 +161,7 @@ class Coord(Attributes):
                 self.name = raw[0]
                 self.offset = [0, 0]
             else:
-                raise TypeError, "Coordinate specification %s does not match the expected format" % coord_txt
+                raise TypeError, "Coordinate specification %s does not match the expected format" % raw
 
         else:
             Attributes.__init__(self, **kwargs)
@@ -167,6 +178,9 @@ class Coord(Attributes):
 
 
 class Species(Attributes):
+    """Class that represent a species such as oxygen, empty, ... . Not empty
+    is treated just like a species.
+    """
     attributes = ['name', 'color', 'id']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
@@ -175,13 +189,17 @@ class Species(Attributes):
         return 'Name: %s Color: %s ID: %s\n' % (self.name, self.color, self.id)
 
 class SpeciesList(Attributes):
-    attributes = ['default_species','name']
+    """A list of species
+    """
+    attributes = ['default_species', 'name']
     def __init__(self, **kwargs):
         kwargs['name'] = 'Species'
         Attributes.__init__(self, **kwargs)
 
 
 class ProcessList(Settable):
+    """A list of processes
+    """
     def __init__(self, **kwargs):
         kwargs['name'] = 'Processes'
         Settable.__init__(self, **kwargs)
@@ -191,18 +209,25 @@ class ProcessList(Settable):
         
 
 class ParameterList(Settable):
+    """A list of parameters
+    """
     def __init__(self, **kwargs):
         kwargs['name'] = 'Parameters'
         Settable.__init__(self, **kwargs)
 
 
 class LatticeList(Settable):
+    """A list of lattices
+    """
     def __init__(self, **kwargs):
         kwargs['name'] = 'Lattices'
         Settable.__init__(self, **kwargs)
 
 
 class Parameter(Attributes, CorrectlyNamed):
+    """A parameter that can be used in a rate constant expression
+    and defined via some init file
+    """
     attributes = ['name', 'value']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
@@ -217,20 +242,12 @@ class Parameter(Attributes, CorrectlyNamed):
         return self.value
 
 
-
-
-class ParameterList(Settable):
-    def __init__(self, **kwargs):
-        kwargs['name'] = 'Parameters'
-        Settable.__init__(self, **kwargs)
-
 class Meta(Settable, object):
+    """Class holding the meta-information about the kMC project
+    """
     name = 'Meta'
     def __init__(self):
         Settable.__init__(self, email='', author='', debug=0, model_name='', model_dimension=0)
-
-
-
 
     def add(self, attrib):
         for key in attrib:
@@ -239,14 +256,14 @@ class Meta(Settable, object):
             else:
                 self.__setattr__(key, attrib[key])
 
-
-
 class Process(Attributes):
+    """One process in a kMC process list
+    """
     attributes = ['name', 'rate_constant', 'condition_list', 'action_list']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
-        self.condition_list=[]
-        self.action_list=[]
+        self.condition_list = []
+        self.action_list = []
             
     def __repr__(self):
         return 'Name:%s Rate: %s\nConditions: %s\nActions: %s' % (self.name, self.rate_constant, self.condition_list, self.action_list)
@@ -261,12 +278,17 @@ class Process(Attributes):
         return self.rate_constant
 
 class Output():
+    """A dummy class, that will hold the values which are to be printed to logfile.
+    """
     def __init__(self):
         self.name = 'Output'
 
 
 
 class ProjectTree(SlaveDelegate):
+    """A rather complex class holding all the information of a kMC project that provides
+    a treelike view for the gui
+    """
     def __init__(self, parent):
         self.project_data = ObjectTree([Column('name', data_type=str, sorted=True), Column('extra', data_type=str)])
         self.set_parent(parent)
@@ -280,7 +302,6 @@ class ProjectTree(SlaveDelegate):
         self.filename = ''
 
         SlaveDelegate.__init__(self, toplevel=self.project_data)
-
 
     def update(self, model):
         self.project_data.update(model)
@@ -316,6 +337,9 @@ class ProjectTree(SlaveDelegate):
         return self._get_xml_string()
 
     def import_xml_file(self, filename):
+        """Takes a filename, validates the content against kmc_project.dtd
+        and import all fields into the current project tree
+        """
         self.filename = filename
         xmlparser = ET.XMLParser(remove_comments=True)
         root = ET.parse(filename, parser=xmlparser).getroot()
@@ -374,43 +398,51 @@ class ProjectTree(SlaveDelegate):
 
 
     def expand_all(self):
+        """Expand all list of the project tree
+        """
         self.project_data.expand(self.species_list_iter)
         self.project_data.expand(self.lattice_list_iter)
         self.project_data.expand(self.parameter_list_iter)
         self.project_data.expand(self.process_list_iter)
 
     def _export_process_list_xml(self):
+        """This basically a legacy function: the part of the source code creator
+        existed before and uses a slightly modified XML syntax which was faster to type
+        by hand unnecesarily complex when using a GUI. So this function converts
+        the current process list to the old form and passes along all essential
+        information to the kmc_generator module
+        """
         root = ET.Element('kmc')
         lattice = self.lattice_list[0]
         # extract meta information
-        meta = ET.SubElement(root,'meta')
-        meta.set('name',self.meta.model_name)
+        meta = ET.SubElement(root, 'meta')
+        meta.set('name', self.meta.model_name)
         meta.set('author', self.meta.author)
-        meta.set('dimension',str(self.meta.model_dimension))
-        meta.set('debug',str(self.meta.debug))
-        meta.set('lattice_module','')
+        meta.set('dimension', str(self.meta.model_dimension))
+        meta.set('debug', str(self.meta.debug))
+        meta.set('lattice_module', '')
         # extract site_type information
-        site_type_list = ET.SubElement(root,'site_type_list')
+        site_type_list = ET.SubElement(root, 'site_type_list')
         # extract species information
-        species_list = ET.SubElement(root,'species_list')
+        species_list = ET.SubElement(root, 'species_list')
         for lattice in self.lattice_list:
             for site in lattice.sites:
                 type = site.name
-                site_type_elem = ET.SubElement(site_type_list,'type')
-                site_type_elem.set('name',type)
+                site_type_elem = ET.SubElement(site_type_list, 'type')
+                site_type_elem.set('name', type)
         for species in self.species_list:
             species_elem = ET.SubElement(species_list, 'species')
-            species_elem.set('name',species.name)
-            species_elem.set('id',str(species.id))
+            species_elem.set('name', species.name)
+            species_elem.set('id', str(species.id))
         # extract process list
         process_list = ET.SubElement(root, 'process_list')
-        process_list.set('lattice',lattice.name)
+        process_list.set('lattice', lattice.name)
         for process in self.process_list:
-            process_elem = ET.SubElement(process_list,'process')
-            process_elem.set('name',process.name)
-            process_elem.set('rate',process.rate_constant)
+            process_elem = ET.SubElement(process_list, 'process')
+            process_elem.set('name', process.name)
+            process_elem.set('rate', process.rate_constant)
             condition_list = ET.SubElement(process_elem, 'condition_list')
-            action_elem = ET.SubElement(process_elem,'action')
+            action_elem = ET.SubElement(process_elem, 'action')
             center_coord = lattice.get_coords(process.condition_list[0])
             #condition_list.set('center_site', ' '.join([str(x) for x in center_coord] ))
             for index, condition in enumerate(process.condition_list):
@@ -418,7 +450,7 @@ class ProjectTree(SlaveDelegate):
                 diff_coord = ' '.join([ str(x-y) for (x, y) in zip(coord, center_coord) ])
                 type = condition.coord.name
                 species = condition.species
-                condition_elem = ET.SubElement(condition_list,'condition')
+                condition_elem = ET.SubElement(condition_list, 'condition')
                 condition_elem.set('site', 'site_%s' % index)
                 condition_elem.set('type', type)
                 condition_elem.set('species', species)
@@ -428,7 +460,7 @@ class ProjectTree(SlaveDelegate):
                 actions = filter(lambda x: x.coord == condition.coord, process.action_list)
                 if actions:
                     action = actions[0]
-                replacement_elem = ET.SubElement(action_elem,'replacement')
+                replacement_elem = ET.SubElement(action_elem, 'replacement')
                 replacement_elem.set('site', 'site_%s' % index)
                 replacement_elem.set('new_species', action.species)
 
@@ -440,10 +472,8 @@ class ProjectTree(SlaveDelegate):
         return root
 
     def _get_xml_string(self):
-        def prettify_xml(elem):
-            rough_string = ET.tostring(elem, encoding='utf-8')
-            reparsed = minidom.parseString(rough_string)
-            return reparsed.toprettyxml(indent='    ')
+        """Produces an XML representation of the project data
+        """
         # build XML Tree
         root = ET.Element('kmc')
         meta = ET.SubElement(root, 'meta')
@@ -458,10 +488,10 @@ class ProjectTree(SlaveDelegate):
         if hasattr(self.meta, 'debug'):
             meta.set('debug', str(self.meta.debug))
         species_list = ET.SubElement(root, 'species_list')
-        if hasattr(self.species_list_iter,'default_species'):
-            species_list.set('default_species',self.species_list_iter.default_species)
+        if hasattr(self.species_list_iter, 'default_species'):
+            species_list.set('default_species', self.species_list_iter.default_species)
         else:
-            species_list.set('default_species','')
+            species_list.set('default_species', '')
             
         for species in self.species_list:
             species_elem = ET.SubElement(species_list, 'species')
@@ -501,18 +531,28 @@ class ProjectTree(SlaveDelegate):
 
 
     def select_meta(self):
+        """Make the treeview focus the meta entry
+        """
         self.focus_topmost()
         self.on_project_data__selection_changed(0, self.meta)
 
     def on_key_press(self, widget, event):
+        """When the user hits the keyboard focusing the treeview
+        this event is triggered. Right now the only supported function
+        is to deleted the selected item
+        """
         selection = self.project_data.get_selected()
         if gtk.gdk.keyval_name(event.keyval) == 'Delete':
-            if isinstance(selection,Species) or isinstance(selection, Process) or isinstance(selection, Parameter) or isinstance(selection, Lattice):
+            if isinstance(selection, Species) or isinstance(selection, Process) or isinstance(selection, Parameter) or isinstance(selection, Lattice):
                 if kiwi.ui.dialogs.yesno("Do you really want to delete '%s'?" % selection.name) == gtk.RESPONSE_YES:
                     self.project_data.remove(selection)
                 
 
     def on_project_data__selection_changed(self, item, elem):
+        """When a new item is selected in the treeview this function
+        loads the main area of the window with the corresponding form
+        and data.
+        """
         slave = self.get_parent().get_slave('workarea')
         if slave:
             self.get_parent().detach_slave('workarea')
@@ -551,11 +591,15 @@ class ProjectTree(SlaveDelegate):
 
 
 class OutputItem(Attributes):
-    attributes = ['name','output']
+    """Not implemented yet
+    """
+    attributes = ['name', 'output']
     def __init__(self, *args, **kwargs):
         Attributes.__init__(self, **kwargs)
 
 class OutputForm(ProxySlaveDelegate):
+    """Not implemented yet
+    """
     def __init__(self, project_tree):
         ProxySlaveDelegate.__init__(self.output_list)
         self.project_tree = project_tree
@@ -565,9 +609,11 @@ class OutputForm(ProxySlaveDelegate):
         
     
 class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
-    gladefile=GLADEFILE
-    toplevel_name='process_form'
-    widgets = ['process_name','rate_constant' ]
+    """A form that allows to create and manipulate a process
+    """
+    gladefile = GLADEFILE
+    toplevel_name = 'process_form'
+    widgets = ['process_name', 'rate_constant' ]
     z = 4 # z as in zoom
     l = 500 # l as in length
     r_cond = 15.
@@ -595,18 +641,18 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 
         # draw lattice
         for i in range(self.z):
-            CanvasLine(self.lattice_layer,0,i*(self.l/self.z),500,i*(self.l/self.z),line_width=1,fg=(.6,.6,.6))
+            CanvasLine(self.lattice_layer, 0, i*(self.l/self.z), 500, i*(self.l/self.z), line_width=1, fg=(.6, .6, .6))
         for i in range(self.z):
-            CanvasLine(self.lattice_layer,i*(self.l/self.z),0,i*(self.l/self.z),500,line_width=1,fg=(.6,.6,.6))
+            CanvasLine(self.lattice_layer, i*(self.l/self.z), 0, i*(self.l/self.z), 500, line_width=1, fg=(.6, .6, .6))
         for i in range(self.z+1):
             for j in range(self.z+1):
                 for site in self.lattice.sites:
                     if i == self.X and j == self.Y:
-                        l_site = CanvasOval(self.site_layer,0,0,10,10,fg=(1.,1.,1.))
+                        l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=(1., 1., 1.))
                     else:
-                        l_site = CanvasOval(self.site_layer,0,0,10,10,fg=(.6,.6,.6))
+                        l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=(.6, .6, .6))
 
-                    l_site.set_center(self.l/self.z*(i+float(site.site_x)/self.lattice.unit_cell_size_x),500-self.l/self.z*(j+float(site.site_y)/self.lattice.unit_cell_size_y))
+                    l_site.set_center(self.l/self.z*(i+float(site.site_x)/self.lattice.unit_cell_size_x), 500-self.l/self.z*(j+float(site.site_y)/self.lattice.unit_cell_size_y))
                     # 500 - ... for having scientific coordinates and note screen coordinates
                     l_site.set_radius(5)
                     l_site.i = i
@@ -614,25 +660,25 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                     l_site.name = site.name
 
         # draw frame
-        frame_col = (.21,.35,.42)
-        CanvasRect(self.frame_layer,0,0,520,80,fg=frame_col, bg=frame_col,filled=True)
-        CanvasRect(self.frame_layer,0,0,10,580,fg=frame_col, bg=frame_col,filled=True)
-        CanvasRect(self.frame_layer,510,0,520,580,fg=frame_col, bg=frame_col,filled=True)
-        CanvasRect(self.frame_layer,0,580,520,590,fg=frame_col, bg=frame_col,filled=True)
-        CanvasText(self.frame_layer,10,10,size=8,text='Reservoir Area')
-        CanvasText(self.frame_layer,10,570,size=8,text='Lattice Area')
+        frame_col = (.21, .35, .42)
+        CanvasRect(self.frame_layer, 0, 0, 520, 80, fg=frame_col, bg=frame_col, filled=True)
+        CanvasRect(self.frame_layer, 0, 0, 10, 580, fg=frame_col, bg=frame_col, filled=True)
+        CanvasRect(self.frame_layer, 510, 0, 520, 580, fg=frame_col, bg=frame_col, filled=True)
+        CanvasRect(self.frame_layer, 0, 580, 520, 590, fg=frame_col, bg=frame_col, filled=True)
+        CanvasText(self.frame_layer, 10, 10, size=8, text='Reservoir Area')
+        CanvasText(self.frame_layer, 10, 570, size=8, text='Lattice Area')
 
         for k, species in enumerate(self.project_tree.species_list):
             color = col_str2tuple(species.color)
-            o = CanvasOval(self.frame_layer, 30+k*50,30,50+k*50,50, filled=True, bg=color)
+            o = CanvasOval(self.frame_layer, 30+k*50, 30, 50+k*50, 50, filled=True, bg=color)
             o.species = species.name
             o.connect('button-press-event', self.button_press)
             o.connect('motion-notify-event', self.drag_motion)
             o.connect('button-release-event', self.button_release)
             o.state = 'reservoir'
 
-        self.lattice_layer.move_all(10,80)
-        self.site_layer.move_all(10,80)
+        self.lattice_layer.move_all(10, 80)
+        self.site_layer.move_all(10, 80)
         self.draw_from_data()
 
         # attributes need for moving objects
@@ -661,7 +707,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 
 
     def drag_motion(self, widget, item, event):
-        d = event.x - self.prev_pos[0],event.y - self.prev_pos[1]
+        d = event.x - self.prev_pos[0], event.y - self.prev_pos[1]
         self.item.move(*d)
         self.prev_pos = event.x, event.y
 
@@ -702,11 +748,14 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 
 
     def draw_from_data(self):
+        """Places circles on the current lattice according
+        to the conditions and actions defined
+        """
         for elem in self.process.condition_list:
             coords = filter(lambda x: isinstance(x, CanvasOval) and x.i==self.X+elem.coord.offset[0] and x.j==self.Y+elem.coord.offset[1] and x.name==elem.coord.name, self.site_layer)[0].get_coords()
             color = filter(lambda x: x.name == elem.species, self.project_tree.species_list)[0].color
             color = col_str2tuple(color)
-            o = CanvasOval(self.condition_layer,bg=color, filled=True)
+            o = CanvasOval(self.condition_layer, bg=color, filled=True)
             o.coords = coords
             o.set_radius(self.r_cond)
 
@@ -714,7 +763,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             coords = filter(lambda x: isinstance(x, CanvasOval) and x.i==self.X+elem.coord.offset[0] and x.j==self.Y+elem.coord.offset[1] and x.name==elem.coord.name, self.site_layer)[0].get_coords()
             color = filter(lambda x: x.name == elem.species, self.project_tree.species_list)[0].color
             color = col_str2tuple(color)
-            o = CanvasOval(self.action_layer,bg=color, filled=True)
+            o = CanvasOval(self.action_layer, bg=color, filled=True)
             o.coords = coords
             o.set_radius(self.r_act)
 
@@ -727,8 +776,13 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.project_tree.update(self.process)
 
     def on_btn_chem_eq__clicked(self, button):
-        # get chemical expression from user
-        chem_form = gtk.MessageDialog(parent=None, flags=gtk.DIALOG_MODAL, type=gtk.MESSAGE_QUESTION, buttons=gtk.BUTTONS_OK_CANCEL, message_format='Please enter a chemical equation, e.g.:\n\nspecies1@site->species2@site')
+        """ get chemical expression from user
+        """
+        chem_form = gtk.MessageDialog(parent=None,
+                                      flags=gtk.DIALOG_MODAL,
+                                      type=gtk.MESSAGE_QUESTION,
+                                      buttons=gtk.BUTTONS_OK_CANCEL,
+                                      message_format='Please enter a chemical equation, e.g.:\n\nspecies1@site->species2@site')
         form_entry = gtk.Entry()
         chem_form.vbox.pack_start(form_entry)
         chem_form.vbox.show_all()
@@ -742,14 +796,16 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.canvas.redraw()
 
     def parse_chemical_equation(self, eq):
-        # evaluate expression
+        """Evaluates a chemical equation 'eq' and adds
+        conditions and actions accordingly
+        """
         # remove spaces
-        eq = re.sub(' ','',eq)
+        eq = re.sub(' ', '', eq)
 
         # split at ->
         if eq.count('->') > 1 :
             raise StandardError, 'Chemical expression may contain at most one "->"\n%s'  % eq
-        eq = re.split('->',eq)
+        eq = re.split('->', eq)
         if len(eq) == 2 :
             left = eq[0]
             right = eq[1]
@@ -781,7 +837,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 
         for term in left + right:
             if not filter(lambda x: x.name == term[0], self.project_tree.species_list):
-                raise StandardError,'Species %s unknown ' % term[0]
+                raise StandardError, 'Species %s unknown ' % term[0]
             if not filter(lambda x: x.name == term[1].split('.')[0], self.project_tree.lattice_list[0].sites):
                 raise StandardError, 'Site %s unknown' % term[1]
 
@@ -815,6 +871,9 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 
 
 class SiteForm(ProxyDelegate):
+    """A form which allows to create or modify a site
+    when setting up a unit cell
+    """
     gladefile = GLADEFILE
     toplevel_name = 'site_form'
     widgets = ['site_name', 'site_index', 'site_x', 'site_y']
@@ -942,8 +1001,10 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
 
 
 class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
-    gladefile=GLADEFILE
-    toplevel_name='meta_form'
+    """A form  that allows to enter meta information about the project
+    """
+    gladefile = GLADEFILE
+    toplevel_name = 'meta_form'
     widgets = ['author', 'email', 'model_name', 'model_dimension', 'debug']
     def __init__(self, model):
         ProxySlaveDelegate.__init__(self, model)
@@ -964,8 +1025,8 @@ class InlineMessage(SlaveView):
 
 
 class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
-    gladefile=GLADEFILE
-    toplevel_name='parameter_form'
+    gladefile = GLADEFILE
+    toplevel_name = 'parameter_form'
     widgets = ['parameter_name', 'value']
     def __init__(self, model, project_tree):
         self.project_tree = project_tree
@@ -1010,8 +1071,8 @@ class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
 
 class KMC_Editor(GladeDelegate):
     widgets = ['workarea', 'statbar']
-    gladefile=GLADEFILE
-    toplevel_name='main_window'
+    gladefile = GLADEFILE
+    toplevel_name = 'main_window'
     def __init__(self):
         self.project_tree = ProjectTree(parent=self)
         GladeDelegate.__init__(self, delete_handler=self.on_btn_quit__clicked)
@@ -1049,7 +1110,11 @@ class KMC_Editor(GladeDelegate):
     def on_btn_new_project__clicked(self, button):
         if str(self.project_tree) != self.saved_state:
             # if there are unsaved changes, ask what to do first
-            save_changes_dialog = gtk.Dialog(buttons=(gtk.STOCK_DISCARD, gtk.RESPONSE_DELETE_EVENT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_SAVE, gtk.RESPONSE_OK), title='Saved unsaved changes?')
+            save_changes_dialog = gtk.Dialog(
+                                    buttons=(gtk.STOCK_DISCARD, gtk.RESPONSE_DELETE_EVENT, 
+                                    gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                    gtk.STOCK_SAVE, gtk.RESPONSE_OK),
+                                    title='Saved unsaved changes?')
             save_changes_dialog.vbox.pack_start(gtk.Label("\nThere are unsaved changes.\nWhat shall we do?\n\n"))
             save_changes_dialog.show_all()
             resp = save_changes_dialog.run()
@@ -1120,7 +1185,11 @@ class KMC_Editor(GladeDelegate):
         """
         if str(self.project_tree) != self.saved_state:
             # if there are unsaved changes, ask what to do first
-            save_changes_dialog = gtk.Dialog(buttons=(gtk.STOCK_DISCARD, gtk.RESPONSE_DELETE_EVENT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_SAVE, gtk.RESPONSE_OK), title='Saved unsaved changes?')
+            save_changes_dialog = gtk.Dialog(
+                                buttons=(gtk.STOCK_DISCARD, gtk.RESPONSE_DELETE_EVENT,
+                                gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                gtk.STOCK_SAVE, gtk.RESPONSE_OK),
+                                title='Saved unsaved changes?')
             save_changes_dialog.vbox.pack_start(gtk.Label("\nThere are unsaved changes.\nWhat shall we do?\n\n"))
             save_changes_dialog.show_all()
             resp = save_changes_dialog.run()
@@ -1217,18 +1286,18 @@ class KMC_Editor(GladeDelegate):
         species_definition += 'character(len=800), dimension(%s) :: site_list\n' % len(lattice.sites)
 
         # UNIT VECTOR DEFINITION
-        unit_vector_definition = 'integer(kind=iint), dimension(2,2) ::  lattice_matrix = reshape((/%(x)s,0,0,%(y)s/),(/2,2/))' % {'x':lattice.unit_cell_size_x, 'y':lattice.unit_cell_size_y,'name':lattice.name}
+        unit_vector_definition = 'integer(kind=iint), dimension(2, 2) ::  lattice_matrix = reshape((/%(x)s, 0, 0, %(y)s/), (/2, 2/))' % {'x':lattice.unit_cell_size_x, 'y':lattice.unit_cell_size_y, 'name':lattice.name}
         # LOOKUP TABLE INITIALIZATION
         indexes = [ x.index for x in lattice.sites ]
-        lookup_table_init = 'integer(kind=iint), dimension(0:%(x)s, 0:%(y)s) :: lookup_%(lattice)s2nr\n' % {'x':lattice.unit_cell_size_x-1,'y':lattice.unit_cell_size_y-1,'lattice':lattice.name}
-        lookup_table_init += 'integer(kind=iint), dimension(%(min)s:%(max)s,2) :: lookup_nr2%(lattice)s\n' % {'min':min(indexes), 'max':max(indexes), 'lattice':lattice.name}
+        lookup_table_init = 'integer(kind=iint), dimension(0:%(x)s, 0:%(y)s) :: lookup_%(lattice)s2nr\n' % {'x':lattice.unit_cell_size_x-1, 'y':lattice.unit_cell_size_y-1, 'lattice':lattice.name}
+        lookup_table_init += 'integer(kind=iint), dimension(%(min)s:%(max)s, 2) :: lookup_nr2%(lattice)s\n' % {'min':min(indexes), 'max':max(indexes), 'lattice':lattice.name}
 
         # LOOKUP TABLE DEFINITION
         lookup_table_definition = ''
         lookup_table_definition += '! Fill lookup table nr2%(name)s\n' % {'name':lattice.name }
         for i, site in enumerate(lattice.sites):
             lookup_table_definition +=  '    site_list(%s) = "%s"\n' % (i+1, site.name)
-            lookup_table_definition += '    lookup_nr2%(name)s(%(index)s,:) = (/%(x)s,%(y)s/)\n' % {'name': lattice.name,
+            lookup_table_definition += '    lookup_nr2%(name)s(%(index)s, :) = (/%(x)s, %(y)s/)\n' % {'name': lattice.name,
                                                                                                 'x':site.site_x,
                                                                                                 'y':site.site_y,
                                                                                                 'index':site.index}
@@ -1238,7 +1307,7 @@ class KMC_Editor(GladeDelegate):
                                                                                                 'x':site.site_x,
                                                                                                 'y':site.site_y,
                                                                                                 'index':site.index}
-        for i,species in enumerate(self.project_tree.species_list):
+        for i, species in enumerate(self.project_tree.species_list):
             lookup_table_definition +=  '    species_list(%s) = "%s"\n' % (i+1, species.name)
         for i, lattice_name in enumerate(self.project_tree.lattice_list):
             lookup_table_definition +=  '    lattice_list(%s) = "%s"\n' % (i+1, lattice_name.name)
@@ -1253,11 +1322,11 @@ class KMC_Editor(GladeDelegate):
             'unit_vector_definition':unit_vector_definition,
             'sites_per_cell':max(indexes)-min(indexes)+1}
 
-        lattice_mod_file = open(dir + '/lattice.f90','w')
+        lattice_mod_file = open(dir + '/lattice.f90', 'w')
         lattice_mod_file.write(lattice_source)
         lattice_mod_file.close()
         # generate process list source via existing code
-        proclist_xml = open(dir + '/process_list.xml','w')
+        proclist_xml = open(dir + '/process_list.xml', 'w')
         pretty_xml = prettify_xml(self.project_tree._export_process_list_xml())
         proclist_xml.write(pretty_xml)
         proclist_xml.close()
@@ -1297,7 +1366,11 @@ class KMC_Editor(GladeDelegate):
 
     def on_btn_quit__clicked(self, button, *args):
         if self.saved_state != str(self.project_tree):
-            save_changes_dialog = gtk.Dialog(buttons=(gtk.STOCK_DISCARD, gtk.RESPONSE_DELETE_EVENT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_SAVE, gtk.RESPONSE_OK), title='Saved unsaved changes?')
+            save_changes_dialog = gtk.Dialog(
+                                  buttons=(gtk.STOCK_DISCARD, gtk.RESPONSE_DELETE_EVENT,
+                                  gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                  gtk.STOCK_SAVE, gtk.RESPONSE_OK),
+                                  title='Saved unsaved changes?')
             save_changes_dialog.vbox.pack_start(gtk.Label("\nThere are unsaved changes.\nWhat shall we do?\n\n"))
             save_changes_dialog.show_all()
             resp = save_changes_dialog.run()
