@@ -3,9 +3,9 @@
 """
 import pdb
 import re
-from optparse import OptionParser
+import optparse
+from ConfigParser import SafeConfigParser
 from app.config import *
-from copy import copy, deepcopy
 import sys
 import os, os.path
 import shutil
@@ -556,32 +556,32 @@ class ProjectTree(SlaveDelegate):
         slave = self.get_parent().get_slave('workarea')
         if slave:
             self.get_parent().detach_slave('workarea')
-        if isinstance(elem, Meta):
+        if isinstance(elem, Lattice):
+            form = LatticeEditor(elem, self.project_data)
+            #kiwi.ui.dialogs.warning('Changing lattice retro-actively might break processes.\nYou have been warned.')
+            self.get_parent().attach_slave('workarea', form)
+            form.on_unit_cell_ok_button__clicked(form.unit_cell_ok_button)
+            form.focus_topmost()
+        elif isinstance(elem, Meta):
             meta_form = MetaForm(self.meta)
             self.get_parent().attach_slave('workarea', meta_form)
             meta_form.focus_toplevel()
             meta_form.focus_topmost()
-        elif isinstance(elem, Process):
-            form = ProcessForm(elem, self)
+        elif isinstance(elem, Parameter):
+            form = ParameterForm(elem, self.project_data)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
-        elif isinstance(elem, SpeciesList):
-            form = SpeciesListForm(elem, self)
+        elif isinstance(elem, Process):
+            form = ProcessForm(elem, self)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
         elif isinstance(elem, Species):
             form = SpeciesForm(elem, self.project_data)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
-        elif isinstance(elem, Parameter):
-            form = ParameterForm(elem, self.project_data)
+        elif isinstance(elem, SpeciesList):
+            form = SpeciesListForm(elem, self)
             self.get_parent().attach_slave('workarea', form)
-            form.focus_topmost()
-        elif isinstance(elem, Lattice):
-            form = LatticeEditor(elem, self.project_data)
-            #kiwi.ui.dialogs.warning('Changing lattice retro-actively might break processes.\nYou have been warned.')
-            self.get_parent().attach_slave('workarea', form)
-            form.on_unit_cell_ok_button__clicked(form.unit_cell_ok_button)
             form.focus_topmost()
         else:
             self.get_parent().toast('Not implemented, yet.')
@@ -1037,6 +1037,7 @@ class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
         self.project_tree.update(self.model)
 
     def on_parameter_name__content_changed(self, text):
+        self.project_tree.project_data.sort_by_attribute('name')
         self.project_tree.update(self.model)
 
 class SpeciesListForm(ProxySlaveDelegate):
@@ -1044,7 +1045,7 @@ class SpeciesListForm(ProxySlaveDelegate):
     toplevel_name = 'species_list_form'
     widgets = ['default_species']
     def __init__(self, model, project_tree):
-        # this ugly implementation is due to an apparent catch 22 bug in ProxyComboBox:
+        # this _ugly_ implementation is due to an apparent catch 22 bug in ProxyComboBox:
         # if the value is set already __init__ expect the value in the list but
         # you cannot fill the list before calling __init__
         default_species = model.default_species
@@ -1263,16 +1264,20 @@ class KMC_Editor(GladeDelegate):
         if not os.path.exists(dir):
             os.mkdir(dir)
 
+        # copy files
         for filename in [ 'base.f90', 'kind_values_f2py.f90', 'units.f90', 'assert.ppc', 'compile_for_f2py', 'run_kmc.py']:
-            # copy files
             shutil.copy(APP_ABS_PATH + '/%s' % filename, dir)
 
         lattice_source = open(APP_ABS_PATH + '/lattice_template.f90').read()
-        lattice = self.project_tree.lattice_list[0]
+        try:
+            lattice = self.project_tree.lattice_list[0]
+        except IndexError:
+            self.toast("No lattice defined, yet. Cannot complete source")
+            return
         # more processing steps ...
-        # SPECIES DEFINITION
+        # species definition
         if not self.project_tree.species_list:
-            print('No species defined, yet, cannot complete source')
+            self.toast('No species defined, yet, cannot complete source')
             return
         species_definition = "integer(kind=iint), public, parameter :: &\n "
         for species in self.project_tree.species_list[:-1]:
@@ -1285,14 +1290,14 @@ class KMC_Editor(GladeDelegate):
         species_definition += 'integer(kind=iint), parameter :: nr_of_sites = %s\n' % len(lattice.sites)
         species_definition += 'character(len=800), dimension(%s) :: site_list\n' % len(lattice.sites)
 
-        # UNIT VECTOR DEFINITION
+        # unit vector definition
         unit_vector_definition = 'integer(kind=iint), dimension(2, 2) ::  lattice_matrix = reshape((/%(x)s, 0, 0, %(y)s/), (/2, 2/))' % {'x':lattice.unit_cell_size_x, 'y':lattice.unit_cell_size_y, 'name':lattice.name}
-        # LOOKUP TABLE INITIALIZATION
+        # lookup table initialization
         indexes = [ x.index for x in lattice.sites ]
         lookup_table_init = 'integer(kind=iint), dimension(0:%(x)s, 0:%(y)s) :: lookup_%(lattice)s2nr\n' % {'x':lattice.unit_cell_size_x-1, 'y':lattice.unit_cell_size_y-1, 'lattice':lattice.name}
         lookup_table_init += 'integer(kind=iint), dimension(%(min)s:%(max)s, 2) :: lookup_nr2%(lattice)s\n' % {'min':min(indexes), 'max':max(indexes), 'lattice':lattice.name}
 
-        # LOOKUP TABLE DEFINITION
+        # lookup table definition
         lookup_table_definition = ''
         lookup_table_definition += '! Fill lookup table nr2%(name)s\n' % {'name':lattice.name }
         for i, site in enumerate(lattice.sites):
@@ -1314,7 +1319,7 @@ class KMC_Editor(GladeDelegate):
 
 
 
-        #LATTICE MAPPINGS
+        #lattice mappings
         lattice_source = lattice_source % {'lattice_name': lattice.name,
             'species_definition':species_definition,
             'lookup_table_init':lookup_table_init,
@@ -1325,6 +1330,23 @@ class KMC_Editor(GladeDelegate):
         lattice_mod_file = open(dir + '/lattice.f90', 'w')
         lattice_mod_file.write(lattice_source)
         lattice_mod_file.close()
+
+        # export parameters
+        config = SafeConfigParser()
+        # Prevent configparser from turning options to lowercase
+        config.optionxform = str
+        config.add_section('Main')
+        config.set('Main','default_species',self.project_tree.species_list_iter.default_species)
+        config.set('Main','system_name',self.project_tree.meta.model_name)
+        config.add_section('User Params')
+        for parameter in self.project_tree.parameter_list:
+            config.set('User Params',parameter.name,str(parameter.value))
+
+        with open(dir + '/params.cfg','w') as configfile:
+            config.write(configfile)
+            
+
+
         # generate process list source via existing code
         proclist_xml = open(dir + '/process_list.xml', 'w')
         pretty_xml = prettify_xml(self.project_tree._export_process_list_xml())
@@ -1401,7 +1423,7 @@ def col_str2tuple(hex_string):
 
 
 if __name__ == '__main__':
-    parser = OptionParser()
+    parser = optparse.OptionParser()
     parser.add_option('-o', '--import', dest='import_file', help='Immediately import store kmc file')
     (options, args) = parser.parse_args()
     editor = KMC_Editor()

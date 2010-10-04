@@ -2,33 +2,33 @@
 """Generical kMC steering script for binary modules created kmos"""
 
 import kmc
+import math
 from ConfigParser import ConfigParser
 from numpy import array
+import StringIO
+import tokenize
 
-CONFIG = """[standard]
-system_size = 10 10
-system_name = foobar
-default_species = empty
-"""
+
+CONFIG_FILENAME = 'params.cfg'
 
 class KMC_Run():
     def __init__(self):
         self.nr_of_proc = kmc.proclist.nr_of_proc
-        # Write config file first
-        config_filename = 'kmc.ini'
-        config_file = open(config_filename, 'w')
-        config_file.write(CONFIG)
-        config_file.close()
 
         # Read config file
         config = ConfigParser()
-        config.read(config_filename)
-        size = config.get('standard', 'system_size')
+        # Prevent configparser from turning options to lowercase
+        config.optionxform = str
+        config.read(CONFIG_FILENAME)
+        size = config.get('User Params', 'lattice_size')
         size = [ int(x) for x in size.split() ]
-        name = config.get('standard', 'system_name')
+        name = config.get('Main', 'system_name')
         kmc.proclist.init(size, name)
+        self.params = {}
+        for user_param in config.options('User Params'):
+            self.params[user_param] = config.get('User Params', user_param)
 
-        default_species = config.get('standard', 'default_species')
+        default_species = config.get('Main', 'default_species')
 
         # initialize name arrays
         self.process_names = []
@@ -72,7 +72,28 @@ class KMC_Run():
         until formula and parameter support is implemented
         """
         for proc_nr in range(kmc.proclist.nr_of_proc):
-            kmc.base.set_rate(proc_nr+1, 50.0)
+            rate_expr = self.rate_expressions[proc_nr]
+            if not rate_expr:
+                kmc.base.set_rate(proc_nr+1, 0.0)
+                continue
+            replaced_tokens = []
+            for i, token,_,_,_ in tokenize.generate_tokens(StringIO.StringIO(rate_expr).readline):
+                if token in ['sqrt','exp','sin','cos','pi','pow']:
+                    replaced_tokens.append((i,'math.' + token))
+                    
+                elif ('u_' + token) in dir(kmc.units):
+                    replaced_tokens.append((i, str(eval('kmc.units.u_' + token))))
+                elif token in self.params:
+                    replaced_tokens.append((i, str(self.params[token])))
+                else:
+                    replaced_tokens.append((i, token))
+            rate_expr = tokenize.untokenize(replaced_tokens)
+            try:
+                kmc.base.set_rate(proc_nr+1, eval(rate_expr))
+            except:
+                raise UserWarning, "Could not evaluate %s, %s" % (rate_expr, proc_nr)
+
+
 
     def fill_unit_cell(self, x, y, species):
         species = eval('kmc.lattice.%s' % species)
