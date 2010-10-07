@@ -30,7 +30,7 @@ class KMC_Run():
         for user_param in config.options('User Params'):
             self.params[user_param] = config.get('User Params', user_param)
 
-        default_species = config.get('Main', 'default_species')
+        self.default_species = config.get('Main', 'default_species')
 
         # initialize name arrays
         self.process_names = []
@@ -54,7 +54,7 @@ class KMC_Run():
 
         for y in range(self.size[1]):
             for x in range(self.size[0]):
-                self.fill_unit_cell(x, y, default_species)
+                self.fill_unit_cell(x, y, self.default_species)
 
         for x in range(self.size[0]):
             for y in range(self.size[1]):
@@ -110,7 +110,7 @@ class KMC_Run():
             rate_expr = tokenize.untokenize(replaced_tokens)
             try:
                 kmc.base.set_rate(proc_nr+1, eval(rate_expr))
-                print(proc_nr,rate_expr, eval(rate_expr))
+                print(self.process_names[proc_nr],proc_nr,rate_expr, eval(rate_expr))
             except:
                 raise UserWarning, "Could not evaluate %s, %s" % (rate_expr, proc_nr)
 
