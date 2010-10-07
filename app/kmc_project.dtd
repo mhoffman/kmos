@@ -1,4 +1,4 @@
-<!ELEMENT kmc (meta?,species_list?,parameter_list?,lattice_list?,process_list?)>
+<!ELEMENT kmc (meta?,species_list?,parameter_list?,lattice_list?,process_list?,output_list?)>
   <!ELEMENT meta EMPTY>
   <!ATTLIST meta
     author CDATA #REQUIRED
@@ -52,3 +52,8 @@
         coord CDATA #REQUIRED
         species CDATA #REQUIRED
       >
+      <!ELEMENT output_list (output)*>
+      <!ELEMENT output EMPTY>
+      <!ATTLIST output
+        item CDATA #REQUIRED
+        >

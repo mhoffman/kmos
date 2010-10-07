@@ -10,6 +10,7 @@ import tokenize
 
 
 CONFIG_FILENAME = 'params.cfg'
+DATAFILE = 'traj.dat'
 
 class KMC_Run():
     def __init__(self):
@@ -20,10 +21,11 @@ class KMC_Run():
         # Prevent configparser from turning options to lowercase
         config.optionxform = str
         config.read(CONFIG_FILENAME)
-        size = config.get('User Params', 'lattice_size')
-        size = [ int(x) for x in size.split() ]
+        self.size = config.get('User Params', 'lattice_size')
+        self.size = [ int(x) for x in self.size.split() ]
         name = config.get('Main', 'system_name')
-        kmc.proclist.init(size, name)
+        self.output_fields = config.get('Main', 'output_fields').split()
+        kmc.proclist.init(self.size, name)
         self.params = {}
         for user_param in config.options('User Params'):
             self.params[user_param] = config.get('User Params', user_param)
@@ -50,22 +52,37 @@ class KMC_Run():
 
         self.base = eval('kmc.lattice.lookup_nr2%s' % self.lattice_name)
 
-        for y in range(size[1]):
-            for x in range(size[0]):
+        for y in range(self.size[1]):
+            for x in range(self.size[0]):
                 self.fill_unit_cell(x, y, default_species)
 
-        for x in range(size[0]):
-            for y in range(size[1]):
+        for x in range(self.size[0]):
+            for y in range(self.size[1]):
                 self.touchup_unit_cell(x, y)
 
 
-        self.set_rates()
 
 
 
     def run(self):
-        for i in xrange(int(1.e6)):
-            kmc.proclist.do_kmc_step()
+        f = open(DATAFILE,'w')
+        f.write('# %s\n' % ', '.join(self.output_fields))
+        f.close()
+        for i in xrange(int(1.e2)):
+            outstr = ''
+            for field in self.output_fields:
+                if field == 'kmc_step':
+                    outstr += '%s ' % kmc.base.get_kmc_step()
+                elif field == 'kmc_time':
+                    outstr += '%s ' % kmc.base.get_kmc_time()
+                elif field == 'walltime':
+                    outstr += '%s ' % kmc.base.get_walltime()
+            f = open(DATAFILE,'a')
+            f.write(outstr + '\n')
+            f.close()
+
+            for i in xrange(int(1.e4)):
+                kmc.proclist.do_kmc_step()
 
     def set_rates(self):
         """For testing purpose we set all rates to a constant
@@ -78,11 +95,14 @@ class KMC_Run():
                 continue
             replaced_tokens = []
             for i, token,_,_,_ in tokenize.generate_tokens(StringIO.StringIO(rate_expr).readline):
+                # replace standard function by call to math module
                 if token in ['sqrt','exp','sin','cos','pi','pow']:
                     replaced_tokens.append((i,'math.' + token))
                     
+                # replace natural constants by call to unit module
                 elif ('u_' + token) in dir(kmc.units):
                     replaced_tokens.append((i, str(eval('kmc.units.u_' + token))))
+                # replace self-define params
                 elif token in self.params:
                     replaced_tokens.append((i, str(self.params[token])))
                 else:
@@ -90,6 +110,7 @@ class KMC_Run():
             rate_expr = tokenize.untokenize(replaced_tokens)
             try:
                 kmc.base.set_rate(proc_nr+1, eval(rate_expr))
+                print(proc_nr,rate_expr, eval(rate_expr))
             except:
                 raise UserWarning, "Could not evaluate %s, %s" % (rate_expr, proc_nr)
 
@@ -113,12 +134,14 @@ class KMC_Run():
 
 
     def get_occupation(self):
+        #TODO
         occupation = {}
         for species_name in self.species_names:
             occupation[species_name] = 0
-        for y in range(size[1]):
-            for x in range(size[0]):
-                pass
+        for y in range(self.size[1]):
+            for x in range(self.size[0]):
+                for site in self.base:
+                    pass
 
 def get_rate_expression(process_nr):
     """Workaround function for f2py's inability to return character arrays, better known as strings.

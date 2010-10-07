@@ -277,13 +277,16 @@ class Process(Attributes):
     def get_extra(self):
         return self.rate_constant
 
-class Output():
-    """A dummy class, that will hold the values which are to be printed to logfile.
-    """
-    def __init__(self):
-        self.name = 'Output'
 
 
+
+class OutputObjectTree(ObjectTree):
+    pass
+    def __init__(self,*args, **kwargs):
+        ObjectTree.__init__(self, *args, **kwargs)
+
+    def append(self, parent, elem):
+        return ObjectTree.append(self, parent, elem)
 
 class ProjectTree(SlaveDelegate):
     """A rather complex class holding all the information of a kMC project that provides
@@ -297,8 +300,8 @@ class ProjectTree(SlaveDelegate):
         self.parameter_list_iter = self.project_data.append(None, ParameterList())
         self.species_list_iter = self.project_data.append(None, SpeciesList())
         self.process_list_iter = self.project_data.append(None, ProcessList())
-        self.output_iter = self.project_data.append(None, Output())
-        self.output_list = ObjectList([Column('name', data_type=str ), Column('output', data_type=bool, editable=True)], sortable=True)
+        self.output_list = self.project_data.append(None, OutputList())
+        self.output_list = []
 
         self.filename = ''
 
@@ -322,7 +325,7 @@ class ProjectTree(SlaveDelegate):
         elif attr == 'parameter_list':
             return self.project_data.get_descendants(self.parameter_list_iter)
         elif attr == 'output_list':
-            return self.output_list
+            return self.project_data.get_descendants(self.output_list_iter)
         elif attr == 'meta':
             return self.meta
         elif attr == 'append':
@@ -396,6 +399,11 @@ class ProjectTree(SlaveDelegate):
                     color = species.attrib['color']
                     species_elem = Species(name=name, color=color, id=id)
                     self.project_data.append(self.species_list_iter, species_elem)
+            if child.tag == 'output_list':
+                for item in child:
+                    output_elem = OutputItem(name=item.attrib['item'], output=True)
+                    self.output_list.append(output_elem)
+
         self.expand_all()
         self.select_meta()
 
@@ -530,6 +538,11 @@ class ProjectTree(SlaveDelegate):
                 action_elem = ET.SubElement(process_elem, 'action')
                 action_elem.set('species', action.species)
                 action_elem.set('coord', str(action.coord))
+        output_list = ET.SubElement(root, 'output_list')
+        for output in self.output_list:
+            if output.output:
+                output_elem = ET.SubElement(output_list,'output')
+                output_elem.set('item',output.name)
         return prettify_xml(root)
 
 
@@ -570,8 +583,8 @@ class ProjectTree(SlaveDelegate):
             self.get_parent().attach_slave('workarea', meta_form)
             meta_form.focus_toplevel()
             meta_form.focus_topmost()
-        elif isinstance(elem, Output):
-            form = OutputForm(self)
+        elif isinstance(elem, OutputList):
+            form = OutputForm(self.output_list, self)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
         elif isinstance(elem, Parameter):
@@ -597,6 +610,12 @@ class ProjectTree(SlaveDelegate):
 
 
 
+class OutputList():
+    """A dummy class, that will hold the values which are to be printed to logfile.
+    """
+    def __init__(self):
+        self.name = 'Output'
+
 class OutputItem(Attributes):
     """Not implemented yet
     """
@@ -604,26 +623,41 @@ class OutputItem(Attributes):
     def __init__(self, *args, **kwargs):
         Attributes.__init__(self, **kwargs)
 
-class OutputForm(ProxySlaveDelegate):
+class OutputForm(GladeDelegate):
     """Not implemented yet
     """
     gladefile = GLADEFILE
     toplevel_name='output_form'
-    def __init__(self, project_tree):
-        self.project_tree = project_tree
-        #for species in self.project_tree.species_list:
-            #self.output_list.append(OutputItem(name=species.name, output=False))
-        #for species in self.project_tree.species_list:
-            #for site in self.project_tree.lattice_list[0].sites:
-                #self.output_list.append(OutputItem(name=species.name+'@'+site.name, output=False))
+    widgets = ['output_list']
+    def __init__(self, output_list, project_tree):
                 
-        ProxySlaveDelegate.__init__(self, self.project_tree.output_list)
-        try:
-            self.hbox15.pack_start(self.project_tree.output_list)
-        except:
-            pass
-        self.project_tree.output_list.show()
-        self.project_tree.output_list.grab_focus()
+        GladeDelegate.__init__(self)
+        self.project_tree = project_tree
+        self.output_list_data = output_list
+        self.output_list.set_columns([Column('name', data_type=str, sorted=True), Column('output',data_type=bool, editable=True)])
+
+        for item in self.output_list_data:
+            self.output_list.append(item)
+
+        self.output_list.show()
+        self.output_list.grab_focus()
+
+    def on_add_output__clicked(self, button):
+        
+        output_form = gtk.MessageDialog(parent=None,
+                                      flags=gtk.DIALOG_MODAL,
+                                      type=gtk.MESSAGE_QUESTION,
+                                      buttons=gtk.BUTTONS_OK_CANCEL,
+                                      message_format='Please enter a new output: examples are a species or species@site')
+        form_entry = gtk.Entry()
+        output_form.vbox.pack_start(form_entry)
+        output_form.vbox.show_all()
+        resp = output_form.run()
+        output_str = form_entry.get_text()
+        output_form.destroy()
+        output_item = OutputItem(name=output_str, output=True)
+        self.output_list.append(output_item)
+        self.output_list_data.append(output_item)
     
 class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     """A form that allows to create and manipulate a process
@@ -843,7 +877,6 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         # small validity checking
         for term in left+right:
             if term.count('@') != 1 :
-                print(term)
                 raise StandardError, 'Each term needs to contain exactly one @:\n%s' % term
 
         # split each term again at @
@@ -1119,9 +1152,9 @@ class KMC_Editor(GladeDelegate):
         self.project_tree.append(self.project_tree.parameter_list_iter, param)
 
         # add output entries
-        self.project_tree.output_list.append(OutputItem(name='kmc_time',output=True))
-        self.project_tree.output_list.append(OutputItem(name='walltime',output=False))
-        self.project_tree.output_list.append(OutputItem(name='kmc_step',output=False))
+        self.output_list.append(OutputItem(name='kmc_time',output=True))
+        self.output_list.append(OutputItem(name='walltime',output=False))
+        self.output_list.append(OutputItem(name='kmc_step',output=False))
 
         self.project_tree.expand_all()
 
@@ -1184,6 +1217,9 @@ class KMC_Editor(GladeDelegate):
         species_form.focus_topmost()
 
     def on_btn_add_process__clicked(self, button):
+        if not self.project_tree.lattice_list:
+            self.toast("No lattice defined, yet!")
+            return
         new_process = Process(name='', rate_constant='')
         self.project_tree.append(self.project_tree.process_list_iter, new_process)
         self.project_tree.expand(self.project_tree.process_list_iter)
@@ -1292,6 +1328,8 @@ class KMC_Editor(GladeDelegate):
         for filename in [ 'base.f90', 'kind_values_f2py.f90', 'units.f90', 'assert.ppc', 'compile_for_f2py', 'run_kmc.py']:
             shutil.copy(APP_ABS_PATH + '/%s' % filename, dir)
 
+
+
         lattice_source = open(APP_ABS_PATH + '/lattice_template.f90').read()
         try:
             lattice = self.project_tree.lattice_list[0]
@@ -1362,6 +1400,7 @@ class KMC_Editor(GladeDelegate):
         config.add_section('Main')
         config.set('Main','default_species',self.project_tree.species_list_iter.default_species)
         config.set('Main','system_name',self.project_tree.meta.model_name)
+        config.set('Main','output_fields',' '.join([x.name for x in self.project_tree.output_list ]))
         config.add_section('User Params')
         for parameter in self.project_tree.parameter_list:
             config.set('User Params',parameter.name,str(parameter.value))
@@ -1384,6 +1423,8 @@ class KMC_Editor(GladeDelegate):
         options.proclist_filename = SRCDIR + '/proclist.f90'
 
         ProcListWriter(options)
+
+
 
 
 
