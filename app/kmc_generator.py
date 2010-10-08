@@ -1002,7 +1002,7 @@ if \{condition 1 \} {[} and
         self._out('    print *,"ABSOLUTELY NO WARRANTY for correctness."')
         self._out('    print *,"Please check back with the author prior to using results in publication."')
         self._out('    call lattice_allocate_system(nr_of_proc, input_system_size, system_name)\n')
-        for i, proc in enumerate(self.procs):
+        for i, proc in enumerate(sorted(self.procs)):
             self._out('    processes(' + str(i+1) + ') = \'' + proc + '\'')
             self._out('    rates(' + str(i+1) + ') = \'' + self.procs[proc]['rate'] + '\'')
         self._out('end subroutine init\n\n')
