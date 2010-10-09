@@ -40,7 +40,8 @@ from pygtkcanvas.canvasitem import *
 KMCPROJECT_DTD = '/kmc_project.dtd'
 PROCESSLIST_DTD = '/process_list.dtd'
 SRCDIR = './fortran_src'
-GLADEFILE = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
+GLADEFILE = os.path.relpath(os.path.join(APP_ABS_PATH, 'kmc_editor.glade'))
+print(GLADEFILE)
 
 def prettify_xml(elem):
     """This function takes an XML document, which can have one or many lines
@@ -1121,7 +1122,11 @@ class KMC_Editor(GladeDelegate):
         # add standard parameter
         param = Parameter(name='lattice_size', value='20 20')
         self.project_tree.append(self.project_tree.parameter_list_iter, param)
-        param = Parameter(name='print_every', value='100000')
+
+        param = Parameter(name='print_every', value='1.e5')
+        self.project_tree.append(self.project_tree.parameter_list_iter, param)
+
+        param = Parameter(name='total_steps', value='1.e7')
         self.project_tree.append(self.project_tree.parameter_list_iter, param)
 
         # add output entries
@@ -1290,18 +1295,18 @@ class KMC_Editor(GladeDelegate):
         filechooser.destroy()
 
     #@verbose
-    def on_btn_export_src__clicked(self, button, dir=''):
+    def on_btn_export_src__clicked(self, button, export_dir=''):
         self.toast('Exporting ...')
-        dir = kiwi.ui.dialogs.selectfolder(title='Select folder for F90 source code.')
-        if not dir:
+        export_dir = kiwi.ui.dialogs.selectfolder(title='Select folder for F90 source code.')
+        if not export_dir:
             self.toast('No folder selected')
             return
-        if not os.path.exists(dir):
-            os.mkdir(dir)
+        if not os.path.exists(export_dir):
+            os.mkdir(export_dir)
 
         # copy files
         for filename in [ 'base.f90', 'kind_values_f2py.f90', 'units.f90', 'assert.ppc', 'compile_for_f2py', 'run_kmc.py']:
-            shutil.copy(APP_ABS_PATH + '/%s' % filename, dir)
+            shutil.copy(APP_ABS_PATH + '/%s' % filename, export_dir)
 
 
 
@@ -1364,7 +1369,7 @@ class KMC_Editor(GladeDelegate):
             'unit_vector_definition':unit_vector_definition,
             'sites_per_cell':max(indexes)-min(indexes)+1}
 
-        lattice_mod_file = open(dir + '/lattice.f90', 'w')
+        lattice_mod_file = open(export_dir + '/lattice.f90', 'w')
         lattice_mod_file.write(lattice_source)
         lattice_mod_file.close()
 
@@ -1380,13 +1385,13 @@ class KMC_Editor(GladeDelegate):
         for parameter in self.project_tree.parameter_list:
             config.set('User Params',parameter.name,str(parameter.value))
 
-        with open(dir + '/params.cfg','w') as configfile:
+        with open(export_dir + '/params.cfg','w') as configfile:
             config.write(configfile)
             
 
 
         # generate process list source via existing code
-        proclist_xml = open(dir + '/process_list.xml', 'w')
+        proclist_xml = open(export_dir + '/process_list.xml', 'w')
         pretty_xml = prettify_xml(self.project_tree._export_process_list_xml())
         proclist_xml.write(pretty_xml)
         proclist_xml.close()
@@ -1395,7 +1400,7 @@ class KMC_Editor(GladeDelegate):
         options.xml_filename = proclist_xml.name
         options.dtd_filename = APP_ABS_PATH + '/process_list.dtd'
         options.force_overwrite = True
-        options.proclist_filename = SRCDIR + '/proclist.f90'
+        options.proclist_filename = export_dir + '/proclist.f90'
 
         ProcListWriter(options)
 

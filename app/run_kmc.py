@@ -68,7 +68,7 @@ class KMC_Run():
         f = open(DATAFILE,'w')
         f.write('# %s\n' % ', '.join(self.output_fields))
         f.close()
-        for i in xrange(int(1.e2)):
+        for i in xrange(int(self.params['total_steps'])/int(self.params['print_every'])):
             outstr = ''
             for field in self.output_fields:
                 if field == 'kmc_step':
@@ -81,7 +81,7 @@ class KMC_Run():
             f.write(outstr + '\n')
             f.close()
 
-            for i in xrange(int(1.e4)):
+            for i in xrange(int(self.params['print_every'])):
                 kmc.proclist.do_kmc_step()
 
     def set_rates(self):

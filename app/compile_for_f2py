@@ -27,7 +27,7 @@ then
   ${0} -h
   echo "I'll start compiling in a few seconds ..."
   sleep 3
-  ${0} -m kmc -G
+  ${0} -m kmc -I
 fi
 
 
