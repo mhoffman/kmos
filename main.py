@@ -1284,14 +1284,14 @@ class KMC_Editor(GladeDelegate):
         # Import
         self.project_tree.import_xml_file(filename)
         self.set_title(self.project_tree.get_name())
-        self.statbar.push(1, 'Imported model %s' % self.project_tree.meta.model_name)
+        self.toast('Imported model %s' % self.project_tree.meta.model_name)
         self.saved_state = str(self.project_tree)
 
     def on_btn_save_model__clicked(self, button, force_save=False):
         #Write Out XML File
         xml_string = str(self.project_tree)
         if xml_string == self.saved_state and not force_save:
-            self.statbar.push(1, 'Nothing to save')
+            self.toast('Nothing to save')
         else:
             if not self.project_tree.filename:
                 self.on_btn_save_as__clicked(None)
@@ -1301,7 +1301,7 @@ class KMC_Editor(GladeDelegate):
                             'please do not change this unless you know what you are doing -->\n')
             outfile.close()
             self.saved_state = xml_string
-            self.statbar.push(1, 'Saved %s' % self.project_tree.filename)
+            self.toast('Saved %s' % self.project_tree.filename)
 
 
     def on_btn_save_as__clicked(self, button):
@@ -1319,8 +1319,10 @@ class KMC_Editor(GladeDelegate):
     #@verbose
     def on_btn_export_src__clicked(self, button, dir=''):
         self.toast('Exporting ...')
+        dir = kiwi.ui.dialogs.selectfolder(title='Select folder for F90 source code.')
         if not dir:
-            dir = SRCDIR
+            self.toast('No folder selected')
+            return
         if not os.path.exists(dir):
             os.mkdir(dir)
 
