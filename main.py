@@ -40,7 +40,7 @@ from pygtkcanvas.canvasitem import *
 KMCPROJECT_DTD = '/kmc_project.dtd'
 PROCESSLIST_DTD = '/process_list.dtd'
 SRCDIR = './fortran_src'
-GLADEFILE = os.path.join(APP_ABS_PATH, 'kmc_editor2.glade')
+GLADEFILE = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
 
 def prettify_xml(elem):
     """This function takes an XML document, which can have one or many lines
@@ -595,6 +595,10 @@ class ProjectTree(SlaveDelegate):
             form = ProcessForm(elem, self)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
+        elif isinstance(elem, ProcessList):
+            form = BatchProcessForm(self)
+            self.get_parent().attach_slave('workarea', form)
+            form.focus_topmost()
         elif isinstance(elem, Species):
             form = SpeciesForm(elem, self.project_data)
             self.get_parent().attach_slave('workarea', form)
@@ -658,6 +662,42 @@ class OutputForm(GladeDelegate):
         output_item = OutputItem(name=output_str, output=True)
         self.output_list.append(output_item)
         self.output_list_data.append(output_item)
+    
+class BatchProcessForm(SlaveDelegate):
+    gladefile = GLADEFILE
+    toplevel_name = 'batch_process_form'
+    def __init__(self, project_tree):
+        self.project_tree = project_tree
+        SlaveDelegate.__init__(self)
+
+    def on_btn_evaluate__clicked(self, button):
+        buffer = self.batch_processes.get_buffer()
+        bounds = buffer.get_bounds()
+        text = buffer.get_text(*bounds)
+        text = text.split('\n')
+        for i, line in enumerate(text):
+            # Ignore empty lines
+            if not line.count(';'):
+                continue
+            if not line.count(';'):
+                raise UserWarning("Line %s: the number of fields you entered is %s, but I expected 3" % (i, line.count(';')+1))
+                continue
+            line = line.split(';')
+            name = line[0]
+            rate_constant = line[2]
+            process = Process(name=name, rate_constant=rate_constant)
+            try:
+                parse_chemical_equation(eq=line[1], process=process, project_tree=self.project_tree)
+            except:
+                raise UserWarning("Found an error in your chemical equation:\n   %s" % line[1])
+            else:
+                self.project_tree.append(self.project_tree.process_list_iter, process)
+        buffer.delete(*bounds)
+
+
+        
+
+    
     
 class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     """A form that allows to create and manipulate a process
@@ -841,78 +881,11 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         eq = form_entry.get_text()
         chem_form.destroy()
 
-        self.parse_chemical_equation(eq)
+        parse_chemical_equation(eq, self.process, self.project_tree)
 
         self.draw_from_data()
         self.canvas.redraw()
 
-    def parse_chemical_equation(self, eq):
-        """Evaluates a chemical equation 'eq' and adds
-        conditions and actions accordingly
-        """
-        # remove spaces
-        eq = re.sub(' ', '', eq)
-
-        # split at ->
-        if eq.count('->') > 1 :
-            raise StandardError, 'Chemical expression may contain at most one "->"\n%s'  % eq
-        eq = re.split('->', eq)
-        if len(eq) == 2 :
-            left = eq[0]
-            right = eq[1]
-        elif len(eq) == 1 :
-            left = eq[0]
-            right = ''
-
-        # split terms
-        left = left.split('+')
-        right = right.split('+')
-
-        while '' in left:
-            left.remove('')
-
-        while '' in right:
-            right.remove('')
-
-        # small validity checking
-        for term in left+right:
-            if term.count('@') != 1 :
-                raise StandardError, 'Each term needs to contain exactly one @:\n%s' % term
-
-        # split each term again at @
-        for i, term in enumerate(left):
-            left[i] = term.split('@')
-        for i, term in enumerate(right):
-            right[i] = term.split('@')
-
-        for term in left + right:
-            if not filter(lambda x: x.name == term[0], self.project_tree.species_list):
-                raise StandardError, 'Species %s unknown ' % term[0]
-            if not filter(lambda x: x.name == term[1].split('.')[0], self.project_tree.lattice_list[0].sites):
-                raise StandardError, 'Site %s unknown' % term[1]
-
-        condition_list = []
-        action_list = []
-        for term in left:
-            condition_list.append(ConditionAction(species=term[0], coord=Coord(string=term[1])))
-        for term in right:
-            action_list.append(ConditionAction(species=term[0], coord=Coord(string=term[1])))
-
-        default_species = self.project_tree.species_list_iter.default_species
-        # every condition that does not have a corresponding action on the 
-        # same coordinate gets complemented with a 'default_species' action
-        for condition in condition_list:
-            if not filter(lambda x: x.coord == condition.coord, action_list):
-                action_list.append(ConditionAction(species=default_species, coord=Coord(string=str(condition.coord))))
-
-        # every action that does not have a corresponding condition on
-        # the same coordinate gets complemented with a 'default_species'
-        # condition
-        for action in action_list:
-            if not filter(lambda x: x.coord == action.coord, condition_list):
-                condition_list.append(ConditionAction(species=default_species, coord=Coord(string=str(action.coord))))
-        self.process.condition_list += condition_list
-        self.process.action_list += action_list
             
 
                 
@@ -1480,6 +1453,75 @@ class KMC_Editor(GladeDelegate):
         # the windows anywas
         return True
 
+
+
+def parse_chemical_equation(eq, process, project_tree):
+    """Evaluates a chemical equation 'eq' and adds
+    conditions and actions accordingly
+    """
+    # remove spaces
+    eq = re.sub(' ', '', eq)
+
+    # split at ->
+    if eq.count('->') > 1 :
+        raise StandardError, 'Chemical expression may contain at most one "->"\n%s'  % eq
+    eq = re.split('->', eq)
+    if len(eq) == 2 :
+        left = eq[0]
+        right = eq[1]
+    elif len(eq) == 1 :
+        left = eq[0]
+        right = ''
+
+    # split terms
+    left = left.split('+')
+    right = right.split('+')
+
+    while '' in left:
+        left.remove('')
+
+    while '' in right:
+        right.remove('')
+
+    # small validity checking
+    for term in left+right:
+        if term.count('@') != 1 :
+            raise StandardError, 'Each term needs to contain exactly one @:\n%s' % term
+
+    # split each term again at @
+    for i, term in enumerate(left):
+        left[i] = term.split('@')
+    for i, term in enumerate(right):
+        right[i] = term.split('@')
+
+    for term in left + right:
+        if not filter(lambda x: x.name == term[0], project_tree.species_list):
+            raise StandardError, 'Species %s unknown ' % term[0]
+        if not filter(lambda x: x.name == term[1].split('.')[0], project_tree.lattice_list[0].sites):
+            raise StandardError, 'Site %s unknown' % term[1]
+
+    condition_list = []
+    action_list = []
+    for term in left:
+        condition_list.append(ConditionAction(species=term[0], coord=Coord(string=term[1])))
+    for term in right:
+        action_list.append(ConditionAction(species=term[0], coord=Coord(string=term[1])))
+
+    default_species = project_tree.species_list_iter.default_species
+    # every condition that does not have a corresponding action on the 
+    # same coordinate gets complemented with a 'default_species' action
+    for condition in condition_list:
+        if not filter(lambda x: x.coord == condition.coord, action_list):
+            action_list.append(ConditionAction(species=default_species, coord=Coord(string=str(condition.coord))))
+
+    # every action that does not have a corresponding condition on
+    # the same coordinate gets complemented with a 'default_species'
+    # condition
+    for action in action_list:
+        if not filter(lambda x: x.coord == action.coord, condition_list):
+            condition_list.append(ConditionAction(species=default_species, coord=Coord(string=str(action.coord))))
+    process.condition_list += condition_list
+    process.action_list += action_list
 
 
 def col_str2tuple(hex_string):
