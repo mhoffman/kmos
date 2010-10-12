@@ -690,7 +690,8 @@ class BatchProcessForm(SlaveDelegate):
             try:
                 parse_chemical_equation(eq=line[1], process=process, project_tree=self.project_tree)
             except:
-                raise UserWarning("Found an error in your chemical equation:\n   %s" % line[1])
+                print("Found an error in your chemical equation(line %s):\n   %s" % (i+1, line[1]))
+                raise
             else:
                 self.project_tree.append(self.project_tree.process_list_iter, process)
         buffer.delete(*bounds)
@@ -1501,9 +1502,9 @@ def parse_chemical_equation(eq, process, project_tree):
 
     for term in left + right:
         if not filter(lambda x: x.name == term[0], project_tree.species_list):
-            raise StandardError, 'Species %s unknown ' % term[0]
+            raise UserWarning('Species %s unknown ' % term[0])
         if not filter(lambda x: x.name == term[1].split('.')[0], project_tree.lattice_list[0].sites):
-            raise StandardError, 'Site %s unknown' % term[1]
+            raise UserWarning('Site %s unknown' % term[1])
 
     condition_list = []
     action_list = []
