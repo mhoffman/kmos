@@ -1,0 +1,29 @@
+kmos: kMC modelling on steroids - a vigorous attempt to make lattice kinetic
+Monte Carlo modelling more accessible.
+
+Copyright (C) 2009-10 Max J. Hoffmann <mjhoffmann@gmail.com>
+
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses/>.
+
+
+DEPENDENCIES:
+  In general this script has been developed and tested on Ubuntu 9.04-10.04 in conjunction with both gfortran and ifort. So things will most likely work best under a similar setup. Other than standard libraries you need to fetch
+  python-numpy : contains f2py
+  python-lxml: project files are stored as XML
+  python-gtk: GUI toolkit
+  python-kiwi, gazpacho: frameworks for python-gtk
+
+  For questions and comment please drop me a line (anytime). Especially you get get import error, I most likely forgot a dependency. Currently this
+  program still has a ton of rough edges. So please regard it at best as a useful proof of concept. Any input is welcome.
+
+USAGE:
+  Start the main program with 
+    python main.py
+  and create your model. To test it you need to press 'Export source' choose a folder where the source code will be dumped. Use a
+  terminal to go to that directory and run ./compile_for_f2py. If this finishes without complains you can try running ./run_kmc.py.
+  Output goes to traj.dat, parameters can be changed via param.cfg
+
