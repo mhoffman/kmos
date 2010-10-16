@@ -639,7 +639,7 @@ class OutputForm(GladeDelegate):
         GladeDelegate.__init__(self)
         self.project_tree = project_tree
         self.output_list_data = output_list
-        self.output_list.set_columns([Column('name', data_type=str, sorted=True), Column('output',data_type=bool, editable=True)])
+        self.output_list.set_columns([Column('name', data_type=str, editable=True, sorted=True), Column('output',data_type=bool, editable=True)])
 
         for item in self.output_list_data:
             self.output_list.append(item)
@@ -1108,7 +1108,8 @@ class KMC_Editor(GladeDelegate):
 
         self.saved_state = str(self.project_tree)
         # Cast initial message
-        self.toast('Start a new project by filling in meta information,\nlattice, species, parameters, and processes or open an existing one\nby opening a kMC XML file')
+        self.toast('Start a new project by filling in\n'
+        + '    * meta information\n    * lattice \n    * species\n    * parameters\n    * processes \n    * output fields\n in roughly this order or open an existing one by opening a kMC XML file')
 
     def add_defaults(self):
         """This function adds some useful defaults that are probably need in every simulation
@@ -1121,7 +1122,7 @@ class KMC_Editor(GladeDelegate):
         self.project_tree.species_list_iter.default_species = 'empty'
         self.project_tree.append(self.project_tree.species_list_iter, empty)
         # add standard parameter
-        param = Parameter(name='lattice_size', value='20 20')
+        param = Parameter(name='lattice_size', value='40 40')
         self.project_tree.append(self.project_tree.parameter_list_iter, param)
 
         param = Parameter(name='print_every', value='1.e5')
@@ -1406,11 +1407,12 @@ class KMC_Editor(GladeDelegate):
         ProcListWriter(options)
 
 
-
-
-
         # return directory name
-        self.toast('Wrote FORTRAN sources to %s' % export_dir)
+        self.toast('Wrote FORTRAN sources to %s\n' % export_dir
+         + 'Please go to the directory and run ./compile_for_f2py,\n'+
+           'which you might have to adapt slightly.\n' +
+           'If this finished successfully you can run the simulation\n'+
+           'by executing ./run_kmc.py')
 
 
     def validate_model(self):

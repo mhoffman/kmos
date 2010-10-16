@@ -1,4 +1,5 @@
 Functionality
+  * fix bug with kmc.base.get_kmc_time(), REGRESSION
   * implement back button
   * organize buttons in menu
   * write autocompletion for rate_constant input
@@ -7,6 +8,8 @@ Functionality
   * write consistency check function that runs before
     exporting f90 source could and give the user hints
     about inconsistencies in the project
+  * build-up library of lattices which can be
+    simply chosen from
 
 Project related
   * build deb package

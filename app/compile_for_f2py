@@ -1,56 +1,25 @@
 #!/bin/bash -eu
 
-#  Note: f2py cannot handle the return type of functions correctly.
+#  Note: f2py cannot handle the return type of functions easily.
 #  If one wants to use it, it is neccessary to refactor all functions
 #  into subroutines
 
-module_name=''
-#src_files='units.f90 kind_values_f2py.f90 base.f90 lattice_pdcombined.f90 proclist_rogal_simplified.f90 io_rogal_simplified.f90'
-overwrite=''
-intel_extra_flags=' -fpp -DDEBUG -fpe0'
-extra_flags='-xf95-cpp-input -DDEBUG'
-
-#intel_extra_flags=' -fpp'
+src_files='kind_values_f2py.f90 units.f90 base.f90  lattice.f90 proclist.f90'
 extra_flags='-xf95-cpp-input'
-if [ "$(uname -m)" = "i686" ]
+module_name='kmc'
+if [ -n "$(which ifort)" ]
 then
-  intel="intel"
-  intel_extra_flags="${intel_extra_flags}  -I/opt/intel/fc/10.1.018/lib"
-else
-  intel="intelem"
+  if [ "$(uname -m)" = "i686" ]
+  then
+    fcompiler="intel"
+    extra_flags="-fast -fpp  -I/opt/intel/fc/10.1.018/lib"
+  else
+    fcompiler="intelem"
+    extra_flags=' -fast -fpp'
+  fi
+else 
+  fcompiler='g95'
+  extra_flags='-xf95-cpp-input'
 fi
 
-
-
-if [ $# -eq 0 ]
-then
-  ${0} -h
-  echo "I'll start compiling in a few seconds ..."
-  sleep 3
-  ${0} -m kmc -I
-fi
-
-
-while getopts "lhfiIgGm:we:" optionName
-do
-  case "$optionName" in
-    l) echo -e "Available modules for -m module are:\n\t face2 face3 first_holes second_holes pd100 rogal rou2 upper_pd100"; exit;;
-    w) overwrite=' --overwrite-signature ';;
-    e) extra_flags="${OPTARG}";;
-    m)
-    module_name="${OPTARG}";
-    case "${module_name}" in
-      kmc) src_files='units.f90 kind_values_f2py.f90 base.f90 lattice.f90 proclist.f90' ;;
-    esac
-    ;;
-    h) echo "Usage:${0} -m modulename  [-f create header [-w overwrite signature]] [-I compile with ifort] [ -i compile from header with ifort ] [-G compile with gfortran ] [ -g compile from header with gfortran ]";
-       echo -e "\n    or simpler: ${0} -m module -action where action \\elem [i,I,g,G], order of arguments matters."
-       echo -e "\n\n    example: ${0} -m pd100 -I"
-       echo -e "\n\nGive arguments in the same order as stated above"; exit;;
-    f) f2py ${overwrite}  ${src_files} -m ${module_name} -h ${module_name}.pyf ; exit;;
-    I) f2py --verbose --f90flags="${intel_extra_flags}"  --fcompiler="${intel}" -c ${src_files} -m ${module_name}; exit;;
-    i) f2py --verbose --f90flags="${intel_extra_flags}"  --fcompiler="${intel}" -c ${src_files} ${module_name}.pyf; exit;;
-    G) f2py --verbose --f90flags="${extra_flags}"  --fcompiler="gnu95" -c ${src_files} -m ${module_name}; exit;;
-    g) f2py --verbose --f90flags="${extra_flags}"  --fcompiler="gnu95" -c ${src_files} ${module_name}.pyf; exit;;
-  esac
-done
+f2py --verbose --f90flags="${extra_flags}"  --fcompiler="${fcompiler}" -c ${src_files} -m ${module_name}
