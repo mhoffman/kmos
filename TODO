@@ -1,7 +1,12 @@
 Functionality
-  * write output function for species@site
   * implement back button
-  * organize button in menu
+  * organize buttons in menu
+  * write autocompletion for rate_constant input
+  * write autocompletion for process input
+  * write autocompletion for output fields
+  * write consistency check function that runs before
+    exporting f90 source could and give the user hints
+    about inconsistencies in the project
 
 Project related
   * build deb package
