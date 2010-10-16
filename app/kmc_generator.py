@@ -986,7 +986,6 @@ if \{condition 1 \} {[} and
         self.writeTouchupFunction()
         self.write_check_functions()
         self._out('end module proclist')
-        print("Wrote module proclist_" + self.meta['name'] + ' to ' + self.meta['source_file'])
 
     def write_init_function(self):
         """This write a convenience function that wraps around lattice.allocate_system

@@ -1410,7 +1410,7 @@ class KMC_Editor(GladeDelegate):
 
 
         # return directory name
-        self.toast('Wrote FORTRAN sources to %s' % dir)
+        self.toast('Wrote FORTRAN sources to %s' % export_dir)
 
 
     def validate_model(self):
