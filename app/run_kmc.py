@@ -102,7 +102,7 @@ class KMC_Run():
                 elif field == 'walltime':
                     outstr += '\t%s' % kmc.base.get_walltime()
                 elif field in self.process_names:
-                    outstr += '\t%s' % kmc.base.get_procstat(eval('kmc.proclist.'+field))
+                    outstr += '\t%s' % (kmc.base.get_procstat(eval('kmc.proclist.'+field))/float(self.size[0]*self.size[1]))
                 elif field in self.species_names.values():
                     outstr += '\t%s ' % sum(occupation[field].values())
                 elif field.count('@') == 1 :
@@ -110,7 +110,7 @@ class KMC_Run():
                     try:
                         outstr += '\t%s ' % occupation[field[0]][field[1]]
                     except:
-                        raise StandardError('Unknown site or species: %s' % field)
+                        raise UserWarning('Unknown site or species: %s' % field)
                 else:
                     raise UserWarning('Could match your output request %s' % field)
                         
