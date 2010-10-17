@@ -1,5 +1,4 @@
 Functionality
-  * fix bug with kmc.base.get_kmc_time(), REGRESSION
   * implement back button
   * organize buttons in menu
   * write autocompletion for rate_constant input
