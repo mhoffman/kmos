@@ -1,12 +1,18 @@
 #!/bin/bash -eu
 
-#  Note: f2py cannot handle the return type of functions easily.
-#  If one wants to use it, it is neccessary to refactor all functions
-#  into subroutines
 
 src_files='kind_values_f2py.f90 units.f90 base.f90  lattice.f90 proclist.f90'
 extra_flags='-xf95-cpp-input'
 module_name='kmc'
+
+for src_file in ${src_files}
+do
+  if [ ! -f ${src_file} ]
+  then
+    echo "Could not find ${src_file}, exiting."
+    exit 1
+  fi
+done
 if [ -n "$(which ifort)" ]
 then
   if [ "$(uname -m)" = "i686" ]
@@ -23,3 +29,12 @@ else
 fi
 
 f2py --verbose --f90flags="${extra_flags}"  --fcompiler="${fcompiler}" -c ${src_files} -m ${module_name}
+#  Note: f2py cannot handle the return type of functions easily.
+#  If one wants to use it, it is neccessary to refactor all functions
+#  into subroutines
+#
+cat <<EOF
+#  If you run into strange errors like '... returned NULL from py_object ...' you probably have to play with
+#  kind_values_f2py.f90. Kind values are hardcoded here because f2py
+#  cannot evaluate selected_real_kind or selected_integer_kind at compile time.
+EOF

@@ -1109,7 +1109,11 @@ class KMC_Editor(GladeDelegate):
         self.saved_state = str(self.project_tree)
         # Cast initial message
         self.toast('Start a new project by filling in\n'
-        + '    * meta information\n    * lattice \n    * species\n    * parameters\n    * processes \n    * output fields\n in roughly this order or open an existing one by opening a kMC XML file')
+        + '    * meta information\n    * lattice \n    * species\n    * parameters\n    * processes \n    * output fields\n in roughly this order or open an existing one by opening a kMC XML file.\n\n\n'+
+        'If you want to run the model run hit "Export Source", where\n'+
+        'you will get a fully self-contained Fortran source code\n'+
+        'of the model and further instructions'
+        )
 
     def add_defaults(self):
         """This function adds some useful defaults that are probably need in every simulation

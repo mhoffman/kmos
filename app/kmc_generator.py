@@ -996,7 +996,7 @@ if \{condition 1 \} {[} and
         self._out('    character(len=400), intent(in) :: system_name\n\n')
         self._out('    print *,"This kMC Model \'%s\' was written by %s"' % (self.meta['name'], self.meta['author']))
         self._out('    print *,"and implemented with the help of kmos, which is distributed under "')
-        self._out('    print *,"GNU/GPL Version 3 (C) Max Hoffmann mjhoffmann@gmail.com."')
+        self._out('    print *,"GNU/GPL Version 3 (C) Max J. Hoffmann mjhoffmann@gmail.com."')
         self._out('    print *,"Currently kmos is a very alphaish stage and there is"')
         self._out('    print *,"ABSOLUTELY NO WARRANTY for correctness."')
         self._out('    print *,"Please check back with the author prior to using results in publication."')
