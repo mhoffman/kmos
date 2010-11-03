@@ -9,10 +9,14 @@ Functionality
     about inconsistencies in the project
   * build-up library of lattices which can be
     simply chosen from
+  * add undo function to process editor
+  * add tooltip window to process editor for sites/condition/action
+  * organize buttons in menu
+
 
 Project related
   * build deb package
 
 
 Future/optional projects:
-  * Allow non-orthogonal unit cells
+  * Allow for non-orthogonal unit cells
