@@ -28,4 +28,4 @@ USAGE:
   Output goes to traj.dat, parameters can be changed via param.cfg
 
 THANKS:
-  This project draws on several other great Python modules, which are in turn each free software and I would like to thank each of these project for making their code avalaible for everyone: This is namely Python, Numpy, lxml and in particular ElementTree (http://www.effbot.org/), pygtkcanvas(http://code.google.com/p/pygtkcanvas/), kiwi (http://www.async.com.br/projects/kiwi/), as well as gazpacho.
+  This project draws on several other great Python modules, which are in turn each free software and I would like to thank each of these project for making their code avalaible for everyone: This is namely Python, Numpy, lxml and in particular ElementTree (http://www.effbot.org/), f2py (http://cens.ioc.ee/projects/f2py2e/), pygtkcanvas(http://code.google.com/p/pygtkcanvas/), kiwi (http://www.async.com.br/projects/kiwi/), as well as gazpacho.
