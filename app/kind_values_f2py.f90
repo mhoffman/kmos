@@ -10,7 +10,7 @@ implicit none
 !******
 
 integer, parameter :: rsingle = 4
-integer, parameter :: rdouble = 8
+integer, parameter :: rdouble = 4
 integer, parameter :: ibyte = 1
 integer, parameter :: ishort = 2
 integer, parameter :: iint = 4

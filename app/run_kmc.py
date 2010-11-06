@@ -1,4 +1,5 @@
 #!/usr/bin/python
+#import pdb
 """Generical kMC steering script for binary modules created kmos"""
 
 import kmc
@@ -38,9 +39,11 @@ class KMC_Run():
         for i in range(kmc.proclist.nr_of_proc):
             self.rate_expressions.append(get_rate_expression(i+1))
             self.process_names.append(get_process_name(i+1))
-        self.species_names = []
+        self.species_names = {}
         for i in range(kmc.lattice.nr_of_species):
-            self.species_names.append(get_species_name(i+1))
+            species_name = get_species_name(i+1)
+            species_nr = int(eval('kmc.lattice.'+species_name))
+            self.species_names[species_nr] = species_name
         self.lattice_names = []
         for i in range(kmc.lattice.nr_of_lattices):
             self.lattice_names.append(get_lattice_name(i+1))
@@ -64,24 +67,59 @@ class KMC_Run():
 
 
 
+    def get_occupation(self):
+        occupation = {}
+        A = kmc.lattice.lattice_matrix
+        for species_name in self.species_names.values():
+            occupation[species_name] = {}
+            for site_name in self.site_names:
+                occupation[species_name][site_name] = 0.
+        for y in range(self.size[1]):
+            for x in range(self.size[0]):
+                for i, site in enumerate(self.base):
+                    current_site = x*A[0] + y*A[1] + site
+                    species = eval('kmc.lattice.%s_get_species' % self.lattice_name)(current_site)
+                    species_name = self.species_names[species]
+                    occupation[species_name][self.site_names[i]] += 1.
+        total = float(self.size[0]*self.size[1])
+        for species_name in self.species_names.values():
+            for site_name in self.site_names:
+                occupation[species_name][site_name] /= total
+        return occupation
+
     def run(self):
         f = open(DATAFILE,'w')
-        f.write('# %s\n' % ', '.join(self.output_fields))
+        f.write('#\t%s\n' % ',\t'.join(self.output_fields))
         f.close()
         for i in xrange(int(self.params['total_steps'])/int(self.params['print_every'])):
             outstr = ''
+            occupation = self.get_occupation()
             for field in self.output_fields:
                 if field == 'kmc_step':
-                    outstr += '%s ' % kmc.base.get_kmc_step()
+                    outstr += '\t%s ' % kmc.base.get_kmc_step()
                 elif field == 'kmc_time':
-                    outstr += '%s ' % kmc.base.get_kmc_time()
+                    outstr += '\t%s' % kmc.base.get_kmc_time()
                 elif field == 'walltime':
-                    outstr += '%s ' % kmc.base.get_walltime()
+                    outstr += '\t%s' % kmc.base.get_walltime()
+                elif field in self.process_names:
+                    outstr += '\t%s' % (kmc.base.get_procstat(eval('kmc.proclist.'+field))/float(self.size[0]*self.size[1]))
+                elif field in self.species_names.values():
+                    outstr += '\t%s ' % sum(occupation[field].values())
+                elif field.count('@') == 1 :
+                    field = field.split('@')
+                    try:
+                        outstr += '\t%s ' % occupation[field[0]][field[1]]
+                    except:
+                        raise UserWarning('Unknown site or species: %s' % field)
+                else:
+                    raise UserWarning('Could match your output request %s' % field)
+                        
+
             f = open(DATAFILE,'a')
             f.write(outstr + '\n')
             f.close()
 
-            for i in xrange(int(self.params['print_every'])):
+            for j in xrange(int(self.params['print_every'])):
                 kmc.proclist.do_kmc_step()
 
     def set_rates(self):
@@ -110,7 +148,6 @@ class KMC_Run():
             rate_expr = tokenize.untokenize(replaced_tokens)
             try:
                 kmc.base.set_rate(proc_nr+1, eval(rate_expr))
-                print(self.process_names[proc_nr],proc_nr,rate_expr, eval(rate_expr))
             except:
                 raise UserWarning, "Could not evaluate %s, %s" % (rate_expr, proc_nr)
 
@@ -118,9 +155,8 @@ class KMC_Run():
 
     def fill_unit_cell(self, x, y, species):
         species = eval('kmc.lattice.%s' % species)
-        base = eval('kmc.lattice.lookup_nr2%s' % self.lattice_name)
         A = kmc.lattice.lattice_matrix
-        for site in base:
+        for site in self.base:
             current_site = x*A[0] + y*A[1] + site
             old_species = eval('kmc.lattice.%s_get_species' % self.lattice_name)(current_site)
             eval('kmc.lattice.%s_replace_species' % self.lattice_name)(current_site, old_species, species)
@@ -133,15 +169,6 @@ class KMC_Run():
             touchup(current_site)
 
 
-    def get_occupation(self):
-        #TODO
-        occupation = {}
-        for species_name in self.species_names:
-            occupation[species_name] = 0
-        for y in range(self.size[1]):
-            for x in range(self.size[0]):
-                for site in self.base:
-                    pass
 
 def get_rate_expression(process_nr):
     """Workaround function for f2py's inability to return character arrays, better known as strings.

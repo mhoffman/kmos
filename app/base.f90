@@ -945,7 +945,7 @@ subroutine determine_procsite(ran_proc, ran_site, proc, site)
 
 
     ASSERT(nr_of_sites(proc).gt.0,"base/determine_procsite: chosen process is invalid &
-        because it has no sites available")
+        because it has no sites available.")
     ASSERT(site.gt.0,"kmos/base/determine_procsite: tries to return invalid site")
     ASSERT(site.le.volume,"base/determine_procsite: tries to return site larger than volume")
 
@@ -968,7 +968,7 @@ subroutine update_clocks(ran_time)
 
     ! Make sure ran_time is in the right interval
     ASSERT(ran_time.ge.0.,"base/update_clocks: ran_time variable has to be positive.")
-    ASSERT(ran_time.le.1.,"base/update_clocks: ran_time variable has to less than 1.")
+    ASSERT(ran_time.le.1.,"base/update_clocks: ran_time variable has to be less than 1.")
 
     kmc_time_step = -log(ran_time)/accum_rates(nr_of_proc)
     ! Make sure the difference is not so small, that it is rounded off
@@ -1101,7 +1101,12 @@ subroutine interval_search_real(arr, value, return_field)
         nonzerosearch: do
             if(arr(mid).gt.0.)then
                 if(mid.ge.size(arr))then
+                    print *,""
+                    print *,""
                     print *,"interval_search_real can't find available process"
+                    print *,"This usually means this &
+        that either you forgot to define rate constants or you defined &
+        a dead-lock: e.g. adsorption without corresponding desorption."
                     stop
                 endif
                 exit nonzerosearch
