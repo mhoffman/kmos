@@ -1303,7 +1303,8 @@ class KMC_Editor(GladeDelegate):
     #@verbose
     def on_btn_export_src__clicked(self, button, export_dir=''):
         self.toast('Exporting ...')
-        export_dir = kiwi.ui.dialogs.selectfolder(title='Select folder for F90 source code.')
+	if not export_dir:
+            export_dir = kiwi.ui.dialogs.selectfolder(title='Select folder for F90 source code.')
         if not export_dir:
             self.toast('No folder selected')
             return
@@ -1317,9 +1318,7 @@ class KMC_Editor(GladeDelegate):
 
 
         lattice_source = open(APP_ABS_PATH + '/lattice_template.f90').read()
-        try:
-            lattice = self.project_tree.lattice_list[0]
-        except IndexError:
+	if len(self.project_tree.lattice_list)==0:
             self.toast("No lattice defined, yet. Cannot complete source")
             return
         # more processing steps ...
@@ -1335,45 +1334,52 @@ class KMC_Editor(GladeDelegate):
         species_definition += 'integer(kind=iint), parameter :: nr_of_species = %s\n' % len(self.project_tree.species_list)
         species_definition += 'integer(kind=iint), parameter :: nr_of_lattices = %s\n' % len(self.project_tree.lattice_list)
         species_definition += 'character(len=800), dimension(%s) :: lattice_list\n' % len(self.project_tree.lattice_list)
-        species_definition += 'integer(kind=iint), parameter :: nr_of_sites = %s\n' % len(lattice.sites)
-        species_definition += 'character(len=800), dimension(%s) :: site_list\n' % len(lattice.sites)
+	list_nr_of_sites = ', '.join([ str(len(lattice.sites)) for lattice in self.project_tree.lattice_list ])
+	species_definition += 'integer(kind=iint), parameter, dimension(%s) :: nr_of_sites = (/%s/)\n' % (len(self.project_tree.lattice_list), list_nr_of_sites)
+	species_definition += 'character(len=800), dimension(%s, %s) :: site_list\n' % (len(self.project_tree.lattice_list), lattice.name)
 
         # unit vector definition
-        unit_vector_definition = 'integer(kind=iint), dimension(2, 2) ::  lattice_matrix = reshape((/%(x)s, 0, 0, %(y)s/), (/2, 2/))' % {'x':lattice.unit_cell_size_x, 'y':lattice.unit_cell_size_y, 'name':lattice.name}
+        unit_vector_definition = 'integer(kind=iint), dimension(2, 2) ::  lattice_matrix = reshape((/%(x)s, 0, 0, %(y)s/), (/2, 2/))' % {'x':lattice.unit_cell_size_x, 'y':lattice.unit_cell_size_y}
         # lookup table initialization
         indexes = [ x.index for x in lattice.sites ]
-        lookup_table_init = 'integer(kind=iint), dimension(0:%(x)s, 0:%(y)s) :: lookup_%(lattice)s2nr\n' % {'x':lattice.unit_cell_size_x-1, 'y':lattice.unit_cell_size_y-1, 'lattice':lattice.name}
-        lookup_table_init += 'integer(kind=iint), dimension(%(min)s:%(max)s, 2) :: lookup_nr2%(lattice)s\n' % {'min':min(indexes), 'max':max(indexes), 'lattice':lattice.name}
-
-        # lookup table definition
         lookup_table_definition = ''
-        lookup_table_definition += '! Fill lookup table nr2%(name)s\n' % {'name':lattice.name }
-        for i, site in enumerate(lattice.sites):
-            lookup_table_definition +=  '    site_list(%s) = "%s"\n' % (i+1, site.name)
-            lookup_table_definition += '    lookup_nr2%(name)s(%(index)s, :) = (/%(x)s, %(y)s/)\n' % {'name': lattice.name,
-                                                                                                'x':site.site_x,
-                                                                                                'y':site.site_y,
-                                                                                                'index':site.index}
-        lookup_table_definition += '\n\n    ! Fill lookup table %(name)s2nr\n' % {'name':lattice.name }
-        for site in lattice.sites:
-            lookup_table_definition += '    lookup_%(name)s2nr(%(x)s, %(y)s) = %(index)s\n'  % {'name': lattice.name,
-                                                                                                'x':site.site_x,
-                                                                                                'y':site.site_y,
-                                                                                                'index':site.index}
+        lattice_mapping_functions = ''
+	lattice_mapping_template = open(APP_ABS_PATH + '/lattice_mapping_template.f90').read()
+	for lattice_nr, lattice in enumerate(self.project_tree.lattice_list):
+            lattice_mapping_functions += lattice_mapping_template % {'lattice_name':lattice.name,
+            'sites_per_cell':max(indexes)-min(indexes)+1,}
+	    
+            lookup_table_init = 'integer(kind=iint), dimension(0:%(x)s, 0:%(y)s) :: lookup_%(lattice)s2nr\n' % {'x':lattice.unit_cell_size_x-1, 'y':lattice.unit_cell_size_y-1, 'lattice':lattice.name}
+            lookup_table_init += 'integer(kind=iint), dimension(%(min)s:%(max)s, 2) :: lookup_nr2%(lattice)s\n' % {'min':min(indexes), 'max':max(indexes), 'lattice':lattice.name}
+
+            # lookup table definition
+            lookup_table_definition += '! Fill lookup table nr2%(name)s\n' % {'name':lattice.name }
+            for i, site in enumerate(lattice.sites):
+                lookup_table_definition +=  '    site_list(%s) = "%s"\n' % (i+1, site.name)
+                lookup_table_definition += '    lookup_nr2%(name)s(%(index)s, :) = (/%(x)s, %(y)s/)\n' % {'name': lattice.name,
+                                                                                                    'x':site.site_x,
+                                                                                                    'y':site.site_y,
+                                                                                                    'index':site.index}
+            lookup_table_definition += '\n\n    ! Fill lookup table %(name)s2nr\n' % {'name':lattice.name }
+            for site in lattice.sites:
+                lookup_table_definition += '    lookup_%(name)s2nr(%(x)s, %(y)s) = %(index)s\n'  % {'name': lattice.name,
+                                                                                                    'x':site.site_x,
+                                                                                                    'y':site.site_y,
+                                                                                                    'index':site.index}
         for i, species in enumerate(self.project_tree.species_list):
-            lookup_table_definition +=  '    species_list(%s) = "%s"\n' % (i+1, species.name)
-        for i, lattice_name in enumerate(self.project_tree.lattice_list):
-            lookup_table_definition +=  '    lattice_list(%s) = "%s"\n' % (i+1, lattice_name.name)
+            lookup_table_definition +=  '    species_list(%s) = "%s_%s"\n' % (10*lattice_nr + i+1, species.name, lattice.name)
+            lookup_table_definition +=  '    lattice_list(%s) = "%s"\n' % (i+1, lattice.name)
 
 
 
         #lattice mappings
-        lattice_source = lattice_source % {'lattice_name': lattice.name,
+        lattice_source = lattice_source % {
             'species_definition':species_definition,
             'lookup_table_init':lookup_table_init,
             'lookup_table_definition':lookup_table_definition,
             'unit_vector_definition':unit_vector_definition,
-            'sites_per_cell':max(indexes)-min(indexes)+1}
+            'sites_per_cell':max(indexes)-min(indexes)+1,
+            'lattice_mapping_functions':lattice_mapping_functions}
 
         lattice_mod_file = open(export_dir + '/lattice.f90', 'w')
         lattice_mod_file.write(lattice_source)
@@ -1545,12 +1551,18 @@ def col_str2tuple(hex_string):
 
 if __name__ == '__main__':
     parser = optparse.OptionParser()
-    parser.add_option('-o', '--import', dest='import_file', help='Immediately import store kmc file')
+    parser.add_option('-o', '--open', dest='import_file', help='Immediately import store kmc file')
+    parser.add_option('-x', '--export-dir', dest='export_dir', type=str, default='')
     (options, args) = parser.parse_args()
     editor = KMC_Editor()
     if options.import_file:
         editor.import_file(options.import_file)
         editor.toast('Imported %s' % options.import_file)
+	if hasattr(options, 'export_dir'):
+            print('Exporting right-away')
+            editor.on_btn_export_src__clicked(button='', export_dir=options.export_dir)
+            exit()
+		
     else:
         editor.add_defaults()
         editor.saved_state = str(editor.project_tree)
