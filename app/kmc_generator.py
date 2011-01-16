@@ -73,8 +73,6 @@ class ProcessList():
             self.pythonize_plist(plist)
         self.check_consistency()
         self.write_source_code()
-        #sketches not satisfying yet, deferred
-        #self.write_tex_code()
 
     def _out(self, line):
         """Write source code to previously defined source file"""
@@ -730,9 +728,13 @@ class ProcessList():
             """
             self.body += line + '\n'
         # Collect all update functions we need
+	# iterate over processes
         for proc in sorted(self.procs):
+	    # iterate over actions
             for replacement in self.procs[proc]['action']:
+		# iterate over conditions list (deprecated concept)
                 for conditions in self.procs[proc]['condition_list'] :
+		    # iterate over conditions in condition list
                     for condition in conditions['conditions']:
                         if replacement['site'] == condition['site']:
                             if condition.has_key('type'):
@@ -1050,14 +1052,9 @@ if __name__ == "__main__":
 
     PARSER.check_required("-x")
     PLIST = ProcessList(OPTIONS)
-    #exit()
 
     PRINTER = pprint.PrettyPrinter(indent=4)
-    #print("PROCESSES")
-    #PRINTER.pprint(PLIST.procs)
     print("META")
     PRINTER.pprint(PLIST.meta)
     print("SPECIES")
     PRINTER.pprint(PLIST.species)
-    #print("SITE TYPES")
-    #PRINTER.pprint(PLIST.site_types)
