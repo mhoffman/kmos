@@ -182,7 +182,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     def __init__(self, process, project_tree):
         self.process = process
         self.project_tree = project_tree
-        self.lattice = self.project_tree.lattice_list[0]
+        #self.lattice = self.project_tree.lattice_list[0]
         ProxySlaveDelegate.__init__(self, process)
         self.canvas = Canvas()
         self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
@@ -203,18 +203,19 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             CanvasLine(self.lattice_layer, i*(self.l/self.z), 0, i*(self.l/self.z), 500, line_width=1, fg=(.6, .6, .6))
         for i in range(self.z+1):
             for j in range(self.z+1):
-                for site in self.lattice.sites:
-                    if i == self.X and j == self.Y:
-                        l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=(1., 1., 1.))
-                    else:
-                        l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=(.6, .6, .6))
+                for lattice in self.project_tree.lattice_list:
+                    for site in lattice.sites:
+                        if i == self.X and j == self.Y:
+                            l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=(1., 1., 1.))
+                        else:
+                            l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=(.6, .6, .6))
 
-                    l_site.set_center(self.l/self.z*(i+float(site.site_x)/self.lattice.unit_cell_size_x), 500-self.l/self.z*(j+float(site.site_y)/self.lattice.unit_cell_size_y))
-                    # 500 - ... for having scientific coordinates and note screen coordinates
-                    l_site.set_radius(5)
-                    l_site.i = i
-                    l_site.j = j
-                    l_site.name = site.name
+                        l_site.set_center(self.l/self.z*(i+float(site.site_x)/lattice.unit_cell_size_x), 500-self.l/self.z*(j+float(site.site_y)/lattice.unit_cell_size_y))
+                        # 500 - ... for having scientific coordinates and note screen coordinates
+                        l_site.set_radius(5)
+                        l_site.i = i
+                        l_site.j = j
+                        l_site.name = site.name
 
         # draw frame
         frame_col = (.21, .35, .42)
