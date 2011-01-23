@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import re
 #gtk import
 import pygtk
 pygtk.require('2.0')
@@ -11,12 +12,89 @@ from kiwi.ui.views import SlaveView
 # own modules
 from config import GLADEFILE
 from utils import CorrectlyNamed
+from models import *
 
 
 # Canvas Import
 from pygtkcanvas.canvas import Canvas
 from pygtkcanvas.canvaslayer import CanvasLayer
 from pygtkcanvas.canvasitem import *
+
+def col_str2tuple(hex_string):
+    """Convenience function that turns a HTML type color
+    into a tuple of three float between 0 and 1
+    """
+    color = gtk.gdk.Color(hex_string)
+    return (color.red_float, color.green_float, color.blue_float)
+
+
+def parse_chemical_equation(eq, process, project_tree):
+    """Evaluates a chemical equation 'eq' and adds
+    conditions and actions accordingly
+    """
+    # remove spaces
+    eq = re.sub(' ', '', eq)
+
+    # split at ->
+    if eq.count('->') > 1 :
+        raise StandardError, 'Chemical expression may contain at most one "->"\n%s'  % eq
+    eq = re.split('->', eq)
+    if len(eq) == 2 :
+        left = eq[0]
+        right = eq[1]
+    elif len(eq) == 1 :
+        left = eq[0]
+        right = ''
+
+    # split terms
+    left = left.split('+')
+    right = right.split('+')
+
+    while '' in left:
+        left.remove('')
+
+    while '' in right:
+        right.remove('')
+
+    # small validity checking
+    for term in left+right:
+        if term.count('@') != 1 :
+            raise StandardError, 'Each term needs to contain exactly one @:\n%s' % term
+
+    # split each term again at @
+    for i, term in enumerate(left):
+        left[i] = term.split('@')
+    for i, term in enumerate(right):
+        right[i] = term.split('@')
+
+    for term in left + right:
+        if not filter(lambda x: x.name == term[0], project_tree.species_list):
+            raise UserWarning('Species %s unknown ' % term[0])
+        if not filter(lambda x: x.name == term[1].split('.')[0], project_tree.lattice_list[0].sites):
+            raise UserWarning('Site %s unknown' % term[1])
+
+    condition_list = []
+    action_list = []
+    for term in left:
+        condition_list.append(ConditionAction(species=term[0], coord=Coord(string=term[1])))
+    for term in right:
+        action_list.append(ConditionAction(species=term[0], coord=Coord(string=term[1])))
+
+    default_species = project_tree.species_list_iter.default_species
+    # every condition that does not have a corresponding action on the 
+    # same coordinate gets complemented with a 'default_species' action
+    for condition in condition_list:
+        if not filter(lambda x: x.coord == condition.coord, action_list):
+            action_list.append(ConditionAction(species=default_species, coord=Coord(string=str(condition.coord))))
+
+    # every action that does not have a corresponding condition on
+    # the same coordinate gets complemented with a 'default_species'
+    # condition
+    for action in action_list:
+        if not filter(lambda x: x.coord == action.coord, condition_list):
+            condition_list.append(ConditionAction(species=default_species, coord=Coord(string=str(action.coord))))
+    process.condition_list += condition_list
+    process.action_list += action_list
 
 
 class OutputForm(GladeDelegate):
@@ -147,6 +225,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         CanvasText(self.frame_layer, 10, 10, size=8, text='Reservoir Area')
         CanvasText(self.frame_layer, 10, 570, size=8, text='Lattice Area')
 
+        # draw reservoir circles
         for k, species in enumerate(self.project_tree.species_list):
             color = col_str2tuple(species.color)
             o = CanvasOval(self.frame_layer, 30+k*50, 30, 50+k*50, 50, filled=True, bg=color)

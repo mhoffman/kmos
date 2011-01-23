@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """The main part of the kmc gui project
 """
-import re
 import optparse
 from ConfigParser import SafeConfigParser
 # import own modules
@@ -776,78 +775,6 @@ class KMC_Editor(GladeDelegate):
 
 
 
-def parse_chemical_equation(eq, process, project_tree):
-    """Evaluates a chemical equation 'eq' and adds
-    conditions and actions accordingly
-    """
-    # remove spaces
-    eq = re.sub(' ', '', eq)
-
-    # split at ->
-    if eq.count('->') > 1 :
-        raise StandardError, 'Chemical expression may contain at most one "->"\n%s'  % eq
-    eq = re.split('->', eq)
-    if len(eq) == 2 :
-        left = eq[0]
-        right = eq[1]
-    elif len(eq) == 1 :
-        left = eq[0]
-        right = ''
-
-    # split terms
-    left = left.split('+')
-    right = right.split('+')
-
-    while '' in left:
-        left.remove('')
-
-    while '' in right:
-        right.remove('')
-
-    # small validity checking
-    for term in left+right:
-        if term.count('@') != 1 :
-            raise StandardError, 'Each term needs to contain exactly one @:\n%s' % term
-
-    # split each term again at @
-    for i, term in enumerate(left):
-        left[i] = term.split('@')
-    for i, term in enumerate(right):
-        right[i] = term.split('@')
-
-    for term in left + right:
-        if not filter(lambda x: x.name == term[0], project_tree.species_list):
-            raise UserWarning('Species %s unknown ' % term[0])
-        if not filter(lambda x: x.name == term[1].split('.')[0], project_tree.lattice_list[0].sites):
-            raise UserWarning('Site %s unknown' % term[1])
-
-    condition_list = []
-    action_list = []
-    for term in left:
-        condition_list.append(ConditionAction(species=term[0], coord=Coord(string=term[1])))
-    for term in right:
-        action_list.append(ConditionAction(species=term[0], coord=Coord(string=term[1])))
-
-    default_species = project_tree.species_list_iter.default_species
-    # every condition that does not have a corresponding action on the 
-    # same coordinate gets complemented with a 'default_species' action
-    for condition in condition_list:
-        if not filter(lambda x: x.coord == condition.coord, action_list):
-            action_list.append(ConditionAction(species=default_species, coord=Coord(string=str(condition.coord))))
-
-    # every action that does not have a corresponding condition on
-    # the same coordinate gets complemented with a 'default_species'
-    # condition
-    for action in action_list:
-        if not filter(lambda x: x.coord == action.coord, condition_list):
-            condition_list.append(ConditionAction(species=default_species, coord=Coord(string=str(action.coord))))
-    process.condition_list += condition_list
-    process.action_list += action_list
-
-
-def col_str2tuple(hex_string):
-    color = gtk.gdk.Color(hex_string)
-    return (color.red_float, color.green_float, color.blue_float)
 
 
 if __name__ == '__main__':
