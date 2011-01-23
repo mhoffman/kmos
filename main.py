@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """The main part of the kmc gui project
 """
-import pdb
 import re
 import optparse
 from ConfigParser import SafeConfigParser
@@ -64,6 +63,7 @@ def verbose(func):
         return ret
     return wrapper_func
 
+
 class Attributes:
     """Handy class that easily allows to define data structures
     that can only hold a well-defined set of fields
@@ -89,7 +89,7 @@ class CorrectlyNamed:
     def __init__(self):
         pass
 
-    def on_name__validate(self, widget, name):
+    def on_name__validate(self, _, name):
         """Called by kiwi upon chaning a string
         """
         if ' ' in name:
@@ -144,8 +144,6 @@ class ConditionAction(Attributes):
     def __repr__(self):
         return "Species: %s Coord:%s\n" % (self.species, self.coord)
 
-
-
 class Coord(Attributes):
     """Class that hold exactly one coordinate as used in the description
     of a process
@@ -176,7 +174,6 @@ class Coord(Attributes):
         return str(self) == str(other)
 
 
-
 class Species(Attributes):
     """Class that represent a species such as oxygen, empty, ... . Not empty
     is treated just like a species.
@@ -187,6 +184,7 @@ class Species(Attributes):
 
     def __repr__(self):
         return 'Name: %s Color: %s ID: %s\n' % (self.name, self.color, self.id)
+
 
 class SpeciesList(Attributes):
     """A list of species
@@ -235,7 +233,7 @@ class Parameter(Attributes, CorrectlyNamed):
     def __repr__(self):
         return 'Name: %s Value: %s\n' % (self.name, self.value)
 
-    def on_name__content_changed(self, text):
+    def on_name__content_changed(self, _):
         self.project_tree.update(self.process)
 
     def get_extra(self):
@@ -255,6 +253,7 @@ class Meta(Settable, object):
                 self.__setattr__(key, int(attrib[key]))
             else:
                 self.__setattr__(key, attrib[key])
+
 
 class Process(Attributes):
     """One process in a kMC process list
@@ -277,16 +276,6 @@ class Process(Attributes):
     def get_extra(self):
         return self.rate_constant
 
-
-
-
-class OutputObjectTree(ObjectTree):
-    pass
-    def __init__(self,*args, **kwargs):
-        ObjectTree.__init__(self, *args, **kwargs)
-
-    def append(self, parent, elem):
-        return ObjectTree.append(self, parent, elem)
 
 class ProjectTree(SlaveDelegate):
     """A rather complex class holding all the information of a kMC project that provides
@@ -552,7 +541,7 @@ class ProjectTree(SlaveDelegate):
         self.focus_topmost()
         self.on_project_data__selection_changed(0, self.meta)
 
-    def on_key_press(self, widget, event):
+    def on_key_press(self, _, event):
         """When the user hits the keyboard focusing the treeview
         this event is triggered. Right now the only supported function
         is to deleted the selected item
@@ -564,7 +553,7 @@ class ProjectTree(SlaveDelegate):
                     self.project_data.remove(selection)
                 
 
-    def on_project_data__selection_changed(self, item, elem):
+    def on_project_data__selection_changed(self, _, elem):
         """When a new item is selected in the treeview this function
         loads the main area of the window with the corresponding form
         and data.
@@ -610,10 +599,6 @@ class ProjectTree(SlaveDelegate):
         else:
             self.get_parent().toast('Not implemented, yet.')
 
-
-
-
-
 class OutputList():
     """A dummy class, that will hold the values which are to be printed to logfile.
     """
@@ -646,8 +631,7 @@ class OutputForm(GladeDelegate):
         self.output_list.show()
         self.output_list.grab_focus()
 
-    def on_add_output__clicked(self, button):
-        
+    def on_add_output__clicked(self, _):
         output_form = gtk.MessageDialog(parent=None,
                                       flags=gtk.DIALOG_MODAL,
                                       type=gtk.MESSAGE_QUESTION,
@@ -656,13 +640,14 @@ class OutputForm(GladeDelegate):
         form_entry = gtk.Entry()
         output_form.vbox.pack_start(form_entry)
         output_form.vbox.show_all()
-        resp = output_form.run()
+        output_form.run()
         output_str = form_entry.get_text()
         output_form.destroy()
         output_item = OutputItem(name=output_str, output=True)
         self.output_list.append(output_item)
         self.output_list_data.append(output_item)
     
+
 class BatchProcessForm(SlaveDelegate):
     gladefile = GLADEFILE
     toplevel_name = 'batch_process_form'
@@ -670,7 +655,7 @@ class BatchProcessForm(SlaveDelegate):
         self.project_tree = project_tree
         SlaveDelegate.__init__(self)
 
-    def on_btn_evaluate__clicked(self, button):
+    def on_btn_evaluate__clicked(self, _):
         buffer = self.batch_processes.get_buffer()
         bounds = buffer.get_bounds()
         text = buffer.get_text(*bounds)
@@ -694,10 +679,6 @@ class BatchProcessForm(SlaveDelegate):
             else:
                 self.project_tree.append(self.project_tree.process_list_iter, process)
         buffer.delete(*bounds)
-
-
-        
-
     
     
 class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
@@ -783,7 +764,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         """
         return 10 < x < 510 and 80 < y < 580
         
-    def button_press(self, widget, item, event):
+    def button_press(self, _, item, dummy):
         coords = item.get_coords()
         if item.state == 'reservoir':
             o = CanvasOval(self.motion_layer, *coords, filled=True, bg=item.bg)
@@ -804,7 +785,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.prev_pos = event.x, event.y
 
     #@verbose
-    def button_release(self, widget, item, event):
+    def button_release(self, _, dummy, event):
         if self.item.state == 'from_reservoir':
             if not self.on_lattice(event.x, event.y):
                 self.item.delete()
@@ -878,7 +859,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         form_entry = gtk.Entry()
         chem_form.vbox.pack_start(form_entry)
         chem_form.vbox.show_all()
-        resp = chem_form.run()
+        chem_form.run()
         eq = form_entry.get_text()
         chem_form.destroy()
 
@@ -886,12 +867,6 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 
         self.draw_from_data()
         self.canvas.redraw()
-
-            
-
-                
-
-        
 
 
 class SiteForm(ProxyDelegate):
@@ -935,7 +910,6 @@ class SiteForm(ProxyDelegate):
                     node.filled = True
         self.parent.canvas.redraw()
         self.hide()
-
 
 
 class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
@@ -1023,7 +997,6 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
         site_form = SiteForm(new_site, self)
 
 
-
 class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
     """A form  that allows to enter meta information about the project
     """
@@ -1036,6 +1009,7 @@ class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
 
     def on_model_name__validate(self, widget, model_name):
         return self.on_name__validate(widget, model_name)
+
 
 class InlineMessage(SlaveView):
     """Return a nice little field with a text message on it
@@ -1063,6 +1037,7 @@ class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
     def on_parameter_name__content_changed(self, text):
         self.project_tree.project_data.sort_by_attribute('name')
         self.project_tree.update(self.model)
+
 
 class SpeciesListForm(ProxySlaveDelegate):
     gladefile = GLADEFILE
@@ -1143,12 +1118,18 @@ class KMC_Editor(GladeDelegate):
 
 
     def toast(self, toast):
+        """Present a nice little text in the middle of the workarea
+        as a standard way write inline messages to the user
+        """
         if self.get_slave('workarea'):
             self.detach_slave('workarea')
         inline_message = InlineMessage(toast)
         self.attach_slave('workarea', inline_message)
         inline_message.show()
+
     def on_btn_new_project__clicked(self, button):
+        """Start a new project
+        """
         if str(self.project_tree) != self.saved_state:
             # if there are unsaved changes, ask what to do first
             save_changes_dialog = gtk.Dialog(
@@ -1167,6 +1148,7 @@ class KMC_Editor(GladeDelegate):
                 return
             elif resp == gtk.RESPONSE_OK:
                 self.on_btn_save_model__clicked(None)
+        # Instantiate new project data
         self.project_tree = ProjectTree(parent=self)
         if self.get_slave('overviewtree'):
             self.detach_slave('overviewtree')
@@ -1175,6 +1157,8 @@ class KMC_Editor(GladeDelegate):
         self.toast('Start a new project by filling in meta information,\nlattice, species, parameters, and processes or open an existing one\nby opening a kMC XML file')
 
     def on_btn_add_lattice__clicked(self, button):
+        """Add a new lattice to the model
+        """
         if len(self.project_tree.lattice_list) < 2 :
             new_lattice = Lattice()
             self.project_tree.append(self.project_tree.lattice_list_iter, new_lattice)
@@ -1188,6 +1172,8 @@ class KMC_Editor(GladeDelegate):
             self.toast('Sorry, no multi-lattice support, yet.')
 
     def on_btn_add_species__clicked(self, button):
+        """Add a new species to the model
+        """
         new_species = Species(color='#fff', name='')
         self.project_tree.append(self.project_tree.species_list_iter, new_species)
         self.project_tree.expand(self.project_tree.species_list_iter)
@@ -1200,6 +1186,8 @@ class KMC_Editor(GladeDelegate):
         species_form.focus_topmost()
 
     def on_btn_add_process__clicked(self, button):
+        """Add a new process to the model
+        """
         if not self.project_tree.lattice_list:
             self.toast("No lattice defined, yet!")
             return
