@@ -336,7 +336,10 @@ class ProjectTree(SlaveDelegate):
         """
         selection = self.project_data.get_selected()
         if gtk.gdk.keyval_name(event.keyval) == 'Delete':
-            if isinstance(selection, Species) or isinstance(selection, Process) or isinstance(selection, Parameter) or isinstance(selection, Lattice):
+            if(isinstance(selection, Species)
+            or isinstance(selection, Process)
+            or isinstance(selection, Parameter)
+            or isinstance(selection, Lattice)):
                 if kiwi.ui.dialogs.yesno("Do you really want to delete '%s'?" % selection.name) == gtk.RESPONSE_YES:
                     self.project_data.remove(selection)
                 
