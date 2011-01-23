@@ -33,19 +33,6 @@ from string import Template
 DTD_FILENAME = '../scripts/process_list.dtd'
 
 
-class OptionParser(optparse.OptionParser):
-    """This class should assist in creating a kMC simulation
-    by reading an XML file and creating the corresponding Fortran
-    source code"""
-    def check_required(self, opt):
-        """Little extension of OptionParser: allows to efficiently check
-         for presence of required options
-         """
-        option = self.get_option(opt)
-        if getattr(self.values, option.dest) is None:
-            self.error("%s option not supplied" % option)
-
-
 class ProcessList():
     """Constructor for process list object. Expects the
         filename of an xml file as input.
@@ -1041,7 +1028,7 @@ class ConsistencyError(Error):
         print(msg + "\n")
 
 if __name__ == "__main__":
-    PARSER = OptionParser(usage="%prog")
+    PARSER = optparse.OptionParser(usage="%prog")
     PARSER.add_option("-x", "--xml", dest="xml_filename", \
             help="Set XML file where the process list is specified.", \
             type = "string")
@@ -1050,7 +1037,6 @@ if __name__ == "__main__":
             help = 'Force source files to be overwritten')
     (OPTIONS, ARGS) = PARSER.parse_args()
 
-    PARSER.check_required("-x")
     PLIST = ProcessList(OPTIONS)
 
     PRINTER = pprint.PrettyPrinter(indent=4)
