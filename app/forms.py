@@ -1,8 +1,22 @@
 #!/usr/bin/env python
-from utils import CorrectlyNamed
+#gtk import
+import pygtk
+pygtk.require('2.0')
+import gtk
+
+#kiwi imports
 from kiwi.ui.delegates import ProxySlaveDelegate, GladeDelegate, SlaveDelegate, ProxyDelegate
 from kiwi.ui.views import SlaveView
+
+# own modules
 from config import GLADEFILE
+from utils import CorrectlyNamed
+
+
+# Canvas Import
+from pygtkcanvas.canvas import Canvas
+from pygtkcanvas.canvaslayer import CanvasLayer
+from pygtkcanvas.canvasitem import *
 
 
 class OutputForm(GladeDelegate):

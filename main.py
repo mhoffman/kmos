@@ -32,11 +32,6 @@ from kiwi.ui.objectlist import ObjectList, ObjectTree, Column
 from kiwi.datatypes import ValidationError
 import kiwi.ui.dialogs 
 
-# Canvas Import
-from pygtkcanvas.canvas import Canvas
-from pygtkcanvas.canvaslayer import CanvasLayer
-from pygtkcanvas.canvasitem import *
-
 
 KMCPROJECT_DTD = '/kmc_project.dtd'
 PROCESSLIST_DTD = '/process_list.dtd'
