@@ -40,8 +40,7 @@ from pygtkcanvas.canvasitem import *
 KMCPROJECT_DTD = '/kmc_project.dtd'
 PROCESSLIST_DTD = '/process_list.dtd'
 SRCDIR = './fortran_src'
-GLADEFILE = os.path.relpath(os.path.join(APP_ABS_PATH, 'kmc_editor.glade'))
-print(GLADEFILE)
+GLADEFILE = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
 
 def prettify_xml(elem):
     """This function takes an XML document, which can have one or many lines
@@ -1176,7 +1175,7 @@ class KMC_Editor(GladeDelegate):
         self.toast('Start a new project by filling in meta information,\nlattice, species, parameters, and processes or open an existing one\nby opening a kMC XML file')
 
     def on_btn_add_lattice__clicked(self, button):
-        if len(self.project_tree.lattice_list) < 1 :
+        if len(self.project_tree.lattice_list) < 2 :
             new_lattice = Lattice()
             self.project_tree.append(self.project_tree.lattice_list_iter, new_lattice)
             lattice_form = LatticeEditor(new_lattice, self.project_tree)
@@ -1303,7 +1302,7 @@ class KMC_Editor(GladeDelegate):
     #@verbose
     def on_btn_export_src__clicked(self, button, export_dir=''):
         self.toast('Exporting ...')
-	if not export_dir:
+        if not export_dir:
             export_dir = kiwi.ui.dialogs.selectfolder(title='Select folder for F90 source code.')
         if not export_dir:
             self.toast('No folder selected')
