@@ -191,7 +191,7 @@ class ProjectTree(SlaveDelegate):
     def _export_process_list_xml(self):
         """This basically a legacy function: the part of the source code creator
         existed before and uses a slightly modified XML syntax which was faster to type
-        by hand unnecesarily complex when using a GUI. So this function converts
+        by hand but is unnecesarily complex when using a GUI. So this function converts
         the current process list to the old form and passes along all essential
         information to the kmc_generator module
         """
