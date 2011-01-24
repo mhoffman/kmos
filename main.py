@@ -28,7 +28,6 @@ from kiwi.controllers import BaseController
 import kiwi.ui
 from kiwi.ui.delegates import Delegate, SlaveDelegate, GladeDelegate, GladeSlaveDelegate
 from kiwi.ui.objectlist import ObjectList, ObjectTree, Column
-from kiwi.datatypes import ValidationError
 import kiwi.ui.dialogs 
 
 
@@ -629,10 +628,10 @@ class KMC_Editor(GladeDelegate):
         if not self.project_tree.species_list:
             self.toast('No species defined, yet, cannot complete source code.')
             return
-        species_definition = "integer(kind=iint), public, parameter :: &\n "
+        species_definition = "integer(kind=iint), public, parameter :: &\n"
         for species in self.project_tree.species_list[:-1]:
             species_definition += '    %(species)s =  %(id)s, &\n' % {'species':species.name, 'id':species.id}
-        species_definition += '     %(species)s = %(id)s\n' % {'species':self.project_tree.species_list[-1].name, 'id':self.project_tree.species_list[-1].id}
+        species_definition += '    %(species)s = %(id)s\n' % {'species':self.project_tree.species_list[-1].name, 'id':self.project_tree.species_list[-1].id}
         species_definition += 'character(len=800), dimension(%s) :: species_list\n' % len(self.project_tree.species_list)
         species_definition += 'integer(kind=iint), parameter :: nr_of_species = %s\n' % len(self.project_tree.species_list)
         species_definition += 'integer(kind=iint), parameter :: nr_of_lattices = %s\n' % len(self.project_tree.lattice_list)

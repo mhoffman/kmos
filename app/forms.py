@@ -8,6 +8,7 @@ import gtk
 #kiwi imports
 from kiwi.ui.delegates import ProxySlaveDelegate, GladeDelegate, SlaveDelegate, ProxyDelegate
 from kiwi.ui.views import SlaveView
+from kiwi.datatypes import ValidationError
 
 # own modules
 from config import GLADEFILE

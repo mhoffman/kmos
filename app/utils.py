@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from kiwi.datatypes import ValidationError
+
 class CorrectlyNamed:
     """Syntactic Sugar class for use with kiwi, that makes sure that the name
     field of the class has a name field, that always complys with the rules for variables
