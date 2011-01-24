@@ -186,7 +186,12 @@ class ProjectTree(SlaveDelegate):
         self.project_data.expand(self.parameter_list_iter)
         self.project_data.expand(self.process_list_iter)
 
-    def _export_process_list_xml(self):
+    def _export_process_list(self):
+        """This is a newer version exporting the proclist.f90 module right to 
+        F90 source code using an algorithm that tries to build an optimized if-tree
+        """
+        pass
+    def _export_process_list_xml_legacy(self):
         """This basically a legacy function: the part of the source code creator
         existed before and uses a slightly modified XML syntax which was faster to type
         by hand but is unnecesarily complex when using a GUI. So this function converts
@@ -245,9 +250,6 @@ class ProjectTree(SlaveDelegate):
                 replacement_elem.set('site', 'site_%s' % index)
                 replacement_elem.set('new_species', action.species)
 
-
-
-                
                 
             # CONTINUE HERE
         return root
@@ -474,17 +476,14 @@ class KMC_Editor(GladeDelegate):
     def on_btn_add_lattice__clicked(self, button):
         """Add a new lattice to the model
         """
-        if len(self.project_tree.lattice_list) < 2 :
-            new_lattice = Lattice()
-            self.project_tree.append(self.project_tree.lattice_list_iter, new_lattice)
-            lattice_form = LatticeEditor(new_lattice, self.project_tree)
-            self.project_tree.expand(self.project_tree.lattice_list_iter)
-            if self.get_slave('workarea'):
-                self.detach_slave('workarea')
-            self.attach_slave('workarea', lattice_form)
-            lattice_form.focus_topmost()
-        else:
-            self.toast('Sorry, no multi-lattice support, yet.')
+        new_lattice = Lattice()
+        self.project_tree.append(self.project_tree.lattice_list_iter, new_lattice)
+        lattice_form = LatticeEditor(new_lattice, self.project_tree)
+        self.project_tree.expand(self.project_tree.lattice_list_iter)
+        if self.get_slave('workarea'):
+            self.detach_slave('workarea')
+        self.attach_slave('workarea', lattice_form)
+        lattice_form.focus_topmost()
 
     def on_btn_add_species__clicked(self, button):
         """Add a new species to the model
@@ -619,6 +618,7 @@ class KMC_Editor(GladeDelegate):
 
 
 
+        # prepare lattice.f90 module
         lattice_source = open(APP_ABS_PATH + '/lattice_template.f90').read()
         if len(self.project_tree.lattice_list)==0 :
             self.toast("No lattice defined, yet. Cannot complete source code.")
@@ -682,6 +682,7 @@ class KMC_Editor(GladeDelegate):
             'sites_per_cell':max(indexes)-min(indexes)+1,
             'lattice_mapping_functions':lattice_mapping_functions}
 
+        # write lattice module
         lattice_mod_file = open(export_dir + '/lattice.f90', 'w')
         lattice_mod_file.write(lattice_source)
         lattice_mod_file.close()
@@ -703,19 +704,26 @@ class KMC_Editor(GladeDelegate):
             
 
 
-        # generate process list source via existing code
-        proclist_xml = open(export_dir + '/process_list.xml', 'w')
-        pretty_xml = prettify_xml(self.project_tree._export_process_list_xml())
-        proclist_xml.write(pretty_xml)
-        proclist_xml.close()
-        class Options(): pass
-        options = Options()
-        options.xml_filename = proclist_xml.name
-        options.dtd_filename = APP_ABS_PATH + '/process_list.dtd'
-        options.force_overwrite = True
-        options.proclist_filename = export_dir + '/proclist.f90'
-
-        ProcListWriter(options)
+        if len(self.project_tree.lattice_list) < 2 :
+            print("single-lattice mode")
+            # single lattice mode
+            # generate process list source via existing code
+            proclist_xml = open(export_dir + '/process_list.xml', 'w')
+            pretty_xml = prettify_xml(self.project_tree._export_process_list_xml_legacy())
+            proclist_xml.write(pretty_xml)
+            proclist_xml.close()
+            class Options(): pass
+            options = Options()
+            options.xml_filename = proclist_xml.name
+            options.dtd_filename = APP_ABS_PATH + '/process_list.dtd'
+            options.force_overwrite = True
+            options.proclist_filename = '%s/proclist.f90' % export_dir
+            ProcListWriter(options)
+        else:
+            # multi-lattice mode
+            print("Multi-lattice mode, not fully supported, yet!")
+            self.write_proclist("%s/proclist.f90" % export_dir)
+            
 
 
         # return directory name
@@ -725,6 +733,8 @@ class KMC_Editor(GladeDelegate):
            'If this finished successfully you can run the simulation\n'+
            'by executing ./run_kmc.py')
 
+    def write_proclist(self, filename):
+        pass
 
     def validate_model(self):
         pass
@@ -785,11 +795,12 @@ if __name__ == '__main__':
     if options.import_file:
         editor.import_file(options.import_file)
         editor.toast('Imported %s' % options.import_file)
+    else:
+        editor.add_defaults()
     if hasattr(options, 'export_dir') and options.export_dir:
         print('Exporting right-away')
         editor.on_btn_export_src__clicked(button='', export_dir=options.export_dir)
         exit()
     else:
-        editor.add_defaults()
         editor.saved_state = str(editor.project_tree)
     editor.show_and_loop()

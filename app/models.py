@@ -76,16 +76,25 @@ class Coord(Attributes):
     """Class that hold exactly one coordinate as used in the description
     of a process
     """
-    attributes = ['offset', 'name']
+    attributes = ['offset', 'name', 'lattice']
     def __init__(self, **kwargs):
         if kwargs.has_key('string'):
             raw = kwargs['string'].split('.')
             if len(raw) == 2 :
                 self.name = raw[0]
                 self.offset = eval(raw[1])
+                self.lattice = ''
             elif len(raw) == 1 :
                 self.name = raw[0]
                 self.offset = [0, 0]
+                self.lattice = ''
+            elif len(raw) == 3 :
+                self.name = raw[0]
+                self.lattice = raw[2]
+                if raw[1]:
+                    self.offset = eval(raw[1])
+                else:
+                    self.offset = [0, 0]
             else:
                 raise TypeError, "Coordinate specification %s does not match the expected format" % raw
 
@@ -93,10 +102,7 @@ class Coord(Attributes):
             Attributes.__init__(self, **kwargs)
 
     def __repr__(self):
-        if filter(lambda x:x != 0, self.offset):
-            return '%s.%s' % (self.name, self.offset)
-        else:
-            return '%s' % self.name
+        return '%s.%s.%s' % (self.name, tuple(self.offset), self.lattice)
 
     def __eq__(self, other):
         return str(self) == str(other)

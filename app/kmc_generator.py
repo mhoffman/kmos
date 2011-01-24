@@ -450,14 +450,14 @@ class ProcessList():
         for lattice in self.meta['lattices']:
             for lattice2 in self.meta['lattices'] :
                 if lattice != lattice2:
-                    self._out('    ' + lattice + '2' + lattice2 + ', &')
-            self._out('    nr2' + lattice + ', &')
-            self._out('    ' + lattice + '2nr, &')
-            self._out('    ' + lattice + '_add_proc, &')
-            self._out('    ' + lattice + '_can_do, &')
-            self._out('    ' + lattice + '_replace_species, &')
-            self._out('    ' + lattice + '_del_proc, &')
-            self._out('    ' + lattice + '_get_species, &')
+                    self._out('    %s2%s, &\n' % (lattice, lattice2))
+            self._out(('    nr2%(lattice)s, &\n'
+                    + '    %(lattice)s2nr, &\n'
+                    + '    %(lattice)s_add_proc, &\n'
+                    + '    %(lattice)s_can_do, &\n'
+                    + '    %(lattice)s_replace_species, &\n'
+                    + '    %(lattice)s_del_proc, &\n'
+                    + '    %(lattice)s_get_species, &') % {'lattice' :lattice } )
 
         for species in self.species.keys()[:-1]:
             self._out('    '+species+', &')

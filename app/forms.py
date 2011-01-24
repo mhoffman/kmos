@@ -33,8 +33,11 @@ def parse_chemical_equation(eq, process, project_tree):
     """Evaluates a chemical equation 'eq' and adds
     conditions and actions accordingly
     """
+    if len(project_tree.lattice_list) > 1 :
+        multi_lattice = True
     # remove spaces
     eq = re.sub(' ', '', eq)
+    
 
     # split at ->
     if eq.count('->') > 1 :
@@ -51,6 +54,7 @@ def parse_chemical_equation(eq, process, project_tree):
     left = left.split('+')
     right = right.split('+')
 
+    # why do we remove empty characters?
     while '' in left:
         left.remove('')
 
@@ -71,8 +75,20 @@ def parse_chemical_equation(eq, process, project_tree):
     for term in left + right:
         if not filter(lambda x: x.name == term[0], project_tree.species_list):
             raise UserWarning('Species %s unknown ' % term[0])
-        if not filter(lambda x: x.name == term[1].split('.')[0], project_tree.lattice_list[0].sites):
-            raise UserWarning('Site %s unknown' % term[1])
+        if multi_lattice:
+            lattice = filter(lambda x: x.name == term[1].split('.')[2], project_tree.lattice_list)
+            if not lattice:
+                raise UserWarning('Lattice %s is unknown.!' % lattice_name)
+            elif len(lattice) > 1 :
+                raise UserWarning('Error: There is  more than lattice named %s.' % lattice[0].name)
+            else:
+                lattice = lattice[0]
+                site_name = term[1].split('.')[0]
+                if not filter(lambda x: x.name == site_name, lattice.sites):
+                    raise UserWarning('Site %s is unknown for lattice %s' % (site_name, lattice.name))
+        else:
+            if not filter(lambda x: x.name == term[1].split('.')[0], project_tree.lattice_list[0].sites):
+                raise UserWarning('Site %s unknown' % term[1])
 
     condition_list = []
     action_list = []
@@ -183,7 +199,6 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     def __init__(self, process, project_tree):
         self.process = process
         self.project_tree = project_tree
-        #self.lattice = self.project_tree.lattice_list[0]
         ProxySlaveDelegate.__init__(self, process)
         self.canvas = Canvas()
         self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
@@ -217,6 +232,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                         l_site.i = i
                         l_site.j = j
                         l_site.name = site.name
+                        l_site.lattice = lattice.name
 
         # draw frame
         frame_col = (.21, .35, .42)
@@ -291,7 +307,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                     # name of the site
                     name = closest_site.name
                     species = self.item.species
-                    condition_action = ConditionAction(species=species, coord=Coord(offset=offset, name=name))
+                    lattice = closest_site.lattice
+                    condition_action = ConditionAction(species=species, coord=Coord(offset=offset, name=name, lattice=lattice))
                     if filter(lambda x: x.get_center() == coord, self.condition_layer):
                         self.item.new_parent(self.action_layer)
                         self.item.set_radius(self.r_act)
@@ -312,7 +329,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         to the conditions and actions defined
         """
         for elem in self.process.condition_list:
-            coords = filter(lambda x: isinstance(x, CanvasOval) and x.i==self.X+elem.coord.offset[0] and x.j==self.Y+elem.coord.offset[1] and x.name==elem.coord.name, self.site_layer)[0].get_coords()
+            #lattice_nr = filter()
+            coords = filter(lambda x: isinstance(x, CanvasOval) and x.i==self.X+elem.coord.offset[0] and x.j==self.Y+elem.coord.offset[1] and x.name==elem.coord.name and x.lattice == elem.coord.lattice, self.site_layer)[0].get_coords()
             color = filter(lambda x: x.name == elem.species, self.project_tree.species_list)[0].color
             color = col_str2tuple(color)
             o = CanvasOval(self.condition_layer, bg=color, filled=True)
@@ -320,7 +338,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             o.set_radius(self.r_cond)
 
         for elem in self.process.action_list:
-            coords = filter(lambda x: isinstance(x, CanvasOval) and x.i==self.X+elem.coord.offset[0] and x.j==self.Y+elem.coord.offset[1] and x.name==elem.coord.name, self.site_layer)[0].get_coords()
+            coords = filter(lambda x: isinstance(x, CanvasOval) and x.i==self.X+elem.coord.offset[0] and x.j==self.Y+elem.coord.offset[1] and x.name==elem.coord.name and x.lattice == elem.coord.lattice, self.site_layer)[0].get_coords()
             color = filter(lambda x: x.name == elem.species, self.project_tree.species_list)[0].color
             color = col_str2tuple(color)
             o = CanvasOval(self.action_layer, bg=color, filled=True)
@@ -467,8 +485,8 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
     toplevel_name = 'lattice_form'
     widgets = ['lattice_name', 'unit_x', 'unit_y']
     def __init__(self, lattice, project_tree):
-        ProxySlaveDelegate.__init__(self, lattice)
         self.project_tree = project_tree
+        ProxySlaveDelegate.__init__(self, lattice)
         self.canvas = Canvas()
         self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
         self.canvas.grab_focus()
@@ -521,6 +539,7 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
             self.canvas.hide()
 
     def on_lattice_name__validate(self, widget, lattice_name):
+        # TODO: validate lattice name to be unique
         return self.on_name__validate(widget, lattice_name)
 
     def on_lattice_name__content_changed(self, widget):
