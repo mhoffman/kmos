@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<kmc>
+    <meta author="" debug="0" email="" model_dimension="2" model_name=""/>
+    <species_list default_species="empty">
+        <species color="#fff" id="0" name="empty"/>
+        <species color="#fff" id="0" name="empty"/>
+        <species color="#ff0000" id="3" name="oxygen"/>
+        <species color="#000000" id="4" name="CO"/>
+    </species_list>
+    <parameter_list>
+        <parameter name="total_steps" value="1.e7"/>
+        <parameter name="total_steps" value="1.e7"/>
+        <parameter name="print_every" value="1.e5"/>
+        <parameter name="print_every" value="1.e5"/>
+        <parameter name="lattice_size" value="40 40"/>
+        <parameter name="lattice_size" value="40 40"/>
+    </parameter_list>
+    <lattice_list>
+        <lattice name="Pd100" unit_cell_size="10 10">
+            <site coord="0 0" index="1" type="hollow_1"/>
+            <site coord="2 4" index="2" type="hollow_2"/>
+            <site coord="4 8" index="3" type="hollow_3"/>
+            <site coord="8 6" index="4" type="hollow_4"/>
+            <site coord="6 2" index="5" type="hollow_5"/>
+            <site coord="1 2" index="6" type="bridge_1"/>
+            <site coord="2 9" index="7" type="bridge_2"/>
+            <site coord="3 6" index="8" type="bridge_3"/>
+            <site coord="4 3" index="9" type="bridge_4"/>
+            <site coord="5 0" index="10" type="bridge_5"/>
+            <site coord="6 7" index="11" type="bridge_6"/>
+            <site coord="9 8" index="12" type="bridge_7"/>
+            <site coord="0 5" index="13" type="bridge_8"/>
+            <site coord="7 4" index="14" type="bridge_9"/>
+            <site coord="8 1" index="15" type="bridge_10"/>
+        </lattice>
+        <lattice name="PdO" unit_cell_size="4 4">
+            <site coord="2 0" index="1" type="bridge_1"/>
+            <site coord="2 2" index="2" type="bridge_2"/>
+            <site coord="1 1" index="3" type="hollow_1"/>
+            <site coord="1 3" index="4" type="hollow_2"/>
+        </lattice>
+    </lattice_list>
+    <process_list/>
+    <output_list/>
+</kmc>
+<!-- This is an automatically generated XML file, representing a kMC model please do not change this unless you know what you are doing -->
