@@ -605,11 +605,11 @@ class KMC_Editor(GladeDelegate):
 
     #@verbose
     def on_btn_export_src__clicked(self, button, export_dir=''):
-        self.toast('Exporting ...')
+        self.toast('Exporting source code ...')
         if not export_dir:
             export_dir = kiwi.ui.dialogs.selectfolder(title='Select folder for F90 source code.')
         if not export_dir:
-            self.toast('No folder selected')
+            self.toast('No folder selected.')
             return
         if not os.path.exists(export_dir):
             os.mkdir(export_dir)
@@ -621,13 +621,13 @@ class KMC_Editor(GladeDelegate):
 
 
         lattice_source = open(APP_ABS_PATH + '/lattice_template.f90').read()
-        if len(self.project_tree.lattice_list)==0:
-            self.toast("No lattice defined, yet. Cannot complete source")
+        if len(self.project_tree.lattice_list)==0 :
+            self.toast("No lattice defined, yet. Cannot complete source code.")
             return
         # more processing steps ...
         # species definition
         if not self.project_tree.species_list:
-            self.toast('No species defined, yet, cannot complete source')
+            self.toast('No species defined, yet, cannot complete source code.')
             return
         species_definition = "integer(kind=iint), public, parameter :: &\n "
         for species in self.project_tree.species_list[:-1]:
