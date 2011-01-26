@@ -360,7 +360,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                                       flags=gtk.DIALOG_MODAL,
                                       type=gtk.MESSAGE_QUESTION,
                                       buttons=gtk.BUTTONS_OK_CANCEL,
-                                      message_format='Please enter a chemical equation, e.g.:\n\nspecies1@site->species2@site')
+                                      message_format='Please enter a chemical equation, e.g.:\n\nspecies1@site->species2@site\n\\w site: site_name.offset.lattice')
         form_entry = gtk.Entry()
         chem_form.vbox.pack_start(form_entry)
         chem_form.vbox.show_all()
