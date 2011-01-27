@@ -10,6 +10,7 @@ class ProcListWriter():
         self.dir = dir
         
     def write_proclist(self):
+        data = self.data
         out = open('%s/proclist.f90' % self.dir, 'w')
         out.write('module proclist\n' 
             + 'use kind_values\n'
@@ -21,13 +22,13 @@ class ProcListWriter():
         out.write('use lattice, only:\n'
             + '    lattice_allocate_system => allocate_system, &\n')
         for lattice in self.data.lattice_list:
-            out.write(('    nr2%s, &\n'
-                + '    %s2nr, &\n'
-                + '    %s_add_proc, &\n'
-                + '    %s_can_do, &\n'
-                + '    %s_replace_species, &\n'
-                + '    %s_del_proc, &\n'
-                + '    %s_get_species, &\n') % lattice.name)
+            out.write(('    nr2%(name)s, &\n'
+                + '    %(name)s2nr, &\n'
+                + '    %(name)s_add_proc, &\n'
+                + '    %(name)s_can_do, &\n'
+                + '    %(name)s_replace_species, &\n'
+                + '    %(name)s_del_proc, &\n'
+                + '    %(name)s_get_species, &\n') % {'name': lattice.name})
         for i, species in enumerate(self.data.species_list):
             if i+1 < len(self.data.species_list):
                 out.write('    %s, &\n' % species.name)
@@ -50,10 +51,38 @@ class ProcListWriter():
             + '    print *, "GNU/GPL Version 3 (C) Max J. Hoffmann mjhoffmann@gmail.com"\n'
             + '    print *, "Currently kms is in a very alphaisch stage and there is"\n'
             + '    print *, "ABSOLUTELY NO WARRANTY for correctness."\n'
-            + '    print *,"Please check back with the author prior to using results in a publications.\n"') % (data.meta.model_dimension, data.meta.author, data.meta.email, ))
+            + '    print *,"Please check back with the author prior to using results in a publications."\n') % (data.meta.model_dimension, data.meta.model_name, data.meta.author, data.meta.email, ))
 
+        # TODO: finish init function
+        out.write('end subroutine init\n\n')
+        
 
-            
+        # TODO: subroutine do_kmc_step
+
+        # TODO: subroutine run_proc_nr
+
+        # TODO: atomistic updates
+
+        # TODO: maybe check_... function (as far as touchup functions rely on it)
+
+        for species in data.species_list:
+            for lattice in data.lattice_list:
+                for site in lattice.sites:
+                    for op in ['take','put']:
+                        # op = operation
+                        routine_name = '%s_%s_%s_%s' % (op, species.name, lattice.name, site.name)
+                        out.write('subroutine  %s(species, site)\n' % routine_name)
+                        out.write('end subroutine %s\n\n' % routine_name)
+
+        # TODO: subroutine touchup functions
+        for species in data.species_list:
+            for lattice in data.lattice_list:
+                for site in lattice.sites:
+                    routine_name = 'touchup_%s_%s_%s' % (species.name, lattice.name, site.name)
+                    out.write('subroutine  %s(species, site)\n' % routine_name)
+                    out.write('end subroutine %s\n\n' % routine_name)
+
+        # TODO: subroutine get_char fuctions, the crumpy part
             
         out.close()
         

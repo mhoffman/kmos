@@ -10,7 +10,7 @@ import os, os.path
 from app.config import *
 from app.models import *
 from app.forms import *
-from app.proclist_generator import ProcListWriter
+from app.proclist_generator import ProcListWriter as MLProcListWriter
 import shutil
 sys.path.append(APP_ABS_PATH)
 import pygtk
@@ -724,7 +724,7 @@ class KMC_Editor(GladeDelegate):
         else:
             # multi-lattice mode
             self.toast("Multi-lattice mode, not fully supported, yet!")
-            writer = ProcListWriter(self.project_tree, export_dir)
+            writer = MLProcListWriter(self.project_tree, export_dir)
             writer.write_proclist()
 
 
