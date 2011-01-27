@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 """The main part of the kmc gui project
 """
+# standard modules
 import optparse
 from ConfigParser import SafeConfigParser
+import sys
+import os, os.path
 # import own modules
 from app.config import *
 from app.models import *
 from app.forms import *
-import sys
-import os, os.path
+from app.proclist_generator import ProcListWriter
 import shutil
 sys.path.append(APP_ABS_PATH)
 import pygtk
@@ -721,9 +723,9 @@ class KMC_Editor(GladeDelegate):
             ProcListWriter(options)
         else:
             # multi-lattice mode
-            print("Multi-lattice mode, not fully supported, yet!")
-            self.write_proclist("%s/proclist.f90" % export_dir)
-            
+            self.toast("Multi-lattice mode, not fully supported, yet!")
+            writer = ProcListWriter(self.project_tree, export_dir)
+            writer.write_proclist()
 
 
         # return directory name
@@ -733,8 +735,6 @@ class KMC_Editor(GladeDelegate):
            'If this finished successfully you can run the simulation\n'+
            'by executing ./run_kmc.py')
 
-    def write_proclist(self, filename):
-        pass
 
     def validate_model(self):
         pass
