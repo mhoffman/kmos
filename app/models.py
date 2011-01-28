@@ -80,13 +80,13 @@ class Coord(Attributes):
     def __init__(self, **kwargs):
         if kwargs.has_key('string'):
             raw = kwargs['string'].split('.')
-            if len(raw) == 2 :
-                self.name = raw[0]
-                self.offset = eval(raw[1])
-                self.lattice = ''
-            elif len(raw) == 1 :
+            if len(raw) == 1 :
                 self.name = raw[0]
                 self.offset = [0, 0]
+                self.lattice = ''
+            elif len(raw) == 2 :
+                self.name = raw[0]
+                self.offset = eval(raw[1])
                 self.lattice = ''
             elif len(raw) == 3 :
                 self.name = raw[0]
