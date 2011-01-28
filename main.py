@@ -797,10 +797,9 @@ if __name__ == '__main__':
         editor.toast('Imported %s' % options.import_file)
     else:
         editor.add_defaults()
+        editor.saved_state = str(editor.project_tree)
     if hasattr(options, 'export_dir') and options.export_dir:
         print('Exporting right-away')
         editor.on_btn_export_src__clicked(button='', export_dir=options.export_dir)
         exit()
-    else:
-        editor.saved_state = str(editor.project_tree)
     editor.show_and_loop()
