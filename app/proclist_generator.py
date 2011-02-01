@@ -69,9 +69,26 @@ class ProcListWriter():
             for lattice in data.lattice_list:
                 for site in lattice.sites:
                     for op in ['take','put']:
+                        enabled_procs = []
+                        disabled_procs = []
                         # op = operation
                         routine_name = '%s_%s_%s_%s' % (op, species.name, lattice.name, site.name)
                         out.write('subroutine  %s(species, site)\n' % routine_name)
+                        for process in data.process_list:
+                            for condition in process.condition_list:
+                                if site.name == condition.coord.name:
+                                    if species == condition.species and op == 'put':
+                                        for condition2 in process.condition_list:
+                                            enabled_procs.append((process, condition2))
+                                    else:
+                                        disabled_procs.append(process, condition)
+                        for process, condition in disabled_procs:
+                            out.write('    if(.not.can_do(%(site)s, %(proc))then' % {'site':condition.site, 'proc':process.name})
+                            out.write('        call add_site(
+
+                                        
+                                        
+                                    
                         out.write('end subroutine %s\n\n' % routine_name)
 
         # TODO: subroutine touchup functions

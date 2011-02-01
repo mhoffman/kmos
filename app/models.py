@@ -28,7 +28,8 @@ class Attributes:
 class Site(Attributes):
     """A class holding exactly one lattice site
     """
-    attributes = ['index', 'name', 'site_x', 'site_y']
+    attributes = ['index', 'name', 'vector']
+    # vector is now a list of floats for the graphical representation
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
 
