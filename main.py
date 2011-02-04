@@ -34,6 +34,7 @@ import kiwi.ui.dialogs
 
 
 KMCPROJECT_DTD = '/kmc_project.dtd'
+MLKMCPROJECT_DTD = '/ml_kmc_project.dtd'
 PROCESSLIST_DTD = '/process_list.dtd'
 SRCDIR = './fortran_src'
 
@@ -121,7 +122,14 @@ class ProjectTree(SlaveDelegate):
         self.filename = filename
         xmlparser = ET.XMLParser(remove_comments=True)
         root = ET.parse(filename, parser=xmlparser).getroot()
-        dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_DTD)
+        if root.tag == 'ml_kmc':
+            self.ml = True
+        else:
+            self.ml = False
+        if self.ml:
+            dtd = ET.DTD(APP_ABS_PATH + MLKMCPROJECT_DTD)
+        else:
+            dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_DTD)
         if not dtd.validate(root):
             print(dtd.error_log.filter_from_errors()[0])
             return

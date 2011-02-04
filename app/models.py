@@ -28,13 +28,13 @@ class Attributes:
 class Site(Attributes):
     """A class holding exactly one lattice site
     """
-    attributes = ['index', 'name', 'vector']
+    attributes = ['index', 'name', 'vector','site_class']
     # vector is now a list of floats for the graphical representation
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
 
     def __repr__(self):
-        return '%s %s %s %s' % (self.name, self.index, self.site_x, self.site_y)
+        return '%s %s %s %s' % (self.name, self.index, self.vector, self.site_class)
 
 class Lattice(Attributes, CorrectlyNamed):
     """A class that defines exactly one lattice
