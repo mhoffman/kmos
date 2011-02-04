@@ -1,4 +1,4 @@
-<!ELEMENT ml_kmc (meta?,species_list?,parameter_list?,lattice_list?,process_list?,output_list?)>
+<!ELEMENT ml_kmc (meta?,species_list?,parameter_list?, lattice, process_list?,output_list?)>
   <!ELEMENT meta EMPTY>
   <!ATTLIST meta
     author CDATA #REQUIRED
@@ -24,7 +24,6 @@
     name CDATA #REQUIRED
     value CDATA #IMPLIED
   >
-  <!ELEMENT lattice_list (lattice)*>
   <!ELEMENT lattice (site)*>
   <!ATTLIST lattice
     name CDATA #REQUIRED
@@ -40,6 +39,7 @@
     vector CDATA #REQUIRED
     index CDATA #REQUIRED
     type CDATA #REQUIRED
+    lattice CDATA #REQUIRED
     class CDATA #IMPLIED
   >
   <!ELEMENT process_list (process)*>
