@@ -5,6 +5,7 @@
     debug CDATA #REQUIRED
     email CDATA #REQUIRED
     model_dimension CDATA #REQUIRED
+    unit_cell_size CDATA #REQUIRED
     model_name CDATA #REQUIRED
   >
 
@@ -24,10 +25,10 @@
     name CDATA #REQUIRED
     value CDATA #IMPLIED
   >
-  <!ELEMENT lattice (site)*>
-  <!ATTLIST lattice
+  <!ELEMENT lattice (layer)+>
+  <!ELEMENT layer (site)*>
+  <!ATTLIST layer 
     name CDATA #REQUIRED
-    unit_cell_size CDATA #REQUIRED
   >
   <!ELEMENT site_class_list (site_class)*>
   <!ELEMENT site_class EMPTY>
@@ -39,7 +40,7 @@
     vector CDATA #REQUIRED
     index CDATA #REQUIRED
     type CDATA #REQUIRED
-    lattice CDATA #REQUIRED
+    layer CDATA #REQUIRED
     class CDATA #IMPLIED
   >
   <!ELEMENT process_list (process)*>

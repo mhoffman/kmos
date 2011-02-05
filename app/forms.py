@@ -515,7 +515,7 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
                 ly = CanvasLine(self.grid_layer, 0 , i*(Y/y), X, i*(Y/y), bg=(0., 0., 0.))
             for i in range(x+1):
                 for j in range(y+1):
-                    r = 10
+                    r = 5
                     o = CanvasOval(self.site_layer, i*(X/x)-r, j*(Y/y)-r, i*(X/x)+r, j*(Y/y)+r, bg=(1., 1., 1.))
                     o.coord = i % x, (y-j) % y
                     o.connect('button-press-event', self.site_press_event)

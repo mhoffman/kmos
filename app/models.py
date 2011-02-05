@@ -36,31 +36,31 @@ class Site(Attributes):
     def __repr__(self):
         return '%s %s %s %s' % (self.name, self.index, self.vector, self.site_class)
 
-class Lattice(Attributes, CorrectlyNamed):
-    """A class that defines exactly one lattice
+class Layer(Attributes, CorrectlyNamed):
+    """A class that defines exactly one layer
     """
-    attributes = ['name', 'unit_cell_size_x', 'unit_cell_size_y', 'sites']
+    attributes = ['name', 'sites']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
         self.sites = []
         self.name = kwargs['name'] if 'name' in kwargs else ''
 
     def __repr__(self):
-        return "%s %s %s\n\n%s" % (self.name, self.unit_cell_size_x, self.unit_cell_size_y, self.sites)
+        return "%s %s %s\n\n%s" % (self.name, self.sites)
 
     def add_site(self, site):
-        """Add a new site to a lattice
+        """Add a new site to a layer
         """
         self.sites.append(site)
 
-    def get_coords(self, site):
-        """Return simple numerical representation of coordinates
-        """
-        local_site = filter(lambda x: x.name == site.coord.name, self.sites)[0]
-        local_coords = local_site.site_x, local_site.site_y
-        global_coords = site.coord.offset[0]*self.unit_cell_size_x, site.coord.offset[1]*self.unit_cell_size_y
-        coords = [ x + y for (x, y) in zip(global_coords, local_coords) ]
-        return coords
+    #def get_coords(self, site):
+        #"""Return simple numerical representation of coordinates
+        #"""
+        #local_site = filter(lambda x: x.name == site.coord.name, self.sites)[0]
+        #local_coords = local_site.site_x, local_site.site_y
+        #global_coords = site.coord.offset[0]*self.unit_cell_size_x, site.coord.offset[1]*self.unit_cell_size_y
+        #coords = [ x + y for (x, y) in zip(global_coords, local_coords) ]
+        #return coords
 
 
 class ConditionAction(Attributes):
@@ -77,21 +77,21 @@ class Coord(Attributes):
     """Class that hold exactly one coordinate as used in the description
     of a process
     """
-    attributes = ['offset', 'name', 'lattice']
+    attributes = ['offset', 'name', 'layer']
     def __init__(self, **kwargs):
         if kwargs.has_key('string'):
             raw = kwargs['string'].split('.')
             if len(raw) == 1 :
                 self.name = raw[0]
                 self.offset = [0, 0]
-                self.lattice = ''
+                self.layer = ''
             elif len(raw) == 2 :
                 self.name = raw[0]
                 self.offset = eval(raw[1])
-                self.lattice = ''
+                self.layer = ''
             elif len(raw) == 3 :
                 self.name = raw[0]
-                self.lattice = raw[2]
+                self.layer = raw[2]
                 if raw[1]:
                     self.offset = eval(raw[1])
                 else:
@@ -103,7 +103,7 @@ class Coord(Attributes):
             Attributes.__init__(self, **kwargs)
 
     def __repr__(self):
-        return '%s.%s.%s' % (self.name, tuple(self.offset), self.lattice)
+        return '%s.%s.%s' % (self.name, tuple(self.offset), self.layer)
 
     def __eq__(self, other):
         return str(self) == str(other)
@@ -149,11 +149,11 @@ class ParameterList(Settable):
         Settable.__init__(self, **kwargs)
 
 
-class LatticeList(Settable):
-    """A list of lattices
+class LayerList(Settable):
+    """A list of layers
     """
     def __init__(self, **kwargs):
-        kwargs['name'] = 'Lattices'
+        kwargs['name'] = 'Layers'
         Settable.__init__(self, **kwargs)
 
 

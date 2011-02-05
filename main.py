@@ -69,7 +69,7 @@ class ProjectTree(SlaveDelegate):
         self.project_data = ObjectTree([Column('name', data_type=str, sorted=True), Column('extra', data_type=str)])
         self.set_parent(parent)
         self.meta = self.project_data.append(None, Meta())
-        self.lattice_list_iter = self.project_data.append(None, LatticeList())
+        self.layer_list_iter = self.project_data.append(None, LayerList())
         self.parameter_list_iter = self.project_data.append(None, ParameterList())
         self.species_list_iter = self.project_data.append(None, SpeciesList())
         self.process_list_iter = self.project_data.append(None, ProcessList())
@@ -91,8 +91,8 @@ class ProjectTree(SlaveDelegate):
     def __getattr__(self, attr):
         if attr == 'species_list':
             return self.project_data.get_descendants(self.species_list_iter)
-        elif attr == 'lattice_list':
-            return self.project_data.get_descendants(self.lattice_list_iter)
+        elif attr == 'layer_list':
+            return self.project_data.get_descendants(self.layer_list_iter)
         elif attr == 'process_list':
             return self.project_data.get_descendants(self.process_list_iter)
         elif attr == 'parameter_list':
@@ -134,18 +134,18 @@ class ProjectTree(SlaveDelegate):
             print(dtd.error_log.filter_from_errors()[0])
             return
         for child in root:
-            if child.tag == 'lattice_list':
-                for lattice in child:
-                    name = lattice.attrib['name']
-                    size = [ int(x) for x in lattice.attrib['unit_cell_size'].split() ]
-                    lattice_elem = Lattice(name=name, unit_cell_size_x=size[0], unit_cell_size_y=size[1])
-                    for site in lattice:
+            if child.tag == 'layer_list':
+                for layer in child:
+                    name = layer.attrib['name']
+                    size = [ int(x) for x in layer.attrib['unit_cell_size'].split() ]
+                    layer_elem = Layer(name=name, )
+                    for site in layer:
                         index =  int(site.attrib['index'])
                         name = site.attrib['type']
                         coord = [ int(x) for x in site.attrib['coord'].split() ]
                         site_elem = Site(index=index, name=name, site_x=coord[0], site_y=coord[1])
-                        lattice_elem.add_site(site_elem)
-                    self.project_data.append(self.lattice_list_iter, lattice_elem)
+                        layer_elem.add_site(site_elem)
+                    self.project_data.append(self.layer_list_iter, layer_elem)
             elif child.tag == 'meta':
                 for attrib in ['author', 'email', 'debug', 'model_name', 'model_dimension']:
                     if child.attrib.has_key(attrib):
@@ -192,7 +192,7 @@ class ProjectTree(SlaveDelegate):
         """Expand all list of the project tree
         """
         self.project_data.expand(self.species_list_iter)
-        self.project_data.expand(self.lattice_list_iter)
+        self.project_data.expand(self.layer_list_iter)
         self.project_data.expand(self.parameter_list_iter)
         self.project_data.expand(self.process_list_iter)
 
@@ -344,7 +344,7 @@ class ProjectTree(SlaveDelegate):
             if(isinstance(selection, Species)
             or isinstance(selection, Process)
             or isinstance(selection, Parameter)
-            or isinstance(selection, Lattice)):
+            or isinstance(selection, Layer)):
                 if kiwi.ui.dialogs.yesno("Do you really want to delete '%s'?" % selection.name) == gtk.RESPONSE_YES:
                     self.project_data.remove(selection)
                 
@@ -357,9 +357,11 @@ class ProjectTree(SlaveDelegate):
         slave = self.get_parent().get_slave('workarea')
         if slave:
             self.get_parent().detach_slave('workarea')
-        if isinstance(elem, Lattice):
-            form = LatticeEditor(elem, self.project_data)
-            #kiwi.ui.dialogs.warning('Changing lattice retro-actively might break processes.\nYou have been warned.')
+        if isinstance(elem, Layer):
+            form = LayerEditor(elem, self.project_data)
+            #kiwi.ui.dialogs.warning('Changing layer retro-actively might break processes.\nYou have been warned.')
+            # TODO: check if there are any processes defined on this letter
+            # and block editing if so
             self.get_parent().attach_slave('workarea', form)
             form.on_unit_cell_ok_button__clicked(form.unit_cell_ok_button)
             form.focus_topmost()
@@ -483,17 +485,17 @@ class KMC_Editor(GladeDelegate):
         self.project_tree.show()
         self.toast('Start a new project by filling in meta information,\nlattice, species, parameters, and processes or open an existing one\nby opening a kMC XML file')
 
-    def on_btn_add_lattice__clicked(self, button):
-        """Add a new lattice to the model
+    def on_btn_add_layer__clicked(self, button):
+        """Add a new layer to the model
         """
-        new_lattice = Lattice()
-        self.project_tree.append(self.project_tree.lattice_list_iter, new_lattice)
-        lattice_form = LatticeEditor(new_lattice, self.project_tree)
-        self.project_tree.expand(self.project_tree.lattice_list_iter)
+        new_layer = Layer()
+        self.project_tree.append(self.project_tree.layer_list_iter, new_layer)
+        layer_form = LayerEditor(new_layer, self.project_tree)
+        self.project_tree.expand(self.project_tree.layer_list_iter)
         if self.get_slave('workarea'):
             self.detach_slave('workarea')
-        self.attach_slave('workarea', lattice_form)
-        lattice_form.focus_topmost()
+        self.attach_slave('workarea', layer_form)
+        layer_form.focus_topmost()
 
     def on_btn_add_species__clicked(self, button):
         """Add a new species to the model
@@ -512,8 +514,8 @@ class KMC_Editor(GladeDelegate):
     def on_btn_add_process__clicked(self, button):
         """Add a new process to the model
         """
-        if not self.project_tree.lattice_list:
-            self.toast("No lattice defined, yet!")
+        if not self.project_tree.layer_list:
+            self.toast("No layer defined, yet!")
             return
         new_process = Process(name='', rate_constant='')
         self.project_tree.append(self.project_tree.process_list_iter, new_process)
@@ -629,9 +631,10 @@ class KMC_Editor(GladeDelegate):
 
 
         # prepare lattice.f90 module
+        # Rewrite completely based on supercell+index nomenclature
         lattice_source = open(APP_ABS_PATH + '/lattice_template.f90').read()
         if len(self.project_tree.lattice_list)==0 :
-            self.toast("No lattice defined, yet. Cannot complete source code.")
+            self.toast("No layer defined, yet. Cannot complete source code.")
             return
         # more processing steps ...
         # species definition
@@ -644,23 +647,23 @@ class KMC_Editor(GladeDelegate):
         species_definition += '    %(species)s = %(id)s\n' % {'species':self.project_tree.species_list[-1].name, 'id':self.project_tree.species_list[-1].id}
         species_definition += 'character(len=800), dimension(%s) :: species_list\n' % len(self.project_tree.species_list)
         species_definition += 'integer(kind=iint), parameter :: nr_of_species = %s\n' % len(self.project_tree.species_list)
-        species_definition += 'integer(kind=iint), parameter :: nr_of_lattices = %s\n' % len(self.project_tree.lattice_list)
-        species_definition += 'character(len=800), dimension(%s) :: lattice_list\n' % len(self.project_tree.lattice_list)
-        list_nr_of_sites = ', '.join([ str(len(lattice.sites)) for lattice in self.project_tree.lattice_list ])
-        species_definition += 'integer(kind=iint), parameter, dimension(%s) :: nr_of_sites = (/%s/)\n' % (len(self.project_tree.lattice_list), list_nr_of_sites)
-        species_definition += 'character(len=800), dimension(%s, %s) :: site_list\n' % (len(self.project_tree.lattice_list), lattice.name)
+        species_definition += 'integer(kind=iint), parameter :: nr_of_layers = %s\n' % len(self.project_tree.layer_list)
+        species_definition += 'character(len=800), dimension(%s) :: layer_list\n' % len(self.project_tree.layer_list)
+        list_nr_of_sites = ', '.join([ str(len(layer.sites)) for layer in self.project_tree.layer_list ])
+        species_definition += 'integer(kind=iint), parameter, dimension(%s) :: nr_of_sites = (/%s/)\n' % (len(self.project_tree.layer_list), list_nr_of_sites)
+        species_definition += 'character(len=800), dimension(%s, %s) :: site_list\n' % (len(self.project_tree.layer_list), layer.name)
 
         # unit vector definition
-        unit_vector_definition = 'integer(kind=iint), dimension(2, 2) ::  lattice_matrix = reshape((/%(x)s, 0, 0, %(y)s/), (/2, 2/))' % {'x':lattice.unit_cell_size_x, 'y':lattice.unit_cell_size_y}
+        unit_vector_definition = 'integer(kind=iint), dimension(2, 2) ::  layer_matrix = reshape((/%(x)s, 0, 0, %(y)s/), (/2, 2/))' % {'x':layer.unit_cell_size_x, 'y':layer.unit_cell_size_y}
         # lookup table initialization
-        indexes = [ x.index for x in lattice.sites ]
+        indexes = [ x.index for x in layer.sites ]
         lookup_table_definition = ''
-        lattice_mapping_functions = ''
-        lattice_mapping_template = open(APP_ABS_PATH + '/lattice_mapping_template.f90').read()
-        for lattice_nr, lattice in enumerate(self.project_tree.lattice_list):
-            lattice_mapping_functions += lattice_mapping_template % {'lattice_name':lattice.name,
+        layer_mapping_functions = ''
+        layer_mapping_template = open(APP_ABS_PATH + '/lattice_mapping_template.f90').read()
+        for layer_nr, layer in enumerate(self.project_tree.layer_list):
+            layer_mapping_functions += layer_mapping_template % {'layer_name':layer.name,
             'sites_per_cell':max(indexes)-min(indexes)+1,}
-            lookup_table_init = 'integer(kind=iint), dimension(0:%(x)s, 0:%(y)s) :: lookup_%(lattice)s2nr\n' % {'x':lattice.unit_cell_size_x-1, 'y':lattice.unit_cell_size_y-1, 'lattice':lattice.name}
+            lookup_table_init = 'integer(kind=iint), dimension(0:%(x)s, 0:%(y)s) :: lookup_%(layer)s2nr\n' % {'x':lattice.unit_cell_size_x-1, 'y':lattice.unit_cell_size_y-1, 'lattice':lattice.name}
             lookup_table_init += 'integer(kind=iint), dimension(%(min)s:%(max)s, 2) :: lookup_nr2%(lattice)s\n' % {'min':min(indexes), 'max':max(indexes), 'lattice':lattice.name}
 
             # lookup table definition
