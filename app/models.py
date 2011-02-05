@@ -153,7 +153,7 @@ class LayerList(Settable):
     """A list of layers
     """
     def __init__(self, **kwargs):
-        kwargs['name'] = 'Layers'
+        kwargs['name'] = 'Lattice(s)'
         Settable.__init__(self, **kwargs)
 
 

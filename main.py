@@ -297,13 +297,13 @@ class ProjectTree(SlaveDelegate):
             parameter_elem.set('name', parameter.name)
             parameter_elem.set('value', str(parameter.value))
         lattice_list = ET.SubElement(root, 'lattice_list')
-        for lattice in self.lattice_list:
-            lattice_elem = ET.SubElement(lattice_list, 'lattice')
-            size = [lattice.unit_cell_size_x, lattice.unit_cell_size_y ]
-            lattice_elem.set('unit_cell_size', str(size)[1 :-1].replace(',', ''))
-            lattice_elem.set('name', lattice.name)
-            for site in lattice.sites:
-                site_elem = ET.SubElement(lattice_elem, 'site')
+        for layer in self.layer_list:
+            layer_elem = ET.SubElement(layer_list, 'layer')
+            size = [layer.unit_cell_size_x, layer.unit_cell_size_y ]
+            layer_elem.set('unit_cell_size', str(size)[1 :-1].replace(',', ''))
+            layer_elem.set('name', layer.name)
+            for site in layer.sites:
+                site_elem = ET.SubElement(layer_elem, 'site')
                 site_elem.set('index', str(site.index))
                 site_elem.set('type', site.name)
                 site_elem.set('coord', '%s %s' % (site.site_x, site.site_y))

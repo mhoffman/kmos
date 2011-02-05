@@ -105,9 +105,10 @@
             </widget>
         </child>
     </widget>
-    <widget class="GtkWindow" id="lattice_form">
+    <widget class="GtkWindow" id="layer_form">
         <property name="default_height">250</property>
         <property name="default_width">440</property>
+        <property name="mnemonics_visible">False</property>
         <child>
             <widget class="GtkVBox" id="vbox14">
                 <property name="visible">True</property>
@@ -127,46 +128,13 @@
                         <child>
                             <widget class="ProxyEntry" id="lattice_name">
                                 <property name="data_type">str</property>
+                                <property name="invisible_char">●</property>
                                 <property name="is_focus">True</property>
                                 <property name="model_attribute">name</property>
                                 <property name="visible">True</property>
                             </widget>
                             <packing>
                                 <property name="position">1</property>
-                            </packing>
-                        </child>
-                        <child>
-                            <widget class="GtkLabel" id="label15">
-                                <property name="label" context="yes" translatable="yes">Size:</property>
-                                <property name="visible">True</property>
-                                <property name="xalign">0.89999998</property>
-                            </widget>
-                            <packing>
-                                <property name="position">2</property>
-                            </packing>
-                        </child>
-                        <child>
-                            <widget class="ProxySpinButton" id="unit_x">
-                                <property name="adjustment">1 1 100 1 10 0</property>
-                                <property name="data_type">int</property>
-                                <property name="model_attribute">unit_cell_size_x</property>
-                                <property name="text" context="yes" translatable="yes">1</property>
-                                <property name="visible">True</property>
-                            </widget>
-                            <packing>
-                                <property name="position">3</property>
-                            </packing>
-                        </child>
-                        <child>
-                            <widget class="ProxySpinButton" id="unit_y">
-                                <property name="adjustment">1 1 100 1 10 0</property>
-                                <property name="data_type">int</property>
-                                <property name="model_attribute">unit_cell_size_y</property>
-                                <property name="text" context="yes" translatable="yes">1</property>
-                                <property name="visible">True</property>
-                            </widget>
-                            <packing>
-                                <property name="position">4</property>
                             </packing>
                         </child>
                         <child>
@@ -177,7 +145,7 @@
                                 <property name="visible">True</property>
                             </widget>
                             <packing>
-                                <property name="position">5</property>
+                                <property name="position">2</property>
                             </packing>
                         </child>
                     </widget>
@@ -200,6 +168,7 @@
         </child>
     </widget>
     <widget class="GtkWindow" id="main_window">
+        <property name="mnemonics_visible">False</property>
         <child>
             <widget class="GtkVBox" id="vbox1">
                 <property name="visible">True</property>
@@ -232,7 +201,8 @@
                                     </packing>
                                 </child>
                                 <child>
-                                    <widget class="GtkButton" id="btn_add_lattice">
+                                    <widget class="GtkButton" id="btn_add_layer">
+                                        <property name="is_focus">True</property>
                                         <property name="label" context="yes" translatable="yes">Add Lattice</property>
                                         <property name="visible">True</property>
                                     </widget>
@@ -521,7 +491,6 @@
                                 <child>
                                     <widget class="ProxyEntry" id="author">
                                         <property name="data_type">str</property>
-                                        <property name="invisible_char">●</property>
                                         <property name="is_focus">True</property>
                                         <property name="model_attribute">author</property>
                                         <property name="visible">True</property>
@@ -530,7 +499,6 @@
                                 <child>
                                     <widget class="ProxyEntry" id="email">
                                         <property name="data_type">str</property>
-                                        <property name="invisible_char">●</property>
                                         <property name="model_attribute">email</property>
                                         <property name="visible">True</property>
                                     </widget>
@@ -541,7 +509,6 @@
                                 <child>
                                     <widget class="ProxyEntry" id="model_name">
                                         <property name="data_type">str</property>
-                                        <property name="invisible_char">●</property>
                                         <property name="model_attribute">model_name</property>
                                         <property name="visible">True</property>
                                     </widget>
@@ -579,7 +546,8 @@
                                         <child>
                                             <widget class="ProxyEntry" id="cell_size_x">
                                                 <property name="data_type">Decimal</property>
-                                                <property name="invisible_char">●</property>
+                                                <property name="invisible_char">*</property>
+                                                <property name="invisible_char_set">True</property>
                                                 <property name="is_focus">True</property>
                                                 <property name="model_attribute">cell_size_x</property>
                                                 <property name="visible">True</property>
@@ -594,7 +562,8 @@
                                         <child>
                                             <widget class="ProxyEntry" id="cell_size_y">
                                                 <property name="data_type">Decimal</property>
-                                                <property name="invisible_char">●</property>
+                                                <property name="invisible_char">*</property>
+                                                <property name="invisible_char_set">True</property>
                                                 <property name="model_attribute">cell_size_y</property>
                                                 <property name="visible">True</property>
                                                 <property name="width_request">70</property>
@@ -609,7 +578,8 @@
                                         <child>
                                             <widget class="ProxyEntry" id="cell_size_z">
                                                 <property name="data_type">Decimal</property>
-                                                <property name="invisible_char">●</property>
+                                                <property name="invisible_char">*</property>
+                                                <property name="invisible_char_set">True</property>
                                                 <property name="model_attribute">cell_size_z</property>
                                                 <property name="visible">True</property>
                                                 <property name="width_request">70</property>

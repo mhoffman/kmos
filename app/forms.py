@@ -478,12 +478,12 @@ class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
         self.project_tree.update(self.model)
 
 
-class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
+class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
     """Widget to define a lattice and the unit cell
     """
     gladefile = GLADEFILE
-    toplevel_name = 'lattice_form'
-    widgets = ['lattice_name', 'unit_x', 'unit_y']
+    toplevel_name = 'layer_form'
+    widgets = ['layer_name', ]
     def __init__(self, lattice, project_tree):
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, lattice)
@@ -537,6 +537,25 @@ class LatticeEditor(ProxySlaveDelegate, CorrectlyNamed):
 
             self.canvas.redraw()
             self.canvas.hide()
+
+    def on_cell_size_x__validate(self, wdidget, size):
+        try:
+            float(size)
+        except:
+            ValidationError('Cannot be converted to float')
+
+    def on_cell_size_y__validate(self, wdidget, size):
+        try:
+            float(size)
+        except:
+            ValidationError('Cannot be converted to float')
+
+    def on_cell_size_z__validate(self, wdidget, size):
+        try:
+            float(size)
+        except:
+            ValidationError('Cannot be converted to float')
+
 
     def on_lattice_name__validate(self, widget, lattice_name):
         # TODO: validate lattice name to be unique
