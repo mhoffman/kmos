@@ -296,11 +296,9 @@ class ProjectTree(SlaveDelegate):
             parameter_elem = ET.SubElement(parameter_list, 'parameter')
             parameter_elem.set('name', parameter.name)
             parameter_elem.set('value', str(parameter.value))
-        lattice_list = ET.SubElement(root, 'lattice_list')
+        layer_list = ET.SubElement(root, 'layer_list')
         for layer in self.layer_list:
             layer_elem = ET.SubElement(layer_list, 'layer')
-            size = [layer.unit_cell_size_x, layer.unit_cell_size_y ]
-            layer_elem.set('unit_cell_size', str(size)[1 :-1].replace(',', ''))
             layer_elem.set('name', layer.name)
             for site in layer.sites:
                 site_elem = ET.SubElement(layer_elem, 'site')
@@ -359,11 +357,9 @@ class ProjectTree(SlaveDelegate):
             self.get_parent().detach_slave('workarea')
         if isinstance(elem, Layer):
             form = LayerEditor(elem, self.project_data)
-            #kiwi.ui.dialogs.warning('Changing layer retro-actively might break processes.\nYou have been warned.')
             # TODO: check if there are any processes defined on this letter
             # and block editing if so
             self.get_parent().attach_slave('workarea', form)
-            form.on_unit_cell_ok_button__clicked(form.unit_cell_ok_button)
             form.focus_topmost()
         elif isinstance(elem, Meta):
             meta_form = MetaForm(self.meta)
@@ -423,13 +419,18 @@ class KMC_Editor(GladeDelegate):
         """
         # add dimension
         self.project_tree.meta.add({'model_dimension':'2'})
+
+        # add layer
+        default_layer = Layer(name='default',)
+        self.project_tree.append(self.project_tree.layer_list_iter, default_layer)
+        
         # add an empty species
         empty = Species(name='empty', color='#fff', id='0')
         # set empty as default species
         self.project_tree.species_list_iter.default_species = 'empty'
         self.project_tree.append(self.project_tree.species_list_iter, empty)
         # add standard parameter
-        param = Parameter(name='lattice_size', value='40 40')
+        param = Parameter(name='lattice_size', value='40 40 1')
         self.project_tree.append(self.project_tree.parameter_list_iter, param)
 
         param = Parameter(name='print_every', value='1.e5')

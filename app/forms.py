@@ -1,5 +1,8 @@
+import pdb
 #!/usr/bin/env python
+# Standard library imports
 import re
+import copy
 #gtk import
 import pygtk
 pygtk.require('2.0')
@@ -33,7 +36,7 @@ def parse_chemical_equation(eq, process, project_tree):
     """Evaluates a chemical equation 'eq' and adds
     conditions and actions accordingly
     """
-    if len(project_tree.lattice_list) > 1 :
+    if len(project_tree.layer_list) > 1 :
         multi_lattice = True
     # remove spaces
     eq = re.sub(' ', '', eq)
@@ -76,9 +79,9 @@ def parse_chemical_equation(eq, process, project_tree):
         if not filter(lambda x: x.name == term[0], project_tree.species_list):
             raise UserWarning('Species %s unknown ' % term[0])
         if multi_lattice:
-            lattice = filter(lambda x: x.name == term[1].split('.')[2], project_tree.lattice_list)
+            lattice = filter(lambda x: x.name == term[1].split('.')[2], project_tree.layer_list)
             if not lattice:
-                raise UserWarning('Lattice %s is unknown.!' % lattice_name)
+                raise UserWarning('Lattice %s is unknown.!' % layer_name)
             elif len(lattice) > 1 :
                 raise UserWarning('Error: There is  more than lattice named %s.' % lattice[0].name)
             else:
@@ -87,7 +90,7 @@ def parse_chemical_equation(eq, process, project_tree):
                 if not filter(lambda x: x.name == site_name, lattice.sites):
                     raise UserWarning('Site %s is unknown for lattice %s' % (site_name, lattice.name))
         else:
-            if not filter(lambda x: x.name == term[1].split('.')[0], project_tree.lattice_list[0].sites):
+            if not filter(lambda x: x.name == term[1].split('.')[0], project_tree.layer_list[0].sites):
                 raise UserWarning('Site %s unknown' % term[1])
 
     condition_list = []
@@ -219,7 +222,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             CanvasLine(self.lattice_layer, i*(self.l/self.z), 0, i*(self.l/self.z), 500, line_width=1, fg=(.6, .6, .6))
         for i in range(self.z+1):
             for j in range(self.z+1):
-                for lattice in self.project_tree.lattice_list:
+                for lattice in self.project_tree.layer_list:
                     for site in lattice.sites:
                         if i == self.X and j == self.Y:
                             l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=(1., 1., 1.))
@@ -472,21 +475,44 @@ class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
         ProxySlaveDelegate.__init__(self, model)
         self.id.set_sensitive(False)
         self.name.grab_focus()
-        self.default_species
 
     def on_name__content_changed(self, text):
         self.project_tree.update(self.model)
 
 
+class GridForm(ProxyDelegate):
+    gladefile = GLADEFILE
+    toplevel_name = 'grid_form'
+    widgets = ['grid_x', 'grid_y', 'grid_z', 'grid_offset_x', 'grid_offset_y', 'grid_offset_z']
+    def __init__(self, grid, project_tree):
+        self.old_grid = copy.copy(grid)
+        self.project_tree = project_tree
+        ProxyDelegate.__init__(self, grid)
+        if self.project_tree.meta.model_dimension < 3:
+            self.grid_z.hide()
+            self.grid_offset_z.hide()
+        elif self.project_tree.meta.model_dimension < 2:
+            self.grid_y.hide()
+            self.grid_offset_y.hide()
+            
+
+    def on_grid_form_ok__clicked(self, button):
+        self.hide()
+
+    def on_grid_form_cancel__clicked(self, button):
+        self.parent.layer.grid = self.old_grid
+        self.hide()
+
+        
 class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
     """Widget to define a lattice and the unit cell
     """
     gladefile = GLADEFILE
     toplevel_name = 'layer_form'
     widgets = ['layer_name', ]
-    def __init__(self, lattice, project_tree):
+    def __init__(self, model, project_tree):
         self.project_tree = project_tree
-        ProxySlaveDelegate.__init__(self, lattice)
+        ProxySlaveDelegate.__init__(self, model)
         self.canvas = Canvas()
         self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
         self.canvas.grab_focus()
@@ -496,77 +522,48 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.canvas.append(self.site_layer)
         self.lattice_pad.add(self.canvas)
 
-        self.unit_cell_ok_button.set_sensitive(False)
-        self.on_lattice_name__content_changed(self.lattice_name)
-
-    def on_unit_cell_ok_button__clicked(self, button):
-        if button.get_label() == 'gtk-ok':
-            X, Y = 400, 400
-            button.set_label('Reset')
-            button.set_tooltip_text('Delete all sites and start anew')
-            x = self.unit_x.get_value_as_int()
-            y = self.unit_y.get_value_as_int()
-            self.unit_x.set_sensitive(False)
-            self.unit_y.set_sensitive(False)
-            self.canvas.show()
-            for i in range(x+1):
-                lx = CanvasLine(self.grid_layer,  i*(X/x), 0, i*(X/x), Y, bg=(0., 0., 0.))
-            for i in range(y+1):
-                ly = CanvasLine(self.grid_layer, 0 , i*(Y/y), X, i*(Y/y), bg=(0., 0., 0.))
-            for i in range(x+1):
-                for j in range(y+1):
-                    r = 5
-                    o = CanvasOval(self.site_layer, i*(X/x)-r, j*(Y/y)-r, i*(X/x)+r, j*(Y/y)+r, bg=(1., 1., 1.))
-                    o.coord = i % x, (y-j) % y
-                    o.connect('button-press-event', self.site_press_event)
-                    for node in self.model.sites:
-                        if node.site_x == o.coord[0] and node.site_y == o.coord[1]:
-                            o.filled = True
-
-            self.canvas.move_all(50, 50)
-        elif button.get_label()=='Reset':
-            while self.site_layer:
-                self.site_layer.pop()
-            while self.grid_layer:
-                self.grid_layer.pop()
-            button.set_label('gtk-ok')
-            button.set_tooltip_text('Add sites')
-            self.model.sites = []
-            self.unit_x.set_sensitive(True)
-            self.unit_y.set_sensitive(True)
-
-            self.canvas.redraw()
-            self.canvas.hide()
-
-    def on_cell_size_x__validate(self, wdidget, size):
-        try:
-            float(size)
-        except:
-            ValidationError('Cannot be converted to float')
-
-    def on_cell_size_y__validate(self, wdidget, size):
-        try:
-            float(size)
-        except:
-            ValidationError('Cannot be converted to float')
-
-    def on_cell_size_z__validate(self, wdidget, size):
-        try:
-            float(size)
-        except:
-            ValidationError('Cannot be converted to float')
+        X, Y = 400, 400
+        self.canvas.show()
+            #for i in range(x+1):
+                #lx = CanvasLine(self.grid_layer,  i*(X/x), 0, i*(X/x), Y, bg=(0., 0., 0.))
+            #for i in range(y+1):
+                #ly = CanvasLine(self.grid_layer, 0 , i*(Y/y), X, i*(Y/y), bg=(0., 0., 0.))
+            #for i in range(x+1):
+                #for j in range(y+1):
+                    #r = 5
+                    #o = CanvasOval(self.site_layer, i*(X/x)-r, j*(Y/y)-r, i*(X/x)+r, j*(Y/y)+r, bg=(1., 1., 1.))
+                    #o.coord = i % x, (y-j) % y
+                    #o.connect('button-press-event', self.site_press_event)
+                    #for node in self.model.sites:
+                        #if node.site_x == o.coord[0] and node.site_y == o.coord[1]:
+                            #o.filled = True
+#
+            #self.canvas.move_all(50, 50)
+        #elif button.get_label()=='Reset':
+            #while self.site_layer:
+                #self.site_layer.pop()
+            #while self.grid_layer:
+                #self.grid_layer.pop()
+            #button.set_label('gtk-ok')
+            #button.set_tooltip_text('Add sites')
+            #self.model.sites = []
+            #self.unit_x.set_sensitive(True)
+            #self.unit_y.set_sensitive(True)
+#
+            #self.canvas.redraw()
+            #self.canvas.hide()
 
 
-    def on_lattice_name__validate(self, widget, lattice_name):
+    def on_set_grid_button__clicked(self, button):
+        grid_form = GridForm(self.model.grid, self.project_tree)
+        grid_form.show()
+
+    def on_layer_name__validate(self, widget, layer_name):
         # TODO: validate lattice name to be unique
-        return self.on_name__validate(widget, lattice_name)
+        return self.on_name__validate(widget, layer_name)
 
-    def on_lattice_name__content_changed(self, widget):
+    def on_layer_name__content_changed(self, widget):
         self.project_tree.update(self.model)
-        if  widget.get_text_length() == 0 :
-            self.unit_cell_ok_button.set_sensitive(False)
-        else:
-            self.unit_cell_ok_button.set_sensitive(True)
 
     def site_press_event(self, widget, item, event):
         if item.filled:

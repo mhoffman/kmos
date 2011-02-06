@@ -36,17 +36,28 @@ class Site(Attributes):
     def __repr__(self):
         return '%s %s %s %s' % (self.name, self.index, self.vector, self.site_class)
 
+class Grid(Attributes):
+    attributes = ['grid_x','grid_y','grid_z','grid_offset_x','grid_offset_y','grid_offset_z',]
+    def __init__(self, **kwargs):
+        self.grid_x = 1
+        self.grid_y = 1
+        self.grid_z = 1
+        self.grid_offset_x = 0.
+        self.grid_offset_y = 0.
+        self.grid_offset_z = 0.
+        
 class Layer(Attributes, CorrectlyNamed):
     """A class that defines exactly one layer
     """
-    attributes = ['name', 'sites']
+    attributes = ['name', 'sites', 'grid']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
         self.sites = []
+        self.grid = Grid()
         self.name = kwargs['name'] if 'name' in kwargs else ''
 
     def __repr__(self):
-        return "%s %s %s\n\n%s" % (self.name, self.sites)
+        return "%s\n\n%s" % (self.name, self.sites)
 
     def add_site(self, site):
         """Add a new site to a layer

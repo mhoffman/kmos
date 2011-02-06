@@ -4,6 +4,7 @@
     <widget class="GtkWindow" id="batch_process_form">
         <property name="default_height">250</property>
         <property name="default_width">440</property>
+        <property name="mnemonics_visible">False</property>
         <child>
             <widget class="GtkVBox" id="vbox19">
                 <property name="visible">True</property>
@@ -74,6 +75,209 @@
             </widget>
         </child>
     </widget>
+    <widget class="GtkWindow" id="grid_form">
+        <property name="default_height">250</property>
+        <property name="default_width">440</property>
+        <property name="mnemonics_visible">False</property>
+        <child>
+            <widget class="GtkHBox" id="hbox18">
+                <property name="visible">True</property>
+                <child>
+                    <widget class="GtkVBox" id="vbox20">
+                        <property name="visible">True</property>
+                        <child>
+                            <widget class="GtkVBox" id="vbox21">
+                                <property name="visible">True</property>
+                                <child>
+                                    <widget class="GtkHBox" id="hbox19">
+                                        <property name="visible">True</property>
+                                        <child>
+                                            <widget class="GtkLabel" id="label15">
+                                                <property name="label" context="yes" translatable="yes">Grid:</property>
+                                                <property name="visible">True</property>
+                                                <property name="xalign">0.0</property>
+                                            </widget>
+                                        </child>
+                                        <child>
+                                            <widget class="ProxySpinButton" id="grid_x">
+                                                <property name="adjustment">1 1 100 1 10 0</property>
+                                                <property name="data_type">int</property>
+                                                <property name="invisible_char">*</property>
+                                                <property name="invisible_char_set">True</property>
+                                                <property name="is_focus">True</property>
+                                                <property name="model_attribute">grid_x</property>
+                                                <property name="text" context="yes" translatable="yes">1</property>
+                                                <property name="visible">True</property>
+                                            </widget>
+                                            <packing>
+                                                <property name="expand">False</property>
+                                                <property name="position">1</property>
+                                            </packing>
+                                        </child>
+                                        <child>
+                                            <widget class="ProxySpinButton" id="grid_y">
+                                                <property name="adjustment">1 1 100 1 10 0</property>
+                                                <property name="data_type">int</property>
+                                                <property name="invisible_char">*</property>
+                                                <property name="invisible_char_set">True</property>
+                                                <property name="model_attribute">grid_y</property>
+                                                <property name="text" context="yes" translatable="yes">1</property>
+                                                <property name="visible">True</property>
+                                            </widget>
+                                            <packing>
+                                                <property name="expand">False</property>
+                                                <property name="position">2</property>
+                                            </packing>
+                                        </child>
+                                        <child>
+                                            <widget class="ProxySpinButton" id="grid_z">
+                                                <property name="adjustment">1 0 100 1 10 0</property>
+                                                <property name="data_type">int</property>
+                                                <property name="invisible_char">*</property>
+                                                <property name="invisible_char_set">True</property>
+                                                <property name="model_attribute">grid_z</property>
+                                                <property name="text" context="yes" translatable="yes">1</property>
+                                                <property name="visible">True</property>
+                                            </widget>
+                                            <packing>
+                                                <property name="expand">False</property>
+                                                <property name="position">3</property>
+                                            </packing>
+                                        </child>
+                                        <child>
+                                            <placeholder/>
+                                            <packing>
+                                                <property name="position">4</property>
+                                            </packing>
+                                        </child>
+                                    </widget>
+                                    <packing>
+                                        <property name="expand">False</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <widget class="GtkHBox" id="hbox20">
+                                        <property name="visible">True</property>
+                                        <child>
+                                            <widget class="GtkLabel" id="label23">
+                                                <property name="label" context="yes" translatable="yes">Offset:</property>
+                                                <property name="visible">True</property>
+                                                <property name="xalign">0.0</property>
+                                            </widget>
+                                        </child>
+                                        <child>
+                                            <widget class="ProxySpinButton" id="grid_offset_x">
+                                                <property name="adjustment">0 0 1 0 10 0</property>
+                                                <property name="data_type">float</property>
+                                                <property name="digits">5</property>
+                                                <property name="invisible_char">*</property>
+                                                <property name="invisible_char_set">True</property>
+                                                <property name="is_focus">True</property>
+                                                <property name="model_attribute">grid_offset_x</property>
+                                                <property name="text" context="yes" translatable="yes">0.00000</property>
+                                                <property name="visible">True</property>
+                                            </widget>
+                                            <packing>
+                                                <property name="expand">False</property>
+                                                <property name="position">1</property>
+                                            </packing>
+                                        </child>
+                                        <child>
+                                            <widget class="ProxySpinButton" id="grid_offset_y">
+                                                <property name="adjustment">0 0 1 0 10 0</property>
+                                                <property name="data_type">float</property>
+                                                <property name="digits">5</property>
+                                                <property name="invisible_char">*</property>
+                                                <property name="invisible_char_set">True</property>
+                                                <property name="model_attribute">grid_offset_y</property>
+                                                <property name="text" context="yes" translatable="yes">0.00000</property>
+                                                <property name="visible">True</property>
+                                            </widget>
+                                            <packing>
+                                                <property name="expand">False</property>
+                                                <property name="position">2</property>
+                                            </packing>
+                                        </child>
+                                        <child>
+                                            <widget class="ProxySpinButton" id="grid_offset_z">
+                                                <property name="adjustment">0 0 1 0 10 0</property>
+                                                <property name="data_type">float</property>
+                                                <property name="digits">5</property>
+                                                <property name="invisible_char">*</property>
+                                                <property name="invisible_char_set">True</property>
+                                                <property name="is_focus">True</property>
+                                                <property name="model_attribute">grid_offset_z</property>
+                                                <property name="text" context="yes" translatable="yes">0.00000</property>
+                                                <property name="visible">True</property>
+                                            </widget>
+                                            <packing>
+                                                <property name="expand">False</property>
+                                                <property name="position">3</property>
+                                            </packing>
+                                        </child>
+                                        <child>
+                                            <placeholder/>
+                                            <packing>
+                                                <property name="position">4</property>
+                                            </packing>
+                                        </child>
+                                    </widget>
+                                    <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">1</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <widget class="GtkHBox" id="hbox21">
+                                        <property name="visible">True</property>
+                                        <child>
+                                            <placeholder/>
+                                            <packing/>
+                                        </child>
+                                        <child>
+                                            <widget class="GtkButton" id="grid_form_cancel">
+                                                <property name="label">gtk-cancel</property>
+                                                <property name="use_stock">True</property>
+                                                <property name="visible">True</property>
+                                            </widget>
+                                            <packing>
+                                                <property name="expand">False</property>
+                                                <property name="fill">False</property>
+                                                <property name="position">1</property>
+                                            </packing>
+                                        </child>
+                                        <child>
+                                            <widget class="GtkButton" id="grid_form_ok">
+                                                <property name="is_focus">True</property>
+                                                <property name="label">gtk-ok</property>
+                                                <property name="use_stock">True</property>
+                                                <property name="visible">True</property>
+                                            </widget>
+                                            <packing>
+                                                <property name="expand">False</property>
+                                                <property name="fill">False</property>
+                                                <property name="position">2</property>
+                                            </packing>
+                                        </child>
+                                    </widget>
+                                    <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">2</property>
+                                    </packing>
+                                </child>
+                            </widget>
+                            <packing>
+                                <property name="padding">20</property>
+                            </packing>
+                        </child>
+                    </widget>
+                    <packing>
+                        <property name="padding">20</property>
+                    </packing>
+                </child>
+            </widget>
+        </child>
+    </widget>
     <widget class="GtkWindow" id="inline_message">
         <property name="border_width">20</property>
         <child>
@@ -126,11 +330,12 @@
                             </packing>
                         </child>
                         <child>
-                            <widget class="ProxyEntry" id="lattice_name">
+                            <widget class="ProxyEntry" id="layer_name">
                                 <property name="data_type">str</property>
-                                <property name="invisible_char">●</property>
+                                <property name="invisible_char">*</property>
+                                <property name="invisible_char_set">True</property>
                                 <property name="is_focus">True</property>
-                                <property name="model_attribute">name</property>
+                                <property name="model_attribute">layer_name</property>
                                 <property name="visible">True</property>
                             </widget>
                             <packing>
@@ -138,10 +343,10 @@
                             </packing>
                         </child>
                         <child>
-                            <widget class="GtkButton" id="unit_cell_ok_button">
+                            <widget class="GtkButton" id="set_grid_button">
                                 <property name="is_focus">True</property>
-                                <property name="label">gtk-ok</property>
-                                <property name="use_stock">True</property>
+                                <property name="label" context="yes" translatable="yes">Set  Grid</property>
+                                <property name="relief">half</property>
                                 <property name="visible">True</property>
                             </widget>
                             <packing>
@@ -615,6 +820,7 @@
     <widget class="GtkWindow" id="output_form">
         <property name="default_height">250</property>
         <property name="default_width">440</property>
+        <property name="mnemonics_visible">False</property>
         <child>
             <widget class="GtkVBox" id="vbox18">
                 <property name="visible">True</property>
@@ -654,6 +860,7 @@
     <widget class="GtkWindow" id="parameter_form">
         <property name="default_height">250</property>
         <property name="default_width">440</property>
+        <property name="mnemonics_visible">False</property>
         <child>
             <widget class="GtkHBox" id="hbox9">
                 <property name="visible">True</property>
@@ -698,7 +905,9 @@
                                         <child>
                                             <widget class="ProxyEntry" id="parameter_name">
                                                 <property name="data_type">str</property>
-                                                <property name="model_attribute">name</property>
+                                                <property name="invisible_char">*</property>
+                                                <property name="invisible_char_set">True</property>
+                                                <property name="model_attribute">parameter_name</property>
                                                 <property name="visible">True</property>
                                             </widget>
                                             <packing>
@@ -708,6 +917,9 @@
                                         <child>
                                             <widget class="ProxyEntry" id="value">
                                                 <property name="data_type">str</property>
+                                                <property name="invisible_char">*</property>
+                                                <property name="invisible_char_set">True</property>
+                                                <property name="is_focus">True</property>
                                                 <property name="model_attribute">value</property>
                                                 <property name="visible">True</property>
                                             </widget>
@@ -852,6 +1064,7 @@
     <widget class="GtkDialog" id="site_form">
         <property name="default_height">260</property>
         <property name="default_width">320</property>
+        <property name="mnemonics_visible">False</property>
         <property name="type_hint">normal</property>
         <child internal-child="vbox">
             <widget class="GtkVBox" id="dialog1-vbox">
@@ -906,24 +1119,46 @@
                                     <widget class="GtkHBox" id="hbox12">
                                         <property name="visible">True</property>
                                         <child>
-                                            <widget class="ProxySpinButton" id="site_x">
+                                            <widget class="ProxySpinButton" id="sitevect_x">
                                                 <property name="adjustment">0 0 100 1 10 0</property>
                                                 <property name="data_type">int</property>
-                                                <property name="model_attribute">site_x</property>
-                                                <property name="text" context="yes" translatable="yes">0</property>
+                                                <property name="digits">5</property>
+                                                <property name="invisible_char">*</property>
+                                                <property name="invisible_char_set">True</property>
+                                                <property name="is_focus">True</property>
+                                                <property name="model_attribute">sitevect_x</property>
+                                                <property name="text" context="yes" translatable="yes">0.00000</property>
                                                 <property name="visible">True</property>
                                             </widget>
                                         </child>
                                         <child>
-                                            <widget class="ProxySpinButton" id="site_y">
+                                            <widget class="ProxySpinButton" id="sitevect_y">
                                                 <property name="adjustment">0 0 100 1 10 0</property>
                                                 <property name="data_type">int</property>
-                                                <property name="model_attribute">site_y</property>
-                                                <property name="text" context="yes" translatable="yes">0</property>
+                                                <property name="digits">5</property>
+                                                <property name="invisible_char">*</property>
+                                                <property name="invisible_char_set">True</property>
+                                                <property name="model_attribute">sitevect_y</property>
+                                                <property name="text" context="yes" translatable="yes">0.00000</property>
                                                 <property name="visible">True</property>
                                             </widget>
                                             <packing>
                                                 <property name="position">1</property>
+                                            </packing>
+                                        </child>
+                                        <child>
+                                            <widget class="ProxySpinButton" id="sitevect_z">
+                                                <property name="adjustment">0 0 100 1 10 0</property>
+                                                <property name="data_type">int</property>
+                                                <property name="digits">5</property>
+                                                <property name="invisible_char">*</property>
+                                                <property name="invisible_char_set">True</property>
+                                                <property name="model_attribute">sitevect_z</property>
+                                                <property name="text" context="yes" translatable="yes">0.00000</property>
+                                                <property name="visible">True</property>
+                                            </widget>
+                                            <packing>
+                                                <property name="position">2</property>
                                             </packing>
                                         </child>
                                     </widget>
@@ -998,6 +1233,7 @@
     <widget class="GtkWindow" id="species_form">
         <property name="default_height">250</property>
         <property name="default_width">440</property>
+        <property name="mnemonics_visible">False</property>
         <child>
             <widget class="GtkVBox" id="vbox5">
                 <property name="visible">True</property>
@@ -1047,6 +1283,9 @@
                                 <child>
                                     <widget class="ProxyEntry" id="name">
                                         <property name="data_type">str</property>
+                                        <property name="invisible_char">*</property>
+                                        <property name="invisible_char_set">True</property>
+                                        <property name="is_focus">True</property>
                                         <property name="model_attribute">name</property>
                                         <property name="visible">True</property>
                                     </widget>
@@ -1064,6 +1303,8 @@
                                 <child>
                                     <widget class="ProxyEntry" id="id">
                                         <property name="data_type">str</property>
+                                        <property name="invisible_char">*</property>
+                                        <property name="invisible_char_set">True</property>
                                         <property name="model_attribute">id</property>
                                         <property name="visible">True</property>
                                     </widget>

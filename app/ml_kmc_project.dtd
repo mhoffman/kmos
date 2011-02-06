@@ -29,6 +29,8 @@
   <!ELEMENT layer (site)*>
   <!ATTLIST layer 
     name CDATA #REQUIRED
+    grid CDATA #REQUIRED
+    grid_offset CDATA #REQUIRED
   >
   <!ELEMENT site_class_list (site_class)*>
   <!ELEMENT site_class EMPTY>
