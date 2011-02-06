@@ -356,13 +356,13 @@ class ProjectTree(SlaveDelegate):
         if slave:
             self.get_parent().detach_slave('workarea')
         if isinstance(elem, Layer):
-            form = LayerEditor(elem, self.project_data)
+            form = LayerEditor(elem, self)
             # TODO: check if there are any processes defined on this letter
             # and block editing if so
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
         elif isinstance(elem, Meta):
-            meta_form = MetaForm(self.meta)
+            meta_form = MetaForm(self.meta, self)
             self.get_parent().attach_slave('workarea', meta_form)
             meta_form.focus_toplevel()
             meta_form.focus_topmost()

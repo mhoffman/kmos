@@ -426,12 +426,24 @@ class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
     gladefile = GLADEFILE
     toplevel_name = 'meta_form'
     widgets = ['author', 'email', 'model_name', 'model_dimension', 'debug']
-    def __init__(self, model):
+    def __init__(self, model, project_tree):
         ProxySlaveDelegate.__init__(self, model)
         self.model_dimension.set_sensitive(False)
+        self.project_tree = project_tree
+        if self.project_tree.meta.model_dimension < 3:
+            self.cell_size_z.hide()
+        if self.project_tree.meta.model_dimension < 2:
+            self.cell_size_y.hide()
+
 
     def on_model_name__validate(self, widget, model_name):
         return self.on_name__validate(widget, model_name)
+
+    def on_model_name__content_changed(self, text):
+        self.project_tree.update(self.model)
+
+    def on_model_dimension__content_changed(self, text):
+        self.project_tree.update(self.model)
 
 
 class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
@@ -485,23 +497,19 @@ class GridForm(ProxyDelegate):
     toplevel_name = 'grid_form'
     widgets = ['grid_x', 'grid_y', 'grid_z', 'grid_offset_x', 'grid_offset_y', 'grid_offset_z']
     def __init__(self, grid, project_tree):
-        self.old_grid = copy.copy(grid)
+        self.old_grid = copy.deepcopy(grid)
         self.project_tree = project_tree
         ProxyDelegate.__init__(self, grid)
         if self.project_tree.meta.model_dimension < 3:
             self.grid_z.hide()
             self.grid_offset_z.hide()
-        elif self.project_tree.meta.model_dimension < 2:
+        if self.project_tree.meta.model_dimension < 2:
             self.grid_y.hide()
             self.grid_offset_y.hide()
-            
 
     def on_grid_form_ok__clicked(self, button):
         self.hide()
 
-    def on_grid_form_cancel__clicked(self, button):
-        self.parent.layer.grid = self.old_grid
-        self.hide()
 
         
 class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):

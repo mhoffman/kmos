@@ -200,6 +200,10 @@ class Meta(Settable, object):
             else:
                 self.__setattr__(key, attrib[key])
 
+    def get_extra(self):
+        return "%s(%s)" % (self.model_name, self.model_dimension)
+
+
 
 class Process(Attributes):
     """One process in a kMC process list
