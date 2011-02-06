@@ -191,7 +191,7 @@ class Meta(Settable, object):
     """
     name = 'Meta'
     def __init__(self):
-        Settable.__init__(self, email='', author='', debug=0, model_name='', model_dimension=0)
+        Settable.__init__(self, email='', author='', debug=0, model_name='', model_dimension=0, cell_size_x=1., cell_size_y=1., cell_size_z=1.)
 
     def add(self, attrib):
         for key in attrib:

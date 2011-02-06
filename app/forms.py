@@ -12,6 +12,7 @@ import gtk
 from kiwi.ui.delegates import ProxySlaveDelegate, GladeDelegate, SlaveDelegate, ProxyDelegate
 from kiwi.ui.views import SlaveView
 from kiwi.datatypes import ValidationError
+from kiwi.ui.objectlist import Column
 
 # own modules
 from config import GLADEFILE
@@ -425,10 +426,10 @@ class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
     """
     gladefile = GLADEFILE
     toplevel_name = 'meta_form'
-    widgets = ['author', 'email', 'model_name', 'model_dimension', 'debug']
+    widgets = ['author', 'email', 'model_name', 'model_dimension', 'debug', 'cell_size_x', 'cell_size_y', 'cell_size_z']
     def __init__(self, model, project_tree):
         ProxySlaveDelegate.__init__(self, model)
-        self.model_dimension.set_sensitive(False)
+        #self.model_dimension.set_sensitive(False)
         self.project_tree = project_tree
         if self.project_tree.meta.model_dimension < 3:
             self.cell_size_z.hide()
@@ -442,7 +443,16 @@ class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
     def on_model_name__content_changed(self, text):
         self.project_tree.update(self.model)
 
-    def on_model_dimension__content_changed(self, text):
+    def on_model_dimension__content_changed(self, widget):
+        dimension = int(widget.get_text())
+        if dimension < 3:
+            self.cell_size_z.hide()
+        else:
+            self.cell_size_z.show()
+        if dimension < 2:
+            self.cell_size_y.hide()
+        else:
+            self.cell_size_y.show()
         self.project_tree.update(self.model)
 
 
@@ -531,7 +541,15 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.lattice_pad.add(self.canvas)
 
         X, Y = 400, 400
+        if self.project_tree.meta.cell_size_x > self.project_tree.meta.cell_size_y :
+            X = 400
+            Y = 400*self.project_tree.meta.cell_size_y/self.project_tree.meta.cell_size_x
+        else:
+            Y = 400
+            X = 400*self.project_tree.meta.cell_size_x/self.project_tree.meta.cell_size_y
         self.canvas.show()
+        print(self.project_tree.meta.cell_size_x,self.project_tree.meta.cell_size_y)
+        print(X,Y)
             #for i in range(x+1):
                 #lx = CanvasLine(self.grid_layer,  i*(X/x), 0, i*(X/x), Y, bg=(0., 0., 0.))
             #for i in range(y+1):
