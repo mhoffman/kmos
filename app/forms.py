@@ -506,9 +506,10 @@ class GridForm(ProxyDelegate):
     gladefile = GLADEFILE
     toplevel_name = 'grid_form'
     widgets = ['grid_x', 'grid_y', 'grid_z', 'grid_offset_x', 'grid_offset_y', 'grid_offset_z']
-    def __init__(self, grid, project_tree):
+    def __init__(self, grid, project_tree, layer):
         self.old_grid = copy.deepcopy(grid)
         self.project_tree = project_tree
+        self.layer = layer
         ProxyDelegate.__init__(self, grid)
         if self.project_tree.meta.model_dimension < 3:
             self.grid_z.hide()
@@ -517,7 +518,20 @@ class GridForm(ProxyDelegate):
             self.grid_y.hide()
             self.grid_offset_y.hide()
 
+    def on_grid_x__content_changed(self, widget):
+        self.layer.redraw()
+
+    def on_grid_y__content_changed(self, widget):
+        self.layer.redraw()
+
+    def on_grid_offset_x__content_changed(self, widget):
+        self.layer.redraw()
+
+    def on_grid_offset_y__content_changed(self, widget):
+        self.layer.redraw()
+
     def on_grid_form_ok__clicked(self, button):
+        self.layer.redraw()
         self.hide()
 
 
@@ -540,17 +554,45 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.canvas.append(self.grid_layer)
         self.canvas.append(self.site_layer)
         self.lattice_pad.add(self.canvas)
+        self.redraw()
 
+    def redraw(self):
+        self.grid_layer.clear()
+        self.site_layer.clear()
         X, Y = 400, 400
+
         if self.project_tree.meta.cell_size_x > self.project_tree.meta.cell_size_y :
             X = 400.
             Y = 400.*self.project_tree.meta.cell_size_y/self.project_tree.meta.cell_size_x
         else:
             Y = 400.
             X = 400.*self.project_tree.meta.cell_size_x/self.project_tree.meta.cell_size_y
-        self.canvas.show()
-        for i in range(self.grid.x):
-            CanvasLine(self.grid_layer, (i+self.grid.offset_x)*X/(self.grid.x),0, (i+self.grid.offset_x)*X/(self.grid.x), Y)
+
+
+        # draw frame
+        CanvasLine(self.grid_layer, 0,0,0,Y)
+        CanvasLine(self.grid_layer, X,0,X,Y)
+        CanvasLine(self.grid_layer, 0,0,X,0)
+        CanvasLine(self.grid_layer, 0,Y,X,Y)
+
+        # draw grid lines
+        for i in range(self.grid.x+1):
+            xprime = (float(i)/self.grid.x+self.grid.offset_x)*X % X
+            CanvasLine(self.grid_layer,xprime ,0, xprime, Y)
+        for i in range(self.grid.y+1):
+            yprime = (float(i)/(self.grid.y)+self.grid.offset_y)*Y % Y
+            CanvasLine(self.grid_layer, 0, Y-yprime , X, Y-yprime)
+        for i in range(self.grid.x+1):
+            for j in range(self.grid.y+1):
+                xprime = (float(i)/self.grid.x+self.grid.offset_x)*X % X
+
+                yprime = (float(j)/(self.grid.y)+self.grid.offset_y)*Y % Y
+                o = CanvasOval(self.site_layer, 0, 0, 10, 10, bg=(1., 1., 1.))
+                o.set_center(xprime, Y-yprime)
+                o.set_radius(5)
+                o.frac_coords = (xprime/X, yprime/Y)
+                o.connect('button-press-event', self.site_press_event)
+
             #for i in range(x+1):
                 #lx = CanvasLine(self.grid_layer,  i*(X/x), 0, i*(X/x), Y, bg=(0., 0., 0.))
             #for i in range(y+1):
@@ -577,12 +619,15 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
             #self.unit_x.set_sensitive(True)
             #self.unit_y.set_sensitive(True)
 #
-            self.canvas.redraw()
             #self.canvas.hide()
+        self.canvas.hide()
+        self.canvas.show()
+    def site_press_event(self, widget, item, event):
+        print(item.frac_coords)
 
 
     def on_set_grid_button__clicked(self, button):
-        grid_form = GridForm(self.model.grid, self.project_tree)
+        grid_form = GridForm(self.model.grid, self.project_tree, self)
         grid_form.show()
 
     def on_layer_name__validate(self, widget, layer_name):
@@ -592,19 +637,19 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
     def on_layer_name__content_changed(self, widget):
         self.project_tree.update(self.model)
 
-    def site_press_event(self, widget, item, event):
-        if item.filled:
-            new_site = filter(lambda x: (x.site_x, x.site_y) == item.coord, self.model.sites)[0]
-        else:
-            # choose the smallest number that is not given away
-            indexes = [x.index for x in self.model.sites]
-            for i in range(1, len(indexes)+2):
-                if i not in indexes:
-                    index = i
-                    break
-            new_site = Site(site_x=item.coord[0], site_y=item.coord[1], name='', index=index)
-            self.model.sites.append(new_site)
-        site_form = SiteForm(new_site, self)
+    #def site_press_event(self, widget, item, event):
+        #if item.filled:
+            #new_site = filter(lambda x: (x.site_x, x.site_y) == item.coord, self.model.sites)[0]
+        #else:
+            ## choose the smallest number that is not given away
+            #indexes = [x.index for x in self.model.sites]
+            #for i in range(1, len(indexes)+2):
+                #if i not in indexes:
+                    #index = i
+                    #break
+            #new_site = Site(site_x=item.coord[0], site_y=item.coord[1], name='', index=index)
+            #self.model.sites.append(new_site)
+        #site_form = SiteForm(new_site, self)
 
 
 class InlineMessage(SlaveView):

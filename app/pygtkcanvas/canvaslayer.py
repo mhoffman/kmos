@@ -14,7 +14,8 @@ class CanvasLayer(list):
         return self.visible
     
     def clear(self):
-        del self[:]
+        while len(self):
+            self.pop()
     
     def move_all(self, dx, dy):
         for item in self:

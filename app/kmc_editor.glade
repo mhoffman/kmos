@@ -166,7 +166,8 @@
                                 </child>
                                 <child>
                                     <widget class="ProxySpinButton" id="grid_offset_x">
-                                        <property name="adjustment">0 0 100 1 10 0</property>
+                                        <property name="adjustment">0 0 1 0 1 0</property>
+                                        <property name="climb_rate">0.1</property>
                                         <property name="data_type">float</property>
                                         <property name="digits">5</property>
                                         <property name="invisible_char">*</property>
@@ -183,7 +184,8 @@
                                 </child>
                                 <child>
                                     <widget class="ProxySpinButton" id="grid_offset_y">
-                                        <property name="adjustment">0 0 100 1 10 0</property>
+                                        <property name="adjustment">0 0 1 1 10 0</property>
+                                        <property name="climb_rate">0.1</property>
                                         <property name="data_type">float</property>
                                         <property name="digits">5</property>
                                         <property name="invisible_char">*</property>
@@ -201,6 +203,7 @@
                                 <child>
                                     <widget class="ProxySpinButton" id="grid_offset_z">
                                         <property name="adjustment">0 0 1 0 10 0</property>
+                                        <property name="climb_rate">0.1</property>
                                         <property name="data_type">float</property>
                                         <property name="digits">5</property>
                                         <property name="invisible_char">*</property>

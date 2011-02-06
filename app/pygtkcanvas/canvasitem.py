@@ -30,17 +30,11 @@ class CanvasItem(object):
         # properties as bool
         self.visible = kw['visible'] if 'visible' in kw else True
 
-    def __del__(self):
-        self.delete()
 
     def new_parent(self, new_parent):
         self.parent.remove(self)
         new_parent.append(self)
         self.parent = new_parent
-
-    #@verbose
-    def delete(self):
-        self.parent.remove(self)
 
     def set_coords(self, *args):
         self.coords = map(float, args)
