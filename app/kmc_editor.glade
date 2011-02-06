@@ -104,7 +104,7 @@
                                         <property name="invisible_char">*</property>
                                         <property name="invisible_char_set">True</property>
                                         <property name="is_focus">True</property>
-                                        <property name="model_attribute">grid_x</property>
+                                        <property name="model_attribute">x</property>
                                         <property name="text" context="yes" translatable="yes">1</property>
                                         <property name="visible">True</property>
                                     </widget>
@@ -119,7 +119,7 @@
                                         <property name="data_type">int</property>
                                         <property name="invisible_char">*</property>
                                         <property name="invisible_char_set">True</property>
-                                        <property name="model_attribute">grid_y</property>
+                                        <property name="model_attribute">y</property>
                                         <property name="text" context="yes" translatable="yes">1</property>
                                         <property name="visible">True</property>
                                     </widget>
@@ -134,7 +134,7 @@
                                         <property name="data_type">int</property>
                                         <property name="invisible_char">*</property>
                                         <property name="invisible_char_set">True</property>
-                                        <property name="model_attribute">grid_z</property>
+                                        <property name="model_attribute">z</property>
                                         <property name="text" context="yes" translatable="yes">1</property>
                                         <property name="visible">True</property>
                                     </widget>
@@ -172,7 +172,7 @@
                                         <property name="invisible_char">*</property>
                                         <property name="invisible_char_set">True</property>
                                         <property name="is_focus">True</property>
-                                        <property name="model_attribute">grid_offset_x</property>
+                                        <property name="model_attribute">offset_x</property>
                                         <property name="text" context="yes" translatable="yes">0.00000</property>
                                         <property name="visible">True</property>
                                     </widget>
@@ -189,7 +189,7 @@
                                         <property name="invisible_char">*</property>
                                         <property name="invisible_char_set">True</property>
                                         <property name="is_focus">True</property>
-                                        <property name="model_attribute">grid_offset_y</property>
+                                        <property name="model_attribute">offset_y</property>
                                         <property name="text" context="yes" translatable="yes">0.00000</property>
                                         <property name="visible">True</property>
                                     </widget>
@@ -206,7 +206,7 @@
                                         <property name="invisible_char">*</property>
                                         <property name="invisible_char_set">True</property>
                                         <property name="is_focus">True</property>
-                                        <property name="model_attribute">grid_offset_z</property>
+                                        <property name="model_attribute">offset_z</property>
                                         <property name="text" context="yes" translatable="yes">0.00000</property>
                                         <property name="visible">True</property>
                                     </widget>

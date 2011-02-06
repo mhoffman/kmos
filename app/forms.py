@@ -531,6 +531,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
     def __init__(self, model, project_tree):
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, model)
+        self.grid = self.model.grid
         self.canvas = Canvas()
         self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
         self.canvas.grab_focus()
@@ -542,14 +543,14 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
 
         X, Y = 400, 400
         if self.project_tree.meta.cell_size_x > self.project_tree.meta.cell_size_y :
-            X = 400
-            Y = 400*self.project_tree.meta.cell_size_y/self.project_tree.meta.cell_size_x
+            X = 400.
+            Y = 400.*self.project_tree.meta.cell_size_y/self.project_tree.meta.cell_size_x
         else:
-            Y = 400
-            X = 400*self.project_tree.meta.cell_size_x/self.project_tree.meta.cell_size_y
+            Y = 400.
+            X = 400.*self.project_tree.meta.cell_size_x/self.project_tree.meta.cell_size_y
         self.canvas.show()
-        print(self.project_tree.meta.cell_size_x,self.project_tree.meta.cell_size_y)
-        print(X,Y)
+        for i in range(self.grid.x):
+            CanvasLine(self.grid_layer, (i+self.grid.offset_x)*X/(self.grid.x),0, (i+self.grid.offset_x)*X/(self.grid.x), Y)
             #for i in range(x+1):
                 #lx = CanvasLine(self.grid_layer,  i*(X/x), 0, i*(X/x), Y, bg=(0., 0., 0.))
             #for i in range(y+1):
@@ -576,7 +577,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
             #self.unit_x.set_sensitive(True)
             #self.unit_y.set_sensitive(True)
 #
-            #self.canvas.redraw()
+            self.canvas.redraw()
             #self.canvas.hide()
 
 

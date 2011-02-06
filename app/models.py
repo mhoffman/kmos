@@ -37,14 +37,14 @@ class Site(Attributes):
         return '%s %s %s %s' % (self.name, self.index, self.vector, self.site_class)
 
 class Grid(Attributes):
-    attributes = ['grid_x','grid_y','grid_z','grid_offset_x','grid_offset_y','grid_offset_z',]
+    attributes = ['x','y','z','offset_x','offset_y','offset_z',]
     def __init__(self, **kwargs):
-        self.grid_x = 1
-        self.grid_y = 1
-        self.grid_z = 1
-        self.grid_offset_x = 0.
-        self.grid_offset_y = 0.
-        self.grid_offset_z = 0.
+        self.x = 1
+        self.y = 1
+        self.z = 1
+        self.offset_x = 0.
+        self.offset_y = 0.
+        self.offset_z = 0.
         
 class Layer(Attributes, CorrectlyNamed):
     """A class that defines exactly one layer
