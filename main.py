@@ -356,9 +356,10 @@ class ProjectTree(SlaveDelegate):
         if slave:
             self.get_parent().detach_slave('workarea')
         if isinstance(elem, Layer):
+            if self.meta.model_dimension in [1,3]:
+                self.get_parent().toast('Only 2d supported')
+                return
             form = LayerEditor(elem, self)
-            # TODO: check if there are any processes defined on this letter
-            # and block editing if so
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
         elif isinstance(elem, Meta):
@@ -375,10 +376,16 @@ class ProjectTree(SlaveDelegate):
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
         elif isinstance(elem, Process):
+            if self.meta.model_dimension in [1,3]:
+                self.get_parent().toast('Only 2d supported')
+                return
             form = ProcessForm(elem, self)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
         elif isinstance(elem, ProcessList):
+            if self.meta.model_dimension in [1,3]:
+                self.get_parent().toast('Only 2d supported')
+                return
             form = BatchProcessForm(self)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
@@ -489,6 +496,9 @@ class KMC_Editor(GladeDelegate):
     def on_btn_add_layer__clicked(self, button):
         """Add a new layer to the model
         """
+        if self.project_tree.meta.model_dimension in [1,3]:
+            self.toast('Only 2d supported')
+            return
         new_layer = Layer()
         self.project_tree.append(self.project_tree.layer_list_iter, new_layer)
         layer_form = LayerEditor(new_layer, self.project_tree)
@@ -515,6 +525,9 @@ class KMC_Editor(GladeDelegate):
     def on_btn_add_process__clicked(self, button):
         """Add a new process to the model
         """
+        if self.project_tree.meta.model_dimension in [1,3]:
+            self.toast('Only 2d supported')
+            return
         if not self.project_tree.layer_list:
             self.toast("No layer defined, yet!")
             return
