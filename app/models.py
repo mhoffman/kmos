@@ -25,16 +25,29 @@ class Attributes:
             raise AttributeError, 'Tried to set illegal attribute %s' % attrname
 
 
-class Site(Attributes):
-    """A class holding exactly one lattice site
+class SiteClass(Attributes):
+    """An optional every site can have. If two sites belong
+    to the same class is a long winded way of saying, they 
+    are equivalent.
     """
-    attributes = ['index', 'name', 'vector','site_class']
-    # vector is now a list of floats for the graphical representation
+    attributes = ['name']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
 
+
+class Site(Attributes):
+    """A class holding exactly one lattice site
+    """
+    attributes = ['index', 'name', 'x', 'y', 'z', 'site_class', 'layer']
+    # vector is now a list of floats for the graphical representation
+    def __init__(self, **kwargs):
+        Attributes.__init__(self, **kwargs)
+        self.site_class = kwargs['site_class'] if  'site_class' in kwargs else ''
+        self.layer = kwargs['layer'] if 'layer' in kwargs else ''
+        self.name = kwargs['name'] if 'name' in kwargs else ''
+
     def __repr__(self):
-        return '%s %s %s %s' % (self.name, self.index, self.vector, self.site_class)
+        return '%s(%s) %s %s %s' % (self.name, self.layer, self.index, (self.x, self.y, self.z), self.site_class)
 
 class Grid(Attributes):
     attributes = ['x','y','z','offset_x','offset_y','offset_z',]
@@ -49,15 +62,14 @@ class Grid(Attributes):
 class Layer(Attributes, CorrectlyNamed):
     """A class that defines exactly one layer
     """
-    attributes = ['name', 'sites', 'grid']
+    attributes = ['name', 'grid']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
-        self.sites = []
         self.grid = Grid()
         self.name = kwargs['name'] if 'name' in kwargs else ''
 
     def __repr__(self):
-        return "%s\n\n%s" % (self.name, self.sites)
+        return "%s\n" % (self.name)
 
     def add_site(self, site):
         """Add a new site to a layer

@@ -384,27 +384,24 @@ class SiteForm(ProxyDelegate):
     """
     gladefile = GLADEFILE
     toplevel_name = 'site_form'
-    widgets = ['site_name', 'site_index', 'site_x', 'site_y']
+    widgets = ['site_name', 'site_index', 'sitevect_x', 'sitevect_y', 'sitevect_z']
     def __init__(self, site, parent):
         ProxyDelegate.__init__(self, site)
         self.site = site
         self.parent = parent
-        self.site_x.set_value(site.site_x)
-        self.site_y.set_value(site.site_y)
-        self.site_x.set_sensitive(False)
-        self.site_y.set_sensitive(False)
         self.site_index.set_sensitive(False)
         self.show_all()
 
 
 
     def on_site_name__validate(self, widget, site_name):
-        # check if other site already has the name
-        if  filter(lambda x : x.name == site_name, self.parent.model.sites):
-            self.site_ok.set_sensitive(False)
-            return ValidationError('Site name needs to be unique')
-        else:
-            self.site_ok.set_sensitive(True)
+        pass
+        ## check if other site already has the name
+        #if  filter(lambda x : x.name == site_name, self.parent.model.sites):
+            #self.site_ok.set_sensitive(False)
+            #return ValidationError('Site name needs to be unique')
+        #else:
+            #self.site_ok.set_sensitive(True)
 
 
     def on_site_ok__clicked(self, button):
@@ -587,56 +584,35 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                 xprime = (float(i)/self.grid.x+self.grid.offset_x)*X % X
 
                 yprime = (float(j)/(self.grid.y)+self.grid.offset_y)*Y % Y
-                o = CanvasOval(self.site_layer, 0, 0, 10, 10, bg=(1., 1., 1.))
+                o = CanvasOval(self.grid_layer, 0, 0, 10, 10, bg=(1., 1., 1.))
                 o.set_center(xprime, Y-yprime)
                 o.set_radius(5)
                 o.frac_coords = (xprime/X, yprime/Y)
                 o.connect('button-press-event', self.site_press_event)
-
-            #for i in range(x+1):
-                #lx = CanvasLine(self.grid_layer,  i*(X/x), 0, i*(X/x), Y, bg=(0., 0., 0.))
-            #for i in range(y+1):
-                #ly = CanvasLine(self.grid_layer, 0 , i*(Y/y), X, i*(Y/y), bg=(0., 0., 0.))
-            #for i in range(x+1):
-                #for j in range(y+1):
-                    #r = 5
-                    #o = CanvasOval(self.site_layer, i*(X/x)-r, j*(Y/y)-r, i*(X/x)+r, j*(Y/y)+r, bg=(1., 1., 1.))
-                    #o.coord = i % x, (y-j) % y
-                    #o.connect('button-press-event', self.site_press_event)
-                    #for node in self.model.sites:
-                        #if node.site_x == o.coord[0] and node.site_y == o.coord[1]:
-                            #o.filled = True
-#
-            #self.canvas.move_all(50, 50)
-        #elif button.get_label()=='Reset':
-            #while self.site_layer:
-                #self.site_layer.pop()
-            #while self.grid_layer:
-                #self.grid_layer.pop()
-            #button.set_label('gtk-ok')
-            #button.set_tooltip_text('Add sites')
-            #self.model.sites = []
-            #self.unit_x.set_sensitive(True)
-            #self.unit_y.set_sensitive(True)
-#
-            #self.canvas.hide()
+        self.canvas.move_all(50, 50)
         self.canvas.hide()
         self.canvas.show()
+
     def site_press_event(self, widget, item, event):
-        print(item.frac_coords)
+        def find_smallest_gap(l):
+            if not l:
+                return 1
+            r = range(l[0], len(l)+l[0])
+            if r == l:
+                return l[-1]+1
+            return filter(lambda x: x[0]!=x[1], zip(r,l))[0][0]
 
+        new_site = Site()
+        new_site.name = ''
+        new_site.index = find_smallest_gap([site.index for site in self.project_tree.site_list])
+        new_site.x = item.frac_coords[0]
+        new_site.y = item.frac_coords[1]
+        new_site.z = 0.
+        new_site.layer = self.model.name
 
-    def on_set_grid_button__clicked(self, button):
-        grid_form = GridForm(self.model.grid, self.project_tree, self)
-        grid_form.show()
-
-    def on_layer_name__validate(self, widget, layer_name):
-        # TODO: validate lattice name to be unique
-        return self.on_name__validate(widget, layer_name)
-
-    def on_layer_name__content_changed(self, widget):
-        self.project_tree.update(self.model)
-
+        SiteForm(new_site, self)
+        
+      
     #def site_press_event(self, widget, item, event):
         #if item.filled:
             #new_site = filter(lambda x: (x.site_x, x.site_y) == item.coord, self.model.sites)[0]
@@ -650,6 +626,19 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
             #new_site = Site(site_x=item.coord[0], site_y=item.coord[1], name='', index=index)
             #self.model.sites.append(new_site)
         #site_form = SiteForm(new_site, self)
+
+
+    def on_set_grid_button__clicked(self, button):
+        grid_form = GridForm(self.model.grid, self.project_tree, self)
+        grid_form.show()
+
+    def on_layer_name__validate(self, widget, layer_name):
+        # TODO: validate lattice name to be unique
+        return self.on_name__validate(widget, layer_name)
+
+    def on_layer_name__content_changed(self, widget):
+        self.project_tree.update(self.model)
+
 
 
 class InlineMessage(SlaveView):

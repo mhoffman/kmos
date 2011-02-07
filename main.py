@@ -75,6 +75,7 @@ class ProjectTree(SlaveDelegate):
         self.process_list_iter = self.project_data.append(None, ProcessList())
         self.output_list = self.project_data.append(None, OutputList())
         self.output_list = []
+        self.site_list = []
 
         self.filename = ''
 
@@ -300,11 +301,6 @@ class ProjectTree(SlaveDelegate):
         for layer in self.layer_list:
             layer_elem = ET.SubElement(layer_list, 'layer')
             layer_elem.set('name', layer.name)
-            for site in layer.sites:
-                site_elem = ET.SubElement(layer_elem, 'site')
-                site_elem.set('index', str(site.index))
-                site_elem.set('type', site.name)
-                site_elem.set('coord', '%s %s' % (site.site_x, site.site_y))
         process_list = ET.SubElement(root, 'process_list')
         for process in self.process_list:
             process_elem = ET.SubElement(process_list, 'process')

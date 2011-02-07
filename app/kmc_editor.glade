@@ -1125,6 +1125,8 @@
                                 <child>
                                     <widget class="ProxyEntry" id="site_name">
                                         <property name="data_type">str</property>
+                                        <property name="invisible_char">*</property>
+                                        <property name="invisible_char_set">True</property>
                                         <property name="model_attribute">name</property>
                                         <property name="visible">True</property>
                                     </widget>
@@ -1135,12 +1137,12 @@
                                         <child>
                                             <widget class="ProxySpinButton" id="sitevect_x">
                                                 <property name="adjustment">0 0 100 1 10 0</property>
-                                                <property name="data_type">int</property>
+                                                <property name="data_type">float</property>
                                                 <property name="digits">5</property>
                                                 <property name="invisible_char">*</property>
                                                 <property name="invisible_char_set">True</property>
                                                 <property name="is_focus">True</property>
-                                                <property name="model_attribute">sitevect_x</property>
+                                                <property name="model_attribute">x</property>
                                                 <property name="text" context="yes" translatable="yes">0.00000</property>
                                                 <property name="visible">True</property>
                                             </widget>
@@ -1148,11 +1150,11 @@
                                         <child>
                                             <widget class="ProxySpinButton" id="sitevect_y">
                                                 <property name="adjustment">0 0 100 1 10 0</property>
-                                                <property name="data_type">int</property>
+                                                <property name="data_type">float</property>
                                                 <property name="digits">5</property>
                                                 <property name="invisible_char">*</property>
                                                 <property name="invisible_char_set">True</property>
-                                                <property name="model_attribute">sitevect_y</property>
+                                                <property name="model_attribute">y</property>
                                                 <property name="text" context="yes" translatable="yes">0.00000</property>
                                                 <property name="visible">True</property>
                                             </widget>
@@ -1163,11 +1165,12 @@
                                         <child>
                                             <widget class="ProxySpinButton" id="sitevect_z">
                                                 <property name="adjustment">0 0 100 1 10 0</property>
-                                                <property name="data_type">int</property>
+                                                <property name="data_type">float</property>
                                                 <property name="digits">5</property>
                                                 <property name="invisible_char">*</property>
                                                 <property name="invisible_char_set">True</property>
-                                                <property name="model_attribute">sitevect_z</property>
+                                                <property name="is_focus">True</property>
+                                                <property name="model_attribute">z</property>
                                                 <property name="text" context="yes" translatable="yes">0.00000</property>
                                                 <property name="visible">True</property>
                                             </widget>
@@ -1183,6 +1186,8 @@
                                 <child>
                                     <widget class="ProxyEntry" id="site_index">
                                         <property name="data_type">int</property>
+                                        <property name="invisible_char">*</property>
+                                        <property name="invisible_char_set">True</property>
                                         <property name="is_focus">True</property>
                                         <property name="model_attribute">index</property>
                                         <property name="visible">True</property>
@@ -1225,7 +1230,6 @@
                             <widget class="GtkButton" id="site_ok">
                                 <property name="is_focus">True</property>
                                 <property name="label">gtk-ok</property>
-                                <property name="response_id">-5</property>
                                 <property name="use_stock">True</property>
                                 <property name="visible">True</property>
                             </widget>
