@@ -619,6 +619,9 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         
     def grid_point_press_event(self, widget, item, event):
         def find_smallest_gap(l,base=1):
+            """Expects a list of integers and find the smallest 
+            number that is not given away, starting from base
+            """
             l.sort()
             if not l:
                 return 1
