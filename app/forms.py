@@ -385,37 +385,38 @@ class SiteForm(ProxyDelegate):
     gladefile = GLADEFILE
     toplevel_name = 'site_form'
     widgets = ['site_name', 'site_index', 'sitevect_x', 'sitevect_y', 'sitevect_z']
-    def __init__(self, site, parent):
+    def __init__(self, site, parent, project_tree):
         ProxyDelegate.__init__(self, site)
         self.site = site
         self.parent = parent
+        self.project_tree = project_tree
         self.site_index.set_sensitive(False)
         self.show_all()
-
+        if self.project_tree.meta.model_dimension < 3 :
+            self.sitevect_z.hide()
+        if self.project_tree.meta.model_dimension < 2 :
+            self.sitevect_y.hide()
 
 
     def on_site_name__validate(self, widget, site_name):
-        pass
-        ## check if other site already has the name
-        #if  filter(lambda x : x.name == site_name, self.parent.model.sites):
-            #self.site_ok.set_sensitive(False)
-            #return ValidationError('Site name needs to be unique')
-        #else:
-            #self.site_ok.set_sensitive(True)
+        # check if other site already has the name
+        print('found me')
+        if filter(lambda x : x.name == site_name, self.project_tree.site_list):
+            self.site_ok.set_sensitive(False)
+            return ValidationError('Site name needs to be unique')
+        else:
+            self.site_ok.set_sensitive(True)
 
+
+    def on_site_cancel__clicked(self, button):  
+        self.hide()
 
     def on_site_ok__clicked(self, button):
-        if len(self.site_name.get_text()) == 0 :
-            self.parent.model.sites.remove(self.model)
-            for node in self.parent.site_layer:
-                if node.coord[0] == self.site_x.get_value_as_int() and node.coord[1] == self.site_y.get_value_as_int():
-                    node.filled = False
-        else:
-            for node in self.parent.site_layer:
-                if node.coord[0] == self.site_x.get_value_as_int() and node.coord[1] == self.site_y.get_value_as_int():
-                    node.filled = True
+        if not len(self.site_name.get_text()) :
+            self.project_tree.site_list.remove(self.model)
         self.parent.canvas.redraw()
         self.hide()
+        self.parent.redraw()
 
 
 class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
@@ -588,12 +589,23 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                 o.set_center(xprime, Y-yprime)
                 o.set_radius(5)
                 o.frac_coords = (xprime/X, yprime/Y)
-                o.connect('button-press-event', self.site_press_event)
+                o.connect('button-press-event', self.grid_point_press_event)
+
+        for site in self.project_tree.site_list:
+            o = CanvasOval(self.site_layer,0,0,10,10, filled=True)
+            o.set_radius(10)
+            o.set_center(site.x*X,(1-site.y)*Y)
+            o.site = site
+            o.connect('button-press-event', self.site_press_event)
+            # don't forget to add tooltip a stored site
         self.canvas.move_all(50, 50)
         self.canvas.hide()
         self.canvas.show()
 
     def site_press_event(self, widget, item, event):
+        SiteForm(item.site, self, self.project_tree)
+        
+    def grid_point_press_event(self, widget, item, event):
         def find_smallest_gap(l):
             if not l:
                 return 1
@@ -610,23 +622,9 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         new_site.z = 0.
         new_site.layer = self.model.name
 
-        SiteForm(new_site, self)
-        
+        self.project_tree.site_list.append(new_site)
+        SiteForm(new_site, self, self.project_tree)
       
-    #def site_press_event(self, widget, item, event):
-        #if item.filled:
-            #new_site = filter(lambda x: (x.site_x, x.site_y) == item.coord, self.model.sites)[0]
-        #else:
-            ## choose the smallest number that is not given away
-            #indexes = [x.index for x in self.model.sites]
-            #for i in range(1, len(indexes)+2):
-                #if i not in indexes:
-                    #index = i
-                    #break
-            #new_site = Site(site_x=item.coord[0], site_y=item.coord[1], name='', index=index)
-            #self.model.sites.append(new_site)
-        #site_form = SiteForm(new_site, self)
-
 
     def on_set_grid_button__clicked(self, button):
         grid_form = GridForm(self.model.grid, self.project_tree, self)
