@@ -386,6 +386,8 @@ class SiteForm(ProxyDelegate):
     toplevel_name = 'site_form'
     widgets = ['site_name', 'site_index', 'sitevect_x', 'sitevect_y', 'sitevect_z']
     def __init__(self, site, parent, project_tree):
+        self.saved_state = copy.deepcopy(site)
+        print(self.saved_state.name)
         ProxyDelegate.__init__(self, site)
         self.site = site
         self.parent = parent
@@ -400,7 +402,6 @@ class SiteForm(ProxyDelegate):
 
     def on_site_name__validate(self, widget, site_name):
         # check if other site already has the name
-        print('found me')
         if filter(lambda x : x.name == site_name, self.project_tree.site_list):
             self.site_ok.set_sensitive(False)
             return ValidationError('Site name needs to be unique')
@@ -409,12 +410,25 @@ class SiteForm(ProxyDelegate):
 
 
     def on_site_cancel__clicked(self, button):  
+        print(self.project_tree.site_list)
+        if self.saved_state.name:
+            # if site existed, reset to previous state
+            print(self.site)
+            print(self.saved_state)
+            self.project_tree.site_list.remove(self.site)
+            print(self.project_tree.site_list)
+            self.project_tree.site_list.append(self.saved_state)
+            print(self.project_tree.site_list)
+        else:
+            # if site did not exist previously, remove completely
+            self.project_tree.site_list.remove(self.site)
         self.hide()
+        self.parent.redraw()
 
     def on_site_ok__clicked(self, button):
+        print(self.project_tree.site_list)
         if not len(self.site_name.get_text()) :
             self.project_tree.site_list.remove(self.model)
-        self.parent.canvas.redraw()
         self.hide()
         self.parent.redraw()
 
@@ -590,6 +604,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                 o.set_radius(5)
                 o.frac_coords = (xprime/X, yprime/Y)
                 o.connect('button-press-event', self.grid_point_press_event)
+                o.connect('query-tooltip-event', self.query_tooltip)
 
         for site in self.project_tree.site_list:
             o = CanvasOval(self.site_layer,0,0,10,10, filled=True)
@@ -601,6 +616,9 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.canvas.move_all(50, 50)
         self.canvas.hide()
         self.canvas.show()
+
+    def query_tooltip(self, widget):
+        print(widget.name)
 
     def site_press_event(self, widget, item, event):
         SiteForm(item.site, self, self.project_tree)
