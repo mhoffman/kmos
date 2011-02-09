@@ -410,15 +410,10 @@ class SiteForm(ProxyDelegate):
 
 
     def on_site_cancel__clicked(self, button):  
-        print(self.project_tree.site_list)
         if self.saved_state.name:
             # if site existed, reset to previous state
-            print(self.site)
-            print(self.saved_state)
             self.project_tree.site_list.remove(self.site)
-            print(self.project_tree.site_list)
             self.project_tree.site_list.append(self.saved_state)
-            print(self.project_tree.site_list)
         else:
             # if site did not exist previously, remove completely
             self.project_tree.site_list.remove(self.site)
@@ -426,7 +421,6 @@ class SiteForm(ProxyDelegate):
         self.parent.redraw()
 
     def on_site_ok__clicked(self, button):
-        print(self.project_tree.site_list)
         if not len(self.site_name.get_text()) :
             self.project_tree.site_list.remove(self.model)
         self.hide()
@@ -624,12 +618,15 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         SiteForm(item.site, self, self.project_tree)
         
     def grid_point_press_event(self, widget, item, event):
-        def find_smallest_gap(l):
+        def find_smallest_gap(l,base=1):
+            l.sort()
             if not l:
                 return 1
-            r = range(l[0], len(l)+l[0])
+            r = range(base, len(l)+base)
             if r == l:
+                print(l, l[-1]+1)
                 return l[-1]+1
+            print(l,filter(lambda x: x[0]!=x[1], zip(r,l))[0][0])
             return filter(lambda x: x[0]!=x[1], zip(r,l))[0][0]
 
         new_site = Site()
