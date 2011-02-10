@@ -24,6 +24,7 @@ class Canvas(gtk.DrawingArea):
     def __init__(self):
         gtk.DrawingArea.__init__(self)
         self.set_double_buffered(False)
+        self.set_has_tooltip(True)
         self.add_events(
             gtk.gdk.BUTTON_PRESS_MASK| 
             gtk.gdk.BUTTON_RELEASE_MASK| 
@@ -103,10 +104,11 @@ class Canvas(gtk.DrawingArea):
         self.event_cb(widget, signal_id, 'button-release-event')
         return False
     
-    def drawing_area_query_tooltip_cb(self, widget, event):
-        print(widget)
-        self.event_cb(widget, event, 'query-tooltip')
-        return False
+    def drawing_area_query_tooltip_cb(self,canvas,x,y,flag,tooltip,):
+        tooltip.x = x
+        tooltip.y = y
+        return self.event_cb(canvas, tooltip, 'query-tooltip')
+
     #@verbose
     def drawingarea_scroll_event_cb(self, widget, event):
         self.event_cb(widget, event, 'scroll-event')
@@ -130,6 +132,8 @@ class Canvas(gtk.DrawingArea):
                 self.redraw_visible()
             elif name == 'button-release-event':
                 self.current_item = None
+            elif name == 'query-tooltip':
+                self.visible = self.find_visible(*self.get_allocation())
             
         # classical way for finding where is mouse above
         else:
@@ -140,7 +144,7 @@ class Canvas(gtk.DrawingArea):
                 if bindings and name in bindings:
                     if n.is_coord_above(x, y):
                         func_, args_, kw_ = bindings[name]
-                        func_(self, n, event, *args_, **kw_)
+                        return func_(self, n, event, *args_, **kw_)
                         self.current_item = n
                         break
             
