@@ -135,7 +135,7 @@ class ProjectTree(SlaveDelegate):
             print(dtd.error_log.filter_from_errors()[0])
             return
         for child in root:
-            if child.tag == 'layer_list':
+            if child.tag == 'lattice':
                 for layer in child:
                     name = layer.attrib['name']
                     size = [ int(x) for x in layer.attrib['unit_cell_size'].split() ]
@@ -269,7 +269,7 @@ class ProjectTree(SlaveDelegate):
         """Produces an XML representation of the project data
         """
         # build XML Tree
-        root = ET.Element('kmc')
+        root = ET.Element('ml_kmc')
         meta = ET.SubElement(root, 'meta')
         if hasattr(self.meta, 'author'):
             meta.set('author', self.meta.author)
@@ -281,6 +281,13 @@ class ProjectTree(SlaveDelegate):
             meta.set('model_dimension', str(self.meta.model_dimension))
         if hasattr(self.meta, 'debug'):
             meta.set('debug', str(self.meta.debug))
+        if (hasattr(self.meta, 'cell_size_x') and 
+            hasattr(self.meta, 'cell_size_y') and
+            hasattr(self.meta, 'cell_size_z')):
+            meta.set('unit_cell_size', '%s %s %s' %
+            (self.meta.cell_size_x,
+            self.meta.cell_size_y,
+            self.meta.cell_size_z))
         species_list = ET.SubElement(root, 'species_list')
         if hasattr(self.species_list_iter, 'default_species'):
             species_list.set('default_species', self.species_list_iter.default_species)
@@ -297,10 +304,25 @@ class ProjectTree(SlaveDelegate):
             parameter_elem = ET.SubElement(parameter_list, 'parameter')
             parameter_elem.set('name', parameter.name)
             parameter_elem.set('value', str(parameter.value))
-        layer_list = ET.SubElement(root, 'layer_list')
+        layer_list = ET.SubElement(root, 'lattice')
         for layer in self.layer_list:
             layer_elem = ET.SubElement(layer_list, 'layer')
             layer_elem.set('name', layer.name)
+            if (hasattr(layer.grid, 'x') and
+            hasattr(layer.grid, 'y') and
+            hasattr(layer.grid, 'z')):
+                layer_elem.set('grid',
+                    '%s %s %s' % (layer.grid.x,
+                                  layer.grid.y,
+                                  layer.grid.z))
+            if (hasattr(layer.grid, 'offset_x') and
+            hasattr(layer.grid, 'offset_y') and
+            hasattr(layer.grid, 'offset_z')):
+                layer_elem.set('grid_offset',
+                    '%s %s %s' % (layer.grid.offset_x,
+                                  layer.grid.offset_y,
+                                  layer.grid.offset_z))
+                
         process_list = ET.SubElement(root, 'process_list')
         for process in self.process_list:
             process_elem = ET.SubElement(process_list, 'process')
