@@ -223,20 +223,20 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             CanvasLine(self.lattice_layer, i*(self.l/self.z), 0, i*(self.l/self.z), 500, line_width=1, fg=(.6, .6, .6))
         for i in range(self.z+1):
             for j in range(self.z+1):
-                for lattice in self.project_tree.layer_list:
-                    for site in lattice.sites:
-                        if i == self.X and j == self.Y:
-                            l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=(1., 1., 1.))
-                        else:
-                            l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=(.6, .6, .6))
+                for site in self.project_tree.site_list:
+                    if i == self.X and j == self.Y:
+                        l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=(1., 1., 1.))
+                    else:
+                        l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=(.6, .6, .6))
 
-                        l_site.set_center(self.l/self.z*(i+float(site.site_x)/lattice.unit_cell_size_x), 500-self.l/self.z*(j+float(site.site_y)/lattice.unit_cell_size_y))
-                        # 500 - ... for having scientific coordinates and note screen coordinates
-                        l_site.set_radius(5)
-                        l_site.i = i
-                        l_site.j = j
-                        l_site.name = site.name
-                        l_site.lattice = lattice.name
+                    l_site.set_center(self.l/self.z*(i+float(site.x)), 500-self.l/self.z*(j+float(site.y)))
+                    l_site.connect('query-tooltip', self.query_tooltip)
+                    # 500 - ... for having scientific coordinates and note screen coordinates
+                    l_site.set_radius(5)
+                    l_site.i = i
+                    l_site.j = j
+                    l_site.name = site.name
+                    l_site.layer = site.layer
 
         # draw frame
         frame_col = (.21, .35, .42)
@@ -252,9 +252,11 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             color = col_str2tuple(species.color)
             o = CanvasOval(self.frame_layer, 30+k*50, 30, 50+k*50, 50, filled=True, bg=color)
             o.species = species.name
+            o.name = species.name # for tooltip
             o.connect('button-press-event', self.button_press)
             o.connect('motion-notify-event', self.drag_motion)
             o.connect('button-release-event', self.button_release)
+            o.connect('query-tooltip',self.query_tooltip)
             o.state = 'reservoir'
 
         self.lattice_layer.move_all(10, 80)
@@ -265,6 +267,9 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.item = None
         self.prev_pos = None
 
+    def query_tooltip(self, canvas, widget, tooltip):
+        tooltip.set_text(widget.name)
+        return True
 
     def on_lattice(self, x, y):
         """Returns True if (x, y) is in lattice box
