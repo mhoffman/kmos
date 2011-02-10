@@ -1,4 +1,3 @@
-import pdb
 #!/usr/bin/env python
 # Standard library imports
 import re
@@ -235,7 +234,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                     l_site.set_radius(5)
                     l_site.i = i
                     l_site.j = j
-                    l_site.name = site.name
+                    l_site.name = '%s.(%s,%s)' % (site.name, i-self.X, j-self.Y)
                     l_site.layer = site.layer
 
         # draw frame
@@ -602,7 +601,6 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                 o.set_radius(5)
                 o.frac_coords = (xprime/X, yprime/Y)
                 o.connect('button-press-event', self.grid_point_press_event)
-                #o.connect('query-tooltip', self.query_tooltip)
 
         for site in self.project_tree.site_list:
             o = CanvasOval(self.site_layer,0,0,10,10, filled=True)
@@ -611,7 +609,6 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
             o.site = site
             o.connect('button-press-event', self.site_press_event)
             o.connect('query-tooltip', self.query_tooltip)
-            # don't forget to add tooltip a stored site
         self.canvas.move_all(50, 50)
         self.canvas.hide()
         self.canvas.show()
