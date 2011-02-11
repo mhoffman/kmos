@@ -1168,16 +1168,6 @@
                                         <property name="position">2</property>
                                     </packing>
                                 </child>
-                                <child>
-                                    <widget class="GtkLabel" id="Index:">
-                                        <property name="label" context="yes" translatable="yes">Class:</property>
-                                        <property name="visible">True</property>
-                                        <property name="xalign">0.0</property>
-                                    </widget>
-                                    <packing>
-                                        <property name="position">3</property>
-                                    </packing>
-                                </child>
                             </widget>
                         </child>
                         <child>
@@ -1257,15 +1247,6 @@
                                     </widget>
                                     <packing>
                                         <property name="position">2</property>
-                                    </packing>
-                                </child>
-                                <child>
-                                    <widget class="ProxyComboEntry" id="site_class">
-                                        <property name="model_attribute">site_class</property>
-                                        <property name="visible">True</property>
-                                    </widget>
-                                    <packing>
-                                        <property name="position">3</property>
                                     </packing>
                                 </child>
                             </widget>

@@ -141,16 +141,30 @@ class ProjectTree(SlaveDelegate):
                 self.lattice.cell_size_x = cell_size[0]
                 self.lattice.cell_size_y = cell_size[1]
                 self.lattice.cell_size_z = cell_size[2]
-                for layer in child:
-                    name = layer.attrib['name']
-                    layer_elem = Layer(name=name, )
-                    for site in layer:
-                        index =  int(site.attrib['index'])
-                        name = site.attrib['type']
-                        coord = [ int(x) for x in site.attrib['coord'].split() ]
-                        site_elem = Site(index=index, name=name, site_x=coord[0], site_y=coord[1])
-                        layer_elem.add_site(site_elem)
-                    self.project_data.append(self.lattice, layer_elem)
+                for elem in child:
+                    if elem.tag == 'site':
+                        index =  int(elem.attrib['index'])
+                        name = elem.attrib['type']
+                        x, y, z = [ float(x) for x in elem.attrib['vector'].split() ]
+                        layer_name = elem.attrib['layer']
+                        site_class = elem.attrib['class']
+                        site_elem = Site(index=index,
+                            name=name,
+                            x=x, y=y, z=z,
+                            site_class=site_class)
+                        self.site_list.append(site_elem)
+                    elif elem.tag == 'layer':
+                        name = elem.attrib['name']
+                        x, y, z = [int(i) for i in elem.attrib['grid'].split()]
+                        ox, oy, oz = [float(i) for i in elem.attrib['grid_offset'].split()]
+                        grid = Grid(x=x, y=y, z=z,
+                            offset_x=ox, offset_y=oy, offset_z=oz)
+                        layer = Layer(name=name, grid=grid)
+                        self.project_data.append(self.layer_list_iter, layer)
+                        print(layer)
+                    elif elem.tag == 'site_class':
+                        # ignored for now
+                        pass
             elif child.tag == 'meta':
                 for attrib in ['author', 'email', 'debug', 'model_name', 'model_dimension']:
                     if child.attrib.has_key(attrib):
@@ -641,9 +655,9 @@ class KMC_Editor(GladeDelegate):
             if not self.project_tree.filename:
                 self.on_btn_save_as__clicked(None)
             outfile = open(self.project_tree.filename, 'w')
+            outfile.write(xml_string)
             outfile.write('<!-- This is an automatically generated XML file, representing a kMC model ' + \
                             'please do not change this unless you know what you are doing -->\n')
-            outfile.write(xml_string)
             outfile.close()
             self.saved_state = xml_string
             self.toast('Saved %s' % self.project_tree.filename)
