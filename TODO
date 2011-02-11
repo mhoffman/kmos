@@ -10,8 +10,6 @@ Functionality
   * build-up library of lattices which can be
     simply chosen from
   * add undo function to process editor
-  * add tooltip window to process editor for sites/condition/action
-  * organize buttons in menu
 
 
 Project related
@@ -20,3 +18,6 @@ Project related
 
 Future/optional projects:
   * Allow for non-orthogonal unit cells
+
+
+  * Finish export of layers (and import)

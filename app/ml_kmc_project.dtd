@@ -24,7 +24,7 @@
     name CDATA #REQUIRED
     value CDATA #IMPLIED
   >
-  <!ELEMENT lattice (layer)+>
+  <!ELEMENT lattice (layer|site|site_class)*>
   <!ATTLIST lattice
     cell_size CDATA #REQUIRED
   >
@@ -34,10 +34,9 @@
     grid CDATA #REQUIRED
     grid_offset CDATA #REQUIRED
   >
-  <!ELEMENT site_class_list (site_class)*>
   <!ELEMENT site_class EMPTY>
   <!ATTLIST site_class
-    site_class CDATA #REQUIRED
+    name CDATA #REQUIRED
   >
   <!ELEMENT site EMPTY>
   <!ATTLIST site

@@ -301,7 +301,7 @@ class ProjectTree(SlaveDelegate):
             parameter_elem = ET.SubElement(parameter_list, 'parameter')
             parameter_elem.set('name', parameter.name)
             parameter_elem.set('value', str(parameter.value))
-        layer_list = ET.SubElement(root, 'lattice')
+        lattice_elem = ET.SubElement(root, 'lattice')
         if (hasattr(self.layer_list_iter, 'cell_size_x') and 
             hasattr(self.layer_list_iter, 'cell_size_y') and
             hasattr(self.layer_list_iter, 'cell_size_z')):
@@ -310,7 +310,7 @@ class ProjectTree(SlaveDelegate):
             self.layer_list_iter.cell_size_y,
             self.layer_list_iter.cell_size_z))
         for layer in self.layer_list:
-            layer_elem = ET.SubElement(layer_list, 'layer')
+            layer_elem = ET.SubElement(lattice_elem, 'layer')
             layer_elem.set('name', layer.name)
             if (hasattr(layer.grid, 'x') and
             hasattr(layer.grid, 'y') and
@@ -327,6 +327,13 @@ class ProjectTree(SlaveDelegate):
                                   layer.grid.offset_y,
                                   layer.grid.offset_z))
                 
+        for site in self.site_list:
+            site_elem = ET.SubElement(lattice_elem, 'site')
+            site_elem.set('vector', '%s %s %s' % (site.x, site.y, site.z))
+            site_elem.set('index', site.index)
+            site_elem.set('type', site.name)
+            site_elem.set('layer', site.layer)
+            site_elem.set('class', site.site_class)
         process_list = ET.SubElement(root, 'process_list')
         for process in self.process_list:
             process_elem = ET.SubElement(process_list, 'process')
