@@ -55,12 +55,20 @@ class Site(Attributes):
 class Grid(Attributes):
     attributes = ['x','y','z','offset_x','offset_y','offset_z',]
     def __init__(self, **kwargs):
-        self.x = 1
-        self.y = 1
-        self.z = 1
-        self.offset_x = 0.
-        self.offset_y = 0.
-        self.offset_z = 0.
+        Attributes.__init__(self, **kwargs)
+        self.x = kwargs['x'] if 'x' in kwargs else 1
+        self.y = kwargs['y'] if 'y' in kwargs else 1
+        self.z = kwargs['z'] if 'z' in kwargs else 1
+        self.offset_x = kwargs['offset_x'] if 'offset_x' in kwargs else 0.0
+        self.offset_y = kwargs['offset_y'] if 'offset_y' in kwargs else 0.0
+        self.offset_z = kwargs['offset_z'] if 'offset_z' in kwargs else 0.0
+
+    def __repr__(self):
+        return ('grid: %s %s %s\noffset: %s %s %s' %
+            (self.x, self.y, self.z,
+            self.offset_x,
+            self.offset_y,
+            self.offset_z))
         
 class Layer(Attributes, CorrectlyNamed):
     """A class that defines exactly one layer
@@ -68,11 +76,11 @@ class Layer(Attributes, CorrectlyNamed):
     attributes = ['name', 'grid']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
-        self.grid = Grid()
+        self.grid = kwargs['grid'] if 'grid' in kwargs else Grid()
         self.name = kwargs['name'] if 'name' in kwargs else ''
 
     def __repr__(self):
-        return "%s\n" % (self.name)
+        return "%s\n[%s]\n" % (self.name, self.grid)
 
     def add_site(self, site):
         """Add a new site to a layer

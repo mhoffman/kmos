@@ -162,7 +162,6 @@ class ProjectTree(SlaveDelegate):
                             offset_x=ox, offset_y=oy, offset_z=oz)
                         layer = Layer(name=name, grid=grid)
                         self.project_data.append(self.layer_list_iter, layer)
-                        print(layer)
                     elif elem.tag == 'site_class':
                         # ignored for now
                         pass
