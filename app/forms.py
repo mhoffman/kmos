@@ -570,12 +570,12 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.site_layer.clear()
         X, Y = 400, 400
 
-        if self.project_tree.meta.cell_size_x > self.project_tree.meta.cell_size_y :
+        if self.project_tree.lattice.cell_size_x > self.project_tree.lattice.cell_size_y :
             X = 400.
-            Y = 400.*self.project_tree.meta.cell_size_y/self.project_tree.meta.cell_size_x
+            Y = 400.*self.project_tree.lattice.cell_size_y/self.project_tree.lattice.cell_size_x
         else:
             Y = 400.
-            X = 400.*self.project_tree.meta.cell_size_x/self.project_tree.meta.cell_size_y
+            X = 400.*self.project_tree.lattice.cell_size_x/self.project_tree.lattice.cell_size_y
 
 
         # draw frame

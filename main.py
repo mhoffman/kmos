@@ -70,6 +70,7 @@ class ProjectTree(SlaveDelegate):
         self.set_parent(parent)
         self.meta = self.project_data.append(None, Meta())
         self.layer_list_iter = self.project_data.append(None, LayerList())
+        self.lattice = self.layer_list_iter
         self.parameter_list_iter = self.project_data.append(None, ParameterList())
         self.species_list_iter = self.project_data.append(None, SpeciesList())
         self.process_list_iter = self.project_data.append(None, ProcessList())
@@ -137,9 +138,9 @@ class ProjectTree(SlaveDelegate):
         for child in root:
             if child.tag == 'lattice':
                 cell_size = [float(x) for x in child.attrib['cell_size'].split()]
-                self.layer_list_iter.cell_size_x = cell_size[0]
-                self.layer_list_iter.cell_size_y = cell_size[1]
-                self.layer_list_iter.cell_size_z = cell_size[2]
+                self.lattice.cell_size_x = cell_size[0]
+                self.lattice.cell_size_y = cell_size[1]
+                self.lattice.cell_size_z = cell_size[2]
                 for layer in child:
                     name = layer.attrib['name']
                     layer_elem = Layer(name=name, )
@@ -149,7 +150,7 @@ class ProjectTree(SlaveDelegate):
                         coord = [ int(x) for x in site.attrib['coord'].split() ]
                         site_elem = Site(index=index, name=name, site_x=coord[0], site_y=coord[1])
                         layer_elem.add_site(site_elem)
-                    self.project_data.append(self.layer_list_iter, layer_elem)
+                    self.project_data.append(self.lattice, layer_elem)
             elif child.tag == 'meta':
                 for attrib in ['author', 'email', 'debug', 'model_name', 'model_dimension']:
                     if child.attrib.has_key(attrib):
@@ -419,7 +420,7 @@ class ProjectTree(SlaveDelegate):
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
         else:
-            self.get_parent().toast('Not implemented, yet.')
+            self.get_parent().toast('Not implemented, yet(%s).' % type(elem))
 
 
 class KMC_Editor(GladeDelegate):
