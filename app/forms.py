@@ -615,7 +615,8 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                 o.frac_coords = (xprime/X, yprime/Y)
                 o.connect('button-press-event', self.grid_point_press_event)
 
-        for site in self.project_tree.site_list:
+        sites = filter(lambda x: x.layer==self.model.name, self.project_tree.site_list)
+        for site in sites:
             o = CanvasOval(self.site_layer,0,0,10,10, filled=True)
             o.set_radius(10)
             o.set_center(site.x*X,(1-site.y)*Y)
