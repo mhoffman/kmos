@@ -435,7 +435,7 @@ class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
     """
     gladefile = GLADEFILE
     toplevel_name = 'meta_form'
-    widgets = ['author', 'email', 'model_name', 'model_dimension', 'debug', 'cell_size_x', 'cell_size_y', 'cell_size_z']
+    widgets = ['author', 'email', 'model_name', 'model_dimension', 'debug', ]
     def __init__(self, model, project_tree):
         ProxySlaveDelegate.__init__(self, model)
         #self.model_dimension.set_sensitive(False)
@@ -542,6 +542,19 @@ class GridForm(ProxyDelegate):
     def on_grid_form_ok__clicked(self, button):
         self.layer.redraw()
         self.hide()
+
+
+        
+class LatticeForm(ProxySlaveDelegate):
+    gladefile = GLADEFILE
+    toplevel_name = 'lattice_form'
+    widgets = ['cell_size_x', 'cell_size_y', 'cell_size_z']
+    def __init__(self, model, dimension):
+        ProxySlaveDelegate.__init__(self, model)
+        if dimension < 3 :
+            self.cell_size_z.hide()
+        if dimension < 2 :
+            self.cell_size_y.hide()
 
 
         

@@ -419,6 +419,11 @@ class ProjectTree(SlaveDelegate):
             form = SpeciesListForm(elem, self)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
+        elif isinstance(elem, LayerList):
+            dimension = self.meta.model_dimension
+            form = LatticeForm(elem, dimension)
+            self.get_parent().attach_slave('workarea', form)
+            form.focus_topmost()
         else:
             self.get_parent().toast('Not implemented, yet(%s).' % type(elem))
 
