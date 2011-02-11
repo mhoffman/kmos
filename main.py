@@ -150,6 +150,7 @@ class ProjectTree(SlaveDelegate):
                         site_class = elem.attrib['class']
                         site_elem = Site(index=index,
                             name=name,
+                            layer=layer_name,
                             x=x, y=y, z=z,
                             site_class=site_class)
                         self.site_list.append(site_elem)
