@@ -26,9 +26,12 @@ class Attributes:
 
 
 class SiteClass(Attributes):
-    """An optional every site can have. If two sites belong
+    """An optional attribute every site can have. If two sites belong
     to the same class is a long winded way of saying, they 
-    are equivalent.
+    are equivalent. Thus if there will ever be automatic
+    geometry recognition in the editor, it will use this
+    field to know wether to sites are really geometrically
+    equivalent.
     """
     attributes = ['name']
     def __init__(self, **kwargs):

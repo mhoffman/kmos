@@ -305,7 +305,7 @@ class ProjectTree(SlaveDelegate):
         if (hasattr(self.layer_list_iter, 'cell_size_x') and 
             hasattr(self.layer_list_iter, 'cell_size_y') and
             hasattr(self.layer_list_iter, 'cell_size_z')):
-            layer_list.set('cell_size', '%s %s %s' %
+            lattice_elem.set('cell_size', '%s %s %s' %
             (self.layer_list_iter.cell_size_x,
             self.layer_list_iter.cell_size_y,
             self.layer_list_iter.cell_size_z))
@@ -330,7 +330,7 @@ class ProjectTree(SlaveDelegate):
         for site in self.site_list:
             site_elem = ET.SubElement(lattice_elem, 'site')
             site_elem.set('vector', '%s %s %s' % (site.x, site.y, site.z))
-            site_elem.set('index', site.index)
+            site_elem.set('index', str(site.index))
             site_elem.set('type', site.name)
             site_elem.set('layer', site.layer)
             site_elem.set('class', site.site_class)
@@ -641,9 +641,9 @@ class KMC_Editor(GladeDelegate):
             if not self.project_tree.filename:
                 self.on_btn_save_as__clicked(None)
             outfile = open(self.project_tree.filename, 'w')
-            outfile.write(xml_string)
             outfile.write('<!-- This is an automatically generated XML file, representing a kMC model ' + \
                             'please do not change this unless you know what you are doing -->\n')
+            outfile.write(xml_string)
             outfile.close()
             self.saved_state = xml_string
             self.toast('Saved %s' % self.project_tree.filename)
