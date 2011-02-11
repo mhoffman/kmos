@@ -5,7 +5,6 @@
     debug CDATA #REQUIRED
     email CDATA #REQUIRED
     model_dimension CDATA #REQUIRED
-    unit_cell_size CDATA #REQUIRED
     model_name CDATA #REQUIRED
   >
 
@@ -26,6 +25,9 @@
     value CDATA #IMPLIED
   >
   <!ELEMENT lattice (layer)+>
+  <!ATTLIST lattice
+    cell_size CDATA #REQUIRED
+  >
   <!ELEMENT layer (site)*>
   <!ATTLIST layer 
     name CDATA #REQUIRED

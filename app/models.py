@@ -172,12 +172,16 @@ class ParameterList(Settable):
         Settable.__init__(self, **kwargs)
 
 
-class LayerList(Settable):
+class LayerList(Attributes):
     """A list of layers
     """
+    attributes = ['name','cell_size_x', 'cell_size_y', 'cell_size_z']
     def __init__(self, **kwargs):
-        kwargs['name'] = 'Lattice(s)'
-        Settable.__init__(self, **kwargs)
+        Attributes.__init__(self, **kwargs)
+        self.name = 'Lattice(s)'
+        self.cell_size_x = 1.
+        self.cell_size_y = 1.
+        self.cell_size_z = 1.
 
 
 class Parameter(Attributes, CorrectlyNamed):
@@ -203,7 +207,7 @@ class Meta(Settable, object):
     """
     name = 'Meta'
     def __init__(self):
-        Settable.__init__(self, email='', author='', debug=0, model_name='', model_dimension=0, cell_size_x=1., cell_size_y=1., cell_size_z=1.)
+        Settable.__init__(self, email='', author='', debug=0, model_name='', model_dimension=0, )
 
     def add(self, attrib):
         for key in attrib:

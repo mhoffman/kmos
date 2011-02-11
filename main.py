@@ -136,9 +136,12 @@ class ProjectTree(SlaveDelegate):
             return
         for child in root:
             if child.tag == 'lattice':
+                cell_size = [float(x) for x in child.attrib['cell_size'].split()]
+                self.layer_list_iter.cell_size_x = cell_size[0]
+                self.layer_list_iter.cell_size_y = cell_size[1]
+                self.layer_list_iter.cell_size_z = cell_size[2]
                 for layer in child:
                     name = layer.attrib['name']
-                    size = [ int(x) for x in layer.attrib['unit_cell_size'].split() ]
                     layer_elem = Layer(name=name, )
                     for site in layer:
                         index =  int(site.attrib['index'])
@@ -281,13 +284,6 @@ class ProjectTree(SlaveDelegate):
             meta.set('model_dimension', str(self.meta.model_dimension))
         if hasattr(self.meta, 'debug'):
             meta.set('debug', str(self.meta.debug))
-        if (hasattr(self.meta, 'cell_size_x') and 
-            hasattr(self.meta, 'cell_size_y') and
-            hasattr(self.meta, 'cell_size_z')):
-            meta.set('unit_cell_size', '%s %s %s' %
-            (self.meta.cell_size_x,
-            self.meta.cell_size_y,
-            self.meta.cell_size_z))
         species_list = ET.SubElement(root, 'species_list')
         if hasattr(self.species_list_iter, 'default_species'):
             species_list.set('default_species', self.species_list_iter.default_species)
@@ -305,6 +301,13 @@ class ProjectTree(SlaveDelegate):
             parameter_elem.set('name', parameter.name)
             parameter_elem.set('value', str(parameter.value))
         layer_list = ET.SubElement(root, 'lattice')
+        if (hasattr(self.layer_list_iter, 'cell_size_x') and 
+            hasattr(self.layer_list_iter, 'cell_size_y') and
+            hasattr(self.layer_list_iter, 'cell_size_z')):
+            layer_list.set('cell_size', '%s %s %s' %
+            (self.layer_list_iter.cell_size_x,
+            self.layer_list_iter.cell_size_y,
+            self.layer_list_iter.cell_size_z))
         for layer in self.layer_list:
             layer_elem = ET.SubElement(layer_list, 'layer')
             layer_elem.set('name', layer.name)
