@@ -5,6 +5,8 @@
 from kiwi.python import Settable
 from utils import CorrectlyNamed
 
+from copy import deepcopy
+
 
 class Attributes:
     """Handy class that easily allows to define data structures
@@ -24,18 +26,6 @@ class Attributes:
         else:
             raise AttributeError, 'Tried to set illegal attribute %s' % attrname
 
-
-class SiteClass(Attributes):
-    """An optional attribute every site can have. If two sites belong
-    to the same class is a long winded way of saying, they 
-    are equivalent. Thus if there will ever be automatic
-    geometry recognition in the editor, it will use this
-    field to know wether to sites are really geometrically
-    equivalent.
-    """
-    attributes = ['name']
-    def __init__(self, **kwargs):
-        Attributes.__init__(self, **kwargs)
 
 
 class Site(Attributes):
@@ -73,11 +63,12 @@ class Grid(Attributes):
 class Layer(Attributes, CorrectlyNamed):
     """A class that defines exactly one layer
     """
-    attributes = ['name', 'grid']
+    attributes = ['name', 'grid','sites', 'site_classes']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
         self.grid = kwargs['grid'] if 'grid' in kwargs else Grid()
         self.name = kwargs['name'] if 'name' in kwargs else ''
+        self.sites = []
 
     def __repr__(self):
         return "%s\n[%s]\n" % (self.name, self.grid)
@@ -111,25 +102,16 @@ class Coord(Attributes):
     """Class that hold exactly one coordinate as used in the description
     of a process
     """
-    attributes = ['offset', 'name', 'layer']
+    attributes = ['offset', 'name']
     def __init__(self, **kwargs):
         if kwargs.has_key('string'):
             raw = kwargs['string'].split('.')
             if len(raw) == 1 :
                 self.name = raw[0]
                 self.offset = [0, 0]
-                self.layer = ''
             elif len(raw) == 2 :
                 self.name = raw[0]
                 self.offset = eval(raw[1])
-                self.layer = ''
-            elif len(raw) == 3 :
-                self.name = raw[0]
-                self.layer = raw[2]
-                if raw[1]:
-                    self.offset = eval(raw[1])
-                else:
-                    self.offset = [0, 0]
             else:
                 raise TypeError, "Coordinate specification %s does not match the expected format" % raw
 

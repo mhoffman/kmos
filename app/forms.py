@@ -78,19 +78,8 @@ def parse_chemical_equation(eq, process, project_tree):
     for term in left + right:
         if not filter(lambda x: x.name == term[0], project_tree.species_list):
             raise UserWarning('Species %s unknown ' % term[0])
-        if multi_lattice:
-            lattice = filter(lambda x: x.name == term[1].split('.')[2], project_tree.layer_list)
-            if not lattice:
-                raise UserWarning('Lattice %s is unknown.!' % layer_name)
-            elif len(lattice) > 1 :
-                raise UserWarning('Error: There is  more than lattice named %s.' % lattice[0].name)
-            else:
-                lattice = lattice[0]
-                site_name = term[1].split('.')[0]
-                if not filter(lambda x: x.name == site_name, lattice.sites):
-                    raise UserWarning('Site %s is unknown for lattice %s' % (site_name, lattice.name))
         else:
-            if not filter(lambda x: x.name == term[1].split('.')[0], project_tree.layer_list[0].sites):
+            if not filter(lambda x: x.name == term[1].split('.')[0], project_tree.site_list):
                 raise UserWarning('Site %s unknown' % term[1])
 
     condition_list = []
@@ -389,12 +378,14 @@ class SiteForm(ProxyDelegate):
     gladefile = GLADEFILE
     toplevel_name = 'site_form'
     widgets = ['site_name', 'site_index', 'sitevect_x', 'sitevect_y', 'sitevect_z']
-    def __init__(self, site, parent, project_tree):
+    def __init__(self, site, parent, project_tree, layer):
         self.saved_state = copy.deepcopy(site)
         ProxyDelegate.__init__(self, site)
+        self.site_ok.grab_default()
         self.site = site
         self.parent = parent
         self.project_tree = project_tree
+        self.layer = layer
         self.site_index.set_sensitive(False)
         self.show_all()
         if self.project_tree.meta.model_dimension < 3 :
@@ -405,7 +396,7 @@ class SiteForm(ProxyDelegate):
 
     def on_site_name__validate(self, widget, site_name):
         # check if other site already has the name
-        if filter(lambda x : x.name == site_name, self.project_tree.site_list):
+        if filter(lambda x : x.name == site_name, self.layer.sites):
             self.site_ok.set_sensitive(False)
             return ValidationError('Site name needs to be unique')
         else:
@@ -415,8 +406,8 @@ class SiteForm(ProxyDelegate):
     def on_site_cancel__clicked(self, button):  
         if self.saved_state.name:
             # if site existed, reset to previous state
-            self.project_tree.site_list.remove(self.site)
-            self.project_tree.site_list.append(self.saved_state)
+            self.layer.sites.remove(self.site)
+            self.layer.sites.append(self.saved_state)
         else:
             # if site did not exist previously, remove completely
             self.project_tree.site_list.remove(self.site)
@@ -425,7 +416,7 @@ class SiteForm(ProxyDelegate):
 
     def on_site_ok__clicked(self, button):
         if not len(self.site_name.get_text()) :
-            self.project_tree.site_list.remove(self.model)
+            self.layer.sites.remove(self.model)
         self.hide()
         self.parent.redraw()
 
@@ -615,8 +606,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                 o.frac_coords = (xprime/X, yprime/Y)
                 o.connect('button-press-event', self.grid_point_press_event)
 
-        sites = filter(lambda x: x.layer==self.model.name, self.project_tree.site_list)
-        for site in sites:
+        for site in self.model.sites:
             o = CanvasOval(self.site_layer,0,0,10,10, filled=True)
             o.set_radius(10)
             o.set_center(site.x*X,(1-site.y)*Y)
@@ -632,7 +622,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         return True
 
     def site_press_event(self, widget, item, event):
-        SiteForm(item.site, self, self.project_tree)
+        SiteForm(item.site, self, self.project_tree, self.model)
         
     def grid_point_press_event(self, widget, item, event):
         def find_smallest_gap(l,base=1):
@@ -649,14 +639,14 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
 
         new_site = Site()
         new_site.name = ''
-        new_site.index = find_smallest_gap([site.index for site in self.project_tree.site_list])
+        new_site.index = find_smallest_gap([site.index for site in self.model.sites])
         new_site.x = item.frac_coords[0]
         new_site.y = item.frac_coords[1]
         new_site.z = 0.
         new_site.layer = self.model.name
 
-        self.project_tree.site_list.append(new_site)
-        SiteForm(new_site, self, self.project_tree)
+        self.model.sites.append(new_site)
+        SiteForm(new_site, self, self.project_tree, self.model)
       
 
     def on_set_grid_button__clicked(self, button):

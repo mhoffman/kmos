@@ -76,7 +76,6 @@ class ProjectTree(SlaveDelegate):
         self.process_list_iter = self.project_data.append(None, ProcessList())
         self.output_list = self.project_data.append(None, OutputList())
         self.output_list = []
-        self.site_list = []
 
         self.filename = ''
 
@@ -132,6 +131,8 @@ class ProjectTree(SlaveDelegate):
             dtd = ET.DTD(APP_ABS_PATH + MLKMCPROJECT_DTD)
         else:
             dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_DTD)
+            raise UserWarning('This is a single-lattice kmc project which is not supported in this development\n' +
+                'version of kmos\n')
         if not dtd.validate(root):
             print(dtd.error_log.filter_from_errors()[0])
             return
@@ -142,19 +143,7 @@ class ProjectTree(SlaveDelegate):
                 self.lattice.cell_size_y = cell_size[1]
                 self.lattice.cell_size_z = cell_size[2]
                 for elem in child:
-                    if elem.tag == 'site':
-                        index =  int(elem.attrib['index'])
-                        name = elem.attrib['type']
-                        x, y, z = [ float(x) for x in elem.attrib['vector'].split() ]
-                        layer_name = elem.attrib['layer']
-                        site_class = elem.attrib['class']
-                        site_elem = Site(index=index,
-                            name=name,
-                            layer=layer_name,
-                            x=x, y=y, z=z,
-                            site_class=site_class)
-                        self.site_list.append(site_elem)
-                    elif elem.tag == 'layer':
+                    if elem.tag == 'layer':
                         name = elem.attrib['name']
                         x, y, z = [int(i) for i in elem.attrib['grid'].split()]
                         ox, oy, oz = [float(i) for i in elem.attrib['grid_offset'].split()]
@@ -162,6 +151,16 @@ class ProjectTree(SlaveDelegate):
                             offset_x=ox, offset_y=oy, offset_z=oz)
                         layer = Layer(name=name, grid=grid)
                         self.project_data.append(self.layer_list_iter, layer)
+                        for site in elem:
+                            index =  int(site.attrib['index'])
+                            name = site.attrib['type']
+                            x, y, z = [ float(x) for x in site.attrib['vector'].split() ]
+                            site_class = site.attrib['class']
+                            site_elem = Site(index=index,
+                                name=name,
+                                x=x, y=y, z=z,
+                                site_class=site_class)
+                            layer.sites.append(site_elem)
                     elif elem.tag == 'site_class':
                         # ignored for now
                         pass
@@ -341,13 +340,14 @@ class ProjectTree(SlaveDelegate):
                                   layer.grid.offset_y,
                                   layer.grid.offset_z))
                 
-        for site in self.site_list:
-            site_elem = ET.SubElement(lattice_elem, 'site')
-            site_elem.set('vector', '%s %s %s' % (site.x, site.y, site.z))
-            site_elem.set('index', str(site.index))
-            site_elem.set('type', site.name)
-            site_elem.set('layer', site.layer)
-            site_elem.set('class', site.site_class)
+            for site in layer.sites:
+                site_elem = ET.SubElement(layer_elem, 'site')
+                site_elem.set('vector', '%s %s %s' % (site.x, site.y, site.z))
+                site_elem.set('index', str(site.index))
+                site_elem.set('type', site.name)
+                site_elem.set('class', site.site_class)
+
+
         process_list = ET.SubElement(root, 'process_list')
         for process in self.process_list:
             process_elem = ET.SubElement(process_list, 'process')
