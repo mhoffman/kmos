@@ -63,11 +63,12 @@ class Grid(Attributes):
 class Layer(Attributes, CorrectlyNamed):
     """A class that defines exactly one layer
     """
-    attributes = ['name', 'grid','sites', 'site_classes']
+    attributes = ['name', 'grid','sites', 'site_classes', 'active']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
         self.grid = kwargs['grid'] if 'grid' in kwargs else Grid()
         self.name = kwargs['name'] if 'name' in kwargs else ''
+        self.active = kwargs['active'] if 'active' in kwargs else False
         self.sites = []
 
     def __repr__(self):
@@ -78,14 +79,12 @@ class Layer(Attributes, CorrectlyNamed):
         """
         self.sites.append(site)
 
-    #def get_coords(self, site):
-        #"""Return simple numerical representation of coordinates
-        #"""
-        #local_site = filter(lambda x: x.name == site.coord.name, self.sites)[0]
-        #local_coords = local_site.site_x, local_site.site_y
-        #global_coords = site.coord.offset[0]*self.unit_cell_size_x, site.coord.offset[1]*self.unit_cell_size_y
-        #coords = [ x + y for (x, y) in zip(global_coords, local_coords) ]
-        #return coords
+            
+    def get_info(self):
+        if self.active:
+            return 'visible'
+        else:
+            return 'invisible'
 
 
 class ConditionAction(Attributes):
@@ -155,7 +154,6 @@ class ProcessList(Settable):
 
     def __lt__(self, other):
         return self.name < other.name
-        
 
 class ParameterList(Settable):
     """A list of parameters
@@ -191,7 +189,7 @@ class Parameter(Attributes, CorrectlyNamed):
     def on_name__content_changed(self, _):
         self.project_tree.update(self.process)
 
-    def get_extra(self):
+    def get_info(self):
         return self.value
 
 
@@ -232,7 +230,7 @@ class Process(Attributes):
     def add_action(self, action):
         self.action_list.append(action)
 
-    def get_extra(self):
+    def get_info(self):
         return self.rate_constant
 
 

@@ -66,7 +66,11 @@ class ProjectTree(SlaveDelegate):
     a treelike view for the gui
     """
     def __init__(self, parent):
-        self.project_data = ObjectTree([Column('name', data_type=str, sorted=True), Column('extra', data_type=str)])
+        self.project_data = ObjectTree([Column('name',use_markup=True, data_type=str, sorted=True), Column('info')])
+
+        self.project_data.connect('row-activated',self.on_row_activated)
+
+
         self.set_parent(parent)
         self.meta = self.project_data.append(None, Meta())
         self.layer_list_iter = self.project_data.append(None, LayerList())
@@ -83,6 +87,11 @@ class ProjectTree(SlaveDelegate):
 
     def update(self, model):
         self.project_data.update(model)
+
+
+    def on_row_activated(self, tree, data):
+        if isinstance(data, Layer):
+            data.active = not data.active
 
     def get_name(self):
         if self.filename:
