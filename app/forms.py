@@ -209,9 +209,14 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             CanvasLine(self.lattice_layer, 0, i*(self.l/self.z), 500, i*(self.l/self.z), line_width=1, fg=(.6, .6, .6))
         for i in range(self.z):
             CanvasLine(self.lattice_layer, i*(self.l/self.z), 0, i*(self.l/self.z), 500, line_width=1, fg=(.6, .6, .6))
+        active_layers = filter(lambda x: x.active==True, self.project_tree.layer_list)
+        site_list = []
+        for active_layer in active_layers:
+            for site in active_layer.sites:
+                site_list.append(site)
         for i in range(self.z+1):
             for j in range(self.z+1):
-                for site in self.project_tree.site_list:
+                for site in site_list:
                     if i == self.X and j == self.Y:
                         l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=(1., 1., 1.))
                     else:
