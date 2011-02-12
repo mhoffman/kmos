@@ -972,7 +972,7 @@
                                                 <property name="data_type">str</property>
                                                 <property name="invisible_char">*</property>
                                                 <property name="invisible_char_set">True</property>
-                                                <property name="model_attribute">parameter_name</property>
+                                                <property name="model_attribute">name</property>
                                                 <property name="visible">True</property>
                                             </widget>
                                             <packing>

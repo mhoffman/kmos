@@ -415,7 +415,7 @@ class ProjectTree(SlaveDelegate):
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
         elif isinstance(elem, Parameter):
-            form = ParameterForm(elem, self.project_data)
+            form = ParameterForm(elem, self)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
         elif isinstance(elem, Process):

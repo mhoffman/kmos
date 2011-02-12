@@ -469,8 +469,8 @@ class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
         self.project_tree.update(self.model)
 
     def on_parameter_name__content_changed(self, text):
-        self.project_tree.project_data.sort_by_attribute('name')
         self.project_tree.update(self.model)
+        self.project_tree.project_data.sort_by_attribute('name')
 
 
 class SpeciesListForm(ProxySlaveDelegate):
