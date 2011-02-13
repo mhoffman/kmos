@@ -36,15 +36,13 @@ def parse_chemical_equation(eq, process, project_tree):
     """Evaluates a chemical equation 'eq' and adds
     conditions and actions accordingly
     """
-    if len(project_tree.layer_list) > 1 :
-        multi_lattice = True
     # remove spaces
     eq = re.sub(' ', '', eq)
     
 
     # split at ->
-    if eq.count('->') > 1 :
-        raise StandardError, 'Chemical expression may contain at most one "->"\n%s'  % eq
+    if eq.count('->') != 1 :
+        raise StandardError, 'Chemical expression must contain exactly one "->"\n%s'  % eq
     eq = re.split('->', eq)
     if len(eq) == 2 :
         left = eq[0]
@@ -78,30 +76,77 @@ def parse_chemical_equation(eq, process, project_tree):
     for term in left + right:
         if not filter(lambda x: x.name == term[0], project_tree.species_list):
             raise UserWarning('Species %s unknown ' % term[0])
-        else:
-            if not filter(lambda x: x.name == term[1].split('.')[0], project_tree.site_list):
-                raise UserWarning('Site %s unknown' % term[1])
 
     condition_list = []
     action_list = []
-    for term in left:
-        condition_list.append(ConditionAction(species=term[0], coord=Coord(string=term[1])))
-    for term in right:
-        action_list.append(ConditionAction(species=term[0], coord=Coord(string=term[1])))
+
+    for i, term in enumerate(left + right):
+        #parse coordinate
+        coord_term = term[1].split('.')
+        if len(coord_term) == 1 :
+            coord_term.append('(0,0)')
+
+        if len(coord_term) == 2 :
+            name = coord_term[0]
+            active_layers = filter(lambda x: x.active, project_tree.layer_list)
+            if len(active_layers) == 1 :
+                layer = active_layers[0].name
+            else: # if more than one active try to guess layer from name
+                possible_sites = []
+                # if no layer visible choose among all of them
+                # else choose among visible
+                if not len(active_layers):
+                    layers = project_tree.layer_list
+                else:
+                    layers = active_layers
+                for ilayer in layers:
+                    for jsite in ilayer.sites:
+                        if jsite.name == name:
+                            possible_sites.append((jsite.name,ilayer.name))
+                if len(possible_sites) == 0 :
+                    raise UserWarning("Site %s not known" % name)
+                elif len(possible_sites) == 1 :
+                    layer = possible_sites[0][1]
+                else:
+                    raise UserWarning("Site %s is ambiguous because it"+
+                        "exists on the following lattices: %" %
+                        (name, [x[1] for x  in possible_sites]))
+            coord_term.append(layer)
+                    
+        if len(coord_term) == 3 :
+            name = coord_term[0]
+            offset = eval(coord_term[1])
+            layer = coord_term[2]
+            layer_names = [ x.name for x in project_tree.layer_list]
+            if layer not in layer_names:
+                raise UserWarning("Layer %s not known, must be one of %s" % (layer, layer_names))
+            else:
+                layer_instance = filter(lambda x: x.name==layer, project_tree.layer_list)[0]
+                site_names = [x.name for x in layer_instance.sites]
+                if name not in site_names:
+                    raise UserWarning("Site %s not known, must be one of %s" % (name, site_names))
+                
+                
+        species = term[0]
+        coord = Coord(name=name,offset=offset,layer=layer)
+        if i < len(left):
+            condition_list.append(ConditionAction(species=species, coord=coord))
+        else:
+            action_list.append(ConditionAction(species=species, coord=coord))
 
     default_species = project_tree.species_list_iter.default_species
     # every condition that does not have a corresponding action on the 
     # same coordinate gets complemented with a 'default_species' action
     for condition in condition_list:
         if not filter(lambda x: x.coord == condition.coord, action_list):
-            action_list.append(ConditionAction(species=default_species, coord=Coord(string=str(condition.coord))))
+            action_list.append(ConditionAction(species=default_species, coord=condition.coord))
 
     # every action that does not have a corresponding condition on
     # the same coordinate gets complemented with a 'default_species'
     # condition
     for action in action_list:
         if not filter(lambda x: x.coord == action.coord, condition_list):
-            condition_list.append(ConditionAction(species=default_species, coord=Coord(string=str(action.coord))))
+            condition_list.append(ConditionAction(species=default_species, coord=action.coord))
     process.condition_list += condition_list
     process.action_list += action_list
 
@@ -162,7 +207,17 @@ class BatchProcessForm(SlaveDelegate):
                 continue
             line = line.split(';')
             name = line[0]
-            rate_constant = line[2]
+            if len(line) == 1 :
+                eq = ''
+                rate_constant = ''
+            elif len(line) == 2 :
+                eq = line[1]
+                rate_constant = ''
+            elif len(line) == 3 :
+                eq = line[1]
+                rate_constant = line[2]
+            else:
+                raise UserWarning("There are too many ';' in your expression %s" % line)
             process = Process(name=name, rate_constant=rate_constant)
             try:
                 parse_chemical_equation(eq=line[1], process=process, project_tree=self.project_tree)
@@ -229,7 +284,10 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                     l_site.set_radius(5)
                     l_site.i = i
                     l_site.j = j
-                    l_site.tooltip_text = '%s.(%s,%s)' % (site.name, i-self.X, j-self.Y)
+                    if len(active_layers) > 1 :
+                        l_site.tooltip_text = '%s.(%s,%s).%s' % (site.name, i-self.X, j-self.Y, site.layer)
+                    else:
+                        l_site.tooltip_text = '%s.(%s,%s)' % (site.name, i-self.X, j-self.Y)
                     l_site.name = site.name
                     l_site.offset = (i-self.X, j-self.Y)
                     l_site.layer = site.layer
