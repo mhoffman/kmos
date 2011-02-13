@@ -373,13 +373,15 @@ class ProjectTree(SlaveDelegate):
                 condition_elem.set('species', condition.species)
                 condition_elem.set('coord_layer', condition.coord.layer)
                 condition_elem.set('coord_name', condition.coord.name)
-                condition_elem.set('coord_offset', ' '.join([str(i) for i in coord.offset]))
+                condition_elem.set('coord_offset', 
+                    ' '.join([str(i) for i in condition.coord.offset]))
             for action in process.action_list:
                 action_elem = ET.SubElement(process_elem, 'action')
                 action_elem.set('species', action.species)
                 action_elem.set('coord_layer', action.coord.layer)
                 action_elem.set('coord_name', action.coord.name)
-                action_elem.set('coord_offset', ' '.join([str(i) for i in coord.offset]))
+                action_elem.set('coord_offset',
+                    ' '.join([str(i) for i in condition.coord.offset]))
         output_list = ET.SubElement(root, 'output_list')
         for output in self.output_list:
             if output.output:
