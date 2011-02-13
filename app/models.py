@@ -101,7 +101,7 @@ class Coord(Attributes):
     """Class that hold exactly one coordinate as used in the description
     of a process
     """
-    attributes = ['offset', 'name']
+    attributes = ['offset', 'name', 'layer']
     def __init__(self, **kwargs):
         if kwargs.has_key('string'):
             raw = kwargs['string'].split('.')

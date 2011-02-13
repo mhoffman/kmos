@@ -191,8 +191,14 @@ class ProjectTree(SlaveDelegate):
                     for sub in process:
                         if sub.tag == 'action' or sub.tag == 'condition':
                             species =  sub.attrib['species']
-                            coord = Coord(string=sub.attrib['coord'])
-                            condition_action = ConditionAction(species=species, coord=coord)
+                            coord_layer = sub.attrib['coord_layer']
+                            coord_name = sub.attrib['coord_name']
+                            coord_offset = tuple([int(i) for i in sub.attrib['coord_name']])
+                            condition_action = ConditionAction(
+                                species=species,
+                                coord_layer=coord_layer,
+                                coord_name=coord_name,
+                                coord_offset=coord_offset)
                             if sub.tag == 'action':
                                 process_elem.add_action(condition_action)
                             elif sub.tag == 'condition':
@@ -365,11 +371,15 @@ class ProjectTree(SlaveDelegate):
             for condition in process.condition_list:
                 condition_elem = ET.SubElement(process_elem, 'condition')
                 condition_elem.set('species', condition.species)
-                condition_elem.set('coord', str(condition.coord))
+                condition_elem.set('coord_layer', condition.coord.layer)
+                condition_elem.set('coord_name', condition.coord.name)
+                condition_elem.set('coord_offset', ' '.join([str(i) for i in coord.offset]))
             for action in process.action_list:
                 action_elem = ET.SubElement(process_elem, 'action')
                 action_elem.set('species', action.species)
-                action_elem.set('coord', str(action.coord))
+                action_elem.set('coord_layer', action.coord.layer)
+                action_elem.set('coord_name', action.coord.name)
+                action_elem.set('coord_offset', ' '.join([str(i) for i in coord.offset]))
         output_list = ET.SubElement(root, 'output_list')
         for output in self.output_list:
             if output.output:
