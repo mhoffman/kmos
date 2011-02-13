@@ -68,7 +68,7 @@ class Layer(Attributes, CorrectlyNamed):
         Attributes.__init__(self, **kwargs)
         self.grid = kwargs['grid'] if 'grid' in kwargs else Grid()
         self.name = kwargs['name'] if 'name' in kwargs else ''
-        self.active = kwargs['active'] if 'active' in kwargs else False
+        self.active = kwargs['active'] if 'active' in kwargs else True
         self.sites = []
 
     def __repr__(self):
