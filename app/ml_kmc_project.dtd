@@ -57,7 +57,9 @@
       >
       <!ELEMENT action EMPTY>
       <!ATTLIST action
-        coord CDATA #REQUIRED
+        coord_name CDATA #REQUIRED
+        coord_layer CDATA #REQUIRED
+        coord_offset CDATA #REQUIRED
         species CDATA #REQUIRED
       >
       <!ELEMENT output_list (output)*>

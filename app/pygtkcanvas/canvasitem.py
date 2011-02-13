@@ -31,6 +31,8 @@ class CanvasItem(object):
         self.visible = kw['visible'] if 'visible' in kw else True
 
 
+    def delete(self):
+        self.parent.remove(self)
     def new_parent(self, new_parent):
         self.parent.remove(self)
         new_parent.append(self)

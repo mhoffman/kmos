@@ -193,12 +193,14 @@ class ProjectTree(SlaveDelegate):
                             species =  sub.attrib['species']
                             coord_layer = sub.attrib['coord_layer']
                             coord_name = sub.attrib['coord_name']
-                            coord_offset = tuple([int(i) for i in sub.attrib['coord_name']])
+                            coord_offset = tuple(
+                                [int(i) for i in 
+                                sub.attrib['coord_offset'].split()])
+                            coord = Coord(layer=coord_layer,
+                                          name=coord_name,
+                                          offset=coord_offset)
                             condition_action = ConditionAction(
-                                species=species,
-                                coord_layer=coord_layer,
-                                coord_name=coord_name,
-                                coord_offset=coord_offset)
+                                species=species,coord=coord)
                             if sub.tag == 'action':
                                 process_elem.add_action(condition_action)
                             elif sub.tag == 'condition':

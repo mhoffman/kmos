@@ -213,6 +213,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         site_list = []
         for active_layer in active_layers:
             for site in active_layer.sites:
+                site.layer = active_layer.name
                 site_list.append(site)
         for i in range(self.z+1):
             for j in range(self.z+1):
@@ -228,7 +229,9 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                     l_site.set_radius(5)
                     l_site.i = i
                     l_site.j = j
-                    l_site.name = '%s.(%s,%s)' % (site.name, i-self.X, j-self.Y)
+                    l_site.tooltip_text = '%s.(%s,%s)' % (site.name, i-self.X, j-self.Y)
+                    l_site.name = site.name
+                    l_site.offset = (i-self.X, j-self.Y)
                     l_site.layer = site.layer
 
         # draw frame
@@ -245,9 +248,9 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             color = col_str2tuple(species.color)
             o = CanvasOval(self.frame_layer, 30+k*50, 30, 50+k*50, 50, filled=True, bg=color)
             o.species = species.name
-            o.name = species.name # for tooltip
+            o.tooltip_text = species.name # for tooltip
             o.connect('button-press-event', self.button_press)
-            o.connect('motion-notify-event', self.drag_motion)
+            #o.connect('motion-notify-event', self.drag_motion)
             o.connect('button-release-event', self.button_release)
             o.connect('query-tooltip',self.query_tooltip)
             o.state = 'reservoir'
@@ -261,7 +264,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.prev_pos = None
 
     def query_tooltip(self, canvas, widget, tooltip):
-        tooltip.set_text(widget.name)
+        tooltip.set_text(widget.tooltip_text)
         return True
 
     def on_lattice(self, x, y):
@@ -279,18 +282,21 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             o.state = 'from_reservoir'
             o.species = item.species
             self.item = o
+            self.item.clicked = True
             self.item.father = item
             self.prev_pos = self.item.get_center()
             self.canvas.redraw()
 
 
     def drag_motion(self, widget, item, event):
-        d = event.x - self.prev_pos[0], event.y - self.prev_pos[1]
-        self.item.move(*d)
-        self.prev_pos = event.x, event.y
+        if self.item.clicked:
+            d = event.x - self.prev_pos[0], event.y - self.prev_pos[1]
+            self.item.move(*d)
+            self.prev_pos = event.x, event.y
 
     #@verbose
     def button_release(self, _, dummy, event):
+        self.item.clicked = False
         if self.item.state == 'from_reservoir':
             if not self.on_lattice(event.x, event.y):
                 self.item.delete()
@@ -305,12 +311,17 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                     # we need to set the center of the editor
                         self.X = closest_site.i
                         self.Y = closest_site.j
-                    offset = closest_site.i - self.X, closest_site.j - self.Y
-                    # name of the site
-                    name = closest_site.name
                     species = self.item.species
-                    lattice = closest_site.lattice
-                    condition_action = ConditionAction(species=species, coord=Coord(offset=offset, name=name, lattice=lattice))
+                    offset = closest_site.i - self.X, closest_site.j - self.Y
+                    name = closest_site.name
+                    layer = closest_site.layer
+                    kmc_coord = Coord(offset=offset,
+                                  name=name,
+                                  layer=layer)
+                    condition_action = ConditionAction(species=species,
+                                                       coord=kmc_coord)
+
+
                     if filter(lambda x: x.get_center() == coord, self.condition_layer):
                         self.item.new_parent(self.action_layer)
                         self.item.set_radius(self.r_act)
@@ -331,23 +342,48 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         to the conditions and actions defined
         """
         for elem in self.process.condition_list:
-            #lattice_nr = filter()
-            coords = filter(lambda x: isinstance(x, CanvasOval) and x.i==self.X+elem.coord.offset[0] and x.j==self.Y+elem.coord.offset[1] and x.name==elem.coord.name and x.lattice == elem.coord.lattice, self.site_layer)[0].get_coords()
-            color = filter(lambda x: x.name == elem.species, self.project_tree.species_list)[0].color
-            color = col_str2tuple(color)
-            o = CanvasOval(self.condition_layer, bg=color, filled=True)
-            o.coords = coords
-            o.set_radius(self.r_cond)
+            matching_sites = filter(lambda x: isinstance(x, CanvasOval)
+                                    and x.i==self.X+elem.coord.offset[0]
+                                    and x.j==self.Y+elem.coord.offset[1]
+                                    and x.name==elem.coord.name
+                                    and x.layer == elem.coord.layer, self.site_layer)
+            if matching_sites:
+                coords = matching_sites[0].get_coords()
+                color = filter(lambda x: x.name == elem.species, self.project_tree.species_list)[0].color
+                color = col_str2tuple(color)
+                o = CanvasOval(self.condition_layer, bg=color, filled=True)
+                o.coords = coords
+                o.connect('button-press-event', self.on_condition_action_clicked)
+                o.set_radius(self.r_cond)
+                o.type = 'condition'
+                o.condition = elem
 
         for elem in self.process.action_list:
-            coords = filter(lambda x: isinstance(x, CanvasOval) and x.i==self.X+elem.coord.offset[0] and x.j==self.Y+elem.coord.offset[1] and x.name==elem.coord.name and x.lattice == elem.coord.lattice, self.site_layer)[0].get_coords()
-            color = filter(lambda x: x.name == elem.species, self.project_tree.species_list)[0].color
-            color = col_str2tuple(color)
-            o = CanvasOval(self.action_layer, bg=color, filled=True)
-            o.coords = coords
-            o.set_radius(self.r_act)
+            matching_sites = filter(lambda x: isinstance(x, CanvasOval)
+                                    and x.i==self.X+elem.coord.offset[0]
+                                    and x.j==self.Y+elem.coord.offset[1]
+                                    and x.name==elem.coord.name
+                                    and x.layer == elem.coord.layer, self.site_layer)
+            if matching_sites:
+                coords = matching_sites[0].get_coords()
+                color = filter(lambda x: x.name == elem.species, self.project_tree.species_list)[0].color
+                color = col_str2tuple(color)
+                o = CanvasOval(self.action_layer, bg=color, filled=True)
+                o.coords = coords
+                o.connect('button-press-event', self.on_condition_action_clicked)
+                o.set_radius(self.r_act)
+                o.type = 'action'
+                o.action = elem
 
         
+    def on_condition_action_clicked(self, canvas, widget, event):
+        if event.button == 2 :
+            if widget.type == 'action':
+                self.process.action_list.remove(widget.action)
+            elif widget.type == 'condition':
+                self.process.condition_list.remove(widget.condition)
+            widget.delete()
+
     def on_process_name__content_changed(self, text):
         self.project_tree.project_data.sort_by_attribute('name')
         self.project_tree.update(self.process)
@@ -362,7 +398,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                                       flags=gtk.DIALOG_MODAL,
                                       type=gtk.MESSAGE_QUESTION,
                                       buttons=gtk.BUTTONS_OK_CANCEL,
-                                      message_format='Please enter a chemical equation, e.g.:\n\nspecies1@site->species2@site\n\\w site: site_name.offset.lattice')
+                                      message_format='Please enter a chemical equation, e.g.:\n\nspecies1@site->species2@site\n\\w site: site_name.offset.layer')
         form_entry = gtk.Entry()
         chem_form.vbox.pack_start(form_entry)
         chem_form.vbox.show_all()
@@ -415,7 +451,7 @@ class SiteForm(ProxyDelegate):
             self.layer.sites.append(self.saved_state)
         else:
             # if site did not exist previously, remove completely
-            self.project_tree.site_list.remove(self.site)
+            self.layer.sites.remove(self.site)
         self.hide()
         self.parent.redraw()
 
