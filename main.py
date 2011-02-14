@@ -383,7 +383,7 @@ class ProjectTree(SlaveDelegate):
                 action_elem.set('coord_layer', action.coord.layer)
                 action_elem.set('coord_name', action.coord.name)
                 action_elem.set('coord_offset',
-                    ' '.join([str(i) for i in condition.coord.offset]))
+                    ' '.join([str(i) for i in action.coord.offset]))
         output_list = ET.SubElement(root, 'output_list')
         for output in self.output_list:
             if output.output:
