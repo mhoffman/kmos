@@ -34,7 +34,7 @@ class ProcListWriter():
         
     def write_lattice_module(self):
         data = self.data
-        out = open('%s/lattice.f90' % self.dir 'w')
+        out = open('%s/lattice.f90' % self.dir, 'w')
         out.write(self._gpl_message())
         out.write('\n\nmodule lattice\n')
         out.write('use kind_values\n')
