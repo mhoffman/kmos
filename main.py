@@ -821,6 +821,7 @@ class KMC_Editor(GladeDelegate):
             # multi-lattice mode
             self.toast("Multi-lattice mode, not fully supported, yet!")
             writer = MLProcListWriter(self.project_tree, export_dir)
+            writer.write_lattice()
             writer.write_proclist()
 
 
