@@ -40,7 +40,8 @@ class Site(Attributes):
         self.name = kwargs['name'] if 'name' in kwargs else ''
 
     def __repr__(self):
-        return '%s(%s) %s %s %s' % (self.name, self.layer, self.index, (self.x, self.y, self.z), self.site_class)
+        return '<SITE> %s(%s) %s %s %s' % (self.name, self.layer, self.index, (self.x, self.y, self.z), self.site_class)
+
 
 class Grid(Attributes):
     attributes = ['x','y','z','offset_x','offset_y','offset_z',]
@@ -54,7 +55,7 @@ class Grid(Attributes):
         self.offset_z = kwargs['offset_z'] if 'offset_z' in kwargs else 0.0
 
     def __repr__(self):
-        return ('grid: %s %s %s\noffset: %s %s %s' %
+        return ('<GRID> %s %s %s\noffset: %s %s %s' %
             (self.x, self.y, self.z,
             self.offset_x,
             self.offset_y,
@@ -72,7 +73,7 @@ class Layer(Attributes, CorrectlyNamed):
         self.sites = []
 
     def __repr__(self):
-        return "%s\n[%s]\n" % (self.name, self.grid)
+        return "<LAYER> %s\n[%s]\n" % (self.name, self.grid)
 
     def add_site(self, site):
         """Add a new site to a layer
@@ -95,7 +96,7 @@ class ConditionAction(Attributes):
         Attributes.__init__(self, **kwargs)
 
     def __repr__(self):
-        return "Species: %s Coord:%s\n" % (self.species, self.coord)
+        return "<COND_ACT> Species: %s Coord:%s\n" % (self.species, self.coord)
 
 class Coord(Attributes):
     """Class that hold exactly one coordinate as used in the description
@@ -103,25 +104,30 @@ class Coord(Attributes):
     """
     attributes = ['offset', 'name', 'layer']
     def __init__(self, **kwargs):
-        if kwargs.has_key('string'):
-            raw = kwargs['string'].split('.')
-            if len(raw) == 1 :
-                self.name = raw[0]
-                self.offset = [0, 0]
-            elif len(raw) == 2 :
-                self.name = raw[0]
-                self.offset = eval(raw[1])
-            else:
-                raise TypeError, "Coordinate specification %s does not match the expected format" % raw
+        Attributes.__init__(self, **kwargs)
+        if len(self.offset) == 1 :
+            self.offset = (self.offset[0], 0, 0)
+        if len(self.offset) == 2 :
+            self.offset = (self.offset[0], self.offset[1], 0)
 
-        else:
-            Attributes.__init__(self, **kwargs)
 
     def __repr__(self):
-        return '%s.%s.%s' % (self.name, tuple(self.offset), self.layer)
+        return '<COORD> %s.%s.%s' % (self.name, tuple(self.offset), self.layer)
 
-    def __eq__(self, other):
-        return str(self) == str(other)
+    def __neg__(self):
+        """When negating a lattice coordinate we only mean to negate to supercell part"""
+        return Coord(name=self.name,layer=self.layer,offset=[-x for x in self.offset])
+
+    def __sub__(a, b):
+        """When subtracting to lattice coordinates from each other, i.e. a-b, we want
+        to keep the name and layer from a, and just take the difference in suppercells
+        """
+        diff = [ (x-y) for (x,y) in zip(a.offset, b.offset) ]
+        return Coord(name=a.name,layer=a.layer,offset=diff)
+
+    def ff(self):
+        """ff like 'Fortran Form'"""
+        return "%s_%s, (/%s, %s, %s/)" % (self.name, self.layer, self.offset[0], self.offset[1], self.offset[2])
 
 
 class Species(Attributes):
@@ -133,7 +139,7 @@ class Species(Attributes):
         Attributes.__init__(self, **kwargs)
 
     def __repr__(self):
-        return 'Name: %s Color: %s ID: %s\n' % (self.name, self.color, self.id)
+        return '<SPECIES> Name: %s Color: %s ID: %s\n' % (self.name, self.color, self.id)
 
 
 class SpeciesList(Attributes):
@@ -184,7 +190,7 @@ class Parameter(Attributes, CorrectlyNamed):
         Attributes.__init__(self, **kwargs)
 
     def __repr__(self):
-        return 'Name: %s Value: %s\n' % (self.name, self.value)
+        return '<PARAMETER> Name: %s Value: %s\n' % (self.name, self.value)
 
     def on_name__content_changed(self, _):
         self.project_tree.update(self.process)
@@ -222,7 +228,7 @@ class Process(Attributes):
         self.action_list = []
             
     def __repr__(self):
-        return 'Name:%s Rate: %s\nConditions: %s\nActions: %s' % (self.name, self.rate_constant, self.condition_list, self.action_list)
+        return '[PROCESS] Name:%s Rate: %s\nConditions: %s\nActions: %s' % (self.name, self.rate_constant, self.condition_list, self.action_list)
 
     def add_condition(self, condition):
         self.condition_list.append(condition)
