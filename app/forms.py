@@ -768,7 +768,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
             for elem in process.condition_list:
                 if elem.coord.layer == self.previous_layer_name:
                     elem.coord.layer = new_layer_name
-            for elem in process.condition_list:
+            for elem in process.action_list:
                 if elem.coord.layer == self.previous_layer_name:
                     elem.coord.layer = new_layer_name
         self.previous_layer_name = new_layer_name
