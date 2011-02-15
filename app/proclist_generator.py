@@ -283,7 +283,7 @@ class ProcListWriter():
             out.write('\n')
                     
         out.write('    end select\n\n')
-        out.write('end subroutine run_proc_nr\n')
+        out.write('end subroutine run_proc_nr\n\n\n')
         # TODO: subroutine run_proc_nr
 
         # TODO: maybe check_... function (as far as touchup functions rely on it)

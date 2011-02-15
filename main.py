@@ -498,13 +498,13 @@ class KMC_Editor(GladeDelegate):
         self.project_tree.meta.add({'model_dimension':'2'})
 
         # add layer
-        default_lattice = 'default'
-        default_layer = Layer(name=default_lattice,)
+        default_layer_name = 'default'
+        default_layer = Layer(name=default_layer_name,)
         self.project_tree.append(self.project_tree.layer_list_iter, default_layer)
-        self.project_tree.lattice.default_lattice = default_lattice
+        self.project_tree.lattice.default_layer = default_layer_name
         
         # add an empty species
-        empty_spieces = 'empty'
+        empty_species = 'empty'
         empty = Species(name=empty_species, color='#fff', id='0')
         # set empty as default species
         self.project_tree.species_list_iter.default_species = empty_species
