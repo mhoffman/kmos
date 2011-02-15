@@ -271,7 +271,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         site_list = []
         for active_layer in active_layers:
             for site in active_layer.sites:
-                form_site = ProcessFormSite(index=site.index,name=site.name,x=site.x, y=site.y, z=site.z, layer=active_layer.name)
+                form_site = ProcessFormSite(name=site.name,x=site.x, y=site.y, z=site.z, layer=active_layer.name)
                 site_list.append(form_site)
         for i in range(self.z+1):
             for j in range(self.z+1):
@@ -479,7 +479,7 @@ class SiteForm(ProxyDelegate):
     """
     gladefile = GLADEFILE
     toplevel_name = 'site_form'
-    widgets = ['site_name', 'site_index', 'sitevect_x', 'sitevect_y', 'sitevect_z']
+    widgets = ['site_name', 'sitevect_x', 'sitevect_y', 'sitevect_z']
     def __init__(self, site, parent, project_tree, layer):
         self.saved_state = copy.deepcopy(site)
         ProxyDelegate.__init__(self, site)
@@ -488,7 +488,6 @@ class SiteForm(ProxyDelegate):
         self.parent = parent
         self.project_tree = project_tree
         self.layer = layer
-        self.site_index.set_sensitive(False)
         self.show_all()
         if self.project_tree.meta.model_dimension < 3 :
             self.sitevect_z.hide()
@@ -721,7 +720,6 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.canvas.show()
 
     def query_tooltip(self, canvas, widget, tooltip):
-        print(widget.site)
         tooltip.set_text(widget.site.name)
         return True
 
@@ -729,21 +727,9 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         SiteForm(item.site, self, self.project_tree, self.model)
         
     def grid_point_press_event(self, widget, item, event):
-        def find_smallest_gap(l,base=1):
-            """Expects a list of integers and find the smallest 
-            number that is not given away, starting from base
-            """
-            l.sort()
-            if not l:
-                return 1
-            r = range(base, len(l)+base)
-            if r == l:
-                return l[-1]+1
-            return filter(lambda x: x[0]!=x[1], zip(r,l))[0][0]
 
         new_site = Site()
         new_site.name = ''
-        new_site.index = find_smallest_gap([site.index for site in self.model.sites])
         new_site.x = item.frac_coords[0]
         new_site.y = item.frac_coords[1]
         new_site.z = 0.

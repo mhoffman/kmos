@@ -1159,16 +1159,6 @@
                                         <property name="position">1</property>
                                     </packing>
                                 </child>
-                                <child>
-                                    <widget class="GtkLabel" id="label15">
-                                        <property name="label" context="yes" translatable="yes">Index:</property>
-                                        <property name="visible">True</property>
-                                        <property name="xalign">0.0</property>
-                                    </widget>
-                                    <packing>
-                                        <property name="position">2</property>
-                                    </packing>
-                                </child>
                             </widget>
                         </child>
                         <child>
@@ -1180,7 +1170,7 @@
                                         <property name="invisible_char">*</property>
                                         <property name="invisible_char_set">True</property>
                                         <property name="is_focus">True</property>
-                                        <property name="model_attribute">name</property>
+                                        <property name="model_attribute">site_name</property>
                                         <property name="visible">True</property>
                                     </widget>
                                 </child>
@@ -1234,20 +1224,6 @@
                                     </widget>
                                     <packing>
                                         <property name="position">1</property>
-                                    </packing>
-                                </child>
-                                <child>
-                                    <widget class="ProxyEntry" id="site_index">
-                                        <property name="data_type">int</property>
-                                        <property name="invisible_char">*</property>
-                                        <property name="invisible_char_set">True</property>
-                                        <property name="is_focus">True</property>
-                                        <property name="model_attribute">site_index</property>
-                                        <property name="visible">True</property>
-                                        <property name="xalign">1.0</property>
-                                    </widget>
-                                    <packing>
-                                        <property name="position">2</property>
                                     </packing>
                                 </child>
                             </widget>

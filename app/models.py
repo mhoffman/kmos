@@ -32,7 +32,7 @@ class Attributes:
 class Site(Attributes):
     """A class holding exactly one lattice site
     """
-    attributes = ['index', 'name', 'x', 'y', 'z', 'site_class']
+    attributes = ['name', 'x', 'y', 'z', 'site_class']
     # vector is now a list of floats for the graphical representation
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
@@ -40,7 +40,7 @@ class Site(Attributes):
         self.name = kwargs['name'] if 'name' in kwargs else ''
 
     def __repr__(self):
-        return '<SITE> %s %s %s %s' % (self.name, self.index, (self.x, self.y, self.z), self.site_class)
+        return '<SITE> %s %s %s' % (self.name, (self.x, self.y, self.z), self.site_class)
 
 
 class ProcessFormSite(Site):

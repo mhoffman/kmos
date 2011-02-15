@@ -24,8 +24,8 @@
     </parameter_list>
     <lattice_list>
         <lattice name="ruo2" unit_cell_size="2 1">
-            <site coord="0 0" index="1" type="bridge"/>
-            <site coord="1 0" index="2" type="cus"/>
+            <site coord="0 0" type="bridge"/>
+            <site coord="1 0" type="cus"/>
         </lattice>
     </lattice_list>
     <process_list>

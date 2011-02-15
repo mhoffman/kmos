@@ -38,7 +38,6 @@
   <!ELEMENT site EMPTY>
   <!ATTLIST site
     vector CDATA #REQUIRED
-    index CDATA #REQUIRED
     type CDATA #REQUIRED
     class CDATA #IMPLIED
   >

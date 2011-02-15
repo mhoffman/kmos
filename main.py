@@ -161,12 +161,10 @@ class ProjectTree(SlaveDelegate):
                         layer = Layer(name=name, grid=grid)
                         self.project_data.append(self.layer_list_iter, layer)
                         for site in elem:
-                            index =  int(site.attrib['index'])
                             name = site.attrib['type']
                             x, y, z = [ float(x) for x in site.attrib['vector'].split() ]
                             site_class = site.attrib['class']
-                            site_elem = Site(index=index,
-                                name=name,
+                            site_elem = Site(name=name,
                                 x=x, y=y, z=z,
                                 site_class=site_class)
                             layer.sites.append(site_elem)
@@ -360,7 +358,6 @@ class ProjectTree(SlaveDelegate):
             for site in layer.sites:
                 site_elem = ET.SubElement(layer_elem, 'site')
                 site_elem.set('vector', '%s %s %s' % (site.x, site.y, site.z))
-                site_elem.set('index', str(site.index))
                 site_elem.set('type', site.name)
                 site_elem.set('class', site.site_class)
 
@@ -713,77 +710,6 @@ class KMC_Editor(GladeDelegate):
         for filename in [ 'base.f90', 'kind_values_f2py.f90', 'units.f90', 'assert.ppc', 'compile_for_f2py', 'run_kmc.py']:
             shutil.copy(APP_ABS_PATH + '/%s' % filename, export_dir)
 
-
-
-        ## prepare lattice.f90 module
-        ## Rewrite completely based on supercell+index nomenclature
-        #lattice_source = open(APP_ABS_PATH + '/lattice_template.f90').read()
-        #if len(self.project_tree.layer_list)==0 :
-            #self.toast("No layer defined, yet. Cannot complete source code.")
-            #return
-        ## more processing steps ...
-        ## species definition
-        #if not self.project_tree.species_list:
-            #self.toast('No species defined, yet, cannot complete source code.')
-            #return
-        #species_definition = "integer(kind=iint), public, parameter :: &\n"
-        #for species in self.project_tree.species_list[:-1]:
-            #species_definition += '    %(species)s =  %(id)s, &\n' % {'species':species.name, 'id':species.id}
-        #species_definition += '    %(species)s = %(id)s\n' % {'species':self.project_tree.species_list[-1].name, 'id':self.project_tree.species_list[-1].id}
-        #species_definition += 'character(len=800), dimension(%s) :: species_list\n' % len(self.project_tree.species_list)
-        #species_definition += 'integer(kind=iint), parameter :: nr_of_species = %s\n' % len(self.project_tree.species_list)
-        #species_definition += 'integer(kind=iint), parameter :: nr_of_layers = %s\n' % len(self.project_tree.layer_list)
-        #species_definition += 'character(len=800), dimension(%s) :: layer_list\n' % len(self.project_tree.layer_list)
-        #list_nr_of_sites = ', '.join([ str(len(layer.sites)) for layer in self.project_tree.layer_list ])
-        #species_definition += 'integer(kind=iint), parameter, dimension(%s) :: nr_of_sites = (/%s/)\n' % (len(self.project_tree.layer_list), list_nr_of_sites)
-        #species_definition += 'character(len=800), dimension(%s, %s) :: site_list\n' % (len(self.project_tree.layer_list), layer.name)
-#
-        ## unit vector definition
-        #unit_vector_definition = 'integer(kind=iint), dimension(2, 2) ::  layer_matrix = reshape((/%(x)s, 0, 0, %(y)s/), (/2, 2/))' % {'x':layer.unit_cell_size_x, 'y':layer.unit_cell_size_y}
-        ## lookup table initialization
-        #indexes = [ x.index for x in layer.sites ]
-        #lookup_table_definition = ''
-        #layer_mapping_functions = ''
-        #layer_mapping_template = open(APP_ABS_PATH + '/lattice_mapping_template.f90').read()
-        #for layer_nr, layer in enumerate(self.project_tree.layer_list):
-            #layer_mapping_functions += layer_mapping_template % {'layer_name':layer.name,
-            #'sites_per_cell':max(indexes)-min(indexes)+1,}
-            #lookup_table_init = 'integer(kind=iint), dimension(0:%(x)s, 0:%(y)s) :: lookup_%(layer)s2nr\n' % {'x':lattice.unit_cell_size_x-1, 'y':lattice.unit_cell_size_y-1, 'lattice':lattice.name}
-            #lookup_table_init += 'integer(kind=iint), dimension(%(min)s:%(max)s, 2) :: lookup_nr2%(lattice)s\n' % {'min':min(indexes), 'max':max(indexes), 'lattice':lattice.name}
-#
-            ## lookup table definition
-            #lookup_table_definition += '! Fill lookup table nr2%(name)s\n' % {'name':lattice.name }
-            #for i, site in enumerate(lattice.sites):
-                #lookup_table_definition +=  '    site_list(%s) = "%s"\n' % (i+1, site.name)
-                #lookup_table_definition += '    lookup_nr2%(name)s(%(index)s, :) = (/%(x)s, %(y)s/)\n' % {'name': lattice.name,
-                                                                                                    #'x':site.site_x,
-                                                                                                    #'y':site.site_y,
-                                                                                                    #'index':site.index}
-            #lookup_table_definition += '\n\n    ! Fill lookup table %(name)s2nr\n' % {'name':lattice.name }
-            #for site in lattice.sites:
-                #lookup_table_definition += '    lookup_%(name)s2nr(%(x)s, %(y)s) = %(index)s\n'  % {'name': lattice.name,
-                                                                                                    #'x':site.site_x,
-                                                                                                    #'y':site.site_y,
-                                                                                                    #'index':site.index}
-            #for i, species in enumerate(self.project_tree.species_list):
-                #lookup_table_definition +=  '    species_list(%s) = "%s_%s"\n' % (10*lattice_nr + i+1, species.name, lattice.name)
-                #lookup_table_definition +=  '    lattice_list(%s) = "%s"\n' % (i+1, lattice.name)
-#
-#
-#
-        ##lattice mappings
-        #lattice_source = lattice_source % {
-            #'species_definition':species_definition,
-            #'lookup_table_init':lookup_table_init,
-            #'lookup_table_definition':lookup_table_definition,
-            #'unit_vector_definition':unit_vector_definition,
-            #'sites_per_cell':max(indexes)-min(indexes)+1,
-            #'lattice_mapping_functions':lattice_mapping_functions}
-#
-        ## write lattice module
-        #lattice_mod_file = open(export_dir + '/lattice.f90', 'w')
-        #lattice_mod_file.write(lattice_source)
-        #lattice_mod_file.close()
 
         # export parameters
         config = SafeConfigParser()
