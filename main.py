@@ -151,6 +151,7 @@ class ProjectTree(SlaveDelegate):
                 self.lattice.cell_size_x = cell_size[0]
                 self.lattice.cell_size_y = cell_size[1]
                 self.lattice.cell_size_z = cell_size[2]
+                self.lattice.default_layer = child.attrib['default_layer']
                 for elem in child:
                     if elem.tag == 'layer':
                         name = elem.attrib['name']
@@ -337,6 +338,7 @@ class ProjectTree(SlaveDelegate):
             (self.layer_list_iter.cell_size_x,
             self.layer_list_iter.cell_size_y,
             self.layer_list_iter.cell_size_z))
+            lattice_elem.set('default_layer', self.layer_list_iter.default_layer)
         for layer in self.layer_list:
             layer_elem = ET.SubElement(lattice_elem, 'layer')
             layer_elem.set('name', layer.name)
@@ -462,7 +464,7 @@ class ProjectTree(SlaveDelegate):
             form.focus_topmost()
         elif isinstance(elem, LayerList):
             dimension = self.meta.model_dimension
-            form = LatticeForm(elem, dimension)
+            form = LatticeForm(elem, dimension, self)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
         else:
@@ -496,13 +498,16 @@ class KMC_Editor(GladeDelegate):
         self.project_tree.meta.add({'model_dimension':'2'})
 
         # add layer
-        default_layer = Layer(name='default',)
+        default_lattice = 'default'
+        default_layer = Layer(name=default_lattice,)
         self.project_tree.append(self.project_tree.layer_list_iter, default_layer)
+        self.project_tree.lattice.default_lattice = default_lattice
         
         # add an empty species
-        empty = Species(name='empty', color='#fff', id='0')
+        empty_spieces = 'empty'
+        empty = Species(name=empty_species, color='#fff', id='0')
         # set empty as default species
-        self.project_tree.species_list_iter.default_species = 'empty'
+        self.project_tree.species_list_iter.default_species = empty_species
         self.project_tree.append(self.project_tree.species_list_iter, empty)
         # add standard parameter
         param = Parameter(name='lattice_size', value='40 40 1')

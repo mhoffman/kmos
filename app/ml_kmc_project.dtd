@@ -27,6 +27,7 @@
   <!ELEMENT lattice (layer)*>
   <!ATTLIST lattice
     cell_size CDATA #REQUIRED
+    default_layer CDATA #REQUIRED
     site_classes CDATA #IMPLIED
   >
   <!ELEMENT layer (site)*>

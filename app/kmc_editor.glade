@@ -341,9 +341,21 @@
                                             </packing>
                                         </child>
                                         <child>
+                                            <widget class="GtkLabel" id="label15">
+                                                <property name="label" context="yes" translatable="yes">Default layer:</property>
+                                                <property name="visible">True</property>
+                                                <property name="xalign">0.0</property>
+                                            </widget>
+                                            <packing>
+                                                <property name="expand">False</property>
+                                                <property name="fill">False</property>
+                                                <property name="position">1</property>
+                                            </packing>
+                                        </child>
+                                        <child>
                                             <placeholder/>
                                             <packing>
-                                                <property name="position">1</property>
+                                                <property name="position">2</property>
                                             </packing>
                                         </child>
                                     </widget>
@@ -409,9 +421,21 @@
                                             </packing>
                                         </child>
                                         <child>
+                                            <widget class="ProxyComboBox" id="default_layer">
+                                                <property name="data_type">str</property>
+                                                <property name="model_attribute">default_layer</property>
+                                                <property name="visible">True</property>
+                                            </widget>
+                                            <packing>
+                                                <property name="expand">False</property>
+                                                <property name="fill">False</property>
+                                                <property name="position">1</property>
+                                            </packing>
+                                        </child>
+                                        <child>
                                             <placeholder/>
                                             <packing>
-                                                <property name="position">1</property>
+                                                <property name="position">2</property>
                                             </packing>
                                         </child>
                                     </widget>

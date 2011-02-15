@@ -187,13 +187,14 @@ class ParameterList(Settable):
 class LayerList(Attributes):
     """A list of layers
     """
-    attributes = ['name','cell_size_x', 'cell_size_y', 'cell_size_z']
+    attributes = ['name', 'cell_size_x', 'cell_size_y', 'cell_size_z', 'default_layer']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
         self.name = 'Lattice(s)'
-        self.cell_size_x = 1.
-        self.cell_size_y = 1.
-        self.cell_size_z = 1.
+        self.cell_size_x = kwargs['cell_size_x'] if 'cell_size_x' in kwargs else 1.
+        self.cell_size_y = kwargs['cell_size_y'] if 'cell_size_y' in kwargs else 1.
+        self.cell_size_z = kwargs['cell_size_z'] if 'cell_size_z' in kwargs else 1.
+        self.default_layer = kwargs['default_layer'] if 'default_layer' in kwargs else 'default'
 
 
 class Parameter(Attributes, CorrectlyNamed):

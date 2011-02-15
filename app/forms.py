@@ -587,6 +587,11 @@ class SpeciesListForm(ProxySlaveDelegate):
         ProxySlaveDelegate.__init__(self, model)
         self.default_species.prefill([ x.name for x in project_tree.species_list], sort=True)
         self.default_species.select(default_species)
+        self.default_species.set_tooltip_text('The lattice will be initialized with this species by default\n'
+            + 'but also every unspecified condition or action wil be completed with this choice.\n'
+            + 'So better only change this once at the begining if at all!')
+
+
 
 
 class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
@@ -640,13 +645,17 @@ class GridForm(ProxyDelegate):
 class LatticeForm(ProxySlaveDelegate):
     gladefile = GLADEFILE
     toplevel_name = 'lattice_form'
-    widgets = ['cell_size_x', 'cell_size_y', 'cell_size_z']
-    def __init__(self, model, dimension):
+    widgets = ['cell_size_x', 'cell_size_y', 'cell_size_z', 'default_layer']
+    def __init__(self, model, dimension, project_tree):
+        model.default_layer = None
         ProxySlaveDelegate.__init__(self, model)
         if dimension < 3 :
             self.cell_size_z.hide()
         if dimension < 2 :
             self.cell_size_y.hide()
+        self.default_layer.prefill([x.name for x in project_tree.layer_list], sort=True)
+        self.default_layer.select(model.default_layer)
+        self.default_layer.set_tooltip_text('By default the system\nwill be initialized with this layer')
 
 
         
@@ -655,7 +664,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
     """
     gladefile = GLADEFILE
     toplevel_name = 'layer_form'
-    widgets = ['layer_name', ]
+    widgets = ['layer_name',  ]
     def __init__(self, model, project_tree):
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, model)
@@ -670,6 +679,11 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.lattice_pad.add(self.canvas)
         self.previous_layer_name = self.layer_name.get_text()
         self.redraw()
+        self.set_grid_button.set_tooltip_text('The grid set here help to put sites at specific locations.\n'
+            + 'The fractional position has no direct meaning for the lattice kMC model.\n'
+            + 'Meaning such as nearest neighbor etc. is only gained\n'
+            + 'through corresponding processes')
+            
 
     def redraw(self):
         self.grid_layer.clear()
