@@ -142,7 +142,7 @@ class Coord(Attributes):
 
     def ff(self):
         """ff like 'Fortran Form'"""
-        return "%s_%s, (/%s, %s, %s/)" % (self.name, self.layer, self.offset[0], self.offset[1], self.offset[2])
+        return "(/%s, %s, %s, %s_%s/)" % (self.offset[0], self.offset[1], self.offset[2], self.layer, self.name, )
 
 
 class Species(Attributes):

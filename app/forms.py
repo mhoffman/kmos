@@ -225,6 +225,9 @@ class BatchProcessForm(SlaveDelegate):
                 print("Found an error in your chemical equation(line %s):\n   %s" % (i+1, line[1]))
                 raise
             else:
+                # replace any existing process with identical names
+                for dublette_proc in filter(lambda x: x.name == name, self.project_tree.process_list):
+                    self.project_tree.process_list.remove(dublette_proc)
                 self.project_tree.append(self.project_tree.process_list_iter, process)
         buffer.delete(*bounds)
     

@@ -1004,8 +1004,8 @@ pure function get_species(site)
 
     !! DEBUG 
     !print *, site
-    ASSERT(site.ge.1,"kmos/base/get_species was asked for a zero or negative site")
-    ASSERT(site.le.volume,"kmos/base/get_species was asked for a site outside the lattice")
+    !ASSERT(site.ge.1,"kmos/base/get_species was asked for a zero or negative site")
+    !ASSERT(site.le.volume,"kmos/base/get_species was asked for a site outside the lattice")
 
     get_species = lattice(site)
 

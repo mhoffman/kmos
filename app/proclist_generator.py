@@ -190,20 +190,26 @@ class ProcListWriter():
             + '    update_accum_rate, &\n'
             + '    determine_procsite, &\n'
             + '    update_clocks, &\n'
-            + '    increment_procstat, &\n')
-        out.write('use lattice, only:\n'
-            + '    lattice_allocate_system => allocate_system, &\n')
-        out.write('    nr2lattice, &\n'
+            + '    increment_procstat\n\n')
+        out.write('use lattice, only: &\n')
+        site_params = []
+        for layer in data.layer_list:
+            for site in layer.sites:
+                site_params.append((site.name, layer.name))
+        for i,(site,layer) in enumerate(site_params):
+            out.write(('    %s_%s, &\n') % (layer,site))
+        out.write('    allocate_system, &\n'
+            + '    nr2lattice, &\n'
             + '    lattice2nr, &\n'
             + '    add_proc, &\n'
             + '    can_do, &\n'
             + '    replace_species, &\n'
             + '    del_proc, &\n'
-            + '    get_species, &\n' )
+            + '    get_species\n' )
         out.write('\n\nimplicit none\n\n')
         out.write('\n\n ! Species constants\n\n')
         for i, species in enumerate(data.species_list):
-            out.write('integer(kind=iint), parameter, public, :: %s = %s\n' % (species.name, i +1))
+            out.write('integer(kind=iint), parameter, public :: %s = %s\n' % (species.name, i +1))
 
         out.write('\n\n! Process constants\n\n')
         for i, process in enumerate(self.data.process_list):
@@ -215,7 +221,7 @@ class ProcListWriter():
 
         out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_proc = %s\n'\
             % (len(data.process_list)))
-        out.write('character(len=2000), dimension(%s) :: processes, rates')
+        out.write('character(len=2000), dimension(%s) :: processes, rates'% (len(data.process_list)))
         out.write('\n\ncontains\n\n')
         out.write(('subroutine init(input_system_size, system_name)\n'
             + '    integer(kind=iint), dimension(%s), intent(in) :: input_system_size\n'
@@ -253,7 +259,9 @@ class ProcListWriter():
                         disabled_procs = []
                         # op = operation
                         routine_name = '%s_%s_%s_%s' % (op, species.name, layer.name, site.name)
-                        out.write('subroutine %s(species, site)\n' % routine_name)
+                        out.write('subroutine %s(species, site)\n\n' % routine_name)
+                        out.write('    integer(kind=iint), intent(in) :: species\n')
+                        out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
                         for process in data.process_list:
                             for condition in process.condition_list:
                                 if site.name == condition.coord.name:
@@ -288,8 +296,8 @@ class ProcListWriter():
                         if disabled_procs:
                             out.write('    ! disable affected processes\n')
                         for process, condition in disabled_procs:
-                            out.write(('    if(can_do(%(site)s, %(proc)s)then\n'
-                            + '        call del_site(%(proc)s, %(site)s)\n'
+                            out.write(('    if(can_do(%(proc)s, %(site)s))then\n'
+                            + '        call del_proc(%(proc)s, %(site)s)\n'
                             + '    endif\n\n') % {'site':(-condition.coord).ff(), 'proc':process.name})
 
                         # updating enabled procs is not so simply, because meeting one condition
@@ -308,11 +316,14 @@ class ProcListWriter():
         for layer in data.layer_list:
             for site in layer.sites:
                 routine_name = 'touchup_%s_%s' % (layer.name, site.name)
-                out.write('subroutine %s(species, site)\n' % routine_name)
+                out.write('subroutine %s(species, site)\n\n' % routine_name)
+                out.write('    integer(kind=iint), intent(in) :: species\n')
+                out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
                 out.write('end subroutine %s\n\n' % routine_name)
 
         # TODO: subroutine get_char fuctions, the crumpy part
             
+        out.write('end module proclist\n')
         out.close()
 
     def _write_optimal_iftree(self, items, indent, out):
@@ -327,7 +338,7 @@ class ProcListWriter():
         #print(len(items))
         #print(items)
         for item in filter(lambda x: not x[0], items):
-            out.write('%scall add_site(%s, %s)\n' % (' '*indent, item[1][0], item[1][1].ff()))
+            out.write('%scall add_proc(%s, %s)\n' % (' '*indent, item[1][0], item[1][1].ff()))
 
         # and only keep those that have conditions
         items = filter(lambda x: x[0], items)
@@ -374,7 +385,7 @@ class ProcListWriter():
             #print(len(nested_items))
             #print(nested_items)
             self._write_optimal_iftree(pruned_items, indent+4, out)
-        out.write('%send case\n\n' % (indent*' ',))
+        out.write('%send select\n\n' % (indent*' ',))
 
         if items:
             # if items are left
