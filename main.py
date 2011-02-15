@@ -889,6 +889,9 @@ if __name__ == '__main__':
     parser.add_option('-x', '--export-dir', dest='export_dir', type=str)
     (options, args) = parser.parse_args()
     editor = KMC_Editor()
+    if len(args) >= 1 :
+        options.import_file = args[0]
+
     if options.import_file:
         editor.import_file(options.import_file)
         editor.toast('Imported %s' % options.import_file)
