@@ -19,7 +19,7 @@ class Attributes:
                 self.__dict__[attribute] = kwargs[attribute]
         for key in kwargs:
             if key not in self.attributes:
-                raise AttributeError, 'Tried to initialize illegal attribute %s' % key
+                raise AttributeError('Tried to initialize illegal attribute %s' % key)
     def __setattr__(self, attrname, value):
         if attrname in self.attributes:
             self.__dict__[attrname] = value
@@ -28,22 +28,37 @@ class Attributes:
 
 
 
+
 class Site(Attributes):
     """A class holding exactly one lattice site
     """
-    attributes = ['index', 'name', 'x', 'y', 'z', 'site_class', 'layer']
+    attributes = ['index', 'name', 'x', 'y', 'z', 'site_class']
     # vector is now a list of floats for the graphical representation
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
         self.site_class = kwargs['site_class'] if  'site_class' in kwargs else ''
-        self.layer = kwargs['layer'] if 'layer' in kwargs else ''
         self.name = kwargs['name'] if 'name' in kwargs else ''
 
     def __repr__(self):
-        return '<SITE> %s(%s) %s %s %s' % (self.name, self.layer, self.index, (self.x, self.y, self.z), self.site_class)
+        return '<SITE> %s %s %s %s' % (self.name, self.index, (self.x, self.y, self.z), self.site_class)
+
+
+class ProcessFormSite(Site):
+    """This is just a little varient of the site object,
+    with the sole difference that it has a layer attribute
+    and is meant to be used in the process form. This separation was chosen, since the Site object as in the ProjectTree should not have a layer attribute to avoid data duplication but in the ProcessForm we need this to define processes
+    """
+    attributes = Site.attributes
+    attributes.append('layer')
+    def __init__(self, **kwargs):
+        Site.__init__(self, **kwargs)
+        self.layer = kwargs['layer'] if 'layer' in kwargs else ''
 
 
 class Grid(Attributes):
+    """A grid is simply a guide to the eye to set up
+    sites in unit cell at specific location. It has no effect for the kMC model itself
+    """
     attributes = ['x','y','z','offset_x','offset_y','offset_z',]
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
@@ -89,7 +104,7 @@ class Layer(Attributes, CorrectlyNamed):
 
 
 class ConditionAction(Attributes):
-    """Class that holds either a condition or an action
+    """Class that holds either a condition or an action. Since both have the same attributes we use the same class here, and just store them in different lists, depending on its role
     """
     attributes = ['species', 'coord']
     def __init__(self, **kwargs):
@@ -99,8 +114,8 @@ class ConditionAction(Attributes):
         return "<COND_ACT> Species: %s Coord:%s\n" % (self.species, self.coord)
 
 class Coord(Attributes):
-    """Class that hold exactly one coordinate as used in the description
-    of a process
+    """Class that holds exactly one coordinate as used in the description
+    of a process. The distinction between a Coord and a Site may seem superfluous but it is crucial to avoid to much data duplication
     """
     attributes = ['offset', 'name', 'layer']
     def __init__(self, **kwargs):

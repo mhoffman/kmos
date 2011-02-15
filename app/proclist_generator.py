@@ -79,7 +79,8 @@ class ProcListWriter():
         out.write('subroutine lattice2nr(site, nr)\n')
         out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n')
         out.write('    integer(kind=iint), intent(out) :: nr\n\n')
-        out.write('    nr = (
+        out.write('    nr = (')
+        # CONTINUE HERE
         out.write('end subroutine lattice2nr\n\n')
         out.write('subroutine nr2lattice(nr, site)\n')
         out.write('    integer(kind=iint), intent(in) :: nr\n')

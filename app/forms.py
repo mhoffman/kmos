@@ -268,8 +268,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         site_list = []
         for active_layer in active_layers:
             for site in active_layer.sites:
-                site.layer = active_layer.name
-                site_list.append(site)
+                form_site = ProcessFormSite(index=site.index,name=site.name,x=site.x, y=site.y, z=site.z, layer=active_layer.name)
+                site_list.append(form_site)
         for i in range(self.z+1):
             for j in range(self.z+1):
                 for site in site_list:
@@ -666,6 +666,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.canvas.append(self.grid_layer)
         self.canvas.append(self.site_layer)
         self.lattice_pad.add(self.canvas)
+        self.previous_layer_name = self.layer_name.get_text()
         self.redraw()
 
     def redraw(self):
@@ -717,6 +718,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.canvas.show()
 
     def query_tooltip(self, canvas, widget, tooltip):
+        print(widget.site)
         tooltip.set_text(widget.site.name)
         return True
 
@@ -757,6 +759,18 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         return self.on_name__validate(widget, layer_name)
 
     def on_layer_name__content_changed(self, widget):
+        # Sync layer names in process coords
+        new_layer_name = widget.get_text()
+        for process in self.project_tree.process_list:
+            for elem in process.condition_list:
+                if elem.coord.layer == self.previous_layer_name:
+                    elem.coord.layer = new_layer_name
+            for elem in process.condition_list:
+                if elem.coord.layer == self.previous_layer_name:
+                    elem.coord.layer = new_layer_name
+        self.previous_layer_name = new_layer_name
+
+                    
         self.project_tree.update(self.model)
 
 
