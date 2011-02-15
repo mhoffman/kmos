@@ -55,17 +55,17 @@ class ProcListWriter():
         out.write('    base_can_do => can_do, &\n')
         out.write('    base_del_proc => del_proc, &\n')
         out.write('    determine_procsite, &\n')
+        out.write('    base_replace_species => replace_species, &\n')
+        out.write('    base_get_species => get_species, &\n')
+        out.write('    base_get_volume => get_volume, &\n')
+        out.write('    reload_system => reload_system, &\n')
+        out.write('    save_system, &\n')
         out.write('    assertion_fail, &\n')
-        out.write('    assertion_fail, &\n')
-        out.write('    assertion_fail, &\n')
-        out.write('    assertion_fail, &\n')
-        out.write('    assertion_fail, &\n')
-        out.write('    assertion_fail, &\n')
-        out.write('    assertion_fail, &\n')
-        out.write('    assertion_fail, &\n')
-        out.write('    assertion_fail, &\n')
-        out.write('    assertion_fail, &\n')
-        out.write('    assertion_fail, &\n')
+        out.write('    null_species, &\n')
+        out.write('    set_rate, &\n')
+        out.write('    update_accum_rate, &\n')
+        out.write('    update_clocks, &\n')
+        out.write('\n\nimplicit none\n\n')
 
         out.write('\n ! Site constants\n\n')
         site_params = []
@@ -74,6 +74,19 @@ class ProcListWriter():
                 site_params.append((site.name, layer.name))
         for i,(site,layer) in enumerate(site_params):
             out.write(('integer(kind=iint), parameter, public :: %s_%s = %s\n') % (layer,site,i +1))
+        out.write('integer(kind=iint), parameter, public :: sites_in_unit_cell = %s\n' % len(site_params))
+        out.write('\n\ncontains\n\n')
+        out.write('subroutine lattice2nr(site, nr)\n')
+        out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n')
+        out.write('    integer(kind=iint), intent(out) :: nr\n\n')
+        out.write('    nr = (
+        out.write('end subroutine lattice2nr\n\n')
+        out.write('subroutine nr2lattice(nr, site)\n')
+        out.write('    integer(kind=iint), intent(in) :: nr\n')
+        out.write('    integer(kind=iint), dimension(4), intent(out) :: site\n\n')
+        out.write('end subroutine nr2lattice\n\n')
+
+        out.write('end module lattice\n')
         out.close()
 
     def write_proclist(self):
