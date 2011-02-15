@@ -120,7 +120,7 @@ class ProcListWriter():
 
         out.write('subroutine allocate_system(nr_of_proc, input_system_size, system_name)\n\n')
         out.write('    integer(kind=iint), intent(in) :: nr_of_proc\n')
-        out.write('    integer(kind=iint), intent(in) :: input_system_size\n')
+        out.write('    integer(kind=iint), dimension(%s), intent(in) :: input_system_size\n' % data.meta.model_dimension)
         out.write('    character(len=200), intent(in) :: system_name\n\n')
         out.write('    integer(kind=iint) :: volume\n')
         out.write('    ! Copy to module wide variable\n')
@@ -221,7 +221,7 @@ class ProcListWriter():
 
         out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_proc = %s\n'\
             % (len(data.process_list)))
-        out.write('character(len=2000), dimension(%s) :: processes, rates'% (len(data.process_list)))
+        out.write('character(len=2000), dimension(%s) :: processes, rates' % (len(data.process_list)))
         out.write('\n\ncontains\n\n')
         out.write(('subroutine init(input_system_size, system_name)\n'
             + '    integer(kind=iint), dimension(%s), intent(in) :: input_system_size\n'
@@ -233,18 +233,53 @@ class ProcListWriter():
             + '    print *, "Currently kmos is in a very alphaish stage and there is"\n'
             + '    print *, "ABSOLUTELY NO WARRANTY for correctness."\n'
             + '    print *, "Please check back with the author prior to using"\n'
-            + '    print *, "results in a publication."\n')\
+            + '    print *, "results in a publication."\n\n')\
             % (data.meta.model_dimension, data.meta.model_name, data.meta.author, data.meta.email, ))
+        out.write('    call allocate_system(nr_of_proc, input_system_size, system_name)\n\n')
 
-        # TODO: finish init function
         out.write('end subroutine init\n\n')
-        
 
-        # TODO: subroutine do_kmc_step
+        out.write('subroutine do_kmc_step()\n\n')
+        out.write('    integer(kind=iint), dimension(4) :: site\n')
+        out.write('    real(kind=rsingle) :: ran_proc, ran_time, ran_site\n')
+        out.write('    integer(kind=iint) :: nr_site, proc_nr\n\n')
+        out.write('    call random_number(ran_time)\n')
+        out.write('    call random_number(ran_proc)\n')
+        out.write('    call random_number(ran_site)\n')
+        out.write('    call update_accum_rate\n')
+        out.write('    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
+        out.write('    call run_proc_nr(proc_nr, nr_site)\n')
+        out.write('    call update_clocks(ran_time)\n\n')
+        out.write('end subroutine do_kmc_step\n\n')
 
+
+        out.write('subroutine run_proc_nr(proc, nr_site)\n\n')
+        out.write('    integer(kind=iint), intent(in) :: proc\n')
+        out.write('    integer(kind=iint), intent(in) :: nr_site\n\n')
+        out.write('    integer(kind=iint), dimension(4) :: lsite\n\n')
+        out.write('    call increment_procstat(proc)\n\n')
+        out.write('    lsite = nr2lattice(nr_site)\n')
+        out.write('    select case(proc)\n')
+        for process in data.process_list:
+            out.write('    case(%s)\n' % process.name)
+            for action in process.action_list:
+                relaction_coord = (
+                ('(/lsite(1)+(%s), ' % action.coord.offset[0] if action.coord.offset[0] else '(/lsite(1), ')
+                + ('lsite(2)+(%s), ' % action.coord.offset[1] if action.coord.offset[1] else 'lsite(2), ')
+                + ('lsite(3)+(%s), ' % action.coord.offset[2] if action.coord.offset[2] else 'lsite(3), ')
+                + ('%s_%s/)' % (action.coord.layer, action.coord.name))
+                )
+                if action.species == data.species_list_iter.default_species:
+                    previous_species = filter(lambda x: x.coord.ff()==action.coord.ff(), process.condition_list)[0].species
+                    out.write('        call take_%s_%s_%s(%s)\n' % (previous_species, action.coord.layer, action.coord.name, relaction_coord))
+                else:
+                    out.write('        call put_%s_%s_%s(%s)\n' % (action.species, action.coord.layer, action.coord.name, relaction_coord))
+
+            out.write('\n')
+                    
+        out.write('    end select\n\n')
+        out.write('end subroutine run_proc_nr\n')
         # TODO: subroutine run_proc_nr
-
-        # TODO: atomistic updates
 
         # TODO: maybe check_... function (as far as touchup functions rely on it)
 
@@ -259,8 +294,7 @@ class ProcListWriter():
                         disabled_procs = []
                         # op = operation
                         routine_name = '%s_%s_%s_%s' % (op, species.name, layer.name, site.name)
-                        out.write('subroutine %s(species, site)\n\n' % routine_name)
-                        out.write('    integer(kind=iint), intent(in) :: species\n')
+                        out.write('subroutine %s(site)\n\n' % routine_name)
                         out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
                         for process in data.process_list:
                             for condition in process.condition_list:
@@ -307,7 +341,7 @@ class ProcListWriter():
                         if enabled_procs:
                             out.write('    ! enable affected processes\n')
                         if not enabled_procs + disabled_procs:
-                            print("Warning: site %s_%s is not used at all!" %(layer.name, site.name))
+                            pass
 
                         self._write_optimal_iftree(items=enabled_procs, indent=4,out=out)
                         out.write('end subroutine %s\n\n' % routine_name)
