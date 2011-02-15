@@ -270,7 +270,12 @@ class ProcListWriter():
                 + ('%s_%s/)' % (action.coord.layer, action.coord.name))
                 )
                 if action.species == data.species_list_iter.default_species:
-                    previous_species = filter(lambda x: x.coord.ff()==action.coord.ff(), process.condition_list)[0].species
+                    try:
+                        previous_species = filter(lambda x: x.coord.ff()==action.coord.ff(), process.condition_list)[0].species
+                    except:
+                        print(process)
+                        print(action.coord.ff())
+                        print([x.coord.ff() for x in process.condition_list])
                     out.write('        call take_%s_%s_%s(%s)\n' % (previous_species, action.coord.layer, action.coord.name, relaction_coord))
                 else:
                     out.write('        call put_%s_%s_%s(%s)\n' % (action.species, action.coord.layer, action.coord.name, relaction_coord))
@@ -316,7 +321,7 @@ class ProcListWriter():
                                                 species=other_condition.species,
                                                 coord=(other_condition.coord-condition.coord)) for 
                                                 other_condition in other_conditions]
-                                        enabled_procs.append((other_conditions, (process.name, -condition.coord)))
+                                        enabled_procs.append((other_conditions, (process.name, -condition.coord, True)))
                                     # and we disable something whenever we put something down, and the process
                                     # needs an empty site here or if we take something and the process needs
                                     # something else
@@ -340,8 +345,6 @@ class ProcListWriter():
                         # frequent questions are closer to the top
                         if enabled_procs:
                             out.write('    ! enable affected processes\n')
-                        if not enabled_procs + disabled_procs:
-                            pass
 
                         self._write_optimal_iftree(items=enabled_procs, indent=4,out=out)
                         out.write('end subroutine %s\n\n' % routine_name)
@@ -372,7 +375,12 @@ class ProcListWriter():
         #print(len(items))
         #print(items)
         for item in filter(lambda x: not x[0], items):
-            out.write('%scall add_proc(%s, %s)\n' % (' '*indent, item[1][0], item[1][1].ff()))
+            # [1][2] field of the item determine if this search is intended for enabling (=True) or
+            # disabling (=False) a process
+            if item[1][2]:
+                out.write('%scall add_proc(%s, %s)\n' % (' '*indent, item[1][0], item[1][1].ff()))
+            else:
+                out.write('%scall del_proc(%s, %s)\n' % (' '*indent, item[1][0], item[1][1].ff()))
 
         # and only keep those that have conditions
         items = filter(lambda x: x[0], items)
