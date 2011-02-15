@@ -297,7 +297,7 @@ subroutine add_proc(proc, site)
 
 end subroutine add_proc
 
-subroutine can_do(proc, site, can)
+pure function can_do(proc, site)
     !****f* base/can_do
     ! FUNCTION
     !    Returns true if 'site' can do 'proc' right now
@@ -307,12 +307,12 @@ subroutine can_do(proc, site, can)
     !  * can -- writeable boolean, where the result will be stored.
     !******
     !---------------I/O variables---------------
+    logical :: can_do 
     integer(kind=iint), intent(in) :: proc, site
-    logical, intent(out) :: can
 
-    can = avail_sites(proc,site,2).ne.0
+    can_do = avail_sites(proc,site,2).ne.0
 
-end subroutine can_do
+end function can_do
 
 
 subroutine reset_site(site, old_species)
@@ -333,7 +333,7 @@ subroutine reset_site(site, old_species)
     integer(kind=iint) :: proc, species
     logical :: can
 
-    call get_species(site, species)
+    species = get_species(site)
 
     ! Reset species if stated correctly
     if(old_species.eq.species)then
@@ -346,8 +346,7 @@ subroutine reset_site(site, old_species)
 
     ! Strip all available capabilities from this site
     do proc = 1, nr_of_proc
-        call can_do(proc, site, can)
-        if(can)then
+        if(can_do(proc, site))then
             call del_proc(proc, site)
         endif
     enddo
@@ -746,7 +745,7 @@ subroutine deallocate_system()
 end subroutine deallocate_system
 
 
-subroutine get_system_name(return_system_name)
+pure function get_system_name()
     !****f* base/get_system_name
     ! FUNCTION
     !    Returns the systems name, that was specified with base/allocate_system
@@ -754,10 +753,10 @@ subroutine get_system_name(return_system_name)
     !    Writeable string of type character(len=200).
     !******
     !---------------I/O variables---------------
-    character(len=200), intent(out) :: return_system_name
+    character(len=200) :: get_system_name
 
-    return_system_name = system_name
-end subroutine get_system_name
+    get_system_name = system_name
+end function get_system_name
 
 
 subroutine get_kmc_time(return_kmc_time)
@@ -992,7 +991,7 @@ subroutine update_clocks(ran_time)
 end subroutine update_clocks
 
 
-subroutine get_species(site, return_species)
+pure function get_species(site)
     !****f* base/get_species
     ! FUNCTION
     !    Return the species that occupies site.
@@ -1000,17 +999,17 @@ subroutine get_species(site, return_species)
     !  * site -- integer representing the site
     !******
     !---------------I/O variables---------------
+    integer(kind=iint) :: get_species
     integer(kind=iint), intent(in) :: site
-    integer(kind=iint), intent(out) :: return_species
 
     !! DEBUG 
     !print *, site
     ASSERT(site.ge.1,"kmos/base/get_species was asked for a zero or negative site")
     ASSERT(site.le.volume,"kmos/base/get_species was asked for a site outside the lattice")
 
-    return_species = lattice(site)
+    get_species = lattice(site)
 
-end subroutine get_species
+end function get_species
 
 
 subroutine replace_species(site, old_species, new_species)
