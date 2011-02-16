@@ -82,7 +82,7 @@ public :: add_proc, &
     reload_system, &
     reset_site, &
     save_system, &
-    set_rate, &
+    set_rate_const, &
     update_accum_rate, &
     update_clocks
 
@@ -568,10 +568,10 @@ subroutine save_system()
 end subroutine save_system
 
 
-subroutine set_rate(proc_nr, rate)
-    !****f* base/set_rate
+subroutine set_rate_const(proc_nr, rate)
+    !****f* base/set_rate_const
     ! FUNCTION
-    !    set_rate allows to set the rate of the process with the number proc_nr.
+    !    set_rate_const allows to set the rate constant of the process with the number proc_nr.
     ! ARGUMENTS
     !  * proc_nr -- The process number as defined in the corresponding proclist_
     !    module.
@@ -584,13 +584,13 @@ subroutine set_rate(proc_nr, rate)
     real(kind=rsingle), intent(in) :: rate
 
     ! Make sure proc_nr is in the right range
-    ASSERT(proc_nr.gt.0,"base/set_rate: proc_nr has to be positive")
+    ASSERT(proc_nr.gt.0,"base/set_rate_const: proc_nr has to be positive")
     !   * the field within the process, but the meaning differs as explained
     !     under 'switch'
-    ASSERT(proc_nr.le.nr_of_proc,"base/set_rate: proc_nr less or equal nr_of_proc.")
+    ASSERT(proc_nr.le.nr_of_proc,"base/set_rate_const: proc_nr less or equal nr_of_proc.")
     rates(proc_nr) = rate
 
-end subroutine set_rate
+end subroutine set_rate_const
 
 subroutine update_accum_rate()
     !****f* base/update_accum_rate

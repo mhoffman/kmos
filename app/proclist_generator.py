@@ -63,7 +63,7 @@ class ProcListWriter():
         out.write('    save_system, &\n')
         out.write('    assertion_fail, &\n')
         out.write('    null_species, &\n')
-        out.write('    set_rate, &\n')
+        out.write('    set_rate_const, &\n')
         out.write('    update_accum_rate, &\n')
         out.write('    update_clocks\n\n')
 
@@ -81,6 +81,7 @@ class ProcListWriter():
         out.write('integer(kind=iint), dimension(3), public :: system_size\n')
         out.write('integer(kind=iint), parameter, public :: nr_of_layers = %s\n' % len(data.layer_list))
         out.write('\n ! Layer constants\n\n')
+        out.write('integer(kind=iint), parameter, public :: model_dimension = %s\n' % (data.meta.model_dimension))
         for i, layer in enumerate(data.layer_list):
             out.write('integer(kind=iint), parameter, public :: %s = %s\n'
                 % (layer.name, i + 1))
@@ -109,12 +110,11 @@ class ProcListWriter():
                 + '      + system_size(1)*modulo(site(2), system_size(2)))&\n' 
                 + '      + site(4)\n')
         elif data.meta.model_dimension == 3 :
-            out.write('    lattice2nr = site_per_unit_cell*(&\n'
+            out.write('    lattice2nr = spuck*(&\n'
                 + '      modulo(site(1), system_size(1))&\n'
-                + '      + system_size(1)*modulo(site(2), system_size(2)&\n'
-                + '      + system_size(1)*system_size(2)*modulo(site(3), system_size))&\n'
+                + '      + system_size(1)*modulo(site(2), system_size(2))&\n'
+                + '      + system_size(1)*system_size(2)*modulo(site(3), system_size(3)))&\n'
                 + '      + site(4)\n')
-
         out.write('\nend function lattice2nr\n\n')
 
         out.write('pure function nr2lattice(nr)\n\n')
@@ -122,7 +122,7 @@ class ProcListWriter():
         out.write('    integer(kind=iint), dimension(4) :: nr2lattice\n\n')
 
         if data.meta.model_dimension == 3 :
-            out.write('    nr2lattice(3) = (nr - 1) /  system_size(1)*system_size(2)*spuck\n')
+            out.write('    nr2lattice(3) = (nr - 1) /  (system_size(1)*system_size(2)*spuck)\n')
             out.write('    nr2lattice(2) = (nr - 1 - system_size(1)*system_size(2)*spuck*nr2lattice(3)) / (system_size(1)*spuck)\n')
             out.write('    nr2lattice(1) = (nr - 1 - spuck*(system_size(1)*system_size(2)*nr2lattice(3) + system_size(1)*nr2lattice(2))) / spuck\n')
             out.write('    nr2lattice(4) = nr - spuck*(system_size(1)*system_size(2)*nr2lattice(3) + system_size(2)*nr2lattice(2) + nr2lattice(1))\n')
@@ -233,6 +233,7 @@ class ProcListWriter():
             + '    lattice2nr, &\n'
             + '    add_proc, &\n'
             + '    can_do, &\n'
+            + '    set_rate_const, &\n'
             + '    replace_species, &\n'
             + '    del_proc, &\n'
             + '    reset_site, &\n'
@@ -319,9 +320,16 @@ class ProcListWriter():
             + '    print *, "results in a publication."\n\n')\
             % (data.meta.model_dimension, data.meta.model_name, data.meta.author, data.meta.email, ))
         out.write('    call allocate_system(nr_of_proc, input_system_size, system_name)\n')
-        out.write('    call initialize_state(layer, species)\n\n')
+        out.write('    call initialize_state(layer, species)\n')
+        out.write('    call set_rate_constants\n\n')
         out.write('end subroutine init\n\n')
 
+        out.write('subroutine set_rate_constants()\n\n')
+        for process in data.process_list:
+            rate_constant = process.rate_constant if process.rate_constant else 0.
+            out.write('    call set_rate_const(%s, real(%s))\n' % (process.name, rate_constant))
+
+        out.write('\nend subroutine set_rate_constants\n\n')
 
         out.write('subroutine initialize_state(layer, species)\n\n')
         out.write('    integer(kind=iint), intent(in) :: layer, species\n\n')
