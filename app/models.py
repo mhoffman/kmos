@@ -140,8 +140,7 @@ class Coord(Attributes):
         elif a.layer:
             name = '%s_%s + %s' % (a.layer, a.name, b.name)
         elif b.layer:
-            layer = ''
-            name "%s + %s_%s" % (a.name,b.layer, b.name)
+            name = "%s + %s_%s" % (a.name,b.layer, b.name)
         else:
             name = '%s + %s' % (a.name, b.name)
         layer = ''
@@ -152,24 +151,51 @@ class Coord(Attributes):
         to keep the name and layer from a, and just take the difference in suppercells
         """
         offset = [ (x-y) for (x,y) in zip(a.offset, b.offset) ]
-        if a.layer and b.layer:
-            name = "%s_%s - %s_%s" % (a.layer, a.name, b.layer, b.name)
-        elif a.layer:
-            name = '%s_%s - %s' % (a.layer, a.name, b.name)
-        elif b.layer:
-            layer = ''
-            name "%s - %s_%s" % (a.name,b.layer, b.name)
+        if a.layer:
+            a_name = '%s_%s' % (a.layer, a.name)
         else:
-            name = '%s - %s' % (a.name, b.name)
+            a_name = a.name
+        if b.layer:
+            b_name = '%s_%s' % (b.layer, b.name)
+        else:
+            b_name = b.name
+
+        if a_name == b_name:
+            name = '0'
+        else:
+            name = '%s - %s' % (a_name, b_name)
         layer = ''
         return Coord(name=name,layer=layer,offset=offset)
+
+    def rsub_ff(self):
+        """Build term as if subtrating on the right, omit '-' if 0 anyway
+        (in Fortran Form :-)
+        """
+        ff = self.ff()
+        if ff == '(/0, 0, 0, 0/)':
+            return ''
+        else:
+            return ' - %s' % ff
+
+    def radd_ff(self):
+        """Build term as if adding on the right, omit '+' if 0 anyway
+        (in Fortran Form :-)
+        """
+        ff = self.ff()
+        if ff == '(/0, 0, 0, 0/)':
+            return ''
+        else:
+            return ' + %s' % ff
 
     def sort_key(self):
         return "%s_%s_%s_%s_%s" % (self.layer, self.name, self.offset[0], self.offset[1], self.offset[2])
 
     def ff(self):
         """ff like 'Fortran Form'"""
-        return "(/%s, %s, %s, %s_%s/)" % (self.offset[0], self.offset[1], self.offset[2], self.layer, self.name, )
+        if self.layer:
+            return "(/%s, %s, %s, %s_%s/)" % (self.offset[0], self.offset[1], self.offset[2], self.layer, self.name, )
+        else:
+            return "(/%s, %s, %s, %s/)" % (self.offset[0], self.offset[1], self.offset[2], self.name, )
 
 
 class Species(Attributes):
@@ -279,8 +305,8 @@ class Process(Attributes):
     def add_action(self, action):
         self.action_list.append(action)
 
-    def executing_site(self):
-        return sorted(self.action_list, key=lambda action: action.coord.sort_key())[0]
+    def executing_coord(self):
+        return sorted(self.action_list, key=lambda action: action.coord.sort_key())[0].coord
 
     def get_info(self):
         return self.rate_constant

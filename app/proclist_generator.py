@@ -258,28 +258,35 @@ class ProcListWriter():
         out.write('    integer(kind=iint), intent(in) :: nr_site\n\n')
         out.write('    integer(kind=iint), dimension(4) :: lsite\n\n')
         out.write('    call increment_procstat(proc)\n\n')
-        out.write('    lsite = nr2lattice(nr_site)\n')
+        out.write('    ! lsite = lattice_site, (vs. scalar site)\n')
+        out.write('    lsite = nr2lattice(nr_site)\n\n')
         out.write('    select case(proc)\n')
-        # lsite = lattice site, (site in lattice coordinates)
         for process in data.process_list:
             out.write('    case(%s)\n' % process.name)
             for action in process.action_list:
-                relaction_coord = (
-                ('(/lsite(1)+(%s), ' % action.coord.offset[0] if action.coord.offset[0] else '(/lsite(1), ')
-                + ('lsite(2)+(%s), ' % action.coord.offset[1] if action.coord.offset[1] else 'lsite(2), ')
-                + ('lsite(3)+(%s), ' % action.coord.offset[2] if action.coord.offset[2] else 'lsite(3), ')
-                + ('%s_%s/)' % (action.coord.layer, action.coord.name))
-                )
+                #relative_coord = (
+                #('(/lsite(1)+(%s), ' % action.coord.offset[0] if action.coord.offset[0] else '(/lsite(1), ')
+                #+ ('lsite(2)+(%s), ' % action.coord.offset[1] if action.coord.offset[1] else 'lsite(2), ')
+                #+ ('lsite(3)+(%s), ' % action.coord.offset[2] if action.coord.offset[2] else 'lsite(3), ')
+                #+ ('%s_%s/)' % (action.coord.layer, action.coord.name))
+                #)
+
+                print(process.name, process.executing_coord().ff(),action.coord.ff())
+                print('    ' +(action.coord-process.executing_coord()).ff())
+                if action.coord == process.executing_coord():
+                    relative_coord = 'lsite'
+                else:
+                    relative_coord = 'lsite%s' % (action.coord-process.executing_coord()).radd_ff()
+
+
                 if action.species == data.species_list_iter.default_species:
                     try:
                         previous_species = filter(lambda x: x.coord.ff()==action.coord.ff(), process.condition_list)[0].species
                     except:
-                        print(process)
-                        print(action.coord.ff())
-                        print([x.coord.ff() for x in process.condition_list])
-                    out.write('        call take_%s_%s_%s(%s)\n' % (previous_species, action.coord.layer, action.coord.name, relaction_coord))
+                        UserWarning("Process %s seems to be ill-defined\n" % process.name)
+                    out.write('        call take_%s_%s_%s(%s)\n' % (previous_species, action.coord.layer, action.coord.name, relative_coord))
                 else:
-                    out.write('        call put_%s_%s_%s(%s)\n' % (action.species, action.coord.layer, action.coord.name, relaction_coord))
+                    out.write('        call put_%s_%s_%s(%s)\n' % (action.species, action.coord.layer, action.coord.name, relative_coord))
 
             out.write('\n')
                     
@@ -301,6 +308,11 @@ class ProcListWriter():
                         routine_name = '%s_%s_%s_%s' % (op, species.name, layer.name, site.name)
                         out.write('subroutine %s(site)\n\n' % routine_name)
                         out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
+                        out.write('    ! update lattice\n')
+                        if op == 'put':
+                            out.write('    call replace_species(site, %s, %s)\n\n' % (data.species_list_iter.default_species, species.name))
+                        elif op == 'take':
+                            out.write('    call replace_species(site, %s, %s)\n\n' % (species.name, data.species_list_iter.default_species))
                         for process in data.process_list:
                             for condition in process.condition_list:
                                 if site.name == condition.coord.name :
@@ -321,9 +333,9 @@ class ProcListWriter():
                                         # the right relative site
                                         other_conditions = [ConditionAction(
                                                 species=other_condition.species,
-                                                coord=('site-%s' % (other_condition.coord-condition.coord).ff())) for 
+                                                coord=('site%s' % (other_condition.coord-condition.coord).radd_ff())) for 
                                                 other_condition in other_conditions]
-                                        enabled_procs.append((other_conditions, (process.name, 'site-%s' % (-process.executing_site().coord).ff(), True)))
+                                        enabled_procs.append((other_conditions, (process.name, 'site%s' % (process.executing_coord()-condition.coord).radd_ff(), True)))
                                     # and we disable something whenever we put something down, and the process
                                     # needs an empty site here or if we take something and the process needs
                                     # something else
@@ -331,15 +343,16 @@ class ProcListWriter():
                                         and condition.species == data.species_list_iter.default_species \
                                         or op == 'take' \
                                         and species.name == condition.species :
-                                            disabled_procs.append((process, condition))
+                                            coord = process.executing_coord() - condition.coord
+                                            disabled_procs.append((process, coord))
                         # updating disabled procs is easy to do efficiently
                         # because we don't ask any questions twice, so we do it immediately
                         if disabled_procs:
                             out.write('    ! disable affected processes\n')
-                        for process, condition in disabled_procs:
-                            out.write(('    if(can_do(%(proc)s, %(site)s))then\n'
-                            + '        call del_proc(%(proc)s, %(site)s)\n'
-                            + '    endif\n\n') % {'site':(-condition.coord).ff(), 'proc':process.name})
+                        for process, coord in disabled_procs:
+                            out.write(('    if(can_do(%(proc)s, site%(coord)s))then\n'
+                            + '        call del_proc(%(proc)s, site%(coord)s)\n'
+                            + '    endif\n\n') % {'coord':(coord).radd_ff(), 'proc':process.name})
 
                         # updating enabled procs is not so simply, because meeting one condition
                         # is not enough. We need to know if all other conditions are met as well
