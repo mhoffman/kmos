@@ -271,8 +271,6 @@ class ProcListWriter():
                 #+ ('%s_%s/)' % (action.coord.layer, action.coord.name))
                 #)
 
-                print(process.name, process.executing_coord().ff(),action.coord.ff())
-                print('    ' +(action.coord-process.executing_coord()).ff())
                 if action.coord == process.executing_coord():
                     relative_coord = 'lsite'
                 else:
@@ -368,9 +366,20 @@ class ProcListWriter():
         for layer in data.layer_list:
             for site in layer.sites:
                 routine_name = 'touchup_%s_%s' % (layer.name, site.name)
-                out.write('subroutine %s(species, site)\n\n' % routine_name)
-                out.write('    integer(kind=iint), intent(in) :: species\n')
+                out.write('subroutine %s(site)\n\n' % routine_name)
                 out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
+                items = []
+                for process in data.process_list:
+                    executing_coord = process.executing_coord()
+                    if executing_coord.layer == layer.name \
+                        and executing_coord.name == site.name:
+                        condition_list = [ ConditionAction(
+                            species=condition.species,
+                            coord='site%s' % (condition.coord-executing_coord).radd_ff(),
+                            ) for condition in process.condition_list ]
+                        items.append((condition_list, (process.name, 'site', True)))
+
+                self._write_optimal_iftree(items=items, indent=4, out=out)
                 out.write('end subroutine %s\n\n' % routine_name)
 
         # TODO: subroutine get_char fuctions, the crumpy part
