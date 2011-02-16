@@ -99,7 +99,7 @@
                                 </child>
                                 <child>
                                     <widget class="ProxySpinButton" id="grid_x">
-                                        <property name="adjustment">1 0 100 1 10 0</property>
+                                        <property name="adjustment">1 1 100 1 10 0</property>
                                         <property name="data_type">int</property>
                                         <property name="invisible_char">*</property>
                                         <property name="invisible_char_set">True</property>
@@ -115,10 +115,11 @@
                                 </child>
                                 <child>
                                     <widget class="ProxySpinButton" id="grid_y">
-                                        <property name="adjustment">1 0 100 1 10 0</property>
+                                        <property name="adjustment">1 1 100 1 10 0</property>
                                         <property name="data_type">int</property>
                                         <property name="invisible_char">*</property>
                                         <property name="invisible_char_set">True</property>
+                                        <property name="is_focus">True</property>
                                         <property name="model_attribute">y</property>
                                         <property name="text" context="yes" translatable="yes">1</property>
                                         <property name="visible">True</property>
@@ -130,7 +131,7 @@
                                 </child>
                                 <child>
                                     <widget class="ProxySpinButton" id="grid_z">
-                                        <property name="adjustment">1 0 100 1 10 0</property>
+                                        <property name="adjustment">1 1 100 1 10 0</property>
                                         <property name="data_type">int</property>
                                         <property name="invisible_char">*</property>
                                         <property name="invisible_char_set">True</property>
@@ -1194,7 +1195,7 @@
                                         <property name="invisible_char">*</property>
                                         <property name="invisible_char_set">True</property>
                                         <property name="is_focus">True</property>
-                                        <property name="model_attribute">site_name</property>
+                                        <property name="model_attribute">name</property>
                                         <property name="visible">True</property>
                                     </widget>
                                 </child>

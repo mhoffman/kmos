@@ -260,6 +260,7 @@ class ProcListWriter():
         out.write('    call increment_procstat(proc)\n\n')
         out.write('    lsite = nr2lattice(nr_site)\n')
         out.write('    select case(proc)\n')
+        # lsite = lattice site, (site in lattice coordinates)
         for process in data.process_list:
             out.write('    case(%s)\n' % process.name)
             for action in process.action_list:
@@ -286,7 +287,6 @@ class ProcListWriter():
         out.write('end subroutine run_proc_nr\n\n\n')
         # TODO: subroutine run_proc_nr
 
-        # TODO: maybe check_... function (as far as touchup functions rely on it)
 
         for species in data.species_list:
             if species.name == data.species_list_iter.default_species:
@@ -303,7 +303,7 @@ class ProcListWriter():
                         out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
                         for process in data.process_list:
                             for condition in process.condition_list:
-                                if site.name == condition.coord.name:
+                                if site.name == condition.coord.name :
                                     # first let's check if we could be enabling any site
                                     # this can be the case if we put down a particle, and 
                                     # it is the right one, or if we lift one up and the process
@@ -313,15 +313,17 @@ class ProcListWriter():
                                         or op == 'take' \
                                         and condition.species == data.species_list_iter.default_species  :
 
+                                        # filter out the current condition, because we know we set it to true 
+                                        # right now
                                         other_conditions = filter(lambda x: x.coord != condition.coord, process.condition_list)
                                         # note how '-' operation is defined for Coord class !
                                         # we change the coordinate part to already point at 
                                         # the right relative site
                                         other_conditions = [ConditionAction(
                                                 species=other_condition.species,
-                                                coord=(other_condition.coord-condition.coord)) for 
+                                                coord=('site-%s' % (other_condition.coord-condition.coord).ff())) for 
                                                 other_condition in other_conditions]
-                                        enabled_procs.append((other_conditions, (process.name, -condition.coord, True)))
+                                        enabled_procs.append((other_conditions, (process.name, 'site-%s' % (-process.executing_site().coord).ff(), True)))
                                     # and we disable something whenever we put something down, and the process
                                     # needs an empty site here or if we take something and the process needs
                                     # something else
@@ -378,9 +380,9 @@ class ProcListWriter():
             # [1][2] field of the item determine if this search is intended for enabling (=True) or
             # disabling (=False) a process
             if item[1][2]:
-                out.write('%scall add_proc(%s, %s)\n' % (' '*indent, item[1][0], item[1][1].ff()))
+                out.write('%scall add_proc(%s, %s)\n' % (' '*indent, item[1][0], item[1][1]))
             else:
-                out.write('%scall del_proc(%s, %s)\n' % (' '*indent, item[1][0], item[1][1].ff()))
+                out.write('%scall del_proc(%s, %s)\n' % (' '*indent, item[1][0], item[1][1]))
 
         # and only keep those that have conditions
         items = filter(lambda x: x[0], items)
@@ -399,27 +401,27 @@ class ProcListWriter():
         #print("MOST_COMMON_COORD: %s" % most_common_coord)
 
         # filter out list of uniq answers for this site
-        answers = [ y.species for y in filter(lambda x: x.coord.ff()==most_common_coord.ff(), flatten([x[0] for x in items]))]
+        answers = [ y.species for y in filter(lambda x: x.coord==most_common_coord, flatten([x[0] for x in items]))]
         uniq_answers = list(set(answers))
 
         #DEBUGGING
         #print("ANSWERS %s" % answers)
         #print("UNIQ_ANSWERS %s" % uniq_answers)
 
-        out.write('%sselect case(get_species(%s))\n' % ((indent)*' ', most_common_coord.ff()))
+        out.write('%sselect case(get_species(%s))\n' % ((indent)*' ', most_common_coord))
         for answer in uniq_answers:
             out.write('%scase(%s)\n' % ((indent)*' ', answer))
             # this very crazy expression matches at items that contain
             # a question for the same coordinate and have the same answer here
             nested_items = filter(
-                lambda x: (most_common_coord.ff() in [y.coord.ff() for y in x[0]]
-                and answer == filter(lambda y: y.coord.ff() == most_common_coord.ff(), x[0])[0].species),
+                lambda x: (most_common_coord in [y.coord for y in x[0]]
+                and answer == filter(lambda y: y.coord == most_common_coord, x[0])[0].species),
                 items)
             # pruned items are almost identical to nested items, except the have
             # the one condition removed, that we just met
             pruned_items = []
             for nested_item in nested_items:
-                conditions = filter( lambda x: most_common_coord.ff()!=x.coord.ff(), nested_item[0])
+                conditions = filter( lambda x: most_common_coord !=x.coord, nested_item[0])
                 pruned_items.append((conditions,nested_item[1]))
 
 

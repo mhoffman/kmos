@@ -133,12 +133,39 @@ class Coord(Attributes):
         """When negating a lattice coordinate we only mean to negate to supercell part"""
         return Coord(name=self.name,layer=self.layer,offset=[-x for x in self.offset])
 
+    def __add__(a, b):
+        diff = [ (x+y) for (x,y) in zip(a.offset, b.offset) ]
+        if a.layer and b.layer:
+            name = "%s_%s + %s_%s" % (a.layer, a.name, b.layer, b.name)
+        elif a.layer:
+            name = '%s_%s + %s' % (a.layer, a.name, b.name)
+        elif b.layer:
+            layer = ''
+            name "%s + %s_%s" % (a.name,b.layer, b.name)
+        else:
+            name = '%s + %s' % (a.name, b.name)
+        layer = ''
+        return Coord(name=name,layer=layer,offset=offset)
+
     def __sub__(a, b):
         """When subtracting to lattice coordinates from each other, i.e. a-b, we want
         to keep the name and layer from a, and just take the difference in suppercells
         """
-        diff = [ (x-y) for (x,y) in zip(a.offset, b.offset) ]
-        return Coord(name=a.name,layer=a.layer,offset=diff)
+        offset = [ (x-y) for (x,y) in zip(a.offset, b.offset) ]
+        if a.layer and b.layer:
+            name = "%s_%s - %s_%s" % (a.layer, a.name, b.layer, b.name)
+        elif a.layer:
+            name = '%s_%s - %s' % (a.layer, a.name, b.name)
+        elif b.layer:
+            layer = ''
+            name "%s - %s_%s" % (a.name,b.layer, b.name)
+        else:
+            name = '%s - %s' % (a.name, b.name)
+        layer = ''
+        return Coord(name=name,layer=layer,offset=offset)
+
+    def sort_key(self):
+        return "%s_%s_%s_%s_%s" % (self.layer, self.name, self.offset[0], self.offset[1], self.offset[2])
 
     def ff(self):
         """ff like 'Fortran Form'"""
@@ -251,6 +278,9 @@ class Process(Attributes):
 
     def add_action(self, action):
         self.action_list.append(action)
+
+    def executing_site(self):
+        return sorted(self.action_list, key=lambda action: action.coord.sort_key())[0]
 
     def get_info(self):
         return self.rate_constant
