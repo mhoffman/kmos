@@ -331,7 +331,6 @@ subroutine reset_site(site, old_species)
     integer(kind=iint), intent(in) :: site, old_species
     !---------------internal variables---------------
     integer(kind=iint) :: proc, species
-    logical :: can
 
     species = get_species(site)
 
@@ -340,7 +339,7 @@ subroutine reset_site(site, old_species)
         call replace_species(site, species, null_species)
     else
         print *,'ERROR: base/reset_site: wrong species given'
-        print *,'Expected',old_species,'but found',species
+        print *,'Expected',old_species,'but found',species,'on',site
         stop
     endif
 
@@ -1103,9 +1102,9 @@ subroutine interval_search_real(arr, value, return_field)
                     print *,""
                     print *,""
                     print *,"interval_search_real can't find available process"
-                    print *,"This usually means this &
-        that either you forgot to define rate constants or you defined &
-        a dead-lock: e.g. adsorption without corresponding desorption."
+                    print *,"This usually means"
+                    print *,"that either you forgot to define rate constants or you defined"
+                    print *,"a dead-lock: e.g. adsorption without corresponding desorption."
                     stop
                 endif
                 exit nonzerosearch

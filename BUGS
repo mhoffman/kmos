@@ -1,1 +1,0 @@
-* Fix accidental (double) creation of 'empty' species, possibly happens when more than one lattice is created, or on opening and existing xml file
