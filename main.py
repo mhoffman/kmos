@@ -100,15 +100,15 @@ class ProjectTree(SlaveDelegate):
             return 'Untitled'
     def __getattr__(self, attr):
         if attr == 'species_list':
-            return self.project_data.get_descendants(self.species_list_iter)
+            return sorted(self.project_data.get_descendants(self.species_list_iter), key=lambda species: species.name)
         elif attr == 'layer_list':
-            return self.project_data.get_descendants(self.layer_list_iter)
+            return sorted(self.project_data.get_descendants(self.layer_list_iter), key=lambda layer: layer.name)
         elif attr == 'process_list':
-            return self.project_data.get_descendants(self.process_list_iter)
+            return sorted(self.project_data.get_descendants(self.process_list_iter), key=lambda process: process.name)
         elif attr == 'parameter_list':
-            return self.project_data.get_descendants(self.parameter_list_iter)
+            return sorted(self.project_data.get_descendants(self.parameter_list_iter), key=lambda parameter: parameter.name)
         elif attr == 'output_list':
-            return self.project_data.get_descendants(self.output_list_iter)
+            return sorted(self.project_data.get_descendants(self.output_list_iter), key=lambda output: output.name)
         elif attr == 'meta':
             return self.meta
         elif attr == 'append':
