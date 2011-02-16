@@ -79,11 +79,12 @@ class ProcListWriter():
         out.write('\n\nimplicit none\n\n')
 
         out.write('integer(kind=iint), dimension(3), public :: system_size\n')
-        out.write('integer(kind=iint), parameter :: nr_of_layers = %s\n' % len(data.layer_list))
+        out.write('integer(kind=iint), parameter, public :: nr_of_layers = %s\n' % len(data.layer_list))
         out.write('\n ! Layer constants\n\n')
         for i, layer in enumerate(data.layer_list):
             out.write('integer(kind=iint), parameter, public :: %s = %s\n'
                 % (layer.name, i + 1))
+        out.write('integer(kind=iint), parameter, public :: default_layer = %s\n' % data.layer_list_iter.default_layer)
         out.write('\n ! Site constants\n\n')
         site_params = []
         for layer in data.layer_list:
@@ -243,6 +244,7 @@ class ProcListWriter():
         out.write('\n\n ! Species constants\n\n')
         for i, species in enumerate(data.species_list):
             out.write('integer(kind=iint), parameter, public :: %s = %s\n' % (species.name, i +1))
+        out.write('integer(kind=iint), parameter, public :: default_species = %s' % (data.species_list_iter.default_species))
 
         out.write('\n\n! Process constants\n\n')
         for i, process in enumerate(self.data.process_list):
