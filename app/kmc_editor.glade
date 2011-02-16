@@ -521,7 +521,7 @@
         </child>
     </widget>
     <widget class="GtkWindow" id="main_window">
-        <property name="height_request">600</property>
+        <property name="height_request">-1</property>
         <property name="mnemonics_visible">False</property>
         <child>
             <widget class="GtkVBox" id="vbox1">
