@@ -51,6 +51,7 @@ class ProcListWriter():
         out.write('    get_rate, &\n')
         out.write('    increment_procstat, &\n')
         out.write('    base_add_proc => add_proc, &\n')
+        out.write('    base_reset_site => reset_site, &\n')
         out.write('    base_allocate_system => allocate_system, &\n')
         out.write('    base_can_do => can_do, &\n')
         out.write('    base_del_proc => del_proc, &\n')
@@ -64,18 +65,33 @@ class ProcListWriter():
         out.write('    null_species, &\n')
         out.write('    set_rate, &\n')
         out.write('    update_accum_rate, &\n')
-        out.write('    update_clocks\n')
+        out.write('    update_clocks\n\n')
+
+        #out.write('use proclist, only: &\n')
+        #if len(data.layer_list) > 1 :
+            #for layer in data.layer_list[:-1]:
+                #for site in layer.sites:
+                    #out.write('    touchup_%s_%s, &\n' % (layer.name, site.name))
+        #for site in data.layer_list[-1].sites[:-1]:
+            #out.write('    touchup_%s_%s, &\n' % (data.layer_list[-1].name, site.name))
+        #out.write('    touchup_%s_%s\n' % (data.layer_list[-1].name, data.layer_list[-1].sites[-1].name))
+                
         out.write('\n\nimplicit none\n\n')
 
         out.write('integer(kind=iint), dimension(%s), public :: system_size\n'  % data.meta.model_dimension)
         out.write('integer(kind=iint), parameter :: nr_of_layers = %s\n' % len(data.layer_list))
+        out.write('\n ! Layer constants\n\n')
+        for i, layer in enumerate(data.layer_list):
+            out.write('integer(kind=iint), parameter, public :: %s = %s\n'
+                % (layer.name, i + 1))
         out.write('\n ! Site constants\n\n')
         site_params = []
         for layer in data.layer_list:
             for site in layer.sites:
                 site_params.append((site.name, layer.name))
         for i,(site,layer) in enumerate(site_params):
-            out.write(('integer(kind=iint), parameter, public :: %s_%s = %s\n') % (layer,site,i +1))
+            out.write(('integer(kind=iint), parameter, public :: %s_%s = %s\n')
+                % (layer,site,i + 1))
         out.write('\n ! spuck = Sites Per Unit Cell Konstant\n')
         out.write('integer(kind=iint), parameter, public :: spuck = %s\n' % len(site_params))
         out.write('\n\ncontains\n\n')
@@ -122,16 +138,16 @@ class ProcListWriter():
         out.write('    integer(kind=iint), intent(in) :: nr_of_proc\n')
         out.write('    integer(kind=iint), dimension(%s), intent(in) :: input_system_size\n' % data.meta.model_dimension)
         out.write('    character(len=200), intent(in) :: system_name\n\n')
-        out.write('    integer(kind=iint) :: volume\n')
+        out.write('    integer(kind=iint) :: volume\n\n')
         out.write('    ! Copy to module wide variable\n')
-        out.write('    system_size = input_system_size\n\n')
+        out.write('    system_size = input_system_size\n')
 
         if data.meta.model_dimension == 3 :
-            out.write('    volume = system_size(1)*system_size(2)*system_size(3)*spuck\n\n')
+            out.write('    volume = system_size(1)*system_size(2)*system_size(3)*spuck\n')
         elif data.meta.model_dimension == 2 :
-            out.write('    volume = system_size(1)*system_size(2)*spuck\n\n')
+            out.write('    volume = system_size(1)*system_size(2)*spuck\n')
         elif data.meta.model_dimension == 1 :
-            out.write('    volume = system_size(1)spuck\n\n')
+            out.write('    volume = system_size(1)spuck\n')
 
         out.write('    call base_allocate_system(nr_of_proc, volume, system_name)\n\n')
         out.write('end subroutine allocate_system\n\n')  
@@ -152,11 +168,11 @@ class ProcListWriter():
         out.write('    call base_del_proc(proc, nr)\n\n')
         out.write('end subroutine del_proc\n\n')
 
-        out.write('pure function can_do(proc, site)\n')
+        out.write('pure function can_do(proc, site)\n\n')
         out.write('    logical :: can_do\n')
         out.write('    integer(kind=iint), intent(in) :: proc\n')
         out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
-        out.write('    integer(kind=iint) :: nr\n')
+        out.write('    integer(kind=iint) :: nr\n\n')
         out.write('    nr = lattice2nr(site)\n')
         out.write('    can_do = base_can_do(proc, nr)\n\n')
         out.write('end function can_do\n\n')
@@ -177,6 +193,15 @@ class ProcListWriter():
         out.write('    get_species = base_get_species(nr)\n\n')
         out.write('end function get_species\n\n')
 
+        out.write('subroutine reset_site(site, old_species)\n\n')
+        out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n')
+        out.write('    integer(kind=iint), intent(in) :: old_species\n\n')
+        out.write('    integer(kind=iint) :: nr\n\n')
+        out.write('    nr = lattice2nr(site)\n')
+        out.write('    call base_reset_site(nr, old_species)\n\n')
+        out.write('end subroutine reset_site\n\n')
+
+
         out.write('end module lattice\n')
         out.close()
 
@@ -194,6 +219,7 @@ class ProcListWriter():
         out.write('use lattice, only: &\n')
         site_params = []
         for layer in data.layer_list:
+            out.write('    %s, &\n' % layer.name)
             for site in layer.sites:
                 site_params.append((site.name, layer.name))
         for i,(site,layer) in enumerate(site_params):
@@ -205,6 +231,10 @@ class ProcListWriter():
             + '    can_do, &\n'
             + '    replace_species, &\n'
             + '    del_proc, &\n'
+            + '    reset_site, &\n'
+            + '    system_size, &\n'
+            + '    spuck, &\n'
+            + '    null_species, &\n'
             + '    get_species\n' )
         out.write('\n\nimplicit none\n\n')
         out.write('\n\n ! Species constants\n\n')
@@ -223,21 +253,6 @@ class ProcListWriter():
             % (len(data.process_list)))
         out.write('character(len=2000), dimension(%s) :: processes, rates' % (len(data.process_list)))
         out.write('\n\ncontains\n\n')
-        out.write(('subroutine init(input_system_size, system_name)\n'
-            + '    integer(kind=iint), dimension(%s), intent(in) :: input_system_size\n'
-            + '    character(len=400), intent(in) :: system_name\n'
-            + '    print *, "This kMC Model \'%s\' was written by %s (%s)"\n'
-            + '    print *, "and implemented with the help of kmos,"\n'
-            + '    print *, "which is distributed under"\n'
-            + '    print *, "GNU/GPL Version 3 (C) Max J. Hoffmann mjhoffmann@gmail.com"\n'
-            + '    print *, "Currently kmos is in a very alphaish stage and there is"\n'
-            + '    print *, "ABSOLUTELY NO WARRANTY for correctness."\n'
-            + '    print *, "Please check back with the author prior to using"\n'
-            + '    print *, "results in a publication."\n\n')\
-            % (data.meta.model_dimension, data.meta.model_name, data.meta.author, data.meta.email, ))
-        out.write('    call allocate_system(nr_of_proc, input_system_size, system_name)\n\n')
-
-        out.write('end subroutine init\n\n')
 
         out.write('subroutine do_kmc_step()\n\n')
         out.write('    integer(kind=iint), dimension(4) :: site\n')
@@ -289,8 +304,55 @@ class ProcListWriter():
             out.write('\n')
                     
         out.write('    end select\n\n')
-        out.write('end subroutine run_proc_nr\n\n\n')
-        # TODO: subroutine run_proc_nr
+
+        out.write('end subroutine run_proc_nr\n\n')
+
+
+        out.write(('subroutine init(input_system_size, system_name, layer, species)\n\n'
+            + '    integer(kind=iint), intent(in) :: layer, species\n'
+            + '    integer(kind=iint), dimension(%s), intent(in) :: input_system_size\n\n'
+            + '    character(len=400), intent(in) :: system_name\n\n'
+            + '    print *, "This kMC Model \'%s\' was written by %s (%s)"\n'
+            + '    print *, "and implemented with the help of kmos,"\n'
+            + '    print *, "which is distributed under"\n'
+            + '    print *, "GNU/GPL Version 3 (C) Max J. Hoffmann mjhoffmann@gmail.com"\n'
+            + '    print *, "Currently kmos is in a very alphaish stage and there is"\n'
+            + '    print *, "ABSOLUTELY NO WARRANTY for correctness."\n'
+            + '    print *, "Please check back with the author prior to using"\n'
+            + '    print *, "results in a publication."\n\n')\
+            % (data.meta.model_dimension, data.meta.model_name, data.meta.author, data.meta.email, ))
+        out.write('    call allocate_system(nr_of_proc, input_system_size, system_name)\n')
+        out.write('    call initialize_state(layer, species)\n\n')
+        out.write('end subroutine init\n\n')
+
+
+        out.write('subroutine initialize_state(layer, species)\n\n')
+        out.write('    integer(kind=iint), intent(in) :: layer, species\n\n')
+        out.write('    integer(kind=iint) :: i, j, k, nr\n\n')
+        out.write('    do i = 0, system_size(1)-1\n')
+        out.write('        do j = 0, system_size(2)-1\n')
+        out.write('            do k = 0, system_size(3)-1\n')
+        out.write('                do nr = 1, spuck\n')
+        out.write('                    call reset_site((/i, j, k, nr/), null_species)\n')
+        out.write('                    call replace_species((/i, j, k, nr/), null_species, species)\n')
+        out.write('                end do\n')
+        out.write('            end do\n')
+        out.write('        end do\n')
+        out.write('    end do\n\n')
+        out.write('    do i = 0, system_size(1)-1\n')
+        out.write('        do j = 0, system_size(2)-1\n')
+        out.write('            do k = 0, system_size(3)-1\n')
+        out.write('                select case(layer)\n')
+        for layer in data.layer_list:
+            out.write('                case(%s)\n' % layer.name)
+            for site in layer.sites:
+                out.write('                    call touchup_%s_%s((/i, j, k, %s_%s/))\n' % (2*(layer.name, site.name)))
+        out.write('                end select\n')
+        out.write('            end do\n')
+        out.write('        end do\n')
+        out.write('    end do\n\n')
+        out.write('end subroutine initialize_state\n\n')
+
 
 
         for species in data.species_list:
@@ -360,9 +422,8 @@ class ProcListWriter():
                             out.write('    ! enable affected processes\n')
 
                         self._write_optimal_iftree(items=enabled_procs, indent=4,out=out)
-                        out.write('end subroutine %s\n\n' % routine_name)
+                        out.write('\nend subroutine %s\n\n' % routine_name)
 
-        # TODO: subroutine touchup functions
         for layer in data.layer_list:
             for site in layer.sites:
                 routine_name = 'touchup_%s_%s' % (layer.name, site.name)
