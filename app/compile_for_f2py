@@ -24,7 +24,7 @@ then
     extra_flags=' -fast -fpp'
   fi
 else 
-  fcompiler='g95'
+  fcompiler='gfortran'
   extra_flags='-xf95-cpp-input'
 fi
 
