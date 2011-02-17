@@ -90,8 +90,11 @@ class ProcListWriter():
         site_params = []
         for layer in data.layer_list:
             for site in layer.sites:
-                site_params.append((site.name, layer.name))
-        for i,(site,layer) in enumerate(site_params):
+                site_params.append((site.name, layer.name, (site.x, site.y, site.z)))
+
+        out.write(('real(kind=rsingle), dimension(3,3), public :: unit_cell_size = 0.\n'))
+        out.write('real(kind=rsingle), dimension(%s, 3), public :: site_positions\n' % len(site_params))
+        for i,(site,layer, _) in enumerate(site_params):
             out.write(('integer(kind=iint), parameter, public :: %s_%s = %s\n')
                 % (layer,site,i + 1))
         out.write('\n ! spuck = Sites Per Unit Cell Konstant\n')
@@ -154,6 +157,12 @@ class ProcListWriter():
         out.write('    volume = system_size(1)*system_size(2)*system_size(3)*spuck\n')
 
         out.write('    call base_allocate_system(nr_of_proc, volume, system_name)\n\n')
+        out.write('    unit_cell_size(1, 1) = %s\n' % data.layer_list_iter.cell_size_x)
+        out.write('    unit_cell_size(2, 2) = %s\n' % data.layer_list_iter.cell_size_y)
+        out.write('    unit_cell_size(3, 3) = %s\n' % data.layer_list_iter.cell_size_z)
+        for i, (_, _, (x,y,z)) in enumerate(site_params):
+            out.write('    site_positions(%s,:) = (/%s, %s, %s/)\n' % (i+1, x, y, z))
+            
         out.write('end subroutine allocate_system\n\n')  
 
         out.write('subroutine add_proc(proc, site)\n\n')
