@@ -521,7 +521,6 @@
         </child>
     </widget>
     <widget class="GtkWindow" id="main_window">
-        <property name="height_request">-1</property>
         <property name="mnemonics_visible">False</property>
         <child>
             <widget class="GtkVBox" id="vbox1">
@@ -1343,6 +1342,16 @@
                                         <property name="position">2</property>
                                     </packing>
                                 </child>
+                                <child>
+                                    <widget class="GtkLabel" id="label19">
+                                        <property name="label" context="yes" translatable="yes">Representation:</property>
+                                        <property name="visible">True</property>
+                                        <property name="xalign">0.0</property>
+                                    </widget>
+                                    <packing>
+                                        <property name="position">3</property>
+                                    </packing>
+                                </child>
                             </widget>
                             <packing>
                                 <property name="expand">False</property>
@@ -1383,6 +1392,22 @@
                                     </widget>
                                     <packing>
                                         <property name="position">2</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <widget class="ProxyTextView" id="representation">
+                                        <property name="data_type">str</property>
+                                        <property name="has_tooltip">True</property>
+                                        <property name="height_request">60</property>
+                                        <property name="is_focus">True</property>
+                                        <property name="model_attribute">representation</property>
+                                        <property name="tooltip_markup" context="yes" translatable="yes">Enter a ase.atoms like Atoms(&amp;apos;CO&amp;apos;,[[0,0,0],[0,0,1.15]]) for graphical representation</property>
+                                        <property name="tooltip_text" context="yes" translatable="yes">Enter a ase.atoms like Atoms('CO',[[0,0,0],[0,0,1.15]]) for graphical representation</property>
+                                        <property name="visible">True</property>
+                                        <property name="width_request">260</property>
+                                    </widget>
+                                    <packing>
+                                        <property name="position">3</property>
                                     </packing>
                                 </child>
                             </widget>

@@ -597,7 +597,7 @@ class SpeciesListForm(ProxySlaveDelegate):
 class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
     gladefile = GLADEFILE
     toplevel_name = 'species_form'
-    widgets = ['name', 'color', 'id']
+    widgets = ['name', 'color', 'id', 'representation']
     def __init__(self, model, project_tree):
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, model)

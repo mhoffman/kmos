@@ -192,6 +192,7 @@ class ProjectTree(SlaveDelegate):
                             species =  sub.attrib['species']
                             coord_layer = sub.attrib['coord_layer']
                             coord_name = sub.attrib['coord_name']
+                            representation = sub.attrib['representation'] if 'representation' in sub.attrib else ''
                             coord_offset = tuple(
                                 [int(i) for i in 
                                 sub.attrib['coord_offset'].split()])
@@ -325,6 +326,7 @@ class ProjectTree(SlaveDelegate):
             species_elem.set('name', species.name)
             species_elem.set('color', species.color)
             species_elem.set('id', str(species.id))
+            species_elem.set('representation', species.representation)
         parameter_list = ET.SubElement(root, 'parameter_list')
         for parameter in self.parameter_list:
             parameter_elem = ET.SubElement(parameter_list, 'parameter')
