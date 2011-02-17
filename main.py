@@ -192,7 +192,6 @@ class ProjectTree(SlaveDelegate):
                             species =  sub.attrib['species']
                             coord_layer = sub.attrib['coord_layer']
                             coord_name = sub.attrib['coord_name']
-                            representation = sub.attrib['representation'] if 'representation' in sub.attrib else ''
                             coord_offset = tuple(
                                 [int(i) for i in 
                                 sub.attrib['coord_offset'].split()])
@@ -212,7 +211,8 @@ class ProjectTree(SlaveDelegate):
                     name = species.attrib['name']
                     id = species.attrib['id']
                     color = species.attrib['color']
-                    species_elem = Species(name=name, color=color, id=id)
+                    representation = species.attrib['representation'] if 'representation' in species.attrib else ''
+                    species_elem = Species(name=name, color=color, id=id, representation=representation)
                     self.project_data.append(self.species_list_iter, species_elem)
             if child.tag == 'output_list':
                 for item in child:
