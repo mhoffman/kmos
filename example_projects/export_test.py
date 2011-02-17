@@ -3,7 +3,7 @@ import main
 import shutil
 
 export_dir = 'default_src'
-xml_file = 'einsD.xml'
+xml_file = 'dreiD.xml'
 
 shutil.rmtree(export_dir,ignore_errors=True)
 kmc = main.KMC_Editor()
