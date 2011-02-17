@@ -17,6 +17,7 @@
     color CDATA #REQUIRED
     id CDATA #REQUIRED
     name CDATA #REQUIRED
+    representation CDATA #IMPLIED
   >
   <!ELEMENT parameter_list (parameter)*>
   <!ELEMENT parameter EMPTY>

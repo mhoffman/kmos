@@ -254,15 +254,15 @@ class ProcListWriter():
         out.write('\n\n ! Species constants\n\n')
         for i, species in enumerate(data.species_list):
             out.write('integer(kind=iint), parameter, public :: %s = %s\n' % (species.name, i +1))
-        out.write('integer(kind=iint), parameter, public :: default_species = %s' % (data.species_list_iter.default_species))
+        out.write('integer(kind=iint), parameter, public :: default_species = %s\n' % (data.species_list_iter.default_species))
+        representation_length = max([len(species.representation) for species in data.species_list])
+
+        out.write('integer(kind=iint), parameter, public :: representation_length = %s\n' % representation_length)
+        out.write('character(len=%s), dimension(%s), public :: species_representation\n' % (representation_length, len(data.species_list)))
 
         out.write('\n\n! Process constants\n\n')
         for i, process in enumerate(self.data.process_list):
             out.write('integer(kind=iint), parameter, public :: %s = %s\n' % (process.name, i + 1))
-
-
-        
-            
 
         out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_proc = %s\n'\
             % (len(data.process_list)))
@@ -333,6 +333,14 @@ class ProcListWriter():
         out.write('    call set_rate_constants\n\n')
         out.write('end subroutine init\n\n')
 
+        out.write('subroutine get_representation_char(species_nr, slot, species_char)\n\n')
+        out.write('    integer(kind=iint), intent(in) :: species_nr, slot\n')
+        out.write('    character, intent(out) :: species_char\n\n')
+        out.write('    species_char = species_representation(species_nr)(slot:slot)\n\n')
+        out.write('end subroutine get_representation_char\n\n')
+
+
+
         out.write('subroutine set_rate_constants()\n\n')
         for process in data.process_list:
             rate_constant = process.rate_constant if process.rate_constant else 0.
@@ -394,6 +402,8 @@ class ProcListWriter():
         out.write('            end do\n')
         out.write('        end do\n')
         out.write('    end do\n\n')
+        for i, species in enumerate(data.species_list):
+            out.write('    species_representation(%s) = "%s"\n' % (i+1, species.representation))
         out.write('end subroutine initialize_state\n\n')
 
 

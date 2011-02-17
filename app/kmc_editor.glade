@@ -1401,8 +1401,8 @@
                                         <property name="height_request">60</property>
                                         <property name="is_focus">True</property>
                                         <property name="model_attribute">representation</property>
-                                        <property name="tooltip_markup" context="yes" translatable="yes">Enter a ase.atoms like Atoms(&amp;apos;CO&amp;apos;,[[0,0,0],[0,0,1.15]]) for graphical representation</property>
-                                        <property name="tooltip_text" context="yes" translatable="yes">Enter a ase.atoms like Atoms('CO',[[0,0,0],[0,0,1.15]]) for graphical representation</property>
+                                        <property name="tooltip_markup" context="yes" translatable="yes">Enter a ase.atoms like Atoms(&amp;apos;CO&amp;apos;,[[0,0,0],[0,0,1.15]]) for graphical representation. Please use only &amp;apos;  &amp;apos; as quotation marks.</property>
+                                        <property name="tooltip_text" context="yes" translatable="yes">Enter a ase.atoms like Atoms('CO',[[0,0,0],[0,0,1.15]]) for graphical representation. Please use only '  ' as quotation marks.</property>
                                         <property name="visible">True</property>
                                         <property name="width_request">260</property>
                                     </widget>
