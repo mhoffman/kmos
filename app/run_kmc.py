@@ -43,8 +43,8 @@ class KMC_Model():
                         species = lattice.get_species([i,j,k,n]) - 1
                         if self.species_representation[species]:
                             atom = deepcopy(self.species_representation[species])
-                            atom.translate(np.dot(lattice.unit_cell_size,np.array([i,j,k]))
-                                           + lattice.site_positions[n-1])
+                            atom.translate(np.dot(lattice.unit_cell_size,
+                            np.array([i,j,k]) + lattice.site_positions[n-1]))
                             if initialized:
                                 atoms += atom
                             else:
