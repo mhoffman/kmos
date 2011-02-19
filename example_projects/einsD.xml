@@ -2,8 +2,8 @@
 <ml_kmc>
     <meta author="StangenMensch" debug="0" email="linie@tum.de" model_dimension="1" model_name="hopping_model"/>
     <species_list default_species="empty">
-        <species color="#000000" id="2" name="C"/>
-        <species color="#ffffff" id="0" name="empty"/>
+        <species color="#000000" name="C"/>
+        <species color="#ffffff" name="empty"/>
     </species_list>
     <parameter_list>
         <parameter name="lattice_size" value="40 40 1"/>

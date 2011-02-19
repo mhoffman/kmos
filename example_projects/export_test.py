@@ -5,7 +5,7 @@ import main
 import shutil
 
 export_dir = 'default_src'
-xml_file = 'dreiD.xml'
+xml_file = 'ruo2.xml'
 
 shutil.rmtree(export_dir,ignore_errors=True)
 kmc = main.KMC_Editor()
