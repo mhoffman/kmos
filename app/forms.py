@@ -489,10 +489,6 @@ class SiteForm(ProxyDelegate):
         self.project_tree = project_tree
         self.layer = layer
         self.show_all()
-        if self.project_tree.meta.model_dimension < 3 :
-            self.sitevect_z.hide()
-        if self.project_tree.meta.model_dimension < 2 :
-            self.sitevect_y.hide()
 
 
     def on_site_name__validate(self, widget, site_name):
@@ -532,10 +528,6 @@ class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
         ProxySlaveDelegate.__init__(self, model)
         #self.model_dimension.set_sensitive(False)
         self.project_tree = project_tree
-        if self.project_tree.meta.model_dimension < 3:
-            self.cell_size_z.hide()
-        if self.project_tree.meta.model_dimension < 2:
-            self.cell_size_y.hide()
 
 
     def on_model_name__validate(self, widget, model_name):
@@ -546,14 +538,6 @@ class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
 
     def on_model_dimension__content_changed(self, widget):
         dimension = int(widget.get_text())
-        if dimension < 3:
-            self.cell_size_z.hide()
-        else:
-            self.cell_size_z.show()
-        if dimension < 2:
-            self.cell_size_y.hide()
-        else:
-            self.cell_size_y.show()
         self.project_tree.update(self.model)
 
 
@@ -620,9 +604,6 @@ class GridForm(ProxyDelegate):
         if self.project_tree.meta.model_dimension < 3:
             self.grid_z.hide()
             self.grid_offset_z.hide()
-        if self.project_tree.meta.model_dimension < 2:
-            self.grid_y.hide()
-            self.grid_offset_y.hide()
 
     def on_grid_x__content_changed(self, widget):
         self.layer.redraw()
@@ -649,10 +630,6 @@ class LatticeForm(ProxySlaveDelegate):
     def __init__(self, model, dimension, project_tree):
         model.default_layer = None
         ProxySlaveDelegate.__init__(self, model)
-        if dimension < 3 :
-            self.cell_size_z.hide()
-        if dimension < 2 :
-            self.cell_size_y.hide()
         self.default_layer.prefill([x.name for x in project_tree.layer_list], sort=True)
         self.default_layer.select(model.default_layer)
         self.default_layer.set_tooltip_text('By default the system\nwill be initialized with this layer')
