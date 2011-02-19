@@ -15,7 +15,6 @@
   <!ELEMENT species EMPTY>
   <!ATTLIST species
     color CDATA #REQUIRED
-    id CDATA #REQUIRED
     name CDATA #REQUIRED
     representation CDATA #IMPLIED
   >

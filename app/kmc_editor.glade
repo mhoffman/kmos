@@ -1333,23 +1333,13 @@
                                     </packing>
                                 </child>
                                 <child>
-                                    <widget class="GtkLabel" id="label12">
-                                        <property name="label" context="yes" translatable="yes">ID:</property>
-                                        <property name="visible">True</property>
-                                        <property name="xalign">0.0</property>
-                                    </widget>
-                                    <packing>
-                                        <property name="position">2</property>
-                                    </packing>
-                                </child>
-                                <child>
                                     <widget class="GtkLabel" id="label19">
                                         <property name="label" context="yes" translatable="yes">Representation:</property>
                                         <property name="visible">True</property>
                                         <property name="xalign">0.0</property>
                                     </widget>
                                     <packing>
-                                        <property name="position">3</property>
+                                        <property name="position">2</property>
                                     </packing>
                                 </child>
                             </widget>
@@ -1383,18 +1373,6 @@
                                     </packing>
                                 </child>
                                 <child>
-                                    <widget class="ProxyEntry" id="id">
-                                        <property name="data_type">str</property>
-                                        <property name="invisible_char">*</property>
-                                        <property name="invisible_char_set">True</property>
-                                        <property name="model_attribute">id</property>
-                                        <property name="visible">True</property>
-                                    </widget>
-                                    <packing>
-                                        <property name="position">2</property>
-                                    </packing>
-                                </child>
-                                <child>
                                     <widget class="ProxyTextView" id="representation">
                                         <property name="data_type">str</property>
                                         <property name="has_tooltip">True</property>
@@ -1407,7 +1385,7 @@
                                         <property name="width_request">260</property>
                                     </widget>
                                     <packing>
-                                        <property name="position">3</property>
+                                        <property name="position">2</property>
                                     </packing>
                                 </child>
                             </widget>

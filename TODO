@@ -1,5 +1,4 @@
 Functionality
-  * erase index field from species class
   * implement back button
   * organize buttons in menu
   * write autocompletion for rate_constant input

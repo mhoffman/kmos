@@ -202,13 +202,13 @@ class Species(Attributes):
     """Class that represent a species such as oxygen, empty, ... . Not empty
     is treated just like a species.
     """
-    attributes = ['name', 'color', 'id', 'representation']
+    attributes = ['name', 'color', 'representation']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
         self.representation = kwargs['representation']  if 'representation' in kwargs else ''
 
     def __repr__(self):
-        return '<SPECIES> Name: %s Color: %s ID: %s\n' % (self.name, self.color, self.id)
+        return '<SPECIES> Name: %s Color: %s\n' % (self.name, self.color)
 
 
 class SpeciesList(Attributes):

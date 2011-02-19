@@ -209,10 +209,9 @@ class ProjectTree(SlaveDelegate):
                 self.species_list_iter.default_species = child.attrib['default_species']
                 for species in child:
                     name = species.attrib['name']
-                    id = species.attrib['id']
                     color = species.attrib['color']
                     representation = species.attrib['representation'] if 'representation' in species.attrib else ''
-                    species_elem = Species(name=name, color=color, id=id, representation=representation)
+                    species_elem = Species(name=name, color=color, representation=representation)
                     self.project_data.append(self.species_list_iter, species_elem)
             if child.tag == 'output_list':
                 for item in child:
@@ -261,10 +260,6 @@ class ProjectTree(SlaveDelegate):
                 type = site.name
                 site_type_elem = ET.SubElement(site_type_list, 'type')
                 site_type_elem.set('name', type)
-        for species in self.species_list:
-            species_elem = ET.SubElement(species_list, 'species')
-            species_elem.set('name', species.name)
-            species_elem.set('id', str(species.id))
         # extract process list
         process_list = ET.SubElement(root, 'process_list')
         process_list.set('lattice', lattice.name)
@@ -325,7 +320,6 @@ class ProjectTree(SlaveDelegate):
             species_elem = ET.SubElement(species_list, 'species')
             species_elem.set('name', species.name)
             species_elem.set('color', species.color)
-            species_elem.set('id', str(species.id))
             species_elem.set('representation', species.representation)
         parameter_list = ET.SubElement(root, 'parameter_list')
         for parameter in self.parameter_list:
@@ -507,7 +501,7 @@ class KMC_Editor(GladeDelegate):
         
         # add an empty species
         empty_species = 'empty'
-        empty = Species(name=empty_species, color='#fff', id='0')
+        empty = Species(name=empty_species, color='#fff')
         # set empty as default species
         self.project_tree.species_list_iter.default_species = empty_species
         self.project_tree.append(self.project_tree.species_list_iter, empty)
@@ -590,7 +584,6 @@ class KMC_Editor(GladeDelegate):
         self.project_tree.append(self.project_tree.species_list_iter, new_species)
         self.project_tree.expand(self.project_tree.species_list_iter)
         self.project_tree.select(new_species)
-        new_species.id = "%s" % (len(self.project_tree.species_list))
         species_form = SpeciesForm(new_species, self.project_tree)
         if self.get_slave('workarea'):
             self.detach_slave('workarea')
@@ -777,7 +770,6 @@ class KMC_Editor(GladeDelegate):
         # check if all processes have a rate expression 
         # check if all rate expressions are valid
         # check if all species have a unique name
-        # check if all species have a unique id
         # check if all species used in condition_action are defined
         # check if all sites used in processes are defined: actions, conditions
 
