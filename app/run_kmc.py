@@ -34,8 +34,8 @@ class KMC_Model():
             proclist.do_kmc_step()
 
     def get_atoms(self):
-        initialized = False
-        atoms = None
+        atoms = ase.atoms.Atoms()
+        atoms.set_cell(self.cell_size)
         for i in xrange(lattice.system_size[0]):
             for j in xrange(lattice.system_size[1]):
                 for k in xrange(lattice.system_size[2]):
@@ -45,13 +45,7 @@ class KMC_Model():
                             atom = deepcopy(self.species_representation[species])
                             atom.translate(np.dot(lattice.unit_cell_size,
                             np.array([i,j,k]) + lattice.site_positions[n-1]))
-                            if initialized:
-                                atoms += atom
-                            else:
-                                atoms = atom
-                                initialized = True
-        if atoms:
-            atoms.set_cell(self.cell_size)
+                            atoms += atom
         return atoms
                     
                     
