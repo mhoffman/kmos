@@ -141,7 +141,7 @@ class ProcListWriter():
         out.write('    integer(kind=iint), dimension(%s), intent(in) :: input_system_size\n' % data.meta.model_dimension)
         out.write('    character(len=200), intent(in) :: system_name\n\n')
         out.write('    integer(kind=iint) :: i, j, k, nr\n')
-        out.write('    integer(kind=iint) :: check_nr, check_site(4)\n')
+        out.write('    integer(kind=iint) :: check_nr\n')
         out.write('    integer(kind=iint) :: volume\n\n')
         out.write('    ! Copy to module wide variable\n')
         if data.meta.model_dimension == 3 :
