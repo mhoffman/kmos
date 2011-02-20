@@ -497,20 +497,20 @@ class ProcListWriter():
                 self._write_optimal_iftree(items=items, indent=4, out=out)
                 out.write('end subroutine %s\n\n' % routine_name)
 
-        for special_op in ['create','annihilate']:
-            for layer in data.layer_list:
-                for site in layer.sites:
+        for layer in data.layer_list:
+            for site in layer.sites:
+                for special_op in ['create','annihilate']:
                     enabled_procs = []
-                    disabled_proc = []
+                    disabled_procs = []
                     routine_name = '%s_%s_%s' % (special_op, layer.name, site.name)
                     out.write('subroutine %s(site, species)\n\n' % routine_name)
                     out.write('    integer(kind=iint), intent(in) :: species\n')
                     out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
                     out.write('    ! update lattice\n')
                     if special_op == 'create':
-                        out.write('    call replace_species(site, null_species, %s)\n\n')
+                        out.write('    call replace_species(site, null_species, species)\n\n')
                     elif special_op == 'annihilate':
-                        out.write('    call replace_species(site, %s, null_species)\n\n')
+                        out.write('    call replace_species(site, species, null_species)\n\n')
 
                     for process in data.process_list:
                         for condition in process.condition_list:
@@ -519,7 +519,9 @@ class ProcListWriter():
                                         species=other_condition.species,
                                         coord=('site%s' % (other_condition.coord-condition.coord).radd_ff())) for 
                                         other_condition in process.condition_list]
-                                enabled_procs.append((other_conditions, (process.name, 'site%s' % (process.executing_coord()-condition.coord).radd_ff(), True)))
+                                enabled_procs.append((other_conditions, (process.name,
+                                    'site%s' % (process.executing_coord()
+                                    -condition.coord).radd_ff(), True)))
                             elif special_op == 'annihilate':
                                 coord = process.executing_coord() - condition.coord
                                 disabled_procs.append((process, coord))
