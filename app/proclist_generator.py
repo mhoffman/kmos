@@ -44,7 +44,7 @@ class ProcListWriter():
         out.write('use kind_values\n')
         out.write('use base, only: &\n')
         out.write('    assertion_fail, &\n')
-        out.write('    deallocate_system, &\n')
+        out.write('    base_deallocate_system => deallocate_system, &\n')
         out.write('    get_kmc_step, &\n')
         out.write('    get_kmc_time, &\n')
         out.write('    get_kmc_time_step, &\n')
@@ -91,52 +91,57 @@ class ProcListWriter():
                 % (layer,site,i + 1))
         out.write('\n ! spuck = Sites Per Unit Cell Konstant\n')
         out.write('integer(kind=iint), parameter, public :: spuck = %s\n' % len(site_params))
+        out.write(' ! lookup tables\n')
+        out.write('integer(kind=iint), dimension(:, :), allocatable, public :: nr2lattice\n')
+        out.write('integer(kind=iint), dimension(:,:,:,:), allocatable, public :: lattice2nr\n\n')
         out.write('\n\ncontains\n\n')
-        out.write('pure function lattice2nr(site)\n\n')
+        out.write('pure function calculate_lattice2nr(site)\n\n')
         out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n')
-        out.write('    integer(kind=iint) :: lattice2nr\n\n')
+        out.write('    integer(kind=iint) :: calculate_lattice2nr\n\n')
         out.write('    ! site = (x,y,z,local_index)\n')
 
         if data.meta.model_dimension == 1 :
-            out.write('    lattice2nr = spuck*(modulo(site(1), system_size(1)))+site(4)')
+            out.write('    calculate_lattice2nr = spuck*(modulo(site(1), system_size(1)))+site(4)')
         elif data.meta.model_dimension == 2 :
-            out.write('    lattice2nr = spuck*(&\n'
+            out.write('    calculate_lattice2nr = spuck*(&\n'
                 + '      modulo(site(1), system_size(1))&\n'
                 + '      + system_size(1)*modulo(site(2), system_size(2)))&\n' 
                 + '      + site(4)\n')
         elif data.meta.model_dimension == 3 :
-            out.write('    lattice2nr = spuck*(&\n'
+            out.write('    calculate_lattice2nr = spuck*(&\n'
                 + '      modulo(site(1), system_size(1))&\n'
                 + '      + system_size(1)*modulo(site(2), system_size(2))&\n'
                 + '      + system_size(1)*system_size(2)*modulo(site(3), system_size(3)))&\n'
                 + '      + site(4)\n')
-        out.write('\nend function lattice2nr\n\n')
+        out.write('\nend function calculate_lattice2nr\n\n')
 
-        out.write('pure function nr2lattice(nr)\n\n')
+        out.write('pure function calculate_nr2lattice(nr)\n\n')
         out.write('    integer(kind=iint), intent(in) :: nr\n')
-        out.write('    integer(kind=iint), dimension(4) :: nr2lattice\n\n')
+        out.write('    integer(kind=iint), dimension(4) :: calculate_nr2lattice\n\n')
 
         if data.meta.model_dimension == 3 :
-            out.write('    nr2lattice(3) = (nr - 1) /  (system_size(1)*system_size(2)*spuck)\n')
-            out.write('    nr2lattice(2) = (nr - 1 - system_size(1)*system_size(2)*spuck*nr2lattice(3)) / (system_size(1)*spuck)\n')
-            out.write('    nr2lattice(1) = (nr - 1 - spuck*(system_size(1)*system_size(2)*nr2lattice(3) + system_size(1)*nr2lattice(2))) / spuck\n')
-            out.write('    nr2lattice(4) = nr - spuck*(system_size(1)*system_size(2)*nr2lattice(3) + system_size(2)*nr2lattice(2) + nr2lattice(1))\n')
+            out.write('    calculate_nr2lattice(3) = (nr - 1) /  (system_size(1)*system_size(2)*spuck)\n')
+            out.write('    calculate_nr2lattice(2) = (nr - 1 - system_size(1)*system_size(2)*spuck*calculate_nr2lattice(3)) / (system_size(1)*spuck)\n')
+            out.write('    calculate_nr2lattice(1) = (nr - 1 - spuck*(system_size(1)*system_size(2)*calculate_nr2lattice(3) + system_size(1)*calculate_nr2lattice(2))) / spuck\n')
+            out.write('    calculate_nr2lattice(4) = nr - spuck*(system_size(1)*system_size(2)*calculate_nr2lattice(3) + system_size(2)*calculate_nr2lattice(2) + calculate_nr2lattice(1))\n')
         elif data.meta.model_dimension == 2 :
-            out.write('    nr2lattice(3) = 0\n')
-            out.write('    nr2lattice(2) = (nr -1) / (system_size(1)*spuck)\n')
-            out.write('    nr2lattice(1) = (nr - 1 - spuck*system_size(1)*nr2lattice(2)) / spuck\n')
-            out.write('    nr2lattice(4) = nr - spuck*(system_size(1)*nr2lattice(2) + nr2lattice(1))\n')
+            out.write('    calculate_nr2lattice(3) = 0\n')
+            out.write('    calculate_nr2lattice(2) = (nr -1) / (system_size(1)*spuck)\n')
+            out.write('    calculate_nr2lattice(1) = (nr - 1 - spuck*system_size(1)*calculate_nr2lattice(2)) / spuck\n')
+            out.write('    calculate_nr2lattice(4) = nr - spuck*(system_size(1)*calculate_nr2lattice(2) + calculate_nr2lattice(1))\n')
         elif data.meta.model_dimension == 1 :
-            out.write('    nr2lattice(3) = 0\n')
-            out.write('    nr2lattice(2) = 0\n')
-            out.write('    nr2lattice(1) = (nr - 1) / spuck\n')
-            out.write('    nr2lattice(4) = nr - spuck*nr2lattice(1)\n')
-        out.write('\nend function nr2lattice\n\n')
+            out.write('    calculate_nr2lattice(3) = 0\n')
+            out.write('    calculate_nr2lattice(2) = 0\n')
+            out.write('    calculate_nr2lattice(1) = (nr - 1) / spuck\n')
+            out.write('    calculate_nr2lattice(4) = nr - spuck*calculate_nr2lattice(1)\n')
+        out.write('\nend function calculate_nr2lattice\n\n')
 
         out.write('subroutine allocate_system(nr_of_proc, input_system_size, system_name)\n\n')
         out.write('    integer(kind=iint), intent(in) :: nr_of_proc\n')
         out.write('    integer(kind=iint), dimension(%s), intent(in) :: input_system_size\n' % data.meta.model_dimension)
         out.write('    character(len=200), intent(in) :: system_name\n\n')
+        out.write('    integer(kind=iint) :: i, j, k, nr\n')
+        out.write('    integer(kind=iint) :: check_nr, check_site(4)\n')
         out.write('    integer(kind=iint) :: volume\n\n')
         out.write('    ! Copy to module wide variable\n')
         if data.meta.model_dimension == 3 :
@@ -148,6 +153,49 @@ class ProcListWriter():
 
         out.write('    volume = system_size(1)*system_size(2)*system_size(3)*spuck\n')
 
+        out.write('    ! Let\'s check if the works correctly, first\n')
+        out.write('    ! and if so populate lookup tables\n')
+        out.write('    do k = 0, system_size(3)-1\n')
+        out.write('        do j = 0, system_size(2)-1\n')
+        out.write('            do i = 0, system_size(1)-1\n')
+        out.write('                do nr = 1, spuck\n')
+        out.write('                    if(.not.all((/i,j,k,nr/).eq. &\n'
+        + '                    calculate_nr2lattice(calculate_lattice2nr((/i,j,k,nr/)))))then\n')
+        out.write('                        print *,"Error in Mapping:"\n')
+        out.write('                        print *, (/i,j,k,nr/), "was mapped on", calculate_lattice2nr((/i,j,k,nr/))\n')
+        out.write('                        print *, "but that was mapped on", calculate_nr2lattice(calculate_lattice2nr((/i,j,k,nr/)))\n')
+        out.write('                        stop\n')
+        out.write('                    endif\n')
+        out.write('                end do\n')
+        out.write('            end do\n')
+        out.write('        end do\n')
+        out.write('    end do\n\n')
+
+        out.write('    do check_nr=1, product(system_size)*spuck\n')
+        out.write('        if(.not.check_nr.eq.calculate_lattice2nr(calculate_nr2lattice(check_nr)))then\n')
+        out.write('            print *, "ERROR in Mapping:", check_nr\n')
+        out.write('            print *, "was mapped on", calculate_nr2lattice(check_nr)\n')
+        out.write('            print *, "but that was mapped on",calculate_lattice2nr(calculate_nr2lattice(check_nr))\n')
+        out.write('            stop\n')
+        out.write('        endif\n')
+        out.write('    end do\n\n')
+        out.write('    allocate(nr2lattice(1:product(system_size)*spuck,4))\n')
+        out.write('    allocate(lattice2nr(-system_size(1):2*system_size(1)-1, &\n'
+            + '        -system_size(2):2*system_size(2)-1, &\n'
+            + '        -system_size(3):2*system_size(3)-1, &\n'
+            + '         1:spuck))\n')
+        out.write('    do check_nr=1, product(system_size)*spuck\n')
+        out.write('        nr2lattice(check_nr, :) = calculate_nr2lattice(check_nr)\n')
+        out.write('    end do\n')
+        out.write('    do k = -system_size(3), 2*system_size(3)-1\n')
+        out.write('        do j = -system_size(2), 2*system_size(2)-1\n')
+        out.write('            do i = -system_size(1), 2*system_size(1)-1\n')
+        out.write('                do nr = 1, spuck\n')
+        out.write('                    lattice2nr(i, j, k, nr) = calculate_lattice2nr((/i, j, k, nr/))\n')
+        out.write('                end do\n')
+        out.write('            end do\n')
+        out.write('        end do\n')
+        out.write('    end do\n\n')
         out.write('    call base_allocate_system(nr_of_proc, volume, system_name)\n\n')
         out.write('    unit_cell_size(1, 1) = %s\n' % data.layer_list_iter.cell_size_x)
         out.write('    unit_cell_size(2, 2) = %s\n' % data.layer_list_iter.cell_size_y)
@@ -157,11 +205,17 @@ class ProcListWriter():
             
         out.write('end subroutine allocate_system\n\n')  
 
+        out.write('subroutine deallocate_system()\n\n')
+        out.write('    deallocate(lattice2nr)\n')
+        out.write('    deallocate(nr2lattice)\n')
+        out.write('    call base_deallocate_system()\n\n')
+        out.write('end subroutine deallocate_system\n\n')
+
         out.write('subroutine add_proc(proc, site)\n\n')
         out.write('    integer(kind=iint), intent(in) :: proc\n')
         out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
         out.write('    integer(kind=iint) :: nr\n\n')
-        out.write('    nr = lattice2nr(site)\n')
+        out.write('    nr = lattice2nr(site(1), site(2), site(3), site(4))\n')
         out.write('    call base_add_proc(proc, nr)\n\n')
         out.write('end subroutine add_proc\n\n')
 
@@ -169,7 +223,7 @@ class ProcListWriter():
         out.write('    integer(kind=iint), intent(in) :: proc\n')
         out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
         out.write('    integer(kind=iint) :: nr\n\n')
-        out.write('    nr = lattice2nr(site)\n')
+        out.write('    nr = lattice2nr(site(1), site(2), site(3), site(4))\n')
         out.write('    call base_del_proc(proc, nr)\n\n')
         out.write('end subroutine del_proc\n\n')
 
@@ -178,7 +232,7 @@ class ProcListWriter():
         out.write('    integer(kind=iint), intent(in) :: proc\n')
         out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
         out.write('    integer(kind=iint) :: nr\n\n')
-        out.write('    nr = lattice2nr(site)\n')
+        out.write('    nr = lattice2nr(site(1), site(2), site(3), site(4))\n')
         out.write('    can_do = base_can_do(proc, nr)\n\n')
         out.write('end function can_do\n\n')
 
@@ -186,7 +240,7 @@ class ProcListWriter():
         out.write('    integer(kind=iint), dimension(4), intent(in) ::site\n')
         out.write('    integer(kind=iint), intent(in) :: old_species, new_species\n\n')
         out.write('    integer(kind=iint) :: nr\n\n')
-        out.write('    nr = lattice2nr(site)\n')
+        out.write('    nr = lattice2nr(site(1), site(2), site(3), site(4))\n')
         out.write('    call base_replace_species(nr, old_species, new_species)\n\n')
         out.write('end subroutine replace_species\n\n')
 
@@ -194,7 +248,7 @@ class ProcListWriter():
         out.write('    integer(kind=iint) :: get_species\n')
         out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n')
         out.write('    integer(kind=iint) :: nr\n\n')
-        out.write('    nr = lattice2nr(site)\n')
+        out.write('    nr = lattice2nr(site(1), site(2), site(3), site(4))\n')
         out.write('    get_species = base_get_species(nr)\n\n')
         out.write('end function get_species\n\n')
 
@@ -202,7 +256,7 @@ class ProcListWriter():
         out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n')
         out.write('    integer(kind=iint), intent(in) :: old_species\n\n')
         out.write('    integer(kind=iint) :: nr\n\n')
-        out.write('    nr = lattice2nr(site)\n')
+        out.write('    nr = lattice2nr(site(1), site(2), site(3), site(4))\n')
         out.write('    call base_reset_site(nr, old_species)\n\n')
         out.write('end subroutine reset_site\n\n')
 
@@ -280,7 +334,7 @@ class ProcListWriter():
         out.write('    integer(kind=iint), dimension(4) :: lsite\n\n')
         out.write('    call increment_procstat(proc)\n\n')
         out.write('    ! lsite = lattice_site, (vs. scalar site)\n')
-        out.write('    lsite = nr2lattice(nr_site)\n\n')
+        out.write('    lsite = nr2lattice(nr_site, :)\n\n')
         out.write('    select case(proc)\n')
         for process in data.process_list:
             out.write('    case(%s)\n' % process.name)
@@ -348,33 +402,6 @@ class ProcListWriter():
         out.write('subroutine initialize_state(layer, species)\n\n')
         out.write('    integer(kind=iint), intent(in) :: layer, species\n\n')
         out.write('    integer(kind=iint) :: i, j, k, nr\n')
-        out.write('    integer(kind=iint) :: check_nr, check_site(4)\n\n')
-
-        out.write('    ! Let\'s check if the works correctly, first\n')
-        out.write('    do k = 0, system_size(3)-1\n')
-        out.write('        do j = 0, system_size(2)-1\n')
-        out.write('            do i = 0, system_size(1)-1\n')
-        out.write('                do nr = 1, spuck\n')
-        out.write('                    if(.not.all((/i,j,k,nr/).eq. &\n'
-        + '                    nr2lattice(lattice2nr((/i,j,k,nr/)))))then\n')
-        out.write('                        print *,"Error in Mapping:"\n')
-        out.write('                        print *, (/i,j,k,nr/), "was mapped on", lattice2nr((/i,j,k,nr/))\n')
-        out.write('                        print *, "but that was mapped on", nr2lattice(lattice2nr((/i,j,k,nr/)))\n')
-        out.write('                        stop\n')
-        out.write('                    endif\n')
-        out.write('                end do\n')
-        out.write('            end do\n')
-        out.write('        end do\n')
-        out.write('    end do\n\n')
-
-        out.write('    do check_nr=1, system_size(1)*system_size(2)*system_size(3)*spuck\n')
-        out.write('        if(.not.check_nr.eq.lattice2nr(nr2lattice(check_nr)))then\n')
-        out.write('            print *, "ERROR in Mapping:", check_nr\n')
-        out.write('            print *, "was mapped on", nr2lattice(check_nr)\n')
-        out.write('            print *, "but that was mapped on",lattice2nr(nr2lattice(check_nr))\n')
-        out.write('            stop\n')
-        out.write('        endif\n')
-        out.write('    end do\n\n')
 
         out.write('    do k = 0, system_size(3)-1\n')
         out.write('        do j = 0, system_size(2)-1\n')
