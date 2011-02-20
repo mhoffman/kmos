@@ -20,7 +20,7 @@
                 </child>
                 <child>
                     <widget class="GtkLabel" id="label33">
-                        <property name="label" context="yes" translatable="yes">process_name; chemical_equation; rate_expression</property>
+                        <property name="label" context="yes" translatable="yes">process_name; chemical_expression; rate_expression</property>
                         <property name="visible">True</property>
                     </widget>
                     <packing>
@@ -1078,7 +1078,7 @@
                                 <child>
                                     <widget class="GtkButton" id="btn_chem_eq">
                                         <property name="is_focus">True</property>
-                                        <property name="label" context="yes" translatable="yes">Enter chemical equation</property>
+                                        <property name="label" context="yes" translatable="yes">Enter chemical expression</property>
                                         <property name="visible">True</property>
                                     </widget>
                                     <packing>

@@ -32,12 +32,43 @@ def col_str2tuple(hex_string):
     return (color.red_float, color.green_float, color.blue_float)
 
 
-def parse_chemical_equation(eq, process, project_tree):
-    """Evaluates a chemical equation 'eq' and adds
-    conditions and actions accordingly
+def parse_chemical_expression(eq, process, project_tree):
+    """Evaluates a chemical expression 'eq' and adds
+    conditions and actions accordingly. Rules are:
+        - each chemical expression has the form
+           conditions -> actions
+        - each condition or action term has the form (regex)
+          [$^]*SPECIES@SITE\.OFFSET
+        - each SPECIES must have been defined before. The special
+          species 'empty' exists by default
+        - each SITE must have been defined before via the 
+          layer form
+        - an offset in units of units cell can be given as 
+          tuple such as '(0,0)'
+        - a condition or action term containing the default species,
+          i.e. by default 'empty' may be omitted. However a term containing
+          the omitted site and a species other then the default must exist
+          on the opposite side of the expression
+        - ^ and $ are special prefixes for the 'creation' and
+          'annihilation' of a site, respectively. In case of '$'
+           the species can be always omitted. In case of ^ the default
+           species may be omitted. Creation and annihilation is only
+           needed for lattice reconstructions/multi-lattice models and
+           they only stand on the right-hand (i.e. action) side of
+           the expression
+        - white spaces may be used for readability but have no effect
+
+        Examples:
+            oxygen@cus -> oxygen@bridge #diffusion
+            co@bridge -> co@cus.(-1,0) # diffusion
+            -> oxygen@cus + oxygen@bridge # adsorption
+            oxygen@cus + co@bridge -> # reaction
     """
     # remove spaces
     eq = re.sub(' ', '', eq)
+
+    # remove comments
+    eq = eq[:eq.find('#')]
     
 
     # split at ->
@@ -73,8 +104,12 @@ def parse_chemical_equation(eq, process, project_tree):
     for i, term in enumerate(right):
         right[i] = term.split('@')
 
+    # check if species is defined
     for term in left + right:
-        if not filter(lambda x: x.name == term[0], project_tree.species_list):
+        if term[0][0] in ['$','^'] and term[0][1 :]:
+            if not  filter(lambda x: x.name == term[0][1 :], project_tree.species_list):
+                raise UserWarning('Species %s unknown ' % term[0 :])
+        elif not filter(lambda x: x.name == term[0], project_tree.species_list):
             raise UserWarning('Species %s unknown ' % term[0])
 
     condition_list = []
@@ -84,7 +119,7 @@ def parse_chemical_equation(eq, process, project_tree):
         #parse coordinate
         coord_term = term[1].split('.')
         if len(coord_term) == 1 :
-            coord_term.append('(0,0)')
+            coord_term.append('(0,0,0)')
 
         if len(coord_term) == 2 :
             name = coord_term[0]
@@ -147,6 +182,35 @@ def parse_chemical_equation(eq, process, project_tree):
     for action in action_list:
         if not filter(lambda x: x.coord == action.coord, condition_list):
             condition_list.append(ConditionAction(species=default_species, coord=action.coord))
+
+    # species completion and consistency check for site creation/annihilation
+    for action in action_list:
+        # for a annihilation the following rules apply:
+        #   -  if no species is gives, it will be complemented with the corresponding
+        #      species as on the left side
+        #   -  if a species is given, it must be equal to the corresponding one on the 
+        #      left side. if no corresponding condition is given on the left side,
+        #      the condition will be added with the same species as the annihilated one
+        if action.species[0] == '$':
+            corresponding_condition = filter(lambda x: x.coord == action.coord, condition_list)
+            if action.species[1 :]:
+                if not corresponding_condition:
+                    condition_list.append(ConditionAction(species=action.species[1 :], coord=action.coord))
+                else:
+                    if corresponding_condition[0].species != action.species[1 :]:
+                        raise UserWarning('When annihilating a site, species must be the same for condition\n'
+                            + 'and action.\n')
+            else:
+                if corresponding_condition:
+                    action.species = '$%s' % corresponding_species[0].species
+                else:
+                    raise UserWarning('When omitting the species in the site annihilation, a species must\n'
+                        + 'must be given in a corresponding condition.')
+                    
+        elif action.species == '^' :
+            raise UserWarning('When creating a site, the species on the new site must be stated.')
+            
+            
     process.condition_list += condition_list
     process.action_list += action_list
 
@@ -220,9 +284,9 @@ class BatchProcessForm(SlaveDelegate):
                 raise UserWarning("There are too many ';' in your expression %s" % line)
             process = Process(name=name, rate_constant=rate_constant)
             try:
-                parse_chemical_equation(eq=line[1], process=process, project_tree=self.project_tree)
+                parse_chemical_expression(eq=line[1], process=process, project_tree=self.project_tree)
             except:
-                print("Found an error in your chemical equation(line %s):\n   %s" % (i+1, line[1]))
+                print("Found an error in your chemical expression(line %s):\n   %s" % (i+1, line[1]))
                 raise
             else:
                 # replace any existing process with identical names
@@ -459,15 +523,20 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                                       flags=gtk.DIALOG_MODAL,
                                       type=gtk.MESSAGE_QUESTION,
                                       buttons=gtk.BUTTONS_OK_CANCEL,
-                                      message_format='Please enter a chemical equation, e.g.:\n\nspecies1@site->species2@site\n\\w site: site_name.offset.layer')
+                                      message_format='Please enter a chemical expression, e.g.:\n\n'
+                                       + 'species1@site->species2@site\n'
+                                       + '\\w site: site_name.offset.layer')
         form_entry = gtk.Entry()
         chem_form.vbox.pack_start(form_entry)
         chem_form.vbox.show_all()
-        chem_form.run()
+        res = chem_form.run()
+        if res == gtk.RESPONSE_CANCEL.real:
+            chem_form.destroy()
+            return
         eq = form_entry.get_text()
         chem_form.destroy()
 
-        parse_chemical_equation(eq, self.process, self.project_tree)
+        parse_chemical_expression(eq, self.process, self.project_tree)
 
         self.draw_from_data()
         self.canvas.redraw()

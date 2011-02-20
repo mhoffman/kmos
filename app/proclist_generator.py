@@ -67,14 +67,6 @@ class ProcListWriter():
         out.write('    update_accum_rate, &\n')
         out.write('    update_clocks\n\n')
 
-        #out.write('use proclist, only: &\n')
-        #if len(data.layer_list) > 1 :
-            #for layer in data.layer_list[:-1]:
-                #for site in layer.sites:
-                    #out.write('    touchup_%s_%s, &\n' % (layer.name, site.name))
-        #for site in data.layer_list[-1].sites[:-1]:
-            #out.write('    touchup_%s_%s, &\n' % (data.layer_list[-1].name, site.name))
-        #out.write('    touchup_%s_%s\n' % (data.layer_list[-1].name, data.layer_list[-1].sites[-1].name))
                 
         out.write('\n\nimplicit none\n\n')
 
@@ -299,7 +291,12 @@ class ProcListWriter():
                     relative_coord = 'lsite%s' % (action.coord-process.executing_coord()).radd_ff()
 
 
-                if action.species == data.species_list_iter.default_species:
+                if action.species[0] == '^':
+                    out.write('        call create_%s_%s(%s, %s)\n' % (action.coord.layer, action.coord.name, relative_coord, action.species[:1]))
+                elif action.species[0] == '$':
+                    out.write('        call annihilate_%s_%s(%s, %s)\n' % (action.coord.layer, action.coord.name, relative_coord, action.species[:1]))
+                    
+                elif action.species == data.species_list_iter.default_species:
                     try:
                         previous_species = filter(lambda x: x.coord.ff()==action.coord.ff(), process.condition_list)[0].species
                     except:
@@ -408,7 +405,11 @@ class ProcListWriter():
 
 
 
-        for species in data.species_list:
+
+
+
+                    
+        for species in data.species_list :
             if species.name == data.species_list_iter.default_species:
                 continue # don't put/take 'empty'
             # iterate over all layers, sites, operations, process, and conditions ...
@@ -462,10 +463,10 @@ class ProcListWriter():
                         # because we don't ask any questions twice, so we do it immediately
                         if disabled_procs:
                             out.write('    ! disable affected processes\n')
-                        for process, coord in disabled_procs:
-                            out.write(('    if(can_do(%(proc)s, site%(coord)s))then\n'
-                            + '        call del_proc(%(proc)s, site%(coord)s)\n'
-                            + '    endif\n\n') % {'coord':(coord).radd_ff(), 'proc':process.name})
+                            for process, coord in disabled_procs:
+                                out.write(('    if(can_do(%(proc)s, site%(coord)s))then\n'
+                                + '        call del_proc(%(proc)s, site%(coord)s)\n'
+                                + '    endif\n\n') % {'coord':(coord).radd_ff(), 'proc':process.name})
 
                         # updating enabled procs is not so simply, because meeting one condition
                         # is not enough. We need to know if all other conditions are met as well
@@ -474,7 +475,7 @@ class ProcListWriter():
                         if enabled_procs:
                             out.write('    ! enable affected processes\n')
 
-                        self._write_optimal_iftree(items=enabled_procs, indent=4,out=out)
+                            self._write_optimal_iftree(items=enabled_procs, indent=4,out=out)
                         out.write('\nend subroutine %s\n\n' % routine_name)
 
         for layer in data.layer_list:
@@ -496,7 +497,45 @@ class ProcListWriter():
                 self._write_optimal_iftree(items=items, indent=4, out=out)
                 out.write('end subroutine %s\n\n' % routine_name)
 
-        # TODO: subroutine get_char fuctions, the crumpy part
+        for special_op in ['create','annihilate']:
+            for layer in data.layer_list:
+                for site in layer.sites:
+                    enabled_procs = []
+                    disabled_proc = []
+                    routine_name = '%s_%s_%s' % (special_op, layer.name, site.name)
+                    out.write('subroutine %s(site, species)\n\n' % routine_name)
+                    out.write('    integer(kind=iint), intent(in) :: species\n')
+                    out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
+                    out.write('    ! update lattice\n')
+                    if special_op == 'create':
+                        out.write('    call replace_species(site, null_species, %s)\n\n')
+                    elif special_op == 'annihilate':
+                        out.write('    call replace_species(site, %s, null_species)\n\n')
+
+                    for process in data.process_list:
+                        for condition in process.condition_list:
+                            if special_op == 'create':
+                                other_conditions = [ConditionAction(
+                                        species=other_condition.species,
+                                        coord=('site%s' % (other_condition.coord-condition.coord).radd_ff())) for 
+                                        other_condition in process.condition_list]
+                                enabled_procs.append((other_conditions, (process.name, 'site%s' % (process.executing_coord()-condition.coord).radd_ff(), True)))
+                            elif special_op == 'annihilate':
+                                coord = process.executing_coord() - condition.coord
+                                disabled_procs.append((process, coord))
+                                
+                    if disabled_procs:
+                        out.write('    ! disable affected processes\n')
+                        for process, coord in disabled_procs:
+                            out.write(('    if(can_do(%(proc)s, site%(coord)s))then\n'
+                            + '        call del_proc(%(proc)s, site%(coord)s)\n'
+                            + '    endif\n\n') % {'coord':(coord).radd_ff(), 'proc':process.name})
+                        
+                    if enabled_procs:
+                        out.write('    ! enable affected processes\n')
+
+                        self._write_optimal_iftree(items=enabled_procs, indent=4,out=out)
+                    out.write('\nend subroutine %s\n\n' % routine_name)
             
         out.write('end module proclist\n')
         out.close()
