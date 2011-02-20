@@ -707,7 +707,7 @@ class KMC_Editor(GladeDelegate):
             os.mkdir(export_dir)
 
         # copy files
-        for filename in [ 'base.f90', 'kind_values_f2py.f90', 'units.f90', 'assert.ppc', 'compile_for_f2py', 'run_kmc.py']:
+        for filename in [ 'base.f90', 'kind_values_f2py.f90', 'units.f90', 'assert.ppc', 'compile_for_f2py', 'run_kmc.py', 'run_kmc.f90', 'compile_for_fortran']:
             shutil.copy(APP_ABS_PATH + '/%s' % filename, export_dir)
 
 
