@@ -2,15 +2,21 @@
 """Generical kMC steering script for binary modules created kmos"""
 
 
+import threading
 from copy import deepcopy
 import numpy as np
 import ase
 from ase.atoms import Atom, Atoms
 from kmc import base, lattice, proclist
-import pickle
+import gtk
 
-class KMC_Model():
-    def __init__(self, size=10, system_name='kmc_model'):
+gtk.gdk.threads_init()
+
+class KMC_Model(threading.Thread):
+    stopthread = threading.Event()
+    def __init__(self, size=20, system_name='kmc_model'):
+        super(KMC_Model, self).__init__()
+
         proclist.init((size,)*int(lattice.model_dimension),system_name, lattice.default_layer, proclist.default_species)
         self.cell_size = np.dot(lattice.unit_cell_size, lattice.system_size)
         self.species_representation = []
@@ -28,6 +34,16 @@ class KMC_Model():
                 self.species_representation.append(None)
 
 
+
+    def run(self):
+        while not self.stopthread.isSet():
+            gtk.gdk.threads_enter()
+            proclist.do_kmc_step()
+            gtk.gdk.threads_leave()
+
+    def stop(self):
+        self.stopthread.set()
+        base.deallocate_system()
 
     def run_steps(self, n):
         for i in xrange(n):

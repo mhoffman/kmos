@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+import time
+import threading
 import pygtk
 pygtk.require('2.0')
 import gtk
@@ -39,19 +41,20 @@ class FakeUI():
 
 
         
-class KMC_Viewer(View, Images, Status,FakeUI):
+class KMC_Viewer(threading.Thread, View, Images, Status,FakeUI,):
+    stopthread = threading.Event()
     def __init__(self,rotations='',show_unit_cell=True, show_bonds=False):
+        super(KMC_Viewer, self).__init__()
         self.configured = False
         self.ui = FakeUI.__init__(self)
         self.model = KMC_Model()
-        self.model.run_steps(10)
+        self.model.run_steps(10000)
         self.images = Images()
         self.images.initialize([self.model.get_atoms()])
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_position(gtk.WIN_POS_CENTER)
-        self.window.connect('delete-event',gtk.main_quit)
+        self.window.connect('delete-event',self.exit)
         self.window.connect('scroll-event',self.scroll_event)
-        self.window.connect('key-press-event',self.step)
 
         self.vbox = gtk.VBox()
         self.window.add(self.vbox)
@@ -62,27 +65,32 @@ class KMC_Viewer(View, Images, Status,FakeUI):
 
         self.drawing_area.realize()
         self.scale = 1.0
-        self.center = np.zeros(3)
+        self.center = self.model.get_atoms().cell.diagonal()*.5
         self.set_colors()
         self.set_coordinates(0)
 
         self.window.show()
-        #self.draw()
-        gtk.mainloop()
 
 
 
+    def run(self):
+        while not self.stopthread.isSet():
+            self.images = Images()
+            gtk.gdk.threads_enter()
+            self.images.initialize([self.model.get_atoms()])
+            gtk.gdk.threads_leave()
+            self.set_coordinates(0)
+            self.draw()
+            time.sleep(0.1)
+    def stop(self):
+        self.stopthread.set()
+        
     def exit(self,widget,event):
+        self.model.stop()
         gtk.main_quit()
         return True
 
 
-    def step(self, widget, event):
-        self.model.run_steps(10)
-        self.images = Images()
-        self.images.initialize([self.model.get_atoms()])
-        self.set_coordinates(0)
-        self.draw()
 
     
     def scroll_event(self, window, event):
@@ -92,13 +100,21 @@ class KMC_Viewer(View, Images, Status,FakeUI):
             x = 1.2
         elif event.direction == gtk.gdk.SCROLL_DOWN:
             x = 1.0 / 1.2
+        gtk.gdk.threads_enter()
         self._do_zoom(x)
+        gtk.gdk.threads_leave()
 
     def _do_zoom(self, x):
         """Utility method for zooming"""
         self.scale *= x
         self.draw()
 
+
+
 if __name__ == '__main__':
-    KMC_Viewer()
+    gtk.gdk.threads_init()
+    viewer = KMC_Viewer()
+    viewer.start()
+    viewer.model.start()
+    gtk.main()
     
