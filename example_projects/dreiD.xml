@@ -26,7 +26,7 @@
             <action coord_layer="default" coord_name="a" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="default" coord_name="a" coord_offset="0 0 1" species="C"/>
         </process>
-        <process name="creation" rate_constant="10**6">
+        <process name="creation" rate_constant="10**3">
             <condition coord_layer="default" coord_name="a" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="default" coord_name="a" coord_offset="0 0 0" species="C"/>
         </process>
