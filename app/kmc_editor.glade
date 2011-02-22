@@ -339,6 +339,7 @@
                                             </widget>
                                             <packing>
                                                 <property name="expand">False</property>
+                                                <property name="fill">False</property>
                                             </packing>
                                         </child>
                                         <child>
@@ -354,9 +355,22 @@
                                             </packing>
                                         </child>
                                         <child>
+                                            <widget class="GtkLabel" id="label12">
+                                                <property name="height_request">70</property>
+                                                <property name="label" context="yes" translatable="yes">Representation:</property>
+                                                <property name="visible">True</property>
+                                                <property name="xalign">0.0</property>
+                                            </widget>
+                                            <packing>
+                                                <property name="expand">False</property>
+                                                <property name="fill">False</property>
+                                                <property name="position">2</property>
+                                            </packing>
+                                        </child>
+                                        <child>
                                             <placeholder/>
                                             <packing>
-                                                <property name="position">2</property>
+                                                <property name="position">3</property>
                                             </packing>
                                         </child>
                                     </widget>
@@ -434,9 +448,28 @@
                                             </packing>
                                         </child>
                                         <child>
+                                            <widget class="ProxyTextView" id="lattice_representation">
+                                                <property name="data_type">str</property>
+                                                <property name="has_tooltip">True</property>
+                                                <property name="height_request">70</property>
+                                                <property name="is_focus">True</property>
+                                                <property name="model_attribute">representation</property>
+                                                <property name="tooltip_markup" context="yes" translatable="yes">Here you can set a ASE object, that will be put at the corner of every unit cell. This could represent some background, substrate of framework which is not explicitly part of the kMC model.</property>
+                                                <property name="tooltip_text" context="yes" translatable="yes">Here you can set a ASE object, that will be put at the corner of every unit cell. This could represent some background, substrate of framework which is not explicitly part of the kMC model.</property>
+                                                <property name="visible">True</property>
+                                                <property name="width_request">120</property>
+                                                <property name="wrap_mode">word-char</property>
+                                            </widget>
+                                            <packing>
+                                                <property name="expand">False</property>
+                                                <property name="fill">False</property>
+                                                <property name="position">2</property>
+                                            </packing>
+                                        </child>
+                                        <child>
                                             <placeholder/>
                                             <packing>
-                                                <property name="position">2</property>
+                                                <property name="position">3</property>
                                             </packing>
                                         </child>
                                     </widget>

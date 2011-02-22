@@ -307,6 +307,7 @@ class ProcListWriter():
 
         out.write('integer(kind=iint), parameter, public :: representation_length = %s\n' % representation_length)
         out.write('character(len=%s), dimension(%s), public :: species_representation\n' % (representation_length, len(data.species_list)))
+        out.write('character(len=%s), public :: lattice_representation\n' % len(data.lattice.representation))
 
         out.write('\n\n! Process constants\n\n')
         for i, process in enumerate(self.data.process_list):
@@ -393,7 +394,6 @@ class ProcListWriter():
         out.write('end subroutine get_representation_char\n\n')
 
 
-
         out.write('subroutine set_rate_constants()\n\n')
         for process in data.process_list:
             rate_constant = process.rate_constant if process.rate_constant else 0.
@@ -428,6 +428,16 @@ class ProcListWriter():
         out.write('            end do\n')
         out.write('        end do\n')
         out.write('    end do\n\n')
+
+        lattice_repr = data.lattice.representation.replace(']',']\n').splitlines()
+        if not lattice_repr:
+            out.write('    lattice_representation = ""\n')
+        else:
+            out.write('    lattice_representation = &\n')
+            for line in lattice_repr[:-1]:
+                out.write('        "%s"// &\n' % line)
+            if lattice_repr :
+                out.write('        "%s"\n' % lattice_repr[-1])
         for i, species in enumerate(data.species_list):
             out.write('    species_representation(%s) = "%s"\n' % (i+1, species.representation))
         out.write('end subroutine initialize_state\n\n')

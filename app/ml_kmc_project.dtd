@@ -29,6 +29,7 @@
     cell_size CDATA #REQUIRED
     default_layer CDATA #REQUIRED
     site_classes CDATA #IMPLIED
+    representation CDATA #IMPLIED
   >
   <!ELEMENT layer (site)*>
   <!ATTLIST layer 

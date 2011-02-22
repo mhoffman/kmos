@@ -694,7 +694,7 @@ class GridForm(ProxyDelegate):
 class LatticeForm(ProxySlaveDelegate):
     gladefile = GLADEFILE
     toplevel_name = 'lattice_form'
-    widgets = ['cell_size_x', 'cell_size_y', 'cell_size_z', 'default_layer']
+    widgets = ['cell_size_x', 'cell_size_y', 'cell_size_z', 'default_layer','lattice_representation']
     def __init__(self, model, dimension, project_tree):
         model.default_layer = None
         ProxySlaveDelegate.__init__(self, model)

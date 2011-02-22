@@ -152,6 +152,10 @@ class ProjectTree(SlaveDelegate):
                 self.lattice.cell_size_y = cell_size[1]
                 self.lattice.cell_size_z = cell_size[2]
                 self.lattice.default_layer = child.attrib['default_layer']
+                if 'representation' in child.attrib:
+                    self.lattice.representation = child.attrib['representation']
+                else:
+                    self.lattice.representation = ''
                 for elem in child:
                     if elem.tag == 'layer':
                         name = elem.attrib['name']
@@ -335,6 +339,8 @@ class ProjectTree(SlaveDelegate):
             self.layer_list_iter.cell_size_y,
             self.layer_list_iter.cell_size_z))
             lattice_elem.set('default_layer', self.layer_list_iter.default_layer)
+        if hasattr(self.lattice, 'representation'):
+            lattice_elem.set('representation', self.lattice.representation)
         for layer in self.layer_list:
             layer_elem = ET.SubElement(lattice_elem, 'layer')
             layer_elem.set('name', layer.name)
@@ -707,7 +713,7 @@ class KMC_Editor(GladeDelegate):
             os.mkdir(export_dir)
 
         # copy files
-        for filename in [ 'base.f90', 'kind_values_f2py.f90', 'units.f90', 'assert.ppc', 'compile_for_f2py', 'run_kmc.py', 'run_kmc.f90', 'compile_for_fortran', 'view_kmc.py']:
+        for filename in [ 'assert.ppc', 'base.f90', 'compile_for_f2py', 'compile_for_fortran', 'kind_values_f2py.f90', 'run_kmc.f90', 'units.f90', 'view_kmc.py' ]:
             shutil.copy(APP_ABS_PATH + '/%s' % filename, export_dir)
 
 
