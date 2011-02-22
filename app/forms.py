@@ -68,7 +68,8 @@ def parse_chemical_expression(eq, process, project_tree):
     eq = re.sub(' ', '', eq)
 
     # remove comments
-    eq = eq[:eq.find('#')]
+    if '#' in eq:
+        eq = eq[:eq.find('#')]
     
 
     # split at ->
@@ -85,13 +86,6 @@ def parse_chemical_expression(eq, process, project_tree):
     # split terms
     left = left.split('+')
     right = right.split('+')
-
-    # why do we remove empty characters?
-    while '' in left:
-        left.remove('')
-
-    while '' in right:
-        right.remove('')
 
     # small validity checking
     for term in left+right:
@@ -119,7 +113,7 @@ def parse_chemical_expression(eq, process, project_tree):
         #parse coordinate
         coord_term = term[1].split('.')
         if len(coord_term) == 1 :
-            coord_term.append('(0,0,0)')
+            coord_term.append('(0,0)')
 
         if len(coord_term) == 2 :
             name = coord_term[0]
@@ -138,7 +132,7 @@ def parse_chemical_expression(eq, process, project_tree):
                     for jsite in ilayer.sites:
                         if jsite.name == name:
                             possible_sites.append((jsite.name,ilayer.name))
-                if len(possible_sites) == 0 :
+                if not possible_sites :
                     raise UserWarning("Site %s not known" % name)
                 elif len(possible_sites) == 1 :
                     layer = possible_sites[0][1]
