@@ -349,9 +349,9 @@ class ProcListWriter():
 
 
                 if action.species[0] == '^':
-                    out.write('        call create_%s_%s(%s, %s)\n' % (action.coord.layer, action.coord.name, relative_coord, action.species[:1]))
+                    out.write('        call create_%s_%s(%s, %s)\n' % (action.coord.layer, action.coord.name, relative_coord, action.species[1 :]))
                 elif action.species[0] == '$':
-                    out.write('        call annihilate_%s_%s(%s, %s)\n' % (action.coord.layer, action.coord.name, relative_coord, action.species[:1]))
+                    out.write('        call annihilate_%s_%s(%s, %s)\n' % (action.coord.layer, action.coord.name, relative_coord, action.species[1 :]))
                     
                 elif action.species == data.species_list_iter.default_species:
                     try:
