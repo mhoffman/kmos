@@ -177,8 +177,8 @@ def parse_chemical_expression(eq, process, project_tree):
     # the same coordinate gets complemented with a 'default_species'
     # condition
     for action in action_list:
-        if (not filter(lambda x: x.coord == action.coord, condition_list)
-        and not action.species[0] == '^'):
+        if not filter(lambda x: x.coord == action.coord, condition_list)\
+            and not action.species[0] in ['^', '$']:
             condition_list.append(ConditionAction(species=default_species, coord=action.coord))
 
     # species completion and consistency check for site creation/annihilation
@@ -204,7 +204,6 @@ def parse_chemical_expression(eq, process, project_tree):
                 else:
                     raise UserWarning('When omitting the species in the site annihilation, a species must\n'
                         + 'must be given in a corresponding condition.')
-                    
         elif action.species == '^' :
             raise UserWarning('When creating a site, the species on the new site must be stated.')
             
@@ -309,10 +308,12 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     # where the center unit cell is in the drawing
     X = 2; Y = 2
     def __init__(self, process, project_tree):
+        white = col_str2tuple('#ffffff')
+        black = col_str2tuple('#000000')
         self.process = process
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, process)
-        self.canvas = Canvas()
+        self.canvas = Canvas(bg=white,fg=white)
         self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
         self.canvas.grab_focus()
         self.canvas.show()
@@ -464,6 +465,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         """Places circles on the current lattice according
         to the conditions and actions defined
         """
+        black=col_str2tuple('#003333')
         for elem in self.process.condition_list:
             matching_sites = filter(lambda x: isinstance(x, CanvasOval)
                                     and x.i==self.X+elem.coord.offset[0]
@@ -474,7 +476,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 coords = matching_sites[0].get_coords()
                 color = filter(lambda x: x.name == elem.species, self.project_tree.species_list)[0].color
                 color = col_str2tuple(color)
-                o = CanvasOval(self.condition_layer, bg=color, filled=True)
+                o = CanvasOval(self.condition_layer, bg=color, fg=black, filled=True, outline=True)
                 o.coords = coords
                 o.connect('button-press-event', self.on_condition_action_clicked)
                 o.set_radius(self.r_cond)
@@ -497,7 +499,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 else:
                     color = filter(lambda x: x.name == elem.species, self.project_tree.species_list)[0].color
                 color = col_str2tuple(color)
-                o = CanvasOval(self.action_layer, bg=color, filled=True)
+                o = CanvasOval(self.action_layer, bg=color, fg=black, filled=True, outline=True)
                 o.coords = coords
                 o.connect('button-press-event', self.on_condition_action_clicked)
                 o.set_radius(self.r_act)
