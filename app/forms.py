@@ -76,17 +76,20 @@ def parse_chemical_expression(eq, process, project_tree):
     if eq.count('->') != 1 :
         raise StandardError, 'Chemical expression must contain exactly one "->"\n%s'  % eq
     eq = re.split('->', eq)
-    if len(eq) == 2 :
-        left = eq[0]
-        right = eq[1]
-    elif len(eq) == 1 :
-        left = eq[0]
-        right = ''
+    left, right = eq
+
 
     # split terms
     left = left.split('+')
     right = right.split('+')
 
+    # Delete term, which contain nothing
+    while '' in left:
+        left.remove('')
+    while '' in right:
+        right.remove('')
+
+    print(len(left),len(right))
     # small validity checking
     for term in left+right:
         if term.count('@') != 1 :
@@ -174,7 +177,8 @@ def parse_chemical_expression(eq, process, project_tree):
     # the same coordinate gets complemented with a 'default_species'
     # condition
     for action in action_list:
-        if not filter(lambda x: x.coord == action.coord, condition_list):
+        if (not filter(lambda x: x.coord == action.coord, condition_list)
+        and not action.species[0] == '^'):
             condition_list.append(ConditionAction(species=default_species, coord=action.coord))
 
     # species completion and consistency check for site creation/annihilation
@@ -485,7 +489,13 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                                     and x.layer == elem.coord.layer, self.site_layer)
             if matching_sites:
                 coords = matching_sites[0].get_coords()
-                color = filter(lambda x: x.name == elem.species, self.project_tree.species_list)[0].color
+                if elem.species[0] ==  '^':
+                    color = filter(lambda x: x.name == elem.species[1 :], self.project_tree.species_list)[0].color
+                elif elem.species[0] == '$':
+                    # Don't draw the disappearing particle
+                    continue
+                else:
+                    color = filter(lambda x: x.name == elem.species, self.project_tree.species_list)[0].color
                 color = col_str2tuple(color)
                 o = CanvasOval(self.action_layer, bg=color, filled=True)
                 o.coords = coords
