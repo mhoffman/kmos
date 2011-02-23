@@ -21,7 +21,7 @@ def verbose(func):
 
 class Canvas(gtk.DrawingArea):
     #@verbose
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         gtk.DrawingArea.__init__(self)
         self.set_double_buffered(False)
         self.set_has_tooltip(True)
@@ -35,9 +35,9 @@ class Canvas(gtk.DrawingArea):
             gtk.gdk.KEY_PRESS_MASK| 
             gtk.gdk.KEY_RELEASE_MASK)
         
-        # foregorund, backgroundtt
-        self.fg = (0.9, 0.9, 0.9)
-        self.bg = (0.5, 0.5, 0.5)
+        # foreground, background
+        self.fg = kwargs['fg'] if 'fg' in kwargs else (0.9, 0.9, 0.9)
+        self.bg = kwargs['bg'] if 'bg' in kwargs else (0.5, 0.5, 0.5)
         
         # list of layers
         self.layers = []

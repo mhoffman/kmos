@@ -24,7 +24,6 @@ class CanvasLayer(list):
     def scale_all(self, xc, yc, xs, ys):
         for item in self:
             item.scale(xc, yc, xs, ys)
-    
     def find_above(self, item):
         index = self.index(item)
         if index < len(self) - 1:
@@ -57,10 +56,14 @@ class CanvasLayer(list):
         l = []
         for item in self:
             _x0, _y0, _x1, _y1 = item.get_bbox()
-            if y1 < _y0: continue
-            if y0 > _y1: continue
-            if x1 < _x0: continue
-            if x0 > _x1: continue
+            if y1 < _y0:
+                continue
+            if y0 > _y1:
+                continue
+            if x1 < _x0:
+                continue
+            if x0 > _x1:
+                continue
             l.append(item)
         
         return l
