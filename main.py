@@ -683,28 +683,10 @@ class KMC_Editor(GladeDelegate):
             config.write(configfile)
             
 
-
-        if False :
-            print("single-lattice mode")
-            # single lattice mode
-            # generate process list source via existing code
-            proclist_xml = open(export_dir + '/process_list.xml', 'w')
-            pretty_xml = prettify_xml(self.project_tree._export_process_list_xml_legacy())
-            proclist_xml.write(pretty_xml)
-            proclist_xml.close()
-            class Options(): pass
-            options = Options()
-            options.xml_filename = proclist_xml.name
-            options.dtd_filename = APP_ABS_PATH + '/process_list.dtd'
-            options.force_overwrite = True
-            options.proclist_filename = '%s/proclist.f90' % export_dir
-            ProcListWriter(options)
-        else:
-            # multi-lattice mode
-            self.toast("Multi-lattice mode, not fully supported, yet!")
-            writer = MLProcListWriter(self.project_tree, export_dir)
-            writer.write_lattice()
-            writer.write_proclist()
+        self.toast("Multi-lattice mode, not fully supported, yet!")
+        writer = MLProcListWriter(self.project_tree, export_dir)
+        writer.write_lattice()
+        writer.write_proclist()
 
 
         # return directory name
