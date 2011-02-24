@@ -32,12 +32,13 @@ class Attributes:
 class Site(Attributes):
     """A class holding exactly one lattice site
     """
-    attributes = ['name', 'x', 'y', 'z', 'site_class']
+    attributes = ['name', 'x', 'y', 'z', 'site_class','default_species']
     # vector is now a list of floats for the graphical representation
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
         self.site_class = kwargs['site_class'] if  'site_class' in kwargs else ''
         self.name = kwargs['name'] if 'name' in kwargs else ''
+        self.default_species = kwargs['default_species'] if 'default_species' in kwargs else 'default_species'
 
     def __repr__(self):
         return '<SITE> %s %s %s' % (self.name, (self.x, self.y, self.z), self.site_class)
@@ -292,11 +293,12 @@ class Meta(Settable, object):
 class Process(Attributes):
     """One process in a kMC process list
     """
-    attributes = ['name', 'rate_constant', 'condition_list', 'action_list']
+    attributes = ['name', 'rate_constant', 'condition_list', 'action_list','enabled']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
         self.condition_list = []
         self.action_list = []
+        self.enabled = kwargs['enabled'] if 'enabled' in kwargs else True
             
     def __repr__(self):
         return '[PROCESS] Name:%s Rate: %s\nConditions: %s\nActions: %s' % (self.name, self.rate_constant, self.condition_list, self.action_list)

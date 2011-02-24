@@ -1167,6 +1167,22 @@
                                         <property name="position">1</property>
                                     </packing>
                                 </child>
+                                <child>
+                                    <widget class="ProxyCheckButton" id="process_enabled">
+                                        <property name="active">True</property>
+                                        <property name="data_type">bool</property>
+                                        <property name="has_tooltip">True</property>
+                                        <property name="is_focus">True</property>
+                                        <property name="label" context="yes" translatable="yes"></property>
+                                        <property name="model_attribute">enabled</property>
+                                        <property name="tooltip_markup" context="yes" translatable="yes">Process enabled</property>
+                                        <property name="tooltip_text" context="yes" translatable="yes">Process enabled</property>
+                                        <property name="visible">True</property>
+                                    </widget>
+                                    <packing>
+                                        <property name="position">2</property>
+                                    </packing>
+                                </child>
                             </widget>
                             <packing>
                                 <property name="expand">False</property>
@@ -1214,6 +1230,16 @@
                                     </widget>
                                     <packing>
                                         <property name="position">1</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <widget class="GtkLabel" id="label23">
+                                        <property name="label" context="yes" translatable="yes">Default species:</property>
+                                        <property name="visible">True</property>
+                                        <property name="xalign">0.0</property>
+                                    </widget>
+                                    <packing>
+                                        <property name="position">2</property>
                                     </packing>
                                 </child>
                             </widget>
@@ -1281,6 +1307,17 @@
                                     </widget>
                                     <packing>
                                         <property name="position">1</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <widget class="ProxyComboBox" id="site_default_species">
+                                        <property name="data_type">str</property>
+                                        <property name="model_attribute">default_species</property>
+                                        <property name="visible">True</property>
+                                    </widget>
+                                    <packing>
+                                        <property name="fill">False</property>
+                                        <property name="position">2</property>
                                     </packing>
                                 </child>
                             </widget>

@@ -169,9 +169,14 @@ class ProjectTree(SlaveDelegate):
                             name = site.attrib['type']
                             x, y, z = [ float(x) for x in site.attrib['vector'].split() ]
                             site_class = site.attrib['class']
+                            if 'default_species' in site.attrib:
+                                default_species = site.attrib['default_species']
+                            else:
+                                default_species = 'default_species'
                             site_elem = Site(name=name,
                                 x=x, y=y, z=z,
-                                site_class=site_class)
+                                site_class=site_class,
+                                default_species=default_species)
                             layer.sites.append(site_elem)
                     elif elem.tag == 'site_class':
                         # ignored for now
@@ -190,7 +195,14 @@ class ProjectTree(SlaveDelegate):
                 for process in child:
                     name = process.attrib['name']
                     rate_constant = process.attrib['rate_constant']
-                    process_elem = Process(name=name, rate_constant=rate_constant)
+                    if 'enabled' in process.attrib:
+                        try:    
+                            proc_enabled = bool(eval(process.attrib['enabled']))
+                        except:
+                            proc_enabled = True
+                    else:
+                        proc_enabled = True
+                    process_elem = Process(name=name, rate_constant=rate_constant,enabled=proc_enabled)
                     for sub in process:
                         if sub.tag == 'action' or sub.tag == 'condition':
                             species =  sub.attrib['species']
@@ -331,7 +343,7 @@ class ProjectTree(SlaveDelegate):
             parameter_elem.set('name', parameter.name)
             parameter_elem.set('value', str(parameter.value))
         lattice_elem = ET.SubElement(root, 'lattice')
-        if (hasattr(self.layer_list_iter, 'cell_size_x') and 
+        if (hasattr(self.layer_list_iter, 'cell_size_x') and \
             hasattr(self.layer_list_iter, 'cell_size_y') and
             hasattr(self.layer_list_iter, 'cell_size_z')):
             lattice_elem.set('cell_size', '%s %s %s' %
@@ -344,14 +356,14 @@ class ProjectTree(SlaveDelegate):
         for layer in self.layer_list:
             layer_elem = ET.SubElement(lattice_elem, 'layer')
             layer_elem.set('name', layer.name)
-            if (hasattr(layer.grid, 'x') and
+            if (hasattr(layer.grid, 'x') and\
             hasattr(layer.grid, 'y') and
             hasattr(layer.grid, 'z')):
                 layer_elem.set('grid',
                     '%s %s %s' % (layer.grid.x,
                                   layer.grid.y,
                                   layer.grid.z))
-            if (hasattr(layer.grid, 'offset_x') and
+            if (hasattr(layer.grid, 'offset_x') and\
             hasattr(layer.grid, 'offset_y') and
             hasattr(layer.grid, 'offset_z')):
                 layer_elem.set('grid_offset',
@@ -364,6 +376,7 @@ class ProjectTree(SlaveDelegate):
                 site_elem.set('vector', '%s %s %s' % (site.x, site.y, site.z))
                 site_elem.set('type', site.name)
                 site_elem.set('class', site.site_class)
+                site_elem.set('default_species', site.default_species)
 
 
         process_list = ET.SubElement(root, 'process_list')
@@ -371,6 +384,7 @@ class ProjectTree(SlaveDelegate):
             process_elem = ET.SubElement(process_list, 'process')
             process_elem.set('rate_constant', process.rate_constant)
             process_elem.set('name', process.name)
+            process_elem.set('enabled',str(process.enabled))
             for condition in process.condition_list:
                 condition_elem = ET.SubElement(process_elem, 'condition')
                 condition_elem.set('species', condition.species)

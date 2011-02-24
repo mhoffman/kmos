@@ -298,7 +298,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     """
     gladefile = GLADEFILE
     toplevel_name = 'process_form'
-    widgets = ['process_name', 'rate_constant' ]
+    widgets = ['process_name', 'rate_constant', 'process_enabled' ]
     z = 4 # z as in zoom
     l = 500 # l as in length
     r_cond = 15.
@@ -554,10 +554,22 @@ class SiteForm(ProxyDelegate):
     """
     gladefile = GLADEFILE
     toplevel_name = 'site_form'
-    widgets = ['site_name', 'sitevect_x', 'sitevect_y', 'sitevect_z']
+    widgets = ['site_name', 'sitevect_x', 'sitevect_y', 'sitevect_z','default_species']
     def __init__(self, site, parent, project_tree, layer):
         self.saved_state = copy.deepcopy(site)
+        self.project_tree = project_tree
+        default_species = site.default_species
+        site.default_species = None
         ProxyDelegate.__init__(self, site)
+
+        self.site_default_species.prefill( [ x.name for x in project_tree.species_list], sort=True)
+
+        if default_species == 'default_species':
+            self.site_default_species.select(self.project_tree.species_list_iter.default_species)
+        else:
+            self.site_default_species.select(default_species)
+        self.model.default_species = self.site_default_species.get_selected()
+
         self.site_ok.grab_default()
         self.site = site
         self.parent = parent
@@ -587,6 +599,7 @@ class SiteForm(ProxyDelegate):
         self.parent.redraw()
 
     def on_site_ok__clicked(self, button):
+        self.model.default_species = self.site_default_species.get_selected()
         if not len(self.site_name.get_text()) :
             self.layer.sites.remove(self.model)
         self.hide()

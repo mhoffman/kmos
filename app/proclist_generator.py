@@ -461,7 +461,10 @@ class ProcListWriter():
         # mu_co, mu_o2, etc
         for process in data.process_list:
             rate_constant = process.rate_constant if process.rate_constant else 0.
-            out.write('    call set_rate_const(%s, real(%s, rdouble))\n' % (process.name, rate_constant))
+            if process.enabled:
+                out.write('    call set_rate_const(%s, real(%s, rdouble))\n' % (process.name, rate_constant))
+            else:
+                out.write('    call set_rate_const(%s, real(0, rdouble))\n' % (process.name, ))
             if data.meta.debug > 0 :
                 out.write('print *,"PROCLIST/SET_RATE_CONSTANTS/PROCESS_NAME","%s"\n' % process.name)
                 out.write('print *,"PROCLIST/SET_RATE_CONSTANTS/RATE_CONSTANT",%s\n' % rate_constant)
@@ -485,7 +488,7 @@ class ProcListWriter():
         for layer in data.layer_list:
             out.write('                case (%s)\n' % layer.name)
             for site in layer.sites:
-                out.write('                    call replace_species((/i, j, k, %s_%s/), null_species, species)\n' % (layer.name, site.name))
+                out.write('                    call replace_species((/i, j, k, %s_%s/), null_species, %s)\n' % (layer.name, site.name, site.default_species))
         out.write('                end select\n')
         out.write('            end do\n')
         out.write('        end do\n')

@@ -42,12 +42,14 @@
     vector CDATA #REQUIRED
     type CDATA #REQUIRED
     class CDATA #IMPLIED
+    default_species CDATA #IMPLIED
   >
   <!ELEMENT process_list (process)*>
     <!ELEMENT process (condition|action)*>
       <!ATTLIST process
         name CDATA #REQUIRED
         rate_constant CDATA #REQUIRED
+        enabled CDATA #IMPLIED
       >
       <!ELEMENT condition EMPTY>
       <!ATTLIST condition
