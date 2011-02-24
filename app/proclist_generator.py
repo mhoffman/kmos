@@ -607,7 +607,7 @@ class ProcListWriter():
                         out.write('    call replace_species(site, species, null_species)\n\n')
 
                     for process in data.process_list:
-                        for condition in process.condition_list:
+                        for condition in filter(lambda condition: condition.coord.name == site.name, process.condition_list):
                             if special_op == 'create':
                                 other_conditions = [ConditionAction(
                                         species=other_condition.species,
