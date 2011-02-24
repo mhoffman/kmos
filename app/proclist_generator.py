@@ -234,6 +234,9 @@ class ProcListWriter():
         out.write('    integer(kind=iint), intent(in) :: proc\n')
         out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
         out.write('    integer(kind=iint) :: nr\n\n')
+        if data.meta.debug > 1 :
+            out.write('print *,"    LATTICE/ADD_PROC/PROC",proc\n')
+            out.write('print *,"    LATTICE/ADD_PROC/SITE",site\n')
         out.write('    nr = lattice2nr(site(1), site(2), site(3), site(4))\n')
         out.write('    call base_add_proc(proc, nr)\n\n')
         out.write('end subroutine add_proc\n\n')
@@ -242,6 +245,9 @@ class ProcListWriter():
         out.write('    integer(kind=iint), intent(in) :: proc\n')
         out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
         out.write('    integer(kind=iint) :: nr\n\n')
+        if data.meta.debug > 1 :
+            out.write('print *,"    LATTICE/DEL_PROC/PROC",proc\n')
+            out.write('print *,"    LATTICE/DEL_PROC/SITE",site\n')
         out.write('    nr = lattice2nr(site(1), site(2), site(3), site(4))\n')
         out.write('    call base_del_proc(proc, nr)\n\n')
         out.write('end subroutine del_proc\n\n')
@@ -347,8 +353,14 @@ class ProcListWriter():
         out.write('    call random_number(ran_time)\n')
         out.write('    call random_number(ran_proc)\n')
         out.write('    call random_number(ran_site)\n')
+        if data.meta.debug > 0 :
+            out.write('print *,"PROCLIST/DO_KMC_STEP/RAN_TIME",ran_time\n')
+            out.write('print *,"PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc\n')
+            out.write('print *,"PROCLIST/DO_KMC_STEP/RAN_site",ran_site\n')
         out.write('    call update_accum_rate\n')
         out.write('    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
+        if data.meta.debug > 0 :
+            out.write('print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr\n')
         out.write('    call run_proc_nr(proc_nr, nr_site)\n')
         out.write('    call update_clocks(ran_time)\n\n')
         out.write('end subroutine do_kmc_step\n\n')
@@ -375,6 +387,8 @@ class ProcListWriter():
         out.write('    select case(proc)\n')
         for process in data.process_list:
             out.write('    case(%s)\n' % process.name)
+            if data.meta.debug > 0 :
+                out.write('print *,"PROCLIST/RUN_PROC_NR/NAME","%s"\n' % process.name)
             for action in process.action_list:
                 if action.coord == process.executing_coord():
                     relative_coord = 'lsite'
@@ -383,8 +397,12 @@ class ProcListWriter():
 
 
                 if action.species[0] == '^':
+                    if data.meta.debug > 0 :
+                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","create %s_%s"\n' % (action.coord.layer, action.coord.name))
                     out.write('        call create_%s_%s(%s, %s)\n' % (action.coord.layer, action.coord.name, relative_coord, action.species[1 :]))
                 elif action.species[0] == '$':
+                    if data.meta.debug > 0 :
+                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","annihilate %s_%s"\n' % (action.coord.layer, action.coord.name))
                     out.write('        call annihilate_%s_%s(%s, %s)\n' % (action.coord.layer, action.coord.name, relative_coord, action.species[1 :]))
                     
                 elif action.species == data.species_list_iter.default_species:
@@ -392,8 +410,12 @@ class ProcListWriter():
                         previous_species = filter(lambda x: x.coord.ff()==action.coord.ff(), process.condition_list)[0].species
                     except:
                         UserWarning("Process %s seems to be ill-defined\n" % process.name)
+                    if data.meta.debug > 0 :
+                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","take %s_%s %s"\n' % (action.coord.layer, action.coord.name, previous_species))
                     out.write('        call take_%s_%s_%s(%s)\n' % (previous_species, action.coord.layer, action.coord.name, relative_coord))
                 else:
+                    if data.meta.debug > 0 :
+                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","put %s_%s %s"\n' % (action.coord.layer, action.coord.name, action.species))
                     out.write('        call put_%s_%s_%s(%s)\n' % (action.species, action.coord.layer, action.coord.name, relative_coord))
 
             out.write('\n')
@@ -419,6 +441,8 @@ class ProcListWriter():
             + '    print *, "Please check back with the author prior to using"\n'
             + '    print *, "results in a publication."\n\n')\
             % (data.meta.model_dimension, data.meta.model_name, data.meta.author, data.meta.email, ))
+        if data.meta.debug > 0 :
+            out.write('print *,"PROCLIST/INIT/SYSTEM_SIZE",input_system_size\n')
         out.write('    call allocate_system(nr_of_proc, input_system_size, system_name)\n')
         out.write('    call initialize_state(layer, species)\n')
         out.write('    call set_rate_constants\n\n')
@@ -438,6 +462,9 @@ class ProcListWriter():
         for process in data.process_list:
             rate_constant = process.rate_constant if process.rate_constant else 0.
             out.write('    call set_rate_const(%s, real(%s))\n' % (process.name, rate_constant))
+            if data.meta.debug > 0 :
+                out.write('print *,"PROCLIST/SET_RATE_CONSTANTS/PROCESS_NAME","%s"\n' % process.name)
+                out.write('print *,"PROCLIST/SET_RATE_CONSTANTS/RATE_CONSTANT",%s\n' % rate_constant)
 
         out.write('\nend subroutine set_rate_constants\n\n')
 
@@ -453,8 +480,13 @@ class ProcListWriter():
         out.write('            do i = 0, system_size(1)-1\n')
         out.write('                do nr = 1, spuck\n')
         out.write('                    call reset_site((/i, j, k, nr/), null_species)\n')
-        out.write('                    call replace_species((/i, j, k, nr/), null_species, species)\n')
         out.write('                end do\n')
+        out.write('                select case(layer)\n')
+        for layer in data.layer_list:
+            out.write('                case (%s)\n' % layer.name)
+            for site in layer.sites:
+                out.write('                    call replace_species((/i, j, k, %s_%s/), null_species, species)\n' % (layer.name, site.name))
+        out.write('                end select\n')
         out.write('            end do\n')
         out.write('        end do\n')
         out.write('    end do\n\n')
@@ -483,7 +515,7 @@ class ProcListWriter():
                 out.write('        "%s"\n' % lattice_repr[-1])
         for i, species in enumerate(data.species_list):
             out.write('    species_representation(%s) = "%s"\n' % (i+1, species.representation))
-        out.write('end subroutine initialize_state\n\n')
+        out.write('\nend subroutine initialize_state\n\n')
 
 
                     
@@ -516,10 +548,20 @@ class ProcListWriter():
                         routine_name = '%s_%s_%s_%s' % (op, species.name, layer.name, site.name)
                         out.write('subroutine %s(site)\n\n' % routine_name)
                         out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
+                        if data.meta.debug > 0 :
+                            out.write('print *,"PROCLIST/%s/SITE",site\n' % (routine_name.upper(), ))
                         out.write('    ! update lattice\n')
                         if op == 'put':
+                            if data.meta.debug > 0 :
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/SITE",site\n')
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES","%s"\n' % data.species_list_iter.default_species)
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES","%s"\n' % species.name)
                             out.write('    call replace_species(site, %s, %s)\n\n' % (data.species_list_iter.default_species, species.name))
                         elif op == 'take':
+                            if data.meta.debug > 0 :
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/SITE",site\n')
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES","%s"\n' % species.name)
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES","%s"\n' % data.species_list_iter.default_species)
                             out.write('    call replace_species(site, %s, %s)\n\n' % (species.name, data.species_list_iter.default_species))
                         for process in data.process_list:
                             for condition in process.condition_list:
@@ -558,6 +600,10 @@ class ProcListWriter():
                         if disabled_procs:
                             out.write('    ! disable affected processes\n')
                             for process, coord in disabled_procs:
+                                if data.meta.debug > 1 :
+                                    out.write('print *,"    LATTICE/CAN_DO/PROC",%s\n' % process.name)
+                                    out.write('print *,"    LATTICE/CAN_DO/VSITE","site%s"\n' % (coord).radd_ff())
+                                    out.write('print *,"    LATTICE/CAN_DO/SITE",site%s\n' % (coord).radd_ff())
                                 out.write(('    if(can_do(%(proc)s, site%(coord)s))then\n'
                                 + '        call del_proc(%(proc)s, site%(coord)s)\n'
                                 + '    endif\n\n') % {'coord':(coord).radd_ff(), 'proc':process.name})
@@ -591,47 +637,63 @@ class ProcListWriter():
                 self._write_optimal_iftree(items=items, indent=4, out=out)
                 out.write('end subroutine %s\n\n' % routine_name)
 
-        for layer in data.layer_list:
-            for site in layer.sites:
-                for special_op in ['create','annihilate']:
-                    enabled_procs = []
-                    disabled_procs = []
-                    routine_name = '%s_%s_%s' % (special_op, layer.name, site.name)
-                    out.write('subroutine %s(site, species)\n\n' % routine_name)
-                    out.write('    integer(kind=iint), intent(in) :: species\n')
-                    out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
-                    out.write('    ! update lattice\n')
-                    if special_op == 'create':
-                        out.write('    call replace_species(site, null_species, species)\n\n')
-                    elif special_op == 'annihilate':
-                        out.write('    call replace_species(site, species, null_species)\n\n')
+        if len(data.layer_list) > 1 :
+            # where are in multi-lattice mode
+            for layer in data.layer_list:
+                for site in layer.sites:
+                    for special_op in ['create','annihilate']:
+                        enabled_procs = []
+                        disabled_procs = []
+                        routine_name = '%s_%s_%s' % (special_op, layer.name, site.name)
+                        out.write('subroutine %s(site, species)\n\n' % routine_name)
+                        out.write('    integer(kind=iint), intent(in) :: species\n')
+                        out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
+                        out.write('    ! update lattice\n')
+                        if data.meta.debug > 0 :
+                            out.write('print *,"PROCLIST/%s/SITE",site\n' % (routine_name.upper(), ))
+                        if special_op == 'create':
+                            if data.meta.debug > 0 :
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/SITE",site\n')
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES","null_species"\n')
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES",species\n' )
+                            out.write('    call replace_species(site, null_species, species)\n\n')
+                        elif special_op == 'annihilate':
+                            if data.meta.debug > 0 :
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/SITE",site\n')
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES",species\n' )
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES","null_species"\n')
+                            out.write('    call replace_species(site, species, null_species)\n\n')
 
-                    for process in data.process_list:
-                        for condition in filter(lambda condition: condition.coord.name == site.name, process.condition_list):
-                            if special_op == 'create':
-                                other_conditions = [ConditionAction(
-                                        species=other_condition.species,
-                                        coord=('site%s' % (other_condition.coord-condition.coord).radd_ff())) for 
-                                        other_condition in process.condition_list]
-                                enabled_procs.append((other_conditions, (process.name,
-                                    'site%s' % (process.executing_coord()
-                                    -condition.coord).radd_ff(), True)))
-                            elif special_op == 'annihilate':
-                                coord = process.executing_coord() - condition.coord
-                                disabled_procs.append((process, coord))
-                                
-                    if disabled_procs:
-                        out.write('    ! disable affected processes\n')
-                        for process, coord in disabled_procs:
-                            out.write(('    if(can_do(%(proc)s, site%(coord)s))then\n'
-                            + '        call del_proc(%(proc)s, site%(coord)s)\n'
-                            + '    endif\n\n') % {'coord':(coord).radd_ff(), 'proc':process.name})
-                        
-                    if enabled_procs:
-                        out.write('    ! enable affected processes\n')
+                        for process in data.process_list:
+                            for condition in filter(lambda condition: condition.coord.name == site.name, process.condition_list):
+                                if special_op == 'create':
+                                    other_conditions = [ConditionAction(
+                                            species=other_condition.species,
+                                            coord=('site%s' % (other_condition.coord-condition.coord).radd_ff())) for 
+                                            other_condition in process.condition_list]
+                                    enabled_procs.append((other_conditions, (process.name,
+                                        'site%s' % (process.executing_coord()
+                                        -condition.coord).radd_ff(), True)))
+                                elif special_op == 'annihilate':
+                                    coord = process.executing_coord() - condition.coord
+                                    disabled_procs.append((process, coord))
+                                    
+                        if disabled_procs:
+                            out.write('    ! disable affected processes\n')
+                            for process, coord in disabled_procs:
+                                if data.meta.debug > 1 :
+                                    out.write('print *,"    LATTICE/CAN_DO/PROC",%s\n' % process.name)
+                                    out.write('print *,"    LATTICE/CAN_DO/VSITE","site%s"\n' % (coord).radd_ff())
+                                    out.write('print *,"    LATTICE/CAN_DO/SITE",site%s\n' % (coord).radd_ff())
+                                out.write(('    if(can_do(%(proc)s, site%(coord)s))then\n'
+                                + '        call del_proc(%(proc)s, site%(coord)s)\n'
+                                + '    endif\n\n') % {'coord':(coord).radd_ff(), 'proc':process.name})
+                            
+                        if enabled_procs:
+                            out.write('    ! enable affected processes\n')
 
-                        self._write_optimal_iftree(items=enabled_procs, indent=4,out=out)
-                    out.write('\nend subroutine %s\n\n' % routine_name)
+                            self._write_optimal_iftree(items=enabled_procs, indent=4,out=out)
+                        out.write('\nend subroutine %s\n\n' % routine_name)
             
         out.write('end module proclist\n')
         out.close()
@@ -678,6 +740,11 @@ class ProcListWriter():
         #DEBUGGING
         #print("ANSWERS %s" % answers)
         #print("UNIQ_ANSWERS %s" % uniq_answers)
+
+        if self.data.meta.debug > 1 :
+            out.write('print *,"    LATTICE/GET_SPECIES/VSITE","%s"\n' % most_common_coord)
+            out.write('print *,"    LATTICE/GET_SPECIES/SITE",%s\n' %  most_common_coord)
+            out.write('print *,"    LATTICE/GET_SPECIES/SPECIES",get_species(%s)\n' %  most_common_coord)
 
         out.write('%sselect case(get_species(%s))\n' % ((indent)*' ', most_common_coord))
         for answer in uniq_answers:
