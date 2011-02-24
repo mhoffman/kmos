@@ -36,7 +36,6 @@ import kiwi.ui.dialogs
 KMCPROJECT_DTD = '/kmc_project.dtd'
 MLKMCPROJECT_DTD = '/ml_kmc_project.dtd'
 PROCESSLIST_DTD = '/process_list.dtd'
-SRCDIR = './fortran_src'
 
 def prettify_xml(elem):
     """This function takes an XML document, which can have one or many lines
@@ -246,69 +245,6 @@ class ProjectTree(SlaveDelegate):
         self.project_data.expand(self.parameter_list_iter)
         self.project_data.expand(self.process_list_iter)
 
-    def _export_process_list(self):
-        """This is a newer version exporting the proclist.f90 module right to 
-        F90 source code using an algorithm that tries to build an optimized if-tree
-        """
-        pass
-    def _export_process_list_xml_legacy(self):
-        """This basically a legacy function: the part of the source code creator
-        existed before and uses a slightly modified XML syntax which was faster to type
-        by hand but is unnecesarily complex when using a GUI. So this function converts
-        the current process list to the old form and passes along all essential
-        information to the kmc_generator module
-        """
-        root = ET.Element('kmc')
-        lattice = self.lattice_list[0]
-        # extract meta information
-        meta = ET.SubElement(root, 'meta')
-        meta.set('name', self.meta.model_name)
-        meta.set('author', self.meta.author)
-        meta.set('dimension', str(self.meta.model_dimension))
-        meta.set('debug', str(self.meta.debug))
-        meta.set('lattice_module', '')
-        # extract site_type information
-        site_type_list = ET.SubElement(root, 'site_type_list')
-        # extract species information
-        species_list = ET.SubElement(root, 'species_list')
-        for lattice in self.lattice_list:
-            for site in lattice.sites:
-                type = site.name
-                site_type_elem = ET.SubElement(site_type_list, 'type')
-                site_type_elem.set('name', type)
-        # extract process list
-        process_list = ET.SubElement(root, 'process_list')
-        process_list.set('lattice', lattice.name)
-        for process in self.process_list:
-            process_elem = ET.SubElement(process_list, 'process')
-            process_elem.set('name', process.name)
-            process_elem.set('rate', process.rate_constant)
-            condition_list = ET.SubElement(process_elem, 'condition_list')
-            action_elem = ET.SubElement(process_elem, 'action')
-            center_coord = lattice.get_coords(process.condition_list[0])
-            #condition_list.set('center_site', ' '.join([str(x) for x in center_coord] ))
-            for index, condition in enumerate(process.condition_list):
-                coord = lattice.get_coords(condition)
-                diff_coord = ' '.join([ str(x-y) for (x, y) in zip(coord, center_coord) ])
-                type = condition.coord.name
-                species = condition.species
-                condition_elem = ET.SubElement(condition_list, 'condition')
-                condition_elem.set('site', 'site_%s' % index)
-                condition_elem.set('type', type)
-                condition_elem.set('species', species)
-                condition_elem.set('coordinate', diff_coord)
-
-                # Create corresponding action field, if available
-                actions = filter(lambda x: x.coord == condition.coord, process.action_list)
-                if actions:
-                    action = actions[0]
-                replacement_elem = ET.SubElement(action_elem, 'replacement')
-                replacement_elem.set('site', 'site_%s' % index)
-                replacement_elem.set('new_species', action.species)
-
-                
-            # CONTINUE HERE
-        return root
 
     def _get_xml_string(self):
         """Produces an XML representation of the project data
