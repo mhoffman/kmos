@@ -37,6 +37,7 @@ class ProcListWriter():
         self.dir = dir
         
     def write_lattice(self):
+        # write header section and module imports
         data = self.data
         out = open('%s/lattice.f90' % self.dir, 'w')
         out.write(self._gpl_message())
@@ -69,6 +70,8 @@ class ProcListWriter():
 
                 
         out.write('\n\nimplicit none\n\n')
+        
+        # define module wide variables
 
         out.write('integer(kind=iint), dimension(3), public :: system_size\n')
         out.write('integer(kind=iint), parameter, public :: nr_of_layers = %s\n' % len(data.layer_list))
@@ -95,6 +98,13 @@ class ProcListWriter():
         out.write('integer(kind=iint), dimension(:, :), allocatable, public :: nr2lattice\n')
         out.write('integer(kind=iint), dimension(:,:,:,:), allocatable, public :: lattice2nr\n\n')
         out.write('\n\ncontains\n\n')
+
+        # define the lattice mapping from the (multi-) lattice to a single lattice in 1D
+        # and back. These mapping are the central piece of the lattice module and are used
+        # by most of the other functions
+        # For reasons of performance (modulo operation is usually considered expensive)
+        # we write slightly different versions for d=1,2,3
+        # where the lower dimension version simply ignore some fields
         out.write('pure function calculate_lattice2nr(site)\n\n')
         out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n')
         out.write('    integer(kind=iint) :: calculate_lattice2nr\n\n')
@@ -138,6 +148,9 @@ class ProcListWriter():
             out.write('    calculate_nr2lattice(4) = nr - spuck*calculate_nr2lattice(1)\n')
         out.write('\nend function calculate_nr2lattice\n\n')
 
+        # allocate system replicates the base_allocate function
+        # tests the lattice mappings for correctness
+        # and initialized a lot more parameter type of data
         out.write('subroutine allocate_system(nr_of_proc, input_system_size, system_name)\n\n')
         out.write('    integer(kind=iint), intent(in) :: nr_of_proc\n')
         out.write('    integer(kind=iint), dimension(%s), intent(in) :: input_system_size\n' % data.meta.model_dimension)
@@ -207,6 +220,10 @@ class ProcListWriter():
             
         out.write('end subroutine allocate_system\n\n')  
 
+        # all subroutines below simply replicate the base module version
+        # in terms of lattice coordinates. Could be stored in fixed template
+        # but are kept here for completeness and readability
+
         out.write('subroutine deallocate_system()\n\n')
         out.write('    deallocate(lattice2nr)\n')
         out.write('    deallocate(nr2lattice)\n')
@@ -267,7 +284,10 @@ class ProcListWriter():
         out.close()
 
     def write_proclist(self):
+        # make long lines a little shorter
         data = self.data
+
+        # write header section and module imports
         out = open('%s/proclist.f90' % self.dir, 'w')
         out.write(self._gpl_message())
         out.write('\n\nmodule proclist\n' 
@@ -299,6 +319,8 @@ class ProcListWriter():
             + '    null_species, &\n'
             + '    get_species\n' )
         out.write('\n\nimplicit none\n\n')
+
+        # initialize various parameter kind of data
         out.write('\n\n ! Species constants\n\n')
         for i, species in enumerate(data.species_list):
             out.write('integer(kind=iint), parameter, public :: %s = %s\n' % (species.name, i +1))
@@ -318,6 +340,7 @@ class ProcListWriter():
         out.write('character(len=2000), dimension(%s) :: processes, rates' % (len(data.process_list)))
         out.write('\n\ncontains\n\n')
 
+        # do exactly one kmc step
         out.write('subroutine do_kmc_step()\n\n')
         out.write('    real(kind=rsingle) :: ran_proc, ran_time, ran_site\n')
         out.write('    integer(kind=iint) :: nr_site, proc_nr\n\n')
@@ -330,6 +353,17 @@ class ProcListWriter():
         out.write('    call update_clocks(ran_time)\n\n')
         out.write('end subroutine do_kmc_step\n\n')
 
+        # run_proc_nr runs the process selected by determine_procsite
+        # for sake of simplicity each process is formulated in terms
+        # of take and put operations. This is due to the fact that
+        # in surface science type of models the default species, 
+        # i.e. 'empty' has a special meaning. So instead of just 
+        # 'setting' new species, which would be more general
+        # we say we 'take' and 'put' atoms. So a take is equivalent
+        # to a set_empty.
+        # While this looks more readable on paper, I am not sure
+        # if this make code maintainability a lot worse. So this
+        # should probably change.
 
         out.write('subroutine run_proc_nr(proc, nr_site)\n\n')
         out.write('    integer(kind=iint), intent(in) :: proc\n')
@@ -369,6 +403,9 @@ class ProcListWriter():
         out.write('end subroutine run_proc_nr\n\n')
 
 
+        # Here we replicate the allocate_system call, initialize
+        # all book-keeping databases
+        # and calculate the rate constants for the first time
         out.write(('subroutine init(input_system_size, system_name, layer, species)\n\n'
             + '    integer(kind=iint), intent(in) :: layer, species\n'
             + '    integer(kind=iint), dimension(%s), intent(in) :: input_system_size\n\n'
@@ -394,13 +431,19 @@ class ProcListWriter():
         out.write('end subroutine get_representation_char\n\n')
 
 
+        # Evaluate all rate constants
         out.write('subroutine set_rate_constants()\n\n')
+        # TODO Put block/hook here to calculate intermediate variables such as
+        # mu_co, mu_o2, etc
         for process in data.process_list:
             rate_constant = process.rate_constant if process.rate_constant else 0.
             out.write('    call set_rate_const(%s, real(%s))\n' % (process.name, rate_constant))
 
         out.write('\nend subroutine set_rate_constants\n\n')
 
+        # initialize the system with the default layer and the default species
+        # initialize all book-keeping databases
+        # and representation strings for ASE representation
         out.write('subroutine initialize_state(layer, species)\n\n')
         out.write('    integer(kind=iint), intent(in) :: layer, species\n\n')
         out.write('    integer(kind=iint) :: i, j, k, nr\n')
@@ -443,11 +486,23 @@ class ProcListWriter():
         out.write('end subroutine initialize_state\n\n')
 
 
-
-
-
-
                     
+        # HERE comes the bulk part of this code generator:
+        # the put/take/create/annihilation functions
+        # encode what all the processes we defined mean in terms
+        # updates for the geometry and the list of available processes
+        #
+        # The updates that disable available process are pretty easy 
+        # and flat so they cannot be optimized much.
+        # The updates enabling processes are more sophisticasted: most 
+        # processes have more than one condition. So enabling one condition
+        # of a processes is not enough. We need to check if all the other
+        # conditions are met after this update as well. All these checks
+        # typically involve many repetitive questions, i.e. we will 
+        # inquire the lattice many times about the same site.
+        # To mend this we first collect all processes that could be enabled
+        # and then use a heuristic algorithm (any theoretical computer scientist
+        # knows how to improve on this?) to construct an improved if-tree
         for species in data.species_list :
             if species.name == data.species_list_iter.default_species:
                 continue # don't put/take 'empty'
