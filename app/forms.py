@@ -688,7 +688,7 @@ class GridForm(ProxyDelegate):
         self.project_tree = project_tree
         self.layer = layer
         ProxyDelegate.__init__(self, grid)
-        if self.project_tree.meta.model_dimension < 3:
+        if self.project_tree.meta.model_dimension < 3 :
             self.grid_z.hide()
             self.grid_offset_z.hide()
 
@@ -715,10 +715,11 @@ class LatticeForm(ProxySlaveDelegate):
     toplevel_name = 'lattice_form'
     widgets = ['cell_size_x', 'cell_size_y', 'cell_size_z', 'default_layer','lattice_representation']
     def __init__(self, model, dimension, project_tree):
+        default_layer = model.default_layer
         model.default_layer = None
         ProxySlaveDelegate.__init__(self, model)
         self.default_layer.prefill([x.name for x in project_tree.layer_list], sort=True)
-        self.default_layer.select(model.default_layer)
+        self.default_layer.select(default_layer)
         self.default_layer.set_tooltip_text('By default the system\nwill be initialized with this layer')
 
 
