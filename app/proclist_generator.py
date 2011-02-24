@@ -461,7 +461,7 @@ class ProcListWriter():
         # mu_co, mu_o2, etc
         for process in data.process_list:
             rate_constant = process.rate_constant if process.rate_constant else 0.
-            out.write('    call set_rate_const(%s, real(%s))\n' % (process.name, rate_constant))
+            out.write('    call set_rate_const(%s, real(%s, rdouble))\n' % (process.name, rate_constant))
             if data.meta.debug > 0 :
                 out.write('print *,"PROCLIST/SET_RATE_CONSTANTS/PROCESS_NAME","%s"\n' % process.name)
                 out.write('print *,"PROCLIST/SET_RATE_CONSTANTS/RATE_CONSTANT",%s\n' % rate_constant)

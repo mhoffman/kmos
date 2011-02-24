@@ -117,7 +117,7 @@ integer(kind=iint), dimension(:), allocatable :: lattice
 !   Species constants can be conveniently defined
 !   in lattice_... and later used directly in the process list.
 !******
-real(kind=rsingle), dimension(:), allocatable :: accum_rates
+real(kind=rdouble), dimension(:), allocatable :: accum_rates
 !****v* base/accum_rates
 ! FUNCTION
 !   Stores the accumulated rate constant multiplied with the number
@@ -144,7 +144,7 @@ integer(kind=iint), dimension(:), allocatable :: nr_of_sites
 ! FUNCTION
 !   Stores the number of sites available for each process.
 !******
-real(kind=rsingle), dimension(:), allocatable :: rates
+real(kind=rdouble), dimension(:), allocatable :: rates
 !****v* base/rates
 ! FUNCTION
 !   Stores the rate constants for each process in s^-1.
@@ -581,7 +581,7 @@ subroutine set_rate_const(proc_nr, rate)
     !    .
     !******
     integer(kind=iint), intent(in) :: proc_nr
-    real(kind=rsingle), intent(in) :: rate
+    real(kind=rdouble), intent(in) :: rate
 
     ! Make sure proc_nr is in the right range
     ASSERT(proc_nr.gt.0,"base/set_rate_const: proc_nr has to be positive")
@@ -831,7 +831,7 @@ subroutine get_rate(proc_nr, return_rate)
     !******
     !---------------I/O variables---------------
     integer(kind=iint), intent(in) :: proc_nr
-    real(kind=rsingle), intent(out) :: return_rate
+    real(kind=rdouble), intent(out) :: return_rate
 
     return_rate=rates(proc_nr)
 
@@ -1066,8 +1066,8 @@ subroutine interval_search_real(arr, value, return_field)
     !
     !******
     !---------------I/O variables---------------
-    real(kind=rsingle),dimension(:), intent(in) :: arr
-    real(kind=rsingle),intent(in) :: value
+    real(kind=rdouble),dimension(:), intent(in) :: arr
+    real(kind=rdouble),intent(in) :: value
     integer(kind=iint), intent(out) :: return_field
     !---------------internal variables---------------
     integer(kind=iint) :: left, mid, right
