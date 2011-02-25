@@ -579,7 +579,7 @@ class SiteForm(ProxyDelegate):
 
 
     def on_site_name__validate(self, widget, site_name):
-        # check if other site already has the name
+        """check if other site already has the name"""
         if filter(lambda x : x.name == site_name, self.layer.sites):
             self.site_ok.set_sensitive(False)
             return ValidationError('Site name needs to be unique')
@@ -588,6 +588,8 @@ class SiteForm(ProxyDelegate):
 
 
     def on_site_cancel__clicked(self, button):  
+        """If we click cancel revert to previous state
+        or don't add site, if new."""
         if self.saved_state.name:
             # if site existed, reset to previous state
             self.layer.sites.remove(self.site)
@@ -630,6 +632,12 @@ class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
 
 
 class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
+    """The parameter form allows to set parameter. These
+    parameter can be used in e.g. Transition State Theory
+    formula to calculate rate constants.
+    They might later also be adjustable via a visualization
+    GUI
+    """
     gladefile = GLADEFILE
     toplevel_name = 'parameter_form'
     widgets = ['parameter_name', 'value']
@@ -647,6 +655,10 @@ class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
 
 
 class SpeciesListForm(ProxySlaveDelegate):
+    """This form only allows to set the default species, that is 
+    a system will be globally initialized with this species if 
+    nothing else is set on a per site basis
+    """
     gladefile = GLADEFILE
     toplevel_name = 'species_list_form'
     widgets = ['default_species']
@@ -667,6 +679,12 @@ class SpeciesListForm(ProxySlaveDelegate):
 
 
 class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
+    """Widget to define a new species. Required attribute is name. The
+    chosen color will only shop up in the process editor. So choose something
+    you will remember and recognize.
+    The representation string is meant to be a ASE ase.atoms.Atoms constructor
+    that will show up in the ASE visualization.
+    """
     gladefile = GLADEFILE
     toplevel_name = 'species_form'
     widgets = ['name', 'color', 'representation']
@@ -680,6 +698,10 @@ class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
 
 
 class GridForm(ProxyDelegate):
+    """Widget to set the grid for defining the lattice. The grid itself has
+    no meaning for the model but it is merely there to assist setting sites
+    at specific locations
+    """
     gladefile = GLADEFILE
     toplevel_name = 'grid_form'
     widgets = ['grid_x', 'grid_y', 'grid_z', 'grid_offset_x', 'grid_offset_y', 'grid_offset_z']
@@ -711,6 +733,10 @@ class GridForm(ProxyDelegate):
 
         
 class LatticeForm(ProxySlaveDelegate):
+    """Widget to set global lattice parameter such as the lattice vector,
+    a ASE representation string, and the default layer. The program will
+    be initialized using the default layer
+    """
     gladefile = GLADEFILE
     toplevel_name = 'lattice_form'
     widgets = ['cell_size_x', 'cell_size_y', 'cell_size_z', 'default_layer','lattice_representation']
