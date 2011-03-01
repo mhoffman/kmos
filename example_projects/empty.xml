@@ -3,6 +3,7 @@
     <meta author="Fritz Mueller" debug="0" email="fritzmueller@tum.de" model_dimension="2" model_name="foo_model"/>
     <species_list default_species="empty">
         <species color="#000000" name="CO" representation="Atoms('CO',[[0,0,0],[0,0,1.2]])"/>
+        <species color="#0034be" name="Pd" representation="Atoms('Pd',[[0,0,0]])"/>
         <species color="#fff" name="empty" representation=""/>
         <species color="#ff1717" name="oxygen" representation="Atoms('O',[[0,0,0]])"/>
     </species_list>
@@ -13,185 +14,366 @@
         <parameter name="print_every" value="1.e5"/>
         <parameter name="total_steps" value="1.e7"/>
     </parameter_list>
-    <lattice cell_size="6.29 6.29 10.0" default_layer="PdO" representation="Atoms(symbols='Pd15', positions=np.array( [[  4.74536588,   0.34239956,  -8.29627642], [  5.92199002,   2.86578697,  -8.29627642], [  0.87533998,   5.21909763,  -8.29627642], [  2.22197847,   1.51908609,  -8.29627642], [  3.398665  ,   4.04241111,  -8.29627642], [  2.82001105,   5.90917072,  -6.24970573], [  0.34097598,   0.91823796,  -6.24362784], [  1.57674031,   3.40671184,  -6.25070729], [  5.26250348,   4.71173388,  -6.29960027], [  4.06752131,   2.19432896,  -6.28970289], [  4.74172449,   0.32992489,  -4.25580734], [  5.99691572,   2.85801944,  -4.22685536], [  0.97483913,   5.23732922,  -4.23766488], [  2.19854396,   1.53975362,  -4.23151537], [  3.44081858,   4.06773128,  -4.33377281]])),     ">
+    <lattice cell_size="6.29 6.29 10.0" default_layer="PdO" representation="Atoms(symbols='Pd15', positions=np.array( [[  4.74536588,   0.34239956,  -6.29627642], [  5.92199002,   2.86578697,  -6.29627642], [  0.87533998,   5.21909763,  -6.29627642], [  2.22197847,   1.51908609,  -6.29627642], [  3.398665  ,   4.04241111,  -6.29627642], [  2.82001105,   5.90917072,  -4.24970573], [  0.34097598,   0.91823796,  -4.24362784], [  1.57674031,   3.40671184,  -4.25070729], [  5.26250348,   4.71173388,  -4.29960027], [  4.06752131,   2.19432896,  -4.28970289], [  4.74172449,   0.32992489,  -2.25580734], [  5.99691572,   2.85801944,  -2.22685536], [  0.97483913,   5.23732922,  -2.23766488], [  2.19854396,   1.53975362,  -2.23151537], [  3.44081858,   4.06773128,  -2.33377281]])),     ">
         <layer grid="10 10 1" grid_offset="0.1 0.1 0.0" name="Pd100">
-            <site class="" type="h1" vector="0.1 0.1 0.0"/>
-            <site class="" type="h2" vector="0.3 0.5 0.0"/>
-            <site class="" type="h3" vector="0.5 0.9 0.0"/>
-            <site class="" type="h4" vector="0.9 0.7 0.0"/>
-            <site class="" type="h5" vector="0.7 0.3 0.0"/>
-            <site class="" type="b1" vector="0.2 0.3 0.0"/>
-            <site class="" type="b2" vector="0.4 0.7 0.0"/>
-            <site class="" type="b3" vector="0.5 0.4 0.0"/>
-            <site class="" type="b4" vector="0.9 0.2 0.0"/>
-            <site class="" type="b5" vector="0.8 0.5 0.0"/>
-            <site class="" type="b6" vector="0.7 0.8 0.0"/>
-            <site class="" type="b7" vector="0.1 0.6 0.0"/>
-            <site class="" type="b8" vector="0.6 0.1 0.0"/>
-            <site class="" type="b9" vector="0.3 0.0 0.0"/>
-            <site class="" type="b10" vector="0.0 0.9 0.0"/>
+            <site class="" default_species="default_species" type="h1" vector="0.1 0.1 0.0"/>
+            <site class="" default_species="default_species" type="h2" vector="0.3 0.5 0.0"/>
+            <site class="" default_species="default_species" type="h4" vector="0.9 0.7 0.0"/>
+            <site class="" default_species="default_species" type="h5" vector="0.7 0.3 0.0"/>
+            <site class="" default_species="default_species" type="b1" vector="0.2 0.3 0.0"/>
+            <site class="" default_species="default_species" type="b2" vector="0.4 0.7 0.0"/>
+            <site class="" default_species="default_species" type="b3" vector="0.5 0.4 0.0"/>
+            <site class="" default_species="default_species" type="b4" vector="0.9 0.2 0.0"/>
+            <site class="" default_species="default_species" type="b5" vector="0.8 0.5 0.0"/>
+            <site class="" default_species="default_species" type="b6" vector="0.7 0.8 0.0"/>
+            <site class="" default_species="default_species" type="b7" vector="0.1 0.6 0.0"/>
+            <site class="" default_species="default_species" type="b8" vector="0.6 0.1 0.0"/>
+            <site class="" default_species="default_species" type="b9" vector="0.3 0.0 0.0"/>
+            <site class="" default_species="default_species" type="b10" vector="0.0 0.9 0.0"/>
+            <site class="" default_species="default_species" type="h3" vector="0.5 0.9 0.0"/>
         </layer>
         <layer grid="4 4 1" grid_offset="0.0 0.0 0.0" name="PdO">
-            <site class="" type="bridge2" vector="0.5 0.5 0.1"/>
-            <site class="" type="hollow1" vector="0.25 0.25 0.0"/>
-            <site class="" type="hollow2" vector="0.25 0.75 0.0"/>
-            <site class="" type="bridge1" vector="0.5 0.0 0.1"/>
+            <site class="" default_species="empty" type="bridge2" vector="0.5 0.5 0.1"/>
+            <site class="" default_species="empty" type="hollow1" vector="0.25 0.25 0.2"/>
+            <site class="" default_species="empty" type="hollow2" vector="0.25 0.75 0.2"/>
+            <site class="" default_species="empty" type="bridge1" vector="0.5 0.0 0.1"/>
+            <site class="" default_species="Pd" type="Pd2" vector="0.0 0.5 0.1"/>
+            <site class="" default_species="Pd" type="Pd3" vector="0.5 0.25 0.05"/>
+            <site class="" default_species="Pd" type="Pd4" vector="0.5 0.75 0.05"/>
+            <site class="" default_species="oxygen" type="hollow3" vector="0.75 0.25 0.0"/>
+            <site class="" default_species="oxygen" type="hollow4" vector="0.75 0.75 0.0"/>
+            <site class="" default_species="Pd" type="Pd1" vector="0.0 0.0 0.1"/>
         </layer>
     </lattice>
     <process_list>
-        <process name="m_COads_h1" rate_constant="10**8">
-            <condition coord_layer="Pd100" coord_name="h1" coord_offset="0 0 0" species="empty"/>
-            <action coord_layer="Pd100" coord_name="h1" coord_offset="0 0 0" species="CO"/>
+        <process enabled="False" name="destruct1" rate_constant="10E15">
+            <condition coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="empty"/>
+            <action coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="$empty"/>
+            <action coord_layer="Pd100" coord_name="h1" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b1" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b9" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b10" coord_offset="0 -1 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b7" coord_offset="0 -1 0" species="^empty"/>
         </process>
-        <process name="m_COads_h2" rate_constant="10**8">
-            <condition coord_layer="Pd100" coord_name="h2" coord_offset="0 0 0" species="empty"/>
-            <action coord_layer="Pd100" coord_name="h2" coord_offset="0 0 0" species="CO"/>
+        <process enabled="False" name="destruct10" rate_constant="10E15">
+            <condition coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="empty"/>
+            <action coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="$CO"/>
+            <action coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="$CO"/>
+            <action coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="$empty"/>
+            <action coord_layer="Pd100" coord_name="h1" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b1" coord_offset="0 0 0" species="^CO"/>
+            <action coord_layer="Pd100" coord_name="b9" coord_offset="0 0 0" species="^CO"/>
+            <action coord_layer="Pd100" coord_name="b10" coord_offset="0 -1 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b7" coord_offset="0 -1 0" species="^empty"/>
         </process>
-        <process name="m_COads_h3" rate_constant="10**8">
-            <condition coord_layer="Pd100" coord_name="h3" coord_offset="0 0 0" species="empty"/>
-            <action coord_layer="Pd100" coord_name="h3" coord_offset="0 0 0" species="CO"/>
+        <process enabled="False" name="destruct11" rate_constant="10E15">
+            <condition coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="CO"/>
+            <action coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="$CO"/>
+            <action coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="$CO"/>
+            <action coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="$CO"/>
+            <action coord_layer="Pd100" coord_name="h1" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b1" coord_offset="0 0 0" species="^CO"/>
+            <action coord_layer="Pd100" coord_name="b9" coord_offset="0 0 0" species="^CO"/>
+            <action coord_layer="Pd100" coord_name="b10" coord_offset="0 -1 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b7" coord_offset="0 -1 0" species="^CO"/>
         </process>
-        <process name="m_COads_h4" rate_constant="10**8">
-            <condition coord_layer="Pd100" coord_name="h4" coord_offset="0 0 0" species="empty"/>
-            <action coord_layer="Pd100" coord_name="h4" coord_offset="0 0 0" species="CO"/>
+        <process enabled="False" name="destruct2" rate_constant="10E15">
+            <condition coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="CO"/>
+            <action coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="$CO"/>
+            <action coord_layer="Pd100" coord_name="h1" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b1" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b9" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b10" coord_offset="0 -1 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b7" coord_offset="0 -1 0" species="^CO"/>
         </process>
-        <process name="m_COads_h5" rate_constant="10**8">
-            <condition coord_layer="Pd100" coord_name="h5" coord_offset="0 0 0" species="empty"/>
-            <action coord_layer="Pd100" coord_name="h5" coord_offset="0 0 0" species="CO"/>
+        <process enabled="False" name="destruct3" rate_constant="10E15">
+            <condition coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="empty"/>
+            <action coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="$CO"/>
+            <action coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="$empty"/>
+            <action coord_layer="Pd100" coord_name="h1" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b1" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b9" coord_offset="0 0 0" species="^CO"/>
+            <action coord_layer="Pd100" coord_name="b10" coord_offset="0 -1 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b7" coord_offset="0 -1 0" species="^empty"/>
         </process>
-        <process name="m_COdes_b1" rate_constant="10**8">
+        <process enabled="False" name="destruct4" rate_constant="10E15">
+            <condition coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="CO"/>
+            <condition coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="empty"/>
+            <action coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="$CO"/>
+            <action coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="$empty"/>
+            <action coord_layer="Pd100" coord_name="h1" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b1" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b9" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b10" coord_offset="0 -1 0" species="^CO"/>
+            <action coord_layer="Pd100" coord_name="b7" coord_offset="0 -1 0" species="^empty"/>
+        </process>
+        <process enabled="False" name="destruct5" rate_constant="10E15">
+            <condition coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="CO"/>
+            <condition coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="CO"/>
+            <action coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="$CO"/>
+            <action coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="$CO"/>
+            <action coord_layer="Pd100" coord_name="h1" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b1" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b9" coord_offset="0 0 0" species="^CO"/>
+            <action coord_layer="Pd100" coord_name="b10" coord_offset="0 -1 0" species="^CO"/>
+            <action coord_layer="Pd100" coord_name="b7" coord_offset="0 -1 0" species="^empty"/>
+        </process>
+        <process enabled="False" name="destruct6" rate_constant="10E15">
+            <condition coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="CO"/>
+            <condition coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="empty"/>
+            <action coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="$CO"/>
+            <action coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="$CO"/>
+            <action coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="$empty"/>
+            <action coord_layer="Pd100" coord_name="h1" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b1" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b9" coord_offset="0 0 0" species="^CO"/>
+            <action coord_layer="Pd100" coord_name="b10" coord_offset="0 -1 0" species="^CO"/>
+            <action coord_layer="Pd100" coord_name="b7" coord_offset="0 -1 0" species="^empty"/>
+        </process>
+        <process enabled="False" name="destruct7" rate_constant="10E15">
+            <condition coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="CO"/>
+            <condition coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="CO"/>
+            <action coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="$CO"/>
+            <action coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="$CO"/>
+            <action coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="$CO"/>
+            <action coord_layer="Pd100" coord_name="h1" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b1" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b9" coord_offset="0 0 0" species="^CO"/>
+            <action coord_layer="Pd100" coord_name="b10" coord_offset="0 -1 0" species="^CO"/>
+            <action coord_layer="Pd100" coord_name="b7" coord_offset="0 -1 0" species="^CO"/>
+        </process>
+        <process enabled="False" name="destruct8" rate_constant="10E15">
+            <condition coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="empty"/>
+            <action coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="$CO"/>
+            <action coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="$empty"/>
+            <action coord_layer="Pd100" coord_name="h1" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b1" coord_offset="0 0 0" species="^CO"/>
+            <action coord_layer="Pd100" coord_name="b9" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b10" coord_offset="0 -1 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b7" coord_offset="0 -1 0" species="^empty"/>
+        </process>
+        <process enabled="False" name="destruct9" rate_constant="10E15">
+            <condition coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="CO"/>
+            <action coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="$CO"/>
+            <action coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="$CO"/>
+            <action coord_layer="Pd100" coord_name="h1" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b1" coord_offset="0 0 0" species="^CO"/>
+            <action coord_layer="Pd100" coord_name="b9" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b10" coord_offset="0 -1 0" species="^empty"/>
+            <action coord_layer="Pd100" coord_name="b7" coord_offset="0 -1 0" species="^CO"/>
+        </process>
+        <process enabled="True" name="m_COads_b1" rate_constant="10E8">
+            <condition coord_layer="Pd100" coord_name="b1" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="b1" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="m_COads_b10" rate_constant="10E8">
+            <condition coord_layer="Pd100" coord_name="b10" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="b10" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="m_COads_b2" rate_constant="10E8">
+            <condition coord_layer="Pd100" coord_name="b2" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="b2" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="m_COads_b3" rate_constant="10E8">
+            <condition coord_layer="Pd100" coord_name="b3" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="b3" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="m_COads_b4" rate_constant="10E8">
+            <condition coord_layer="Pd100" coord_name="b4" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="b4" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="m_COads_b5" rate_constant="10E8">
+            <condition coord_layer="Pd100" coord_name="b5" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="b5" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="m_COads_b6" rate_constant="10E8">
+            <condition coord_layer="Pd100" coord_name="b6" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="b6" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="m_COads_b7" rate_constant="10E8">
+            <condition coord_layer="Pd100" coord_name="b7" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="b7" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="m_COads_b8" rate_constant="10E8">
+            <condition coord_layer="Pd100" coord_name="b8" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="b8" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="m_COads_b9" rate_constant="10E8">
+            <condition coord_layer="Pd100" coord_name="b9" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="b9" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="m_COdes_b1" rate_constant="10E8">
             <condition coord_layer="Pd100" coord_name="b1" coord_offset="0 0 0" species="CO"/>
             <action coord_layer="Pd100" coord_name="b1" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process name="m_COdes_b10" rate_constant="10**8">
+        <process enabled="True" name="m_COdes_b10" rate_constant="10E8">
             <condition coord_layer="Pd100" coord_name="b10" coord_offset="0 0 0" species="CO"/>
             <action coord_layer="Pd100" coord_name="b10" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process name="m_COdes_b2" rate_constant="10**8">
+        <process enabled="True" name="m_COdes_b2" rate_constant="10E8">
             <condition coord_layer="Pd100" coord_name="b2" coord_offset="0 0 0" species="CO"/>
             <action coord_layer="Pd100" coord_name="b2" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process name="m_COdes_b3" rate_constant="10**8">
+        <process enabled="True" name="m_COdes_b3" rate_constant="10E8">
             <condition coord_layer="Pd100" coord_name="b3" coord_offset="0 0 0" species="CO"/>
             <action coord_layer="Pd100" coord_name="b3" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process name="m_COdes_b4" rate_constant="10**8">
+        <process enabled="True" name="m_COdes_b4" rate_constant="10E8">
             <condition coord_layer="Pd100" coord_name="b4" coord_offset="0 0 0" species="CO"/>
             <action coord_layer="Pd100" coord_name="b4" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process name="m_COdes_b5" rate_constant="10**8">
+        <process enabled="True" name="m_COdes_b5" rate_constant="10E8">
             <condition coord_layer="Pd100" coord_name="b5" coord_offset="0 0 0" species="CO"/>
             <action coord_layer="Pd100" coord_name="b5" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process name="m_COdes_b6" rate_constant="10**8">
+        <process enabled="True" name="m_COdes_b6" rate_constant="10E8">
             <condition coord_layer="Pd100" coord_name="b6" coord_offset="0 0 0" species="CO"/>
             <action coord_layer="Pd100" coord_name="b6" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process name="m_COdes_b7" rate_constant="10**8">
+        <process enabled="True" name="m_COdes_b7" rate_constant="10E8">
             <condition coord_layer="Pd100" coord_name="b7" coord_offset="0 0 0" species="CO"/>
             <action coord_layer="Pd100" coord_name="b7" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process name="m_COdes_b8" rate_constant="10**8">
+        <process enabled="True" name="m_COdes_b8" rate_constant="10E8">
             <condition coord_layer="Pd100" coord_name="b8" coord_offset="0 0 0" species="CO"/>
             <action coord_layer="Pd100" coord_name="b8" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process name="m_COdes_b9" rate_constant="10**8">
+        <process enabled="True" name="m_COdes_b9" rate_constant="10E8">
             <condition coord_layer="Pd100" coord_name="b9" coord_offset="0 0 0" species="CO"/>
             <action coord_layer="Pd100" coord_name="b9" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process name="m_COdes_h1" rate_constant="10**8">
-            <condition coord_layer="Pd100" coord_name="h1" coord_offset="0 0 0" species="CO"/>
-            <action coord_layer="Pd100" coord_name="h1" coord_offset="0 0 0" species="empty"/>
-        </process>
-        <process name="m_COdes_h2" rate_constant="10**8">
-            <condition coord_layer="Pd100" coord_name="h2" coord_offset="0 0 0" species="CO"/>
-            <action coord_layer="Pd100" coord_name="h2" coord_offset="0 0 0" species="empty"/>
-        </process>
-        <process name="m_COdes_h3" rate_constant="10**8">
-            <condition coord_layer="Pd100" coord_name="h3" coord_offset="0 0 0" species="CO"/>
-            <action coord_layer="Pd100" coord_name="h3" coord_offset="0 0 0" species="empty"/>
-        </process>
-        <process name="m_COdes_h4" rate_constant="10**8">
-            <condition coord_layer="Pd100" coord_name="h4" coord_offset="0 0 0" species="CO"/>
-            <action coord_layer="Pd100" coord_name="h4" coord_offset="0 0 0" species="empty"/>
-        </process>
-        <process name="m_COdes_h5" rate_constant="10**8">
-            <condition coord_layer="Pd100" coord_name="h5" coord_offset="0 0 0" species="CO"/>
-            <action coord_layer="Pd100" coord_name="h5" coord_offset="0 0 0" species="empty"/>
-        </process>
-        <process name="m_O2ads_h1h2" rate_constant="10**8">
-            <condition coord_layer="Pd100" coord_name="h1" coord_offset="0 0 0" species="empty"/>
-            <condition coord_layer="Pd100" coord_name="h2" coord_offset="0 0 0" species="empty"/>
-            <action coord_layer="Pd100" coord_name="h1" coord_offset="0 0 0" species="oxygen"/>
-            <action coord_layer="Pd100" coord_name="h2" coord_offset="0 0 0" species="oxygen"/>
-        </process>
-        <process name="o_COads_bridge1" rate_constant="10**8">
+        <process enabled="True" name="o_COads_bridge1" rate_constant="10E8">
             <condition coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process name="o_COads_bridge2" rate_constant="10**8">
+        <process enabled="True" name="o_COads_bridge2" rate_constant="10E8">
             <condition coord_layer="PdO" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="PdO" coord_name="bridge2" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process name="o_COads_hollow1" rate_constant="10**8">
+        <process enabled="True" name="o_COads_hollow1" rate_constant="10E8">
             <condition coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process name="o_COads_hollow2" rate_constant="10**8">
+        <process enabled="True" name="o_COads_hollow2" rate_constant="10E8">
             <condition coord_layer="PdO" coord_name="hollow2" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="PdO" coord_name="hollow2" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process name="o_COdes_bridge1" rate_constant="10**8">
+        <process enabled="True" name="o_COdes_bridge1" rate_constant="10E8">
             <condition coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="CO"/>
             <action coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process name="o_COdes_bridge2" rate_constant="10**8">
+        <process enabled="True" name="o_COdes_bridge2" rate_constant="10E8">
             <condition coord_layer="PdO" coord_name="bridge2" coord_offset="0 0 0" species="CO"/>
             <action coord_layer="PdO" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process name="o_COdes_hollow1" rate_constant="10**8">
+        <process enabled="True" name="o_COdes_hollow1" rate_constant="10E8">
             <condition coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="CO"/>
             <action coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process name="o_COdes_hollow2" rate_constant="10**8">
+        <process enabled="True" name="o_COdes_hollow2" rate_constant="10E8">
             <condition coord_layer="PdO" coord_name="hollow2" coord_offset="0 0 0" species="CO"/>
             <action coord_layer="PdO" coord_name="hollow2" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process name="o_COdif_h1h2down" rate_constant="10**8">
+        <process enabled="True" name="o_COdif_h1h2down" rate_constant="10E8">
             <condition coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="empty"/>
             <action coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="CO"/>
             <action coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process name="o_COdif_h1h2up" rate_constant="10**8">
+        <process enabled="True" name="o_COdif_h1h2up" rate_constant="10E8">
             <condition coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="PdO" coord_name="hollow2" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="PdO" coord_name="hollow2" coord_offset="0 0 0" species="CO"/>
             <action coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process name="o_O2ads_h1h2" rate_constant="10**8">
+        <process enabled="False" name="o_O2ads_h1h2" rate_constant="10E12">
             <condition coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="PdO" coord_name="hollow2" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="oxygen"/>
             <action coord_layer="PdO" coord_name="hollow2" coord_offset="0 0 0" species="oxygen"/>
         </process>
-        <process name="o_O2ads_h2h1" rate_constant="10**8">
+        <process enabled="False" name="o_O2ads_h2h1" rate_constant="10E12">
             <condition coord_layer="PdO" coord_name="hollow2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="PdO" coord_name="hollow1" coord_offset="0 1 0" species="empty"/>
             <action coord_layer="PdO" coord_name="hollow2" coord_offset="0 0 0" species="oxygen"/>
             <action coord_layer="PdO" coord_name="hollow1" coord_offset="0 1 0" species="oxygen"/>
         </process>
-        <process name="o_O2des_h1h2" rate_constant="10**8">
+        <process enabled="True" name="o_O2des_h1h2" rate_constant="10E8">
             <condition coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="oxygen"/>
             <condition coord_layer="PdO" coord_name="hollow2" coord_offset="0 0 0" species="oxygen"/>
             <action coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="PdO" coord_name="hollow2" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process name="o_O2des_h2h1" rate_constant="10**8">
+        <process enabled="True" name="o_O2des_h2h1" rate_constant="10E8">
             <condition coord_layer="PdO" coord_name="hollow1" coord_offset="0 1 0" species="oxygen"/>
             <condition coord_layer="PdO" coord_name="hollow2" coord_offset="0 0 0" species="oxygen"/>
             <action coord_layer="PdO" coord_name="hollow1" coord_offset="0 1 0" species="empty"/>
             <action coord_layer="PdO" coord_name="hollow2" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="oxidize1" rate_constant="10E15">
+            <condition coord_layer="Pd100" coord_name="h1" coord_offset="0 0 0" species="oxygen"/>
+            <condition coord_layer="Pd100" coord_name="b1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="b9" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="b10" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="b7" coord_offset="0 -1 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="h1" coord_offset="0 0 0" species="$oxygen"/>
+            <action coord_layer="Pd100" coord_name="b1" coord_offset="0 0 0" species="$empty"/>
+            <action coord_layer="Pd100" coord_name="b9" coord_offset="0 0 0" species="$empty"/>
+            <action coord_layer="Pd100" coord_name="b10" coord_offset="0 -1 0" species="$empty"/>
+            <action coord_layer="Pd100" coord_name="b7" coord_offset="0 -1 0" species="$empty"/>
+            <action coord_layer="PdO" coord_name="hollow1" coord_offset="0 0 0" species="^oxygen"/>
+            <action coord_layer="PdO" coord_name="hollow2" coord_offset="0 -1 0" species="^empty"/>
+            <action coord_layer="PdO" coord_name="bridge1" coord_offset="0 0 0" species="^empty"/>
+            <action coord_layer="PdO" coord_name="bridge2" coord_offset="0 -1 0" species="^empty"/>
         </process>
     </process_list>
     <output_list/>
