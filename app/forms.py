@@ -777,6 +777,8 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
             
 
     def redraw(self):
+        white = col_str2tuple('#ffffff')
+        black = col_str2tuple('#000000')
         self.grid_layer.clear()
         self.site_layer.clear()
         X, Y = 400, 400
@@ -807,14 +809,14 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                 xprime = (float(i)/self.grid.x+self.grid.offset_x)*X % X
 
                 yprime = (float(j)/(self.grid.y)+self.grid.offset_y)*Y % Y
-                o = CanvasOval(self.grid_layer, 0, 0, 10, 10, bg=(1., 1., 1.))
+                o = CanvasOval(self.grid_layer, 0, 0, 10, 10,)
                 o.set_center(xprime, Y-yprime)
                 o.set_radius(5)
                 o.frac_coords = (xprime/X, yprime/Y)
                 o.connect('button-press-event', self.grid_point_press_event)
 
         for site in self.model.sites:
-            o = CanvasOval(self.site_layer,0,0,10,10, filled=True)
+            o = CanvasOval(self.site_layer,0,0,10,10, filled=True, bg=black)
             o.set_radius(10)
             o.set_center(site.x*X,(1-site.y)*Y)
             o.site = site
