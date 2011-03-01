@@ -188,7 +188,19 @@ class ProjectTree(SlaveDelegate):
                 for parameter in child:
                     name = parameter.attrib['name']
                     value = parameter.attrib['value']
-                    parameter_elem = Parameter(name=name, value=value)
+                    if 'adjustable' in parameter.attrib:
+                        adjustable = bool(eval(parameter.attrib['adjustable'])) 
+                    else:
+                        adjustable = False
+
+                    min = parameter.attrib['min'] if 'min' in parameter.attrib else 0.0
+                    max = parameter.attrib['max'] if 'max' in parameter.attrib else 0.0
+
+                    parameter_elem = Parameter(name=name,
+                                               value=value,
+                                               adjustable=adjustable,
+                                               min=min,
+                                               max=max)
                     self.project_data.append(self.parameter_list_iter, parameter_elem)
             elif child.tag == 'process_list':
                 for process in child:
@@ -278,6 +290,9 @@ class ProjectTree(SlaveDelegate):
             parameter_elem = ET.SubElement(parameter_list, 'parameter')
             parameter_elem.set('name', parameter.name)
             parameter_elem.set('value', str(parameter.value))
+            parameter_elem.set('adjustable', str(parameter.adjustable))
+            parameter_elem.set('min', str(parameter.min))
+            parameter_elem.set('max', str(parameter.max))
         lattice_elem = ET.SubElement(root, 'lattice')
         if (hasattr(self.layer_list_iter, 'cell_size_x') and \
             hasattr(self.layer_list_iter, 'cell_size_y') and

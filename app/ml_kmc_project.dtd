@@ -23,6 +23,9 @@
   <!ATTLIST parameter
     name CDATA #REQUIRED
     value CDATA #IMPLIED
+    adjustable CDATA #IMPLIED
+    min CDATA #IMPLIED
+    max CDATA #IMPLIED
   >
   <!ELEMENT lattice (layer)*>
   <!ATTLIST lattice

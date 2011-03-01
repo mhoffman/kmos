@@ -640,11 +640,20 @@ class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
     """
     gladefile = GLADEFILE
     toplevel_name = 'parameter_form'
-    widgets = ['parameter_name', 'value']
+    widgets = ['parameter_name', 'value','parameter_adjustable','parameter_min','parameter_max']
     def __init__(self, model, project_tree):
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, model)
+        value = self.parameter_adjustable.get_active()
+        self.parameter_max.set_sensitive(value)
+        self.parameter_min.set_sensitive(value)
         self.name.grab_focus()
+
+    def on_parameter_adjustable__content_changed(self, form):
+        value = self.parameter_adjustable.get_active()
+        self.parameter_max.set_sensitive(value)
+        self.parameter_min.set_sensitive(value)
+            
 
     def on_value__content_changed(self, text):
         self.project_tree.update(self.model)

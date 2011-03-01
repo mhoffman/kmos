@@ -257,12 +257,18 @@ class Parameter(Attributes, CorrectlyNamed):
     """A parameter that can be used in a rate constant expression
     and defined via some init file
     """
-    attributes = ['name', 'value']
+    attributes = ['name', 'value', 'adjustable', 'min', 'max']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
+        self.adjustable = kwargs['adjustable'] if 'adjustable' in kwargs else False
+        self.min = float(kwargs['min']) if 'min' in kwargs else 0.0
+        self.max = float(kwargs['max']) if 'max' in kwargs else 0.0
 
     def __repr__(self):
         return '<PARAMETER> Name: %s Value: %s\n' % (self.name, self.value)
+
+    def on_adjustale__do_toggled(self, value):
+        print(value)
 
     def on_name__content_changed(self, _):
         self.project_tree.update(self.process)

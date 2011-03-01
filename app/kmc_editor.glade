@@ -1003,18 +1003,38 @@
                                                 <property name="xalign">0.0</property>
                                             </widget>
                                             <packing>
+                                                <property name="fill">False</property>
                                                 <property name="padding">5</property>
                                             </packing>
                                         </child>
                                         <child>
                                             <widget class="GtkLabel" id="label16">
-                                                <property name="label" context="yes" translatable="yes">Value</property>
+                                                <property name="label" context="yes" translatable="yes">Value:</property>
                                                 <property name="visible">True</property>
                                                 <property name="xalign">0.0</property>
                                             </widget>
                                             <packing>
+                                                <property name="fill">False</property>
                                                 <property name="padding">5</property>
                                                 <property name="position">1</property>
+                                            </packing>
+                                        </child>
+                                        <child>
+                                            <widget class="GtkLabel" id="label27">
+                                                <property name="visible">True</property>
+                                                <property name="xalign">0.0</property>
+                                            </widget>
+                                            <packing>
+                                                <property name="position">2</property>
+                                            </packing>
+                                        </child>
+                                        <child>
+                                            <widget class="GtkLabel" id="label28">
+                                                <property name="visible">True</property>
+                                                <property name="xalign">0.0</property>
+                                            </widget>
+                                            <packing>
+                                                <property name="position">3</property>
                                             </packing>
                                         </child>
                                     </widget>
@@ -1049,6 +1069,65 @@
                                             <packing>
                                                 <property name="padding">5</property>
                                                 <property name="position">1</property>
+                                            </packing>
+                                        </child>
+                                        <child>
+                                            <widget class="ProxyCheckButton" id="parameter_adjustable">
+                                                <property name="data_type">bool</property>
+                                                <property name="is_focus">True</property>
+                                                <property name="label" context="yes" translatable="yes">adjustable</property>
+                                                <property name="model_attribute">adjustable</property>
+                                                <property name="visible">True</property>
+                                            </widget>
+                                            <packing>
+                                                <property name="position">2</property>
+                                            </packing>
+                                        </child>
+                                        <child>
+                                            <widget class="GtkHBox" id="hbox20">
+                                                <property name="visible">True</property>
+                                                <child>
+                                                    <widget class="GtkLabel" id="label26">
+                                                        <property name="label" context="yes" translatable="yes">min</property>
+                                                        <property name="visible">True</property>
+                                                        <property name="xalign">0.0</property>
+                                                    </widget>
+                                                </child>
+                                                <child>
+                                                    <widget class="ProxyEntry" id="parameter_min">
+                                                        <property name="data_type">float</property>
+                                                        <property name="model_attribute">min</property>
+                                                        <property name="visible">True</property>
+                                                        <property name="xalign">1.0</property>
+                                                    </widget>
+                                                    <packing>
+                                                        <property name="position">1</property>
+                                                    </packing>
+                                                </child>
+                                                <child>
+                                                    <widget class="GtkLabel" id="label39">
+                                                        <property name="label" context="yes" translatable="yes">max</property>
+                                                        <property name="visible">True</property>
+                                                        <property name="xalign">0.0</property>
+                                                    </widget>
+                                                    <packing>
+                                                        <property name="position">2</property>
+                                                    </packing>
+                                                </child>
+                                                <child>
+                                                    <widget class="ProxyEntry" id="parameter_max">
+                                                        <property name="data_type">float</property>
+                                                        <property name="model_attribute">max</property>
+                                                        <property name="visible">True</property>
+                                                        <property name="xalign">1.0</property>
+                                                    </widget>
+                                                    <packing>
+                                                        <property name="position">3</property>
+                                                    </packing>
+                                                </child>
+                                            </widget>
+                                            <packing>
+                                                <property name="position">3</property>
                                             </packing>
                                         </child>
                                     </widget>

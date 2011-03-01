@@ -1,8 +1,11 @@
 #!/usr/bin/python
 
-import time
-import threading
 from copy import deepcopy
+import math
+import StringIO
+import threading
+import time
+import tokenize
 
 import pygtk
 pygtk.require('2.0')
@@ -16,7 +19,8 @@ from ase.gui.images import Images
 from ase.gui.status import Status
 from ase.gui.defaults import read_defaults
 
-from kmc import  base, lattice, proclist
+from kmc import units, base, lattice, proclist
+import settings
 
 
 gtk.gdk.threads_init()
@@ -29,24 +33,18 @@ class KMC_Model(threading.Thread):
         proclist.init((size,)*int(lattice.model_dimension),system_name, lattice.default_layer, proclist.default_species)
         self.cell_size = np.dot(lattice.unit_cell_size, lattice.system_size)
         self.species_representation = []
-        # This clumsy loop is neccessary because f2py
-        # can unfortunately only pass through one character
-        # at a time and not strings
-        for ispecies in range(len(proclist.species_representation)):
-            repr = ''
-            for jchar in range(proclist.representation_length):
-                char = proclist.get_representation_char(ispecies+1, jchar+1)
-                repr += char
-            if repr.strip():
-                self.species_representation.append(eval(repr))
+        for species in sorted(settings.representations):
+            if settings.representations[species].strip():
+                self.species_representation.append(eval(settings.representations[species]))
             else:
-                self.species_representation.append(None)
+                self.species_representation.append(Atoms())
 
-        if len(proclist.lattice_representation):
-            self.lattice_representation = eval(''.join(proclist.lattice_representation))[0]
+        if len(settings.lattice_representation):
+            self.lattice_representation = eval(settings.lattice_representation)[0]
         else:
             self.lattice_representation = Atoms()
 
+        self.set_rate_constants()
 
 
     def run(self):
@@ -63,6 +61,39 @@ class KMC_Model(threading.Thread):
         for i in xrange(n):
             proclist.do_kmc_step()
 
+    def set_rate_constants(self):
+        """Tries to evaluate the supplied expression for a rate constant
+        to a simple real number and sets it for the corresponding process.
+        For the evaluation we draw on predefined natural constants, user defined
+        parameters and mathematical functions
+        """
+        for proc in settings.rate_constants:
+            rate_expr = settings.rate_constants[proc][0]
+            if not rate_expr:
+                base.set_rate(eval('proclist.%s' % proc.lower()), 0.0)
+                continue
+            replaced_tokens = []
+            for i, token, _, _, _ in tokenize.generate_tokens(StringIO.StringIO(rate_expr).readline):
+                if token in ['sqrt','exp','sin','cos','pi','pow']:
+                    replaced_tokens.append((i,'math.'+token))
+                elif ('u_' + token) in dir(units):
+                    replaced_tokens.append((i, str(eval('units.u_' + token))))
+
+                elif token in settings.parameters:
+                    replaced_tokens.append((i, str(settings.parameters[token]['value'])))
+                else:
+                    replaced_tokens.append((i, token))
+
+            rate_expr = tokenize.untokenize(replaced_tokens)
+            try:
+                rate_const = eval(rate_expr)
+            except Exception as e:
+                raise UserWarning("Could not evaluate rate expression: %s\nException: %s" % (rate_expr, e))
+            try:
+                base.set_rate_const(eval('proclist.%s' % proc.lower()), rate_const)
+            except Exception as e:
+                raise UserWarning("Could not set %s for process %s!\nException: %s" % (rate_expr, proc, e))
+            
     def get_atoms(self):
         atoms = ase.atoms.Atoms()
         atoms.set_cell(self.cell_size)
@@ -82,6 +113,22 @@ class KMC_Model(threading.Thread):
                     atoms += lattice_repr
         
         return atoms
+class ParamSlider(gtk.HScale):
+    def __init__(self, settings, name, value, min, max, set_rate_constants):
+        self.settings = settings
+        self.param_name = name
+        self.value = float(value)
+        self.min = float(min)
+        self.max = float(max)
+        self.set_rate_constants = set_rate_constants
+        adjustment = gtk.Adjustment(value=self.value, lower=self.min, upper=self.max)
+        gtk.HScale.__init__(self, adjustment)
+        self.connect('value-changed',self.value_changed)
+        self.set_tooltip_text(self.param_name)
+
+    def value_changed(self, widget):
+        self.settings.parameters[self.param_name]['value'] = self.get_value()
+        self.set_rate_constants()
 
 
 class FakeWidget():
@@ -177,7 +224,11 @@ class KMC_Viewer():
         self.vbox = gtk.VBox()
         self.window.add(self.vbox)
         self.kmc_viewbox = KMC_ViewBox(self.vbox, self.window)
-        self.window.show()
+        for param_name in filter(lambda p: settings.parameters[p]['adjustable'], settings.parameters):
+            param = settings.parameters[param_name]
+            slider = ParamSlider(settings, param_name, param['value'], param['min'], param['max'], self.kmc_viewbox.model.set_rate_constants)
+            self.vbox.add(slider)
+        self.window.show_all()
         self.kmc_viewbox.start()
 
 

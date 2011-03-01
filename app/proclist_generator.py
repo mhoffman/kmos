@@ -334,8 +334,6 @@ class ProcListWriter():
         representation_length = max([len(species.representation) for species in data.species_list])
 
         out.write('integer(kind=iint), parameter, public :: representation_length = %s\n' % representation_length)
-        out.write('character(len=%s), dimension(%s), public :: species_representation\n' % (representation_length, len(data.species_list)))
-        out.write('character(len=%s), public :: lattice_representation\n' % len(data.lattice.representation))
 
         out.write('\n\n! Process constants\n\n')
         for i, process in enumerate(self.data.process_list):
@@ -445,32 +443,8 @@ class ProcListWriter():
             out.write('print *,"PROCLIST/INIT/SYSTEM_SIZE",input_system_size\n')
         out.write('    call allocate_system(nr_of_proc, input_system_size, system_name)\n')
         out.write('    call initialize_state(layer, species)\n')
-        out.write('    call set_rate_constants\n\n')
         out.write('end subroutine init\n\n')
 
-
-        out.write('subroutine get_representation_char(species_nr, slot, species_char)\n\n')
-        out.write('    integer(kind=iint), intent(in) :: species_nr, slot\n')
-        out.write('    character, intent(out) :: species_char\n\n')
-        out.write('    species_char = species_representation(species_nr)(slot:slot)\n\n')
-        out.write('end subroutine get_representation_char\n\n')
-
-
-        # Evaluate all rate constants
-        out.write('subroutine set_rate_constants()\n\n')
-        # TODO Put block/hook here to calculate intermediate variables such as
-        # mu_co, mu_o2, etc
-        for process in data.process_list:
-            rate_constant = process.rate_constant if process.rate_constant else 0.
-            if process.enabled:
-                out.write('    call set_rate_const(%s, real(%s, rdouble))\n' % (process.name, rate_constant))
-            else:
-                out.write('    call set_rate_const(%s, real(0, rdouble))\n' % (process.name, ))
-            if data.meta.debug > 0 :
-                out.write('print *,"PROCLIST/SET_RATE_CONSTANTS/PROCESS_NAME","%s"\n' % process.name)
-                out.write('print *,"PROCLIST/SET_RATE_CONSTANTS/RATE_CONSTANT",%s\n' % rate_constant)
-
-        out.write('\nend subroutine set_rate_constants\n\n')
 
         # initialize the system with the default layer and the default species
         # initialize all book-keeping databases
@@ -508,17 +482,6 @@ class ProcListWriter():
         out.write('        end do\n')
         out.write('    end do\n\n')
 
-        lattice_repr = data.lattice.representation.replace(']',']\n').splitlines()
-        if not lattice_repr:
-            out.write('    lattice_representation = ""\n')
-        else:
-            out.write('    lattice_representation = &\n')
-            for line in lattice_repr[:-1]:
-                out.write('        "%s"// &\n' % line)
-            if lattice_repr :
-                out.write('        "%s"\n' % lattice_repr[-1])
-        for i, species in enumerate(data.species_list):
-            out.write('    species_representation(%s) = "%s"\n' % (i+1, species.representation))
         out.write('\nend subroutine initialize_state\n\n')
 
 
@@ -789,7 +752,12 @@ class ProcListWriter():
         out.write('lattice_representation = "%s"\n\n' % data.lattice.representation)
         out.write('parameters = {\n')
         for parameter in data.parameter_list:
-            out.write('    "%s":"%s",\n' % (parameter.name, parameter.value))
+            out.write(('    "%s":{"value":"%s", "adjustable":%s,' 
+            +' "min":%s, "max":%s},\n') % (parameter.name,
+                                          parameter.value,
+                                          parameter.adjustable,
+                                          parameter.min,
+                                          parameter.max))
         out.write('    }\n\n')
         out.write('rate_constants = {\n')
         for process in data.process_list:
