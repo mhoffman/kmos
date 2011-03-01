@@ -778,6 +778,24 @@ class ProcListWriter():
             self._write_optimal_iftree(items, indent, out)
 
         
+    def write_settings(self):
+        data = self.data
+        out = open('%s/settings.py' % self.dir, 'w')
+        out.write('representations = {\n')
+        for species in data.species_list:
+            out.write('    "%s":"%s"\n' % (species.name, species.representation))
+        out.write('    }\n\n')
+        out.write('lattice_representation = "%s"\n\n' % data.lattice.representation)
+        out.write('parameters = {\n')
+        for parameter in data.parameter_list:
+            out.write('    "%s":"%s"\n' % (parameter.name, parameter.value))
+        out.write('    }\n\n')
+        out.write('rate_constants = {\n')
+        for process in data.process_list:
+            out.write('    "%s":("%s", %s)\n' % (process.name, process.rate_constant, process.enabled))
+        out.write('    }\n\n')
+        out.close()
+        
     def _gpl_message(self):
         """Prints the GPL statement at the top of the source file"""
         data = self.data

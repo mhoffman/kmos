@@ -687,6 +687,7 @@ class KMC_Editor(GladeDelegate):
         writer = MLProcListWriter(self.project_tree, export_dir)
         writer.write_lattice()
         writer.write_proclist()
+        writer.write_settings()
 
 
         # return directory name
