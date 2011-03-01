@@ -11,7 +11,8 @@ usage = 'usage: %prog [xml file] [export dir]\n'\
     + '    export directory will be deleted first!'
 
 parser = optparse.OptionParser(usage=usage)
-(option, args) = parser.parse_args()
+parser.add_option('-s','--source-only', action='store_true', dest='source_only', default=False, help='Export source code only, don\'t compile.')
+(options, args) = parser.parse_args()
 
 if len(args) != 2 :
     parser.print_help()
@@ -26,7 +27,7 @@ kmc.project_tree.import_xml_file(xml_file)
 
 kmc.on_btn_export_src__clicked('',export_dir)
 
-if os.uname()[0] == 'Linux':
+if os.uname()[0] == 'Linux' and not options.source_only:
     os.chdir(export_dir)
     os.system("./compile_for_f2py" )
 exit()
