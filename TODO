@@ -1,14 +1,13 @@
 Functionality
+  * reimplement 'print output' function using old_src
   * implement back button
   * organize buttons in menu
   * write autocompletion for rate_constant input
-  * write autocompletion for process input
+  * write autocompletion for (batch) process input 
   * write autocompletion for output fields
   * write consistency check function that runs before
     exporting f90 source could and give the user hints
     about inconsistencies in the project
-  * build-up library of lattices which can be
-    simply chosen from
   * add undo function to process editor
 
 
@@ -19,4 +18,9 @@ Project related
 Future/optional projects:
   * Allow for non-orthogonal unit cells
 
+
+Defered:
+  * build-up library of lattices which can be
+    simply chosen from (making new lattice is very easy
+    and fast)
 
