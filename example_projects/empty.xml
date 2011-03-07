@@ -8,14 +8,14 @@
         <species color="#ff1717" name="oxygen" representation="Atoms('O',[[0,0,0]])"/>
     </species_list>
     <parameter_list>
-        <parameter name="lattice_size" value="40 40 1"/>
-        <parameter name="p_co" value="1."/>
-        <parameter name="p_o2" value="1."/>
-        <parameter name="print_every" value="1.e5"/>
-        <parameter name="total_steps" value="1.e7"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="lattice_size" value="40 40 1"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="p_co" value="1."/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="p_o2" value="1."/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="print_every" value="1.e5"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="total_steps" value="1.e7"/>
     </parameter_list>
     <lattice cell_size="6.29 6.29 10.0" default_layer="PdO" representation="Atoms(symbols='Pd15', positions=np.array( [[  4.74536588,   0.34239956,  -6.29627642], [  5.92199002,   2.86578697,  -6.29627642], [  0.87533998,   5.21909763,  -6.29627642], [  2.22197847,   1.51908609,  -6.29627642], [  3.398665  ,   4.04241111,  -6.29627642], [  2.82001105,   5.90917072,  -4.24970573], [  0.34097598,   0.91823796,  -4.24362784], [  1.57674031,   3.40671184,  -4.25070729], [  5.26250348,   4.71173388,  -4.29960027], [  4.06752131,   2.19432896,  -4.28970289], [  4.74172449,   0.32992489,  -2.25580734], [  5.99691572,   2.85801944,  -2.22685536], [  0.97483913,   5.23732922,  -2.23766488], [  2.19854396,   1.53975362,  -2.23151537], [  3.44081858,   4.06773128,  -2.33377281]])),     ">
-        <layer grid="10 10 1" grid_offset="0.1 0.1 0.0" name="Pd100">
+        <layer color="#6dbf6e" grid="10 10 1" grid_offset="0.1 0.1 0.0" name="Pd100">
             <site class="" default_species="default_species" type="h1" vector="0.1 0.1 0.0"/>
             <site class="" default_species="default_species" type="h2" vector="0.3 0.5 0.0"/>
             <site class="" default_species="default_species" type="h4" vector="0.9 0.7 0.0"/>
@@ -32,7 +32,7 @@
             <site class="" default_species="default_species" type="b10" vector="0.0 0.9 0.0"/>
             <site class="" default_species="default_species" type="h3" vector="0.5 0.9 0.0"/>
         </layer>
-        <layer grid="4 4 1" grid_offset="0.0 0.0 0.0" name="PdO">
+        <layer color="#a14b49" grid="4 4 1" grid_offset="0.0 0.0 0.0" name="PdO">
             <site class="" default_species="empty" type="bridge2" vector="0.5 0.5 0.1"/>
             <site class="" default_species="empty" type="hollow1" vector="0.25 0.25 0.2"/>
             <site class="" default_species="empty" type="hollow2" vector="0.25 0.75 0.2"/>
