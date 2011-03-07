@@ -534,6 +534,18 @@
                                 <property name="position">2</property>
                             </packing>
                         </child>
+                        <child>
+                            <widget class="ProxyColorButton" id="layer_color">
+                                <property name="data_type">str</property>
+                                <property name="label">gtk-select-color</property>
+                                <property name="model_attribute">color</property>
+                                <property name="use_stock">True</property>
+                                <property name="visible">True</property>
+                            </widget>
+                            <packing>
+                                <property name="position">3</property>
+                            </packing>
+                        </child>
                     </widget>
                     <packing>
                         <property name="expand">False</property>

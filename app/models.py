@@ -51,6 +51,7 @@ class ProcessFormSite(Site):
     """
     attributes = Site.attributes
     attributes.append('layer')
+    attributes.append('color')
     def __init__(self, **kwargs):
         Site.__init__(self, **kwargs)
         self.layer = kwargs['layer'] if 'layer' in kwargs else ''
@@ -80,12 +81,13 @@ class Grid(Attributes):
 class Layer(Attributes, CorrectlyNamed):
     """A class that defines exactly one layer
     """
-    attributes = ['name', 'grid','sites', 'site_classes', 'active']
+    attributes = ['name', 'grid','sites', 'site_classes', 'active', 'color']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
         self.grid = kwargs['grid'] if 'grid' in kwargs else Grid()
         self.name = kwargs['name'] if 'name' in kwargs else ''
         self.active = kwargs['active'] if 'active' in kwargs else True
+        self.color = kwargs['color'] if 'color' in kwargs else '#ffffff'
         self.sites = []
 
     def __repr__(self):

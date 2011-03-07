@@ -334,15 +334,16 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         site_list = []
         for active_layer in active_layers:
             for site in active_layer.sites:
-                form_site = ProcessFormSite(name=site.name,x=site.x, y=site.y, z=site.z, layer=active_layer.name)
+                form_site = ProcessFormSite(name=site.name,x=site.x, y=site.y, z=site.z, layer=active_layer.name, color=active_layer.color)
                 site_list.append(form_site)
         for i in range(self.z+1):
             for j in range(self.z+1):
                 for site in site_list:
+                    color =  col_str2tuple(site.color)
                     if i == self.X and j == self.Y:
-                        l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=(1., 1., 1.))
+                        l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=color)
                     else:
-                        l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=(.6, .6, .6))
+                        l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=color)
 
                     l_site.set_center(self.l/self.z*(i+float(site.x)), 500-self.l/self.z*(j+float(site.y)))
                     l_site.connect('query-tooltip', self.query_tooltip)
@@ -764,7 +765,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
     """
     gladefile = GLADEFILE
     toplevel_name = 'layer_form'
-    widgets = ['layer_name',  ]
+    widgets = ['layer_name', 'layer_color' ]
     def __init__(self, model, project_tree):
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, model)

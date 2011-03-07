@@ -39,6 +39,7 @@
     name CDATA #REQUIRED
     grid CDATA #REQUIRED
     grid_offset CDATA #REQUIRED
+    color CDATA #IMPLIED
   >
   <!ELEMENT site EMPTY>
   <!ATTLIST site

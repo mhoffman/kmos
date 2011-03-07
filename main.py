@@ -162,8 +162,13 @@ class ProjectTree(SlaveDelegate):
                         ox, oy, oz = [float(i) for i in elem.attrib['grid_offset'].split()]
                         grid = Grid(x=x, y=y, z=z,
                             offset_x=ox, offset_y=oy, offset_z=oz)
-                        layer = Layer(name=name, grid=grid)
+                        if 'color' in elem.attrib:
+                            color = elem.attrib['color']
+                        else:
+                            color = '#ffffff'
+                        layer = Layer(name=name, grid=grid, color=color)
                         self.project_data.append(self.layer_list_iter, layer)
+
                         for site in elem:
                             name = site.attrib['type']
                             x, y, z = [ float(x) for x in site.attrib['vector'].split() ]
@@ -321,6 +326,8 @@ class ProjectTree(SlaveDelegate):
                     '%s %s %s' % (layer.grid.offset_x,
                                   layer.grid.offset_y,
                                   layer.grid.offset_z))
+
+            layer_elem.set('color',layer.color)
                 
             for site in layer.sites:
                 site_elem = ET.SubElement(layer_elem, 'site')
