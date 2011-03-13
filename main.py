@@ -13,6 +13,7 @@ from app.forms import *
 from app.proclist_generator import ProcListWriter as MLProcListWriter
 import shutil
 sys.path.append(APP_ABS_PATH)
+import gobject
 import pygtk
 pygtk.require('2.0')
 import gtk
@@ -21,7 +22,6 @@ import gtk.glade
 from lxml import etree as ET
 #Need to pretty print XML
 from xml.dom import minidom
-from app.kmc_generator import ProcessList as ProcListWriter
 
 
 #Kiwi imports
@@ -36,6 +36,36 @@ import kiwi.ui.dialogs
 KMCPROJECT_DTD = '/kmc_project.dtd'
 MLKMCPROJECT_DTD = '/ml_kmc_project.dtd'
 PROCESSLIST_DTD = '/process_list.dtd'
+
+
+MENU_LAYOUT = """\
+<ui>
+  <menubar name="MainMenuBar">
+    <menu action="MenuFile">
+      <menuitem action="FileNew"/>
+      <menuitem action="FileOpenProject"/>
+      <menuitem action="FileSave"/>
+      <menuitem action="FileSaveAs"/>
+      <menuitem action="FileExportSource"/>
+      <separator/>
+      <menuitem action="FileQuit"/>
+    </menu>
+    <menu action="MenuEdit">
+      <menuitem action="EditUndo"/>
+      <menuitem action="EditRedo"/>
+    </menu>
+    <menu action="MenuInsert">
+      <menuitem action="InsertLayer"/>
+      <menuitem action="InsertSpecies"/>
+      <menuitem action="InsertParameter"/>
+      <menuitem action="InsertProcess"/>
+    </menu>
+    <menu action="MenuHelp">
+      <menuitem action="HelpAbout"/>
+    </menu>
+  </menubar>
+</ui>
+"""
 
 def prettify_xml(elem):
     """This function takes an XML document, which can have one or many lines
@@ -446,7 +476,7 @@ class ProjectTree(SlaveDelegate):
 
 
 class KMC_Editor(GladeDelegate):
-    widgets = ['workarea', 'statbar']
+    widgets = ['workarea', 'statbar','vbox1']
     gladefile = GLADEFILE
     toplevel_name = 'main_window'
     def __init__(self):
@@ -456,6 +486,41 @@ class KMC_Editor(GladeDelegate):
         self.set_title(self.project_tree.get_name())
         self.project_tree.show()
 
+
+        if gtk.pygtk_version < (2,12):
+            self.set_tip = gtk.Tooltips().set_tip
+        actions  = gtk.ActionGroup('Actions')
+        actions.add_actions([
+        ('MenuFile',None,'_File'),
+        ('FileNew', None, '_New','<control>N','Start new project',self.on_btn_new_project__clicked),
+        ('FileOpenProject', None, '_Open','<control>O','Open project', self.on_btn_open_model__clicked),
+        ('FileSave', None, '_Save', '<control>S', 'Save model', self.on_btn_save_model__clicked),
+        ('FileSaveAs', None,'Save _As','<control><shift>s', 'Save model As', self.on_btn_save_as__clicked),
+        ('FileExportSource', None, '_Export Source', '<control>E', 'Export model to Fortran 90 source code', self.on_btn_export_src__clicked),
+        ('FileQuit', None, '_Quit', '<control>Q', 'Quit the program', self.on_btn_quit__clicked),
+        ('MenuEdit',None,'_Edit'),
+        ('EditUndo', None, '_Undo','<control>Z', 'Undo the last edit', None),
+        ('EditRedo', None, '_Redo', '<control>Y', 'Redo and undo', None),
+        ('MenuInsert', None, '_Insert'),
+        ('InsertParameter', None, 'Para_meter', '<control><shift>M','Add a new parameter', self.on_btn_add_parameter__clicked),
+        ('InsertLayer', None, '_Layer','<control><shift>L', 'Add a new layer', self.on_btn_add_layer__clicked),
+        ('InsertProcess', None, '_Process', '<control><shift>P', 'Add a new process', self.on_btn_add_process__clicked),
+        ('InsertSpecies', None, '_Species', '<control><shift>E', 'Add a new species', self.on_btn_add_species__clicked),
+        ('MenuHelp', None, '_Help'),
+        ('HelpAbout', None, '_About'),
+        ])
+
+        self.ui = ui = gtk.UIManager()
+        ui.insert_action_group(actions, 0)
+        self.main_window.add_accel_group(ui.get_accel_group())
+        try:
+            mergeid = ui.add_ui_from_string(MENU_LAYOUT)
+        except gobject.GError as error:
+            print('Building menu failed: %s' % (e, mergeid))
+        wid = ui.get_widget('/MainMenuBar')
+        self.menu_box.pack_start(wid, False, False, 0)
+        self.menu_box.show()
+
         self.saved_state = str(self.project_tree)
         # Cast initial message
         self.toast('Start a new project by filling in\n'
@@ -464,6 +529,9 @@ class KMC_Editor(GladeDelegate):
         'you will get a fully self-contained Fortran source code\n'+
         'of the model and further instructions'
         )
+
+    def filemenu_cb(self):
+        pass
 
     def add_defaults(self):
         """This function adds some useful defaults that are probably need in every simulation
