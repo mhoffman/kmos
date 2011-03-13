@@ -520,6 +520,7 @@ class KMC_Editor(GladeDelegate):
         wid = ui.get_widget('/MainMenuBar')
         self.menu_box.pack_start(wid, False, False, 0)
         self.menu_box.show()
+        self.quickbuttons.hide()
 
         self.saved_state = str(self.project_tree)
         # Cast initial message
