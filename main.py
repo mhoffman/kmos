@@ -35,8 +35,8 @@ from kiwi.ui.objectlist import ObjectList, ObjectTree, Column
 import kiwi.ui.dialogs 
 
 
-KMCPROJECT_DTD = '/kmc_project.dtd'
-MLKMCPROJECT_DTD = '/ml_kmc_project.dtd'
+KMCPROJECT_V0_1_DTD = '/kmc_project_v0.1.dtd'
+KMCPROJECT_V0_2_DTD = '/kmc_project_v0.2.dtd'
 
 
 MENU_LAYOUT = """\
@@ -172,124 +172,125 @@ class ProjectTree(SlaveDelegate):
         xmlparser = ET.XMLParser(remove_comments=True)
         root = ET.parse(filename, parser=xmlparser).getroot()
         self.init_data()
-        if root.tag == 'ml_kmc':
-            self.ml = True
+        if 'version' in root.attrib:
+            self.version = tuple([int(x) for x in root.attrib['version'].split('.')])
         else:
-            self.ml = False
-        if self.ml:
-            dtd = ET.DTD(APP_ABS_PATH + MLKMCPROJECT_DTD)
-        else:
-            dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_DTD)
-            raise UserWarning('This is a single-lattice kmc project which is not supported in this development\n' +
-                'version of kmos\n')
-        if not dtd.validate(root):
-            print(dtd.error_log.filter_from_errors()[0])
-            return
-        for child in root:
-            if child.tag == 'lattice':
-                cell_size = [float(x) for x in child.attrib['cell_size'].split()]
-                self.lattice.cell_size_x = cell_size[0]
-                self.lattice.cell_size_y = cell_size[1]
-                self.lattice.cell_size_z = cell_size[2]
-                self.lattice.default_layer = child.attrib['default_layer']
-                if 'representation' in child.attrib:
-                    self.lattice.representation = child.attrib['representation']
-                else:
-                    self.lattice.representation = ''
-                for elem in child:
-                    if elem.tag == 'layer':
-                        name = elem.attrib['name']
-                        x, y, z = [int(i) for i in elem.attrib['grid'].split()]
-                        ox, oy, oz = [float(i) for i in elem.attrib['grid_offset'].split()]
-                        grid = Grid(x=x, y=y, z=z,
-                            offset_x=ox, offset_y=oy, offset_z=oz)
-                        if 'color' in elem.attrib:
-                            color = elem.attrib['color']
-                        else:
-                            color = '#ffffff'
-                        layer = Layer(name=name, grid=grid, color=color)
-                        self.project_data.append(self.layer_list_iter, layer)
+            self.version = (0, 1)
 
-                        for site in elem:
-                            name = site.attrib['type']
-                            x, y, z = [ float(x) for x in site.attrib['vector'].split() ]
-                            site_class = site.attrib['class']
-                            if 'default_species' in site.attrib:
-                                default_species = site.attrib['default_species']
+        print(self.version)
+
+        if self.version == (0, 1):
+            kiwi.ui.dialogs.info('No legacy support, yet!', long='But I am working on it')
+        elif self.version == (0, 2):
+            dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_V0_2_DTD)
+            if not dtd.validate(root):
+                print(dtd.error_log.filter_from_errors()[0])
+                return
+            for child in root:
+                if child.tag == 'lattice':
+                    cell_size = [float(x) for x in child.attrib['cell_size'].split()]
+                    self.lattice.cell_size_x = cell_size[0]
+                    self.lattice.cell_size_y = cell_size[1]
+                    self.lattice.cell_size_z = cell_size[2]
+                    self.lattice.default_layer = child.attrib['default_layer']
+                    if 'representation' in child.attrib:
+                        self.lattice.representation = child.attrib['representation']
+                    else:
+                        self.lattice.representation = ''
+                    for elem in child:
+                        if elem.tag == 'layer':
+                            name = elem.attrib['name']
+                            x, y, z = [int(i) for i in elem.attrib['grid'].split()]
+                            ox, oy, oz = [float(i) for i in elem.attrib['grid_offset'].split()]
+                            grid = Grid(x=x, y=y, z=z,
+                                offset_x=ox, offset_y=oy, offset_z=oz)
+                            if 'color' in elem.attrib:
+                                color = elem.attrib['color']
                             else:
-                                default_species = 'default_species'
-                            site_elem = Site(name=name,
-                                x=x, y=y, z=z,
-                                site_class=site_class,
-                                default_species=default_species)
-                            layer.sites.append(site_elem)
-                    elif elem.tag == 'site_class':
-                        # ignored for now
-                        pass
-            elif child.tag == 'meta':
-                for attrib in ['author', 'email', 'debug', 'model_name', 'model_dimension']:
-                    if child.attrib.has_key(attrib):
-                        self.meta.add({attrib:child.attrib[attrib]})
-            elif child.tag == 'parameter_list':
-                for parameter in child:
-                    name = parameter.attrib['name']
-                    value = parameter.attrib['value']
-                    if 'adjustable' in parameter.attrib:
-                        adjustable = bool(eval(parameter.attrib['adjustable'])) 
-                    else:
-                        adjustable = False
+                                color = '#ffffff'
+                            layer = Layer(name=name, grid=grid, color=color)
+                            self.project_data.append(self.layer_list_iter, layer)
 
-                    min = parameter.attrib['min'] if 'min' in parameter.attrib else 0.0
-                    max = parameter.attrib['max'] if 'max' in parameter.attrib else 0.0
+                            for site in elem:
+                                name = site.attrib['type']
+                                x, y, z = [ float(x) for x in site.attrib['vector'].split() ]
+                                site_class = site.attrib['class']
+                                if 'default_species' in site.attrib:
+                                    default_species = site.attrib['default_species']
+                                else:
+                                    default_species = 'default_species'
+                                site_elem = Site(name=name,
+                                    x=x, y=y, z=z,
+                                    site_class=site_class,
+                                    default_species=default_species)
+                                layer.sites.append(site_elem)
+                        elif elem.tag == 'site_class':
+                            # ignored for now
+                            pass
+                elif child.tag == 'meta':
+                    for attrib in ['author', 'email', 'debug', 'model_name', 'model_dimension']:
+                        if child.attrib.has_key(attrib):
+                            self.meta.add({attrib:child.attrib[attrib]})
+                elif child.tag == 'parameter_list':
+                    for parameter in child:
+                        name = parameter.attrib['name']
+                        value = parameter.attrib['value']
+                        if 'adjustable' in parameter.attrib:
+                            adjustable = bool(eval(parameter.attrib['adjustable'])) 
+                        else:
+                            adjustable = False
 
-                    parameter_elem = Parameter(name=name,
-                                               value=value,
-                                               adjustable=adjustable,
-                                               min=min,
-                                               max=max)
-                    self.project_data.append(self.parameter_list_iter, parameter_elem)
-            elif child.tag == 'process_list':
-                for process in child:
-                    name = process.attrib['name']
-                    rate_constant = process.attrib['rate_constant']
-                    if 'enabled' in process.attrib:
-                        try:    
-                            proc_enabled = bool(eval(process.attrib['enabled']))
-                        except:
+                        min = parameter.attrib['min'] if 'min' in parameter.attrib else 0.0
+                        max = parameter.attrib['max'] if 'max' in parameter.attrib else 0.0
+
+                        parameter_elem = Parameter(name=name,
+                                                   value=value,
+                                                   adjustable=adjustable,
+                                                   min=min,
+                                                   max=max)
+                        self.project_data.append(self.parameter_list_iter, parameter_elem)
+                elif child.tag == 'process_list':
+                    for process in child:
+                        name = process.attrib['name']
+                        rate_constant = process.attrib['rate_constant']
+                        if 'enabled' in process.attrib:
+                            try:    
+                                proc_enabled = bool(eval(process.attrib['enabled']))
+                            except:
+                                proc_enabled = True
+                        else:
                             proc_enabled = True
-                    else:
-                        proc_enabled = True
-                    process_elem = Process(name=name, rate_constant=rate_constant,enabled=proc_enabled)
-                    for sub in process:
-                        if sub.tag == 'action' or sub.tag == 'condition':
-                            species =  sub.attrib['species']
-                            coord_layer = sub.attrib['coord_layer']
-                            coord_name = sub.attrib['coord_name']
-                            coord_offset = tuple(
-                                [int(i) for i in 
-                                sub.attrib['coord_offset'].split()])
-                            coord = Coord(layer=coord_layer,
-                                          name=coord_name,
-                                          offset=coord_offset)
-                            condition_action = ConditionAction(
-                                species=species,coord=coord)
-                            if sub.tag == 'action':
-                                process_elem.add_action(condition_action)
-                            elif sub.tag == 'condition':
-                                process_elem.add_condition(condition_action)
-                    self.project_data.append(self.process_list_iter, process_elem)
-            elif child.tag == 'species_list':
-                self.species_list_iter.default_species = child.attrib['default_species']
-                for species in child:
-                    name = species.attrib['name']
-                    color = species.attrib['color']
-                    representation = species.attrib['representation'] if 'representation' in species.attrib else ''
-                    species_elem = Species(name=name, color=color, representation=representation)
-                    self.project_data.append(self.species_list_iter, species_elem)
-            if child.tag == 'output_list':
-                for item in child:
-                    output_elem = OutputItem(name=item.attrib['item'], output=True)
-                    self.output_list.append(output_elem)
+                        process_elem = Process(name=name, rate_constant=rate_constant,enabled=proc_enabled)
+                        for sub in process:
+                            if sub.tag == 'action' or sub.tag == 'condition':
+                                species =  sub.attrib['species']
+                                coord_layer = sub.attrib['coord_layer']
+                                coord_name = sub.attrib['coord_name']
+                                coord_offset = tuple(
+                                    [int(i) for i in 
+                                    sub.attrib['coord_offset'].split()])
+                                coord = Coord(layer=coord_layer,
+                                              name=coord_name,
+                                              offset=coord_offset)
+                                condition_action = ConditionAction(
+                                    species=species,coord=coord)
+                                if sub.tag == 'action':
+                                    process_elem.add_action(condition_action)
+                                elif sub.tag == 'condition':
+                                    process_elem.add_condition(condition_action)
+                        self.project_data.append(self.process_list_iter, process_elem)
+                elif child.tag == 'species_list':
+                    self.species_list_iter.default_species = child.attrib['default_species']
+                    for species in child:
+                        name = species.attrib['name']
+                        color = species.attrib['color']
+                        representation = species.attrib['representation'] if 'representation' in species.attrib else ''
+                        species_elem = Species(name=name, color=color, representation=representation)
+                        self.project_data.append(self.species_list_iter, species_elem)
+                if child.tag == 'output_list':
+                    for item in child:
+                        output_elem = OutputItem(name=item.attrib['item'], output=True)
+                        self.output_list.append(output_elem)
 
         self.expand_all()
 
@@ -599,7 +600,7 @@ class KMC_Editor(GladeDelegate):
         GladeDelegate.__init__(self, delete_handler=self.on_btn_quit__clicked)
 
         # Prepare and fill the menu from XML layout
-        menubar = gtk.UIManager()
+        self.menubar = gtk.UIManager()
         if gtk.pygtk_version < (2,12):
             self.set_tip = gtk.Tooltips().set_tip
         actions  = gtk.ActionGroup('Actions')
@@ -621,15 +622,15 @@ class KMC_Editor(GladeDelegate):
         ('HelpAbout', None, '_About'),
         ])
 
-        menubar.insert_action_group(actions, 0)
+        self.menubar.insert_action_group(actions, 0)
         try:
-            mergeid = menubar.add_ui_from_string(MENU_LAYOUT)
+            mergeid = self.menubar.add_ui_from_string(MENU_LAYOUT)
         except gobject.GError as error:
             print('Building menu failed: %s' % (e, mergeid))
 
         # Initialize the project tree, passing in the menu bar
-        self.project_tree = ProjectTree(parent=self, menubar=menubar)
-        self.main_window.add_accel_group(menubar.get_accel_group())
+        self.project_tree = ProjectTree(parent=self, menubar=self.menubar)
+        self.main_window.add_accel_group(self.menubar.get_accel_group())
         self.attach_slave('overviewtree', self.project_tree)
         self.set_title(self.project_tree.get_name())
         self.project_tree.show()
@@ -821,7 +822,7 @@ class KMC_Editor(GladeDelegate):
         filechooser.destroy()
         if resp == gtk.RESPONSE_OK and filename:
             # Initialize blank project tree
-            self.project_tree = ProjectTree(parent=self)
+            self.project_tree = ProjectTree(parent=self,menubar=self.menubar)
             if self.get_slave('overviewtree'):
                 self.detach_slave('overviewtree')
             self.attach_slave('overviewtree', self.project_tree)

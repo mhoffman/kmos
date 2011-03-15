@@ -49,9 +49,9 @@ class KMC_Model(threading.Thread):
 
     def run(self):
         while not self.stopthread.isSet():
-            gtk.gdk.threads_enter()
+            #gtk.gdk.threads_enter()
             proclist.do_kmc_step()
-            gtk.gdk.threads_leave()
+            #gtk.gdk.threads_leave()
 
     def stop(self):
         self.stopthread.set()

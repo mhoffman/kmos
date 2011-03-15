@@ -1,4 +1,7 @@
-<!ELEMENT kmc (meta?,species_list?,parameter_list?,lattice_list?,process_list?,output_list?)>
+<!ELEMENT kmc (meta?,species_list?,parameter_list?, lattice, process_list?,output_list?)>
+  <!ATTLIST kmc
+  version CDATA #REQUIRED
+  >
   <!ELEMENT meta EMPTY>
   <!ATTLIST meta
     author CDATA #REQUIRED
@@ -15,45 +18,62 @@
   <!ELEMENT species EMPTY>
   <!ATTLIST species
     color CDATA #REQUIRED
-    id CDATA #REQUIRED
     name CDATA #REQUIRED
+    representation CDATA #IMPLIED
   >
   <!ELEMENT parameter_list (parameter)*>
   <!ELEMENT parameter EMPTY>
   <!ATTLIST parameter
     name CDATA #REQUIRED
     value CDATA #IMPLIED
+    adjustable CDATA #IMPLIED
+    min CDATA #IMPLIED
+    max CDATA #IMPLIED
   >
-  <!ELEMENT lattice_list (lattice)*>
-  <!ELEMENT lattice (site)*>
+  <!ELEMENT lattice (layer)*>
   <!ATTLIST lattice
+    cell_size CDATA #REQUIRED
+    default_layer CDATA #REQUIRED
+    site_classes CDATA #IMPLIED
+    representation CDATA #IMPLIED
+  >
+  <!ELEMENT layer (site)*>
+  <!ATTLIST layer 
     name CDATA #REQUIRED
-    unit_cell_size CDATA #REQUIRED
+    grid CDATA #REQUIRED
+    grid_offset CDATA #REQUIRED
+    color CDATA #IMPLIED
   >
   <!ELEMENT site EMPTY>
   <!ATTLIST site
-    coord CDATA #REQUIRED
-    index CDATA #REQUIRED
+    vector CDATA #REQUIRED
     type CDATA #REQUIRED
+    class CDATA #IMPLIED
+    default_species CDATA #IMPLIED
   >
   <!ELEMENT process_list (process)*>
     <!ELEMENT process (condition|action)*>
       <!ATTLIST process
         name CDATA #REQUIRED
         rate_constant CDATA #REQUIRED
+        enabled CDATA #IMPLIED
       >
       <!ELEMENT condition EMPTY>
       <!ATTLIST condition
-        coord CDATA #REQUIRED
+        coord_name CDATA #REQUIRED
+        coord_layer CDATA #REQUIRED
+        coord_offset CDATA #REQUIRED
         species CDATA #REQUIRED
       >
       <!ELEMENT action EMPTY>
       <!ATTLIST action
-        coord CDATA #REQUIRED
+        coord_name CDATA #REQUIRED
+        coord_layer CDATA #REQUIRED
+        coord_offset CDATA #REQUIRED
         species CDATA #REQUIRED
       >
       <!ELEMENT output_list (output)*>
-      <!ELEMENT output EMPTY>
-      <!ATTLIST output
-        item CDATA #REQUIRED
+        <!ELEMENT output EMPTY>
+        <!ATTLIST output
+          item CDATA #REQUIRED
         >
