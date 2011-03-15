@@ -37,7 +37,6 @@ import kiwi.ui.dialogs
 
 KMCPROJECT_DTD = '/kmc_project.dtd'
 MLKMCPROJECT_DTD = '/ml_kmc_project.dtd'
-PROCESSLIST_DTD = '/process_list.dtd'
 
 
 MENU_LAYOUT = """\
@@ -168,10 +167,11 @@ class ProjectTree(SlaveDelegate):
         """Takes a filename, validates the content against kmc_project.dtd
         and import all fields into the current project tree
         """
-        self.init_data()
+        # TODO: catch XML version first and convert if necessary
         self.filename = filename
         xmlparser = ET.XMLParser(remove_comments=True)
         root = ET.parse(filename, parser=xmlparser).getroot()
+        self.init_data()
         if root.tag == 'ml_kmc':
             self.ml = True
         else:
