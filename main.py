@@ -4,8 +4,10 @@
 # standard modules
 import optparse
 from ConfigParser import SafeConfigParser
+import StringIO
 import sys
 import os, os.path
+import copy
 # import own modules
 from app.config import *
 from app.models import *
@@ -94,13 +96,25 @@ class ProjectTree(SlaveDelegate):
     """A rather complex class holding all the information of a kMC project that provides
     a treelike view for the gui
     """
-    def __init__(self, parent):
+    def __init__(self, parent, menubar):
         self.project_data = ObjectTree([Column('name',use_markup=True, data_type=str, sorted=True), Column('info')])
 
         self.project_data.connect('row-activated',self.on_row_activated)
 
+        self.menubar = menubar
 
         self.set_parent(parent)
+
+        self.init_data()
+
+        self.filename = ''
+
+        self.undo_stack = UndoStack(self._get_xml_string, self.import_xml_file, self.project_data.select, menubar, self.meta,'Initialization')
+
+        SlaveDelegate.__init__(self, toplevel=self.project_data)
+
+    def init_data(self):
+        self.project_data.clear()
         self.meta = self.project_data.append(None, Meta())
         self.layer_list_iter = self.project_data.append(None, LayerList())
         self.lattice = self.layer_list_iter
@@ -109,10 +123,6 @@ class ProjectTree(SlaveDelegate):
         self.process_list_iter = self.project_data.append(None, ProcessList())
         self.output_list = self.project_data.append(None, OutputList())
         self.output_list = []
-
-        self.filename = ''
-
-        SlaveDelegate.__init__(self, toplevel=self.project_data)
 
     def update(self, model):
         self.project_data.update(model)
@@ -158,6 +168,7 @@ class ProjectTree(SlaveDelegate):
         """Takes a filename, validates the content against kmc_project.dtd
         and import all fields into the current project tree
         """
+        self.init_data()
         self.filename = filename
         xmlparser = ET.XMLParser(remove_comments=True)
         root = ET.parse(filename, parser=xmlparser).getroot()
@@ -281,7 +292,6 @@ class ProjectTree(SlaveDelegate):
                     self.output_list.append(output_elem)
 
         self.expand_all()
-        self.select_meta()
 
 
     def expand_all(self):
@@ -395,11 +405,6 @@ class ProjectTree(SlaveDelegate):
         return prettify_xml(root)
 
 
-    def select_meta(self):
-        """Make the treeview focus the meta entry
-        """
-        self.focus_topmost()
-        self.on_project_data__selection_changed(0, self.meta)
 
     def on_key_press(self, _, event):
         """When the user hits the keyboard focusing the treeview
@@ -428,19 +433,23 @@ class ProjectTree(SlaveDelegate):
             if self.meta.model_dimension in [1,3]:
                 self.get_parent().toast('Only 2d supported')
                 return
+            self.undo_stack.start_new_action('Edit Layer %s' % elem.name, elem)
             form = LayerEditor(elem, self)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
         elif isinstance(elem, Meta):
+            self.undo_stack.start_new_action('Edit Meta', elem)
             meta_form = MetaForm(self.meta, self)
             self.get_parent().attach_slave('workarea', meta_form)
             meta_form.focus_toplevel()
             meta_form.focus_topmost()
         elif isinstance(elem, OutputList):
+            self.undo_stack.start_new_action('Edit Output', elem)
             form = OutputForm(self.output_list, self)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
         elif isinstance(elem, Parameter):
+            self.undo_stack.start_new_action('Edit Parameter %s' % elem.name, elem)
             form = ParameterForm(elem, self)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
@@ -448,6 +457,7 @@ class ProjectTree(SlaveDelegate):
             if self.meta.model_dimension in [1,3]:
                 self.get_parent().toast('Only 2d supported')
                 return
+            self.undo_stack.start_new_action('Edit Process %s' % elem.name, elem)
             form = ProcessForm(elem, self)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
@@ -455,18 +465,22 @@ class ProjectTree(SlaveDelegate):
             if self.meta.model_dimension in [1,3]:
                 self.get_parent().toast('Only 2d supported')
                 return
+            self.undo_stack.start_new_action('Batch process editing', elem)
             form = BatchProcessForm(self)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
         elif isinstance(elem, Species):
+            self.undo_stack.start_new_action('Edit species', elem)
             form = SpeciesForm(elem, self.project_data)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
         elif isinstance(elem, SpeciesList):
+            self.undo_stack.start_new_action('Edit default species', elem)
             form = SpeciesListForm(elem, self)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
         elif isinstance(elem, LayerList):
+            self.undo_stack.start_new_action('Edit lattice', elem)
             dimension = self.meta.model_dimension
             form = LatticeForm(elem, dimension, self)
             self.get_parent().attach_slave('workarea', form)
@@ -475,18 +489,117 @@ class ProjectTree(SlaveDelegate):
             self.get_parent().toast('Not implemented, yet(%s).' % type(elem))
 
 
+class UndoStack():
+    def __init__(self, get_state_cb, set_state_from_file_cb, select_elem_cb, menubar, elem, action = ''):
+        self.menubar = menubar
+        self.get_state_cb = get_state_cb
+        self.set_state_from_file_cb = set_state_from_file_cb
+        self.select_elem_cb = select_elem_cb
+        actions  = gtk.ActionGroup('Actions')
+        actions.add_actions([
+        ('EditUndo', None, '_Undo','<control>Z', 'Undo the last edit', self.undo),
+        ('EditRedo', None, '_Redo', '<control>Y', 'Redo and undo', self.redo),
+        ])
+        menubar.insert_action_group(actions, 0)
+        self.menubar.ensure_update()
+        self.stack = []
+        self.head = -1
+        self.current_action = action
+        self.current_elem = elem
+        self.get_state_cb = get_state_cb
+        self.origin = self.get_state_cb()
+        self.state = self.get_state_cb()
+        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditUndo').set_sensitive(False)
+        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_sensitive(False)
+        print([x['action'] for x in self.stack])
+        print(self.head)
+
+    def _set_state_cb(self, string):
+        tmpfile = StringIO.StringIO()
+        tmpfile.write(string)
+        tmpfile.seek(0)
+        self.set_state_from_file_cb(tmpfile)
+
+
+    def start_new_action(self, action, elem):
+        if self.get_state_cb() != self.state:
+            self.head += 1
+            self.stack = self.stack[:self.head] + [{
+                'action':self.current_action,
+                'state':self.get_state_cb(),
+                'elem':self.current_elem,
+                }]
+            self.state = self.get_state_cb()
+        self.current_action = action
+        self.current_elem = elem
+        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditUndo').set_label('Undo %s' % action)
+        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditUndo').set_sensitive(True)
+        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_label('Redo')
+        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_sensitive(False)
+        print(self.current_action)
+        print([x['action'] for x in self.stack])
+        print(self.head)
+
+    def undo(self, _):
+        print([x['action'] for x in self.stack])
+        print(self.head)
+        if self.head < 0 :
+            return
+        if self.state != self.get_state_cb():
+            
+            print("reverting unstashed changes")
+            # if unstashed changes, first undo those
+            self.start_new_action(self.current_action, self.get_state_cb())
+            self.head += -1
+
+        self.head += -1
+        self.state = self.stack[self.head]['state']
+        self._set_state_cb(self.state)
+        print('moved state back')
+
+        self.current_action = self.stack[self.head+1]['action']
+        self.current_elem = self.stack[self.head+1]['elem']
+
+        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditUndo').set_label('Undo %s' % self.stack[self.head]['action'])
+        if self.head <= 0 :
+            self.menubar.get_widget('/MainMenuBar/MenuEdit/EditUndo').set_sensitive(False)
+        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_label('Redo %s' % (self.stack[self.head+1]['action']))
+        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_sensitive(True)
+        print(self.current_action)
+        print([x['action'] for x in self.stack])
+        print(self.head)
+        
+            
+
+    def redo(self, _):
+        if self.head  >= len(self.stack) - 1 :
+            return UserWarning('TopReached')
+        else:
+            self.head += +1
+            self.state = self.stack[self.head]['state']
+            self._set_state_cb(self.state)
+            self.current_action = self.stack[self.head]['action']
+            self.current_elem = self.stack[self.head]['elem']
+            #self.select_elem_cb(self.current_elem)
+
+        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditUndo').set_label(self.stack[self.head]['action'])
+        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditUndo').set_sensitive(True)
+        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_label('Redo')
+        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_sensitive(False)
+        print(self.current_action)
+        print([x['action'] for x in self.stack])
+        print(self.head)
+
+
 class KMC_Editor(GladeDelegate):
     widgets = ['workarea', 'statbar','vbox1']
     gladefile = GLADEFILE
     toplevel_name = 'main_window'
     def __init__(self):
-        self.project_tree = ProjectTree(parent=self)
         GladeDelegate.__init__(self, delete_handler=self.on_btn_quit__clicked)
-        self.attach_slave('overviewtree', self.project_tree)
-        self.set_title(self.project_tree.get_name())
-        self.project_tree.show()
 
-
+        # Prepare and fill the menu from XML layout
+        menubar = gtk.UIManager()
         if gtk.pygtk_version < (2,12):
             self.set_tip = gtk.Tooltips().set_tip
         actions  = gtk.ActionGroup('Actions')
@@ -499,8 +612,6 @@ class KMC_Editor(GladeDelegate):
         ('FileExportSource', None, '_Export Source', '<control>E', 'Export model to Fortran 90 source code', self.on_btn_export_src__clicked),
         ('FileQuit', None, '_Quit', '<control>Q', 'Quit the program', self.on_btn_quit__clicked),
         ('MenuEdit',None,'_Edit'),
-        ('EditUndo', None, '_Undo','<control>Z', 'Undo the last edit', None),
-        ('EditRedo', None, '_Redo', '<control>Y', 'Redo and undo', None),
         ('MenuInsert', None, '_Insert'),
         ('InsertParameter', None, 'Para_meter', '<control><shift>M','Add a new parameter', self.on_btn_add_parameter__clicked),
         ('InsertLayer', None, '_Layer','<control><shift>L', 'Add a new layer', self.on_btn_add_layer__clicked),
@@ -510,14 +621,21 @@ class KMC_Editor(GladeDelegate):
         ('HelpAbout', None, '_About'),
         ])
 
-        self.ui = ui = gtk.UIManager()
-        ui.insert_action_group(actions, 0)
-        self.main_window.add_accel_group(ui.get_accel_group())
+        menubar.insert_action_group(actions, 0)
         try:
-            mergeid = ui.add_ui_from_string(MENU_LAYOUT)
+            mergeid = menubar.add_ui_from_string(MENU_LAYOUT)
         except gobject.GError as error:
             print('Building menu failed: %s' % (e, mergeid))
-        wid = ui.get_widget('/MainMenuBar')
+
+        # Initialize the project tree, passing in the menu bar
+        self.project_tree = ProjectTree(parent=self, menubar=menubar)
+        self.main_window.add_accel_group(menubar.get_accel_group())
+        self.attach_slave('overviewtree', self.project_tree)
+        self.set_title(self.project_tree.get_name())
+        self.project_tree.show()
+
+
+        wid = self.project_tree.menubar.get_widget('/MainMenuBar')
         self.menu_box.pack_start(wid, False, False, 0)
         self.menu_box.show()
         self.quickbuttons.hide()
@@ -530,9 +648,6 @@ class KMC_Editor(GladeDelegate):
         'you will get a fully self-contained Fortran source code\n'+
         'of the model and further instructions'
         )
-
-    def filemenu_cb(self):
-        pass
 
     def add_defaults(self):
         """This function adds some useful defaults that are probably need in every simulation
@@ -616,6 +731,7 @@ class KMC_Editor(GladeDelegate):
             self.toast('Only 2d supported')
             return
         new_layer = Layer()
+        self.project_tree.undo_stack.start_new_action('Add layer', new_layer)
         self.project_tree.append(self.project_tree.layer_list_iter, new_layer)
         layer_form = LayerEditor(new_layer, self.project_tree)
         self.project_tree.expand(self.project_tree.layer_list_iter)
@@ -628,6 +744,7 @@ class KMC_Editor(GladeDelegate):
         """Add a new species to the model
         """
         new_species = Species(color='#fff', name='')
+        self.project_tree.undo_stack.start_new_action('Add species', new_species)
         self.project_tree.append(self.project_tree.species_list_iter, new_species)
         self.project_tree.expand(self.project_tree.species_list_iter)
         self.project_tree.select(new_species)
@@ -647,6 +764,7 @@ class KMC_Editor(GladeDelegate):
             self.toast("No layer defined, yet!")
             return
         new_process = Process(name='', rate_constant='')
+        self.project_tree.undo_stack.start_new_action('Add process',new_process)
         self.project_tree.append(self.project_tree.process_list_iter, new_process)
         self.project_tree.expand(self.project_tree.process_list_iter)
         self.project_tree.select(new_process)
@@ -658,6 +776,7 @@ class KMC_Editor(GladeDelegate):
 
     def on_btn_add_parameter__clicked(self, button):
         new_parameter = Parameter(name='', value='')
+        self.project_tree.undo_stack.start_new_action('Add parameter',new_parameter)
         self.project_tree.append(self.project_tree.parameter_list_iter, new_parameter)
         self.project_tree.expand(self.project_tree.parameter_list_iter)
         self.project_tree.select(new_parameter)
