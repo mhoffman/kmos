@@ -727,6 +727,10 @@ class KMC_Editor(GladeDelegate):
     def on_btn_add_layer__clicked(self, button):
         """Add a new layer to the model
         """
+        if len(self.project_tree.layer_list) >= 1 :
+            kiwi.ui.dialogs.warning('Entering multi-lattice mode',long='This is an unpublished feature\n' +
+                'Please ask me about publishing results obtained\n' +
+                'from using this feature mjhoffmann@gmail.com')
         if self.project_tree.meta.model_dimension in [1,3]:
             self.toast('Only 2d supported')
             return
