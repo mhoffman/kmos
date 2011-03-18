@@ -132,10 +132,6 @@ class Coord(Attributes):
     def __repr__(self):
         return '<COORD> %s.%s.%s' % (self.name, tuple(self.offset), self.layer)
 
-    def __neg__(self):
-        """When negating a lattice coordinate we only mean to negate to supercell part"""
-        return Coord(name=self.name,layer=self.layer,offset=[-x for x in self.offset])
-
     def __add__(a, b):
         diff = [ (x+y) for (x,y) in zip(a.offset, b.offset) ]
         if a.layer and b.layer:
@@ -301,7 +297,7 @@ class Meta(Settable, object):
 class Process(Attributes):
     """One process in a kMC process list
     """
-    attributes = ['name', 'rate_constant', 'condition_list', 'action_list','enabled']
+    attributes = ['name', 'rate_constant', 'condition_list', 'action_list','enabled','chemical_expression']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
         self.condition_list = []
