@@ -634,11 +634,26 @@ class KMC_Editor(GladeDelegate):
 
         self.saved_state = str(self.project_tree)
         # Cast initial message
-        self.toast('Start a new project by filling in\n'
-        + '    * meta information\n    * lattice \n    * species\n    * parameters\n    * processes \n    * output fields\n in roughly this order or open an existing one by opening a kMC XML file.\n\n\n'+
+        self.toast('DISCLAIMER: This tool can significantly reduce the time you need\n' +
+        'to implement _and_ run a lattice kmc simulation. However it can not help\n' +
+        'you plan the model. It is therefore highly recommend that you have clear\n' +
+        'idea of you model before you start using this tool.\n\n' +
+        '    A good way to define a model is to use a paper and pencil\n' +
+        'to: draw you lattice, chose the species that you will need, draw\n' +
+        'each process and write down an expression for each rate constant, and\n' +
+        'finally fix all energy barriers and external parameters that you will need.\n\n' +
+        'Then a new project by filling in\n'
+        + '    * meta information\n' +
+        '    * lattice \n' +
+        '    * species\n' +
+        '    * parameters\n' +
+        '    * processes \n' +
+        '    * output fields\n' +
+        'in roughly this order or open an existing one by opening a kMC XML file.\n\n\n'+
         'If you want to run the model run hit "Export Source", where\n'+
         'you will get a fully self-contained Fortran source code\n'+
-        'of the model and further instructions'
+        'of the model and further instructions.\n\n' +
+        'In the example_projects folder you find some simple examples.\n' 
         )
 
     def add_defaults(self):
