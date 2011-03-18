@@ -37,6 +37,7 @@ import kiwi.ui.dialogs
 
 KMCPROJECT_V0_1_DTD = '/kmc_project_v0.1.dtd'
 KMCPROJECT_V0_2_DTD = '/kmc_project_v0.2.dtd'
+XML_API_VERSION = (0, 2)
 
 
 MENU_LAYOUT = """\
@@ -173,14 +174,19 @@ class ProjectTree(SlaveDelegate):
         root = ET.parse(filename, parser=xmlparser).getroot()
         self.init_data()
         if 'version' in root.attrib:
-            self.version = tuple([int(x) for x in root.attrib['version'].split('.')])
+            self.version = eval(root.attrib['version'])
         else:
             self.version = (0, 1)
 
-        print(self.version)
 
         if self.version == (0, 1):
-            kiwi.ui.dialogs.info('No legacy support, yet!', long='But I am working on it')
+            dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_V0_1_DTD)
+            if not dtd.validate(root):
+                print(dtd.error_log.filter_from_errors()[0])
+                return
+            nroot = ET.Element('kmc')
+            nroot.set('version','0.2')
+            kiwi.ui.dialogs.info('No legacy support, yet!', long='Drop me an email if there is need!')
         elif self.version == (0, 2):
             dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_V0_2_DTD)
             if not dtd.validate(root):
@@ -308,7 +314,8 @@ class ProjectTree(SlaveDelegate):
         """Produces an XML representation of the project data
         """
         # build XML Tree
-        root = ET.Element('ml_kmc')
+        root = ET.Element('kmc')
+        root.set('version',str(XML_API_VERSION))
         meta = ET.SubElement(root, 'meta')
         if hasattr(self.meta, 'author'):
             meta.set('author', self.meta.author)
@@ -512,8 +519,6 @@ class UndoStack():
         self.state = self.get_state_cb()
         self.menubar.get_widget('/MainMenuBar/MenuEdit/EditUndo').set_sensitive(False)
         self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_sensitive(False)
-        print([x['action'] for x in self.stack])
-        print(self.head)
 
     def _set_state_cb(self, string):
         tmpfile = StringIO.StringIO()
@@ -537,18 +542,11 @@ class UndoStack():
         self.menubar.get_widget('/MainMenuBar/MenuEdit/EditUndo').set_sensitive(True)
         self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_label('Redo')
         self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_sensitive(False)
-        print(self.current_action)
-        print([x['action'] for x in self.stack])
-        print(self.head)
 
     def undo(self, _):
-        print([x['action'] for x in self.stack])
-        print(self.head)
         if self.head < 0 :
             return
         if self.state != self.get_state_cb():
-            
-            print("reverting unstashed changes")
             # if unstashed changes, first undo those
             self.start_new_action(self.current_action, self.get_state_cb())
             self.head += -1
@@ -556,7 +554,6 @@ class UndoStack():
         self.head += -1
         self.state = self.stack[self.head]['state']
         self._set_state_cb(self.state)
-        print('moved state back')
 
         self.current_action = self.stack[self.head+1]['action']
         self.current_elem = self.stack[self.head+1]['elem']
@@ -566,9 +563,6 @@ class UndoStack():
             self.menubar.get_widget('/MainMenuBar/MenuEdit/EditUndo').set_sensitive(False)
         self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_label('Redo %s' % (self.stack[self.head+1]['action']))
         self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_sensitive(True)
-        print(self.current_action)
-        print([x['action'] for x in self.stack])
-        print(self.head)
         
             
 
@@ -587,9 +581,6 @@ class UndoStack():
         self.menubar.get_widget('/MainMenuBar/MenuEdit/EditUndo').set_sensitive(True)
         self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_label('Redo')
         self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_sensitive(False)
-        print(self.current_action)
-        print([x['action'] for x in self.stack])
-        print(self.head)
 
 
 class KMC_Editor(GladeDelegate):
@@ -639,7 +630,7 @@ class KMC_Editor(GladeDelegate):
         wid = self.project_tree.menubar.get_widget('/MainMenuBar')
         self.menu_box.pack_start(wid, False, False, 0)
         self.menu_box.show()
-        self.quickbuttons.hide()
+        #self.quickbuttons.hide()
 
         self.saved_state = str(self.project_tree)
         # Cast initial message

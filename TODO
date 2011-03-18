@@ -1,7 +1,6 @@
 Functionality
   * reimplement 'print output' function using old_src
-  * implement back button
-  * organize buttons in menu
+  * add various tooltips and examples using Claudias suggestions
   * write autocompletion for rate_constant input
   * write autocompletion for (batch) process input 
   * write autocompletion for output fields
