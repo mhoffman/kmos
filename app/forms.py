@@ -312,10 +312,9 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.process = process
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, process)
-        #self.chemical_expression.set_text(self.generate_expression(), dontdraw=True)
+        expression = self.generate_expression()
+        self.chemical_expression.update(expression, )
         self.draw_from_data()
-
-        
 
     def generate_expression(self):
         expr = ''
@@ -333,7 +332,10 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         return expr
 
         
-    def on_chemical_expression__content_changed(self, entry):
+    def on_chemical_expression__activate(self, entry, **kwargs):
+        if 'draw' in kwargs:
+            if not draw:
+                return
         text = entry.get_text()
         if not text:
             self.process.condition_list = []
@@ -438,7 +440,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                     self.item.delete()
 
                     
-        #self.chemical_expression.set_text(self.generate_expression())
+        self.chemical_expression.update(self.generate_expression(), )
         self.canvas.redraw()
 
 
@@ -484,7 +486,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 
                     l_site.set_center(self.l/self.z*(i+float(site.x)), 500-self.l/self.z*(j+float(site.y)))
                     l_site.connect('query-tooltip', self.query_tooltip)
-                    # 500 - ... for having scientific coordinates and note screen coordinates
+                    # 500 - ... for having scientific coordinates and not screen coordinates
                     l_site.set_radius(5)
                     l_site.i = i
                     l_site.j = j
