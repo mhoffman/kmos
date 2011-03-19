@@ -333,9 +333,6 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 
         
     def on_chemical_expression__activate(self, entry, **kwargs):
-        if 'draw' in kwargs:
-            if not draw:
-                return
         text = entry.get_text()
         if not text:
             self.process.condition_list = []
@@ -357,6 +354,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         except Exception as e:
             # first remove last term and try again
             try:
+                print("Error ...")
                 text = re.sub(r'+[^+]*$', '', text)
                 parse_chemical_expression(eq=text, process=self.process, project_tree=self.project_tree)
                 self.process.condition_list = []
@@ -364,6 +362,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 parse_chemical_expression(eq=text, process=self.process, project_tree=self.project_tree)
 
             except Exception as e:
+                print("Fatal Error ... %s" % e)
                 self.process.condition_list = []
                 self.process.action_list = []
         finally:

@@ -132,6 +132,9 @@ class Coord(Attributes):
     def __repr__(self):
         return '<COORD> %s.%s.%s' % (self.name, tuple(self.offset), self.layer)
 
+    def __eq__(self, other):
+        return self.layer, self.name, self.offset == other.layer, other.name, other.offset
+
     def __add__(a, b):
         diff = [ (x+y) for (x,y) in zip(a.offset, b.offset) ]
         if a.layer and b.layer:
