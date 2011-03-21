@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<kmc version="0.2">
+<kmc version="(0, 2)">
     <meta author="Onkel 3d" debug="0" email="dreiD@gmail.com" model_dimension="3" model_name="dreiD_attempt"/>
     <species_list default_species="empty">
         <species color="#000000" name="C" representation="Atoms('O',[[0.,0.,0.]])"/>

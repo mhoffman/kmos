@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<kmc version="0.2">
+<kmc version="(0, 2)">
     <meta author="Klein Fritzchen" debug="0" email="fritz@tum.de" model_dimension="2" model_name="FritzModell"/>
     <species_list default_species="empty">
         <species color="#000000" name="CO" representation="Atoms('CO',[[0,0,0],[0,0,1.2]])"/>
