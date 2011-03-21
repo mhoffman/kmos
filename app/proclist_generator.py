@@ -285,6 +285,22 @@ class ProcListWriter():
         out.write('    call base_reset_site(nr, old_species)\n\n')
         out.write('end subroutine reset_site\n\n')
 
+        out.write('subroutine get_occupation(occupation)\n\n')
+        out.write('    real(kind=rsingle), dimension(:,:), intent(out) :: occupation\n\n')
+        out.witte('    integer(kind=iint) :: i, j, k, nr\n\n')
+        out.write('    allocate(occupation(nr_of_species, spuck\n')
+        out.write('    occupation = 0\n\n')
+        out.write('    do k = 0, system_size(3)-1\n')
+        out.write('        do j = 0, system_size(2)-1\n')
+        out.write('            do i = 0, system_size(1)-1\n')
+        out.write('                do nr = 1, spuck\n')
+        out.write('                    occupation(get_species((/i,j,k,nr/)), nr) += 1\n')
+        out.write('                end do\n')
+        out.write('            end do\n')
+        out.write('        end do\n')
+        out.write('    end do\n\n')
+
+
 
         out.write('end module lattice\n')
         out.close()
