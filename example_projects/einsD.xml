@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<ml_kmc>
+<kmc version="(0, 2)">
     <meta author="StangenMensch" debug="0" email="linie@tum.de" model_dimension="1" model_name="hopping_model"/>
     <species_list default_species="empty">
         <species color="#000000" name="C" representation="Atoms('C',[[0,0,0]])"/>
@@ -38,5 +38,5 @@
         </process>
     </process_list>
     <output_list/>
-</ml_kmc>
+</kmc>
 <!-- This is an automatically generated XML file, representing a kMC model please do not change this unless you know what you are doing -->

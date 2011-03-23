@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<ml_kmc>
+<kmc version="(0, 2)">
     <meta author="Onkel 3d" debug="0" email="dreiD@gmail.com" model_dimension="3" model_name="dreiD_attempt"/>
     <species_list default_species="empty">
         <species color="#000000" name="C" representation="Atoms('O',[[0.,0.,0.]])"/>
@@ -62,5 +62,5 @@
         </process>
     </process_list>
     <output_list/>
-</ml_kmc>
+</kmc>
 <!-- This is an automatically generated XML file, representing a kMC model please do not change this unless you know what you are doing -->

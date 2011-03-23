@@ -51,6 +51,7 @@ class ProcessFormSite(Site):
     """
     attributes = Site.attributes
     attributes.append('layer')
+    attributes.append('color')
     def __init__(self, **kwargs):
         Site.__init__(self, **kwargs)
         self.layer = kwargs['layer'] if 'layer' in kwargs else ''
@@ -80,12 +81,13 @@ class Grid(Attributes):
 class Layer(Attributes, CorrectlyNamed):
     """A class that defines exactly one layer
     """
-    attributes = ['name', 'grid','sites', 'site_classes', 'active']
+    attributes = ['name', 'grid','sites', 'site_classes', 'active', 'color']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
         self.grid = kwargs['grid'] if 'grid' in kwargs else Grid()
         self.name = kwargs['name'] if 'name' in kwargs else ''
         self.active = kwargs['active'] if 'active' in kwargs else True
+        self.color = kwargs['color'] if 'color' in kwargs else '#ffffff'
         self.sites = []
 
     def __repr__(self):
@@ -130,9 +132,8 @@ class Coord(Attributes):
     def __repr__(self):
         return '<COORD> %s.%s.%s' % (self.name, tuple(self.offset), self.layer)
 
-    def __neg__(self):
-        """When negating a lattice coordinate we only mean to negate to supercell part"""
-        return Coord(name=self.name,layer=self.layer,offset=[-x for x in self.offset])
+    def __eq__(self, other):
+        return (self.layer, self.name, self.offset) == (other.layer, other.name, other.offset)
 
     def __add__(a, b):
         diff = [ (x+y) for (x,y) in zip(a.offset, b.offset) ]
@@ -299,7 +300,7 @@ class Meta(Settable, object):
 class Process(Attributes):
     """One process in a kMC process list
     """
-    attributes = ['name', 'rate_constant', 'condition_list', 'action_list','enabled']
+    attributes = ['name', 'rate_constant', 'condition_list', 'action_list','enabled','chemical_expression']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
         self.condition_list = []

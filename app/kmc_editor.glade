@@ -534,6 +534,18 @@
                                 <property name="position">2</property>
                             </packing>
                         </child>
+                        <child>
+                            <widget class="ProxyColorButton" id="layer_color">
+                                <property name="data_type">str</property>
+                                <property name="label">gtk-select-color</property>
+                                <property name="model_attribute">color</property>
+                                <property name="use_stock">True</property>
+                                <property name="visible">True</property>
+                            </widget>
+                            <packing>
+                                <property name="position">3</property>
+                            </packing>
+                        </child>
                     </widget>
                     <packing>
                         <property name="expand">False</property>
@@ -554,13 +566,18 @@
         </child>
     </widget>
     <widget class="GtkWindow" id="main_window">
+        <property name="default_height">600</property>
         <property name="mnemonics_visible">False</property>
         <child>
             <widget class="GtkVBox" id="vbox1">
                 <property name="visible">True</property>
                 <child>
-                    <widget class="GtkHSeparator" id="hseparator1">
+                    <widget class="GtkVBox" id="menu_box">
                         <property name="visible">True</property>
+                        <child>
+                            <placeholder/>
+                            <packing/>
+                        </child>
                     </widget>
                     <packing>
                         <property name="expand">False</property>
@@ -570,7 +587,7 @@
                     <widget class="GtkHBox" id="hbox1">
                         <property name="visible">True</property>
                         <child>
-                            <widget class="GtkVBox" id="vbox3">
+                            <widget class="GtkVBox" id="quickbuttons">
                                 <property name="visible">True</property>
                                 <property name="width_request">120</property>
                                 <child>
@@ -1154,6 +1171,7 @@
     <widget class="GtkWindow" id="process_form">
         <property name="default_height">250</property>
         <property name="default_width">440</property>
+        <property name="mnemonics_visible">False</property>
         <child>
             <widget class="GtkHBox" id="hbox4">
                 <property name="visible">True</property>
@@ -1177,45 +1195,52 @@
                                 <child>
                                     <widget class="ProxyEntry" id="process_name">
                                         <property name="data_type">str</property>
+                                        <property name="invisible_char">*</property>
+                                        <property name="invisible_char_set">True</property>
                                         <property name="model_attribute">name</property>
                                         <property name="progress_pulse_step">1.0</property>
                                         <property name="visible">True</property>
                                         <property name="width_chars">30</property>
                                     </widget>
                                     <packing>
-                                        <property name="fill">False</property>
                                         <property name="position">1</property>
                                     </packing>
                                 </child>
+                            </widget>
+                            <packing>
+                                <property name="expand">False</property>
+                            </packing>
+                        </child>
+                        <child>
+                            <widget class="GtkHBox" id="hbox21">
+                                <property name="visible">True</property>
                                 <child>
-                                    <widget class="GtkButton" id="btn_chem_eq">
-                                        <property name="is_focus">True</property>
-                                        <property name="label" context="yes" translatable="yes">Enter chemical expression</property>
+                                    <widget class="GtkLabel" id="label29">
+                                        <property name="label" context="yes" translatable="yes">Chemical expression:</property>
                                         <property name="visible">True</property>
+                                        <property name="xalign">0.0</property>
                                     </widget>
                                     <packing>
                                         <property name="expand">False</property>
-                                        <property name="position">2</property>
+                                        <property name="fill">False</property>
+                                    </packing>
+                                </child>
+                                <child>
+                                    <widget class="ProxyEntry" id="chemical_expression">
+                                        <property name="data_type">str</property>
+                                        <property name="invisible_char">*</property>
+                                        <property name="invisible_char_set">True</property>
+                                        <property name="is_focus">True</property>
+                                        <property name="model_attribute">chemical_expression</property>
+                                        <property name="visible">True</property>
+                                    </widget>
+                                    <packing>
+                                        <property name="position">1</property>
                                     </packing>
                                 </child>
                             </widget>
                             <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">False</property>
-                            </packing>
-                        </child>
-                        <child>
-                            <widget class="GtkEventBox" id="process_pad">
-                                <property name="height_request">590</property>
-                                <property name="visible">True</property>
-                                <property name="width_request">520</property>
-                                <child>
-                                    <placeholder/>
-                                </child>
-                            </widget>
-                            <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">False</property>
                                 <property name="position">1</property>
                             </packing>
                         </child>
@@ -1236,6 +1261,8 @@
                                 <child>
                                     <widget class="ProxyEntry" id="rate_constant">
                                         <property name="data_type">str</property>
+                                        <property name="invisible_char">*</property>
+                                        <property name="invisible_char_set">True</property>
                                         <property name="is_focus">True</property>
                                         <property name="model_attribute">rate_constant</property>
                                         <property name="visible">True</property>
@@ -1269,9 +1296,24 @@
                             </packing>
                         </child>
                         <child>
+                            <widget class="GtkEventBox" id="process_pad">
+                                <property name="height_request">590</property>
+                                <property name="visible">True</property>
+                                <property name="width_request">520</property>
+                                <child>
+                                    <placeholder/>
+                                </child>
+                            </widget>
+                            <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">3</property>
+                            </packing>
+                        </child>
+                        <child>
                             <placeholder/>
                             <packing>
-                                <property name="position">3</property>
+                                <property name="position">4</property>
                             </packing>
                         </child>
                     </widget>

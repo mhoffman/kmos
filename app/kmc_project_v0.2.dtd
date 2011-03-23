@@ -1,4 +1,7 @@
-<!ELEMENT ml_kmc (meta?,species_list?,parameter_list?, lattice, process_list?,output_list?)>
+<!ELEMENT kmc (meta?,species_list?,parameter_list?, lattice, process_list?,output_list?)>
+  <!ATTLIST kmc
+  version CDATA #REQUIRED
+  >
   <!ELEMENT meta EMPTY>
   <!ATTLIST meta
     author CDATA #REQUIRED
@@ -39,6 +42,7 @@
     name CDATA #REQUIRED
     grid CDATA #REQUIRED
     grid_offset CDATA #REQUIRED
+    color CDATA #IMPLIED
   >
   <!ELEMENT site EMPTY>
   <!ATTLIST site
