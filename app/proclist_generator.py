@@ -285,22 +285,6 @@ class ProcListWriter():
         out.write('    call base_reset_site(nr, old_species)\n\n')
         out.write('end subroutine reset_site\n\n')
 
-        out.write('subroutine get_occupation(occupation)\n\n')
-        out.write('    real(kind=rsingle), dimension(:,:), intent(out) :: occupation\n\n')
-        out.witte('    integer(kind=iint) :: i, j, k, nr\n\n')
-        out.write('    allocate(occupation(nr_of_species, spuck\n')
-        out.write('    occupation = 0\n\n')
-        out.write('    do k = 0, system_size(3)-1\n')
-        out.write('        do j = 0, system_size(2)-1\n')
-        out.write('            do i = 0, system_size(1)-1\n')
-        out.write('                do nr = 1, spuck\n')
-        out.write('                    occupation(get_species((/i,j,k,nr/)), nr) += 1\n')
-        out.write('                end do\n')
-        out.write('            end do\n')
-        out.write('        end do\n')
-        out.write('    end do\n\n')
-
-
 
         out.write('end module lattice\n')
         out.close()
@@ -344,8 +328,10 @@ class ProcListWriter():
 
         # initialize various parameter kind of data
         out.write('\n\n ! Species constants\n\n')
+        out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_species = %s\n'\
+            % (len(data.species_list)))
         for i, species in enumerate(data.species_list):
-            out.write('integer(kind=iint), parameter, public :: %s = %s\n' % (species.name, i +1))
+            out.write('integer(kind=iint), parameter, public :: %s = %s\n' % (species.name, i))
         out.write('integer(kind=iint), parameter, public :: default_species = %s\n' % (data.species_list_iter.default_species))
         representation_length = max([len(species.representation) for species in data.species_list])
 
@@ -378,6 +364,28 @@ class ProcListWriter():
         out.write('    call run_proc_nr(proc_nr, nr_site)\n')
         out.write('    call update_clocks(ran_time)\n\n')
         out.write('end subroutine do_kmc_step\n\n')
+
+        out.write('subroutine get_occupation(occupation)\n\n')
+        out.write('    ! nr_of_species = %s, spuck = %s\n' % (len(data.species_list), len(site_params)))
+        out.write('    real(kind=rdouble), dimension(0:%s, %s), intent(out) :: occupation\n\n' % (len(data.species_list) - 1, len(site_params)))
+        out.write('    integer(kind=iint) :: i, j, k, nr, species\n\n')
+        out.write('    occupation = 0\n\n')
+        out.write('    do k = 0, system_size(3)-1\n')
+        out.write('        do j = 0, system_size(2)-1\n')
+        out.write('            do i = 0, system_size(1)-1\n')
+        out.write('                do nr = 1, spuck\n')
+        out.write('                    species = get_species((/i,j,k,nr/))\n')
+        out.write('                    if(species.gt.null_species) then\n')
+        out.write('                    occupation(species, nr) = &\n')
+        out.write('                        occupation(species, nr) + 1\n')
+        out.write('                    endif\n')
+        out.write('                end do\n')
+        out.write('            end do\n')
+        out.write('        end do\n')
+        out.write('    end do\n\n')
+        out.write('    occupation = occupation/real(system_size(1)*system_size(2)*system_size(3))\n')
+        out.write('end subroutine get_occupation\n\n')
+
 
         # run_proc_nr runs the process selected by determine_procsite
         # for sake of simplicity each process is formulated in terms
