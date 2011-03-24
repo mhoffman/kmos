@@ -639,7 +639,7 @@ class KMC_Editor(GladeDelegate):
         'you plan the model. It is therefore highly recommend that you have clear\n' +
         'idea of you model before you start using this tool.\n\n' +
         '    A good way to define a model is to use a paper and pencil\n' +
-        'to: draw you lattice, chose the species that you will need, draw\n' +
+        'to: draw you lattice, choose the species that you will need, draw\n' +
         'each process and write down an expression for each rate constant, and\n' +
         'finally fix all energy barriers and external parameters that you will need.\n\n' +
         'Then a new project by filling in\n'

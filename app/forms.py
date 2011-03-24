@@ -12,6 +12,7 @@ from kiwi.ui.delegates import ProxySlaveDelegate, GladeDelegate, SlaveDelegate, 
 from kiwi.ui.views import SlaveView
 from kiwi.datatypes import ValidationError
 from kiwi.ui.objectlist import Column
+import kiwi.ui.dialogs
 
 # own modules
 from config import GLADEFILE
@@ -315,10 +316,12 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         expression = self.generate_expression()
         self.chemical_expression.update(expression, )
         self.draw_from_data()
+
         self.process_name.set_tooltip_text('This name has to uniquely identify the process e.g. co_diff_right')
         self.chemical_expression.set_tooltip_text('This is a fast way to define a process e.g. CO@cus->CO@bridge ' +
         'to declare a CO diffusion from site br to site cus or ' +
-        'CO@cus->CO@cus.(0,1) for a CO diffusion in the up direction')
+        'CO@cus->CO@cus.(0,1) for a CO diffusion in the up direction. Hit ENTER to update the graphical'
+        'representation.')
         self.rate_constant.set_tooltip_text('Python has to be able to evaluate this expression to a simple real ' +
         'number. One can use standard mathematical functions, parameters that are defined under "Parameters" or ' +
         'constants and conversion factor such as c, h, e, kboltzmann, pi, bar, angstrom')
@@ -572,6 +575,10 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 o.type = 'action'
                 o.action = elem
 
+        #if not site_list and not hasattr(self,'infoed'):
+            #self.infoed = True
+            #kiwi.ui.dialogs.info('No sites found', 'You either have not defined any sites or you switched all ' +
+                #'layers to invisible. Double-click on a layer to change its visibility.')
         
     def on_condition_action_clicked(self, canvas, widget, event):
         if event.button == 2 :
@@ -589,7 +596,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.project_tree.update(self.process)
 
 
-class SiteForm(ProxyDelegate):
+class SiteForm(ProxyDelegate, CorrectlyNamed):
     """A form which allows to create or modify a site
     when setting up a unit cell
     """
@@ -617,7 +624,36 @@ class SiteForm(ProxyDelegate):
         self.project_tree = project_tree
         self.layer = layer
         self.show_all()
+        self.site_name.set_tooltip_text('The site name has to be uniquely identify a site (at least' +
+        'within each layer for multi-lattice mode). You may have to type this name a lot, so keep' +
+        'it short but unambiguous')
 
+    def on_site_name__validate(self, widget, name):
+        return self.on_name__validate(widget, model_name)
+
+    def on_sitevect_x__validate(self, widget, value):
+        if not 0 <= value <= 1 :
+            return ValidationError('Each component must be between 0 and 1.')
+
+    def on_sitevect_y__validate(self, widget, value):
+        if not 0 <= value <= 1 :
+            return ValidationError('Each component must be between 0 and 1.')
+
+    def on_sitevect_z__validate(self, widget, value):
+        if not 0 <= value <= 1 :
+            return ValidationError('Each component must be between 0 and 1.')
+
+    def on_sitevect_x__activate(self, _):
+        self.on_site_ok__clicked(_)
+
+    def on_sitevect_y__activate(self, _):
+        self.on_site_ok__clicked(_)
+
+    def on_sitevect_z__activate(self, _):
+        self.on_site_ok__clicked(_)
+
+    def on_site_name__activate(self, _):
+        self.on_site_ok__clicked(_)
 
     def on_site_name__validate(self, widget, site_name):
         """check if other site already has the name"""
@@ -628,7 +664,7 @@ class SiteForm(ProxyDelegate):
             self.site_ok.set_sensitive(True)
 
 
-    def on_site_cancel__clicked(self, button):  
+    def on_site_cancel__clicked(self, _):  
         """If we click cancel revert to previous state
         or don't add site, if new."""
         if self.saved_state.name:
@@ -647,6 +683,7 @@ class SiteForm(ProxyDelegate):
             self.layer.sites.remove(self.model)
         self.hide()
         self.parent.redraw()
+
 
 
 class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
@@ -668,6 +705,7 @@ class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
         'so a 3d simulation might require on the order of 10GB or RAM or more')
         self.debug.set_tooltip_text('Increasing the debug level might give hints if one suspects errors in ' +
         'kmos itself. It does not help to debug your model. So usually one wants to keep it a 0.')
+        self.author.grab_focus()
 
 
     def on_model_name__validate(self, widget, model_name):
@@ -782,6 +820,7 @@ class GridForm(ProxyDelegate):
         self.project_tree = project_tree
         self.layer = layer
         ProxyDelegate.__init__(self, grid)
+        self.grid_x.grab_focus()
         if self.project_tree.meta.model_dimension < 3 :
             self.grid_z.hide()
             self.grid_offset_z.hide()
@@ -792,16 +831,38 @@ class GridForm(ProxyDelegate):
     def on_grid_y__content_changed(self, widget):
         self.layer.redraw()
 
+    def on_grid_offset_x__validate(self, widget, offset):
+        if not 0 <= offset <= 1 :
+            return ValidationError('Offset must between 0 and 1.')
+
+    def on_grid_offset_y__validate(self, widget, offset):
+        if not 0 <= offset <= 1 :
+            return ValidationError('Offset must between 0 and 1.')
+
     def on_grid_offset_x__content_changed(self, widget):
         self.layer.redraw()
 
     def on_grid_offset_y__content_changed(self, widget):
         self.layer.redraw()
 
+    def on_grid_form_cancel__clicked(self, button):
+        self.hide()
+
     def on_grid_form_ok__clicked(self, button):
         self.layer.redraw()
         self.hide()
 
+    def on_grid_x__activate(self, widget):
+        self.on_grid_form_ok__clicked(widget)
+
+    def on_grid_y__activate(self, widget):
+        self.on_grid_form_ok__clicked(widget)
+
+    def on_grid_offset_x__activate(self, widget):
+        self.on_grid_form_ok__clicked(widget)
+
+    def on_grid_offset_y__activate(self, widget):
+        self.on_grid_form_ok__clicked(widget)
 
         
 class LatticeForm(ProxySlaveDelegate):
