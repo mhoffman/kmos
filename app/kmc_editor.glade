@@ -329,11 +329,8 @@
                                     <widget class="GtkVBox" id="vbox21">
                                         <property name="visible">True</property>
                                         <child>
-                                            <widget class="GtkLabel" id="label22">
-                                                <property name="has_tooltip">True</property>
+                                            <widget class="GtkLabel" id="cell_size_label">
                                                 <property name="label" context="yes" translatable="yes">Cell size:</property>
-                                                <property name="tooltip_markup" context="yes" translatable="yes">In units of angstrom for best results</property>
-                                                <property name="tooltip_text" context="yes" translatable="yes">In units of angstrom for best results</property>
                                                 <property name="visible">True</property>
                                                 <property name="xalign">0.0</property>
                                             </widget>
@@ -343,7 +340,7 @@
                                             </packing>
                                         </child>
                                         <child>
-                                            <widget class="GtkLabel" id="label15">
+                                            <widget class="GtkLabel" id="default_layer_label">
                                                 <property name="label" context="yes" translatable="yes">Default layer:</property>
                                                 <property name="visible">True</property>
                                                 <property name="xalign">0.0</property>
@@ -1574,8 +1571,6 @@
                                         <property name="height_request">60</property>
                                         <property name="is_focus">True</property>
                                         <property name="model_attribute">representation</property>
-                                        <property name="tooltip_markup" context="yes" translatable="yes">Enter a ase.atoms like Atoms(&amp;apos;CO&amp;apos;,[[0,0,0],[0,0,1.15]]) for graphical representation. Please use only &amp;apos;  &amp;apos; as quotation marks.</property>
-                                        <property name="tooltip_text" context="yes" translatable="yes">Enter a ase.atoms like Atoms('CO',[[0,0,0],[0,0,1.15]]) for graphical representation. Please use only '  ' as quotation marks.</property>
                                         <property name="visible">True</property>
                                         <property name="width_request">260</property>
                                     </widget>

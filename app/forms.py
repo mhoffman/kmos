@@ -315,6 +315,13 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         expression = self.generate_expression()
         self.chemical_expression.update(expression, )
         self.draw_from_data()
+        self.process_name.set_tooltip_text('This name has to uniquely identify the process e.g. co_diff_right')
+        self.chemical_expression.set_tooltip_text('This is a fast way to define a process e.g. CO@cus->CO@bridge ' +
+        'to declare a CO diffusion from site br to site cus or ' +
+        'CO@cus->CO@cus.(0,1) for a CO diffusion in the up direction')
+        self.rate_constant.set_tooltip_text('Python has to be able to evaluate this expression to a simple real ' +
+        'number. One can use standard mathematical functions, parameters that are defined under "Parameters" or ' +
+        'constants and conversion factor such as c, h, e, kboltzmann, pi, bar, angstrom')
 
     def generate_expression(self):
         expr = ''
@@ -652,6 +659,15 @@ class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
         ProxySlaveDelegate.__init__(self, model)
         #self.model_dimension.set_sensitive(False)
         self.project_tree = project_tree
+        self.author.set_tooltip_text('Give a name so people know who to credit for the model.')
+        self.email.set_tooltip_text('Enter an email address so people can get in touch with you.')
+        self.model_name.set_tooltip_text('Give a clear unique name, so identify the model.')
+        self.model_dimension.set_tooltip_text('The source code export function can generate ' +
+        '1d, 2d, and 3d programs. However this GUI currently only supports 2d. 3d is still possibble ' +
+        'by manipulating the project XML file by hand. The algorithm though is fast but very memory consuming ' +
+        'so a 3d simulation might require on the order of 10GB or RAM or more')
+        self.debug.set_tooltip_text('Increasing the debug level might give hints if one suspects errors in ' +
+        'kmos itself. It does not help to debug your model. So usually one wants to keep it a 0.')
 
 
     def on_model_name__validate(self, widget, model_name):
@@ -682,6 +698,14 @@ class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
         self.parameter_max.set_sensitive(value)
         self.parameter_min.set_sensitive(value)
         self.name.grab_focus()
+        self.parameter_adjustable.set_tooltip_text(
+        'Settings this adjustable will create a bar in the auto-generated movie .' +
+        'Dragging this bar will adapt the barrier and recalculate all rate constants. This only makes sense for ' +
+        'physical parameters such a partial pressure but not for e.g. lattice size')
+        self.parameter_name.set_tooltip_text(
+        'Choose a sensible name that you remember later when typing rate constant ' +
+        'formulae. This should not contain spaces')
+        self.value.set_tooltip_text('This defines the initial value for the parameter.')
 
     def on_parameter_adjustable__content_changed(self, form):
         value = self.parameter_adjustable.get_active()
@@ -735,6 +759,11 @@ class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, model)
         self.name.grab_focus()
+        self.name.set_tooltip_text('The name here is arbitrary but you will have to type it many times. ' +
+        'So you might want to use e.g. CO instead carbon_monoxide' )
+        self.color.set_tooltip_text('Choose a color a represent this species in the process editor')
+        self.representation.set_tooltip_text('Set an ASE Atoms(\n\'...\') like string to representation in the ' +
+        'auto-generated movie. Please only use \'\' for quotation')
 
     def on_name__content_changed(self, text):
         self.project_tree.update(self.model)
@@ -789,7 +818,11 @@ class LatticeForm(ProxySlaveDelegate):
         ProxySlaveDelegate.__init__(self, model)
         self.default_layer.prefill([x.name for x in project_tree.layer_list], sort=True)
         self.default_layer.select(default_layer)
-        self.default_layer.set_tooltip_text('By default the system\nwill be initialized with this layer')
+        self.default_layer.set_tooltip_text(
+        'By default the system will be initialized with this layer. This only matters if using ' +
+        'using more than one layer (multi-lattice kMC)')
+        self.cell_size_label.set_tooltip_text(
+        'Set the size of your unit cell in Angstrom for the auto-generated movie')
 
 
         
@@ -813,8 +846,11 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.lattice_pad.add(self.canvas)
         self.previous_layer_name = self.layer_name.get_text()
         self.redraw()
+
+        self.layer_name.set_tooltip_text('A name is only relevant if you are using more than one\n' +
+            'layer in your model.')
         self.set_grid_button.set_tooltip_text('The grid set here help to put sites at specific locations.\n'
-            + 'The fractional position has no direct meaning for the lattice kMC model.\n'
+            + 'The position has no direct meaning for the lattice kMC model.\n'
             + 'Meaning such as nearest neighbor etc. is only gained\n'
             + 'through corresponding processes')
             
