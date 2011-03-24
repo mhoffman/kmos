@@ -820,7 +820,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
             
 
     def redraw(self):
-        white = col_str2tuple('#ffffff')
+        white = col_str2tuple(self.model.color)
         black = col_str2tuple('#000000')
         self.grid_layer.clear()
         self.site_layer.clear()
@@ -835,31 +835,31 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
 
 
         # draw frame
-        CanvasLine(self.grid_layer, 0,0,0,Y)
-        CanvasLine(self.grid_layer, X,0,X,Y)
-        CanvasLine(self.grid_layer, 0,0,X,0)
-        CanvasLine(self.grid_layer, 0,Y,X,Y)
+        CanvasLine(self.grid_layer, 0,0,0,Y, fg=white)
+        CanvasLine(self.grid_layer, X,0,X,Y, fg=white)
+        CanvasLine(self.grid_layer, 0,0,X,0, fg=white)
+        CanvasLine(self.grid_layer, 0,Y,X,Y, fg=white)
 
         # draw grid lines
         for i in range(self.grid.x+1):
             xprime = (float(i)/self.grid.x+self.grid.offset_x)*X % X
-            CanvasLine(self.grid_layer,xprime ,0, xprime, Y)
+            CanvasLine(self.grid_layer,xprime ,0, xprime, Y, fg=white)
         for i in range(self.grid.y+1):
             yprime = (float(i)/(self.grid.y)+self.grid.offset_y)*Y % Y
-            CanvasLine(self.grid_layer, 0, Y-yprime , X, Y-yprime)
+            CanvasLine(self.grid_layer, 0, Y-yprime , X, Y-yprime, fg=white)
         for i in range(self.grid.x+1):
             for j in range(self.grid.y+1):
                 xprime = (float(i)/self.grid.x+self.grid.offset_x)*X % X
 
                 yprime = (float(j)/(self.grid.y)+self.grid.offset_y)*Y % Y
-                o = CanvasOval(self.grid_layer, 0, 0, 10, 10,)
+                o = CanvasOval(self.grid_layer, 0, 0, 10, 10, fg=white)
                 o.set_center(xprime, Y-yprime)
                 o.set_radius(5)
                 o.frac_coords = (xprime/X, yprime/Y)
                 o.connect('button-press-event', self.grid_point_press_event)
 
         for site in self.model.sites:
-            o = CanvasOval(self.site_layer,0,0,10,10, filled=True, bg=black)
+            o = CanvasOval(self.site_layer,0,0,10,10, filled=True, bg=white, fg=white)
             o.set_radius(10)
             o.set_center(site.x*X,(1-site.y)*Y)
             o.site = site
