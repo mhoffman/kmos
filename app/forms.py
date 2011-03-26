@@ -325,6 +325,16 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.rate_constant.set_tooltip_text('Python has to be able to evaluate this expression to a simple real ' +
         'number. One can use standard mathematical functions, parameters that are defined under "Parameters" or ' +
         'constants and conversion factor such as c, h, e, kboltzmann, pi, bar, angstrom')
+        rate_constant_terms = ['exp','kboltzmann']
+        for param in self.project_tree.parameter_list:
+            rate_constant_terms.append(param.name)
+        self.rate_constant.prefill(rate_constant_terms)
+
+        chem_exp_terms = ['->',]
+        for species in self.project_tree.species_list:
+            chem_exp_terms.append(species.name)
+        self.chemical_expression.prefill(chem_exp_terms)
+        
 
     def generate_expression(self):
         expr = ''
