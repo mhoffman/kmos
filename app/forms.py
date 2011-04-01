@@ -238,15 +238,22 @@ class OutputForm(GladeDelegate):
                                       type=gtk.MESSAGE_QUESTION,
                                       buttons=gtk.BUTTONS_OK_CANCEL,
                                       message_format='Please enter a new output: examples are a species or species@site')
+        output_form.set_flags(gtk.CAN_DEFAULT | gtk.CAN_FOCUS)
+        output_form.set_default_response(gtk.RESPONSE_OK)
+        output_form.set_default(output_form.get_widget_for_response(gtk.RESPONSE_OK))
         form_entry = gtk.Entry()
+        def activate_default(_):
+            output_form.activate_default()
+        form_entry.connect('activate', activate_default)
         output_form.vbox.pack_start(form_entry)
         output_form.vbox.show_all()
-        output_form.run()
+        res = output_form.run()
         output_str = form_entry.get_text()
         output_form.destroy()
-        output_item = OutputItem(name=output_str, output=True)
-        self.output_list.append(output_item)
-        self.output_list_data.append(output_item)
+        if res == gtk.RESPONSE_OK:
+            output_item = OutputItem(name=output_str, output=True)
+            self.output_list.append(output_item)
+            self.output_list_data.append(output_item)
 
 class BatchProcessForm(SlaveDelegate):
     gladefile = GLADEFILE
