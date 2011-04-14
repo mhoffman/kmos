@@ -887,6 +887,9 @@ class KMC_Editor(GladeDelegate):
         for filename in [ 'assert.ppc', 'base.f90', 'compile_for_f2py', 'compile_for_fortran', 'kind_values_f2py.f90', 'run_kmc.f90', 'units.f90', 'view_kmc.py' ]:
             shutil.copy(APP_ABS_PATH + '/%s' % filename, export_dir)
 
+        #copy xml file itself to target dir
+        shutil.copy(self.project_tree.filename, export_dir)
+
 
         # export parameters
         config = SafeConfigParser()
