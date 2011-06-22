@@ -137,6 +137,7 @@ class ProjectTree(SlaveDelegate):
             return os.path.basename(self.filename)
         else:
             return 'Untitled'
+
     def __getattr__(self, attr):
         if attr == 'species_list':
             return sorted(self.project_data.get_descendants(self.species_list_iter), key=lambda species: species.name)
@@ -215,7 +216,7 @@ class ProjectTree(SlaveDelegate):
                             else:
                                 color = '#ffffff'
                             layer = Layer(name=name, grid=grid, color=color)
-                            self.project_data.append(self.layer_list_iter, layer)
+                            self.append_layer(layer)
 
                             for site in elem:
                                 name = site.attrib['type']
@@ -242,7 +243,7 @@ class ProjectTree(SlaveDelegate):
                         name = parameter.attrib['name']
                         value = parameter.attrib['value']
                         if 'adjustable' in parameter.attrib:
-                            adjustable = bool(eval(parameter.attrib['adjustable'])) 
+                            adjustable = bool(eval(parameter.attrib['adjustable']))
                         else:
                             adjustable = False
 
@@ -260,7 +261,7 @@ class ProjectTree(SlaveDelegate):
                         name = process.attrib['name']
                         rate_constant = process.attrib['rate_constant']
                         if 'enabled' in process.attrib:
-                            try:    
+                            try:
                                 proc_enabled = bool(eval(process.attrib['enabled']))
                             except:
                                 proc_enabled = True
@@ -273,7 +274,7 @@ class ProjectTree(SlaveDelegate):
                                 coord_layer = sub.attrib['coord_layer']
                                 coord_name = sub.attrib['coord_name']
                                 coord_offset = tuple(
-                                    [int(i) for i in 
+                                    [int(i) for i in
                                     sub.attrib['coord_offset'].split()])
                                 coord = Coord(layer=coord_layer,
                                               name=coord_name,
@@ -284,15 +285,15 @@ class ProjectTree(SlaveDelegate):
                                     process_elem.add_action(condition_action)
                                 elif sub.tag == 'condition':
                                     process_elem.add_condition(condition_action)
-                        self.project_data.append(self.process_list_iter, process_elem)
+                        self.append_process(process_elem)
                 elif child.tag == 'species_list':
-                    self.species_list_iter.default_species = child.attrib['default_species']
+                    self.set_default_species(child.attrib['default_species'])
                     for species in child:
                         name = species.attrib['name']
                         color = species.attrib['color']
                         representation = species.attrib['representation'] if 'representation' in species.attrib else ''
                         species_elem = Species(name=name, color=color, representation=representation)
-                        self.project_data.append(self.species_list_iter, species_elem)
+                        self.append_species(species_elem)
                 if child.tag == 'output_list':
                     for item in child:
                         output_elem = OutputItem(name=item.attrib['item'], output=True)
@@ -300,6 +301,18 @@ class ProjectTree(SlaveDelegate):
 
         self.expand_all()
 
+
+
+    def set_default_species(self, species):
+        self.species_list_iter.default_species = species
+
+    def append_process(self, process):
+        self.project_data.append(self.process_list_iter, process)
+    def append_layer(self, layer):
+        self.project_data.append(self.layer_list_iter, layer)
+
+    def append_species(self, species):
+        self.project_data.append(self.species_list_iter, species)
 
     def expand_all(self):
         """Expand all list of the project tree

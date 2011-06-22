@@ -238,15 +238,22 @@ class OutputForm(GladeDelegate):
                                       type=gtk.MESSAGE_QUESTION,
                                       buttons=gtk.BUTTONS_OK_CANCEL,
                                       message_format='Please enter a new output: examples are a species or species@site')
+        output_form.set_flags(gtk.CAN_DEFAULT | gtk.CAN_FOCUS)
+        output_form.set_default_response(gtk.RESPONSE_OK)
+        output_form.set_default(output_form.get_widget_for_response(gtk.RESPONSE_OK))
         form_entry = gtk.Entry()
+        def activate_default(_):
+            output_form.activate_default()
+        form_entry.connect('activate', activate_default)
         output_form.vbox.pack_start(form_entry)
         output_form.vbox.show_all()
-        output_form.run()
+        res = output_form.run()
         output_str = form_entry.get_text()
         output_form.destroy()
-        output_item = OutputItem(name=output_str, output=True)
-        self.output_list.append(output_item)
-        self.output_list_data.append(output_item)
+        if res == gtk.RESPONSE_OK:
+            output_item = OutputItem(name=output_str, output=True)
+            self.output_list.append(output_item)
+            self.output_list_data.append(output_item)
 
 class BatchProcessForm(SlaveDelegate):
     gladefile = GLADEFILE
@@ -325,6 +332,16 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.rate_constant.set_tooltip_text('Python has to be able to evaluate this expression to a simple real ' +
         'number. One can use standard mathematical functions, parameters that are defined under "Parameters" or ' +
         'constants and conversion factor such as c, h, e, kboltzmann, pi, bar, angstrom')
+        rate_constant_terms = ['exp','kboltzmann']
+        for param in self.project_tree.parameter_list:
+            rate_constant_terms.append(param.name)
+        self.rate_constant.prefill(rate_constant_terms)
+
+        chem_exp_terms = ['->',]
+        for species in self.project_tree.species_list:
+            chem_exp_terms.append(species.name)
+        self.chemical_expression.prefill(chem_exp_terms)
+        
 
     def generate_expression(self):
         expr = ''
