@@ -8,9 +8,20 @@
         <species color="#ff1717" name="oxygen" representation="Atoms('O',[[0,0,0]])"/>
     </species_list>
     <parameter_list>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_adsorption_o2_bridge_bridge" value="1.9"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_co_bridge" value=""/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_co_hollow" value=""/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_diff_co_bridge_bridge" value=""/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_diff_co_hollow_hollow" value=""/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_diff_o_bridge_bridge" value=""/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_diff_o_bridge_hollow" value=""/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_diff_o_hollow_hollow" value=""/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_o_bridge" value=""/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_o_hollow" value=""/>
+        <parameter adjustable="True" max="600.0" min="500.0" name="T" value="600"/>
         <parameter adjustable="False" max="0.0" min="0.0" name="lattice_size" value="40 40 1"/>
-        <parameter adjustable="False" max="0.0" min="0.0" name="p_co" value="1."/>
-        <parameter adjustable="False" max="0.0" min="0.0" name="p_o2" value="1."/>
+        <parameter adjustable="True" max="0.0" min="0.0" name="p_co" value="1."/>
+        <parameter adjustable="True" max="0.0" min="0.0" name="p_o2" value="1."/>
         <parameter adjustable="False" max="0.0" min="0.0" name="print_every" value="1.e5"/>
         <parameter adjustable="False" max="0.0" min="0.0" name="total_steps" value="1.e7"/>
     </parameter_list>
