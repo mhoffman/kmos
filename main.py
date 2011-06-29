@@ -160,6 +160,7 @@ class ProjectTree(SlaveDelegate):
         elif attr == 'select':
             return self.project_data.select
         else:
+            print(attr)
             raise UserWarning, ('%s not found' % attr)
 
     def __repr__(self):
@@ -255,7 +256,7 @@ class ProjectTree(SlaveDelegate):
                                                    adjustable=adjustable,
                                                    min=min,
                                                    max=max)
-                        self.project_data.append(self.parameter_list_iter, parameter_elem)
+                        self.append_parameter(parameter_elem)
                 elif child.tag == 'process_list':
                     for process in child:
                         name = process.attrib['name']
@@ -306,8 +307,12 @@ class ProjectTree(SlaveDelegate):
     def set_default_species(self, species):
         self.species_list_iter.default_species = species
 
+    def append_parameter(self, parameter):
+        self.project_data.append(self.parameter_list_iter, parameter)
+
     def append_process(self, process):
         self.project_data.append(self.process_list_iter, process)
+
     def append_layer(self, layer):
         self.project_data.append(self.layer_list_iter, layer)
 
