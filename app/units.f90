@@ -17,7 +17,7 @@ real,parameter :: u_h=6.62606957e-34 ! J s
 real,parameter :: u_hbar=1.054571726e-34 ! J s
 real,parameter :: u_e=1.602176565e-19 ! C
 real,parameter :: u_kboltzmann=1.3806488-23 ! J K
-real,parameter :: u_u=1.660538921e-27 ! kg atomic mass
+real,parameter :: u_umass=1.660538921e-27 ! kg atomic mass
 real,parameter :: u_angstrom=1.E-10 ! m
 real,parameter :: u_bar = 1.E5 ! kg / m s^2
 
