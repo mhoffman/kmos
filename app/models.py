@@ -300,11 +300,18 @@ class Meta(Settable, object):
 class Process(Attributes):
     """One process in a kMC process list
     """
-    attributes = ['name', 'rate_constant', 'condition_list', 'action_list','enabled','chemical_expression']
+    attributes = ['name',
+                  'rate_constant',
+                  'condition_list',
+                  'action_list',
+                  'enabled',
+                  'chemical_expression',
+                  'tof_count']
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
         self.condition_list = []
         self.action_list = []
+        self.tof_count = kwargs['tof_count'] if 'tof_count' in kwargs else None
         self.enabled = kwargs['enabled'] if 'enabled' in kwargs else True
             
     def __repr__(self):

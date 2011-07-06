@@ -789,6 +789,11 @@ class ProcListWriter():
         for process in data.process_list:
             out.write('    "%s":("%s", %s),\n' % (process.name, process.rate_constant, process.enabled))
         out.write('    }\n\n')
+        out.write('tof_count = {\n')
+        for process in data.process_list:
+            if process.tof_count is not None:
+                out.write('    "%s":"%s",\n' % (process.name, process.tof_count))
+        out.write('    }\n\n')
         out.close()
         
     def _gpl_message(self):

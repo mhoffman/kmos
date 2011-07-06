@@ -57,6 +57,7 @@
         name CDATA #REQUIRED
         rate_constant CDATA #REQUIRED
         enabled CDATA #IMPLIED
+        tof_count CDATA #IMPLIED
       >
       <!ELEMENT condition EMPTY>
       <!ATTLIST condition
