@@ -76,8 +76,8 @@ class KMC_Model(threading.Thread):
             for i, token, _, _, _ in tokenize.generate_tokens(StringIO.StringIO(rate_expr).readline):
                 if token in ['sqrt','exp','sin','cos','pi','pow']:
                     replaced_tokens.append((i,'math.'+token))
-                elif ('u_' + token) in dir(units):
-                    replaced_tokens.append((i, str(eval('units.u_' + token))))
+                elif ('u_' + token.lower()) in dir(units):
+                    replaced_tokens.append((i, str(eval('units.u_' + token.lower()))))
 
                 elif token in settings.parameters:
                     replaced_tokens.append((i, str(settings.parameters[token]['value'])))
