@@ -40,7 +40,7 @@ class KMC_Model(threading.Thread):
                 self.species_representation.append(Atoms())
 
         if len(settings.lattice_representation):
-            self.lattice_representation = eval(settings.lattice_representation)[0]
+            self.lattice_representation = eval(settings.lattice_representation)
         else:
             self.lattice_representation = Atoms()
 
@@ -186,8 +186,13 @@ class KMC_ViewBox(threading.Thread, View, Images, Status,FakeUI):
     def update_vbox(self, atoms):
         self.images = Images()
         self.images.initialize([atoms])
-        self.set_coordinates(0)
-        self.draw()
+        try: # FIXME : Threading
+            self.set_coordinates(0)
+            self.draw()
+        except:
+            pass
+
+
         return False
         
     def run(self):
@@ -213,7 +218,6 @@ class KMC_ViewBox(threading.Thread, View, Images, Status,FakeUI):
     def _do_zoom(self, x):
         """Utility method for zooming"""
         self.scale *= x
-        self.draw()
 
 class KMC_Viewer():
     def __init__(self):
