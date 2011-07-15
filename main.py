@@ -261,6 +261,10 @@ class ProjectTree(SlaveDelegate):
                     for process in child:
                         name = process.attrib['name']
                         rate_constant = process.attrib['rate_constant']
+                        if 'tof_count' in process.attrib:
+                            tof_count = process.attrib['tof_count']
+                        else:
+                            tof_count = None
                         if 'enabled' in process.attrib:
                             try:
                                 proc_enabled = bool(eval(process.attrib['enabled']))
@@ -268,7 +272,10 @@ class ProjectTree(SlaveDelegate):
                                 proc_enabled = True
                         else:
                             proc_enabled = True
-                        process_elem = Process(name=name, rate_constant=rate_constant,enabled=proc_enabled)
+                        process_elem = Process(name=name,
+                            rate_constant=rate_constant,
+                            enabled=proc_enabled,
+                            tof_count=tof_count)
                         for sub in process:
                             if sub.tag == 'action' or sub.tag == 'condition':
                                 species =  sub.attrib['species']
