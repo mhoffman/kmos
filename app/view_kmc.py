@@ -40,7 +40,7 @@ class KMC_Model(threading.Thread):
                 self.species_representation.append(Atoms())
 
         if len(settings.lattice_representation):
-            self.lattice_representation = eval(settings.lattice_representation)
+            self.lattice_representation = eval(settings.lattice_representation)[0]
         else:
             self.lattice_representation = Atoms()
 
