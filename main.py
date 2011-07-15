@@ -409,6 +409,8 @@ class ProjectTree(SlaveDelegate):
             process_elem.set('rate_constant', process.rate_constant)
             process_elem.set('name', process.name)
             process_elem.set('enabled',str(process.enabled))
+            if process.tof_count:
+                process_elem.set('tof_count', str(process.tof_count))
             for condition in process.condition_list:
                 condition_elem = ET.SubElement(process_elem, 'condition')
                 condition_elem.set('species', condition.species)
