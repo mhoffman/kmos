@@ -793,8 +793,7 @@ class ProcListWriter():
         print('len(process_list): %s' % len(data.process_list))
         for process in data.process_list:
             if process.tof_count is not None:
-                print(process.tof_count)
-                out.write('    %s:%s,\n' % (process.name, process.tof_count))
+                out.write('    "%s":%s,\n' % (process.name, process.tof_count))
         out.write('    }\n\n')
         out.close()
         
