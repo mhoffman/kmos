@@ -52,11 +52,17 @@ class KMC_Model(threading.Thread):
             for tof in tof_count:
                 if tof not in tofs:
                     tofs.append(tof)
-        tof_matrix = np.zeros((proclist.nr_of_proc, len(tofs)))
+        self.tof_matrix = np.zeros((len(tofs),proclist.nr_of_proc))
         for process, tof_count in settings.tof_count.iteritems():
             process_nr = eval('proclist.%s' % process.lower())
             for tof, tof_factor in tof_count.iteritems():
-                tof_matrix[process_nr, tofs.index(tof)] += tof_factor
+                self.tof_matrix[tofs.index(tof), process_nr] += tof_factor
+
+        # prepare procstat
+        self.procstat = np.zeros((proclist.nr_of_proc,))
+        for i in range(proclist.nr_of_proc):
+            self.procstat[i] = base.get_procstat(i+1)
+        self.time = base.get_kmc_time()
 
 
     def run(self):
@@ -200,6 +206,20 @@ class KMC_ViewBox(threading.Thread, View, Images, Status,FakeUI):
         self.images.initialize([atoms])
         self.set_coordinates(0)
         self.draw()
+
+        # Determine turn-over-frequencies
+        new_time = base.get_kmc_time()
+        new_procstat = np.zeros((proclist.nr_of_proc,))
+        for i in range(proclist.nr_of_proc):
+            new_procstat[i] = base.get_procstat(i+1)
+        tof = np.dot(self.model.tof_matrix,  (new_procstat - self.model.procstat))
+
+        print(self.model.time, tof/(new_time-self.model.time))
+
+        self.model.procstat[:] = new_procstat
+        self.model.time = new_time
+
+
         return False
 
     def run(self):
