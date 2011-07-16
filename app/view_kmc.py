@@ -198,13 +198,8 @@ class KMC_ViewBox(threading.Thread, View, Images, Status,FakeUI):
     def update_vbox(self, atoms):
         self.images = Images()
         self.images.initialize([atoms])
-        try: # FIXME : Threading
-            self.set_coordinates(0)
-            self.draw()
-        except:
-            pass
-
-
+        self.set_coordinates(0)
+        self.draw()
         return False
 
     def run(self):
