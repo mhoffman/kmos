@@ -40,11 +40,23 @@ class KMC_Model(threading.Thread):
                 self.species_representation.append(Atoms())
 
         if len(settings.lattice_representation):
-            self.lattice_representation = eval(settings.lattice_representation)
+            self.lattice_representation = eval(settings.lattice_representation)[0]
         else:
             self.lattice_representation = Atoms()
 
         self.set_rate_constants()
+
+        # prepare TOF counter
+        tofs = []
+        for process, tof_count in settings.tof_count.iteritems():
+            for tof in tof_count:
+                if tof not in tofs:
+                    tofs.append(tof)
+        tof_matrix = np.zeros((proclist.nr_of_proc, len(tofs)))
+        for process, tof_count in settings.tof_count.iteritems():
+            process_nr = eval('proclist.%s' % process.lower())
+            for tof, tof_factor in tof_count.iteritems():
+                tof_matrix[process_nr, tofs.index(tof)] += tof_factor
 
 
     def run(self):
@@ -93,7 +105,7 @@ class KMC_Model(threading.Thread):
                 base.set_rate_const(eval('proclist.%s' % proc.lower()), rate_const)
             except Exception as e:
                 raise UserWarning("Could not set %s for process %s!\nException: %s" % (rate_expr, proc, e))
-            
+
     def get_atoms(self):
         atoms = ase.atoms.Atoms()
         atoms.set_cell(self.cell_size)
@@ -111,7 +123,7 @@ class KMC_Model(threading.Thread):
                     lattice_repr.translate(np.dot(lattice.unit_cell_size,
                                 np.array([i,j,k])))
                     atoms += lattice_repr
-        
+
         return atoms
 class ParamSlider(gtk.HScale):
     def __init__(self, settings, name, value, min, max, set_rate_constants):
@@ -194,7 +206,7 @@ class KMC_ViewBox(threading.Thread, View, Images, Status,FakeUI):
 
 
         return False
-        
+
     def run(self):
         while not self.stopthread.isSet():
             atoms = self.model.get_atoms()
@@ -204,8 +216,8 @@ class KMC_ViewBox(threading.Thread, View, Images, Status,FakeUI):
     def stop(self):
         self.model.stop()
         self.stopthread.set()
-        
-    
+
+
     def scroll_event(self, window, event):
         """Zoom in/out when using mouse wheel"""
         x = 1.0
@@ -224,7 +236,7 @@ class KMC_Viewer():
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_position(gtk.WIN_POS_CENTER)
         self.window.connect('delete-event',self.exit)
-        
+
         self.vbox = gtk.VBox()
         self.window.add(self.vbox)
         self.kmc_viewbox = KMC_ViewBox(self.vbox, self.window)
@@ -246,4 +258,4 @@ if __name__ == '__main__':
     gobject.threads_init()
     viewer = KMC_Viewer()
     gtk.main()
-    
+
