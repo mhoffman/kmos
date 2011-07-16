@@ -790,6 +790,7 @@ class ProcListWriter():
             out.write('    "%s":("%s", %s),\n' % (process.name, process.rate_constant, process.enabled))
         out.write('    }\n\n')
         out.write('tof_count = {\n')
+        print('len(process_list): %s' % len(data.process_list))
         for process in data.process_list:
             if process.tof_count is not None:
                 out.write('    "%s":%s,\n' % (process.name, process.tof_count))
