@@ -100,7 +100,7 @@ class KMC_Model(threading.Thread):
         For the evaluation we draw on predefined natural constants, user defined
         parameters and mathematical functions
         """
-        for proc in settings.rate_constants:
+        for proc in sorted(settings.rate_constants):
             rate_expr = settings.rate_constants[proc][0]
             if not rate_expr:
                 base.set_rate(eval('proclist.%s' % proc.lower()), 0.0)
@@ -311,6 +311,7 @@ class KMC_Viewer():
             param = settings.parameters[param_name]
             slider = ParamSlider(settings, param_name, param['value'], param['min'], param['max'], self.kmc_viewbox.model.set_rate_constants)
             self.vbox.add(slider)
+            self.vbox.set_child_packing(slider, expand=False, fill=False, padding=0, pack_type=gtk.PACK_START)
         self.window.show_all()
         self.kmc_viewbox.start()
 
