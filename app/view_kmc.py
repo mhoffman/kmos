@@ -256,7 +256,7 @@ class KMC_ViewBox(threading.Thread, View, Images, Status,FakeUI):
         # plot occupations
         while len(self.model.occupation_hist) > 100 :
             self.model.occupation_hist.pop()
-        occupations = proclist.get_occupation().sum(axis=0)
+        occupations = proclist.get_occupation().sum(axis=1)/lattice.spuck
         self.model.occupation_hist = [occupations] + self.model.occupation_hist
         #self.model.occupation_hist = [[random() for x in range(proclist.nr_of_species)]] + self.model.occupation_hist
         for i, occupation_plot in enumerate(self.occupation_plots):
