@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import pdb
 
 from copy import deepcopy
 import math
@@ -6,6 +7,7 @@ import StringIO
 import threading
 import time
 import tokenize
+from random import random
 
 import pygtk
 pygtk.require('2.0')
@@ -18,6 +20,11 @@ from ase.gui.view import View
 from ase.gui.images import Images
 from ase.gui.status import Status
 from ase.gui.defaults import read_defaults
+
+import matplotlib
+matplotlib.use('GTKAgg')
+import matplotlib.pylab as plt
+
 
 from kmc import units, base, lattice, proclist
 import settings
@@ -52,6 +59,8 @@ class KMC_Model(threading.Thread):
             for tof in tof_count:
                 if tof not in tofs:
                     tofs.append(tof)
+        self.tofs = tofs
+
         self.tof_matrix = np.zeros((len(tofs),proclist.nr_of_proc))
         for process, tof_count in settings.tof_count.iteritems():
             process_nr = eval('proclist.%s' % process.lower())
@@ -63,6 +72,12 @@ class KMC_Model(threading.Thread):
         for i in range(proclist.nr_of_proc):
             self.procstat[i] = base.get_procstat(i+1)
         self.time = base.get_kmc_time()
+
+        # history tracking arrays
+        self.times = []
+        self.tof_hist = []
+        self.occupation_hist = []
+
 
 
     def run(self):
@@ -85,7 +100,7 @@ class KMC_Model(threading.Thread):
         For the evaluation we draw on predefined natural constants, user defined
         parameters and mathematical functions
         """
-        for proc in settings.rate_constants:
+        for proc in sorted(settings.rate_constants):
             rate_expr = settings.rate_constants[proc][0]
             if not rate_expr:
                 base.set_rate(eval('proclist.%s' % proc.lower()), 0.0)
@@ -107,6 +122,7 @@ class KMC_Model(threading.Thread):
                 rate_const = eval(rate_expr)
             except Exception as e:
                 raise UserWarning("Could not evaluate rate expression: %s\nException: %s" % (rate_expr, e))
+            print(proc, rate_const)
             try:
                 base.set_rate_const(eval('proclist.%s' % proc.lower()), rate_const)
             except Exception as e:
@@ -200,6 +216,17 @@ class KMC_ViewBox(threading.Thread, View, Images, Status,FakeUI):
 
         self.model.start()
 
+        # prepare diagrams
+        self.data_plot = plt.figure()
+        self.tof_diagram = self.data_plot.add_subplot(211)
+        self.tof_plots = []
+        for tof in self.model.tofs:
+            self.tof_plots.append(self.tof_diagram.plot([],[],'b-')[0])
+        self.occupation_plots =[]
+        self.occupation_diagram = self.data_plot.add_subplot(212)
+        for species in range(proclist.nr_of_species):
+            self.occupation_plots.append(self.occupation_diagram.plot([], [],)[0])
+
 
     def update_vbox(self, atoms):
         self.images = Images()
@@ -207,18 +234,42 @@ class KMC_ViewBox(threading.Thread, View, Images, Status,FakeUI):
         self.set_coordinates(0)
         self.draw()
 
+
+    def update_plots(self):
         # Determine turn-over-frequencies
         new_time = base.get_kmc_time()
         new_procstat = np.zeros((proclist.nr_of_proc,))
         for i in range(proclist.nr_of_proc):
             new_procstat[i] = base.get_procstat(i+1)
-        tof = np.dot(self.model.tof_matrix,  (new_procstat - self.model.procstat))
+        tof_data = np.dot(self.model.tof_matrix,  (new_procstat - self.model.procstat))
+        # plot TOFs
+        while len(self.model.tof_hist) > 100 :
+            self.model.tof_hist.pop()
+            self.model.times.pop()
+        self.model.tof_hist = [tof_data] + self.model.tof_hist
+        self.model.times = [ x + base.get_kmc_time() for x in  self.model.times]
+        self.model.times = [0.] + self.model.times
+        for i, tof_plot in enumerate(self.tof_plots):
+            self.tof_plots[i].set_xdata(self.model.times)
+            self.tof_plots[i].set_ydata([tof[i] for tof in self.model.tof_hist])
 
-        print(self.model.time, tof/(new_time-self.model.time))
+        # plot occupations
+        while len(self.model.occupation_hist) > 100 :
+            self.model.occupation_hist.pop()
+        occupations = proclist.get_occupation().sum(axis=1)/lattice.spuck
+        self.model.occupation_hist = [occupations] + self.model.occupation_hist
+        #self.model.occupation_hist = [[random() for x in range(proclist.nr_of_species)]] + self.model.occupation_hist
+        for i, occupation_plot in enumerate(self.occupation_plots):
+            self.occupation_plots[i].set_xdata(self.model.times)
+            self.occupation_plots[i].set_ydata([occ[i] for occ in self.model.occupation_hist])
+
+        plt.ioff()
+        self.data_plot.canvas.draw_idle()
+        plt.axes([0, 100, 0, 1])
+        plt.show()
 
         self.model.procstat[:] = new_procstat
         self.model.time = new_time
-
 
         return False
 
@@ -226,6 +277,7 @@ class KMC_ViewBox(threading.Thread, View, Images, Status,FakeUI):
         while not self.stopthread.isSet():
             atoms = self.model.get_atoms()
             gobject.idle_add(self.update_vbox, atoms)
+            gobject.idle_add(self.update_plots)
             time.sleep(0.05)
 
     def stop(self):
@@ -259,6 +311,7 @@ class KMC_Viewer():
             param = settings.parameters[param_name]
             slider = ParamSlider(settings, param_name, param['value'], param['min'], param['max'], self.kmc_viewbox.model.set_rate_constants)
             self.vbox.add(slider)
+            self.vbox.set_child_packing(slider, expand=False, fill=False, padding=0, pack_type=gtk.PACK_START)
         self.window.show_all()
         self.kmc_viewbox.start()
 
