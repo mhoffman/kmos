@@ -367,7 +367,7 @@ class ProcListWriter():
 
         out.write('subroutine get_occupation(occupation)\n\n')
         out.write('    ! nr_of_species = %s, spuck = %s\n' % (len(data.species_list), len(site_params)))
-        out.write('    real(kind=rdouble), dimension(0:%s, 0:%s), intent(out) :: occupation\n\n' % (len(data.species_list), len(site_params)))
+        out.write('    real(kind=rdouble), dimension(0:%s, 1:%s), intent(out) :: occupation\n\n' % (len(data.species_list)-1, len(site_params)))
         out.write('    integer(kind=iint) :: i, j, k, nr, species\n\n')
         out.write('    occupation = 0\n\n')
         out.write('    do k = 0, system_size(3)-1\n')
