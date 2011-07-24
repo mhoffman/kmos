@@ -106,6 +106,10 @@ class KMC_Model(threading.Thread):
                 base.set_rate(eval('proclist.%s' % proc.lower()), 0.0)
                 continue
             replaced_tokens = []
+
+            # replace useful aliases
+            rate_expr = rate_expr.replace('beta','(1/(kboltzmann*T)')
+
             for i, token, _, _, _ in tokenize.generate_tokens(StringIO.StringIO(rate_expr).readline):
                 if token in ['sqrt','exp','sin','cos','pi','pow']:
                     replaced_tokens.append((i,'math.'+token))
