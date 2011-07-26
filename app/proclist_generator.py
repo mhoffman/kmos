@@ -1,4 +1,3 @@
-import pdb
 #!/usr/bin/env python
 import itertools
 import operator
@@ -330,7 +329,7 @@ class ProcListWriter():
         out.write('\n\n ! Species constants\n\n')
         out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_species = %s\n'\
             % (len(data.species_list)))
-        for i, species in enumerate(data.species_list):
+        for i, species in enumerate(sorted(data.species_list)):
             out.write('integer(kind=iint), parameter, public :: %s = %s\n' % (species.name, i))
         out.write('integer(kind=iint), parameter, public :: default_species = %s\n' % (data.species_list_iter.default_species))
         representation_length = max([len(species.representation) for species in data.species_list])
@@ -772,8 +771,10 @@ class ProcListWriter():
         data = self.data
         out = open('%s/settings.py' % self.dir, 'w')
         out.write('representations = {\n')
-        for species in data.species_list:
-            out.write('    "%s":"%s",\n' % (species.name, species.representation))
+        for species in sorted(data.species_list):
+            out.write('    "%s":"%s",\n'
+                % (species.name,
+                species.representation))
         out.write('    }\n\n')
         out.write('lattice_representation = "%s"\n\n' % data.lattice.representation)
         out.write('parameters = {\n')

@@ -139,7 +139,7 @@ class KMC_Model(threading.Thread):
             for j in xrange(lattice.system_size[1]):
                 for k in xrange(lattice.system_size[2]):
                     for n in xrange(1,1+lattice.spuck):
-                        species = lattice.get_species([i,j,k,n]) - 1
+                        species = lattice.get_species([i,j,k,n])
                         if self.species_representation[species]:
                             atom = deepcopy(self.species_representation[species])
                             atom.translate(np.dot(lattice.unit_cell_size,
