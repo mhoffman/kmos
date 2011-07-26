@@ -107,10 +107,14 @@ class KMC_Model(threading.Thread):
                 continue
             replaced_tokens = []
 
-            # replace useful aliases
-            rate_expr = rate_expr.replace('beta','(1/(kboltzmann*T)')
-
-            for i, token, _, _, _ in tokenize.generate_tokens(StringIO.StringIO(rate_expr).readline):
+            # replace some aliases
+            rate_expr = rate_expr.replace('beta', '(1./(kboltzmann*T))')
+            try:
+                tokens = list(tokenize.generate_tokens(StringIO.StringIO(rate_expr).readline))
+            except:
+                print('Trouble with expression: %s' % rate_expr)
+                raise
+            for i, token, _, _, _ in tokens:
                 if token in ['sqrt','exp','sin','cos','pi','pow']:
                     replaced_tokens.append((i,'math.'+token))
                 elif ('u_' + token.lower()) in dir(units):
