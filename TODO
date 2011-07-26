@@ -21,3 +21,5 @@ Defered:
     simply chosen from (making new lattice is very easy
     and fast)
 
+BUGS:
+  * fix output of observables

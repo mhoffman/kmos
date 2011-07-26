@@ -9,12 +9,12 @@ import sys
 import os, os.path
 import copy
 # import own modules
-from app.config import *
-from app.models import *
-from app.forms import *
-from app.proclist_generator import ProcListWriter as MLProcListWriter
+from kmos.config import *
+from kmos.models import *
+from kmos.forms import *
+from kmos.proclist_generator import ProcListWriter as MLProcListWriter
 import shutil
-sys.path.append(APP_ABS_PATH)
+#sys.path.append(APP_ABS_PATH)
 import gobject
 import pygtk
 pygtk.require('2.0')
@@ -996,25 +996,3 @@ class KMC_Editor(GladeDelegate):
 
 
 
-
-
-if __name__ == '__main__':
-    parser = optparse.OptionParser()
-    parser.add_option('-o', '--open', dest='import_file', help='Immediately import store kmc file')
-    parser.add_option('-x', '--export-dir', dest='export_dir', type=str)
-    (options, args) = parser.parse_args()
-    editor = KMC_Editor()
-    if len(args) >= 1 :
-        options.import_file = args[0]
-
-    if options.import_file:
-        editor.import_file(options.import_file)
-        editor.toast('Imported %s' % options.import_file)
-    else:
-        editor.add_defaults()
-        editor.saved_state = str(editor.project_tree)
-    if hasattr(options, 'export_dir') and options.export_dir:
-        print('Exporting right-away')
-        editor.on_btn_export_src__clicked(button='', export_dir=options.export_dir)
-        exit()
-    editor.show_and_loop()

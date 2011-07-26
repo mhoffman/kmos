@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import itertools
 import operator
-from app.models import ConditionAction
+from kmos.models import ConditionAction
 
 def flatten(L):
     return [item for sublist in L for item in sublist]

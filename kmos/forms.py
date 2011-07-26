@@ -21,9 +21,9 @@ from models import *
 
 
 # Canvas Import
-from pygtkcanvas.canvas import Canvas
-from pygtkcanvas.canvaslayer import CanvasLayer
-from pygtkcanvas.canvasitem import *
+from kmos.pygtkcanvas.canvas import Canvas
+from kmos.pygtkcanvas.canvaslayer import CanvasLayer
+from kmos.pygtkcanvas.canvasitem import *
 
 def col_str2tuple(hex_string):
     """Convenience function that turns a HTML type color

@@ -1,4 +1,6 @@
-fortran_src
 *.pyc
 tags
-
+build
+dist
+MANIFEST
+example_projects
