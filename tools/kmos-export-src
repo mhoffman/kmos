@@ -6,6 +6,7 @@ import optparse
 import os
 import shutil
 
+from kmos.config import *
 
 usage = 'usage: %prog [xml file] [export dir]\n'\
     + '    export directory will be deleted first!'
