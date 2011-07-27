@@ -20,7 +20,7 @@ platforms = ['linux']
 name='python-kmos'
 scripts = [
         'tools/kmos-gui',
-        'tools/kmos-export-src',
+        'tools/kmos-export-program',
         'tools/kmos-build',
         'tools/kmos-build-standalone',
         ]
