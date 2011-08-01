@@ -7,6 +7,7 @@ author_email = 'mjhoffmann@gmail.com'
 description = "kMC modeling on steroids"
 license = 'COPYING'
 long_description = "A vigorous attempt to make lattice kinetic Monte Carlo modelling more accessible"
+name='python-kmos'
 packages = [
            'kmos',
            'kmos.pygtkcanvas',
@@ -17,7 +18,7 @@ package_data = {'kmos':['fortran_src/*f90',
                         'fortran_src/assert.ppc',
                         'kmc_project_v0.2.dtd']}
 platforms = ['linux']
-name='python-kmos'
+requires = ['kiwi',]
 scripts = [
         'tools/kmos-gui',
         'tools/kmos-export-program',
@@ -38,8 +39,8 @@ setup(
       package_dir=package_dir,
       package_data=package_data,
       platforms=platforms,
+      requires=requires,
       scripts=scripts,
       url=url,
       version=version,
       )
-
