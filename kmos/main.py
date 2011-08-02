@@ -217,7 +217,7 @@ class ProjectTree(SlaveDelegate):
                             else:
                                 color = '#ffffff'
                             layer = Layer(name=name, grid=grid, color=color)
-                            self.append_layer(layer)
+                            self.add_layer(layer)
 
                             for site in elem:
                                 name = site.attrib['type']
@@ -256,7 +256,7 @@ class ProjectTree(SlaveDelegate):
                                                    adjustable=adjustable,
                                                    min=min,
                                                    max=max)
-                        self.append_parameter(parameter_elem)
+                        self.add_parameter(parameter_elem)
                 elif child.tag == 'process_list':
                     for process in child:
                         name = process.attrib['name']
@@ -293,7 +293,7 @@ class ProjectTree(SlaveDelegate):
                                     process_elem.add_action(condition_action)
                                 elif sub.tag == 'condition':
                                     process_elem.add_condition(condition_action)
-                        self.append_process(process_elem)
+                        self.add_process(process_elem)
                 elif child.tag == 'species_list':
                     self.set_default_species(child.attrib['default_species'])
                     for species in child:
@@ -301,7 +301,7 @@ class ProjectTree(SlaveDelegate):
                         color = species.attrib['color']
                         representation = species.attrib['representation'] if 'representation' in species.attrib else ''
                         species_elem = Species(name=name, color=color, representation=representation)
-                        self.append_species(species_elem)
+                        self.add_species(species_elem)
                 if child.tag == 'output_list':
                     for item in child:
                         output_elem = OutputItem(name=item.attrib['item'], output=True)
@@ -314,16 +314,16 @@ class ProjectTree(SlaveDelegate):
     def set_default_species(self, species):
         self.species_list_iter.default_species = species
 
-    def append_parameter(self, parameter):
+    def add_parameter(self, parameter):
         self.project_data.append(self.parameter_list_iter, parameter)
 
-    def append_process(self, process):
+    def add_process(self, process):
         self.project_data.append(self.process_list_iter, process)
 
-    def append_layer(self, layer):
+    def add_layer(self, layer):
         self.project_data.append(self.layer_list_iter, layer)
 
-    def append_species(self, species):
+    def add_species(self, species):
         self.project_data.append(self.species_list_iter, species)
 
     def expand_all(self):

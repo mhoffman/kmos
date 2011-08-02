@@ -206,8 +206,8 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.set_colors()
         self.set_coordinates(0)
         self.draw()
-        self.label.set_label('%.3f s (%s steps)' % (atoms.kmc_time,
-                                            atoms.kmc_step))
+        self.label.set_label('%.3f s (%s mio. steps)' % (atoms.kmc_time,
+                                                    atoms.kmc_step/1.e6))
 
     def kill(self):
         self.killed = True
