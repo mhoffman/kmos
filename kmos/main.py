@@ -911,7 +911,7 @@ class KMC_Editor(GladeDelegate):
             os.mkdir(export_dir)
 
         # copy files
-        for filename in [
+        cp_files = [
                         'fortran_src/assert.ppc',
                         'fortran_src/base.f90',
                         'fortran_src/kind_values_f2py.f90',
@@ -919,8 +919,14 @@ class KMC_Editor(GladeDelegate):
                         'fortran_src/units.f90',
                         'view_kmc.py',
                         'simple_view.py',
-                        ]:
-            shutil.copy(APP_ABS_PATH + '/%s' % filename, export_dir)
+                        ]
+        exec_files = [ 'view_kmc.py',
+                       'simple_view.py']
+
+        for filename in cp_files:
+            shutil.copy(os.path.join(APP_ABS_PATH, filename), export_dir)
+        for filename in exec_files:
+            os.chmod(os.path.join(export_dir, filename), 0755)
 
         #copy xml file itself to target dir
         shutil.copy(self.project_tree.filename, export_dir)

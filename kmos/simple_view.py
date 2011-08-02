@@ -25,7 +25,7 @@ import settings
 
 
 class KMC_Model(multiprocessing.Process):
-    def __init__(self, image_queue, signal_queue, size=10, system_name='kmc_model'):
+    def __init__(self, image_queue, signal_queue, size=20, system_name='kmc_model'):
         super(KMC_Model, self).__init__()
         self.image_queue = image_queue
         self.signal_queue = signal_queue
@@ -47,21 +47,18 @@ class KMC_Model(multiprocessing.Process):
             self.lattice_representation = Atoms()
         self.set_rate_constants()
 
-    def kill(self):
-        print('Killed model process')
-        self.killed = True
-
     def run(self):
         while True:
-            for _ in xrange(10000):
+            for _ in xrange(1000):
                 proclist.do_kmc_step()
             if not self.image_queue.full():
                 atoms = self.get_atoms()
                 self.image_queue.put(atoms)
             if not self.signal_queue.empty():
                 signal = self.signal_queue.get()
+                print('  ... model received %s' % signal)
                 if signal.upper() == 'STOP':
-                    return
+                    self.terminate()
                 elif signal.upper() == 'PAUSE':
                     while self.signal_queue.empty():
                         time.sleep('0.03')
@@ -206,8 +203,8 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.set_colors()
         self.set_coordinates(0)
         self.draw()
-        self.label.set_label('%.3f s (%s mio. steps)' % (atoms.kmc_time,
-                                                    atoms.kmc_step/1.e6))
+        self.label.set_label('%.3e s (%.3e steps)' % (atoms.kmc_time,
+                                                    atoms.kmc_step))
 
     def kill(self):
         self.killed = True
@@ -269,7 +266,7 @@ class KMC_Viewer():
         print('  ... viewbox thread joined')
         self.model_rc.put('STOP')
         print('  ... sent stop to model')
-
+        self.model.terminate()
         self.model.join()
         print('  ... model thread joined')
         base.deallocate_system()
