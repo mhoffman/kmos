@@ -25,10 +25,14 @@ import settings
 
 
 class KMC_Model(multiprocessing.Process):
-    def __init__(self, image_queue, size=10, system_name='kmc_model'):
+    def __init__(self, image_queue, signal_queue, size=10, system_name='kmc_model'):
         super(KMC_Model, self).__init__()
         self.image_queue = image_queue
-        proclist.init((size,)*int(lattice.model_dimension),system_name, lattice.default_layer, proclist.default_species)
+        self.signal_queue = signal_queue
+        proclist.init((size,)*int(lattice.model_dimension),
+            system_name,
+            lattice.default_layer,
+            proclist.default_species)
         self.cell_size = np.dot(lattice.unit_cell_size, lattice.system_size)
         self.species_representation = []
         for species in sorted(settings.representations):
@@ -42,21 +46,27 @@ class KMC_Model(multiprocessing.Process):
         else:
             self.lattice_representation = Atoms()
         self.set_rate_constants()
-        self.killed = False
 
     def kill(self):
         print('Killed model process')
         self.killed = True
 
     def run(self):
-        while not self.killed:
-            for _ in xrange(1000):
+        while True:
+            for _ in xrange(10000):
                 proclist.do_kmc_step()
             if not self.image_queue.full():
                 atoms = self.get_atoms()
-                self.image_queue.put_nowait(atoms)
-        print(multiprocessing.active_children())
-
+                self.image_queue.put(atoms)
+            if not self.signal_queue.empty():
+                signal = self.signal_queue.get()
+                if signal.upper() == 'STOP':
+                    return
+                elif signal.upper() == 'PAUSE':
+                    while self.signal_queue.empty():
+                        time.sleep('0.03')
+                elif signal.upper() == 'START':
+                    pass
 
     def set_rate_constants(self):
         """Tries to evaluate the supplied expression for a rate constant
@@ -94,7 +104,7 @@ class KMC_Model(multiprocessing.Process):
                 rate_const = eval(rate_expr)
             except Exception as e:
                 raise UserWarning("Could not evaluate rate expression: %s\nException: %s" % (rate_expr, e))
-            #print(proc, rate_const)
+            print(proc, rate_const)
             try:
                 base.set_rate_const(eval('proclist.%s' % proc.lower()), rate_const)
             except Exception as e:
@@ -184,23 +194,24 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.center = np.array([8, 8, 8])
         self.set_colors()
         self.set_coordinates(0)
+        self.center = np.array([0,0,0])
         print('initialized viewbox')
 
-
     def update_vbox(self, atoms):
-        self.center = atoms.cell.diagonal()*.5
+        if not self.center.any():
+            self.center = atoms.cell.diagonal()*.5
         self.images = Images([atoms])
         self.set_colors()
         self.set_coordinates(0)
+        self.label.set_text('foobar')
         self.draw()
-
 
     def kill(self):
         self.killed = True
+        print('  ... viewbox received kill')
 
     def run(self):
         time.sleep(1.)
-        print('called viewbox run')
         while not self.killed:
             time.sleep(0.05)
             if not self.image_queue.empty():
@@ -235,7 +246,8 @@ class KMC_Viewer():
         self.vbox = gtk.VBox()
         self.window.add(self.vbox)
         queue = multiprocessing.Queue(maxsize=3)
-        self.model = KMC_Model(queue)
+        self.model_rc = multiprocessing.Queue(maxsize=10)
+        self.model = KMC_Model(queue, self.model_rc)
         self.viewbox = KMC_ViewBox(queue, self.vbox, self.window)
 
         for param_name in filter(lambda p: settings.parameters[p]['adjustable'], settings.parameters):
@@ -248,12 +260,15 @@ class KMC_Viewer():
 
     def exit(self, widget, event):
         print('Starting shutdown procedure')
-        self.model.kill()
-        self.model.join()
-        print('Model thread joined')
         self.viewbox.kill()
+        print('  ... sent kill to viewbox')
         self.viewbox.join()
-        print('Viewbox thread joined')
+        print('  ... viewbox thread joined')
+        self.model_rc.put('STOP')
+        print('  ... sent stop to model')
+
+        self.model.join()
+        print('  ... model thread joined')
         base.deallocate_system()
         gtk.main_quit()
         return True
@@ -265,6 +280,5 @@ if __name__ == '__main__':
     viewer.model.start()
     viewer.viewbox.start()
     print('started model and viewbox processes')
-    print(multiprocessing.active_children())
     gtk.main()
-    print('finished viewer')
+    print('gtk.main stopped')
