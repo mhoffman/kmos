@@ -113,6 +113,8 @@ class KMC_Model(multiprocessing.Process):
     def get_atoms(self):
         atoms = ase.atoms.Atoms()
         atoms.set_cell(self.cell_size)
+        atoms.kmc_time = base.get_kmc_time()
+        atoms.kmc_step = base.get_kmc_step()
         for i in xrange(lattice.system_size[0]):
             for j in xrange(lattice.system_size[1]):
                 for k in xrange(lattice.system_size[2]):
@@ -203,8 +205,9 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.images = Images([atoms])
         self.set_colors()
         self.set_coordinates(0)
-        self.label.set_text('foobar')
         self.draw()
+        self.label.set_label('%.3f s (%s steps)' % (atoms.kmc_time,
+                                            atoms.kmc_step))
 
     def kill(self):
         self.killed = True
