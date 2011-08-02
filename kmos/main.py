@@ -917,7 +917,8 @@ class KMC_Editor(GladeDelegate):
                         'fortran_src/kind_values_f2py.f90',
                         'fortran_src/run_kmc.f90',
                         'fortran_src/units.f90',
-                        'view_kmc.py'
+                        'view_kmc.py',
+                        'simple_view.py',
                         ]:
             shutil.copy(APP_ABS_PATH + '/%s' % filename, export_dir)
 
