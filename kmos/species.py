@@ -25,17 +25,20 @@ class Species:
 
         # prepare chemical potential
         if self.gas and self.janaf_file:
-            self.mu = self._delta_mu_from_janaf_file(
+            self._prepare_G_p0(
                 os.path.abspath(os.path.join(
-                janaf_data.__path__,
+                janaf_data.__path__[0],
                 self.janaf_file)))
-        else:
-            self.mu = lambda T, p: 0
 
     def __repr__(self):
         return self.name
 
-    def _delta_mu_from_janaf_file(self, filename):
+    def mu(self, T, p):
+        # interpolate given grid
+        return interp1d(self.T_grid, self.G_grid)(T) + \
+               kboltzmann_in_eVK*T*log(p)
+
+    def _prepare_G_p0(self, filename):
         # from CODATA 2010
         kboltzmann = 1.3806488E-23
         kboltzmann_in_eVK = 8.6173324e-5
@@ -44,11 +47,8 @@ class Species:
         data = np.loadtxt(filename, skiprows=2, usecols=(0,2,4))
 
         # define data
-        T_grid = data[:, 0]
-        G_grid = (1000*(data[:, 2] - data[0, 2]) - data[:, 0]*data[:, 1])*Jmol_to_eV
-        # interpolate given grid
-        G_p0 =  interp1d(T_grid, G_grid)
-        return lambda T, p :  G_p0(T) + kboltzmann_in_eVK*T*log(p)
+        self.T_grid = data[:, 0]
+        self.G_grid = (1000*(data[:, 2] - data[0, 2]) - data[:, 0]*data[:, 1])*Jmol_to_eV
 
     def __eq__(self, other):
         return self.atoms == other.atoms and self.gas == other.gas
