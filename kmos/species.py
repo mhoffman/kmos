@@ -34,21 +34,21 @@ class Species:
         return self.name
 
     def mu(self, T, p):
+        kboltzmann_in_eVK = 8.6173324e-5
+
         # interpolate given grid
         return interp1d(self.T_grid, self.G_grid)(T) + \
                kboltzmann_in_eVK*T*log(p)
 
     def _prepare_G_p0(self, filename):
         # from CODATA 2010
-        kboltzmann = 1.3806488E-23
-        kboltzmann_in_eVK = 8.6173324e-5
-        Jmol_to_eV = 1.03642E-5
+        Jmol_in_eV = 1.03642E-5
         # load data
         data = np.loadtxt(filename, skiprows=2, usecols=(0,2,4))
 
         # define data
         self.T_grid = data[:, 0]
-        self.G_grid = (1000*(data[:, 2] - data[0, 2]) - data[:, 0]*data[:, 1])*Jmol_to_eV
+        self.G_grid = (1000*(data[:, 2] - data[0, 2]) - data[:, 0]*data[:, 1])*Jmol_in_eV
 
     def __eq__(self, other):
         return self.atoms == other.atoms and self.gas == other.gas
