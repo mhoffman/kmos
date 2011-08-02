@@ -1,7 +1,10 @@
 #!/usr/bin/python
+
 import multiprocessing
+import threading
 
 import gtk
+import gobject
 import numpy as np
 import tokenize
 import StringIO
@@ -39,13 +42,21 @@ class KMC_Model(multiprocessing.Process):
         else:
             self.lattice_representation = Atoms()
         self.set_rate_constants()
+        self.killed = False
+
+    def kill(self):
+        print('Killed model process')
+        self.killed = True
 
     def run(self):
-        while True:
-            proclist.do_kmc_step()
+        while not self.killed:
+            for _ in xrange(1000):
+                proclist.do_kmc_step()
             if not self.image_queue.full():
                 atoms = self.get_atoms()
                 self.image_queue.put_nowait(atoms)
+        print(multiprocessing.active_children())
+
 
     def set_rate_constants(self):
         """Tries to evaluate the supplied expression for a rate constant
@@ -150,14 +161,15 @@ class FakeUI():
         widget = FakeWidget(path)
         return widget
 
-class KMC_ViewBox(multiprocessing.Process, View, Status, FakeUI):
-    def __init__(self, image_queue, vbox, window, rotations='', show_unit_cell=True, show_bonds=False):
-        super(KMC_ViewBox, self).__init__()
-        self.image_queue = image_queue
+class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
+    def __init__(self, queue, vbox, window, rotations='', show_unit_cell=True, show_bonds=False):
+        threading.Thread.__init__(self)
+        self.image_queue = queue
         self.configured = False
         self.ui = FakeUI.__init__(self)
         self.images = Images()
         self.images.initialize([ase.atoms.Atoms()])
+        self.killed = False
 
         self.vbox = vbox
         self.window = window
@@ -176,18 +188,24 @@ class KMC_ViewBox(multiprocessing.Process, View, Status, FakeUI):
 
 
     def update_vbox(self, atoms):
+        self.center = atoms.cell.diagonal()*.5
         self.images = Images([atoms])
         self.set_colors()
         self.set_coordinates(0)
         self.draw()
 
 
+    def kill(self):
+        self.killed = True
+
     def run(self):
-        while True:
+        time.sleep(1.)
+        print('called viewbox run')
+        while not self.killed:
+            time.sleep(0.05)
             if not self.image_queue.empty():
-                time.sleep(0.5)
-                atoms = self.image_queue.get_nowait()
-                self.update_vbox(atoms)
+                atoms = self.image_queue.get()
+                gobject.idle_add(self.update_vbox,atoms)
 
     def scroll_event(self, window, event):
         """Zoom in/out when using mouse wheel"""
@@ -203,9 +221,9 @@ class KMC_ViewBox(multiprocessing.Process, View, Status, FakeUI):
         self.scale *= x
         try:
             atoms = self.image_queue.get()
-            print(self.image_queue.qsize())
-        except:
+        except Exception, e:
             atoms = ase.atoms.Atoms()
+            print(e)
         self.update_vbox(atoms)
 
 class KMC_Viewer():
@@ -218,7 +236,8 @@ class KMC_Viewer():
         self.window.add(self.vbox)
         queue = multiprocessing.Queue(maxsize=3)
         self.model = KMC_Model(queue)
-        self.kmc_viewbox = KMC_ViewBox(queue, self.vbox, self.window)
+        self.viewbox = KMC_ViewBox(queue, self.vbox, self.window)
+
         for param_name in filter(lambda p: settings.parameters[p]['adjustable'], settings.parameters):
             param = settings.parameters[param_name]
             slider = ParamSlider(settings, param_name, param['value'], param['min'], param['max'], self.model.set_rate_constants)
@@ -227,20 +246,24 @@ class KMC_Viewer():
         self.window.show_all()
         print('initialized kmc_viewer')
 
-    def exit(self,widget,event):
-        self.model.terminate()
+    def exit(self, widget, event):
+        print('Starting shutdown procedure')
+        self.model.kill()
         self.model.join()
-        self.kmc_viewbox.terminate()
-        self.kmc_viewbox.join()
+        print('Model thread joined')
+        self.viewbox.kill()
+        self.viewbox.join()
+        print('Viewbox thread joined')
         base.deallocate_system()
         gtk.main_quit()
         return True
 
 
 if __name__ == '__main__':
+    gobject.threads_init()
     viewer = KMC_Viewer()
     viewer.model.start()
-    viewer.kmc_viewbox.start()
+    viewer.viewbox.start()
     print('started model and viewbox processes')
     print(multiprocessing.active_children())
     gtk.main()
