@@ -20,6 +20,7 @@ from ase.gui.images import Images
 from ase.gui.status import Status
 from ase.gui.defaults import read_defaults
 
+from kmos import species
 from kmc import units, base, lattice, proclist
 import settings
 
@@ -90,7 +91,12 @@ class KMC_Model(multiprocessing.Process):
                     replaced_tokens.append((i,'math.'+token))
                 elif ('u_' + token.lower()) in dir(units):
                     replaced_tokens.append((i, str(eval('units.u_' + token.lower()))))
-
+                elif token.startswith('mu_'):
+                    species_name = '_'.join(token.split('_')[1:])
+                    replaced_tokens.append((i, 'species.%s.mu(%s, %s)'
+                        % (species_name,
+                           settings.parameters['T']['value'],
+                           settings.parameters['p_%s' % species_name]['value'],)))
                 elif token in settings.parameters:
                     replaced_tokens.append((i, str(settings.parameters[token]['value'])))
                 else:

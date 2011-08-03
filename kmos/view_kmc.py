@@ -119,7 +119,10 @@ class KMC_Model(threading.Thread):
                     replaced_tokens.append((i,'math.'+token))
                 elif ('u_' + token.lower()) in dir(units):
                     replaced_tokens.append((i, str(eval('units.u_' + token.lower()))))
-
+                elif token.startswith('mu_'):
+                    species_name = '_'.join(token.split('_')[1:])
+                    print('Found mu symbol for %s' % species_name)
+                    replaced_tokens.append((i, '0'))
                 elif token in settings.parameters:
                     replaced_tokens.append((i, str(settings.parameters[token]['value'])))
                 else:
