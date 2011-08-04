@@ -214,4 +214,18 @@ CO2gas = Species(ase.atoms.Atoms('CO2',
      janaf_file='C-095.txt',
      name='CO2gas')
 
+NH3gas = Species(ase.atoms.Atoms(symbols='NH3',
+          pbc=np.array([ True,  True,  True], dtype=bool),
+          cell=np.array(
+      [[ 10.,   0.,   0.],
+       [  0.,  10.,   0.],
+       [  0.,   0.,  10.]]),
+          positions=np.array(
+      [[ 0.13288865,  0.13288865,  0.13288865],
+       [-0.03325795, -0.03325795,  1.13361278],
+       [-0.03325795,  1.13361278, -0.03325795],
+       [ 1.13361278, -0.03325795, -0.03325795]])),
+      gas=True,
+      janaf_file='H-083.txt',
+      name='NH3gas')
 
