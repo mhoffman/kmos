@@ -34,11 +34,13 @@ class Species:
         return self.name
 
     def mu(self, T, p):
-        kboltzmann_in_eVK = 8.6173324e-5
-
-        # interpolate given grid
-        return interp1d(self.T_grid, self.G_grid)(T) + \
-               kboltzmann_in_eVK*T*log(p)
+        if self.gas:
+            kboltzmann_in_eVK = 8.6173324e-5
+            # interpolate given grid
+            return interp1d(self.T_grid, self.G_grid)(T) + \
+                   kboltzmann_in_eVK*T*log(p)
+        else:
+            raise UserWarning('%s is no gas phas species' % self.name)
 
     def _prepare_G_p0(self, filename):
         # from CODATA 2010
