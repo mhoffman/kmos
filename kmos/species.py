@@ -40,7 +40,7 @@ class Species:
             return interp1d(self.T_grid, self.G_grid)(T) + \
                    kboltzmann_in_eVK*T*log(p)
         else:
-            raise UserWarning('%s is no gas phas species' % self.name)
+            raise UserWarning('%s is no gas-phase species.' % self.name)
 
     def _prepare_G_p0(self, filename):
         # from CODATA 2010
