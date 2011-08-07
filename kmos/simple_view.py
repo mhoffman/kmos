@@ -6,8 +6,6 @@ import threading
 import gtk
 import gobject
 import numpy as np
-import tokenize
-import StringIO
 import math
 import time
 from copy import deepcopy
@@ -20,8 +18,13 @@ from ase.gui.images import Images
 from ase.gui.status import Status
 from ase.gui.defaults import read_defaults
 
-from kmos import species
-from kmc import units, base, lattice, proclist
+import matplotlib
+matplotlib.use('GTKAgg')
+import matplotlib.pylab as plt
+
+
+from kmos import species, units, evaluate_rate_expression
+from kmc import base, lattice, proclist
 import settings
 
 
@@ -47,6 +50,33 @@ class KMC_Model(multiprocessing.Process):
         else:
             self.lattice_representation = Atoms()
         self.set_rate_constants()
+
+        # prepare TOF counter
+        tofs = []
+        for process, tof_count in settings.tof_count.iteritems():
+            for tof in tof_count:
+                if tof not in tofs:
+                    tofs.append(tof)
+        self.tofs = tofs
+
+        self.tof_matrix = np.zeros((len(tofs),proclist.nr_of_proc))
+        for process, tof_count in settings.tof_count.iteritems():
+            process_nr = eval('proclist.%s' % process.lower())
+            for tof, tof_factor in tof_count.iteritems():
+                self.tof_matrix[tofs.index(tof), process_nr] += tof_factor
+
+        # prepare procstat
+        self.procstat = np.zeros((proclist.nr_of_proc,))
+        for i in range(proclist.nr_of_proc):
+            self.procstat[i] = base.get_procstat(i+1)
+        self.time = base.get_kmc_time()
+
+        # history tracking arrays
+        self.times = []
+        self.tof_hist = []
+        self.occupation_hist = []
+
+
 
     def run(self):
         while True:
@@ -74,40 +104,8 @@ class KMC_Model(multiprocessing.Process):
         """
         for proc in sorted(settings.rate_constants):
             rate_expr = settings.rate_constants[proc][0]
-            if not rate_expr:
-                base.set_rate(eval('proclist.%s' % proc.lower()), 0.0)
-                continue
-            replaced_tokens = []
+            rate_const = evaluate_rate_expression(rate_expr, settings.parameters)
 
-            # replace some aliases
-            rate_expr = rate_expr.replace('beta', '(1./(kboltzmann*T))')
-            try:
-                tokens = list(tokenize.generate_tokens(StringIO.StringIO(rate_expr).readline))
-            except:
-                print('Trouble with expression: %s' % rate_expr)
-                raise
-            for i, token, _, _, _ in tokens:
-                if token in ['sqrt','exp','sin','cos','pi','pow']:
-                    replaced_tokens.append((i,'math.'+token))
-                elif ('u_' + token.lower()) in dir(units):
-                    replaced_tokens.append((i, str(eval('units.u_' + token.lower()))))
-                elif token.startswith('mu_'):
-                    species_name = '_'.join(token.split('_')[1:])
-                    replaced_tokens.append((i, 'species.%s.mu(%s, %s)'
-                        % (species_name,
-                           settings.parameters['T']['value'],
-                           settings.parameters['p_%s' % species_name]['value'],)))
-                elif token in settings.parameters:
-                    replaced_tokens.append((i, str(settings.parameters[token]['value'])))
-                else:
-                    replaced_tokens.append((i, token))
-
-            rate_expr = tokenize.untokenize(replaced_tokens)
-            try:
-                rate_const = eval(rate_expr)
-            except Exception as e:
-                raise UserWarning("Could not evaluate rate expression: %s\nException: %s" % (rate_expr, e))
-            print(proc, rate_const)
             try:
                 base.set_rate_const(eval('proclist.%s' % proc.lower()), rate_const)
             except Exception as e:
@@ -211,6 +209,44 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.draw()
         self.label.set_label('%.3e s (%.3e steps)' % (atoms.kmc_time,
                                                     atoms.kmc_step))
+
+    def update_plots(self):
+        # Determine turn-over-frequencies
+        new_time = base.get_kmc_time()
+        new_procstat = np.zeros((proclist.nr_of_proc,))
+        for i in range(proclist.nr_of_proc):
+            new_procstat[i] = base.get_procstat(i+1)
+        tof_data = np.dot(self.model.tof_matrix,  (new_procstat - self.model.procstat))
+        # plot TOFs
+        while len(self.model.tof_hist) > 100 :
+            self.model.tof_hist.pop()
+            self.model.times.pop()
+        self.model.tof_hist = [tof_data] + self.model.tof_hist
+        self.model.times = [ x + base.get_kmc_time() for x in  self.model.times]
+        self.model.times = [0.] + self.model.times
+        for i, tof_plot in enumerate(self.tof_plots):
+            self.tof_plots[i].set_xdata(self.model.times)
+            self.tof_plots[i].set_ydata([tof[i] for tof in self.model.tof_hist])
+
+        # plot occupations
+        while len(self.model.occupation_hist) > 100 :
+            self.model.occupation_hist.pop()
+        occupations = proclist.get_occupation().sum(axis=1)/lattice.spuck
+        self.model.occupation_hist = [occupations] + self.model.occupation_hist
+        #self.model.occupation_hist = [[random() for x in range(proclist.nr_of_species)]] + self.model.occupation_hist
+        for i, occupation_plot in enumerate(self.occupation_plots):
+            self.occupation_plots[i].set_xdata(self.model.times)
+            self.occupation_plots[i].set_ydata([occ[i] for occ in self.model.occupation_hist])
+
+        plt.ioff()
+        self.data_plot.canvas.draw_idle()
+        plt.axes([0, 100, 0, 1])
+        plt.show()
+
+        self.model.procstat[:] = new_procstat
+        self.model.time = new_time
+
+        return False
 
     def kill(self):
         self.killed = True

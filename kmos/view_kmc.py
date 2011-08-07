@@ -26,6 +26,7 @@ matplotlib.use('GTKAgg')
 import matplotlib.pylab as plt
 
 
+import kmos
 from kmc import units, base, lattice, proclist
 import settings
 
@@ -102,38 +103,8 @@ class KMC_Model(threading.Thread):
         """
         for proc in sorted(settings.rate_constants):
             rate_expr = settings.rate_constants[proc][0]
-            if not rate_expr:
-                base.set_rate(eval('proclist.%s' % proc.lower()), 0.0)
-                continue
-            replaced_tokens = []
+            rate_const = kmos.evaluate_rate_expression(rate_expr, settings.parameters)
 
-            # replace some aliases
-            rate_expr = rate_expr.replace('beta', '(1./(kboltzmann*T))')
-            try:
-                tokens = list(tokenize.generate_tokens(StringIO.StringIO(rate_expr).readline))
-            except:
-                print('Trouble with expression: %s' % rate_expr)
-                raise
-            for i, token, _, _, _ in tokens:
-                if token in ['sqrt','exp','sin','cos','pi','pow']:
-                    replaced_tokens.append((i,'math.'+token))
-                elif ('u_' + token.lower()) in dir(units):
-                    replaced_tokens.append((i, str(eval('units.u_' + token.lower()))))
-                elif token.startswith('mu_'):
-                    species_name = '_'.join(token.split('_')[1:])
-                    print('Found mu symbol for %s' % species_name)
-                    replaced_tokens.append((i, '0'))
-                elif token in settings.parameters:
-                    replaced_tokens.append((i, str(settings.parameters[token]['value'])))
-                else:
-                    replaced_tokens.append((i, token))
-
-            rate_expr = tokenize.untokenize(replaced_tokens)
-            try:
-                rate_const = eval(rate_expr)
-            except Exception as e:
-                raise UserWarning("Could not evaluate rate expression: %s\nException: %s" % (rate_expr, e))
-            print(proc, rate_const)
             try:
                 base.set_rate_const(eval('proclist.%s' % proc.lower()), rate_const)
             except Exception as e:
