@@ -916,13 +916,12 @@ class KMC_Editor(GladeDelegate):
                         'fortran_src/base.f90',
                         'fortran_src/kind_values_f2py.f90',
                         'fortran_src/run_kmc.f90',
-                        'view_kmc.py',
-                        'simple_view.py',
                         ]
-        exec_files = [ 'view_kmc.py',
-                       'simple_view.py']
+        exec_files = [ 
+                        'view_kmc.py',
+                       ]
 
-        for filename in cp_files:
+        for filename in cp_files + exec_files:
             shutil.copy(os.path.join(APP_ABS_PATH, filename), export_dir)
         for filename in exec_files:
             os.chmod(os.path.join(export_dir, filename), 0755)
