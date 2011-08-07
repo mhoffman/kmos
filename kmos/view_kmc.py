@@ -1,18 +1,15 @@
 #!/usr/bin/python
-import pdb
 
-from copy import deepcopy
-import math
-import StringIO
+import multiprocessing
 import threading
-import time
-import tokenize
-from random import random
 
-import pygtk
-pygtk.require('2.0')
-import gtk, gobject
+import gtk
+import gobject
 import numpy as np
+import math
+import time
+from copy import deepcopy
+
 
 import ase.gui.ag
 from ase.atoms import Atoms
@@ -26,18 +23,20 @@ matplotlib.use('GTKAgg')
 import matplotlib.pylab as plt
 
 
-from kmc import units, base, lattice, proclist
+from kmos import species, units, evaluate_rate_expression
+from kmc import base, lattice, proclist
 import settings
 
 
-gtk.gdk.threads_init()
-
-class KMC_Model(threading.Thread):
-    stopthread = threading.Event()
-    def __init__(self, size=10, system_name='kmc_model'):
+class KMC_Model(multiprocessing.Process):
+    def __init__(self, image_queue, signal_queue, size=20, system_name='kmc_model'):
         super(KMC_Model, self).__init__()
-
-        proclist.init((size,)*int(lattice.model_dimension),system_name, lattice.default_layer, proclist.default_species)
+        self.image_queue = image_queue
+        self.signal_queue = signal_queue
+        proclist.init((size,)*int(lattice.model_dimension),
+            system_name,
+            lattice.default_layer,
+            proclist.default_species)
         self.cell_size = np.dot(lattice.unit_cell_size, lattice.system_size)
         self.species_representation = []
         for species in sorted(settings.representations):
@@ -50,7 +49,6 @@ class KMC_Model(threading.Thread):
             self.lattice_representation = eval(settings.lattice_representation)[0]
         else:
             self.lattice_representation = Atoms()
-
         self.set_rate_constants()
 
         # prepare TOF counter
@@ -81,18 +79,22 @@ class KMC_Model(threading.Thread):
 
 
     def run(self):
-        while not self.stopthread.isSet():
-            gtk.gdk.threads_enter()
-            proclist.do_kmc_step()
-            gtk.gdk.threads_leave()
-
-    def stop(self):
-        self.stopthread.set()
-        base.deallocate_system()
-
-    def run_steps(self, n):
-        for i in xrange(n):
-            proclist.do_kmc_step()
+        while True:
+            for _ in xrange(1000):
+                proclist.do_kmc_step()
+            if not self.image_queue.full():
+                atoms = self.get_atoms()
+                self.image_queue.put(atoms)
+            if not self.signal_queue.empty():
+                signal = self.signal_queue.get()
+                print('  ... model received %s' % signal)
+                if signal.upper() == 'STOP':
+                    self.terminate()
+                elif signal.upper() == 'PAUSE':
+                    while self.signal_queue.empty():
+                        time.sleep('0.03')
+                elif signal.upper() == 'START':
+                    pass
 
     def set_rate_constants(self):
         """Tries to evaluate the supplied expression for a rate constant
@@ -102,38 +104,8 @@ class KMC_Model(threading.Thread):
         """
         for proc in sorted(settings.rate_constants):
             rate_expr = settings.rate_constants[proc][0]
-            if not rate_expr:
-                base.set_rate(eval('proclist.%s' % proc.lower()), 0.0)
-                continue
-            replaced_tokens = []
+            rate_const = evaluate_rate_expression(rate_expr, settings.parameters)
 
-            # replace some aliases
-            rate_expr = rate_expr.replace('beta', '(1./(kboltzmann*T))')
-            try:
-                tokens = list(tokenize.generate_tokens(StringIO.StringIO(rate_expr).readline))
-            except:
-                print('Trouble with expression: %s' % rate_expr)
-                raise
-            for i, token, _, _, _ in tokens:
-                if token in ['sqrt','exp','sin','cos','pi','pow']:
-                    replaced_tokens.append((i,'math.'+token))
-                elif ('u_' + token.lower()) in dir(units):
-                    replaced_tokens.append((i, str(eval('units.u_' + token.lower()))))
-                elif token.startswith('mu_'):
-                    species_name = '_'.join(token.split('_')[1:])
-                    print('Found mu symbol for %s' % species_name)
-                    replaced_tokens.append((i, '0'))
-                elif token in settings.parameters:
-                    replaced_tokens.append((i, str(settings.parameters[token]['value'])))
-                else:
-                    replaced_tokens.append((i, token))
-
-            rate_expr = tokenize.untokenize(replaced_tokens)
-            try:
-                rate_const = eval(rate_expr)
-            except Exception as e:
-                raise UserWarning("Could not evaluate rate expression: %s\nException: %s" % (rate_expr, e))
-            print(proc, rate_const)
             try:
                 base.set_rate_const(eval('proclist.%s' % proc.lower()), rate_const)
             except Exception as e:
@@ -142,6 +114,8 @@ class KMC_Model(threading.Thread):
     def get_atoms(self):
         atoms = ase.atoms.Atoms()
         atoms.set_cell(self.cell_size)
+        atoms.kmc_time = base.get_kmc_time()
+        atoms.kmc_step = base.get_kmc_step()
         for i in xrange(lattice.system_size[0]):
             for j in xrange(lattice.system_size[1]):
                 for k in xrange(lattice.system_size[2]):
@@ -200,16 +174,15 @@ class FakeUI():
         widget = FakeWidget(path)
         return widget
 
-class KMC_ViewBox(threading.Thread, View, Images, Status,FakeUI):
-    stopthread = threading.Event()
-    def __init__(self, vbox, window, rotations='', show_unit_cell=True, show_bonds=False):
-        super(KMC_ViewBox, self).__init__()
+class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
+    def __init__(self, queue, vbox, window, rotations='', show_unit_cell=True, show_bonds=False):
+        threading.Thread.__init__(self)
+        self.image_queue = queue
         self.configured = False
         self.ui = FakeUI.__init__(self)
-        self.model = KMC_Model()
-        self.model.run_steps(10000)
         self.images = Images()
-        self.images.initialize([self.model.get_atoms()])
+        self.images.initialize([ase.atoms.Atoms()])
+        self.killed = False
 
         self.vbox = vbox
         self.window = window
@@ -220,31 +193,22 @@ class KMC_ViewBox(threading.Thread, View, Images, Status,FakeUI):
         self.vbox.show()
 
         self.drawing_area.realize()
-        self.scale = 1.0
-        self.center = self.model.get_atoms().cell.diagonal()*.5
+        self.scale = 10.0
+        self.center = np.array([8, 8, 8])
         self.set_colors()
         self.set_coordinates(0)
-
-        self.model.start()
-
-        # prepare diagrams
-        self.data_plot = plt.figure()
-        self.tof_diagram = self.data_plot.add_subplot(211)
-        self.tof_plots = []
-        for tof in self.model.tofs:
-            self.tof_plots.append(self.tof_diagram.plot([],[],'b-')[0])
-        self.occupation_plots =[]
-        self.occupation_diagram = self.data_plot.add_subplot(212)
-        for species in range(proclist.nr_of_species):
-            self.occupation_plots.append(self.occupation_diagram.plot([], [],)[0])
-
+        self.center = np.array([0,0,0])
+        print('initialized viewbox')
 
     def update_vbox(self, atoms):
-        self.images = Images()
-        self.images.initialize([atoms])
+        if not self.center.any():
+            self.center = atoms.cell.diagonal()*.5
+        self.images = Images([atoms])
+        self.set_colors()
         self.set_coordinates(0)
         self.draw()
-
+        self.label.set_label('%.3e s (%.3e steps)' % (atoms.kmc_time,
+                                                    atoms.kmc_step))
 
     def update_plots(self):
         # Determine turn-over-frequencies
@@ -284,17 +248,17 @@ class KMC_ViewBox(threading.Thread, View, Images, Status,FakeUI):
 
         return False
 
+    def kill(self):
+        self.killed = True
+        print('  ... viewbox received kill')
+
     def run(self):
-        while not self.stopthread.isSet():
-            atoms = self.model.get_atoms()
-            gobject.idle_add(self.update_vbox, atoms)
-            gobject.idle_add(self.update_plots)
+        time.sleep(1.)
+        while not self.killed:
             time.sleep(0.05)
-
-    def stop(self):
-        self.model.stop()
-        self.stopthread.set()
-
+            if not self.image_queue.empty():
+                atoms = self.image_queue.get()
+                gobject.idle_add(self.update_vbox,atoms)
 
     def scroll_event(self, window, event):
         """Zoom in/out when using mouse wheel"""
@@ -308,6 +272,12 @@ class KMC_ViewBox(threading.Thread, View, Images, Status,FakeUI):
     def _do_zoom(self, x):
         """Utility method for zooming"""
         self.scale *= x
+        try:
+            atoms = self.image_queue.get()
+        except Exception, e:
+            atoms = ase.atoms.Atoms()
+            print(e)
+        self.update_vbox(atoms)
 
 class KMC_Viewer():
     def __init__(self):
@@ -317,18 +287,31 @@ class KMC_Viewer():
 
         self.vbox = gtk.VBox()
         self.window.add(self.vbox)
-        self.kmc_viewbox = KMC_ViewBox(self.vbox, self.window)
+        queue = multiprocessing.Queue(maxsize=3)
+        self.model_rc = multiprocessing.Queue(maxsize=10)
+        self.model = KMC_Model(queue, self.model_rc)
+        self.viewbox = KMC_ViewBox(queue, self.vbox, self.window)
+
         for param_name in filter(lambda p: settings.parameters[p]['adjustable'], settings.parameters):
             param = settings.parameters[param_name]
-            slider = ParamSlider(settings, param_name, param['value'], param['min'], param['max'], self.kmc_viewbox.model.set_rate_constants)
+            slider = ParamSlider(settings, param_name, param['value'], param['min'], param['max'], self.model.set_rate_constants)
             self.vbox.add(slider)
             self.vbox.set_child_packing(slider, expand=False, fill=False, padding=0, pack_type=gtk.PACK_START)
         self.window.show_all()
-        self.kmc_viewbox.start()
+        print('initialized kmc_viewer')
 
-
-    def exit(self,widget,event):
-        self.kmc_viewbox.stop()
+    def exit(self, widget, event):
+        print('Starting shutdown procedure')
+        self.viewbox.kill()
+        print('  ... sent kill to viewbox')
+        self.viewbox.join()
+        print('  ... viewbox thread joined')
+        self.model_rc.put('STOP')
+        print('  ... sent stop to model')
+        self.model.terminate()
+        self.model.join()
+        print('  ... model thread joined')
+        base.deallocate_system()
         gtk.main_quit()
         return True
 
@@ -336,5 +319,8 @@ class KMC_Viewer():
 if __name__ == '__main__':
     gobject.threads_init()
     viewer = KMC_Viewer()
+    viewer.model.start()
+    viewer.viewbox.start()
+    print('started model and viewbox processes')
     gtk.main()
-
+    print('gtk.main stopped')
