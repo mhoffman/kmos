@@ -916,7 +916,6 @@ class KMC_Editor(GladeDelegate):
                         'fortran_src/base.f90',
                         'fortran_src/kind_values_f2py.f90',
                         'fortran_src/run_kmc.f90',
-                        'fortran_src/units.f90',
                         'view_kmc.py',
                         'simple_view.py',
                         ]
