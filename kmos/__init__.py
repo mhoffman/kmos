@@ -3,7 +3,9 @@
 import tokenize
 import StringIO
 import math
-from kmos import units
+from kmos import units, species
+from ase.data import atomic_numbers, atomic_masses
+from ase.atoms import string2symbols
 
 def evaluate_rate_expression(rate_expr, parameters={}):
     """Evaluates an expression for a typical kMC rate constant.
@@ -29,9 +31,23 @@ def evaluate_rate_expression(rate_expr, parameters={}):
                 replaced_tokens.append((i,'math.'+token))
             elif token in dir(units):
                 replaced_tokens.append((i, str(eval('units.' + token))))
+            elif token.startswith('m_'):
+                species_name = '_'.join(token.split('_')[1:])
+                symbols = string2symbols(species_name)
+                replaced_tokens.append((i, '%s' % sum([atomic_masses[atomic_numbers[symbol]]
+                            for symbol in symbols])))
             elif token.startswith('mu_'):
                 species_name = '_'.join(token.split('_')[1:])
-                replaced_tokens.append((i, '0'))
+                if species_name in dir(species):
+                    replaced_tokens.append((i, 'species.%s.mu(%s,%s)' % (
+                                   species_name,
+                                   parameters['T']['value'],
+                                   parameters['p_%s' % species_name]['value'],
+                                   )))
+                else:
+                    print('No JANAF table assigned for %s' % species_name)
+                    print('Setting chemical potential to zero')
+                    replaced_tokens.append((i, '0'))
             elif token in parameters:
                 replaced_tokens.append((i, str(parameters[token]['value'])))
             else:
