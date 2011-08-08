@@ -19,7 +19,7 @@
         <parameter adjustable="False" max="0.0" min="0.0" name="E_o_bridge" value=""/>
         <parameter adjustable="False" max="0.0" min="0.0" name="E_o_hollow" value=""/>
         <parameter adjustable="True" max="600.0" min="500.0" name="T" value="600"/>
-        <parameter adjustable="False" max="0.0" min="0.0" name="lattice_size" value="40 40 1"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="lattice_size" value="14 14 1"/>
         <parameter adjustable="True" max="0.0" min="0.0" name="p_co" value="1."/>
         <parameter adjustable="True" max="0.0" min="0.0" name="p_o2" value="1."/>
         <parameter adjustable="False" max="0.0" min="0.0" name="print_every" value="1.e5"/>
