@@ -52,39 +52,20 @@ class KMC_Model(multiprocessing.Process):
             self.lattice_representation = Atoms()
         self.set_rate_constants(settings.parameters)
 
-        # prepare TOF counter
-        tofs = []
-        for process, tof_count in settings.tof_count.iteritems():
-            for tof in tof_count:
-                if tof not in tofs:
-                    tofs.append(tof)
-        self.tofs = tofs
-
-        self.tof_matrix = np.zeros((len(tofs),proclist.nr_of_proc))
-        for process, tof_count in settings.tof_count.iteritems():
-            process_nr = eval('proclist.%s' % process.lower())
-            for tof, tof_factor in tof_count.iteritems():
-                self.tof_matrix[tofs.index(tof), process_nr] += tof_factor
-
-        # prepare procstat
-        self.procstat = np.zeros((proclist.nr_of_proc,))
-        for i in range(proclist.nr_of_proc):
-            self.procstat[i] = base.get_procstat(i+1)
-        self.time = base.get_kmc_time()
-
-        # history tracking arrays
-        self.times = []
-        self.tof_hist = []
-        self.occupation_hist = []
-
-
-
     def run(self):
         while True:
             for _ in xrange(50000):
                 proclist.do_kmc_step()
             if not self.image_queue.full():
                 atoms = self.get_atoms()
+                # attach other quantities need to plot
+                # to the atoms object and let it travel
+                # piggy-back through the queue
+                atoms.kmc_time = base.get_kmc_time()
+                atoms.procstat = np.zeros((proclist.nr_of_proc,))
+                atoms.occupation = proclist.get_occupation()
+                for i in range(proclist.nr_of_proc):
+                    atoms.procstat[i] = base.get_procstat(i+1)
                 self.image_queue.put(atoms)
             if not self.signal_queue.empty():
                 signal = self.signal_queue.get()
@@ -221,6 +202,40 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.set_colors()
         self.set_coordinates(0)
         self.center = np.array([0,0,0])
+
+        # prepare TOF counter
+        tofs = []
+        for process, tof_count in settings.tof_count.iteritems():
+            for tof in tof_count:
+                if tof not in tofs:
+                    tofs.append(tof)
+        self.tofs = tofs
+        self.tof_matrix = np.zeros((len(tofs),proclist.nr_of_proc))
+        for process, tof_count in settings.tof_count.iteritems():
+            process_nr = eval('proclist.%s' % process.lower())
+            for tof, tof_factor in tof_count.iteritems():
+                print(tof, tof_factor)
+                self.tof_matrix[tofs.index(tof), process_nr-1] += tof_factor
+
+        # history tracking arrays
+        self.times = []
+        self.tof_hist = []
+        self.occupation_hist = []
+
+        # prepare procstat
+        self.procstat = np.zeros((proclist.nr_of_proc,))
+        # prepare diagrams
+        self.data_plot = plt.figure()
+        #plt.xlabel('$t$ in s')
+        self.tof_diagram = self.data_plot.add_subplot(211)
+        self.tof_plots = []
+        for tof in self.tofs:
+            self.tof_plots.append(self.tof_diagram.plot([],[],'b-')[0])
+        self.occupation_plots =[]
+        self.occupation_diagram = self.data_plot.add_subplot(212)
+        for species in range(proclist.nr_of_species):
+            self.occupation_plots.append(self.occupation_diagram.plot([], [],)[0])
+
         print('initialized viewbox')
 
     def update_vbox(self, atoms):
@@ -234,41 +249,39 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.label.set_label('%.3e s (%.3e steps)' % (atoms.kmc_time,
                                                     atoms.kmc_step))
 
-    def update_plots(self):
+    def update_plots(self, atoms):
         # Determine turn-over-frequencies
-        new_time = base.get_kmc_time()
-        new_procstat = np.zeros((proclist.nr_of_proc,))
-        for i in range(proclist.nr_of_proc):
-            new_procstat[i] = base.get_procstat(i+1)
-        tof_data = np.dot(self.model.tof_matrix,  (new_procstat - self.model.procstat))
+        new_time = atoms.kmc_time
+        new_procstat = atoms.procstat
+        tof_data = np.dot(self.tof_matrix,  (new_procstat - self.procstat))
         # plot TOFs
-        while len(self.model.tof_hist) > 100 :
-            self.model.tof_hist.pop()
-            self.model.times.pop()
-        self.model.tof_hist = [tof_data] + self.model.tof_hist
-        self.model.times = [ x + base.get_kmc_time() for x in  self.model.times]
-        self.model.times = [0.] + self.model.times
+        while len(self.tof_hist) > 100 :
+            self.tof_hist.pop()
+            self.times.pop()
+        self.tof_hist = [tof_data] + self.tof_hist
+        self.times = [ x + base.get_kmc_time() for x in  self.times]
+        self.times = [0.] + self.times
         for i, tof_plot in enumerate(self.tof_plots):
-            self.tof_plots[i].set_xdata(self.model.times)
-            self.tof_plots[i].set_ydata([tof[i] for tof in self.model.tof_hist])
+            self.tof_plots[i].set_xdata(self.times)
+            self.tof_plots[i].set_ydata([tof[i] for tof in self.tof_hist])
+        plt.xlim([self.times[0],self.times[-1]])
 
         # plot occupations
-        while len(self.model.occupation_hist) > 100 :
-            self.model.occupation_hist.pop()
-        occupations = proclist.get_occupation().sum(axis=1)/lattice.spuck
-        self.model.occupation_hist = [occupations] + self.model.occupation_hist
+        while len(self.occupation_hist) > 100 :
+            self.occupation_hist.pop()
+        occupations = atoms.occupation.sum(axis=1)/lattice.spuck
+        self.occupation_hist = [occupations] + self.occupation_hist
         #self.model.occupation_hist = [[random() for x in range(proclist.nr_of_species)]] + self.model.occupation_hist
         for i, occupation_plot in enumerate(self.occupation_plots):
-            self.occupation_plots[i].set_xdata(self.model.times)
-            self.occupation_plots[i].set_ydata([occ[i] for occ in self.model.occupation_hist])
+            self.occupation_plots[i].set_xdata(self.times)
+            self.occupation_plots[i].set_ydata([occ[i] for occ in self.occupation_hist])
 
-        plt.ioff()
         self.data_plot.canvas.draw_idle()
-        plt.axes([0, 100, 0, 1])
+        plt.xlim([self.times[0],self.times[-1]])
         plt.show()
 
-        self.model.procstat[:] = new_procstat
-        self.model.time = new_time
+        self.procstat[:] = new_procstat
+        self.time = new_time
 
         return False
 
@@ -283,6 +296,7 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
             if not self.image_queue.empty():
                 atoms = self.image_queue.get()
                 gobject.idle_add(self.update_vbox,atoms)
+                gobject.idle_add(self.update_plots, atoms)
 
     def scroll_event(self, window, event):
         """Zoom in/out when using mouse wheel"""
