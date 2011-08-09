@@ -258,13 +258,14 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         while len(self.tof_hist) > 100 :
             self.tof_hist.pop()
             self.times.pop()
-        self.tof_hist = [tof_data] + self.tof_hist
-        self.times = [ x + base.get_kmc_time() for x in  self.times]
-        self.times = [0.] + self.times
+        self.tof_hist.append(tof_data)
+        self.times.append(atoms.kmc_time)
         for i, tof_plot in enumerate(self.tof_plots):
             self.tof_plots[i].set_xdata(self.times)
             self.tof_plots[i].set_ydata([tof[i] for tof in self.tof_hist])
-        plt.xlim([self.times[0],self.times[-1]])
+        self.tof_diagram.set_xlim(self.times[0],self.times[-1])
+        self.tof_diagram.set_ylim(0,max([tof[i] for tof in self.tof_hist]))
+        self.occupation_diagram.set_xlim([self.times[0],self.times[-1]])
 
         # plot occupations
         while len(self.occupation_hist) > 100 :
@@ -277,7 +278,6 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
             self.occupation_plots[i].set_ydata([occ[i] for occ in self.occupation_hist])
 
         self.data_plot.canvas.draw_idle()
-        plt.xlim([self.times[0],self.times[-1]])
         plt.show()
 
         self.procstat[:] = new_procstat
