@@ -329,7 +329,7 @@ class ProcListWriter():
         out.write('\n\n ! Species constants\n\n')
         out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_species = %s\n'\
             % (len(data.species_list)))
-        for i, species in enumerate(sorted(data.species_list)):
+        for i, species in enumerate(sorted(data.species_list, key=lambda x: x.name)):
             out.write('integer(kind=iint), parameter, public :: %s = %s\n' % (species.name, i))
         out.write('integer(kind=iint), parameter, public :: default_species = %s\n' % (data.species_list_iter.default_species))
         representation_length = max([len(species.representation) for species in data.species_list])
@@ -770,6 +770,7 @@ class ProcListWriter():
     def write_settings(self):
         data = self.data
         out = open('%s/settings.py' % self.dir, 'w')
+        out.write('model_name = \'%s\'\n' % self.data.meta.model_name)
         out.write('representations = {\n')
         for species in sorted(data.species_list):
             out.write('    "%s":"%s",\n'

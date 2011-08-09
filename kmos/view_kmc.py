@@ -29,9 +29,10 @@ import settings
 
 
 class KMC_Model(multiprocessing.Process):
-    def __init__(self, image_queue, signal_queue, size=20, system_name='kmc_model'):
+    def __init__(self, image_queue, parameter_queue, signal_queue, size=20, system_name='kmc_model'):
         super(KMC_Model, self).__init__()
         self.image_queue = image_queue
+        self.parameter_queue = parameter_queue
         self.signal_queue = signal_queue
         proclist.init((size,)*int(lattice.model_dimension),
             system_name,
@@ -49,7 +50,7 @@ class KMC_Model(multiprocessing.Process):
             self.lattice_representation = eval(settings.lattice_representation)[0]
         else:
             self.lattice_representation = Atoms()
-        self.set_rate_constants()
+        self.set_rate_constants(settings.parameters)
 
         # prepare TOF counter
         tofs = []
@@ -95,8 +96,13 @@ class KMC_Model(multiprocessing.Process):
                         time.sleep('0.03')
                 elif signal.upper() == 'START':
                     pass
+            if not self.parameter_queue.empty():
+                while not self.parameter_queue.empty():
+                    parameters = self.parameter_queue.get()
+                self.set_rate_constants(parameters)
 
-    def set_rate_constants(self):
+
+    def set_rate_constants(self, parameters):
         """Tries to evaluate the supplied expression for a rate constant
         to a simple real number and sets it for the corresponding process.
         For the evaluation we draw on predefined natural constants, user defined
@@ -104,10 +110,11 @@ class KMC_Model(multiprocessing.Process):
         """
         for proc in sorted(settings.rate_constants):
             rate_expr = settings.rate_constants[proc][0]
-            rate_const = evaluate_rate_expression(rate_expr, settings.parameters)
+            rate_const = evaluate_rate_expression(rate_expr, parameters)
 
             try:
                 base.set_rate_const(eval('proclist.%s' % proc.lower()), rate_const)
+                print('%s: %.3e s^{-1}' % (proc, rate_const))
             except Exception as e:
                 raise UserWarning("Could not set %s for process %s!\nException: %s" % (rate_expr, proc, e))
 
@@ -133,21 +140,21 @@ class KMC_Model(multiprocessing.Process):
 
         return atoms
 class ParamSlider(gtk.HScale):
-    def __init__(self, settings, name, value, min, max, set_rate_constants):
+    def __init__(self, name, value, min, max, parameter_callback):
         self.settings = settings
         self.param_name = name
         self.value = float(value)
         self.min = float(min)
         self.max = float(max)
-        self.set_rate_constants = set_rate_constants
+        self.parameter_callback = parameter_callback
         adjustment = gtk.Adjustment(value=self.value, lower=self.min, upper=self.max)
         gtk.HScale.__init__(self, adjustment)
         self.connect('value-changed',self.value_changed)
         self.set_tooltip_text(self.param_name)
 
     def value_changed(self, widget):
-        self.settings.parameters[self.param_name]['value'] = self.get_value()
-        self.set_rate_constants()
+        print(self.name)
+        self.parameter_callback(self.param_name, self.get_value())
 
 
 class FakeWidget():
@@ -204,6 +211,7 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         if not self.center.any():
             self.center = atoms.cell.diagonal()*.5
         self.images = Images([atoms])
+        self.images.filenames = ['kmos GUI - %s' % settings.model_name]
         self.set_colors()
         self.set_coordinates(0)
         self.draw()
@@ -288,29 +296,37 @@ class KMC_Viewer():
         self.vbox = gtk.VBox()
         self.window.add(self.vbox)
         queue = multiprocessing.Queue(maxsize=3)
+        self.parameter_queue = multiprocessing.Queue(maxsize=50)
         self.model_rc = multiprocessing.Queue(maxsize=10)
-        self.model = KMC_Model(queue, self.model_rc)
+        self.model = KMC_Model(queue, self.parameter_queue, self.model_rc)
         self.viewbox = KMC_ViewBox(queue, self.vbox, self.window)
 
         for param_name in filter(lambda p: settings.parameters[p]['adjustable'], settings.parameters):
             param = settings.parameters[param_name]
-            slider = ParamSlider(settings, param_name, param['value'], param['min'], param['max'], self.model.set_rate_constants)
+            slider = ParamSlider(param_name, param['value'], param['min'], param['max'], self.parameter_callback)
             self.vbox.add(slider)
             self.vbox.set_child_packing(slider, expand=False, fill=False, padding=0, pack_type=gtk.PACK_START)
-        self.window.show_all()
         print('initialized kmc_viewer')
+        print(self.window.get_title())
+        self.window.set_title('kmos GUI')
+        print(self.window.get_title())
+        self.window.show_all()
+
+    def parameter_callback(self, name, value):
+        settings.parameters[name]['value'] = value
+        self.parameter_queue.put(settings.parameters)
 
     def exit(self, widget, event):
         print('Starting shutdown procedure')
         self.viewbox.kill()
-        print('  ... sent kill to viewbox')
+        print(' ... sent kill to viewbox')
         self.viewbox.join()
-        print('  ... viewbox thread joined')
+        print(' ... viewbox thread joined')
         self.model_rc.put('STOP')
-        print('  ... sent stop to model')
+        print(' ... sent stop to model')
         self.model.terminate()
         self.model.join()
-        print('  ... model thread joined')
+        print(' ... model thread joined')
         base.deallocate_system()
         gtk.main_quit()
         return True
