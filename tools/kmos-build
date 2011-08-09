@@ -29,10 +29,6 @@ else
 fi
 
 f2py --verbose --f90flags="${extra_flags}"  --fcompiler="${fcompiler}" -c ${src_files} -m ${module_name}
-#  Note: f2py cannot handle the return type of functions easily.
-#  If one wants to use it, it is neccessary to refactor all functions
-#  into subroutines
-#
 cat <<EOF
 #  If you run into strange errors like '... returned NULL from py_object ...' you probably have to play with
 #  kind_values_f2py.f90. Kind values are hardcoded here because f2py
