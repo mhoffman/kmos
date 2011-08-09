@@ -1,3 +1,4 @@
+import pdb
 #!/usr/bin/env python
 import itertools
 import operator
@@ -781,11 +782,12 @@ class ProcListWriter():
         out.write('parameters = {\n')
         for parameter in data.parameter_list:
             out.write(('    "%s":{"value":"%s", "adjustable":%s,' 
-            +' "min":%s, "max":%s},\n') % (parameter.name,
+            +' "min":%s, "max":%s,"scale":"%s"},\n') % (parameter.name,
                                           parameter.value,
                                           parameter.adjustable,
                                           parameter.min,
-                                          parameter.max))
+                                          parameter.max,
+                                          parameter.scale))
         out.write('    }\n\n')
         out.write('rate_constants = {\n')
         for process in data.process_list:

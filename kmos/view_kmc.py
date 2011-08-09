@@ -29,7 +29,7 @@ import settings
 
 
 class KMC_Model(multiprocessing.Process):
-    def __init__(self, image_queue, parameter_queue, signal_queue, size=20, system_name='kmc_model'):
+    def __init__(self, image_queue, parameter_queue, signal_queue, size=30, system_name='kmc_model'):
         super(KMC_Model, self).__init__()
         self.image_queue = image_queue
         self.parameter_queue = parameter_queue
@@ -81,7 +81,7 @@ class KMC_Model(multiprocessing.Process):
 
     def run(self):
         while True:
-            for _ in xrange(1000):
+            for _ in xrange(50000):
                 proclist.do_kmc_step()
             if not self.image_queue.full():
                 atoms = self.get_atoms()
@@ -140,21 +140,37 @@ class KMC_Model(multiprocessing.Process):
 
         return atoms
 class ParamSlider(gtk.HScale):
-    def __init__(self, name, value, min, max, parameter_callback):
+    def __init__(self, name, value, min, max, scale, parameter_callback):
         self.settings = settings
         self.param_name = name
         self.value = float(value)
-        self.min = float(min)
-        self.max = float(max)
+        self.scale = scale
+        self.min = 0.
+        self.max = 1.
+        self.xmin = float(min)
+        self.xmax = float(max)
         self.parameter_callback = parameter_callback
         adjustment = gtk.Adjustment(value=self.value, lower=self.min, upper=self.max)
         gtk.HScale.__init__(self, adjustment)
+        self.connect('format-value', self.linlog_scale_format)
         self.connect('value-changed',self.value_changed)
         self.set_tooltip_text(self.param_name)
+        adjustment.set_step_increment(0.01)
+
+    def linlog_scale_format(self, widget, value):
+        if self.scale == 'log':
+            vstr =  '%.2e' % (self.xmin*(self.xmax/self.xmin)**value)
+        else:
+            vstr = '%s' % (self.xmin+value*(self.xmax-self.xmin))
+        return vstr
 
     def value_changed(self, widget):
-        print(self.name)
-        self.parameter_callback(self.param_name, self.get_value())
+        if self.scale == 'log':
+            value = self.xmin*(self.xmax/self.xmin)**self.get_value()
+        else:
+            value = self.xmin +  (self.xmax-self.xmin)*float(self.get_value())
+
+        self.parameter_callback(self.param_name, value)
 
 
 class FakeWidget():
@@ -303,7 +319,7 @@ class KMC_Viewer():
 
         for param_name in filter(lambda p: settings.parameters[p]['adjustable'], settings.parameters):
             param = settings.parameters[param_name]
-            slider = ParamSlider(param_name, param['value'], param['min'], param['max'], self.parameter_callback)
+            slider = ParamSlider(param_name, param['value'], param['min'], param['max'], param['scale'], self.parameter_callback)
             self.vbox.add(slider)
             self.vbox.set_child_packing(slider, expand=False, fill=False, padding=0, pack_type=gtk.PACK_START)
         print('initialized kmc_viewer')

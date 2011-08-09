@@ -32,7 +32,7 @@ from kiwi.controllers import BaseController
 import kiwi.ui
 from kiwi.ui.delegates import Delegate, SlaveDelegate, GladeDelegate, GladeSlaveDelegate
 from kiwi.ui.objectlist import ObjectList, ObjectTree, Column
-import kiwi.ui.dialogs 
+import kiwi.ui.dialogs
 
 
 KMCPROJECT_V0_1_DTD = '/kmc_project_v0.1.dtd'
@@ -250,12 +250,14 @@ class ProjectTree(SlaveDelegate):
 
                         min = parameter.attrib['min'] if 'min' in parameter.attrib else 0.0
                         max = parameter.attrib['max'] if 'max' in parameter.attrib else 0.0
+                        scale = parameter.attrib['scale'] if 'scale' in parameter.attrib else 'linear'
 
                         parameter_elem = Parameter(name=name,
                                                    value=value,
                                                    adjustable=adjustable,
                                                    min=min,
-                                                   max=max)
+                                                   max=max,
+                                                   scale=scale)
                         self.add_parameter(parameter_elem)
                 elif child.tag == 'process_list':
                     for process in child:
@@ -357,7 +359,7 @@ class ProjectTree(SlaveDelegate):
             species_list.set('default_species', self.species_list_iter.default_species)
         else:
             species_list.set('default_species', '')
-            
+
         for species in self.species_list:
             species_elem = ET.SubElement(species_list, 'species')
             species_elem.set('name', species.name)
@@ -371,6 +373,11 @@ class ProjectTree(SlaveDelegate):
             parameter_elem.set('adjustable', str(parameter.adjustable))
             parameter_elem.set('min', str(parameter.min))
             parameter_elem.set('max', str(parameter.max))
+            if hasattr(parameter, 'scale'):
+                parameter_elem.set('scale', str(parameter.scale))
+            else:
+                parameter_elem.set('scale', 'linear')
+
         lattice_elem = ET.SubElement(root, 'lattice')
         if (hasattr(self.layer_list_iter, 'cell_size_x') and \
             hasattr(self.layer_list_iter, 'cell_size_y') and
@@ -401,7 +408,7 @@ class ProjectTree(SlaveDelegate):
                                   layer.grid.offset_z))
 
             layer_elem.set('color',layer.color)
-                
+
             for site in layer.sites:
                 site_elem = ET.SubElement(layer_elem, 'site')
                 site_elem.set('vector', '%s %s %s' % (site.x, site.y, site.z))
@@ -423,7 +430,7 @@ class ProjectTree(SlaveDelegate):
                 condition_elem.set('species', condition.species)
                 condition_elem.set('coord_layer', condition.coord.layer)
                 condition_elem.set('coord_name', condition.coord.name)
-                condition_elem.set('coord_offset', 
+                condition_elem.set('coord_offset',
                     ' '.join([str(i) for i in condition.coord.offset]))
             for action in process.action_list:
                 action_elem = ET.SubElement(process_elem, 'action')
@@ -454,7 +461,7 @@ class ProjectTree(SlaveDelegate):
             or isinstance(selection, Layer)):
                 if kiwi.ui.dialogs.yesno("Do you really want to delete '%s'?" % selection.name) == gtk.RESPONSE_YES:
                     self.project_data.remove(selection)
-                
+
 
     def on_project_data__selection_changed(self, _, elem):
         """When a new item is selected in the treeview this function
@@ -590,8 +597,8 @@ class UndoStack():
             self.menubar.get_widget('/MainMenuBar/MenuEdit/EditUndo').set_sensitive(False)
         self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_label('Redo %s' % (self.stack[self.head+1]['action']))
         self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_sensitive(True)
-        
-            
+
+
 
     def redo(self, _):
         if self.head  >= len(self.stack) - 1 :
@@ -680,7 +687,7 @@ class KMC_Editor(GladeDelegate):
         'If you want to run the model run hit "Export Source", where\n'+
         'you will get a fully self-contained Fortran source code\n'+
         'of the model and further instructions.\n\n' +
-        'In the example_projects folder you find some simple examples.\n' 
+        'In the example_projects folder you find some simple examples.\n'
         )
 
     def add_defaults(self):
@@ -694,7 +701,7 @@ class KMC_Editor(GladeDelegate):
         default_layer = Layer(name=default_layer_name,)
         self.project_tree.append(self.project_tree.layer_list_iter, default_layer)
         self.project_tree.lattice.default_layer = default_layer_name
-        
+
         # add an empty species
         empty_species = 'empty'
         empty = Species(name=empty_species, color='#fff')
@@ -735,7 +742,7 @@ class KMC_Editor(GladeDelegate):
         if str(self.project_tree) != self.saved_state:
             # if there are unsaved changes, ask what to do first
             save_changes_dialog = gtk.Dialog(
-                                    buttons=(gtk.STOCK_DISCARD, gtk.RESPONSE_DELETE_EVENT, 
+                                    buttons=(gtk.STOCK_DISCARD, gtk.RESPONSE_DELETE_EVENT,
                                     gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
                                     gtk.STOCK_SAVE, gtk.RESPONSE_OK),
                                     title='Saved unsaved changes?')
@@ -917,7 +924,7 @@ class KMC_Editor(GladeDelegate):
                         'fortran_src/kind_values_f2py.f90',
                         'fortran_src/run_kmc.f90',
                         ]
-        exec_files = [ 
+        exec_files = [
                         'view_kmc.py',
                        ]
 
@@ -944,7 +951,7 @@ class KMC_Editor(GladeDelegate):
 
         with open(export_dir + '/params.cfg','w') as configfile:
             config.write(configfile)
-            
+
 
         self.toast("Multi-lattice mode, not fully supported, yet!")
         writer = MLProcListWriter(self.project_tree, export_dir)
@@ -969,7 +976,7 @@ class KMC_Editor(GladeDelegate):
         # check if all process names are unique
         # check if all processes have at least one condition
         # check if all processes have at least one action
-        # check if all processes have a rate expression 
+        # check if all processes have a rate expression
         # check if all rate expressions are valid
         # check if all species have a unique name
         # check if all species used in condition_action are defined
@@ -1002,9 +1009,6 @@ class KMC_Editor(GladeDelegate):
         else:
             self.hide_and_quit()
             gtk.main_quit()
-        # Need to return true, or otherwise the window manager destroys 
+        # Need to return true, or otherwise the window manager destroys
         # the windows anywas
         return True
-
-
-
