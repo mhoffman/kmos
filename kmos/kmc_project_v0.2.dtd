@@ -29,6 +29,7 @@
     adjustable CDATA #IMPLIED
     min CDATA #IMPLIED
     max CDATA #IMPLIED
+    scale CDATA #IMPLIED
   >
   <!ELEMENT lattice (layer)*>
   <!ATTLIST lattice

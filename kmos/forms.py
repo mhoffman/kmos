@@ -308,7 +308,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     gladefile = GLADEFILE
     toplevel_name = 'process_form'
     widgets = ['process_name', 'rate_constant', 'process_enabled','chemical_expression']
-    z = 4 # z as in zoom
+    z = 5 # z as in zoom
     l = 500 # l as in length
     r_cond = 15.
     r_act = 10.

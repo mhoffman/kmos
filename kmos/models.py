@@ -47,7 +47,10 @@ class Site(Attributes):
 class ProcessFormSite(Site):
     """This is just a little varient of the site object,
     with the sole difference that it has a layer attribute
-    and is meant to be used in the process form. This separation was chosen, since the Site object as in the ProjectTree should not have a layer attribute to avoid data duplication but in the ProcessForm we need this to define processes
+    and is meant to be used in the process form. This separation was chosen,
+    since the Site object as in the ProjectTree should not have a layer
+    attribute to avoid data duplication but in the ProcessForm we need this
+    to define processes
     """
     attributes = Site.attributes
     attributes.append('layer')
