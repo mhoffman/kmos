@@ -255,7 +255,7 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         new_time = atoms.kmc_time
         new_procstat = atoms.procstat
         tof_data = np.dot(self.tof_matrix,  (new_procstat - self.procstat)/
-                                            (new_time - self.time)
+                                            (new_time - self.time))
         occupations = atoms.occupation.sum(axis=1)/lattice.spuck
 
         # store locally
@@ -266,7 +266,7 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
 
         self.times.append(atoms.kmc_time)
         self.tof_hist.append(tof_data)
-        self.occupation_hist.append(self.occupation_hist)
+        self.occupation_hist.append(occupations)
 
         # plot TOFs
         for i, tof_plot in enumerate(self.tof_plots):

@@ -925,7 +925,6 @@ class KMC_Editor(GladeDelegate):
                         'fortran_src/run_kmc.f90',
                         ]
         exec_files = [
-                        'view_kmc.py',
                        ]
 
         for filename in cp_files + exec_files:

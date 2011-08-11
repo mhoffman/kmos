@@ -23,6 +23,7 @@ scripts = [
         'tools/kmos-gui',
         'tools/kmos-export-program',
         'tools/kmos-build',
+        'tools/kmos-view',
         'tools/kmos-build-standalone',
         ]
 url = 'https://github.com/mhoffman/kmos'

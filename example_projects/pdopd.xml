@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <kmc version="(0, 2)">
-    <meta author="Fritz Mueller" debug="0" email="fritzmueller@tum.de" model_dimension="2" model_name="foo_model"/>
+    <meta author="Max J. Hoffmann" debug="0" email="max.hoffmann@ch.tum.de" model_dimension="2" model_name="sqrt5PdO"/>
     <species_list default_species="empty">
         <species color="#000000" name="CO" representation="Atoms('CO',[[0,0,0],[0,0,1.2]])"/>
         <species color="#0034be" name="Pd" representation="Atoms('Pd',[[0,0,0]])"/>
@@ -18,12 +18,10 @@
         <parameter adjustable="False" max="0.0" min="0.0" name="E_diff_o_hollow_hollow" value=""/>
         <parameter adjustable="False" max="0.0" min="0.0" name="E_o_bridge" value=""/>
         <parameter adjustable="False" max="0.0" min="0.0" name="E_o_hollow" value=""/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="lattice_size" value="10 10 1"/>
         <parameter adjustable="True" max="600.0" min="500.0" name="T" value="600"/>
-        <parameter adjustable="False" max="0.0" min="0.0" name="lattice_size" value="14 14 1"/>
         <parameter adjustable="True" max="0.0" min="0.0" name="p_co" value="1."/>
         <parameter adjustable="True" max="0.0" min="0.0" name="p_o2" value="1."/>
-        <parameter adjustable="False" max="0.0" min="0.0" name="print_every" value="1.e5"/>
-        <parameter adjustable="False" max="0.0" min="0.0" name="total_steps" value="1.e7"/>
     </parameter_list>
     <lattice cell_size="6.29 6.29 10.0" default_layer="PdO" representation="Atoms(symbols='Pd15', positions=np.array( [[  4.74536588,   0.34239956,  -6.29627642], [  5.92199002,   2.86578697,  -6.29627642], [  0.87533998,   5.21909763,  -6.29627642], [  2.22197847,   1.51908609,  -6.29627642], [  3.398665  ,   4.04241111,  -6.29627642], [  2.82001105,   5.90917072,  -4.24970573], [  0.34097598,   0.91823796,  -4.24362784], [  1.57674031,   3.40671184,  -4.25070729], [  5.26250348,   4.71173388,  -4.29960027], [  4.06752131,   2.19432896,  -4.28970289], [  4.74172449,   0.32992489,  -2.25580734], [  5.99691572,   2.85801944,  -2.22685536], [  0.97483913,   5.23732922,  -2.23766488], [  2.19854396,   1.53975362,  -2.23151537], [  3.44081858,   4.06773128,  -2.33377281]])),     ">
         <layer color="#6dbf6e" grid="10 10 1" grid_offset="0.1 0.1 0.0" name="Pd100">
