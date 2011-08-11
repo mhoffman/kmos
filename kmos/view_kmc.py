@@ -224,6 +224,7 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
 
         # prepare procstat
         self.procstat = np.zeros((proclist.nr_of_proc,))
+        self.time = 0.
         # prepare diagrams
         self.data_plot = plt.figure()
         #plt.xlabel('$t$ in s')
@@ -250,38 +251,43 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
                                                     atoms.kmc_step))
 
     def update_plots(self, atoms):
-        # Determine turn-over-frequencies
+        # fetch data piggy-backed on atoms object
         new_time = atoms.kmc_time
         new_procstat = atoms.procstat
-        tof_data = np.dot(self.tof_matrix,  (new_procstat - self.procstat))
-        # plot TOFs
-        while len(self.tof_hist) > 100 :
+        tof_data = np.dot(self.tof_matrix,  (new_procstat - self.procstat)/
+                                            (new_time - self.time)
+        occupations = atoms.occupation.sum(axis=1)/lattice.spuck
+
+        # store locally
+        while len(self.times) > 30 :
             self.tof_hist.pop()
             self.times.pop()
-        self.tof_hist.append(tof_data)
+            self.occupation_hist.pop()
+
         self.times.append(atoms.kmc_time)
+        self.tof_hist.append(tof_data)
+        self.occupation_hist.append(self.occupation_hist)
+
+        # plot TOFs
         for i, tof_plot in enumerate(self.tof_plots):
             self.tof_plots[i].set_xdata(self.times)
             self.tof_plots[i].set_ydata([tof[i] for tof in self.tof_hist])
         self.tof_diagram.set_xlim(self.times[0],self.times[-1])
         self.tof_diagram.set_ylim(0,max([tof[i] for tof in self.tof_hist]))
-        self.occupation_diagram.set_xlim([self.times[0],self.times[-1]])
 
-        # plot occupations
-        while len(self.occupation_hist) > 100 :
-            self.occupation_hist.pop()
-        occupations = atoms.occupation.sum(axis=1)/lattice.spuck
-        self.occupation_hist = [occupations] + self.occupation_hist
-        #self.model.occupation_hist = [[random() for x in range(proclist.nr_of_species)]] + self.model.occupation_hist
+        # plot occupation
         for i, occupation_plot in enumerate(self.occupation_plots):
             self.occupation_plots[i].set_xdata(self.times)
             self.occupation_plots[i].set_ydata([occ[i] for occ in self.occupation_hist])
+        self.occupation_diagram.set_xlim([self.times[0],self.times[-1]])
 
         self.data_plot.canvas.draw_idle()
         plt.show()
 
-        self.procstat[:] = new_procstat
+        # [:] is necessary so that it copies the
+        # values and doesn't reinitialize the pointer
         self.time = new_time
+        self.procstat[:] = new_procstat
 
         return False
 
