@@ -770,7 +770,7 @@ class ProcListWriter():
         
     def write_settings(self):
         data = self.data
-        out = open('%s/settings.py' % self.dir, 'w')
+        out = open('%s/kmc_settings.py' % self.dir, 'w')
         out.write('model_name = \'%s\'\n' % self.data.meta.model_name)
         out.write('representations = {\n')
         for species in sorted(data.species_list):
@@ -782,7 +782,7 @@ class ProcListWriter():
         out.write('parameters = {\n')
         for parameter in data.parameter_list:
             out.write(('    "%s":{"value":"%s", "adjustable":%s,' 
-            +' "min":%s, "max":%s,"scale":"%s"},\n') % (parameter.name,
+            +' "min":"%s", "max":"%s","scale":"%s"},\n') % (parameter.name,
                                           parameter.value,
                                           parameter.adjustable,
                                           parameter.min,
