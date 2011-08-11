@@ -32,7 +32,7 @@ DEPENDENCIES:
 
 USAGE:
   Start the main program with 
-    python main.py
+    kmos-gui
   and create your model. To test it you need to press 'Export source' choose a
   folder where the source code will be dumped. Use a terminal to go to that
   directory and run ./compile_for_f2py. If this finishes without complains
@@ -43,9 +43,10 @@ THANKS:
   each free software and I would like to thank each of these project for
   making their code avalaible for everyone: This is namely
     - Python
+    - ASE (https://wiki.fysik.dtu.dk/ase/)
     - Numpy
-    - lxml and in particular ElementTree (http://www.effbot.org/),
     - f2py (http://cens.ioc.ee/projects/f2py2e/),
-    - kiwi (http://www.async.com.br/projects/kiwi/)
     - gazpacho
+    - kiwi (http://www.async.com.br/projects/kiwi/)
+    - lxml and in particular ElementTree (http://www.effbot.org/),
     - pygtkcanvas(http://code.google.com/p/pygtkcanvas/)
