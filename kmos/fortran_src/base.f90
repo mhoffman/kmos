@@ -68,6 +68,7 @@ public :: add_proc, &
     replace_species, &
     get_kmc_step, &
     get_kmc_time, &
+    set_kmc_time, &
     get_kmc_time_step, &
     get_nrofsites, &
     get_procstat, &
@@ -756,6 +757,21 @@ pure function get_system_name()
 
     get_system_name = system_name
 end function get_system_name
+
+
+subroutine set_kmc_time(new_kmc_time)
+    !****f* base/get_kmc_time
+    ! FUNCTION
+    !    Sets current kmc_time as rdouble real as defined in kind_values.f90.
+    ! ARGUMENTS
+    !  * new -- readable real, that the kmc time will be set to
+    !******
+    !---------------I/O variables---------------
+    real(kind=rdouble), intent(in)  :: new_kmc_time
+
+    kmc_time = new_kmc_time
+
+end subroutine set_kmc_time
 
 
 subroutine get_kmc_time(return_kmc_time)
