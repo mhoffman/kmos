@@ -3,7 +3,7 @@
 
 src_files='kind_values_f2py.f90 base.f90  lattice.f90 proclist.f90'
 extra_flags='-xf95-cpp-input'
-module_name='kmc'
+module_name='kmc_model'
 
 for src_file in ${src_files}
 do
@@ -28,7 +28,7 @@ else
   extra_flags='-xf95-cpp-input -Wall -g'
 fi
 
-f2py --verbose --f90flags="${extra_flags}"  --fcompiler="${fcompiler}" -c ${src_files} -m ${module_name}
+f2py --f90flags="${extra_flags}"  --fcompiler="${fcompiler}" -c ${src_files} -m ${module_name}
 cat <<EOF
 #  If you run into strange errors like '... returned NULL from py_object ...' you probably have to play with
 #  kind_values_f2py.f90. Kind values are hardcoded here because f2py
