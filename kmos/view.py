@@ -113,6 +113,7 @@ class KMC_Model(multiprocessing.Process):
                 print('%s: %.3e s^{-1}' % (proc, rate_const))
             except Exception as e:
                 raise UserWarning("Could not set %s for process %s!\nException: %s" % (rate_expr, proc, e))
+        print('-------------------')
 
     def get_atoms(self):
         atoms = ase.atoms.Atoms()
@@ -135,37 +136,49 @@ class KMC_Model(multiprocessing.Process):
                     atoms += lattice_repr
 
         return atoms
+
+
 class ParamSlider(gtk.HScale):
     def __init__(self, name, value, min, max, scale, parameter_callback):
-        self.settings = settings
-        self.param_name = name
-        self.value = float(value)
-        self.scale = scale
-        self.min = 0.
-        self.max = 1.
+        print('%s %s %s %s' % (name, value, min, max))
+        self.parameter_callback = parameter_callback
+        self.resolution = 1000.
+        adjustment = gtk.Adjustment(0, 0, self.resolution, 0.1, 1.)
         self.xmin = float(min)
         self.xmax = float(max)
-        self.parameter_callback = parameter_callback
-        adjustment = gtk.Adjustment(value=self.value, lower=self.min, upper=self.max)
+        self.settings = settings
+        self.param_name = name
+        self.scale = scale
         gtk.HScale.__init__(self, adjustment)
         self.connect('format-value', self.linlog_scale_format)
         self.connect('value-changed',self.value_changed)
         self.set_tooltip_text(self.param_name)
-        adjustment.set_step_increment(0.01)
+        self.set_value((self.resolution*(float(value)-self.xmin)/(self.xmax-self.xmin)))
+        print('set value %s' % self.get_value())
 
     def linlog_scale_format(self, widget, value):
+        value /= self.resolution
+        name = self.param_name
+        unit = ''
+        if self.param_name.endswith('gas'):
+            name = name[:-3]
+        if self.param_name.startswith('p_'):
+            name = name[2 :]
+            unit = 'bar'
+        if name == 'T':
+            unit = 'K'
         if self.scale == 'log':
-            vstr =  '%.2e' % (self.xmin*(self.xmax/self.xmin)**value)
+            vstr =  '%s: %.2e %s' % (name, self.xmin*(self.xmax/self.xmin)**value, unit)
         else:
-            vstr = '%s' % (self.xmin+value*(self.xmax-self.xmin))
+            vstr = '%s: %s %s' % (name, self.xmin+value*(self.xmax-self.xmin), unit)
         return vstr
 
     def value_changed(self, widget):
+        scale_value = self.get_value()/self.resolution
         if self.scale == 'log':
-            value = self.xmin*(self.xmax/self.xmin)**self.get_value()
+            value = self.xmin*(self.xmax/self.xmin)**scale_value
         else:
-            value = self.xmin +  (self.xmax-self.xmin)*float(self.get_value())
-
+            value = self.xmin +  (self.xmax-self.xmin)*scale_value
         self.parameter_callback(self.param_name, value)
 
 
