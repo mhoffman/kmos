@@ -192,7 +192,7 @@ NOgas = Species(ase.atoms.Atoms('NO',
     cell=[10,10,10],
     ),
     gas=True,
-    janaf_file='N-007.txt',
+    janaf_file='N-005.txt',
     name='NOgas',
     )
 
