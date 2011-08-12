@@ -22,7 +22,7 @@ class CanvasItem(object):
         self.parent.append(self)
 
         # coords as list
-        self.coords = map(float, args) if args else None
+        self.coords = map(float, args[0]) if args else None
 
         # bindings as dict
         self.bindings = None
