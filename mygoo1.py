@@ -44,7 +44,6 @@ class AtomicWindow():
         atoms = ase.io.castep.read_cell('layer2_OTF.cell')
 
         for atom in sorted(atoms, key=lambda x: x.position[2]):
-            
             i = atom.number
             radius = self.radius_scale*covalent_radii[i]
             color = jmolcolor_in_hex(i)
