@@ -6,6 +6,7 @@ import copy
 import pygtk
 pygtk.require('2.0')
 import gtk
+import goocanvas
 
 #kiwi imports
 from kiwi.ui.delegates import ProxySlaveDelegate, GladeDelegate, SlaveDelegate, ProxyDelegate
@@ -19,6 +20,11 @@ from config import GLADEFILE
 from utils import CorrectlyNamed
 from models import *
 
+# ASE import
+import numpy as np
+from ase.atoms import Atoms
+from ase.data import covalent_radii
+from ase.data.colors import jmol_colors
 
 # Canvas Import
 from kmos.pygtkcanvas.canvas import Canvas
@@ -33,6 +39,13 @@ def col_str2tuple(hex_string):
     return (color.red_float, color.green_float, color.blue_float)
 
 
+def jmolcolor_in_hex(i):
+    from ase.data.colors import jmol_colors
+    color = map(int, 255*jmol_colors[i])
+    r, g, b = color
+    a = 255
+    color = (r << 24) | (g << 16) | (b << 8) | a
+    return color
         
 def parse_chemical_expression(eq, process, project_tree):
     """Evaluates a chemical expression 'eq' and adds
@@ -914,13 +927,19 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, model)
         self.grid = self.model.grid
-        self.canvas = Canvas()
+        self.canvas = goocanvas.Canvas()
+        self.root = self.canvas.get_root_item()
+        self.canvas.set_size_request(400,400)
         self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
-        self.canvas.grab_focus()
-        self.grid_layer = CanvasLayer()
-        self.site_layer = CanvasLayer()
-        self.canvas.append(self.grid_layer)
-        self.canvas.append(self.site_layer)
+        self.canvas.connect('button-press-event', self.on_button_press)
+        #self.grid_layer = CanvasLayer()
+        #self.site_layer = CanvasLayer()
+        #self.canvas.append(self.grid_layer)
+        #self.canvas.append(self.site_layer)
+
+        self.radius_scale = 22
+        self.scale = 20
+        self.offset_x, self.offset_y = (100, 100)
         self.lattice_pad.add(self.canvas)
         self.previous_layer_name = self.layer_name.get_text()
         self.redraw()
@@ -936,71 +955,110 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
     def redraw(self):
         white = col_str2tuple(self.model.color)
         black = col_str2tuple('#000000')
-        self.grid_layer.clear()
-        self.site_layer.clear()
-        X, Y = 400, 400
 
-        if self.project_tree.lattice.cell_size_x > self.project_tree.lattice.cell_size_y :
-            X = 400.
-            Y = 400.*self.project_tree.lattice.cell_size_y/self.project_tree.lattice.cell_size_x
-        else:
-            Y = 400.
-            X = 400.*self.project_tree.lattice.cell_size_x/self.project_tree.lattice.cell_size_y
+        atoms = []
+        if self.project_tree.lattice.representation:
+            atoms = eval(self.project_tree.lattice.representation)[0]
+        self.lower_left = (self.offset_x, self.offset_y+self.scale*atoms.cell[1,1])
+        self.upper_right= (self.offset_x + self.scale*atoms.cell[0,0], self.offset_y)
+        for atom in sorted(atoms, key=lambda x: x.position[2]):
+            i = atom.number
+            radius = self.radius_scale*covalent_radii[i]
+            color = jmolcolor_in_hex(i)
+
+            X = atom.position[0]
+            Y = atoms.cell[1,1] - atom.position[1]
+            ellipse = goocanvas.Ellipse(parent=self.root,
+                                center_x=(self.offset_x+self.scale*X),
+                                center_y=(self.offset_y+self.scale*Y),
+                                radius_x=radius,
+                                radius_y=radius,
+                                stroke_color='black',
+                                fill_color_rgba=color,
+                                line_width=1.0)
+        cell = goocanvas.Rect(parent=self.root,
+                              x=self.offset_x,
+                              y=self.offset_y,
+                              height=self.scale*atoms.cell[1,1],
+                              width=self.scale*atoms.cell[0,0],
+                              stroke_color='black',
+                              )
+
+
+        for site in self.model.sites:
+            X = self.scale*np.dot(site.x,atoms.cell[0,0])
+            Y = self.scale*np.dot(1-site.y,atoms.cell[1,1])
+            o = goocanvas.Ellipse(parent=self.root,
+                                  center_x=self.offset_x+X,
+                                  center_y=self.offset_y+Y,
+                                  radius_x=.3*self.radius_scale,
+                                  radius_y=.3*self.radius_scale,
+                                  stroke_color='black',
+                                  fill_color='white',
+                                  line_width=2.0,)
+
+            o.site = site
+            o.connect('query-tooltip', self.query_tooltip)
+        self.canvas.hide()
+        self.canvas.show()
+        #if self.project_tree.lattice.cell_size_x > self.project_tree.lattice.cell_size_y :
+            #X = 400.
+            #Y = 400.*self.project_tree.lattice.cell_size_y/self.project_tree.lattice.cell_size_x
+        #else:
+            #Y = 400.
+            #X = 400.*self.project_tree.lattice.cell_size_x/self.project_tree.lattice.cell_size_y
 
 
         # draw frame
-        CanvasLine(self.grid_layer, 0,0,0,Y, fg=white)
-        CanvasLine(self.grid_layer, X,0,X,Y, fg=white)
-        CanvasLine(self.grid_layer, 0,0,X,0, fg=white)
-        CanvasLine(self.grid_layer, 0,Y,X,Y, fg=white)
+        #CanvasLine(self.grid_layer, 0,0,0,Y, fg=white)
+        #CanvasLine(self.grid_layer, X,0,X,Y, fg=white)
+        #CanvasLine(self.grid_layer, 0,0,X,0, fg=white)
+        #CanvasLine(self.grid_layer, 0,Y,X,Y, fg=white)
 
         # draw grid lines
-        for i in range(self.grid.x+1):
-            xprime = (float(i)/self.grid.x+self.grid.offset_x)*X % X
-            CanvasLine(self.grid_layer,xprime ,0, xprime, Y, fg=white)
-        for i in range(self.grid.y+1):
-            yprime = (float(i)/(self.grid.y)+self.grid.offset_y)*Y % Y
-            CanvasLine(self.grid_layer, 0, Y-yprime , X, Y-yprime, fg=white)
-        for i in range(self.grid.x+1):
-            for j in range(self.grid.y+1):
-                xprime = (float(i)/self.grid.x+self.grid.offset_x)*X % X
-
-                yprime = (float(j)/(self.grid.y)+self.grid.offset_y)*Y % Y
-                o = CanvasOval(self.grid_layer, 0, 0, 10, 10, fg=white)
-                o.set_center(xprime, Y-yprime)
-                o.set_radius(5)
-                o.frac_coords = (xprime/X, yprime/Y)
-                o.connect('button-press-event', self.grid_point_press_event)
-
-        for site in self.model.sites:
-            o = CanvasOval(self.site_layer,0,0,10,10, filled=True, bg=white, fg=white)
-            o.set_radius(10)
-            o.set_center(site.x*X,(1-site.y)*Y)
-            o.site = site
-            o.connect('button-press-event', self.site_press_event)
-            o.connect('query-tooltip', self.query_tooltip)
-        self.canvas.move_all(50, 50)
-        self.canvas.hide()
-        self.canvas.show()
+        #for i in range(self.grid.x+1):
+            #xprime = (float(i)/self.grid.x+self.grid.offset_x)*X % X
+            #CanvasLine(self.grid_layer,xprime ,0, xprime, Y, fg=white)
+        #for i in range(self.grid.y+1):
+            #yprime = (float(i)/(self.grid.y)+self.grid.offset_y)*Y % Y
+            #CanvasLine(self.grid_layer, 0, Y-yprime , X, Y-yprime, fg=white)
+        #for i in range(self.grid.x+1):
+            #for j in range(self.grid.y+1):
+                #xprime = (float(i)/self.grid.x+self.grid.offset_x)*X % X
+                #yprime = (float(j)/(self.grid.y)+self.grid.offset_y)*Y % Y
+                #o = CanvasOval(self.grid_layer, 0, 0, 10, 10, fg=white)
+                #o.set_center(xprime, Y-yprime)
+                #o.set_radius(5)
+                #o.frac_coords = (xprime/X, yprime/Y)
+                #o.connect('button-press-event', self.grid_point_press_event)
 
     def query_tooltip(self, canvas, widget, tooltip):
         tooltip.set_text(widget.site.name)
         return True
 
-    def site_press_event(self, widget, item, event):
-        SiteForm(item.site, self, self.project_tree, self.model)
-        
-    def grid_point_press_event(self, widget, item, event):
+    def on_button_press(self, item, event):
+        pos_x = (event.x-self.lower_left[0])/(self.upper_right[0]-self.lower_left[0])
+        pos_y = (event.y-self.lower_left[1])/(self.upper_right[1]-self.lower_left[1])
 
-        new_site = Site()
-        new_site.name = ''
-        new_site.x = item.frac_coords[0]
-        new_site.y = item.frac_coords[1]
-        new_site.z = 0.
-        new_site.layer = self.model.name
+        for site in self.model.sites:
+            d = np.sqrt((pos_x-site.x)**2 + (pos_y-site.y)**2)
+            if d < 0.03 :
+                SiteForm(site, self, self.project_tree, self.model)
+                break
+        else:
+            new_site = Site()
+            new_site.name = ''
+            new_site.x = pos_x
+            new_site.y = pos_y
+            new_site.z = 0.
+            new_site.layer = self.model.name
 
-        self.model.sites.append(new_site)
-        SiteForm(new_site, self, self.project_tree, self.model)
+            self.model.sites.append(new_site)
+            SiteForm(new_site, self, self.project_tree, self.model)
+
+
+
+
       
 
     def on_set_grid_button__clicked(self, button):
