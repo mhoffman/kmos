@@ -772,6 +772,7 @@ class ProcListWriter():
         data = self.data
         out = open('%s/kmc_settings.py' % self.dir, 'w')
         out.write('model_name = \'%s\'\n' % self.data.meta.model_name)
+        out.write('simulation_size = 20\n')
         out.write('representations = {\n')
         for species in sorted(data.species_list):
             out.write('    "%s":"%s",\n'

@@ -40,13 +40,13 @@ except:
 
 
 class KMC_Model(multiprocessing.Process):
-    def __init__(self, image_queue, parameter_queue, signal_queue, size=30, system_name='kmc_model'):
+    def __init__(self, image_queue, parameter_queue, signal_queue, size=None, system_name='kmc_model'):
         super(KMC_Model, self).__init__()
         self.image_queue = image_queue
         self.parameter_queue = parameter_queue
         self.signal_queue = signal_queue
-        self.size = size
-        proclist.init((size,)*int(lattice.model_dimension),
+        self.size = int(settings.simulation_size) if size is None else int(size)
+        proclist.init((self.size,)*int(lattice.model_dimension),
             system_name,
             lattice.default_layer,
             proclist.default_species)
