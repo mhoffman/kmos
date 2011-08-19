@@ -20,7 +20,7 @@ package_data = {'kmos':['fortran_src/*f90',
 platforms = ['linux']
 requires = ['kiwi',]
 scripts = [
-        'tools/kmos-gui',
+        'tools/kmos-editor',
         'tools/kmos-export-program',
         'tools/kmos-build',
         'tools/kmos-view',
