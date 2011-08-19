@@ -932,6 +932,9 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.canvas.set_size_request(400,400)
         self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
         self.canvas.connect('button-press-event', self.on_button_press)
+
+        self.layer_nr = self.project_tree.layer_list.index(model)
+
         #self.grid_layer = CanvasLayer()
         #self.site_layer = CanvasLayer()
         #self.canvas.append(self.grid_layer)
@@ -939,7 +942,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
 
         self.radius_scale = 22
         self.scale = 20
-        self.offset_x, self.offset_y = (100, 100)
+        self.offset_x, self.offset_y = (200, 200)
         self.lattice_pad.add(self.canvas)
         self.previous_layer_name = self.layer_name.get_text()
         self.redraw()
@@ -958,10 +961,16 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
 
         atoms = []
         if self.project_tree.lattice.representation:
-            atoms = eval(self.project_tree.lattice.representation)[0]
+            representations = eval(self.project_tree.lattice.representation)
+            if len(representations) > self.layer_nr:
+                atoms = representations[self.layer_nr]
+            else:
+                atoms = representations[0]
         self.lower_left = (self.offset_x, self.offset_y+self.scale*atoms.cell[1,1])
         self.upper_right= (self.offset_x + self.scale*atoms.cell[0,0], self.offset_y)
-        for atom in sorted(atoms, key=lambda x: x.position[2]):
+        big_atoms = atoms*(3,3,1)
+        big_atoms.translate(-atoms.cell.diagonal())
+        for atom in sorted(big_atoms, key=lambda x: x.position[2]):
             i = atom.number
             radius = self.radius_scale*covalent_radii[i]
             color = jmolcolor_in_hex(i)
