@@ -25,6 +25,7 @@ scripts = [
         'tools/kmos-build',
         'tools/kmos-view',
         'tools/kmos-build-standalone',
+        'tools/kmos'
         ]
 url = 'https://github.com/mhoffman/kmos'
 version = '0.1'

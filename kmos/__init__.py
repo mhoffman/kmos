@@ -1,4 +1,12 @@
-#!/usr/bin/python
+"""
+kmos is a vigorous attempt to make (multi-)lattice kMC modelling more accessible.
+
+This package features an XML format to define lattice-kMC models, a graphical
+editor for these XML files, a tools which converts a project description into
+compilable python/F90 code and graphical front end to run and watch kMC simulations.
+
+
+"""
 
 import tokenize
 import StringIO
