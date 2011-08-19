@@ -25,11 +25,6 @@ DEPENDENCIES:
   python-gtk: GUI toolkit
   python-kiwi, gazpacho: frameworks for python-gtk
 
-  For questions and comment please drop me a line (anytime). Especially if
-  you get import error, I most likely forgot a dependency. Currently this
-  program still has a ton of rough edges. So please regard it at best as a
-  useful proof of concept. Any input is welcome.
-
 USAGE:
   Start the main program with 
     kmos-gui
