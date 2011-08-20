@@ -20,11 +20,13 @@ DEPENDENCIES
 ############
 In general this script has been developed and tested on Ubuntu 9.04-10.10 in
 conjunction with both gfortran and ifort. So things will most likely work
-best under a similar setup. Other than standard libraries you need to fetch::
-  *  python-numpy : contains f2py
-  *  python-lxml: project files are stored as XML
-  *  python-gtk: GUI toolkit
-  *  python-kiwi, gazpacho: frameworks for python-gtk
+best under a similar setup. Other than standard libraries you need to fetch:
+
+*  python-numpy : contains f2py
+*  python-lxml: project files are stored as XML
+*  python-gtk: GUI toolkit
+*  python-kiwi, gazpacho: frameworks for python-gtk
+
 
 
 USAGE
@@ -40,12 +42,14 @@ THANKS
 ######
 This project draws on several other great Python modules, which are in turn
 each free software and I would like to thank each of these project for
-making their code avalaible for everyone, namely::
-  * `Python <http://www.python.org>`_
-  * `ASE <https://wiki.fysik.dtu.dk/ase/>`_
-  * Numpy
-  * `f2py <http://cens.ioc.ee/projects/f2py2e/>`_
-  * gazpacho
-  * `kiwi <http://www.async.com.br/projects/kiwi/>`_
-  * lxml and in particular `ElementTree <http://www.effbot.org/>`_
-  * `pygtkcanvas <http://code.google.com/p/pygtkcanvas/>`_
+making their code avalaible for everyone, namely:
+
+* `Python <http://www.python.org>`_
+* `ASE <https://wiki.fysik.dtu.dk/ase/>`_
+* Numpy
+* `f2py <http://cens.ioc.ee/projects/f2py2e/>`_
+* gazpacho
+* `kiwi <http://www.async.com.br/projects/kiwi/>`_
+* lxml and in particular `ElementTree <http://www.effbot.org/>`_
+* `pygtkcanvas <http://code.google.com/p/pygtkcanvas/>`_
+
