@@ -34,7 +34,7 @@ USAGE
 Start the main program with:
 ::
   kmos editor
-and create your model. To test it you need to press 'Export source' choose a
+and create your model. To test, it you need to press 'Export source' choose a
 folder where the source code will be dumped. Use a terminal to go to that
 directory and run ./compile_for_f2py. If this finishes without complains
 you can try running::
@@ -43,8 +43,8 @@ you can try running::
 THANKS
 ######
 This project draws on several other great Python modules, which are in turn
-each free software and I would like to thank each of these project for
-making their code avalaible for everyone, namely:
+each free software and I would like to thank each of these projects for
+making their code avalaible for freely, namely:
 
 * `Python <http://www.python.org>`_
 * `ASE <https://wiki.fysik.dtu.dk/ase/>`_
