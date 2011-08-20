@@ -31,7 +31,8 @@ best under a similar setup. Other than standard libraries you need to fetch:
 
 USAGE
 #####
-Start the main program with::
+Start the main program with:
+::
   kmos editor
 and create your model. To test it you need to press 'Export source' choose a
 folder where the source code will be dumped. Use a terminal to go to that
