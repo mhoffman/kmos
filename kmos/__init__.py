@@ -3,9 +3,14 @@ kmos is a vigorous attempt to make (multi-)lattice kMC modelling more accessible
 
 This package features an XML format to define lattice-kMC models, a graphical
 editor for these XML files, a tools which converts a project description into
-compilable python/F90 code and graphical front end to run and watch kMC simulations.
+compilable python/Fortran90 code and graphical front end to run and watch kMC simulations::
 
+    kmos [help] (edit | view | export ) [options]
 
+kmos kMC project DTD
+####################
+
+.. literalinclude:: ../../kmos/kmc_project_v0.2.dtd
 """
 
 import tokenize

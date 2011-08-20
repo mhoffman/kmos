@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""A modules holding all the data models used in kmos.
+"""A module holding all the data models used in kmos.
 """
 
 from kiwi.python import Settable
