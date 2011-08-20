@@ -31,13 +31,13 @@ best under a similar setup. Other than standard libraries you need to fetch:
 
 USAGE
 #####
-  Start the main program with::
-    kmos editor
-  and create your model. To test it you need to press 'Export source' choose a
-  folder where the source code will be dumped. Use a terminal to go to that
-  directory and run ./compile_for_f2py. If this finishes without complains
-  you can try running::
-    kmos view`
+Start the main program with::
+  kmos editor
+and create your model. To test it you need to press 'Export source' choose a
+folder where the source code will be dumped. Use a terminal to go to that
+directory and run ./compile_for_f2py. If this finishes without complains
+you can try running::
+  kmos view
 
 THANKS
 ######
