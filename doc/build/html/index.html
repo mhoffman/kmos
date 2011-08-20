@@ -1,0 +1,204 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to kmos’s documentation! &mdash; kmos v0.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '#',
+        VERSION:     '0.0.1',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="kmos v0.0.1 documentation" href="#" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="modindex.html" title="Global Module Index"
+             accesskey="M">modules</a> |</li>
+        <li><a href="#">kmos v0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-kmos">
+<h1>Welcome to kmos&#8217;s documentation!<a class="headerlink" href="#module-kmos" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+</ul>
+<p>kmos is a vigorous attempt to make (multi-)lattice kMC modelling more accessible.</p>
+<p>This package features an XML format to define lattice-kMC models, a graphical
+editor for these XML files, a tools which converts a project description into
+compilable python/Fortran90 code and graphical front end to run and watch kMC simulations:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">kmos</span> <span class="p">[</span><span class="n">help</span><span class="p">]</span> <span class="p">(</span><span class="n">edit</span> <span class="o">|</span> <span class="n">view</span> <span class="o">|</span> <span class="n">export</span> <span class="p">)</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="section" id="kmos-kmc-project-dtd">
+<h2>kmos kMC project DTD<a class="headerlink" href="#kmos-kmc-project-dtd" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>&lt;!ELEMENT kmc (meta?,species_list?,parameter_list?, lattice, process_list?,output_list?)&gt;
+  &lt;!ATTLIST kmc
+  version CDATA #REQUIRED
+  &gt;
+  &lt;!ELEMENT meta EMPTY&gt;
+  &lt;!ATTLIST meta
+    author CDATA #REQUIRED
+    debug CDATA #REQUIRED
+    email CDATA #REQUIRED
+    model_dimension CDATA #REQUIRED
+    model_name CDATA #REQUIRED
+  &gt;
+
+  &lt;!ELEMENT species_list (species)*&gt;
+  &lt;!ATTLIST species_list
+    default_species CDATA #REQUIRED
+  &gt;
+  &lt;!ELEMENT species EMPTY&gt;
+  &lt;!ATTLIST species
+    color CDATA #REQUIRED
+    name CDATA #REQUIRED
+    representation CDATA #IMPLIED
+  &gt;
+  &lt;!ELEMENT parameter_list (parameter)*&gt;
+  &lt;!ELEMENT parameter EMPTY&gt;
+  &lt;!ATTLIST parameter
+    name CDATA #REQUIRED
+    value CDATA #IMPLIED
+    adjustable CDATA #IMPLIED
+    min CDATA #IMPLIED
+    max CDATA #IMPLIED
+    scale CDATA #IMPLIED
+  &gt;
+  &lt;!ELEMENT lattice (layer)*&gt;
+  &lt;!ATTLIST lattice
+    cell_size CDATA #REQUIRED
+    default_layer CDATA #REQUIRED
+    site_classes CDATA #IMPLIED
+    representation CDATA #IMPLIED
+  &gt;
+  &lt;!ELEMENT layer (site)*&gt;
+  &lt;!ATTLIST layer 
+    name CDATA #REQUIRED
+    grid CDATA #REQUIRED
+    grid_offset CDATA #REQUIRED
+    color CDATA #IMPLIED
+  &gt;
+  &lt;!ELEMENT site EMPTY&gt;
+  &lt;!ATTLIST site
+    vector CDATA #REQUIRED
+    type CDATA #REQUIRED
+    class CDATA #IMPLIED
+    default_species CDATA #IMPLIED
+  &gt;
+  &lt;!ELEMENT process_list (process)*&gt;
+    &lt;!ELEMENT process (condition|action)*&gt;
+      &lt;!ATTLIST process
+        name CDATA #REQUIRED
+        rate_constant CDATA #REQUIRED
+        enabled CDATA #IMPLIED
+        tof_count CDATA #IMPLIED
+      &gt;
+      &lt;!ELEMENT condition EMPTY&gt;
+      &lt;!ATTLIST condition
+        coord_name CDATA #REQUIRED
+        coord_layer CDATA #REQUIRED
+        coord_offset CDATA #REQUIRED
+        species CDATA #REQUIRED
+      &gt;
+      &lt;!ELEMENT action EMPTY&gt;
+      &lt;!ATTLIST action
+        coord_name CDATA #REQUIRED
+        coord_layer CDATA #REQUIRED
+        coord_offset CDATA #REQUIRED
+        species CDATA #REQUIRED
+      &gt;
+      &lt;!ELEMENT output_list (output)*&gt;
+        &lt;!ELEMENT output EMPTY&gt;
+        &lt;!ATTLIST output
+          item CDATA #REQUIRED
+        &gt;
+</pre>
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference external" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference external" href="modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference external" href="search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h3><a href="#">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">Welcome to kmos&#8217;s documentation!</a><ul>
+<li><a class="reference external" href="#kmos-kmc-project-dtd">kmos kMC project DTD</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="_sources/index.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="modindex.html" title="Global Module Index"
+             >modules</a> |</li>
+        <li><a href="#">kmos v0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2011, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+    </div>
+  </body>
+</html>
