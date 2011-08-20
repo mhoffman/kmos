@@ -32,11 +32,11 @@ best under a similar setup. Other than standard libraries you need to fetch:
 USAGE
 #####
   Start the main program with 
-    kmos-gui
+    `kmos editor`
   and create your model. To test it you need to press 'Export source' choose a
   folder where the source code will be dumped. Use a terminal to go to that
   directory and run ./compile_for_f2py. If this finishes without complains
-  you can try running ./run_kmc.py.
+  you can try running `kmos view`
 
 THANKS
 ######
@@ -48,8 +48,7 @@ making their code avalaible for everyone, namely:
 * `ASE <https://wiki.fysik.dtu.dk/ase/>`_
 * Numpy
 * `f2py <http://cens.ioc.ee/projects/f2py2e/>`_
-* gazpacho
-* `kiwi <http://www.async.com.br/projects/kiwi/>`_
+* `kiwi <http://www.async.com.br/projects/kiwi/>`_, gazpacho
 * lxml and in particular `ElementTree <http://www.effbot.org/>`_
 * `pygtkcanvas <http://code.google.com/p/pygtkcanvas/>`_
 
