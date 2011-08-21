@@ -80,7 +80,7 @@ class Grid(Attributes):
             self.offset_x,
             self.offset_y,
             self.offset_z))
-        
+
 class Layer(Attributes, CorrectlyNamed):
     """A class that defines exactly one layer
     """
@@ -101,7 +101,7 @@ class Layer(Attributes, CorrectlyNamed):
         """
         self.sites.append(site)
 
-            
+
     def get_info(self):
         if self.active:
             return 'visible'
@@ -254,7 +254,7 @@ class LayerList(Attributes):
         self.cell_size_y = kwargs['cell_size_y'] if 'cell_size_y' in kwargs else 1.
         self.cell_size_z = kwargs['cell_size_z'] if 'cell_size_z' in kwargs else 1.
         self.default_layer = kwargs['default_layer'] if 'default_layer' in kwargs else 'default'
-        self.default_layer = kwargs['representation'] if 'representation' in kwargs else ''
+        self.representation = kwargs['representation'] if 'representation' in kwargs else ''
 
 
 class Parameter(Attributes, CorrectlyNamed):
@@ -317,7 +317,7 @@ class Process(Attributes):
         self.action_list = []
         self.tof_count = kwargs['tof_count'] if 'tof_count' in kwargs else None
         self.enabled = kwargs['enabled'] if 'enabled' in kwargs else True
-            
+
     def __repr__(self):
         return '[PROCESS] Name:%s Rate: %s\nConditions: %s\nActions: %s' % (self.name, self.rate_constant, self.condition_list, self.action_list)
 

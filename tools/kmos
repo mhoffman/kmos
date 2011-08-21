@@ -30,7 +30,8 @@ if args[0] == 'help':
 
 elif args[0] == 'edit':
     if len(args) < 2 :
-        parser.error("XML file expected")
+        print('No XML file provided, starting a new model.')
+        args.append('')
     os.system('kmos-editor %s' % args[1])
 elif args[0] == 'export':
     if len(args) < 3 :

@@ -17,7 +17,7 @@ import kiwi.ui.dialogs
 
 # own modules
 from config import GLADEFILE
-from utils import CorrectlyNamed
+from utils import CorrectlyNamed, get_ase_constructor
 from models import *
 
 # ASE import
@@ -915,8 +915,41 @@ class LatticeForm(ProxySlaveDelegate):
         self.cell_size_label.set_tooltip_text(
         'Set the size of your unit cell in Angstrom for the auto-generated movie')
 
+    def on_add_structure__clicked(self, _):
+        try:
+            import ase.io
+        except:
+            print('Need ASE to do this.')
+            return
 
-        
+        filechooser = gtk.FileChooserDialog(
+            title='Open structure file',
+            action=gtk.FILE_CHOOSER_ACTION_OPEN,
+            buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                     gtk.STOCK_OK, gtk.RESPONSE_OK))
+        resp = filechooser.run()
+        filename = filechooser.get_filename()
+        filechooser.destroy()
+        if resp == gtk.RESPONSE_OK and filename:
+            try:
+                structure = ase.io.read(filename)
+            except:
+                print('Could not open this file. Please choose')
+                print('a format that ASE can understand')
+                return
+            cur_text = self.lattice_representation.get_buffer().get_text(
+                self.lattice_representation.get_buffer().get_start_iter(),
+                self.lattice_representation.get_buffer().get_end_iter())
+            if not cur_text:
+                self.lattice_representation.get_buffer().set_text(
+                    '[%s]' % get_ase_constructor(structure))
+            else:
+                structures = eval(cur_text)
+                structures.append(structure)
+                self.lattice_representation.get_buffer().set_text(
+                    '%s' % [get_ase_constructor(x) for x in structures])
+
+
 class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
     """Widget to define a lattice and the unit cell
     """
@@ -960,12 +993,15 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         black = col_str2tuple('#000000')
 
         atoms = []
+        print(self.project_tree.lattice.representation)
         if self.project_tree.lattice.representation:
             representations = eval(self.project_tree.lattice.representation)
             if len(representations) > self.layer_nr:
                 atoms = representations[self.layer_nr]
             else:
                 atoms = representations[0]
+        else:
+            atoms = Atoms()
         self.lower_left = (self.offset_x, self.offset_y+self.scale*atoms.cell[1,1])
         self.upper_right= (self.offset_x + self.scale*atoms.cell[0,0], self.offset_y)
         big_atoms = atoms*(3,3,1)
@@ -1004,7 +1040,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                                   radius_y=.3*self.radius_scale,
                                   stroke_color='black',
                                   fill_color='white',
-                                  line_width=2.0,)
+                                  line_width=1.0,)
 
             o.site = site
             o.connect('query-tooltip', self.query_tooltip)

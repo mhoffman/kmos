@@ -366,7 +366,32 @@
                                             </packing>
                                         </child>
                                         <child>
-                                            <placeholder/>
+                                            <widget class="GtkVBox" id="vbox3">
+                                                <property name="visible">True</property>
+                                                <child>
+                                                    <widget class="GtkButton" id="add_structure">
+                                                        <property name="is_focus">True</property>
+                                                        <property name="label" context="yes" translatable="yes">Add Structure</property>
+                                                        <property name="visible">True</property>
+                                                    </widget>
+                                                    <packing>
+                                                        <property name="expand">False</property>
+                                                        <property name="fill">False</property>
+                                                    </packing>
+                                                </child>
+                                                <child>
+                                                    <placeholder/>
+                                                    <packing>
+                                                        <property name="position">1</property>
+                                                    </packing>
+                                                </child>
+                                                <child>
+                                                    <placeholder/>
+                                                    <packing>
+                                                        <property name="position">2</property>
+                                                    </packing>
+                                                </child>
+                                            </widget>
                                             <packing>
                                                 <property name="position">3</property>
                                             </packing>
