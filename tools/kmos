@@ -39,3 +39,6 @@ elif args[0] == 'export':
     os.system('kmos-export-program %s %s' % (args[1], args[2]))
 elif args[0] == 'view':
     os.system('kmos-view')
+
+else:
+    parser.error('Command not understood.')
