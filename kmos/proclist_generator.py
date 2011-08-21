@@ -79,7 +79,7 @@ class ProcListWriter():
         out.write('integer(kind=iint), parameter, public :: model_dimension = %s\n' % (data.meta.model_dimension))
         for i, layer in enumerate(data.layer_list):
             out.write('integer(kind=iint), parameter, public :: %s = %s\n'
-                % (layer.name, i + 1))
+                % (layer.name, i))
         out.write('integer(kind=iint), parameter, public :: default_layer = %s\n' % data.layer_list_iter.default_layer)
         out.write('\n ! Site constants\n\n')
         site_params = []
