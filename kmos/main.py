@@ -667,7 +667,7 @@ class KMC_Editor(GladeDelegate):
         self.project_tree = ProjectTree(parent=self, menubar=self.menubar)
         self.main_window.add_accel_group(self.menubar.get_accel_group())
         self.attach_slave('overviewtree', self.project_tree)
-        self.set_title(self.project_tree.get_name())
+        self.set_title('%s - kmos' % self.project_tree.get_name())
         self.project_tree.show()
 
         wid = self.project_tree.menubar.get_widget('/MainMenuBar')
@@ -873,14 +873,14 @@ class KMC_Editor(GladeDelegate):
             if self.get_slave('overviewtree'):
                 self.detach_slave('overviewtree')
             self.attach_slave('overviewtree', self.project_tree)
-            self.set_title(self.project_tree.get_name())
+            self.set_title('%s - kmos' % self.project_tree.get_name())
             self.project_tree.show()
             self.import_file(filename)
 
     def import_file(self, filename):
         # Import
         self.project_tree.import_xml_file(filename)
-        self.set_title(self.project_tree.get_name())
+        self.set_title('%s - kmos' % self.project_tree.get_name())
         self.toast('Imported model %s' % self.project_tree.meta.model_name)
         self.saved_state = str(self.project_tree)
 
