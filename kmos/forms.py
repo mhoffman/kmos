@@ -993,7 +993,6 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         black = col_str2tuple('#000000')
 
         atoms = []
-        print(self.project_tree.lattice.representation)
         if self.project_tree.lattice.representation:
             representations = eval(self.project_tree.lattice.representation)
             if len(representations) > self.layer_nr:
