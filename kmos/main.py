@@ -179,7 +179,13 @@ class ProjectTree(SlaveDelegate):
         # TODO: catch XML version first and convert if necessary
         self.filename = filename
         xmlparser = ET.XMLParser(remove_comments=True)
-        root = ET.parse(filename, parser=xmlparser).getroot()
+        try:
+            root = ET.parse(filename, parser=xmlparser).getroot()
+        except:
+            print('\nCould not parse file. Are you sure this')
+            print('a kmos project file?\n')
+            raise
+
         self.init_data()
         if 'version' in root.attrib:
             self.version = eval(root.attrib['version'])

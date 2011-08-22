@@ -14,19 +14,21 @@ if args[0] == 'help':
     if len(args) < 2 :
         parser.error('Which help do you  want?')
     if args[1] == 'edit' :
-        print("""Usage: %prog edit <xml-file>
+        print("""Usage: kmos edit <xml-file>
                         open the kmos xml-file in a GUI to edit
                         the model.""")
     elif args[1] == 'view' :
-        print("""Usage: %prog view
+        print("""Usage: kmos view
                         Except a kmc_model.so and kmc_settings in the 
                         same directory and will start to simulate the
                         model visually""")
-    elif args[1] == 'edit' :
-        print("""Usage: %prog export <xml-file> <export-path>
+    elif args[1] == 'export' :
+        print("""Usage: kmos export <xml-file> <export-path>
                         Take a kmos xml-file and export all generated
                         source code to the export-path. There it will
                         try to build the kmc_model.so.""")
+    else:
+        print("Command not know or not documented.")
 
 elif args[0] == 'edit':
     if len(args) < 2 :
