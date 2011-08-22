@@ -728,11 +728,11 @@ class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
         self.project_tree = project_tree
         self.author.set_tooltip_text('Give a name so people know who to credit for the model.')
         self.email.set_tooltip_text('Enter an email address so people can get in touch with you.')
-        self.model_name.set_tooltip_text('Give a clear unique name, so identify the model.')
+        self.model_name.set_tooltip_text('Give a clear unique name, to identify the model.')
         self.model_dimension.set_tooltip_text('The source code export function can generate ' +
-        '1d, 2d, and 3d programs. However this GUI currently only supports 2d. 3d is still possibble ' +
+        '1d, 2d, and 3d programs. However this GUI currently only supports 2d. 3d is still possible ' +
         'by manipulating the project XML file by hand. The algorithm though is fast but very memory consuming ' +
-        'so a 3d simulation might require on the order of 10GB or RAM or more')
+        'so a 3d simulation might require considerably more RAM.')
         self.debug.set_tooltip_text('Increasing the debug level might give hints if one suspects errors in ' +
         'kmos itself. It does not help to debug your model. So usually one wants to keep it a 0.')
         self.author.grab_focus()

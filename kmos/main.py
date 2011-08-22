@@ -248,7 +248,7 @@ class ProjectTree(SlaveDelegate):
                             pass
                 elif child.tag == 'meta':
                     for attrib in ['author', 'email', 'debug', 'model_name', 'model_dimension']:
-                        if attrib in child:
+                        if attrib in child.attrib:
                             self.meta.add({attrib: child.attrib[attrib]})
                 elif child.tag == 'parameter_list':
                     for parameter in child:
