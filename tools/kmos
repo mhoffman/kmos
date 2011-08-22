@@ -23,7 +23,7 @@ if args[0] == 'help':
                         same directory and will start to simulate the
                         model visually""")
     elif args[1] == 'export' :
-        print("""Usage: kmos export <xml-file> <export-path>
+        print("""Usage: kmos export <xml-file> [<export-path>]
                         Take a kmos xml-file and export all generated
                         source code to the export-path. There it will
                         try to build the kmc_model.so.""")
@@ -36,8 +36,12 @@ elif args[0] == 'edit':
         args.append('')
     os.system('kmos-editor %s' % args[1])
 elif args[0] == 'export':
-    if len(args) < 3 :
+    if len(args) < 2 :
         parser.error('XML file and export path expected.')
+    if len(args) < 3 :
+        out_dir = os.path.splitext(args[1])[0]
+        print('No export path provided. Exporting to %s' % out_dir)
+        args.append(out_dir)
     os.system('kmos-export-program %s %s' % (args[1], args[2]))
 elif args[0] == 'view':
     os.system('kmos-view')

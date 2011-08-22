@@ -62,7 +62,11 @@ def evaluate_rate_expression(rate_expr, parameters={}):
                     print('Setting chemical potential to zero')
                     replaced_tokens.append((i, '0'))
             elif token in parameters:
-                replaced_tokens.append((i, str(parameters[token]['value'])))
+                parameter_str = str(parameters[token]['value'])
+                # replace units used in parameters
+                for unit in units.keys:
+                    parameter_str = parameter_str.replace(unit, '%s' % eval('units.%s' % unit))
+                replaced_tokens.append((i, parameter_str))
             else:
                 replaced_tokens.append((i, token))
 
