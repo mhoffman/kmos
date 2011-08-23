@@ -24,7 +24,7 @@ best under a similar setup. Other than standard libraries you need to fetch:
 
 *  python-numpy : contains f2py
 *  python-lxml: project files are stored as XML
-*  python-gtk: GUI toolkit
+*  python-gtk2: GUI toolkit
 *  python-kiwi, gazpacho: frameworks for python-gtk
 
 

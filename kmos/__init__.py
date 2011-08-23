@@ -1,11 +1,36 @@
 """
-kmos is a vigorous attempt to make (multi-)lattice kMC modelling more accessible.
+kmos is a vigorous attempt to make lattice kMC modelling more accessible.
 
 This package features an XML format to define lattice-kMC models, a graphical
 editor for these XML files, a tools which converts a project description into
 compilable python/Fortran90 code and graphical front end to run and watch kMC simulations::
 
-    kmos [help] (edit | view | export ) [options]
+    kmos [help] (edit|view|export) [options]
+
+kmos' goal is to significantly reduce the time you need
+to implement and run a lattice kmc simulation. However it can not help
+you plan the model. It is therefore highly recommend that you have clear
+idea of your model before you start implementing it.
+
+A good way to define a model is to use a paper and pencil to draw
+your lattice, choose the species that you will need, draw
+each process and write down an expression for each rate constant, and
+finally fix all energy barriers and external parameters that you will need.
+Putting a model prepared like this into a computer is a simple exercise.
+You enter a new model by filling in
+
+    * meta information
+    * lattice
+    * species
+    * parameters
+    * processes
+
+in roughly this order or open an existing one by opening a kMC XML file.
+
+If you want to see the model run
+`kmos export <xml-file>` and you will get a subfolder with a self-contained
+Fortran90 code, which solves the model. If all necessary dependencies are
+installed you can simply run kmc view in the export folder.
 
 kmos kMC project DTD
 ####################
