@@ -933,6 +933,8 @@ class LatticeForm(ProxySlaveDelegate):
         if resp == gtk.RESPONSE_OK and filename:
             try:
                 structure = ase.io.read(filename)
+                if structure is list:
+                    structure = structure[-1]
             except:
                 print('Could not open this file. Please choose')
                 print('a format that ASE can understand')
