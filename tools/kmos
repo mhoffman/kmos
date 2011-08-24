@@ -3,7 +3,7 @@
 import os
 import optparse
 
-parser = optparse.OptionParser("""Usage: %prog [help] (edit | view | export) [options]""")
+parser = optparse.OptionParser("""Usage: %prog [help] (edit|view|export) [options]""")
 
 options, args = parser.parse_args()
 
