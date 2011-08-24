@@ -89,7 +89,7 @@ class KMC_Model(multiprocessing.Process):
                     self.terminate()
                 elif signal.upper() == 'PAUSE':
                     while self.signal_queue.empty():
-                        time.sleep('0.03')
+                        time.sleep(0.03)
                 elif signal.upper() == 'RESET_TIME':
                     base.set_kmc_time(0.0)
                 elif signal.upper() == 'START':
@@ -218,11 +218,13 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.images = Images()
         self.images.initialize([ase.atoms.Atoms()])
         self.killed = False
+        self.paused = False
 
         self.vbox = vbox
         self.window = window
 
         self.vbox.connect('scroll-event',self.scroll_event)
+        self.window.connect('key-press-event', self.on_key_press)
         View.__init__(self, self.vbox, rotations)
         Status.__init__(self, self.vbox)
         self.vbox.show()
@@ -346,6 +348,15 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
                 atoms = self.image_queue.get()
                 gobject.idle_add(self.update_vbox,atoms)
                 gobject.idle_add(self.update_plots, atoms)
+
+    def on_key_press(self, window, event):
+        if event.string in [' ', 'p']:
+            if not self.paused:
+                self.signal_queue.put('PAUSE')
+                self.paused = True
+            else:
+                self.signal_queue.put('START')
+                self.paused = False
 
     def scroll_event(self, window, event):
         """Zoom in/out when using mouse wheel"""
