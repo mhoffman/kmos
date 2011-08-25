@@ -463,7 +463,7 @@ class ProcListWriter():
             + '    print *, "Currently kmos is in a very alphaish stage and there is"\n'
             + '    print *, "ABSOLUTELY NO WARRANTY for correctness."\n'
             + '    print *, "Please check back with the author prior to using"\n'
-            + '    print *, "results in a publication."\n\n')\
+            + '    print *, "results in a publication or presentation."\n\n')\
             % (data.meta.model_dimension, data.meta.model_name, data.meta.author, data.meta.email, ))
         if data.meta.debug > 0 :
             out.write('print *,"PROCLIST/INIT/SYSTEM_SIZE",input_system_size\n')
