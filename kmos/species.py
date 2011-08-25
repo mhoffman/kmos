@@ -34,6 +34,7 @@ class Species:
         return self.name
 
     def mu(self, T, p):
+        """Expecting T in Kelvin, p in bar"""
         if self.gas:
             kboltzmann_in_eVK = 8.6173324e-5
             # interpolate given grid

@@ -317,8 +317,8 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         for i, tof_plot in enumerate(self.tof_plots):
             self.tof_plots[i].set_xdata(self.times)
             self.tof_plots[i].set_ydata([tof[i] for tof in self.tof_hist])
-        self.tof_diagram.set_xlim(self.times[0],self.times[-1])
-        self.tof_diagram.set_ylim(0,max([tof[i] for tof in self.tof_hist]))
+            self.tof_diagram.set_xlim(self.times[0],self.times[-1])
+            self.tof_diagram.set_ylim(0,max([tof[i] for tof in self.tof_hist]))
 
         # plot occupation
         for i, occupation_plot in enumerate(self.occupation_plots):
