@@ -54,6 +54,19 @@ class KMC_Model(multiprocessing.Process):
             lattice.default_layer,
             proclist.default_species)
         self.cell_size = np.dot(lattice.unit_cell_size, lattice.system_size)
+
+        # prepare structures for TOF evaluation
+        self.tofs = tofs = get_tof_names()
+        self.tof_matrix = np.zeros((len(tofs),proclist.nr_of_proc))
+        for process, tof_count in settings.tof_count.iteritems():
+            process_nr = eval('proclist.%s' % process.lower())
+            for tof, tof_factor in tof_count.iteritems():
+                self.tof_matrix[tofs.index(tof), process_nr-1] += tof_factor
+
+        # prepare procstat
+        self.procstat = np.zeros((proclist.nr_of_proc,))
+        self.time = 0.
+
         self.species_representation = []
         for species in sorted(settings.representations):
             if settings.representations[species].strip():
@@ -69,6 +82,9 @@ class KMC_Model(multiprocessing.Process):
             self.lattice_representation = Atoms()
         self.set_rate_constants(settings.parameters)
 
+    def __del__(self):
+        lattice.deallocate_system()
+
     def run(self):
         while True:
             for _ in xrange(50000):
@@ -78,12 +94,7 @@ class KMC_Model(multiprocessing.Process):
                 # attach other quantities need to plot
                 # to the atoms object and let it travel
                 # piggy-back through the queue
-                atoms.kmc_time = base.get_kmc_time()
                 atoms.size = self.size
-                atoms.procstat = np.zeros((proclist.nr_of_proc,))
-                atoms.occupation = proclist.get_occupation()
-                for i in range(proclist.nr_of_proc):
-                    atoms.procstat[i] = base.get_procstat(i+1)
                 self.image_queue.put(atoms)
             if not self.signal_queue.empty():
                 signal = self.signal_queue.get()
@@ -140,6 +151,25 @@ class KMC_Model(multiprocessing.Process):
                     lattice_repr.translate(np.dot(lattice.unit_cell_size,
                                 np.array([i,j,k])))
                     atoms += lattice_repr
+
+        # calculate TOF since last call
+        atoms.procstat = np.zeros((proclist.nr_of_proc,))
+        atoms.occupation = proclist.get_occupation()
+        for i in range(proclist.nr_of_proc):
+            atoms.procstat[i] = base.get_procstat(i+1)
+        delta_t = (atoms.kmc_time - self.time)
+        size = self.size**lattice.model_dimension
+        if delta_t == 0. :
+            print("Warning: numerical precision too low, to resolve time-steps")
+            print('         Will reset kMC for next step')
+            base.set_kmc_time(0.0)
+            atoms.tof_data = np.zeros_like(self.tof_matrix[:,0])
+        else:
+            atoms.tof_data = np.dot(self.tof_matrix,  (atoms.procstat - self.procstat)/delta_t/size)
+
+        # update trackers for next call
+        self.procstat[:] = atoms.procstat
+        self.time = atoms.kmc_time
 
         return atoms
 
@@ -240,27 +270,13 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.set_coordinates(0)
         self.center = np.array([0,0,0])
 
-        # prepare TOF counter
-        tofs = []
-        for process, tof_count in settings.tof_count.iteritems():
-            for tof in tof_count:
-                if tof not in tofs:
-                    tofs.append(tof)
-        self.tofs = tofs
-        self.tof_matrix = np.zeros((len(tofs),proclist.nr_of_proc))
-        for process, tof_count in settings.tof_count.iteritems():
-            process_nr = eval('proclist.%s' % process.lower())
-            for tof, tof_factor in tof_count.iteritems():
-                self.tof_matrix[tofs.index(tof), process_nr-1] += tof_factor
+        self.tofs = get_tof_names()
 
         # history tracking arrays
         self.times = []
         self.tof_hist = []
         self.occupation_hist = []
 
-        # prepare procstat
-        self.procstat = np.zeros((proclist.nr_of_proc,))
-        self.time = 0.
         # prepare diagrams
         self.data_plot = plt.figure()
         #plt.xlabel('$t$ in s')
@@ -268,8 +284,9 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.tof_diagram.get_yaxis().get_major_formatter().set_powerlimits((3,3))
         self.tof_plots = []
         for tof in self.tofs:
-            self.tof_plots.append(self.tof_diagram.plot([],[],'b-')[0])
+            self.tof_plots.append(self.tof_diagram.plot([],[],'b-',label=tof)[0])
 
+        self.tof_diagram.legend(loc='lower left')
         self.tof_diagram.set_ylabel('TOF in $\mathrm{s}^{-1}\mathrm{site}^{-1}$')
         self.occupation_plots =[]
         self.occupation_diagram = self.data_plot.add_subplot(212)
@@ -296,17 +313,10 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         # fetch data piggy-backed on atoms object
         new_time = atoms.kmc_time
         new_procstat = atoms.procstat
-        delta_t = (new_time - self.time)
-        size = atoms.size**lattice.model_dimension
-        if delta_t == 0. :
-            print("Warning: numerical precision too low, to resolve time-steps")
-            print('         Will reset kMC for next step')
-            self.signal_queue.put('RESET_TIME')
-            return False
-        tof_data = np.dot(self.tof_matrix,  (new_procstat - self.procstat)/delta_t/size)
 
 
         occupations = atoms.occupation.sum(axis=1)/lattice.spuck
+        tof_data = atoms.tof_data
 
         # store locally
         while len(self.times) > 30 :
@@ -337,7 +347,6 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         # [:] is necessary so that it copies the
         # values and doesn't reinitialize the pointer
         self.time = new_time
-        self.procstat[:] = new_procstat
 
         return False
 
@@ -425,3 +434,12 @@ class KMC_Viewer():
         base.deallocate_system()
         gtk.main_quit()
         return True
+
+def get_tof_names():
+    tofs = []
+    for process, tof_count in settings.tof_count.iteritems():
+        for tof in tof_count:
+            if tof not in tofs:
+                tofs.append(tof)
+    return sorted(tofs)
+
