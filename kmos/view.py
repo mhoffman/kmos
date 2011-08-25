@@ -40,7 +40,10 @@ except:
 
 
 class KMC_Model(multiprocessing.Process):
-    def __init__(self, image_queue, parameter_queue, signal_queue, size=None, system_name='kmc_model'):
+    def __init__(self, image_queue=None,
+                       parameter_queue=None,
+                       signal_queue=None,
+                       size=None, system_name='kmc_model'):
         super(KMC_Model, self).__init__()
         self.image_queue = image_queue
         self.parameter_queue = parameter_queue
@@ -119,6 +122,7 @@ class KMC_Model(multiprocessing.Process):
 
     def get_atoms(self):
         atoms = ase.atoms.Atoms()
+        atoms.calc = None
         atoms.set_cell(self.cell_size)
         atoms.kmc_time = base.get_kmc_time()
         atoms.kmc_step = base.get_kmc_step()
@@ -261,6 +265,7 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.data_plot = plt.figure()
         #plt.xlabel('$t$ in s')
         self.tof_diagram = self.data_plot.add_subplot(211)
+        self.tof_diagram.get_yaxis().get_major_formatter().set_powerlimits((3,3))
         self.tof_plots = []
         for tof in self.tofs:
             self.tof_plots.append(self.tof_diagram.plot([],[],'b-')[0])
@@ -292,7 +297,7 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         new_time = atoms.kmc_time
         new_procstat = atoms.procstat
         delta_t = (new_time - self.time)
-        size = atoms.size*lattice.model_dimension
+        size = atoms.size**lattice.model_dimension
         if delta_t == 0. :
             print("Warning: numerical precision too low, to resolve time-steps")
             print('         Will reset kMC for next step')
