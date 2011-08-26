@@ -25,7 +25,7 @@ then
   fi
 else 
   fcompiler='gfortran'
-  extra_flags='-xf95-cpp-input -Wall -g'
+  extra_flags='-ffree-form -xf95-cpp-input -Wall -g'
 fi
 
 f2py --f90flags="${extra_flags}"  --fcompiler="${fcompiler}" -c ${src_files} -m ${module_name}
