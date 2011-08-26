@@ -28,8 +28,12 @@ except:
 
 
 from kmos import species, units, evaluate_rate_expression
-from kmos.model import KMC_Model, settings, base, lattice, proclist
-
+from kmos.model import KMC_Model,\
+                       base,\
+                       get_tof_names,\
+                       lattice,\
+                       proclist,\
+                       settings
 
 
 
@@ -295,12 +299,3 @@ class KMC_Viewer():
         base.deallocate_system()
         gtk.main_quit()
         return True
-
-def get_tof_names():
-    tofs = []
-    for process, tof_count in settings.tof_count.iteritems():
-        for tof in tof_count:
-            if tof not in tofs:
-                tofs.append(tof)
-    return sorted(tofs)
-

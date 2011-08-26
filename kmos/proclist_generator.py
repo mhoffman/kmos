@@ -2,7 +2,7 @@ import pdb
 #!/usr/bin/env python
 import itertools
 import operator
-from kmos.models import ConditionAction
+from kmos.types import ConditionAction
 
 def flatten(L):
     return [item for sublist in L for item in sublist]

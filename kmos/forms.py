@@ -16,9 +16,9 @@ from kiwi.ui.objectlist import Column
 import kiwi.ui.dialogs
 
 # own modules
-from config import GLADEFILE
-from utils import CorrectlyNamed, get_ase_constructor
-from models import *
+from kmos.config import GLADEFILE
+from kmos.utils import CorrectlyNamed, get_ase_constructor
+from kmos.types import *
 
 # ASE import
 import numpy as np

@@ -10,7 +10,7 @@ import os
 import copy
 # import own modules
 from kmos.config import *
-from kmos.models import *
+from kmos.types import *
 from kmos.forms import *
 from kmos.proclist_generator import ProcListWriter as MLProcListWriter
 import shutil

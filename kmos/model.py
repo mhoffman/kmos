@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 import multiprocessing
+import numpy as np
 from ase.atoms import Atoms
+from kmos import evaluate_rate_expression
 try:
-    print(kmc_model, dir(kmc_model))
     from kmc_model import base, lattice, proclist
 except Exception, e:
     print('Could not find the kmc module. The kmc implements the actual')
@@ -94,7 +95,7 @@ class KMC_Model(multiprocessing.Process):
                 self.set_rate_constants(parameters)
 
 
-    def set_rate_constants(self, parameters):
+    def set_rate_constants(self, parameters=settings.parameters):
         """Tries to evaluate the supplied expression for a rate constant
         to a simple real number and sets it for the corresponding process.
         For the evaluation we draw on predefined natural constants, user defined
@@ -152,3 +153,12 @@ class KMC_Model(multiprocessing.Process):
         self.time = atoms.kmc_time
 
         return atoms
+
+
+def get_tof_names():
+    tofs = []
+    for process, tof_count in settings.tof_count.iteritems():
+        for tof in tof_count:
+            if tof not in tofs:
+                tofs.append(tof)
+    return sorted(tofs)
