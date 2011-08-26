@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from copy import deepcopy
 import multiprocessing
 import numpy as np
 from ase.atoms import Atoms
@@ -102,9 +103,12 @@ class KMC_Model(multiprocessing.Process):
                     parameters = self.parameters_queue.get()
                 set_rate_constants(parameters, self.print_rates)
 
-
+    def view(self):
+        ase = import_ase()
+        ase.visualize.view(self.get_atoms())
 
     def get_atoms(self):
+        ase = import_ase()
         atoms = ase.atoms.Atoms()
         atoms.calc = None
         atoms.set_cell(self.cell_size)
@@ -132,7 +136,7 @@ class KMC_Model(multiprocessing.Process):
             atoms.procstat[i] = base.get_procstat(i+1)
         delta_t = (atoms.kmc_time - self.time)
         size = self.size**lattice.model_dimension
-        if delta_t == 0. :
+        if delta_t == 0. and atoms.kmc_time > 0:
             print("Warning: numerical precision too low, to resolve time-steps")
             print('         Will reset kMC for next step')
             base.set_kmc_time(0.0)
@@ -180,6 +184,15 @@ def set_rate_constants(parameters=settings.parameters, print_rates=True):
             raise UserWarning("Could not set %s for process %s!\nException: %s" % (rate_expr, proc, e))
     if print_rates:
         print('-------------------')
+
+
+def import_ase():
+    try:
+        import ase
+    except:
+        print('Please download the ASE from')
+        print('https://wiki.fysik.dtu.dk/ase/')
+    return ase
 
 
 def get_tof_names():
