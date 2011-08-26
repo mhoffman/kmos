@@ -452,18 +452,21 @@ class ProcListWriter():
         # Here we replicate the allocate_system call, initialize
         # all book-keeping databases
         # and calculate the rate constants for the first time
-        out.write(('subroutine init(input_system_size, system_name, layer, species)\n\n'
+        out.write(('subroutine init(input_system_size, system_name, layer, species, no_banner)\n\n'
             + '    integer(kind=iint), intent(in) :: layer, species\n'
             + '    integer(kind=iint), dimension(%s), intent(in) :: input_system_size\n\n'
             + '    character(len=400), intent(in) :: system_name\n\n'
-            + '    print *, "This kMC Model \'%s\' was written by %s (%s)"\n'
-            + '    print *, "and implemented with the help of kmos,"\n'
-            + '    print *, "which is distributed under"\n'
-            + '    print *, "GNU/GPL Version 3 (C) Max J. Hoffmann mjhoffmann@gmail.com"\n'
-            + '    print *, "Currently kmos is in a very alphaish stage and there is"\n'
-            + '    print *, "ABSOLUTELY NO WARRANTY for correctness."\n'
-            + '    print *, "Please check back with the author prior to using"\n'
-            + '    print *, "results in a publication or presentation."\n\n')\
+            + '    logical, optional, intent(in) :: no_banner\n\n'
+            + '    if (.not. no_banner) then\n'
+            + '        print *, "This kMC Model \'%s\' was written by %s (%s)"\n'
+            + '        print *, "and implemented with the help of kmos,"\n'
+            + '        print *, "which is distributed under"\n'
+            + '        print *, "GNU/GPL Version 3 (C) Max J. Hoffmann mjhoffmann@gmail.com"\n'
+            + '        print *, "Currently kmos is in a very alphaish stage and there is"\n'
+            + '        print *, "ABSOLUTELY NO WARRANTY for correctness."\n'
+            + '        print *, "Please check back with the author prior to using"\n'
+            + '        print *, "results in a publication or presentation."\n\n'\
+            + '    endif\n')
             % (data.meta.model_dimension, data.meta.model_name, data.meta.author, data.meta.email, ))
         if data.meta.debug > 0 :
             out.write('print *,"PROCLIST/INIT/SYSTEM_SIZE",input_system_size\n')

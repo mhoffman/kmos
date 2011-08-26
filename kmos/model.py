@@ -24,16 +24,21 @@ class KMC_Model(multiprocessing.Process):
     def __init__(self, image_queue=None,
                        parameter_queue=None,
                        signal_queue=None,
-                       size=None, system_name='kmc_model'):
+                       size=None, system_name='kmc_model',
+                       banner=True,
+                       print_rates=True):
         super(KMC_Model, self).__init__()
         self.image_queue = image_queue
-        self.parameter_queue = parameter_queue
+        self.parameters_queue = parameter_queue
         self.signal_queue = signal_queue
         self.size = int(settings.simulation_size) if size is None else int(size)
+        self.print_rates = print_rates
+        self.parameters = Model_Parameters(self.print_rates)
         proclist.init((self.size,)*int(lattice.model_dimension),
             system_name,
             lattice.default_layer,
-            proclist.default_species)
+            proclist.default_species,
+            not banner)
         self.cell_size = np.dot(lattice.unit_cell_size, lattice.system_size)
 
         # prepare structures for TOF evaluation
@@ -61,11 +66,14 @@ class KMC_Model(multiprocessing.Process):
                     lattice.default_layer]
         else:
             self.lattice_representation = Atoms()
-        self.set_rate_constants(settings.parameters)
+        set_rate_constants(settings.parameters, self.print_rates)
 
     def __del__(self):
         lattice.deallocate_system()
 
+    def do_steps(self, n=10000):
+        for _ in xrange(n):
+            proclist.do_kmc_step()
     def run(self):
         while True:
             for _ in xrange(50000):
@@ -89,28 +97,12 @@ class KMC_Model(multiprocessing.Process):
                     base.set_kmc_time(0.0)
                 elif signal.upper() == 'START':
                     pass
-            if not self.parameter_queue.empty():
-                while not self.parameter_queue.empty():
-                    parameters = self.parameter_queue.get()
-                self.set_rate_constants(parameters)
+            if not self.parameters_queue.empty():
+                while not self.parameters_queue.empty():
+                    parameters = self.parameters_queue.get()
+                set_rate_constants(parameters, self.print_rates)
 
 
-    def set_rate_constants(self, parameters=settings.parameters):
-        """Tries to evaluate the supplied expression for a rate constant
-        to a simple real number and sets it for the corresponding process.
-        For the evaluation we draw on predefined natural constants, user defined
-        parameters and mathematical functions
-        """
-        for proc in sorted(settings.rate_constants):
-            rate_expr = settings.rate_constants[proc][0]
-            rate_const = evaluate_rate_expression(rate_expr, parameters)
-
-            try:
-                base.set_rate_const(eval('proclist.%s' % proc.lower()), rate_const)
-                print('%s: %.3e s^{-1}' % (proc, rate_const))
-            except Exception as e:
-                raise UserWarning("Could not set %s for process %s!\nException: %s" % (rate_expr, proc, e))
-        print('-------------------')
 
     def get_atoms(self):
         atoms = ase.atoms.Atoms()
@@ -153,6 +145,41 @@ class KMC_Model(multiprocessing.Process):
         self.time = atoms.kmc_time
 
         return atoms
+
+class Model_Parameters(object):
+    def __init__(self, print_rates=True):
+        object.__init__(self)
+        self.__dict__.update(settings.parameters)
+        self.print_rates = print_rates
+
+    def __setattr__(self, attr, value):
+        if attr in settings.parameters:
+            settings.parameters[attr]['value'] = value
+            set_rate_constants(print_rates=self.print_rates)
+        else:
+            self.__dict__[attr] = value
+
+
+def set_rate_constants(parameters=settings.parameters, print_rates=True):
+    """Tries to evaluate the supplied expression for a rate constant
+    to a simple real number and sets it for the corresponding process.
+    For the evaluation we draw on predefined natural constants, user defined
+    parameters and mathematical functions
+    """
+    if print_rates:
+        print('-------------------')
+    for proc in sorted(settings.rate_constants):
+        rate_expr = settings.rate_constants[proc][0]
+        rate_const = evaluate_rate_expression(rate_expr, parameters)
+
+        try:
+            base.set_rate_const(eval('proclist.%s' % proc.lower()), rate_const)
+            if print_rates:
+                print('%s: %.3e s^{-1}' % (proc, rate_const))
+        except Exception as e:
+            raise UserWarning("Could not set %s for process %s!\nException: %s" % (rate_expr, proc, e))
+    if print_rates:
+        print('-------------------')
 
 
 def get_tof_names():
