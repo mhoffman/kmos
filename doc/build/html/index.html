@@ -79,7 +79,7 @@ You enter a new model by filling in</p>
 <p>If you want to see the model run
 <cite>kmos export &lt;xml-file&gt;</cite> and you will get a subfolder with a self-contained
 Fortran90 code, which solves the model. If all necessary dependencies are
-install you can simply run kmc view in the export folder.</p>
+installed you can simply run kmc view in the export folder.</p>
 <div class="section" id="kmos-kmc-project-dtd">
 <h2>kmos kMC project DTD<a class="headerlink" href="#kmos-kmc-project-dtd" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><pre>&lt;!ELEMENT kmc (meta?,species_list?,parameter_list?, lattice, process_list?,output_list?)&gt;
@@ -166,14 +166,26 @@ install you can simply run kmc view in the export folder.</p>
 </pre>
 </div>
 </div>
+<div class="section" id="module-kmos.model">
+<span id="kmc-model"></span><h2>KMC Model<a class="headerlink" href="#module-kmos.model" title="Permalink to this headline">¶</a></h2>
+<p>A python representation of a kMC model. The actual model is
+imported in kmc_model.so and all parameters are stored in kmc_settings.py.</p>
+<p>The model can be used directly like so:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">kmos.model</span> <span class="kn">import</span> <span class="n">KMC_Model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">KMC_Model</span><span class="p">()</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="mi">500</span>
+<span class="n">model</span><span class="o">.</span><span class="n">do_steps</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">view</span><span class="p">()</span>
+</pre></div>
 </div>
-<div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
-<ul class="simple">
-<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
-<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
-<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
-</ul>
+<p>which, of course can also be part of a python script.</p>
+<p>The model also be run in a different process using the
+multiprocessing module. This mode is designed for use with
+a GUI so that the CPU intensive kMC integration can run at
+full throttle without impeding the front-end. Interaction with
+the model happens through Queues.</p>
+</div>
 </div>
 
 
@@ -186,9 +198,9 @@ install you can simply run kmc view in the export folder.</p>
   <ul>
 <li><a class="reference internal" href="#">Welcome to kmos&#8217;s documentation!</a><ul>
 <li><a class="reference internal" href="#kmos-kmc-project-dtd">kmos kMC project DTD</a></li>
+<li><a class="reference internal" href="#module-kmos.model">KMC Model</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 
   <h3>This Page</h3>

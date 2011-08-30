@@ -6,11 +6,6 @@ Welcome to kmos's documentation!
 
 .. automodule:: kmos
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+KMC Model
+#########################
+.. automodule:: kmos.model

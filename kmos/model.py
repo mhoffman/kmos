@@ -1,4 +1,24 @@
 #!/usr/bin/env python
+""" A python representation of a kMC model. The actual model is
+imported in kmc_model.so and all parameters are stored in kmc_settings.py.
+
+The model can be used directly like so::
+
+    from kmos.model import KMC_Model
+    model = KMC_Model()
+
+    model.parameters.T = 500
+    model.do_steps(100000)
+    model.view()
+
+which, of course can also be part of a python script. 
+
+The model also be run in a different process using the
+multiprocessing module. This mode is designed for use with
+a GUI so that the CPU intensive kMC integration can run at
+full throttle without impeding the front-end. Interaction with
+the model happens through Queues.
+"""
 
 from copy import deepcopy
 import multiprocessing
@@ -13,7 +33,6 @@ except Exception, e:
     print('kmos-export-program.')
     print(e)
 
-    raise
 try:
     import kmc_settings as settings
 except:
@@ -75,9 +94,10 @@ class KMC_Model(multiprocessing.Process):
     def do_steps(self, n=10000):
         for _ in xrange(n):
             proclist.do_kmc_step()
+
     def run(self):
         while True:
-            for _ in xrange(50000):
+            for _ in xrange(500):
                 proclist.do_kmc_step()
             if not self.image_queue.full():
                 atoms = self.get_atoms()
@@ -164,12 +184,15 @@ class Model_Parameters(object):
             self.__dict__[attr] = value
 
 
-def set_rate_constants(parameters=settings.parameters, print_rates=True):
+def set_rate_constants(parameters=None, print_rates=True):
     """Tries to evaluate the supplied expression for a rate constant
     to a simple real number and sets it for the corresponding process.
     For the evaluation we draw on predefined natural constants, user defined
     parameters and mathematical functions
     """
+    if parameters is None:
+        parameters = settings.parameters
+
     if print_rates:
         print('-------------------')
     for proc in sorted(settings.rate_constants):
