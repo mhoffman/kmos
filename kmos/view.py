@@ -149,7 +149,7 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.tof_diagram.get_yaxis().get_major_formatter().set_powerlimits((3,3))
         self.tof_plots = []
         for tof in self.tofs:
-            self.tof_plots.append(self.tof_diagram.plot([],[],'b-',label=tof)[0])
+            self.tof_plots.append(self.tof_diagram.plot([],[],label=tof)[0])
 
         self.tof_diagram.legend(loc='lower left')
         self.tof_diagram.set_ylabel('TOF in $\mathrm{s}^{-1}\mathrm{site}^{-1}$')
