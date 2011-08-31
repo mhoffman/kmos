@@ -19,6 +19,7 @@ import kiwi.ui.dialogs
 from kmos.config import GLADEFILE
 from kmos.utils import CorrectlyNamed, get_ase_constructor
 from kmos.types import *
+from kmos import evaluate_rate_expression
 
 # ASE import
 import numpy as np
@@ -342,10 +343,19 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         'to declare a CO diffusion from site br to site cus or ' +
         'CO@cus->CO@cus.(0,1) for a CO diffusion in the up direction. Hit ENTER to update the graphical'
         'representation.')
-        self.rate_constant.set_tooltip_text('Python has to be able to evaluate this expression to a simple real ' +
-        'number. One can use standard mathematical functions, parameters that are defined under "Parameters" or ' +
-        'constants and conversion factor such as c, h, e, kboltzmann, pi, bar, angstrom')
-        rate_constant_terms = ['exp','kboltzmann']
+        self.rate_constant.curr_value = 0.0
+        expr = self.rate_constant.get_text()
+        if expr:
+            parameters = {}
+            for param in self.project_tree.parameter_list:
+                parameters[param.name] = {'value':param.value}
+            self.rate_constant.set_tooltip_text('Current value: %.2e s^{-1}' %
+                evaluate_rate_expression(expr,parameters))
+        else:
+            self.rate_constant.set_tooltip_text(('Python has to be able to evaluate this expression to a simple real ' +
+            'number. One can use standard mathematical functions, parameters that are defined under "Parameters" or ' +
+            'constants and conversion factor such as c, h, e, kboltzmann, pi, bar, angstrom'))
+        rate_constant_terms = ['exp','kboltzmann','h','beta','eV','umass','bar']
         for param in self.project_tree.parameter_list:
             rate_constant_terms.append(param.name)
         self.rate_constant.prefill(rate_constant_terms)
@@ -370,8 +380,18 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 expr += ' + '
             expr += '%s@%s' % (action.species, action.coord.name)
         return expr
-
         
+    def on_rate_constant__validate(self, widget, expr):
+        try:
+            parameters = {}
+            for param in self.project_tree.parameter_list:
+                parameters[param.name] = {'value':param.value}
+            self.rate_constant.set_tooltip_text('Current value: %.2e s^{-1}' %
+                evaluate_rate_expression(expr,parameters))
+        except Exception, e:
+            print(e)
+            return ValidationError('Could not evaluate rate constant')
+
     def on_chemical_expression__activate(self, entry, **kwargs):
         text = entry.get_text()
         if not text:
@@ -1101,11 +1121,6 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
 
             self.model.sites.append(new_site)
             SiteForm(new_site, self, self.project_tree, self.model)
-
-
-
-
-      
 
     def on_set_grid_button__clicked(self, button):
         grid_form = GridForm(self.model.grid, self.project_tree, self)
