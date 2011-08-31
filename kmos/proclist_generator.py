@@ -3,6 +3,7 @@ import pdb
 import itertools
 import operator
 from kmos.types import ConditionAction
+from kmos import evaluate_rate_expression
 
 def flatten(L):
     return [item for sublist in L for item in sublist]
@@ -796,6 +797,14 @@ class ProcListWriter():
         out.write('rate_constants = {\n')
         for process in data.process_list:
             out.write('    "%s":("%s", %s),\n' % (process.name, process.rate_constant, process.enabled))
+            try:
+                parameters = {}
+                for param in data.parameter_list:
+                    parameters[param.name] = {'value':param.value}
+                evaluate_rate_expression(process.rate_constant, parameters)
+            except Exception, e:
+                raise UserWarning('%s\nProcess: %s' % (e, process.name))
+
         out.write('    }\n\n')
         out.write('tof_count = {\n')
         print('len(process_list): %s' % len(data.process_list))
