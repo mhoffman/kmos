@@ -7,6 +7,8 @@ from utils import CorrectlyNamed
 
 from copy import deepcopy
 
+from kmos import evaluate_rate_expression
+
 
 class Attributes:
     """Handy class that easily allows to define data structures
@@ -25,8 +27,6 @@ class Attributes:
             self.__dict__[attrname] = value
         else:
             raise AttributeError, 'Tried to set illegal attribute %s' % attrname
-
-
 
 
 class Site(Attributes):
@@ -300,7 +300,6 @@ class Meta(Settable, object):
         return "%s(%s)" % (self.model_name, self.model_dimension)
 
 
-
 class Process(Attributes):
     """One process in a kMC process list
     """
@@ -332,6 +331,7 @@ class Process(Attributes):
 
     def get_info(self):
         return self.rate_constant
+
 
 
 

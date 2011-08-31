@@ -47,7 +47,7 @@ def jmolcolor_in_hex(i):
     a = 255
     color = (r << 24) | (g << 16) | (b << 8) | a
     return color
-        
+
 def parse_chemical_expression(eq, process, project_tree):
     """Evaluates a chemical expression 'eq' and adds
     conditions and actions accordingly. Rules are:
@@ -57,9 +57,9 @@ def parse_chemical_expression(eq, process, project_tree):
           [$^]*SPECIES@SITE\.OFFSET
         - each SPECIES must have been defined before. The special
           species 'empty' exists by default
-        - each SITE must have been defined before via the 
+        - each SITE must have been defined before via the
           layer form
-        - an offset in units of units cell can be given as 
+        - an offset in units of units cell can be given as
           tuple such as '(0,0)'
         - a condition or action term containing the default species,
           i.e. by default 'empty' may be omitted. However a term containing
@@ -86,7 +86,7 @@ def parse_chemical_expression(eq, process, project_tree):
     # remove comments
     if '#' in eq:
         eq = eq[:eq.find('#')]
-    
+
 
     # split at ->
     if eq.count('->') != 1 :
@@ -159,7 +159,7 @@ def parse_chemical_expression(eq, process, project_tree):
                         "exists on the following lattices: %" %
                         (name, [x[1] for x  in possible_sites]))
             coord_term.append(layer)
-                    
+
         if len(coord_term) == 3 :
             name = coord_term[0]
             offset = eval(coord_term[1])
@@ -172,8 +172,8 @@ def parse_chemical_expression(eq, process, project_tree):
                 site_names = [x.name for x in layer_instance.sites]
                 if name not in site_names:
                     raise UserWarning("Site %s not known, must be one of %s" % (name, site_names))
-                
-                
+
+
         species = term[0]
         coord = Coord(name=name,offset=offset,layer=layer)
         if i < len(left):
@@ -182,7 +182,7 @@ def parse_chemical_expression(eq, process, project_tree):
             action_list.append(ConditionAction(species=species, coord=coord))
 
     default_species = project_tree.species_list_iter.default_species
-    # every condition that does not have a corresponding action on the 
+    # every condition that does not have a corresponding action on the
     # same coordinate gets complemented with a 'default_species' action
     for condition in condition_list:
         if not filter(lambda x: x.coord == condition.coord, action_list):
@@ -201,7 +201,7 @@ def parse_chemical_expression(eq, process, project_tree):
         # for a annihilation the following rules apply:
         #   -  if no species is gives, it will be complemented with the corresponding
         #      species as on the left side
-        #   -  if a species is given, it must be equal to the corresponding one on the 
+        #   -  if a species is given, it must be equal to the corresponding one on the
         #      left side. if no corresponding condition is given on the left side,
         #      the condition will be added with the same species as the annihilated one
         if action.species[0] == '$':
@@ -221,8 +221,8 @@ def parse_chemical_expression(eq, process, project_tree):
                         + 'must be given in a corresponding condition.')
         elif action.species == '^' :
             raise UserWarning('When creating a site, the species on the new site must be stated.')
-            
-            
+
+
     process.condition_list += condition_list
     process.action_list += action_list
 
@@ -234,7 +234,7 @@ class OutputForm(GladeDelegate):
     toplevel_name='output_form'
     widgets = ['output_list']
     def __init__(self, output_list, project_tree):
-                
+
         GladeDelegate.__init__(self)
         self.project_tree = project_tree
         self.output_list_data = output_list
@@ -314,8 +314,8 @@ class BatchProcessForm(SlaveDelegate):
                     self.project_tree.process_list.remove(dublette_proc)
                 self.project_tree.append(self.project_tree.process_list_iter, process)
         buffer.delete(*bounds)
-    
-    
+
+
 class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     """A form that allows to create and manipulate a process
     """
@@ -346,11 +346,15 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.rate_constant.curr_value = 0.0
         expr = self.rate_constant.get_text()
         if expr:
-            parameters = {}
-            for param in self.project_tree.parameter_list:
-                parameters[param.name] = {'value':param.value}
-            self.rate_constant.set_tooltip_text('Current value: %.2e s^{-1}' %
-                evaluate_rate_expression(expr,parameters))
+            try:
+                parameters = {}
+                for param in self.project_tree.parameter_list:
+                    parameters[param.name] = {'value':param.value}
+                self.rate_constant.set_tooltip_text('Current value: %.2e s^{-1}' %
+                    evaluate_rate_expression(expr,parameters))
+            except Exception, e:
+                self.rate_constant.set_tooltip_text(e)
+
         else:
             self.rate_constant.set_tooltip_text(('Python has to be able to evaluate this expression to a simple real ' +
             'number. One can use standard mathematical functions, parameters that are defined under "Parameters" or ' +
@@ -364,7 +368,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         for species in self.project_tree.species_list:
             chem_exp_terms.append(species.name)
         self.chemical_expression.prefill(chem_exp_terms)
-        
+
 
     def generate_expression(self):
         expr = ''
@@ -380,7 +384,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 expr += ' + '
             expr += '%s@%s' % (action.species, action.coord.name)
         return expr
-        
+
     def on_rate_constant__validate(self, widget, expr):
         try:
             parameters = {}
@@ -389,8 +393,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             self.rate_constant.set_tooltip_text('Current value: %.2e s^{-1}' %
                 evaluate_rate_expression(expr,parameters))
         except Exception, e:
-            print(e)
-            return ValidationError('Could not evaluate rate constant')
+            return ValidationError(e)
 
     def on_chemical_expression__activate(self, entry, **kwargs):
         text = entry.get_text()
@@ -436,7 +439,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         """Returns True if (x, y) is in lattice box
         """
         return 10 < x < 510 and 80 < y < 580
-        
+
     def button_press(self, _, item, dummy):
         coords = item.get_coords()
         if item.state == 'reservoir':
@@ -498,7 +501,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 else:
                     self.item.delete()
 
-                    
+
         self.chemical_expression.update(self.generate_expression(), )
         self.canvas.redraw()
 
@@ -629,7 +632,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             #self.infoed = True
             #kiwi.ui.dialogs.info('No sites found', 'You either have not defined any sites or you switched all ' +
                 #'layers to invisible. Double-click on a layer to change its visibility.')
-        
+
     def on_condition_action_clicked(self, canvas, widget, event):
         if event.button == 2 :
             if widget.type == 'action':
@@ -714,7 +717,7 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
             self.site_ok.set_sensitive(True)
 
 
-    def on_site_cancel__clicked(self, _):  
+    def on_site_cancel__clicked(self, _):
         """If we click cancel revert to previous state
         or don't add site, if new."""
         if self.saved_state.name:
@@ -799,7 +802,7 @@ class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
         value = self.parameter_adjustable.get_active()
         self.parameter_max.set_sensitive(value)
         self.parameter_min.set_sensitive(value)
-            
+
 
     def on_value__content_changed(self, text):
         self.project_tree.update(self.model)
@@ -810,8 +813,8 @@ class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
 
 
 class SpeciesListForm(ProxySlaveDelegate):
-    """This form only allows to set the default species, that is 
-    a system will be globally initialized with this species if 
+    """This form only allows to set the default species, that is
+    a system will be globally initialized with this species if
     nothing else is set on a per site basis
     """
     gladefile = GLADEFILE
@@ -914,7 +917,7 @@ class GridForm(ProxyDelegate):
     def on_grid_offset_y__activate(self, widget):
         self.on_grid_form_ok__clicked(widget)
 
-        
+
 class LatticeForm(ProxySlaveDelegate):
     """Widget to set global lattice parameter such as the lattice vector,
     a ASE representation string, and the default layer. The program will
@@ -1008,7 +1011,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
             + 'The position has no direct meaning for the lattice kMC model.\n'
             + 'Meaning such as nearest neighbor etc. is only gained\n'
             + 'through corresponding processes')
-            
+
 
     def redraw(self):
         white = col_str2tuple(self.model.color)
@@ -1142,7 +1145,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                     elem.coord.layer = new_layer_name
         self.previous_layer_name = new_layer_name
 
-                    
+
         self.project_tree.update(self.model)
 
 
