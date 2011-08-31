@@ -54,6 +54,7 @@ class KMC_Model(multiprocessing.Process):
         self.size = int(settings.simulation_size) if size is None else int(size)
         self.print_rates = print_rates
         self.parameters = Model_Parameters(self.print_rates)
+        self.rate_constants = Model_Rate_Constants()
         proclist.init((self.size,)*int(lattice.model_dimension),
             system_name,
             lattice.default_layer,
@@ -183,6 +184,26 @@ class Model_Parameters(object):
         else:
             self.__dict__[attr] = value
 
+    def __repr__(self):
+        res = 'kMC model parameters\n'
+        res += '--------------------\n'
+        for attr in sorted(settings.parameters):
+            res += ('%s = %s\n' % (attr, settings.parameters[attr]['value']))
+        res += '--------------------\n'
+        return res
+
+
+
+class Model_Rate_Constants(object):
+    def __repr__(self):
+        res = 'kMC rate constants\n'
+        res += '------------------\n'
+        for proc in sorted(settings.rate_constants):
+            rate_expr = settings.rate_constants[proc][0]
+            rate_const = evaluate_rate_expression(rate_expr, settings.parameters)
+            res += '%s: %s = %.2e s^{-1}\n' % (proc, rate_expr, rate_const)
+        res += '------------------\n'
+        return res
 
 def set_rate_constants(parameters=None, print_rates=True):
     """Tries to evaluate the supplied expression for a rate constant
@@ -207,7 +228,6 @@ def set_rate_constants(parameters=None, print_rates=True):
             raise UserWarning("Could not set %s for process %s!\nException: %s" % (rate_expr, proc, e))
     if print_rates:
         print('-------------------')
-
 
 def import_ase():
     try:
