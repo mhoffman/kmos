@@ -353,7 +353,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 self.rate_constant.set_tooltip_text('Current value: %.2e s^{-1}' %
                     evaluate_rate_expression(expr,parameters))
             except Exception, e:
-                self.rate_constant.set_tooltip_text(e)
+                self.rate_constant.set_tooltip_text(str(e))
 
         else:
             self.rate_constant.set_tooltip_text(('Python has to be able to evaluate this expression to a simple real ' +
