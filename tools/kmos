@@ -3,7 +3,7 @@
 import os
 import optparse
 
-parser = optparse.OptionParser("""Usage: %prog [help] (edit|view|export) [options]""")
+parser = optparse.OptionParser("""Usage: %prog [help] (edit|export|build|view) [options]""")
 
 options, args = parser.parse_args()
 
@@ -43,6 +43,8 @@ elif args[0] == 'export':
         print('No export path provided. Exporting to %s' % out_dir)
         args.append(out_dir)
     os.system('kmos-export-program %s %s' % (args[1], args[2]))
+elif args[0] == 'build':
+    os.system('kmos-build')
 elif args[0] == 'view':
     os.system('kmos-view')
 
