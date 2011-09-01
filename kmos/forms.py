@@ -9,7 +9,11 @@ import gtk
 import goocanvas
 
 #kiwi imports
-from kiwi.ui.delegates import ProxySlaveDelegate, GladeDelegate, SlaveDelegate, ProxyDelegate
+from kiwi.ui.delegates import ProxySlaveDelegate, \
+                              GladeDelegate, \
+                              SlaveDelegate, \
+                              ProxyDelegate
+
 from kiwi.ui.views import SlaveView
 from kiwi.datatypes import ValidationError
 from kiwi.ui.objectlist import Column
@@ -32,6 +36,7 @@ from kmos.pygtkcanvas.canvas import Canvas
 from kmos.pygtkcanvas.canvaslayer import CanvasLayer
 from kmos.pygtkcanvas.canvasitem import *
 
+
 def col_str2tuple(hex_string):
     """Convenience function that turns a HTML type color
     into a tuple of three float between 0 and 1
@@ -42,11 +47,12 @@ def col_str2tuple(hex_string):
 
 def jmolcolor_in_hex(i):
     from ase.data.colors import jmol_colors
-    color = map(int, 255*jmol_colors[i])
+    color = map(int, 255 * jmol_colors[i])
     r, g, b = color
     a = 255
     color = (r << 24) | (g << 16) | (b << 8) | a
     return color
+
 
 def parse_chemical_expression(eq, process, project_tree):
     """Evaluates a chemical expression 'eq' and adds
@@ -89,8 +95,9 @@ def parse_chemical_expression(eq, process, project_tree):
 
 
     # split at ->
-    if eq.count('->') != 1 :
-        raise StandardError, 'Chemical expression must contain exactly one "->"\n%s'  % eq
+    if eq.count('->') != 1:
+        raise StandardError('Chemical expression must contain ' +
+                            'exactly one "->"\n%s'  % eq
     eq = re.split('->', eq)
     left, right = eq
 
@@ -108,7 +115,8 @@ def parse_chemical_expression(eq, process, project_tree):
     # small validity checking
     for term in left+right:
         if term.count('@') != 1 :
-            raise StandardError, 'Each term needs to contain exactly one @:\n%s' % term
+            raise StandardError('Each term needs to contain ' +
+                                'exactly one @:\n%s' % term
 
     # split each term again at @
     for i, term in enumerate(left):
@@ -119,9 +127,11 @@ def parse_chemical_expression(eq, process, project_tree):
     # check if species is defined
     for term in left + right:
         if term[0][0] in ['$', '^'] and term[0][1:]:
-            if not  filter(lambda x: x.name == term[0][1 :], project_tree.species_list):
+            if not  filter(lambda x: x.name == term[0][1 :], \
+                                     project_tree.species_list):
                 raise UserWarning('Species %s unknown ' % term[0 :])
-        elif not filter(lambda x: x.name == term[0], project_tree.species_list):
+        elif not filter(lambda x: x.name == term[0], \
+                                  project_tree.species_list):
             raise UserWarning('Species %s unknown ' % term[0])
 
     condition_list = []
@@ -166,18 +176,22 @@ def parse_chemical_expression(eq, process, project_tree):
             layer = coord_term[2]
             layer_names = [x.name for x in project_tree.layer_list]
             if layer not in layer_names:
-                raise UserWarning("Layer %s not known, must be one of %s" % (layer, layer_names))
+                raise UserWarning("Layer %s not known, must be one of %s" 
+                                  % (layer, layer_names))
             else:
-                layer_instance = filter(lambda x: x.name==layer, project_tree.layer_list)[0]
+                layer_instance = filter(lambda x: x.name==layer,
+                                                  project_tree.layer_list)[0]
                 site_names = [x.name for x in layer_instance.sites]
                 if name not in site_names:
-                    raise UserWarning("Site %s not known, must be one of %s" % (name, site_names))
+                    raise UserWarning("Site %s not known, must be one of %s"
+                                      % (name, site_names))
 
 
         species = term[0]
         coord = Coord(name=name, offset=offset, layer=layer)
         if i < len(left):
-            condition_list.append(ConditionAction(species=species, coord=coord))
+            condition_list.append(ConditionAction(species=species,
+                                                  coord=coord))
         else:
             action_list.append(ConditionAction(species=species, coord=coord))
 
@@ -186,7 +200,8 @@ def parse_chemical_expression(eq, process, project_tree):
     # same coordinate gets complemented with a 'default_species' action
     for condition in condition_list:
         if not filter(lambda x: x.coord == condition.coord, action_list):
-            action_list.append(ConditionAction(species=default_species, coord=condition.coord))
+            action_list.append(ConditionAction(species=default_species,
+                                               coord=condition.coord))
 
     # every action that does not have a corresponding condition on
     # the same coordinate gets complemented with a 'default_species'
@@ -194,25 +209,33 @@ def parse_chemical_expression(eq, process, project_tree):
     for action in action_list:
         if not filter(lambda x: x.coord == action.coord, condition_list)\
             and not action.species[0] in ['^', '$']:
-            condition_list.append(ConditionAction(species=default_species, coord=action.coord))
+            condition_list.append(ConditionAction(species=default_species,
+                                                  coord=action.coord))
 
     # species completion and consistency check for site creation/annihilation
     for action in action_list:
         # for a annihilation the following rules apply:
-        #   -  if no species is gives, it will be complemented with the corresponding
-        #      species as on the left side
-        #   -  if a species is given, it must be equal to the corresponding one on the
-        #      left side. if no corresponding condition is given on the left side,
-        #      the condition will be added with the same species as the annihilated one
+        #   -  if no species is gives, it will be complemented with the
+        #      corresponding species as on the left side.
+        #   -  if a species is given, it must be equal to the corresponding
+        #      one on the left side. if no corresponding condition is given on
+        #      the left side, the condition will be added with the same
+        #      species as the annihilated one.
         if action.species[0] == '$':
-            corresponding_condition = filter(lambda x: x.coord == action.coord, condition_list)
+            corresponding_condition = filter(lambda x: x.coord
+                                                        == action.coord,
+                                            condition_list)
             if action.species[1 :]:
                 if not corresponding_condition:
-                    condition_list.append(ConditionAction(species=action.species[1 :], coord=action.coord))
+                    condition_list.append(
+                            ConditionAction(
+                                species=action.species[1 :],
+                                coord=action.coord))
                 else:
-                    if corresponding_condition[0].species != action.species[1 :]:
-                        raise UserWarning('When annihilating a site, species must be the same for condition\n'
-                            + 'and action.\n')
+                    if corresponding_condition[0].species != action.species[1:]:
+                        raise UserWarning(
+                        'When annihilating a site, species must be the same' +
+                        'for condition\n  and action.\n')
             else:
                 if corresponding_condition:
                     action.species = '$%s' % corresponding_species[0].species
