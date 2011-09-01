@@ -118,7 +118,7 @@ def parse_chemical_expression(eq, process, project_tree):
 
     # check if species is defined
     for term in left + right:
-        if term[0][0] in ['$','^'] and term[0][1 :]:
+        if term[0][0] in ['$', '^'] and term[0][1:]:
             if not  filter(lambda x: x.name == term[0][1 :], project_tree.species_list):
                 raise UserWarning('Species %s unknown ' % term[0 :])
         elif not filter(lambda x: x.name == term[0], project_tree.species_list):
@@ -138,7 +138,7 @@ def parse_chemical_expression(eq, process, project_tree):
             active_layers = filter(lambda x: x.active, project_tree.layer_list)
             if len(active_layers) == 1 :
                 layer = active_layers[0].name
-            else: # if more than one active try to guess layer from name
+            else:  # if more than one active try to guess layer from name
                 possible_sites = []
                 # if no layer visible choose among all of them
                 # else choose among visible
@@ -149,7 +149,7 @@ def parse_chemical_expression(eq, process, project_tree):
                 for ilayer in layers:
                     for jsite in ilayer.sites:
                         if jsite.name == name:
-                            possible_sites.append((jsite.name,ilayer.name))
+                            possible_sites.append((jsite.name, ilayer.name))
                 if not possible_sites :
                     raise UserWarning("Site %s not known" % name)
                 elif len(possible_sites) == 1 :
@@ -164,7 +164,7 @@ def parse_chemical_expression(eq, process, project_tree):
             name = coord_term[0]
             offset = eval(coord_term[1])
             layer = coord_term[2]
-            layer_names = [ x.name for x in project_tree.layer_list]
+            layer_names = [x.name for x in project_tree.layer_list]
             if layer not in layer_names:
                 raise UserWarning("Layer %s not known, must be one of %s" % (layer, layer_names))
             else:
@@ -175,7 +175,7 @@ def parse_chemical_expression(eq, process, project_tree):
 
 
         species = term[0]
-        coord = Coord(name=name,offset=offset,layer=layer)
+        coord = Coord(name=name, offset=offset, layer=layer)
         if i < len(left):
             condition_list.append(ConditionAction(species=species, coord=coord))
         else:
@@ -233,12 +233,17 @@ class OutputForm(GladeDelegate):
     gladefile = GLADEFILE
     toplevel_name='output_form'
     widgets = ['output_list']
-    def __init__(self, output_list, project_tree):
 
+    def __init__(self, output_list, project_tree):
         GladeDelegate.__init__(self)
         self.project_tree = project_tree
         self.output_list_data = output_list
-        self.output_list.set_columns([Column('name', data_type=str, editable=True, sorted=True), Column('output',data_type=bool, editable=True)])
+        self.output_list.set_columns([Column('name',
+                                          data_type=str,
+                                          editable=True, sorted=True),
+                                      Column('output',
+                                          data_type=bool,
+                                          editable=True)])
 
         for item in self.output_list_data:
             self.output_list.append(item)
@@ -256,6 +261,7 @@ class OutputForm(GladeDelegate):
         output_form.set_default_response(gtk.RESPONSE_OK)
         output_form.set_default(output_form.get_widget_for_response(gtk.RESPONSE_OK))
         form_entry = gtk.Entry()
+
         def activate_default(_):
             output_form.activate_default()
         form_entry.connect('activate', activate_default)
@@ -272,6 +278,7 @@ class OutputForm(GladeDelegate):
 class BatchProcessForm(SlaveDelegate):
     gladefile = GLADEFILE
     toplevel_name = 'batch_process_form'
+
     def __init__(self, project_tree):
         self.project_tree = project_tree
         SlaveDelegate.__init__(self)
@@ -321,15 +328,19 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     """
     gladefile = GLADEFILE
     toplevel_name = 'process_form'
-    widgets = ['process_name', 'rate_constant', 'process_enabled','chemical_expression']
-    z = 5 # z as in zoom
-    l = 500 # l as in length
+    widgets = ['process_name',
+               'rate_constant',
+               'process_enabled',
+               'chemical_expression']
+    z = 5  # z as in zoom
+    l = 500  # l as in length
     r_cond = 15.
     r_act = 10.
     r_reservoir = 5.
-    r_site  = 5.
-    # where the center unit cell is in the drawing
-    X = 2; Y = 2
+    r_site  = 5.  # where the center unit cell is in the drawing
+    X = 2
+    Y = 2
+
     def __init__(self, process, project_tree):
         self.process = process
         self.project_tree = project_tree
@@ -349,9 +360,10 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             try:
                 parameters = {}
                 for param in self.project_tree.parameter_list:
-                    parameters[param.name] = {'value':param.value}
-                self.rate_constant.set_tooltip_text('Current value: %.2e s^{-1}' %
-                    evaluate_rate_expression(expr,parameters))
+                    parameters[param.name] = {'value': param.value}
+                self.rate_constant.set_tooltip_text(
+                    'Current value: %.2e s^{-1}' %
+                    evaluate_rate_expression(expr, parameters))
             except Exception, e:
                 self.rate_constant.set_tooltip_text(str(e))
 
@@ -359,12 +371,18 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             self.rate_constant.set_tooltip_text(('Python has to be able to evaluate this expression to a simple real ' +
             'number. One can use standard mathematical functions, parameters that are defined under "Parameters" or ' +
             'constants and conversion factor such as c, h, e, kboltzmann, pi, bar, angstrom'))
-        rate_constant_terms = ['exp','kboltzmann','h','beta','eV','umass','bar']
+        rate_constant_terms = ['bar',
+                               'beta',
+                               'eV',
+                               'exp',
+                               'h',
+                               'kboltzmann',
+                               'umass']
         for param in self.project_tree.parameter_list:
             rate_constant_terms.append(param.name)
         self.rate_constant.prefill(rate_constant_terms)
 
-        chem_exp_terms = ['->',]
+        chem_exp_terms = ['->', ]
         for species in self.project_tree.species_list:
             chem_exp_terms.append(species.name)
         self.chemical_expression.prefill(chem_exp_terms)
@@ -377,7 +395,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         for i, condition in enumerate(self.process.condition_list):
             if i > 0 :
                 expr += ' + '
-            expr += '%s@%s' % ( condition.species, condition.coord.name)
+            expr += '%s@%s' % (condition.species, condition.coord.name)
         expr += ' -> '
         for i, action in enumerate(self.process.action_list):
             if i > 0 :
@@ -389,7 +407,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         try:
             parameters = {}
             for param in self.project_tree.parameter_list:
-                parameters[param.name] = {'value':param.value}
+                parameters[param.name] = {'value': param.value}
             self.rate_constant.set_tooltip_text('Current value: %.2e s^{-1}' %
                 evaluate_rate_expression(expr,parameters))
         except Exception, e:
@@ -471,7 +489,10 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             else:
                 close_sites = self.site_layer.find_closest(event.x, event.y, halo=(.2*self.l)/self.z)
                 if close_sites:
-                    closest_site = min(close_sites, key=lambda i : (i.get_center()[0]-event.x)**2 + (i.get_center()[1]-event.y)**2)
+                    closest_site = min(close_sites,
+                                       key=lambda i :
+                                        (i.get_center()[0]-event.x) ** 2
+                                        + (i.get_center()[1]-event.y) ** 2)
                     coord = closest_site.get_center()
                     self.item.set_center(*coord)
                     if not self.process.condition_list + self.process.action_list:
@@ -519,12 +540,18 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.canvas.grab_focus()
         self.canvas.show()
         self.process_pad.add(self.canvas)
-        self.lattice_layer = CanvasLayer(); self.canvas.append(self.lattice_layer)
-        self.site_layer = CanvasLayer(); self.canvas.append(self.site_layer)
-        self.condition_layer = CanvasLayer(); self.canvas.append(self.condition_layer)
-        self.action_layer = CanvasLayer(); self.canvas.append(self.action_layer)
-        self.frame_layer = CanvasLayer(); self.canvas.append(self.frame_layer)
-        self.motion_layer = CanvasLayer(); self.canvas.append(self.motion_layer)
+        self.lattice_layer = CanvasLayer()
+        self.canvas.append(self.lattice_layer)
+        self.site_layer = CanvasLayer()
+        self.canvas.append(self.site_layer)
+        self.condition_layer = CanvasLayer()
+        self.canvas.append(self.condition_layer)
+        self.action_layer = CanvasLayer()
+        self.canvas.append(self.action_layer)
+        self.frame_layer = CanvasLayer()
+        self.canvas.append(self.frame_layer)
+        self.motion_layer = CanvasLayer()
+        self.canvas.append(self.motion_layer)
 
         # draw lattice
         for i in range(self.z):
@@ -540,7 +567,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         for i in range(self.z+1):
             for j in range(self.z+1):
                 for site in site_list:
-                    color =  col_str2tuple(site.color)
+                    color = col_str2tuple(site.color)
                     if i == self.X and j == self.Y:
                         l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=color)
                     else:
@@ -572,13 +599,18 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         # draw reservoir circles
         for k, species in enumerate(self.project_tree.species_list):
             color = col_str2tuple(species.color)
-            o = CanvasOval(self.frame_layer, 30+k*50, 30, 50+k*50, 50, filled=True, bg=color)
+            o = CanvasOval(self.frame_layer,
+                           30 + k * 50,
+                           30, 50 + k * 50,
+                           50,
+                           filled=True,
+                           bg=color)
             o.species = species.name
-            o.tooltip_text = species.name # for tooltip
+            o.tooltip_text = species.name  # for tooltip
             o.connect('button-press-event', self.button_press)
             #o.connect('motion-notify-event', self.drag_motion)
             o.connect('button-release-event', self.button_release)
-            o.connect('query-tooltip',self.query_tooltip)
+            o.connect('query-tooltip', self.query_tooltip)
             o.state = 'reservoir'
 
         self.lattice_layer.move_all(10, 80)
@@ -587,12 +619,12 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         # attributes need for moving objects
         self.item = None
         self.prev_pos = None
-        black=col_str2tuple('#003333')
+        black = col_str2tuple('#003333')
         for elem in self.process.condition_list:
             matching_sites = filter(lambda x: isinstance(x, CanvasOval)
-                                    and x.i==self.X+elem.coord.offset[0]
-                                    and x.j==self.Y+elem.coord.offset[1]
-                                    and x.name==elem.coord.name
+                                    and x.i == self.X + elem.coord.offset[0]
+                                    and x.j == self.Y + elem.coord.offset[1]
+                                    and x.name == elem.coord.name
                                     and x.layer == elem.coord.layer, self.site_layer)
             if matching_sites:
                 coords = matching_sites[0].get_coords()
@@ -607,14 +639,14 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 
         for elem in self.process.action_list:
             matching_sites = filter(lambda x: isinstance(x, CanvasOval)
-                                    and x.i==self.X+elem.coord.offset[0]
-                                    and x.j==self.Y+elem.coord.offset[1]
-                                    and x.name==elem.coord.name
+                                    and x.i == self.X + elem.coord.offset[0]
+                                    and x.j == self.Y + elem.coord.offset[1]
+                                    and x.name == elem.coord.name
                                     and x.layer == elem.coord.layer, self.site_layer)
             if matching_sites:
                 coords = matching_sites[0].get_coords()
-                if elem.species[0] ==  '^':
-                    color = filter(lambda x: x.name == elem.species[1 :], self.project_tree.species_list)[0].color
+                if elem.species[0] == '^':
+                    color = filter(lambda x: x.name == elem.species[1:], self.project_tree.species_list)[0].color
                 elif elem.species[0] == '$':
                     # Don't draw the disappearing particle
                     continue
@@ -634,7 +666,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 #'layers to invisible. Double-click on a layer to change its visibility.')
 
     def on_condition_action_clicked(self, canvas, widget, event):
-        if event.button == 2 :
+        if event.button == 2:
             if widget.type == 'action':
                 self.process.action_list.remove(widget.action)
             elif widget.type == 'condition':
@@ -655,7 +687,12 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
     """
     gladefile = GLADEFILE
     toplevel_name = 'site_form'
-    widgets = ['site_name', 'sitevect_x', 'sitevect_y', 'sitevect_z','default_species']
+    widgets = ['site_name',
+               'sitevect_x',
+               'sitevect_y',
+               'sitevect_z',
+               'default_species']
+
     def __init__(self, site, parent, project_tree, layer):
         self.saved_state = copy.deepcopy(site)
         self.project_tree = project_tree
@@ -663,7 +700,10 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
         site.default_species = None
         ProxyDelegate.__init__(self, site)
 
-        self.site_default_species.prefill( [ x.name for x in project_tree.species_list], sort=True)
+        self.site_default_species.prefill([x.name
+                                            for x in
+                                            project_tree.species_list],
+                                            sort=True)
 
         if default_species == 'default_species':
             self.site_default_species.select(self.project_tree.species_list_iter.default_species)
@@ -685,15 +725,15 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
         return self.on_name__validate(widget, model_name)
 
     def on_sitevect_x__validate(self, widget, value):
-        if not 0 <= value <= 1 :
+        if not 0 <= value <= 1:
             return ValidationError('Each component must be between 0 and 1.')
 
     def on_sitevect_y__validate(self, widget, value):
-        if not 0 <= value <= 1 :
+        if not 0 <= value <= 1:
             return ValidationError('Each component must be between 0 and 1.')
 
     def on_sitevect_z__validate(self, widget, value):
-        if not 0 <= value <= 1 :
+        if not 0 <= value <= 1:
             return ValidationError('Each component must be between 0 and 1.')
 
     def on_sitevect_x__activate(self, _):
@@ -710,12 +750,11 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
 
     def on_site_name__validate(self, widget, site_name):
         """check if other site already has the name"""
-        if filter(lambda x : x.name == site_name, self.layer.sites):
+        if filter(lambda x: x.name == site_name, self.layer.sites):
             self.site_ok.set_sensitive(False)
             return ValidationError('Site name needs to be unique')
         else:
             self.site_ok.set_sensitive(True)
-
 
     def on_site_cancel__clicked(self, _):
         """If we click cancel revert to previous state
@@ -732,11 +771,10 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
 
     def on_site_ok__clicked(self, button):
         self.model.default_species = self.site_default_species.get_selected()
-        if not len(self.site_name.get_text()) :
+        if not len(self.site_name.get_text()):
             self.layer.sites.remove(self.model)
         self.hide()
         self.parent.redraw()
-
 
 
 class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
@@ -745,6 +783,7 @@ class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
     gladefile = GLADEFILE
     toplevel_name = 'meta_form'
     widgets = ['author', 'email', 'model_name', 'model_dimension', 'debug', ]
+
     def __init__(self, model, project_tree):
         ProxySlaveDelegate.__init__(self, model)
         #self.model_dimension.set_sensitive(False)
@@ -759,7 +798,6 @@ class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
         self.debug.set_tooltip_text('Increasing the debug level might give hints if one suspects errors in ' +
         'kmos itself. It does not help to debug your model. So usually one wants to keep it a 0.')
         self.author.grab_focus()
-
 
     def on_model_name__validate(self, widget, model_name):
         return self.on_name__validate(widget, model_name)
@@ -781,7 +819,12 @@ class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
     """
     gladefile = GLADEFILE
     toplevel_name = 'parameter_form'
-    widgets = ['parameter_name', 'value','parameter_adjustable','parameter_min','parameter_max']
+    widgets = ['parameter_name',
+               'value',
+               'parameter_adjustable',
+               'parameter_min',
+               'parameter_max']
+
     def __init__(self, model, project_tree):
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, model)
@@ -803,7 +846,6 @@ class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
         self.parameter_max.set_sensitive(value)
         self.parameter_min.set_sensitive(value)
 
-
     def on_value__content_changed(self, text):
         self.project_tree.update(self.model)
 
@@ -820,6 +862,7 @@ class SpeciesListForm(ProxySlaveDelegate):
     gladefile = GLADEFILE
     toplevel_name = 'species_list_form'
     widgets = ['default_species']
+
     def __init__(self, model, project_tree):
         # this _ugly_ implementation is due to an apparent catch 22 bug in ProxyComboBox:
         # if the value is set already __init__ expect the value in the list but
@@ -827,13 +870,15 @@ class SpeciesListForm(ProxySlaveDelegate):
         default_species = model.default_species
         model.default_species = None
         ProxySlaveDelegate.__init__(self, model)
-        self.default_species.prefill([ x.name for x in project_tree.species_list], sort=True)
+        self.default_species.prefill([x.name
+                                      for x in project_tree.species_list],
+                                      sort=True)
         self.default_species.select(default_species)
-        self.default_species.set_tooltip_text('The lattice will be initialized with this species by default\n'
-            + 'but also every unspecified condition or action wil be completed with this choice.\n'
+        self.default_species.set_tooltip_text(
+            'The lattice will be initialized with this species by default\n'
+            + 'but also every unspecified condition or action wil be'
+            + 'completed with this choice.\n'
             + 'So better only change this once at the begining if at all!')
-
-
 
 
 class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
@@ -846,15 +891,19 @@ class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
     gladefile = GLADEFILE
     toplevel_name = 'species_form'
     widgets = ['name', 'color', 'representation']
+
     def __init__(self, model, project_tree):
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, model)
         self.name.grab_focus()
-        self.name.set_tooltip_text('The name here is arbitrary but you will have to type it many times. ' +
-        'So you might want to use e.g. CO instead carbon_monoxide' )
-        self.color.set_tooltip_text('Choose a color a represent this species in the process editor')
-        self.representation.set_tooltip_text('Set an ASE Atoms(\n\'...\') like string to representation in the ' +
-        'auto-generated movie. Please only use \'\' for quotation')
+        self.name.set_tooltip_text(
+        'The name here is arbitrary but you will have to type it many times.'
+        + 'So you might want to use e.g. CO instead carbon_monoxide')
+        self.color.set_tooltip_text(
+            'Choose a color a represent this species in the process editor')
+        self.representation.set_tooltip_text(
+        'Set an ASE Atoms(\n\'...\') like string to representation in the '
+        + 'auto-generated movie. Please only use \'\' for quotation')
 
     def on_name__content_changed(self, text):
         self.project_tree.update(self.model)
@@ -867,14 +916,20 @@ class GridForm(ProxyDelegate):
     """
     gladefile = GLADEFILE
     toplevel_name = 'grid_form'
-    widgets = ['grid_x', 'grid_y', 'grid_z', 'grid_offset_x', 'grid_offset_y', 'grid_offset_z']
+    widgets = ['grid_x',
+               'grid_y',
+               'grid_z',
+               'grid_offset_x',
+               'grid_offset_y',
+               'grid_offset_z']
+
     def __init__(self, grid, project_tree, layer):
         self.old_grid = copy.deepcopy(grid)
         self.project_tree = project_tree
         self.layer = layer
         ProxyDelegate.__init__(self, grid)
         self.grid_x.grab_focus()
-        if self.project_tree.meta.model_dimension < 3 :
+        if self.project_tree.meta.model_dimension < 3:
             self.grid_z.hide()
             self.grid_offset_z.hide()
 
@@ -885,11 +940,11 @@ class GridForm(ProxyDelegate):
         self.layer.redraw()
 
     def on_grid_offset_x__validate(self, widget, offset):
-        if not 0 <= offset <= 1 :
+        if not 0 <= offset <= 1:
             return ValidationError('Offset must between 0 and 1.')
 
     def on_grid_offset_y__validate(self, widget, offset):
-        if not 0 <= offset <= 1 :
+        if not 0 <= offset <= 1:
             return ValidationError('Offset must between 0 and 1.')
 
     def on_grid_offset_x__content_changed(self, widget):
@@ -925,18 +980,26 @@ class LatticeForm(ProxySlaveDelegate):
     """
     gladefile = GLADEFILE
     toplevel_name = 'lattice_form'
-    widgets = ['cell_size_x', 'cell_size_y', 'cell_size_z', 'default_layer','lattice_representation']
+    widgets = ['cell_size_x',
+               'cell_size_y',
+               'cell_size_z',
+               'default_layer',
+               'lattice_representation']
+
     def __init__(self, model, dimension, project_tree):
         default_layer = model.default_layer
         model.default_layer = None
         ProxySlaveDelegate.__init__(self, model)
-        self.default_layer.prefill([x.name for x in project_tree.layer_list], sort=True)
+        self.default_layer.prefill([x.name for x in project_tree.layer_list],
+                                   sort=True)
         self.default_layer.select(default_layer)
         self.default_layer.set_tooltip_text(
-        'By default the system will be initialized with this layer. This only matters if using ' +
-        'using more than one layer (multi-lattice kMC)')
+        'By default the system will be initialized with this layer.'
+        + 'This only matters if using using more than one layer'
+        + '(multi-lattice kMC).')
         self.cell_size_label.set_tooltip_text(
-        'Set the size of your unit cell in Angstrom for the auto-generated movie')
+        'Set the size of your unit cell in Angstrom for the'
+        + 'auto-generated movie')
 
     def on_add_structure__clicked(self, _):
         try:
@@ -980,14 +1043,15 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
     """
     gladefile = GLADEFILE
     toplevel_name = 'layer_form'
-    widgets = ['layer_name', 'layer_color' ]
+    widgets = ['layer_name', 'layer_color']
+
     def __init__(self, model, project_tree):
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, model)
         self.grid = self.model.grid
         self.canvas = goocanvas.Canvas()
         self.root = self.canvas.get_root_item()
-        self.canvas.set_size_request(400,400)
+        self.canvas.set_size_request(400, 400)
         self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
         self.canvas.connect('button-press-event', self.on_button_press)
 
@@ -1005,13 +1069,14 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.previous_layer_name = self.layer_name.get_text()
         self.redraw()
 
-        self.layer_name.set_tooltip_text('A name is only relevant if you are using more than one\n' +
-            'layer in your model.')
-        self.set_grid_button.set_tooltip_text('The grid set here help to put sites at specific locations.\n'
+        self.layer_name.set_tooltip_text(
+            'A name is only relevant if you are using more than one\n'
+            + 'layer in your model.')
+        self.set_grid_button.set_tooltip_text(
+            'The grid set here help to put sites at specific locations.\n'
             + 'The position has no direct meaning for the lattice kMC model.\n'
             + 'Meaning such as nearest neighbor etc. is only gained\n'
             + 'through corresponding processes')
-
 
     def redraw(self):
         white = col_str2tuple(self.model.color)
@@ -1026,20 +1091,24 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                 atoms = representations[0]
         else:
             atoms = Atoms()
-        self.lower_left = (self.offset_x, self.offset_y+self.scale*atoms.cell[1,1])
-        self.upper_right= (self.offset_x + self.scale*atoms.cell[0,0], self.offset_y)
-        big_atoms = atoms*(3,3,1)
+        self.lower_left = (self.offset_x,
+                           self.offset_y
+                           + self.scale * atoms.cell[1, 1])
+        self.upper_right = (self.offset_x
+                           + self.scale * atoms.cell[0, 0],
+                           self.offset_y)
+        big_atoms = atoms * (3, 3, 1)
         big_atoms.translate(-atoms.cell.diagonal())
         for atom in sorted(big_atoms, key=lambda x: x.position[2]):
             i = atom.number
-            radius = self.radius_scale*covalent_radii[i]
+            radius = self.radius_scale * covalent_radii[i]
             color = jmolcolor_in_hex(i)
 
             X = atom.position[0]
-            Y = atoms.cell[1,1] - atom.position[1]
+            Y = atoms.cell[1, 1] - atom.position[1]
             ellipse = goocanvas.Ellipse(parent=self.root,
-                                center_x=(self.offset_x+self.scale*X),
-                                center_y=(self.offset_y+self.scale*Y),
+                                center_x=(self.offset_x + self.scale * X),
+                                center_y=(self.offset_y + self.scale * Y),
                                 radius_x=radius,
                                 radius_y=radius,
                                 stroke_color='black',
@@ -1048,20 +1117,18 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         cell = goocanvas.Rect(parent=self.root,
                               x=self.offset_x,
                               y=self.offset_y,
-                              height=self.scale*atoms.cell[1,1],
-                              width=self.scale*atoms.cell[0,0],
-                              stroke_color='black',
-                              )
-
+                              height=self.scale * atoms.cell[1, 1],
+                              width=self.scale * atoms.cell[0, 0],
+                              stroke_color='black',)
 
         for site in self.model.sites:
-            X = self.scale*np.dot(site.x,atoms.cell[0,0])
-            Y = self.scale*np.dot(1-site.y,atoms.cell[1,1])
+            X = self.scale * np.dot(site.x, atoms.cell[0, 0])
+            Y = self.scale * np.dot(1 - site.y, atoms.cell[1, 1])
             o = goocanvas.Ellipse(parent=self.root,
-                                  center_x=self.offset_x+X,
-                                  center_y=self.offset_y+Y,
-                                  radius_x=.3*self.radius_scale,
-                                  radius_y=.3*self.radius_scale,
+                                  center_x=self.offset_x + X,
+                                  center_y=self.offset_y + Y,
+                                  radius_x=.3 * self.radius_scale,
+                                  radius_y=.3 * self.radius_scale,
                                   stroke_color='black',
                                   fill_color='white',
                                   line_width=1.0,)
@@ -1070,48 +1137,20 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
             o.connect('query-tooltip', self.query_tooltip)
         self.canvas.hide()
         self.canvas.show()
-        #if self.project_tree.lattice.cell_size_x > self.project_tree.lattice.cell_size_y :
-            #X = 400.
-            #Y = 400.*self.project_tree.lattice.cell_size_y/self.project_tree.lattice.cell_size_x
-        #else:
-            #Y = 400.
-            #X = 400.*self.project_tree.lattice.cell_size_x/self.project_tree.lattice.cell_size_y
-
-
-        # draw frame
-        #CanvasLine(self.grid_layer, 0,0,0,Y, fg=white)
-        #CanvasLine(self.grid_layer, X,0,X,Y, fg=white)
-        #CanvasLine(self.grid_layer, 0,0,X,0, fg=white)
-        #CanvasLine(self.grid_layer, 0,Y,X,Y, fg=white)
-
-        # draw grid lines
-        #for i in range(self.grid.x+1):
-            #xprime = (float(i)/self.grid.x+self.grid.offset_x)*X % X
-            #CanvasLine(self.grid_layer,xprime ,0, xprime, Y, fg=white)
-        #for i in range(self.grid.y+1):
-            #yprime = (float(i)/(self.grid.y)+self.grid.offset_y)*Y % Y
-            #CanvasLine(self.grid_layer, 0, Y-yprime , X, Y-yprime, fg=white)
-        #for i in range(self.grid.x+1):
-            #for j in range(self.grid.y+1):
-                #xprime = (float(i)/self.grid.x+self.grid.offset_x)*X % X
-                #yprime = (float(j)/(self.grid.y)+self.grid.offset_y)*Y % Y
-                #o = CanvasOval(self.grid_layer, 0, 0, 10, 10, fg=white)
-                #o.set_center(xprime, Y-yprime)
-                #o.set_radius(5)
-                #o.frac_coords = (xprime/X, yprime/Y)
-                #o.connect('button-press-event', self.grid_point_press_event)
 
     def query_tooltip(self, canvas, widget, tooltip):
         tooltip.set_text(widget.site.name)
         return True
 
     def on_button_press(self, item, event):
-        pos_x = (event.x-self.lower_left[0])/(self.upper_right[0]-self.lower_left[0])
-        pos_y = (event.y-self.lower_left[1])/(self.upper_right[1]-self.lower_left[1])
+        pos_x = ((event.x - self.lower_left[0]) /
+                 (self.upper_right[0] - self.lower_left[0]))
+        pos_y = ((event.y - self.lower_left[1]) /
+                 (self.upper_right[1] - self.lower_left[1]))
 
         for site in self.model.sites:
-            d = np.sqrt((pos_x-site.x)**2 + (pos_y-site.y)**2)
-            if d < 0.03 :
+            d = np.sqrt((pos_x - site.x) ** 2 + (pos_y - site.y) ** 2)
+            if d < 0.03:
                 SiteForm(site, self, self.project_tree, self.model)
                 break
         else:
@@ -1145,9 +1184,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                     elem.coord.layer = new_layer_name
         self.previous_layer_name = new_layer_name
 
-
         self.project_tree.update(self.model)
-
 
 
 class InlineMessage(SlaveView):
@@ -1156,6 +1193,7 @@ class InlineMessage(SlaveView):
     gladefile = GLADEFILE
     toplevel_name = 'inline_message'
     widgets = ['message_label']
+
     def __init__(self, message=''):
         SlaveView.__init__(self)
         self.message_label.set_text(message)
