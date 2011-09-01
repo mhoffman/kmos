@@ -5,11 +5,15 @@ import optparse
 from kmos.main import KMC_Editor
 
 parser = optparse.OptionParser()
-parser.add_option('-o', '--open', dest='import_file', help='Immediately import store kmc file')
-parser.add_option('-x', '--export-dir', dest='export_dir', type=str)
+parser.add_option('-o', '--open',
+                  dest='import_file',
+                  help='Immediately import store kmc file')
+parser.add_option('-x', '--export-dir',
+                  dest='export_dir',
+                  type=str)
 (options, args) = parser.parse_args()
 editor = KMC_Editor()
-if len(args) >= 1 :
+if len(args) >= 1:
     options.import_file = args[0]
 
 if options.import_file:
