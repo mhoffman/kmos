@@ -1048,7 +1048,7 @@ class KMC_Editor(GladeDelegate):
             'Please go to the directory and run ./compile_for_f2py,\n' +
            'which you might have to adapt slightly.\n' +
            'If this finished successfully you can run the simulation\n' +
-           'by executing ./run_kmc.py')
+           'by executing "kmos view"')
 
     def validate_model(self):
         pass

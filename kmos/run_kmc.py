@@ -1,6 +1,5 @@
 #!/usr/bin/python
-#import pdb
-"""Generical kMC steering script for binary modules created kmos"""
+"""Generic kMC steering script for binary modules created kmos"""
 
 import kmc
 import math
