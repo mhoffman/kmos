@@ -8,7 +8,8 @@ from numpy import matrix
 
 class CorrectlyNamed:
     """Syntactic Sugar class for use with kiwi, that makes sure that the name
-    field of the class has a name field, that always complys with the rules for variables
+    field of the class has a name field, that always complys with the rules
+    for variables.
     """
     def __init__(self):
         pass
@@ -21,11 +22,13 @@ class CorrectlyNamed:
         elif name and not name[0].isalpha():
             return ValidationError('Need to start with a letter')
 
+
 def write_py(fileobj, images, **kwargs):
     if isinstance(fileobj, str):
         fileobj = open(fileobj, 'w')
 
-    scaled_positions = kwargs['scaled_positions'] if 'scaled_positions' in kwargs else True
+    scaled_positions = kwargs['scaled_positions'] \
+        if 'scaled_positions' in kwargs else True
     fileobj.write('from ase import Atoms\n\n')
     fileobj.write('import numpy as np\n\n')
 
@@ -48,9 +51,8 @@ def write_py(fileobj, images, **kwargs):
             fileobj.write("          scaled_positions=np.array(\n      %s),\n"
                 % repr(image.get_scaled_positions())[6:])
 
-
-
     fileobj.write(']')
+
 
 def get_ase_constructor(atoms):
     f = StringIO()

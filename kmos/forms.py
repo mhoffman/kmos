@@ -93,14 +93,12 @@ def parse_chemical_expression(eq, process, project_tree):
     if '#' in eq:
         eq = eq[:eq.find('#')]
 
-
     # split at ->
     if eq.count('->') != 1:
         raise StandardError('Chemical expression must contain ' +
-                            'exactly one "->"\n%s'  % eq
+                            'exactly one "->"\n%s' % eq)
     eq = re.split('->', eq)
     left, right = eq
-
 
     # split terms
     left = left.split('+')
@@ -113,10 +111,10 @@ def parse_chemical_expression(eq, process, project_tree):
         right.remove('')
 
     # small validity checking
-    for term in left+right:
-        if term.count('@') != 1 :
+    for term in left + right:
+        if term.count('@') != 1:
             raise StandardError('Each term needs to contain ' +
-                                'exactly one @:\n%s' % term
+                                'exactly one @:\n%s' % term)
 
     # split each term again at @
     for i, term in enumerate(left):
@@ -127,9 +125,9 @@ def parse_chemical_expression(eq, process, project_tree):
     # check if species is defined
     for term in left + right:
         if term[0][0] in ['$', '^'] and term[0][1:]:
-            if not  filter(lambda x: x.name == term[0][1 :], \
+            if not  filter(lambda x: x.name == term[0][1:], \
                                      project_tree.species_list):
-                raise UserWarning('Species %s unknown ' % term[0 :])
+                raise UserWarning('Species %s unknown ' % term[0:])
         elif not filter(lambda x: x.name == term[0], \
                                   project_tree.species_list):
             raise UserWarning('Species %s unknown ' % term[0])
@@ -140,13 +138,14 @@ def parse_chemical_expression(eq, process, project_tree):
     for i, term in enumerate(left + right):
         #parse coordinate
         coord_term = term[1].split('.')
-        if len(coord_term) == 1 :
+        if len(coord_term) == 1:
             coord_term.append('(0,0)')
 
-        if len(coord_term) == 2 :
+        if len(coord_term) == 2:
             name = coord_term[0]
-            active_layers = filter(lambda x: x.active, project_tree.layer_list)
-            if len(active_layers) == 1 :
+            active_layers = filter(lambda x: x.active,
+                                          project_tree.layer_list)
+            if len(active_layers) == 1:
                 layer = active_layers[0].name
             else:  # if more than one active try to guess layer from name
                 possible_sites = []
@@ -160,32 +159,31 @@ def parse_chemical_expression(eq, process, project_tree):
                     for jsite in ilayer.sites:
                         if jsite.name == name:
                             possible_sites.append((jsite.name, ilayer.name))
-                if not possible_sites :
+                if not possible_sites:
                     raise UserWarning("Site %s not known" % name)
-                elif len(possible_sites) == 1 :
+                elif len(possible_sites) == 1:
                     layer = possible_sites[0][1]
                 else:
-                    raise UserWarning("Site %s is ambiguous because it"+
+                    raise UserWarning("Site %s is ambiguous because it" +
                         "exists on the following lattices: %" %
                         (name, [x[1] for x  in possible_sites]))
             coord_term.append(layer)
 
-        if len(coord_term) == 3 :
+        if len(coord_term) == 3:
             name = coord_term[0]
             offset = eval(coord_term[1])
             layer = coord_term[2]
             layer_names = [x.name for x in project_tree.layer_list]
             if layer not in layer_names:
-                raise UserWarning("Layer %s not known, must be one of %s" 
+                raise UserWarning("Layer %s not known, must be one of %s"
                                   % (layer, layer_names))
             else:
-                layer_instance = filter(lambda x: x.name==layer,
+                layer_instance = filter(lambda x: x.name == layer,
                                                   project_tree.layer_list)[0]
                 site_names = [x.name for x in layer_instance.sites]
                 if name not in site_names:
                     raise UserWarning("Site %s not known, must be one of %s"
                                       % (name, site_names))
-
 
         species = term[0]
         coord = Coord(name=name, offset=offset, layer=layer)
@@ -225,14 +223,15 @@ def parse_chemical_expression(eq, process, project_tree):
             corresponding_condition = filter(lambda x: x.coord
                                                         == action.coord,
                                             condition_list)
-            if action.species[1 :]:
+            if action.species[1:]:
                 if not corresponding_condition:
                     condition_list.append(
                             ConditionAction(
-                                species=action.species[1 :],
+                                species=action.species[1:],
                                 coord=action.coord))
                 else:
-                    if corresponding_condition[0].species != action.species[1:]:
+                    if corresponding_condition[0].species \
+                       != action.species[1:]:
                         raise UserWarning(
                         'When annihilating a site, species must be the same' +
                         'for condition\n  and action.\n')
@@ -240,11 +239,14 @@ def parse_chemical_expression(eq, process, project_tree):
                 if corresponding_condition:
                     action.species = '$%s' % corresponding_species[0].species
                 else:
-                    raise UserWarning('When omitting the species in the site annihilation, a species must\n'
+                    raise UserWarning(
+                        'When omitting the species in the site '
+                        + 'annihilation, a species must\n'
                         + 'must be given in a corresponding condition.')
-        elif action.species == '^' :
-            raise UserWarning('When creating a site, the species on the new site must be stated.')
-
+        elif action.species == '^':
+            raise UserWarning(
+                'When creating a site, the species on the new site '
+                + 'must be stated.')
 
     process.condition_list += condition_list
     process.action_list += action_list
@@ -254,7 +256,7 @@ class OutputForm(GladeDelegate):
     """Not implemented yet
     """
     gladefile = GLADEFILE
-    toplevel_name='output_form'
+    toplevel_name = 'output_form'
     widgets = ['output_list']
 
     def __init__(self, output_list, project_tree):
@@ -279,10 +281,13 @@ class OutputForm(GladeDelegate):
                                       flags=gtk.DIALOG_MODAL,
                                       type=gtk.MESSAGE_QUESTION,
                                       buttons=gtk.BUTTONS_OK_CANCEL,
-                                      message_format='Please enter a new output: examples are a species or species@site')
+                                      message_format='Please enter a new ' \
+                                         + 'output: examples are a species ' \
+                                         + 'or species@site')
         output_form.set_flags(gtk.CAN_DEFAULT | gtk.CAN_FOCUS)
         output_form.set_default_response(gtk.RESPONSE_OK)
-        output_form.set_default(output_form.get_widget_for_response(gtk.RESPONSE_OK))
+        output_form.set_default(
+                        output_form.get_widget_for_response(gtk.RESPONSE_OK))
         form_entry = gtk.Entry()
 
         def activate_default(_):
@@ -297,6 +302,7 @@ class OutputForm(GladeDelegate):
             output_item = OutputItem(name=output_str, output=True)
             self.output_list.append(output_item)
             self.output_list_data.append(output_item)
+
 
 class BatchProcessForm(SlaveDelegate):
     gladefile = GLADEFILE
@@ -316,33 +322,42 @@ class BatchProcessForm(SlaveDelegate):
             if not line.count(';'):
                 continue
             if not line.count(';'):
-                raise UserWarning("Line %s: the number of fields you entered is %s, but I expected 3" % (i, line.count(';')+1))
+                raise UserWarning(
+                    ("Line %s: the number of fields you entered is %s, " \
+                     "but I expected 3") % (i, line.count(';') + 1))
                 continue
             line = line.split(';')
             name = line[0]
-            if len(line) == 1 :
+            if len(line) == 1:
                 eq = ''
                 rate_constant = ''
-            elif len(line) == 2 :
+            elif len(line) == 2:
                 eq = line[1]
                 rate_constant = ''
-            elif len(line) == 3 :
+            elif len(line) == 3:
                 eq = line[1]
                 rate_constant = line[2]
             else:
-                raise UserWarning("There are too many ';' in your expression %s" % line)
+                raise UserWarning(
+                    "There are too many ';' in your expression %s" % line)
             process = Process(name=name, rate_constant=rate_constant)
             try:
-                parse_chemical_expression(eq=line[1], process=process, project_tree=self.project_tree)
+                parse_chemical_expression(eq=line[1],
+                                          process=process,
+                                          project_tree=self.project_tree)
                 self.draw_from_data()
             except:
-                print("Found an error in your chemical expression(line %s):\n   %s" % (i+1, line[1]))
+                print(
+                    ("Found an error in your chemical expression(line %s):\n"\
+                    "%s") % (i + 1, line[1]))
                 raise
             else:
                 # replace any existing process with identical names
-                for dublette_proc in filter(lambda x: x.name == name, self.project_tree.process_list):
+                for dublette_proc in filter(lambda x: x.name == name,
+                                            self.project_tree.process_list):
                     self.project_tree.process_list.remove(dublette_proc)
-                self.project_tree.append(self.project_tree.process_list_iter, process)
+                self.project_tree.append(self.project_tree.process_list_iter,
+                                                                     process)
         buffer.delete(*bounds)
 
 
@@ -360,7 +375,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     r_cond = 15.
     r_act = 10.
     r_reservoir = 5.
-    r_site  = 5.  # where the center unit cell is in the drawing
+    r_site = 5.  # where the center unit cell is in the drawing
     X = 2
     Y = 2
 
@@ -372,11 +387,13 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.chemical_expression.update(expression, )
         self.draw_from_data()
 
-        self.process_name.set_tooltip_text('This name has to uniquely identify the process e.g. co_diff_right')
-        self.chemical_expression.set_tooltip_text('This is a fast way to define a process e.g. CO@cus->CO@bridge ' +
+        self.process_name.set_tooltip_text(
+        'This name has to uniquely identify the process e.g. co_diff_right')
+        self.chemical_expression.set_tooltip_text(
+        'This is a fast way to define a process e.g. CO@cus->CO@bridge ' +
         'to declare a CO diffusion from site br to site cus or ' +
-        'CO@cus->CO@cus.(0,1) for a CO diffusion in the up direction. Hit ENTER to update the graphical'
-        'representation.')
+        'CO@cus->CO@cus.(0,1) for a CO diffusion in the up direction. Hit ' +
+        'ENTER to update the graphical representation.')
         self.rate_constant.curr_value = 0.0
         expr = self.rate_constant.get_text()
         if expr:
@@ -391,9 +408,12 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 self.rate_constant.set_tooltip_text(str(e))
 
         else:
-            self.rate_constant.set_tooltip_text(('Python has to be able to evaluate this expression to a simple real ' +
-            'number. One can use standard mathematical functions, parameters that are defined under "Parameters" or ' +
-            'constants and conversion factor such as c, h, e, kboltzmann, pi, bar, angstrom'))
+            self.rate_constant.set_tooltip_text((
+                'Python has to be able to evaluate this expression to a ' +
+                'plain real number. One can use standard mathematical ' +
+                'functions, parameters that are defined under "Parameters"' +
+                'or constants and conversion factor such as c, h, e, ' +
+                'kboltzmann, pi, bar, angstrom'))
         rate_constant_terms = ['bar',
                                'beta',
                                'eV',
@@ -410,18 +430,17 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             chem_exp_terms.append(species.name)
         self.chemical_expression.prefill(chem_exp_terms)
 
-
     def generate_expression(self):
         expr = ''
         if not self.process.condition_list + self.process.action_list:
             return expr
         for i, condition in enumerate(self.process.condition_list):
-            if i > 0 :
+            if i > 0:
                 expr += ' + '
             expr += '%s@%s' % (condition.species, condition.coord.name)
         expr += ' -> '
         for i, action in enumerate(self.process.action_list):
-            if i > 0 :
+            if i > 0:
                 expr += ' + '
             expr += '%s@%s' % (action.species, action.coord.name)
         return expr
@@ -432,7 +451,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             for param in self.project_tree.parameter_list:
                 parameters[param.name] = {'value': param.value}
             self.rate_constant.set_tooltip_text('Current value: %.2e s^{-1}' %
-                evaluate_rate_expression(expr,parameters))
+                evaluate_rate_expression(expr, parameters))
         except Exception, e:
             return ValidationError(e)
 
@@ -451,19 +470,27 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         if not '->' in text:
             text += '->'
         try:
-            parse_chemical_expression(eq=text, process=self.process, project_tree=self.project_tree)
+            parse_chemical_expression(eq=text,
+                                      process=self.process,
+                                      project_tree=self.project_tree)
             self.process.condition_list = []
             self.process.action_list = []
-            parse_chemical_expression(eq=text, process=self.process, project_tree=self.project_tree)
+            parse_chemical_expression(eq=text,
+                                      process=self.process,
+                                      project_tree=self.project_tree)
         except Exception as e:
             # first remove last term and try again
             try:
                 print("Error ...")
                 text = re.sub(r'+[^+]*$', '', text)
-                parse_chemical_expression(eq=text, process=self.process, project_tree=self.project_tree)
+                parse_chemical_expression(eq=text,
+                                          process=self.process,
+                                          project_tree=self.project_tree)
                 self.process.condition_list = []
                 self.process.action_list = []
-                parse_chemical_expression(eq=text, process=self.process, project_tree=self.project_tree)
+                parse_chemical_expression(eq=text,
+                                          process=self.process,
+                                          project_tree=self.project_tree)
 
             except Exception as e:
                 print("Fatal Error ... %s" % e)
@@ -484,7 +511,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     def button_press(self, _, item, dummy):
         coords = item.get_coords()
         if item.state == 'reservoir':
-            o = CanvasOval(self.motion_layer, *coords, filled=True, bg=item.bg)
+            o = CanvasOval(self.motion_layer,
+                           *coords, filled=True, bg=item.bg)
             o.connect('button-press-event', self.button_press)
             o.connect('motion-notify-event', self.drag_motion)
             o.connect('button-release-event', self.button_release)
@@ -495,7 +523,6 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             self.item.father = item
             self.prev_pos = self.item.get_center()
             self.canvas.redraw()
-
 
     def drag_motion(self, widget, item, event):
         if self.item.clicked:
@@ -510,15 +537,19 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             if not self.on_lattice(event.x, event.y):
                 self.item.delete()
             else:
-                close_sites = self.site_layer.find_closest(event.x, event.y, halo=(.2*self.l)/self.z)
+                close_sites = self.site_layer.find_closest(
+                                               event.x,
+                                               event.y,
+                                               halo=(.2 * self.l) / self.z)
                 if close_sites:
                     closest_site = min(close_sites,
-                                       key=lambda i :
-                                        (i.get_center()[0]-event.x) ** 2
-                                        + (i.get_center()[1]-event.y) ** 2)
+                                       key=lambda i:
+                                        (i.get_center()[0] - event.x) ** 2
+                                        + (i.get_center()[1] - event.y) ** 2)
                     coord = closest_site.get_center()
                     self.item.set_center(*coord)
-                    if not self.process.condition_list + self.process.action_list:
+                    if not self.process.condition_list \
+                           + self.process.action_list:
                     # if no condition or action is defined yet,
                     # we need to set the center of the editor
                         self.X = closest_site.i
@@ -533,8 +564,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                     condition_action = ConditionAction(species=species,
                                                        coord=kmc_coord)
 
-
-                    if filter(lambda x: x.get_center() == coord, self.condition_layer):
+                    if filter(lambda x: x.get_center() == coord,
+                                            self.condition_layer):
                         self.item.new_parent(self.action_layer)
                         self.item.set_radius(self.r_act)
                         self.process.action_list.append(condition_action)
@@ -545,10 +576,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 else:
                     self.item.delete()
 
-
         self.chemical_expression.update(self.generate_expression(), )
         self.canvas.redraw()
-
 
     def draw_from_data(self):
         """Places circles on the current lattice according
@@ -558,7 +587,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         black = col_str2tuple('#000000')
         if hasattr(self, 'canvas'):
             self.process_pad.remove(self.canvas)
-        self.canvas = Canvas(bg=white,fg=white)
+        self.canvas = Canvas(bg=white, fg=white)
         self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
         self.canvas.grab_focus()
         self.canvas.show()
@@ -578,44 +607,73 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 
         # draw lattice
         for i in range(self.z):
-            CanvasLine(self.lattice_layer, 0, i*(self.l/self.z), 500, i*(self.l/self.z), line_width=1, fg=(.6, .6, .6))
+            CanvasLine(self.lattice_layer,
+                       0, i * (self.l / self.z),
+                       500, i * (self.l / self.z),
+                       line_width=1, fg=(.6, .6, .6))
         for i in range(self.z):
-            CanvasLine(self.lattice_layer, i*(self.l/self.z), 0, i*(self.l/self.z), 500, line_width=1, fg=(.6, .6, .6))
-        active_layers = filter(lambda x: x.active==True, self.project_tree.layer_list)
+            CanvasLine(self.lattice_layer,
+                       i * (self.l / self.z), 0,
+                       i * (self.l / self.z), 500,
+                       line_width=1, fg=(.6, .6, .6))
+        active_layers = filter(lambda x: x.active == True,
+                                         self.project_tree.layer_list)
         site_list = []
         for active_layer in active_layers:
             for site in active_layer.sites:
-                form_site = ProcessFormSite(name=site.name,x=site.x, y=site.y, z=site.z, layer=active_layer.name, color=active_layer.color)
+                form_site = ProcessFormSite(name=site.name,
+                                            x=site.x,
+                                            y=site.y,
+                                            z=site.z,
+                                            layer=active_layer.name,
+                                            color=active_layer.color)
                 site_list.append(form_site)
-        for i in range(self.z+1):
-            for j in range(self.z+1):
+        for i in range(self.z + 1):
+            for j in range(self.z + 1):
                 for site in site_list:
                     color = col_str2tuple(site.color)
                     if i == self.X and j == self.Y:
-                        l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=color)
+                        l_site = CanvasOval(self.site_layer, 0, 0, 10, 10,
+                                                                    fg=color)
                     else:
-                        l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=color)
+                        l_site = CanvasOval(self.site_layer, 0, 0, 10, 10,
+                                                                    fg=color)
 
-                    l_site.set_center(self.l/self.z*(i+float(site.x)), 500-self.l/self.z*(j+float(site.y)))
+                    l_site.set_center(self.l / self.z * (i + float(site.x)),
+                                500 - self.l / self.z * (j + float(site.y)))
                     l_site.connect('query-tooltip', self.query_tooltip)
-                    # 500 - ... for having scientific coordinates and not screen coordinates
+                    # 500 - ... for having scientific coordinates
+                    # and not screen coordinates
                     l_site.set_radius(5)
                     l_site.i = i
                     l_site.j = j
-                    if len(active_layers) > 1 :
-                        l_site.tooltip_text = '%s.(%s,%s).%s' % (site.name, i-self.X, j-self.Y, site.layer)
+                    if len(active_layers) > 1:
+                        l_site.tooltip_text = '%s.(%s,%s).%s' % (site.name,
+                                                                 i - self.X,
+                                                                 j - self.Y,
+                                                                 site.layer)
                     else:
-                        l_site.tooltip_text = '%s.(%s,%s)' % (site.name, i-self.X, j-self.Y)
+                        l_site.tooltip_text = '%s.(%s,%s)' % (site.name,
+                                                              i - self.X,
+                                                              j - self.Y)
                     l_site.name = site.name
-                    l_site.offset = (i-self.X, j-self.Y)
+                    l_site.offset = (i - self.X, j - self.Y)
                     l_site.layer = site.layer
 
         # draw frame
         frame_col = (.21, .35, .42)
-        CanvasRect(self.frame_layer, 0, 0, 520, 80, fg=frame_col, bg=frame_col, filled=True)
-        CanvasRect(self.frame_layer, 0, 0, 10, 580, fg=frame_col, bg=frame_col, filled=True)
-        CanvasRect(self.frame_layer, 510, 0, 520, 580, fg=frame_col, bg=frame_col, filled=True)
-        CanvasRect(self.frame_layer, 0, 580, 520, 590, fg=frame_col, bg=frame_col, filled=True)
+        CanvasRect(self.frame_layer, 0, 0, 520, 80, fg=frame_col,
+                                                    bg=frame_col,
+                                                    filled=True)
+        CanvasRect(self.frame_layer, 0, 0, 10, 580, fg=frame_col,
+                                                    bg=frame_col,
+                                                    filled=True)
+        CanvasRect(self.frame_layer, 510, 0, 520, 580, fg=frame_col,
+                                                       bg=frame_col,
+                                                       filled=True)
+        CanvasRect(self.frame_layer, 0, 580, 520, 590, fg=frame_col,
+                                                       bg=frame_col,
+                                                       filled=True)
         CanvasText(self.frame_layer, 10, 10, size=8, text='Reservoir Area')
         CanvasText(self.frame_layer, 10, 570, size=8, text='Lattice Area')
 
@@ -648,14 +706,20 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                                     and x.i == self.X + elem.coord.offset[0]
                                     and x.j == self.Y + elem.coord.offset[1]
                                     and x.name == elem.coord.name
-                                    and x.layer == elem.coord.layer, self.site_layer)
+                                    and x.layer == elem.coord.layer,
+                                    self.site_layer)
             if matching_sites:
                 coords = matching_sites[0].get_coords()
-                color = filter(lambda x: x.name == elem.species, self.project_tree.species_list)[0].color
+                color = filter(lambda x: x.name == elem.species,
+                                     self.project_tree.species_list)[0].color
                 color = col_str2tuple(color)
-                o = CanvasOval(self.condition_layer, bg=color, fg=black, filled=True, outline=True)
+                o = CanvasOval(self.condition_layer,
+                               bg=color,
+                               fg=black,
+                               filled=True, outline=True)
                 o.coords = coords
-                o.connect('button-press-event', self.on_condition_action_clicked)
+                o.connect('button-press-event',
+                          self.on_condition_action_clicked)
                 o.set_radius(self.r_cond)
                 o.type = 'condition'
                 o.condition = elem
@@ -665,28 +729,30 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                                     and x.i == self.X + elem.coord.offset[0]
                                     and x.j == self.Y + elem.coord.offset[1]
                                     and x.name == elem.coord.name
-                                    and x.layer == elem.coord.layer, self.site_layer)
+                                    and x.layer == elem.coord.layer,
+                                    self.site_layer)
             if matching_sites:
                 coords = matching_sites[0].get_coords()
                 if elem.species[0] == '^':
-                    color = filter(lambda x: x.name == elem.species[1:], self.project_tree.species_list)[0].color
+                    color = filter(lambda x: x.name == elem.species[1:],
+                                    self.project_tree.species_list)[0].color
                 elif elem.species[0] == '$':
                     # Don't draw the disappearing particle
                     continue
                 else:
-                    color = filter(lambda x: x.name == elem.species, self.project_tree.species_list)[0].color
+                    color = filter(lambda x: x.name == elem.species,
+                                    self.project_tree.species_list)[0].color
                 color = col_str2tuple(color)
-                o = CanvasOval(self.action_layer, bg=color, fg=black, filled=True, outline=True)
+                o = CanvasOval(self.action_layer, bg=color,
+                                                  fg=black,
+                                                  filled=True,
+                                                  outline=True)
                 o.coords = coords
-                o.connect('button-press-event', self.on_condition_action_clicked)
+                o.connect('button-press-event',
+                          self.on_condition_action_clicked)
                 o.set_radius(self.r_act)
                 o.type = 'action'
                 o.action = elem
-
-        #if not site_list and not hasattr(self,'infoed'):
-            #self.infoed = True
-            #kiwi.ui.dialogs.info('No sites found', 'You either have not defined any sites or you switched all ' +
-                #'layers to invisible. Double-click on a layer to change its visibility.')
 
     def on_condition_action_clicked(self, canvas, widget, event):
         if event.button == 2:
@@ -729,7 +795,8 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
                                             sort=True)
 
         if default_species == 'default_species':
-            self.site_default_species.select(self.project_tree.species_list_iter.default_species)
+            self.site_default_species.select(
+                        self.project_tree.species_list_iter.default_species)
         else:
             self.site_default_species.select(default_species)
         self.model.default_species = self.site_default_species.get_selected()
@@ -740,9 +807,11 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
         self.project_tree = project_tree
         self.layer = layer
         self.show_all()
-        self.site_name.set_tooltip_text('The site name has to be uniquely identify a site (at least' +
-        'within each layer for multi-lattice mode). You may have to type this name a lot, so keep' +
-        'it short but unambiguous')
+        self.site_name.set_tooltip_text(
+            'The site name has to be uniquely identify a site (at least ' +
+            'within each layer for multi-lattice mode). You may have to ' +
+            'type this name a lot, so keep' +
+            'it short but unambiguous')
 
     def on_site_name__validate(self, widget, name):
         return self.on_name__validate(widget, model_name)
@@ -811,15 +880,23 @@ class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
         ProxySlaveDelegate.__init__(self, model)
         #self.model_dimension.set_sensitive(False)
         self.project_tree = project_tree
-        self.author.set_tooltip_text('Give a name so people know who to credit for the model.')
-        self.email.set_tooltip_text('Enter an email address so people can get in touch with you.')
-        self.model_name.set_tooltip_text('Give a clear unique name, to identify the model.')
-        self.model_dimension.set_tooltip_text('The source code export function can generate ' +
-        '1d, 2d, and 3d programs. However this GUI currently only supports 2d. 3d is still possible ' +
-        'by manipulating the project XML file by hand. The algorithm though is fast but very memory consuming ' +
-        'so a 3d simulation might require considerably more RAM.')
-        self.debug.set_tooltip_text('Increasing the debug level might give hints if one suspects errors in ' +
-        'kmos itself. It does not help to debug your model. So usually one wants to keep it a 0.')
+        self.author.set_tooltip_text(
+            'Give a name so people know who to credit for the model.')
+        self.email.set_tooltip_text(
+            'Enter an email address so people can get in touch with you.')
+        self.model_name.set_tooltip_text(
+            'Give a clear unique name, to identify the model.')
+        self.model_dimension.set_tooltip_text(
+            'The source code export function can generate ' +
+            '1d, 2d, and 3d programs. However this GUI currently only ' +
+            'supports 2d. 3d is still possible ' +
+            'by manipulating the project XML file by hand. The algorithm ' +
+            'though is fast but very memory consuming ' +
+            'so a 3d simulation might require considerably more RAM.')
+        self.debug.set_tooltip_text(
+            'Increasing the debug level might give hints if one suspects ' +
+            'errors in kmos itself. It does not help to debug your model. ' +
+            'So usually one wants to keep it a 0.')
         self.author.grab_focus()
 
     def on_model_name__validate(self, widget, model_name):
@@ -856,13 +933,15 @@ class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
         self.parameter_min.set_sensitive(value)
         self.name.grab_focus()
         self.parameter_adjustable.set_tooltip_text(
-        'Settings this adjustable will create a bar in the auto-generated movie .' +
-        'Dragging this bar will adapt the barrier and recalculate all rate constants. This only makes sense for ' +
-        'physical parameters such a partial pressure but not for e.g. lattice size')
+        'Settings this adjustable will create a bar in the auto-generated ' +
+        'movie. Dragging this bar will adapt the barrier and recalculate ' +
+        'all rate constants. This only makes sense for physical ' +
+        'parameters such a partial pressure but not for e.g. lattice size')
         self.parameter_name.set_tooltip_text(
-        'Choose a sensible name that you remember later when typing rate constant ' +
-        'formulae. This should not contain spaces')
-        self.value.set_tooltip_text('This defines the initial value for the parameter.')
+        'Choose a sensible name that you remember later when typing rate ' +
+        'constant formulae. This should not contain spaces')
+        self.value.set_tooltip_text(
+            'This defines the initial value for the parameter.')
 
     def on_parameter_adjustable__content_changed(self, form):
         value = self.parameter_adjustable.get_active()
@@ -887,9 +966,10 @@ class SpeciesListForm(ProxySlaveDelegate):
     widgets = ['default_species']
 
     def __init__(self, model, project_tree):
-        # this _ugly_ implementation is due to an apparent catch 22 bug in ProxyComboBox:
-        # if the value is set already __init__ expect the value in the list but
-        # you cannot fill the list before calling __init__
+        # this _ugly_ implementation is due to an apparent catch 22 bug in
+        # ProxyComboBox: if the value is set already __init__ expect
+        # the value in the list but you cannot fill the list before
+        # calling __init__
         default_species = model.default_species
         model.default_species = None
         ProxySlaveDelegate.__init__(self, model)
@@ -1097,8 +1177,8 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
             + 'layer in your model.')
         self.set_grid_button.set_tooltip_text(
             'The grid set here help to put sites at specific locations.\n'
-            + 'The position has no direct meaning for the lattice kMC model.\n'
-            + 'Meaning such as nearest neighbor etc. is only gained\n'
+            + 'The position has no direct meaning for the lattice kMC '
+            + 'model.\nMeaning such as nearest neighbor etc. is only gained\n'
             + 'through corresponding processes')
 
     def redraw(self):

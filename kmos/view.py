@@ -36,8 +36,6 @@ from kmos.model import KMC_Model,\
                        settings
 
 
-
-
 class ParamSlider(gtk.HScale):
     def __init__(self, name, value, min, max, scale, parameter_callback):
         print('%s %s %s %s' % (name, value, min, max))
@@ -51,9 +49,10 @@ class ParamSlider(gtk.HScale):
         self.scale = scale
         gtk.HScale.__init__(self, adjustment)
         self.connect('format-value', self.linlog_scale_format)
-        self.connect('value-changed',self.value_changed)
+        self.connect('value-changed', self.value_changed)
         self.set_tooltip_text(self.param_name)
-        self.set_value((self.resolution*(float(value)-self.xmin)/(self.xmax-self.xmin)))
+        self.set_value((self.resolution * (
+            float(value) - self.xmin) / (self.xmax - self.xmin)))
         print('set value %s' % self.get_value())
 
     def linlog_scale_format(self, widget, value):
@@ -63,22 +62,24 @@ class ParamSlider(gtk.HScale):
         if self.param_name.endswith('gas'):
             name = name[:-3]
         if self.param_name.startswith('p_'):
-            name = name[2 :]
+            name = name[2:]
             unit = 'bar'
         if name == 'T':
             unit = 'K'
         if self.scale == 'log':
-            vstr =  '%s: %.2e %s' % (name, self.xmin*(self.xmax/self.xmin)**value, unit)
+            vstr = '%s: %.2e %s' % (name,
+                           self.xmin * (self.xmax / self.xmin) ** value, unit)
         else:
-            vstr = '%s: %s %s' % (name, self.xmin+value*(self.xmax-self.xmin), unit)
+            vstr = '%s: %s %s' % (name,
+                           self.xmin + value * (self.xmax - self.xmin), unit)
         return vstr
 
     def value_changed(self, widget):
-        scale_value = self.get_value()/self.resolution
+        scale_value = self.get_value() / self.resolution
         if self.scale == 'log':
-            value = self.xmin*(self.xmax/self.xmin)**scale_value
+            value = self.xmin * (self.xmax / self.xmin) ** scale_value
         else:
-            value = self.xmin +  (self.xmax-self.xmin)*scale_value
+            value = self.xmin + (self.xmax - self.xmin) * scale_value
         self.parameter_callback(self.param_name, value)
 
 
@@ -95,6 +96,7 @@ class FakeWidget():
     def get_active(self):
         return self.active
 
+
 class FakeUI():
     """This is a fudge class to simulate to the View class a non-existing
     menu with included settings
@@ -106,8 +108,10 @@ class FakeUI():
         widget = FakeWidget(path)
         return widget
 
+
 class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
-    def __init__(self, queue, signal_queue, vbox, window, rotations='', show_unit_cell=True, show_bonds=False):
+    def __init__(self, queue, signal_queue, vbox, window,
+                rotations='', show_unit_cell=True, show_bonds=False):
 
         threading.Thread.__init__(self)
         self.image_queue = queue
@@ -122,7 +126,7 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.vbox = vbox
         self.window = window
 
-        self.vbox.connect('scroll-event',self.scroll_event)
+        self.vbox.connect('scroll-event', self.scroll_event)
         self.window.connect('key-press-event', self.on_key_press)
         View.__init__(self, self.vbox, rotations)
         Status.__init__(self, self.vbox)
@@ -133,7 +137,7 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.center = np.array([8, 8, 8])
         self.set_colors()
         self.set_coordinates(0)
-        self.center = np.array([0,0,0])
+        self.center = np.array([0, 0, 0])
 
         self.tofs = get_tof_names()
 
@@ -146,17 +150,20 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.data_plot = plt.figure()
         #plt.xlabel('$t$ in s')
         self.tof_diagram = self.data_plot.add_subplot(211)
-        self.tof_diagram.get_yaxis().get_major_formatter().set_powerlimits((3,3))
+        self.tof_diagram.get_yaxis().get_major_formatter().set_powerlimits(
+                                                                    (3, 3))
         self.tof_plots = []
         for tof in self.tofs:
-            self.tof_plots.append(self.tof_diagram.plot([],[],label=tof)[0])
+            self.tof_plots.append(self.tof_diagram.plot([], [], label=tof)[0])
 
         self.tof_diagram.legend(loc='lower left')
-        self.tof_diagram.set_ylabel('TOF in $\mathrm{s}^{-1}\mathrm{site}^{-1}$')
-        self.occupation_plots =[]
+        self.tof_diagram.set_ylabel(
+            'TOF in $\mathrm{s}^{-1}\mathrm{site}^{-1}$')
+        self.occupation_plots = []
         self.occupation_diagram = self.data_plot.add_subplot(212)
         for species in sorted(settings.representations):
-            self.occupation_plots.append(self.occupation_diagram.plot([], [],label=species)[0],)
+            self.occupation_plots.append(
+                self.occupation_diagram.plot([], [], label=species)[0],)
         self.occupation_diagram.legend(loc=2)
         self.occupation_diagram.set_xlabel('$t$ in s')
         self.occupation_diagram.set_ylabel('Coverage')
@@ -165,7 +172,7 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
 
     def update_vbox(self, atoms):
         if not self.center.any():
-            self.center = atoms.cell.diagonal()*.5
+            self.center = atoms.cell.diagonal() * .5
         self.images = Images([atoms])
         self.images.filenames = ['kmos GUI - %s' % settings.model_name]
         self.set_colors()
@@ -179,12 +186,11 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         new_time = atoms.kmc_time
         new_procstat = atoms.procstat
 
-
-        occupations = atoms.occupation.sum(axis=1)/lattice.spuck
+        occupations = atoms.occupation.sum(axis=1) / lattice.spuck
         tof_data = atoms.tof_data
 
         # store locally
-        while len(self.times) > 30 :
+        while len(self.times) > 30:
             self.tof_hist.pop(0)
             self.times.pop(0)
             self.occupation_hist.pop(0)
@@ -197,14 +203,16 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         for i, tof_plot in enumerate(self.tof_plots):
             self.tof_plots[i].set_xdata(self.times)
             self.tof_plots[i].set_ydata([tof[i] for tof in self.tof_hist])
-            self.tof_diagram.set_xlim(self.times[0],self.times[-1])
-            self.tof_diagram.set_ylim(0,max([tof[i] for tof in self.tof_hist]))
+            self.tof_diagram.set_xlim(self.times[0], self.times[-1])
+            self.tof_diagram.set_ylim(0,
+                                      max([tof[i] for tof in self.tof_hist]))
 
         # plot occupation
         for i, occupation_plot in enumerate(self.occupation_plots):
             self.occupation_plots[i].set_xdata(self.times)
-            self.occupation_plots[i].set_ydata([occ[i] for occ in self.occupation_hist])
-        self.occupation_diagram.set_xlim([self.times[0],self.times[-1]])
+            self.occupation_plots[i].set_ydata(
+                            [occ[i] for occ in self.occupation_hist])
+        self.occupation_diagram.set_xlim([self.times[0], self.times[-1]])
 
         self.data_plot.canvas.draw_idle()
         plt.show()
@@ -225,7 +233,7 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
             time.sleep(0.05)
             if not self.image_queue.empty():
                 atoms = self.image_queue.get()
-                gobject.idle_add(self.update_vbox,atoms)
+                gobject.idle_add(self.update_vbox, atoms)
                 gobject.idle_add(self.update_plots, atoms)
 
     def on_key_press(self, window, event):
@@ -256,11 +264,12 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
             print(e)
         self.update_vbox(atoms)
 
+
 class KMC_Viewer():
     def __init__(self):
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_position(gtk.WIN_POS_CENTER)
-        self.window.connect('delete-event',self.exit)
+        self.window.connect('delete-event', self.exit)
 
         self.vbox = gtk.VBox()
         self.window.add(self.vbox)
@@ -268,13 +277,19 @@ class KMC_Viewer():
         self.parameter_queue = multiprocessing.Queue(maxsize=50)
         self.signal_queue = multiprocessing.Queue(maxsize=10)
         self.model = KMC_Model(queue, self.parameter_queue, self.signal_queue)
-        self.viewbox = KMC_ViewBox(queue, self.signal_queue, self.vbox, self.window)
+        self.viewbox = KMC_ViewBox(queue, self.signal_queue,
+                                   self.vbox, self.window)
 
-        for param_name in filter(lambda p: settings.parameters[p]['adjustable'], settings.parameters):
+        for param_name in filter(lambda p: \
+            settings.parameters[p]['adjustable'], settings.parameters):
             param = settings.parameters[param_name]
-            slider = ParamSlider(param_name, param['value'], param['min'], param['max'], param['scale'], self.parameter_callback)
+            slider = ParamSlider(param_name, param['value'],
+                                 param['min'], param['max'],
+                                 param['scale'], self.parameter_callback)
             self.vbox.add(slider)
-            self.vbox.set_child_packing(slider, expand=False, fill=False, padding=0, pack_type=gtk.PACK_START)
+            self.vbox.set_child_packing(slider, expand=False,
+                                        fill=False, padding=0,
+                                        pack_type=gtk.PACK_START)
         print('initialized kmc_viewer')
         print(self.window.get_title())
         self.window.set_title('kmos GUI')

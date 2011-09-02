@@ -30,7 +30,10 @@ from xml.dom import minidom
 from kiwi.ui.views import BaseView
 from kiwi.controllers import BaseController
 import kiwi.ui
-from kiwi.ui.delegates import Delegate, SlaveDelegate, GladeDelegate, GladeSlaveDelegate
+from kiwi.ui.delegates import Delegate, \
+                              SlaveDelegate, \
+                              GladeDelegate, \
+                              GladeSlaveDelegate
 from kiwi.ui.objectlist import ObjectList, ObjectTree, Column
 import kiwi.ui.dialogs
 
@@ -87,19 +90,26 @@ def verbose(func):
     def wrapper_func(*args, **kwargs):
         """The wrapping function
         """
-        print >> sys.stderr, "call(\033[0;31m%s.%s\033[0;30m): %r\n" % (type(args[0]).__name__, func.func_name, args[1:]), sys.stderr.flush()
+        print >> sys.stderr, "call(\033[0;31m%s.%s\033[0;30m): %r\n" % \
+                (type(args[0]).__name__, func.func_name, args[1:]), \
+                sys.stderr.flush()
         ret = func(*args, **kwargs)
-        print >> sys.stderr, "    ret(%s): \033[0;32m%r\033[0;30m\n" % (func.func_name, ret)
+        print >> sys.stderr, "    ret(%s): \033[0;32m%r\033[0;30m\n" % \
+                 (func.func_name, ret)
         return ret
     return wrapper_func
 
 
 class ProjectTree(SlaveDelegate):
-    """A rather complex class holding all the information of a kMC project that provides
-    a treelike view for the gui
+    """A rather complex class holding all the information of a kMC project
+    that provides a treelike view for the GUI
     """
     def __init__(self, parent, menubar):
-        self.project_data = ObjectTree([Column('name', use_markup=True, data_type=str, sorted=True), Column('info')])
+        self.project_data = ObjectTree([Column('name',
+                                               use_markup=True,
+                                               data_type=str,
+                                               sorted=True),
+                                        Column('info')])
 
         self.project_data.connect('row-activated', self.on_row_activated)
 
@@ -125,7 +135,8 @@ class ProjectTree(SlaveDelegate):
         self.meta = self.project_data.append(None, Meta())
         self.layer_list_iter = self.project_data.append(None, LayerList())
         self.lattice = self.layer_list_iter
-        self.parameter_list_iter = self.project_data.append(None, ParameterList())
+        self.parameter_list_iter = self.project_data.append(None,
+                                                            ParameterList())
         self.species_list_iter = self.project_data.append(None, SpeciesList())
         self.process_list_iter = self.project_data.append(None, ProcessList())
         self.output_list = self.project_data.append(None, OutputList())
@@ -146,15 +157,30 @@ class ProjectTree(SlaveDelegate):
 
     def __getattr__(self, attr):
         if attr == 'species_list':
-            return sorted(self.project_data.get_descendants(self.species_list_iter), key=lambda species: species.name)
+            return sorted(
+                self.project_data.get_descendants(
+                    self.species_list_iter),
+                    key=lambda species: species.name)
         elif attr == 'layer_list':
-            return sorted(self.project_data.get_descendants(self.layer_list_iter), key=lambda layer: layer.name)
+            return sorted(
+                self.project_data.get_descendants(
+                    self.layer_list_iter),
+                    key=lambda layer: layer.name)
         elif attr == 'process_list':
-            return sorted(self.project_data.get_descendants(self.process_list_iter), key=lambda process: process.name)
+            return sorted(
+                self.project_data.get_descendants(
+                    self.process_list_iter),
+                    key=lambda process: process.name)
         elif attr == 'parameter_list':
-            return sorted(self.project_data.get_descendants(self.parameter_list_iter), key=lambda parameter: parameter.name)
+            return sorted(
+                self.project_data.get_descendants(
+                    self.parameter_list_iter),
+                    key=lambda parameter: parameter.name)
         elif attr == 'output_list':
-            return sorted(self.project_data.get_descendants(self.output_list_iter), key=lambda output: output.name)
+            return sorted(
+                self.project_data.get_descendants(
+                    self.output_list_iter),
+                    key=lambda output: output.name)
         elif attr == 'meta':
             return self.meta
         elif attr == 'append':
@@ -199,7 +225,7 @@ class ProjectTree(SlaveDelegate):
                 return
             nroot = ET.Element('kmc')
             nroot.set('version', '0.2')
-            kiwi.ui.dialogs.info('No legacy support, yet!', long='Drop me an email if there is need!')
+            kiwi.ui.dialogs.info('No legacy support!')
         elif self.version == (0, 2):
             dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_V0_2_DTD)
             if not dtd.validate(root):
@@ -207,20 +233,25 @@ class ProjectTree(SlaveDelegate):
                 return
             for child in root:
                 if child.tag == 'lattice':
-                    cell_size = [float(x) for x in child.attrib['cell_size'].split()]
+                    cell_size = [float(x)
+                                 for x in child.attrib['cell_size'].split()]
                     self.lattice.cell_size_x = cell_size[0]
                     self.lattice.cell_size_y = cell_size[1]
                     self.lattice.cell_size_z = cell_size[2]
                     self.lattice.default_layer = child.attrib['default_layer']
                     if 'representation' in child.attrib:
-                        self.lattice.representation = child.attrib['representation']
+                        self.lattice.representation = child.attrib[
+                                                             'representation']
                     else:
                         self.lattice.representation = ''
                     for elem in child:
                         if elem.tag == 'layer':
                             name = elem.attrib['name']
-                            x, y, z = [int(i) for i in elem.attrib['grid'].split()]
-                            ox, oy, oz = [float(i) for i in elem.attrib['grid_offset'].split()]
+                            x, y, z = [int(i)
+                                       for i in elem.attrib['grid'].split()]
+                            ox, oy, oz = [float(i)
+                                          for i in elem.attrib[
+                                                     'grid_offset'].split()]
                             grid = Grid(x=x, y=y, z=z,
                                 offset_x=ox, offset_y=oy, offset_z=oz)
                             if 'color' in elem.attrib:
@@ -232,10 +263,12 @@ class ProjectTree(SlaveDelegate):
 
                             for site in elem:
                                 name = site.attrib['type']
-                                x, y, z = [float(x) for x in site.attrib['vector'].split()]
+                                x, y, z = [float(x)
+                                    for x in site.attrib['vector'].split()]
                                 site_class = site.attrib['class']
                                 if 'default_species' in site.attrib:
-                                    default_species = site.attrib['default_species']
+                                    default_species = site.attrib[
+                                                         'default_species']
                                 else:
                                     default_species = 'default_species'
                                 site_elem = Site(name=name,
@@ -247,7 +280,11 @@ class ProjectTree(SlaveDelegate):
                             # ignored for now
                             pass
                 elif child.tag == 'meta':
-                    for attrib in ['author', 'email', 'debug', 'model_name', 'model_dimension']:
+                    for attrib in ['author',
+                                    'debug',
+                                    'email',
+                                    'model_dimension',
+                                    'model_name']:
                         if attrib in child.attrib:
                             self.meta.add({attrib: child.attrib[attrib]})
                 elif child.tag == 'parameter_list':
@@ -255,13 +292,17 @@ class ProjectTree(SlaveDelegate):
                         name = parameter.attrib['name']
                         value = parameter.attrib['value']
                         if 'adjustable' in parameter.attrib:
-                            adjustable = bool(eval(parameter.attrib['adjustable']))
+                            adjustable = bool(eval(
+                                            parameter.attrib['adjustable']))
                         else:
                             adjustable = False
 
-                        min = parameter.attrib['min'] if 'min' in parameter.attrib else 0.0
-                        max = parameter.attrib['max'] if 'max' in parameter.attrib else 0.0
-                        scale = parameter.attrib['scale'] if 'scale' in parameter.attrib else 'linear'
+                        min = parameter.attrib['min'] \
+                            if 'min' in parameter.attrib else 0.0
+                        max = parameter.attrib['max'] \
+                            if 'max' in parameter.attrib else 0.0
+                        scale = parameter.attrib['scale'] \
+                            if 'scale' in parameter.attrib else 'linear'
 
                         parameter_elem = Parameter(name=name,
                                                    value=value,
@@ -280,7 +321,8 @@ class ProjectTree(SlaveDelegate):
                             tof_count = None
                         if 'enabled' in process.attrib:
                             try:
-                                proc_enabled = bool(eval(process.attrib['enabled']))
+                                proc_enabled = bool(
+                                    eval(process.attrib['enabled']))
                             except:
                                 proc_enabled = True
                         else:
@@ -305,19 +347,24 @@ class ProjectTree(SlaveDelegate):
                                 if sub.tag == 'action':
                                     process_elem.add_action(condition_action)
                                 elif sub.tag == 'condition':
-                                    process_elem.add_condition(condition_action)
+                                    process_elem.add_condition(
+                                                            condition_action)
                         self.add_process(process_elem)
                 elif child.tag == 'species_list':
                     self.set_default_species(child.attrib['default_species'])
                     for species in child:
                         name = species.attrib['name']
                         color = species.attrib['color']
-                        representation = species.attrib['representation'] if 'representation' in species.attrib else ''
-                        species_elem = Species(name=name, color=color, representation=representation)
+                        representation = species.attrib['representation'] \
+                            if 'representation' in species.attrib else ''
+                        species_elem = Species(name=name,
+                                               color=color,
+                                               representation=representation)
                         self.add_species(species_elem)
                 if child.tag == 'output_list':
                     for item in child:
-                        output_elem = OutputItem(name=item.attrib['item'], output=True)
+                        output_elem = OutputItem(name=item.attrib['item'],
+                                                 output=True)
                         self.output_list.append(output_elem)
 
         self.expand_all()
@@ -364,7 +411,8 @@ class ProjectTree(SlaveDelegate):
             meta.set('debug', str(self.meta.debug))
         species_list = ET.SubElement(root, 'species_list')
         if hasattr(self.species_list_iter, 'default_species'):
-            species_list.set('default_species', self.species_list_iter.default_species)
+            species_list.set('default_species',
+                             self.species_list_iter.default_species)
         else:
             species_list.set('default_species', '')
 
@@ -394,7 +442,8 @@ class ProjectTree(SlaveDelegate):
             (self.layer_list_iter.cell_size_x,
             self.layer_list_iter.cell_size_y,
             self.layer_list_iter.cell_size_z))
-            lattice_elem.set('default_layer', self.layer_list_iter.default_layer)
+            lattice_elem.set('default_layer',
+                             self.layer_list_iter.default_layer)
         if hasattr(self.lattice, 'representation'):
             lattice_elem.set('representation', self.lattice.representation)
         for layer in self.layer_list:
@@ -464,7 +513,9 @@ class ProjectTree(SlaveDelegate):
             or isinstance(selection, Process)
             or isinstance(selection, Parameter)
             or isinstance(selection, Layer)):
-                if kiwi.ui.dialogs.yesno("Do you really want to delete '%s'?" % selection.name) == gtk.RESPONSE_YES:
+                if kiwi.ui.dialogs.yesno(
+                    "Do you really want to delete '%s'?" \
+                        % selection.name) == gtk.RESPONSE_YES:
                     self.project_data.remove(selection)
 
     def on_project_data__selection_changed(self, _, elem):
@@ -479,7 +530,8 @@ class ProjectTree(SlaveDelegate):
             if self.meta.model_dimension in [1, 3]:
                 self.get_parent().toast('Only 2d supported')
                 return
-            self.undo_stack.start_new_action('Edit Layer %s' % elem.name, elem)
+            self.undo_stack.start_new_action('Edit Layer %s' % elem.name,
+                                                               elem)
             form = LayerEditor(elem, self)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
@@ -495,7 +547,8 @@ class ProjectTree(SlaveDelegate):
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
         elif isinstance(elem, Parameter):
-            self.undo_stack.start_new_action('Edit Parameter %s' % elem.name, elem)
+            self.undo_stack.start_new_action('Edit Parameter %s' % elem.name,
+                                                                   elem)
             form = ParameterForm(elem, self)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
@@ -503,7 +556,8 @@ class ProjectTree(SlaveDelegate):
             if self.meta.model_dimension in [1, 3]:
                 self.get_parent().toast('Only 2d supported')
                 return
-            self.undo_stack.start_new_action('Edit Process %s' % elem.name, elem)
+            self.undo_stack.start_new_action('Edit Process %s' % elem.name,
+                                                                 elem)
             form = ProcessForm(elem, self)
             self.get_parent().attach_slave('workarea', form)
             form.focus_topmost()
@@ -544,8 +598,10 @@ class UndoStack():
         self.select_elem_cb = select_elem_cb
         actions = gtk.ActionGroup('Actions')
         actions.add_actions([
-        ('EditUndo', None, '_Undo', '<control>Z', 'Undo the last edit', self.undo),
-        ('EditRedo', None, '_Redo', '<control>Y', 'Redo and undo', self.redo)])
+        ('EditUndo', None, '_Undo', '<control>Z', 'Undo the last edit',
+                                                            self.undo),
+        ('EditRedo', None, '_Redo', '<control>Y', 'Redo and undo',
+                                                           self.redo)])
         menubar.insert_action_group(actions, 0)
         self.menubar.ensure_update()
         self.stack = []
@@ -555,8 +611,10 @@ class UndoStack():
         self.get_state_cb = get_state_cb
         self.origin = self.get_state_cb()
         self.state = self.get_state_cb()
-        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditUndo').set_sensitive(False)
-        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_sensitive(False)
+        self.menubar.get_widget(
+                        '/MainMenuBar/MenuEdit/EditUndo').set_sensitive(False)
+        self.menubar.get_widget(
+                        '/MainMenuBar/MenuEdit/EditRedo').set_sensitive(False)
 
     def _set_state_cb(self, string):
         tmpfile = StringIO.StringIO()
@@ -575,10 +633,14 @@ class UndoStack():
             self.state = self.get_state_cb()
         self.current_action = action
         self.current_elem = elem
-        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditUndo').set_label('Undo %s' % action)
-        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditUndo').set_sensitive(True)
-        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_label('Redo')
-        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_sensitive(False)
+        self.menubar.get_widget(
+            '/MainMenuBar/MenuEdit/EditUndo').set_label('Undo %s' % action)
+        self.menubar.get_widget(
+            '/MainMenuBar/MenuEdit/EditUndo').set_sensitive(True)
+        self.menubar.get_widget(
+            '/MainMenuBar/MenuEdit/EditRedo').set_label('Redo')
+        self.menubar.get_widget(
+            '/MainMenuBar/MenuEdit/EditRedo').set_sensitive(False)
 
     def undo(self, _):
         if self.head < 0:
@@ -595,11 +657,17 @@ class UndoStack():
         self.current_action = self.stack[self.head + 1]['action']
         self.current_elem = self.stack[self.head + 1]['elem']
 
-        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditUndo').set_label('Undo %s' % self.stack[self.head]['action'])
+        self.menubar.get_widget(
+            '/MainMenuBar/MenuEdit/EditUndo').set_label(
+                'Undo %s' % self.stack[self.head]['action'])
         if self.head <= 0:
-            self.menubar.get_widget('/MainMenuBar/MenuEdit/EditUndo').set_sensitive(False)
-        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_label('Redo %s' % (self.stack[self.head + 1]['action']))
-        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_sensitive(True)
+            self.menubar.get_widget(
+                '/MainMenuBar/MenuEdit/EditUndo').set_sensitive(False)
+        self.menubar.get_widget(
+            '/MainMenuBar/MenuEdit/EditRedo').set_label(
+                'Redo %s' % (self.stack[self.head + 1]['action']))
+        self.menubar.get_widget(
+            '/MainMenuBar/MenuEdit/EditRedo').set_sensitive(True)
 
     def redo(self, _):
         if self.head >= len(self.stack) - 1:
@@ -612,10 +680,15 @@ class UndoStack():
             self.current_elem = self.stack[self.head]['elem']
             #self.select_elem_cb(self.current_elem)
 
-        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditUndo').set_label(self.stack[self.head]['action'])
-        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditUndo').set_sensitive(True)
-        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_label('Redo')
-        self.menubar.get_widget('/MainMenuBar/MenuEdit/EditRedo').set_sensitive(False)
+        self.menubar.get_widget(
+            '/MainMenuBar/MenuEdit/EditUndo').set_label(
+                self.stack[self.head]['action'])
+        self.menubar.get_widget(
+            '/MainMenuBar/MenuEdit/EditUndo').set_sensitive(True)
+        self.menubar.get_widget(
+            '/MainMenuBar/MenuEdit/EditRedo').set_label('Redo')
+        self.menubar.get_widget(
+            '/MainMenuBar/MenuEdit/EditRedo').set_sensitive(False)
 
 
 class KMC_Editor(GladeDelegate):
@@ -633,16 +706,19 @@ class KMC_Editor(GladeDelegate):
         actions = gtk.ActionGroup('Actions')
         actions.add_actions([
         ('MenuFile', None, '_File'),
-        ('FileNew', None, '_New', '<control>N', 'Start new project', self.on_btn_new_project__clicked),
-        ('FileOpenProject', None, '_Open', '<control>O', 'Open project', self.on_btn_open_model__clicked),
-        ('FileSave', None, '_Save', '<control>S', 'Save model', self.on_btn_save_model__clicked),
-        ('FileSaveAs', None, 'Save _As',
-            '<control><shift>s', 'Save model As',
+        ('FileNew', None, '_New', '<control>N', 'Start new project',
+            self.on_btn_new_project__clicked),
+        ('FileOpenProject', None, '_Open', '<control>O', 'Open project',
+            self.on_btn_open_model__clicked),
+        ('FileSave', None, '_Save', '<control>S', 'Save model',
+            self.on_btn_save_model__clicked),
+        ('FileSaveAs', None, 'Save _As', '<control><shift>s', 'Save model As',
             self.on_btn_save_as__clicked),
         ('FileExportSource', None, '_Export Source',
             '<control>E', 'Export model to Fortran 90 source code',
             self.on_btn_export_src__clicked),
-        ('FileQuit', None, '_Quit', '<control>Q', 'Quit the program', self.on_btn_quit__clicked),
+        ('FileQuit', None, '_Quit', '<control>Q', 'Quit the program',
+            self.on_btn_quit__clicked),
         ('MenuEdit', None, '_Edit'),
         ('MenuInsert', None, '_Insert'),
         ('InsertParameter', None, 'Para_meter',
@@ -651,8 +727,10 @@ class KMC_Editor(GladeDelegate):
         ('InsertLayer', None, '_Layer',
             '<control><shift>L', 'Add a new layer',
             self.on_btn_add_layer__clicked),
-        ('InsertProcess', None, '_Process', '<control><shift>P', 'Add a new process', self.on_btn_add_process__clicked),
-        ('InsertSpecies', None, '_Species', '<control><shift>E', 'Add a new species', self.on_btn_add_species__clicked),
+        ('InsertProcess', None, '_Process', '<control><shift>P',
+            'Add a new process', self.on_btn_add_process__clicked),
+        ('InsertSpecies', None, '_Species', '<control><shift>E',
+            'Add a new species', self.on_btn_add_species__clicked),
         ('MenuHelp', None, '_Help'),
         ('HelpAbout', None, '_About'),
         ])
@@ -680,7 +758,8 @@ class KMC_Editor(GladeDelegate):
         self.toast('Welcome!')
 
     def add_defaults(self):
-        """This function adds some useful defaults that are probably need in every simulation
+        """This function adds some useful defaults that are probably
+        need in every simulation
         """
         # add dimension
         self.project_tree.meta.add({'model_dimension': '2'})
@@ -688,7 +767,8 @@ class KMC_Editor(GladeDelegate):
         # add layer
         default_layer_name = 'default'
         default_layer = Layer(name=default_layer_name,)
-        self.project_tree.append(self.project_tree.layer_list_iter, default_layer)
+        self.project_tree.append(self.project_tree.layer_list_iter,
+            default_layer)
         self.project_tree.lattice.default_layer = default_layer_name
 
         # add an empty species
@@ -730,11 +810,14 @@ class KMC_Editor(GladeDelegate):
         if str(self.project_tree) != self.saved_state:
             # if there are unsaved changes, ask what to do first
             save_changes_dialog = gtk.Dialog(
-                                    buttons=(gtk.STOCK_DISCARD, gtk.RESPONSE_DELETE_EVENT,
-                                    gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                    gtk.STOCK_SAVE, gtk.RESPONSE_OK),
-                                    title='Saved unsaved changes?')
-            save_changes_dialog.vbox.pack_start(gtk.Label("\nThere are unsaved changes.\nWhat shall we do?\n\n"))
+                            buttons=(gtk.STOCK_DISCARD,
+                                     gtk.RESPONSE_DELETE_EVENT,
+                                     gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                     gtk.STOCK_SAVE, gtk.RESPONSE_OK),
+                                     title='Saved unsaved changes?')
+            save_changes_dialog.vbox.pack_start(
+                gtk.Label(
+                    "\nThere are unsaved changes.\nWhat shall we do?\n\n"))
             save_changes_dialog.show_all()
             resp = save_changes_dialog.run()
             save_changes_dialog.destroy()
@@ -751,13 +834,17 @@ class KMC_Editor(GladeDelegate):
             self.detach_slave('overviewtree')
         self.attach_slave('overviewtree', self.project_tree)
         self.project_tree.show()
-        self.toast('Start a new project by filling in meta information,\nlattice, species, parameters, and processes or open an existing one\nby opening a kMC XML file')
+        self.toast(
+            'Start a new project by filling in meta information,\n' +
+            'lattice, species, parameters, and processes or open\n' +
+            'an existing one by opening a kMC XML file')
 
     def on_btn_add_layer__clicked(self, button):
         """Add a new layer to the model
         """
         if len(self.project_tree.layer_list) == 1:
-            kiwi.ui.dialogs.warning('Entering multi-lattice mode', long='This is an unpublished feature\n' +
+            kiwi.ui.dialogs.warning('Entering multi-lattice mode',
+                long='This is an unpublished feature\n' +
                 'Please ask me about publishing results obtained\n' +
                 'from using this feature mjhoffmann@gmail.com')
         if self.project_tree.meta.model_dimension in [1, 3]:
@@ -777,8 +864,10 @@ class KMC_Editor(GladeDelegate):
         """Add a new species to the model
         """
         new_species = Species(color='#fff', name='')
-        self.project_tree.undo_stack.start_new_action('Add species', new_species)
-        self.project_tree.append(self.project_tree.species_list_iter, new_species)
+        self.project_tree.undo_stack.start_new_action('Add species',
+                                                      new_species)
+        self.project_tree.append(self.project_tree.species_list_iter,
+                                 new_species)
         self.project_tree.expand(self.project_tree.species_list_iter)
         self.project_tree.select(new_species)
         species_form = SpeciesForm(new_species, self.project_tree)
@@ -797,8 +886,10 @@ class KMC_Editor(GladeDelegate):
             self.toast("No layer defined, yet!")
             return
         new_process = Process(name='', rate_constant='')
-        self.project_tree.undo_stack.start_new_action('Add process', new_process)
-        self.project_tree.append(self.project_tree.process_list_iter, new_process)
+        self.project_tree.undo_stack.start_new_action('Add process',
+                                                      new_process)
+        self.project_tree.append(self.project_tree.process_list_iter,
+                                 new_process)
         self.project_tree.expand(self.project_tree.process_list_iter)
         self.project_tree.select(new_process)
         process_form = ProcessForm(new_process, self.project_tree)
@@ -809,8 +900,10 @@ class KMC_Editor(GladeDelegate):
 
     def on_btn_add_parameter__clicked(self, button):
         new_parameter = Parameter(name='', value='')
-        self.project_tree.undo_stack.start_new_action('Add parameter', new_parameter)
-        self.project_tree.append(self.project_tree.parameter_list_iter, new_parameter)
+        self.project_tree.undo_stack.start_new_action('Add parameter',
+                                                      new_parameter)
+        self.project_tree.append(self.project_tree.parameter_list_iter,
+                                 new_parameter)
         self.project_tree.expand(self.project_tree.parameter_list_iter)
         self.project_tree.select(new_parameter)
         parameter_form = ParameterForm(new_parameter, self.project_tree)
@@ -825,11 +918,14 @@ class KMC_Editor(GladeDelegate):
         if str(self.project_tree) != self.saved_state:
             # if there are unsaved changes, ask what to do first
             save_changes_dialog = gtk.Dialog(
-                                buttons=(gtk.STOCK_DISCARD, gtk.RESPONSE_DELETE_EVENT,
-                                gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                gtk.STOCK_SAVE, gtk.RESPONSE_OK),
-                                title='Saved unsaved changes?')
-            save_changes_dialog.vbox.pack_start(gtk.Label("\nThere are unsaved changes.\nWhat shall we do?\n\n"))
+                        buttons=(gtk.STOCK_DISCARD,
+                                 gtk.RESPONSE_DELETE_EVENT,
+                                 gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                 gtk.STOCK_SAVE, gtk.RESPONSE_OK),
+                                 title='Saved unsaved changes?')
+            save_changes_dialog.vbox.pack_start(
+                gtk.Label(
+                    "\nThere are unsaved changes.\nWhat shall we do?\n\n"))
             save_changes_dialog.show_all()
             resp = save_changes_dialog.run()
             save_changes_dialog.destroy()
@@ -844,7 +940,8 @@ class KMC_Editor(GladeDelegate):
         # choose which file to open next
         filechooser = gtk.FileChooserDialog(title='Open Project',
             action=gtk.FILE_CHOOSER_ACTION_OPEN,
-            buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OK, gtk.RESPONSE_OK))
+            buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                     gtk.STOCK_OK, gtk.RESPONSE_OK))
         resp = filechooser.run()
         filename = filechooser.get_filename()
         filechooser.destroy()
@@ -875,8 +972,10 @@ class KMC_Editor(GladeDelegate):
                 self.on_btn_save_as__clicked(None)
             outfile = open(self.project_tree.filename, 'w')
             outfile.write(xml_string)
-            outfile.write('<!-- This is an automatically generated XML file, representing a kMC model ' + \
-                            'please do not change this unless you know what you are doing -->\n')
+            outfile.write('<!-- This is an automatically generated XML ' +
+                          'file, representing a kMC model ' +
+                          'please do not change this unless ' +
+                          'you know what you are doing -->\n')
             outfile.close()
             self.saved_state = xml_string
             self.toast('Saved %s' % self.project_tree.filename)
@@ -885,7 +984,8 @@ class KMC_Editor(GladeDelegate):
         filechooser = gtk.FileChooserDialog(title='Save Project As ...',
             action=gtk.FILE_CHOOSER_ACTION_SAVE,
             parent=None,
-            buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OK, gtk.RESPONSE_OK))
+            buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                     gtk.STOCK_OK, gtk.RESPONSE_OK))
         filechooser.set_property('do-overwrite-confirmation', True)
         resp = filechooser.run()
         if resp == gtk.RESPONSE_OK:
@@ -897,7 +997,8 @@ class KMC_Editor(GladeDelegate):
     def on_btn_export_src__clicked(self, button, export_dir=''):
         self.toast('Exporting source code ...')
         if not export_dir:
-            export_dir = kiwi.ui.dialogs.selectfolder(title='Select folder for F90 source code.')
+            export_dir = kiwi.ui.dialogs.selectfolder(
+                title='Select folder for F90 source code.')
         if not export_dir:
             self.toast('No folder selected.')
             return
@@ -905,14 +1006,11 @@ class KMC_Editor(GladeDelegate):
             os.mkdir(export_dir)
 
         # copy files
-        cp_files = [
-                        'fortran_src/assert.ppc',
-                        'fortran_src/base.f90',
-                        'fortran_src/kind_values_f2py.f90',
-                        'fortran_src/run_kmc.f90',
-                        ]
-        exec_files = [
-                       ]
+        cp_files = ['fortran_src/assert.ppc',
+                    'fortran_src/base.f90',
+                    'fortran_src/kind_values_f2py.f90',
+                    'fortran_src/run_kmc.f90']
+        exec_files = []
 
         for filename in cp_files + exec_files:
             shutil.copy(os.path.join(APP_ABS_PATH, filename), export_dir)
@@ -927,9 +1025,11 @@ class KMC_Editor(GladeDelegate):
         # Prevent configparser from turning options to lowercase
         config.optionxform = str
         config.add_section('Main')
-        config.set('Main', 'default_species', self.project_tree.species_list_iter.default_species)
+        config.set('Main', 'default_species',
+                   self.project_tree.species_list_iter.default_species)
         config.set('Main', 'system_name', self.project_tree.meta.model_name)
-        config.set('Main', 'output_fields', ' '.join([x.name for x in self.project_tree.output_list]))
+        config.set('Main', 'output_fields',
+                   ' '.join([x.name for x in self.project_tree.output_list]))
         config.add_section('User Params')
         for parameter in self.project_tree.parameter_list:
             config.set('User Params', parameter.name, str(parameter.value))
@@ -948,7 +1048,7 @@ class KMC_Editor(GladeDelegate):
             'Please go to the directory and run ./compile_for_f2py,\n' +
            'which you might have to adapt slightly.\n' +
            'If this finished successfully you can run the simulation\n' +
-           'by executing ./run_kmc.py')
+           'by executing "kmos view"')
 
     def validate_model(self):
         pass
@@ -962,7 +1062,7 @@ class KMC_Editor(GladeDelegate):
         # check if all rate expressions are valid
         # check if all species have a unique name
         # check if all species used in condition_action are defined
-        # check if all sites used in processes are defined: actions, conditions
+        # check if all sites in processes are defined: actions, conditions
 
     def on_btn_help__clicked(self, button):
         self.toast('"Help" is not implemented, yet.')
@@ -970,11 +1070,13 @@ class KMC_Editor(GladeDelegate):
     def on_btn_quit__clicked(self, button, *args):
         if self.saved_state != str(self.project_tree):
             save_changes_dialog = gtk.Dialog(
-                                  buttons=(gtk.STOCK_DISCARD, gtk.RESPONSE_DELETE_EVENT,
-                                  gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                  gtk.STOCK_SAVE, gtk.RESPONSE_OK),
-                                  title='Saved unsaved changes?')
-            save_changes_dialog.vbox.pack_start(gtk.Label("\nThere are unsaved changes.\nWhat shall we do?\n\n"))
+                      buttons=(gtk.STOCK_DISCARD, gtk.RESPONSE_DELETE_EVENT,
+                      gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                      gtk.STOCK_SAVE, gtk.RESPONSE_OK),
+                      title='Saved unsaved changes?')
+            save_changes_dialog.vbox.pack_start(
+                gtk.Label(
+                    "\nThere are unsaved changes.\nWhat shall we do?\n\n"))
             save_changes_dialog.show_all()
             resp = save_changes_dialog.run()
             save_changes_dialog.destroy()

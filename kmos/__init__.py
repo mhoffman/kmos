@@ -3,7 +3,8 @@ kmos is a vigorous attempt to make lattice kMC modelling more accessible.
 
 This package features an XML format to define lattice-kMC models, a graphical
 editor for these XML files, a tools which converts a project description into
-compilable python/Fortran90 code and graphical front end to run and watch kMC simulations::
+compilable python/Fortran90 code and graphical front end to run and watch kMC
+simulations::
 
     kmos [help] (edit|view|export) [options]
 
@@ -45,6 +46,7 @@ from kmos import units, species
 from ase.data import atomic_numbers, atomic_masses
 from ase.atoms import string2symbols
 
+
 def evaluate_rate_expression(rate_expr, parameters={}):
     """Evaluates an expression for a typical kMC rate constant.
      External parameters can be passed in as dictionary, like the
@@ -60,19 +62,21 @@ def evaluate_rate_expression(rate_expr, parameters={}):
         # replace some aliases
         rate_expr = rate_expr.replace('beta', '(1./(kboltzmann*T))')
         try:
-            tokens = list(tokenize.generate_tokens(StringIO.StringIO(rate_expr).readline))
+            tokens = list(tokenize.generate_tokens(
+                            StringIO.StringIO(rate_expr).readline))
         except:
             print('Trouble with expression: %s' % rate_expr)
             raise
         for i, token, _, _, _ in tokens:
-            if token in ['sqrt','exp','sin','cos','pi','pow']:
-                replaced_tokens.append((i,'math.'+token))
+            if token in ['sqrt', 'exp', 'sin', 'cos', 'pi', 'pow']:
+                replaced_tokens.append((i, 'math.' + token))
             elif token in dir(units):
                 replaced_tokens.append((i, str(eval('units.' + token))))
             elif token.startswith('m_'):
                 species_name = '_'.join(token.split('_')[1:])
                 symbols = string2symbols(species_name)
-                replaced_tokens.append((i, '%s' % sum([atomic_masses[atomic_numbers[symbol]]
+                replaced_tokens.append((i,
+                            '%s' % sum([atomic_masses[atomic_numbers[symbol]]
                             for symbol in symbols])))
             elif token.startswith('mu_'):
                 species_name = '_'.join(token.split('_')[1:])
@@ -90,7 +94,8 @@ def evaluate_rate_expression(rate_expr, parameters={}):
                 parameter_str = str(parameters[token]['value'])
                 # replace units used in parameters
                 for unit in units.keys:
-                    parameter_str = parameter_str.replace(unit, '%s' % eval('units.%s' % unit))
+                    parameter_str = parameter_str.replace(
+                                    unit, '%s' % eval('units.%s' % unit))
                 replaced_tokens.append((i, parameter_str))
             else:
                 replaced_tokens.append((i, token))
@@ -99,6 +104,8 @@ def evaluate_rate_expression(rate_expr, parameters={}):
         try:
             rate_const = eval(rate_expr)
         except Exception as e:
-            raise UserWarning("Could not evaluate rate expression: %s\nException: %s" % (rate_expr, e))
+            raise UserWarning(
+            "Could not evaluate rate expression: %s\nException: %s" \
+                % (rate_expr, e))
 
     return rate_const
