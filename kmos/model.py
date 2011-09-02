@@ -223,7 +223,7 @@ def set_rate_constants(parameters=None, print_rates=True):
         try:
             base.set_rate_const(eval('proclist.%s' % proc.lower()), rate_const)
             if print_rates:
-                print('%s: %.3e s^{-1}' % (proc, rate_const))
+                print('%30s: %.3e s^{-1}' % (proc, rate_const))
         except Exception as e:
             raise UserWarning("Could not set %s for process %s!\nException: %s" % (rate_expr, proc, e))
     if print_rates:
