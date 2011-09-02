@@ -39,7 +39,7 @@ class Species:
             kboltzmann_in_eVK = 8.6173324e-5
             # interpolate given grid
             return interp1d(self.T_grid, self.G_grid)(T) + \
-                   kboltzmann_in_eVK*T*log(p)
+                   kboltzmann_in_eVK * T * log(p)
         else:
             raise UserWarning('%s is no gas-phase species.' % self.name)
 
@@ -47,11 +47,12 @@ class Species:
         # from CODATA 2010
         Jmol_in_eV = 1.03642E-5
         # load data
-        data = np.loadtxt(filename, skiprows=2, usecols=(0,2,4))
+        data = np.loadtxt(filename, skiprows=2, usecols=(0, 2, 4))
 
         # define data
         self.T_grid = data[:, 0]
-        self.G_grid = (1000*(data[:, 2] - data[0, 2]) - data[:, 0]*data[:, 1])*Jmol_in_eV
+        self.G_grid = (1000 * (data[:, 2] - data[0, 2])
+                               - data[:, 0] * data[:, 1]) * Jmol_in_eV
 
     def __eq__(self, other):
         return self.atoms == other.atoms and self.gas == other.gas
@@ -67,8 +68,8 @@ class Species:
         """This function estimates mu, the gas phase chemical potential
         based on the translational and the rotational contributions
         to the gas phase entropy.
-        Derivations can be found in e.g. Pathria, Statistical mechanics, Elsevier, 2001
-        ISBN 978-7-5062-6017-6
+        Derivations can be found in e.g. Pathria, Statistical mechanics,
+        Elsevier, 2001, ISBN 978-7-5062-6017-6
 
         # TODO: vibrational contribution
         # TODO: ASE does not seems to support eigenmode calculation
@@ -84,13 +85,14 @@ class Species:
 
         # prefactor
         def pref(T):
-            return cs.k * T/cs.elementary_charge
+            return cs.k * T / cs.elementary_charge
 
         # calculate translational partition function
         # only depends on total mass
         def qtrans(T, p):
-            return (2*np.pi*m/((1/(cs.k*T))*cs.h**2))**(3./2)*1/((1/(cs.k*T))*p*cs.bar)
-
+            return (2 * np.pi * m / \
+                    ((1 / (cs.k * T)) * cs.h ** 2)) ** (3. / 2) * 1 / \
+                    ((1 / (cs.k * T)) * p * cs.bar)
 
         # Calculate rotational contribution
         # depends on moments of inertia and
@@ -100,10 +102,13 @@ class Species:
         nonzero_moments = map(lambda x: x > 10.e-7, moments_of_inertia)
         nonzero_moments = nonzero_moments.count(True)
         if nonzero_moments == 3:
-            sqrtI = np.sqrt(np.product(moments_of_inertia)*(cs.u*cs.angstrom**2)**3)
+            sqrtI = np.sqrt(
+                np.product(
+                    moments_of_inertia) * (cs.u * cs.angstrom ** 2) ** 3)
 
             def qrot(T):
-                return np.sqrt(np.pi)*sqrtI*(8*np.pi**2/((1/(cs.k*T))*cs.h**2))**(3./2)
+                return np.sqrt(np.pi) * sqrtI * (8 * np.pi ** 2 /
+                                  ((1 / (cs.k * T)) * cs.h ** 2)) ** (3. / 2)
 
         elif nonzero_moments == 2:
             # If molecule has reflection symmetry along
@@ -114,12 +119,14 @@ class Species:
                 sigma = 1
             else:
                 sigma = 2
+
             def qrot(T):
-                return 8*np.pi**2*I[0]*cs.u*cs.angstrom**2/(sigma*(1/(cs.k*T))*cs.h**2)
+                return 8 * np.pi ** 2 * I[0] * cs.u * cs.angstrom ** 2 / \
+                    (sigma * (1 / (cs.k * T)) * cs.h ** 2)
         else:
+
             def qrot(T):
                 return 1.
-
 
         qvibstr = '1'
 
@@ -132,25 +139,26 @@ class Species:
         if len(molecule) > 3:
             vib = Vibrations(molecule)
             vib.run()
-            frequencies = filter(lambda x: x > 20, np.real(vib.get_frequencies()))
+            frequencies = filter(lambda x: x > 20,
+                                 np.real(vib.get_frequencies()))
             for nu in frequencies:
-                qvibstr += '*(np.exp(-cs.c*cs.h*%s/(2*cs.k*T))/(1-np.exp(-cs.c*cs.h*%s/(cs.k*T))))' % (nu, nu)
+                qvibstr += ('*(np.exp(-cs.c*cs.h*%s/(2*cs.k*T))/ '
+                            + '(1-np.exp(-cs.c*cs.h*%s/(cs.k*T))))') % (nu, nu)
 
         def qvib(T):
             return eval(qvibstr)
+
         # qvib does not seem to be accurate for bad potentials
         def qvib(T):
             return 1.
 
-
-
         def mu(T, p):
-            return -pref(T)*np.log(qtrans(T,p)*qrot(T)*qvib(T))
+            return -pref(T) * np.log(qtrans(T, p) * qrot(T) * qvib(T))
         return mu
 
 
 # prepare all required species
-H2gas = Species(ase.atoms.Atoms('H2',[[0,0,0],[0,0,1.2]], ),
+H2gas = Species(ase.atoms.Atoms('H2', [[0, 0, 0], [0, 0, 1.2]],),
     gas=True,
     janaf_file='H-050.txt',
     name='H2gas')
@@ -182,29 +190,32 @@ O = Species(ase.atoms.Atoms('O',
 O2gas = Species(ase.atoms.Atoms('O2',
     [[0, 0, 0],
     [0, 0, 1.2]],
-    cell=[10,10,10],
+    cell=[10, 10, 10],
     ),
     gas=True,
     janaf_file='O-029.txt',
     name='O2gas')
 
 NOgas = Species(ase.atoms.Atoms('NO',
-    [[0, 0, 0],[0, 0, 1.2]],
-    cell=[10,10,10],
+    [[0, 0, 0], [0, 0, 1.2]],
+    cell=[10, 10, 10],
     ),
     gas=True,
     janaf_file='N-005.txt',
     name='NOgas',
     )
 
-NO = Species(ase.atoms.Atoms('NO',[[0,0,0],[0,0,1.2]], cell=[10,10,10], ),
+NO = Species(ase.atoms.Atoms('NO', [[0, 0, 0], [0, 0, 1.2]],
+                             cell=[10, 10, 10], ),
     name='NO')
 
-COgas = Species(ase.atoms.Atoms('CO',[[0,0,0],[0,0,1.2]], cell=[10,10,10], ),
+COgas = Species(ase.atoms.Atoms('CO', [[0, 0, 0], [0, 0, 1.2]],
+                                cell=[10, 10, 10],),
     gas=True,
     janaf_file='C-093.txt',
     name='COgas')
-CO = Species(ase.atoms.Atoms('CO',[[0,0,0],[0,0,1.2]], cell=[10,10,10], ),
+CO = Species(ase.atoms.Atoms('CO', [[0, 0, 0], [0, 0, 1.2]],
+                             cell=[10, 10, 10], ),
     name='CO')
 
 CO2gas = Species(ase.atoms.Atoms('CO2',
@@ -218,17 +229,16 @@ CO2gas = Species(ase.atoms.Atoms('CO2',
      name='CO2gas')
 
 NH3gas = Species(ase.atoms.Atoms(symbols='NH3',
-          pbc=np.array([ True,  True,  True], dtype=bool),
+          pbc=np.array([True,  True,  True], dtype=bool),
           cell=np.array(
-      [[ 10.,   0.,   0.],
-       [  0.,  10.,   0.],
-       [  0.,   0.,  10.]]),
+      [[10.,   0.,   0.],
+       [0.,  10.,   0.],
+       [0.,   0.,  10.]]),
           positions=np.array(
-      [[ 0.13288865,  0.13288865,  0.13288865],
+      [[0.13288865,  0.13288865,  0.13288865],
        [-0.03325795, -0.03325795,  1.13361278],
        [-0.03325795,  1.13361278, -0.03325795],
-       [ 1.13361278, -0.03325795, -0.03325795]])),
+       [1.13361278, -0.03325795, -0.03325795]])),
       gas=True,
       janaf_file='H-083.txt',
       name='NH3gas')
-
