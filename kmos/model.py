@@ -11,7 +11,7 @@ The model can be used directly like so::
     model.do_steps(100000)
     model.view()
 
-which, of course can also be part of a python script. 
+which, of course can also be part of a python script.
 
 The model also be run in a different process using the
 multiprocessing module. This mode is designed for use with
@@ -40,6 +40,7 @@ except:
     print('The kmos_settings.py contains all changeable model parameters')
     print('and descriptions for the representation on screen.')
 
+
 class KMC_Model(multiprocessing.Process):
     def __init__(self, image_queue=None,
                        parameter_queue=None,
@@ -51,11 +52,12 @@ class KMC_Model(multiprocessing.Process):
         self.image_queue = image_queue
         self.parameters_queue = parameter_queue
         self.signal_queue = signal_queue
-        self.size = int(settings.simulation_size) if size is None else int(size)
+        self.size = int(settings.simulation_size) \
+                        if size is None else int(size)
         self.print_rates = print_rates
         self.parameters = Model_Parameters(self.print_rates)
         self.rate_constants = Model_Rate_Constants()
-        proclist.init((self.size,)*int(lattice.model_dimension),
+        proclist.init((self.size,) * int(lattice.model_dimension),
             system_name,
             lattice.default_layer,
             proclist.default_species,
@@ -64,11 +66,11 @@ class KMC_Model(multiprocessing.Process):
 
         # prepare structures for TOF evaluation
         self.tofs = tofs = get_tof_names()
-        self.tof_matrix = np.zeros((len(tofs),proclist.nr_of_proc))
+        self.tof_matrix = np.zeros((len(tofs), proclist.nr_of_proc))
         for process, tof_count in settings.tof_count.iteritems():
             process_nr = eval('proclist.%s' % process.lower())
             for tof, tof_factor in tof_count.iteritems():
-                self.tof_matrix[tofs.index(tof), process_nr-1] += tof_factor
+                self.tof_matrix[tofs.index(tof), process_nr - 1] += tof_factor
 
         # prepare procstat
         self.procstat = np.zeros((proclist.nr_of_proc,))
@@ -77,7 +79,8 @@ class KMC_Model(multiprocessing.Process):
         self.species_representation = []
         for species in sorted(settings.representations):
             if settings.representations[species].strip():
-                self.species_representation.append(eval(settings.representations[species]))
+                self.species_representation.append(
+                    eval(settings.representations[species]))
             else:
                 self.species_representation.append(Atoms())
 
@@ -138,38 +141,43 @@ class KMC_Model(multiprocessing.Process):
         for i in xrange(lattice.system_size[0]):
             for j in xrange(lattice.system_size[1]):
                 for k in xrange(lattice.system_size[2]):
-                    for n in xrange(1,1+lattice.spuck):
-                        species = lattice.get_species([i,j,k,n])
+                    for n in xrange(1, 1 + lattice.spuck):
+                        species = lattice.get_species([i, j, k, n])
                         if self.species_representation[species]:
-                            atom = deepcopy(self.species_representation[species])
+                            atom = deepcopy(
+                                self.species_representation[species])
                             atom.translate(np.dot(lattice.unit_cell_size,
-                            np.array([i,j,k]) + lattice.site_positions[n-1]))
+                            np.array([i, j, k]) \
+                            + lattice.site_positions[n - 1]))
                             atoms += atom
                     lattice_repr = deepcopy(self.lattice_representation)
                     lattice_repr.translate(np.dot(lattice.unit_cell_size,
-                                np.array([i,j,k])))
+                                np.array([i, j, k])))
                     atoms += lattice_repr
 
         # calculate TOF since last call
         atoms.procstat = np.zeros((proclist.nr_of_proc,))
         atoms.occupation = proclist.get_occupation()
         for i in range(proclist.nr_of_proc):
-            atoms.procstat[i] = base.get_procstat(i+1)
+            atoms.procstat[i] = base.get_procstat(i + 1)
         delta_t = (atoms.kmc_time - self.time)
-        size = self.size**lattice.model_dimension
+        size = self.size ** lattice.model_dimension
         if delta_t == 0. and atoms.kmc_time > 0:
-            print("Warning: numerical precision too low, to resolve time-steps")
+            print(
+                "Warning: numerical precision too low, to resolve time-steps")
             print('         Will reset kMC for next step')
             base.set_kmc_time(0.0)
-            atoms.tof_data = np.zeros_like(self.tof_matrix[:,0])
+            atoms.tof_data = np.zeros_like(self.tof_matrix[:, 0])
         else:
-            atoms.tof_data = np.dot(self.tof_matrix,  (atoms.procstat - self.procstat)/delta_t/size)
+            atoms.tof_data = np.dot(self.tof_matrix,
+                            (atoms.procstat - self.procstat) / delta_t / size)
 
         # update trackers for next call
         self.procstat[:] = atoms.procstat
         self.time = atoms.kmc_time
 
         return atoms
+
 
 class Model_Parameters(object):
     def __init__(self, print_rates=True):
@@ -193,17 +201,18 @@ class Model_Parameters(object):
         return res
 
 
-
 class Model_Rate_Constants(object):
     def __repr__(self):
         res = 'kMC rate constants\n'
         res += '------------------\n'
         for proc in sorted(settings.rate_constants):
             rate_expr = settings.rate_constants[proc][0]
-            rate_const = evaluate_rate_expression(rate_expr, settings.parameters)
+            rate_const = evaluate_rate_expression(rate_expr,
+                                                  settings.parameters)
             res += '%s: %s = %.2e s^{-1}\n' % (proc, rate_expr, rate_const)
         res += '------------------\n'
         return res
+
 
 def set_rate_constants(parameters=None, print_rates=True):
     """Tries to evaluate the supplied expression for a rate constant
@@ -225,9 +234,12 @@ def set_rate_constants(parameters=None, print_rates=True):
             if print_rates:
                 print('%s: %.3e s^{-1}' % (proc, rate_const))
         except Exception as e:
-            raise UserWarning("Could not set %s for process %s!\nException: %s" % (rate_expr, proc, e))
+            raise UserWarning(
+                "Could not set %s for process %s!\nException: %s" \
+                    % (rate_expr, proc, e))
     if print_rates:
         print('-------------------')
+
 
 def import_ase():
     try:
