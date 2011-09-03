@@ -22,6 +22,7 @@ the model happens through Queues.
 
 from copy import deepcopy
 import multiprocessing
+from math import log
 import numpy as np
 from ase.atoms import Atoms
 from kmos import evaluate_rate_expression
@@ -232,7 +233,8 @@ def set_rate_constants(parameters=None, print_rates=True):
         try:
             base.set_rate_const(eval('proclist.%s' % proc.lower()), rate_const)
             if print_rates:
-                print('%30s: %.3e s^{-1}' % (proc, rate_const))
+                n = int(4*log(rate_const))
+                print('%30s: %.3e s^{-1}: %s' % (proc, rate_const, '#'*n))
         except Exception as e:
             raise UserWarning(
                 "Could not set %s for process %s!\nException: %s" \
