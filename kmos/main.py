@@ -1020,23 +1020,6 @@ class KMC_Editor(GladeDelegate):
         #copy xml file itself to target dir
         shutil.copy(self.project_tree.filename, export_dir)
 
-        # export parameters
-        config = SafeConfigParser()
-        # Prevent configparser from turning options to lowercase
-        config.optionxform = str
-        config.add_section('Main')
-        config.set('Main', 'default_species',
-                   self.project_tree.species_list_iter.default_species)
-        config.set('Main', 'system_name', self.project_tree.meta.model_name)
-        config.set('Main', 'output_fields',
-                   ' '.join([x.name for x in self.project_tree.output_list]))
-        config.add_section('User Params')
-        for parameter in self.project_tree.parameter_list:
-            config.set('User Params', parameter.name, str(parameter.value))
-
-        with open(export_dir + '/params.cfg', 'w') as configfile:
-            config.write(configfile)
-
         self.toast("Multi-lattice mode, not fully supported, yet!")
         writer = MLProcListWriter(self.project_tree, export_dir)
         writer.write_lattice()
