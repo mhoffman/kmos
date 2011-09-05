@@ -13,7 +13,10 @@ from scipy.interpolate import interp1d
 from math import log
 import re
 import os
-import janaf_data
+try:
+    import janaf_data
+except:
+    print("Info: no JANAF tables available")
 
 
 class Species:
