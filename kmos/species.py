@@ -17,6 +17,7 @@ try:
     import janaf_data
 except:
     print("Info: no JANAF tables available")
+    janaf_data = None
 
 
 class Species:
@@ -27,7 +28,7 @@ class Species:
         self.janaf_file = janaf_file
 
         # prepare chemical potential
-        if self.gas and self.janaf_file:
+        if self.gas and self.janaf_file and janaf_data is not None:
             self._prepare_G_p0(
                 os.path.abspath(os.path.join(
                 janaf_data.__path__[0],
