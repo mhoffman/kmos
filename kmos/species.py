@@ -16,7 +16,6 @@ import os
 try:
     import janaf_data
 except:
-    print("Info: no JANAF tables available")
     janaf_data = None
 
 
