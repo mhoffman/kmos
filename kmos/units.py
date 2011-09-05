@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
     Several commonly used constants and conversion factors are offered
     by this module, such a pi, the speed of light, the Planck constant,
@@ -7,6 +7,21 @@
     bar in Pascal.
     Source: CODATA2010
 """
+#    Copyright 2009-2011 Max J. Hoffmann (mjhoffmann@gmail.com)
+#    This file is part of kmos.
+#
+#    kmos is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    kmos is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 keys = ['pi', 'c', 'h', 'hbar', 'eV', 'kboltzmann',
         'umass', 'angstrom', 'bar']
 
