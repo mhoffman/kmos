@@ -109,6 +109,9 @@ class KMC_Model(multiprocessing.Process):
             self.lattice_representation = Atoms()
         set_rate_constants(settings.parameters, self.print_rates)
 
+    def __repr__(self):
+        return (repr(self.parameters) + repr(self.rate_constants))
+
     def __del__(self):
         lattice.deallocate_system()
 
@@ -210,24 +213,24 @@ class Model_Parameters(object):
             self.__dict__[attr] = value
 
     def __repr__(self):
-        res = 'kMC model parameters\n'
-        res += '--------------------\n'
+        res = '# kMC model parameters\n'
+        res += '# --------------------\n'
         for attr in sorted(settings.parameters):
-            res += ('%s = %s\n' % (attr, settings.parameters[attr]['value']))
-        res += '--------------------\n'
+            res += ('# %s = %s\n' % (attr, settings.parameters[attr]['value']))
+        res += '# --------------------\n'
         return res
 
 
 class Model_Rate_Constants(object):
     def __repr__(self):
-        res = 'kMC rate constants\n'
-        res += '------------------\n'
+        res = '# kMC rate constants\n'
+        res += '# ------------------\n'
         for proc in sorted(settings.rate_constants):
             rate_expr = settings.rate_constants[proc][0]
             rate_const = evaluate_rate_expression(rate_expr,
                                                   settings.parameters)
-            res += '%s: %s = %.2e s^{-1}\n' % (proc, rate_expr, rate_const)
-        res += '------------------\n'
+            res += '# %s: %s = %.2e s^{-1}\n' % (proc, rate_expr, rate_const)
+        res += '# ------------------\n'
         return res
 
 
