@@ -17,7 +17,7 @@
 
 import optparse
 
-from kmos.main import KMC_Editor
+from kmos.gui import KMC_Editor
 
 parser = optparse.OptionParser()
 parser.add_option('-o', '--open',
