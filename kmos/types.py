@@ -395,3 +395,13 @@ class OutputItem(Attributes):
 
     def __init__(self, *args, **kwargs):
         Attributes.__init__(self, **kwargs)
+
+
+class ModelTree(object):
+    def __init__(self):
+        self.meta = Meta()
+        self.layer_list = LayerList()
+        self.parameter_list = ParameterList()
+        self.species_list = SpeciesList()
+        self.process_list = ProcessList()
+        self.output_list = OutputList()
