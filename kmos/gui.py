@@ -26,7 +26,7 @@ import os
 import copy
 # import own modules
 from kmos.config import *
-from kmos.types import *
+from kmos.types import ModelTree
 from kmos.forms import *
 from kmos.proclist_generator import ProcListWriter as MLProcListWriter
 import shutil
@@ -128,6 +128,7 @@ class ProjectTree(SlaveDelegate):
                                         Column('info')])
 
         self.project_data.connect('row-activated', self.on_row_activated)
+        self.model_tree = ModelTree()
 
         self.menubar = menubar
 
@@ -148,14 +149,18 @@ class ProjectTree(SlaveDelegate):
 
     def init_data(self):
         self.project_data.clear()
-        self.meta = self.project_data.append(None, Meta())
-        self.layer_list_iter = self.project_data.append(None, LayerList())
+        self.meta = self.project_data.append(None, self.model_tree.meta)
+        self.layer_list_iter = self.project_data.append(None,
+                                   self.model_tree.layer_list)
         self.lattice = self.layer_list_iter
         self.parameter_list_iter = self.project_data.append(None,
-                                                            ParameterList())
-        self.species_list_iter = self.project_data.append(None, SpeciesList())
-        self.process_list_iter = self.project_data.append(None, ProcessList())
-        self.output_list = self.project_data.append(None, OutputList())
+                                       self.model_tree.parameter_list)
+        self.species_list_iter = self.project_data.append(None,
+                                     self.model_tree.species_list)
+        self.process_list_iter = self.project_data.append(None,
+                                     self.model_tree.process_list)
+        self.output_list = self.project_data.append(None,
+                                self.model_tree.output_list)
         self.output_list = []
 
     def update(self, model):
