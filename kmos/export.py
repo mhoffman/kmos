@@ -16,8 +16,11 @@
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 import itertools
 import operator
+import shutil
+
 from kmos.types import ConditionAction
 from kmos import evaluate_rate_expression
+from kmos.config import *
 
 
 def flatten(L):
@@ -840,3 +843,28 @@ class ProcListWriter():
 !  USA
 """
         return out
+
+
+def export_source(project_tree, export_dir):
+    if not os.path.exists(export_dir):
+        os.mkdir(export_dir)
+
+    # copy files
+    cp_files = ['fortran_src/assert.ppc',
+                'fortran_src/base.f90',
+                'fortran_src/kind_values_f2py.f90',
+                'fortran_src/run_kmc.f90']
+    exec_files = []
+
+    for filename in cp_files + exec_files:
+        shutil.copy(os.path.join(APP_ABS_PATH, filename), export_dir)
+    for filename in exec_files:
+        os.chmod(os.path.join(export_dir, filename), 0755)
+
+    #copy xml file itself to target dir
+    shutil.copy(project_tree.filename, export_dir)
+
+    writer = ProcListWriter(project_tree, export_dir)
+    writer.write_lattice()
+    writer.write_proclist()
+    writer.write_settings()

@@ -28,8 +28,7 @@ import copy
 from kmos.config import *
 from kmos.types import ModelTree
 from kmos.forms import *
-from kmos.proclist_generator import ProcListWriter as MLProcListWriter
-import shutil
+import kmos.export
 #sys.path.append(APP_ABS_PATH)
 import gobject
 import pygtk
@@ -1023,34 +1022,12 @@ class KMC_Editor(GladeDelegate):
         if not export_dir:
             self.toast('No folder selected.')
             return
-        if not os.path.exists(export_dir):
-            os.mkdir(export_dir)
 
-        # copy files
-        cp_files = ['fortran_src/assert.ppc',
-                    'fortran_src/base.f90',
-                    'fortran_src/kind_values_f2py.f90',
-                    'fortran_src/run_kmc.f90']
-        exec_files = []
-
-        for filename in cp_files + exec_files:
-            shutil.copy(os.path.join(APP_ABS_PATH, filename), export_dir)
-        for filename in exec_files:
-            os.chmod(os.path.join(export_dir, filename), 0755)
-
-        #copy xml file itself to target dir
-        shutil.copy(self.project_tree.filename, export_dir)
-
-        self.toast("Multi-lattice mode, not fully supported, yet!")
-        writer = MLProcListWriter(self.project_tree, export_dir)
-        writer.write_lattice()
-        writer.write_proclist()
-        writer.write_settings()
+        kmos.export.export_source(self.project_tree, export_dir)
 
         # return directory name
         self.toast('Wrote FORTRAN sources to %s\n' % export_dir +
-            'Please go to the directory and run ./compile_for_f2py,\n' +
-           'which you might have to adapt slightly.\n' +
+            'Please go to the directory and run "kmos build".\n' +
            'If this finished successfully you can run the simulation\n' +
            'by executing "kmos view"')
 
