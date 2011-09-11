@@ -51,8 +51,15 @@ class Species:
         if self.gas:
             kboltzmann_in_eVK = 8.6173324e-5
             # interpolate given grid
-            return interp1d(self.T_grid, self.G_grid)(T) + \
-                   kboltzmann_in_eVK * T * log(p)
+            try:
+                val =  interp1d(self.T_grid, self.G_grid)(T) + \
+                       kboltzmann_in_eVK * T * log(p)
+            except Exception, e:
+                print('Possibly forgot to intall JANAF tables?')
+                raise
+            else:
+                return val
+
         else:
             raise UserWarning('%s is no gas-phase species.' % self.name)
 
