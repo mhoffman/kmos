@@ -2,12 +2,11 @@
 """A module holding all the data models used in kmos.
 """
 
-from kiwi.python import Settable
-from utils import CorrectlyNamed
 
 from copy import deepcopy
 
 from kmos import evaluate_rate_expression
+from kmos.utils import CorrectlyNamed
 
 
 class Attributes:
@@ -253,23 +252,21 @@ class SpeciesList(Attributes):
         Attributes.__init__(self, **kwargs)
 
 
-class ProcessList(Settable):
+class ProcessList():
     """A list of processes
     """
     def __init__(self, **kwargs):
-        kwargs['name'] = 'Processes'
-        Settable.__init__(self, **kwargs)
+        self.name = 'Processes'
 
     def __lt__(self, other):
         return self.name < other.name
 
 
-class ParameterList(Settable):
+class ParameterList():
     """A list of parameters
     """
     def __init__(self, **kwargs):
-        kwargs['name'] = 'Parameters'
-        Settable.__init__(self, **kwargs)
+        self.name = 'Parameters'
 
 
 class LayerList(Attributes):
@@ -323,14 +320,13 @@ class Parameter(Attributes, CorrectlyNamed):
         return self.value
 
 
-class Meta(Settable, object):
+class Meta(object):
     """Class holding the meta-information about the kMC project
     """
     name = 'Meta'
 
-    def __init__(self):
-        Settable.__init__(self, email='', author='', debug=0,
-                          model_name='', model_dimension=0,)
+    def __init__(self, *args, **kwargs):
+        self.add(kwargs)
 
     def add(self, attrib):
         for key in attrib:
