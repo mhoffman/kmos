@@ -26,7 +26,7 @@ import os
 import copy
 # import own modules
 from kmos.config import *
-from kmos.types import ModelTree
+from kmos.types import ProjectTree
 from kmos.forms import *
 import kmos.export
 #sys.path.append(APP_ABS_PATH)
@@ -115,9 +115,9 @@ def verbose(func):
     return wrapper_func
 
 
-class ProjectTree(SlaveDelegate):
-    """A rather complex class holding all the information of a kMC project
-    that provides a treelike view for the GUI
+class GTKProjectTree(SlaveDelegate):
+    """This class is a facade of a ProjectTree so that pygtk can display
+    in a TreeView
     """
     def __init__(self, parent, menubar):
         self.project_data = ObjectTree([Column('name',
@@ -127,7 +127,7 @@ class ProjectTree(SlaveDelegate):
                                         Column('info')])
 
         self.project_data.connect('row-activated', self.on_row_activated)
-        self.model_tree = ModelTree()
+        self.model_tree = ProjectTree()
 
         self.menubar = menubar
 
@@ -245,7 +245,9 @@ class ProjectTree(SlaveDelegate):
                 return
             nroot = ET.Element('kmc')
             nroot.set('version', '0.2')
-            kiwi.ui.dialogs.info('No legacy support!')
+            raise Exception('No legacy support!')
+            # catch and warn when factored out
+			# kiwi.ui.dialogs.info()
         elif self.version == (0, 2):
             dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_V0_2_DTD)
             if not dtd.validate(root):
@@ -392,14 +394,14 @@ class ProjectTree(SlaveDelegate):
     def set_default_species(self, species):
         self.species_list_iter.default_species = species
 
+    def add_layer(self, layer):
+        self.project_data.append(self.layer_list_iter, layer)
+
     def add_parameter(self, parameter):
         self.project_data.append(self.parameter_list_iter, parameter)
 
     def add_process(self, process):
         self.project_data.append(self.process_list_iter, process)
-
-    def add_layer(self, layer):
-        self.project_data.append(self.layer_list_iter, layer)
 
     def add_species(self, species):
         self.project_data.append(self.species_list_iter, species)
@@ -762,7 +764,7 @@ class KMC_Editor(GladeDelegate):
             print('Building menu failed: %s' % (e, mergeid))
 
         # Initialize the project tree, passing in the menu bar
-        self.project_tree = ProjectTree(parent=self, menubar=self.menubar)
+        self.project_tree = GTKProjectTree(parent=self, menubar=self.menubar)
         self.main_window.add_accel_group(self.menubar.get_accel_group())
         self.attach_slave('overviewtree', self.project_tree)
         self.set_title('%s - kmos' % self.project_tree.get_name())
@@ -779,7 +781,7 @@ class KMC_Editor(GladeDelegate):
 
     def add_defaults(self):
         """This function adds some useful defaults that are probably
-        need in every simulation
+        needed in every simulation.
         """
         # add dimension
         self.project_tree.meta.add({'model_dimension': '2'})
@@ -849,7 +851,7 @@ class KMC_Editor(GladeDelegate):
             elif resp == gtk.RESPONSE_OK:
                 self.on_btn_save_model__clicked(None)
         # Instantiate new project data
-        self.project_tree = ProjectTree(parent=self)
+        self.project_tree = GTKProjectTree(parent=self)
         if self.get_slave('overviewtree'):
             self.detach_slave('overviewtree')
         self.attach_slave('overviewtree', self.project_tree)
@@ -967,7 +969,7 @@ class KMC_Editor(GladeDelegate):
         filechooser.destroy()
         if resp == gtk.RESPONSE_OK and filename:
             # Initialize blank project tree
-            self.project_tree = ProjectTree(parent=self, menubar=self.menubar)
+            self.project_tree = GTKProjectTree(parent=self, menubar=self.menubar)
             if self.get_slave('overviewtree'):
                 self.detach_slave('overviewtree')
             self.attach_slave('overviewtree', self.project_tree)
