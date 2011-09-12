@@ -397,7 +397,7 @@ class OutputItem(Attributes):
         Attributes.__init__(self, **kwargs)
 
 
-class ModelTree(object):
+class ProjectTree(object):
     def __init__(self):
         self.meta = Meta()
         self.layer_list = LayerList()
