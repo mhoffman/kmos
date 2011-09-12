@@ -116,8 +116,8 @@ def verbose(func):
 
 
 class GTKProjectTree(SlaveDelegate):
-    """A rather complex class holding all the information of a kMC project
-    that provides a treelike view for the GUI
+    """This class is a facade of a ProjectTree so that pygtk can display
+    in a TreeView
     """
     def __init__(self, parent, menubar):
         self.project_data = ObjectTree([Column('name',
@@ -245,7 +245,9 @@ class GTKProjectTree(SlaveDelegate):
                 return
             nroot = ET.Element('kmc')
             nroot.set('version', '0.2')
-            kiwi.ui.dialogs.info('No legacy support!')
+            raise Exception('No legacy support!')
+            # catch and warn when factored out
+			# kiwi.ui.dialogs.info()
         elif self.version == (0, 2):
             dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_V0_2_DTD)
             if not dtd.validate(root):
