@@ -19,7 +19,7 @@ from kmos.view import KMC_Viewer
 import gtk
 import gobject
 
-if __name__ == '__main__':
+def main():
     gobject.threads_init()
     viewer = KMC_Viewer()
     viewer.model.start()
@@ -27,3 +27,6 @@ if __name__ == '__main__':
     print('started model and viewbox processes')
     gtk.main()
     print('gtk.main stopped')
+
+if __name__ == '__main__':
+    main()
