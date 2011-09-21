@@ -66,9 +66,12 @@ class ParamSlider(gtk.HScale):
         self.connect('format-value', self.linlog_scale_format)
         self.connect('value-changed', self.value_changed)
         self.set_tooltip_text(self.param_name)
-        self.set_value((self.resolution * (
-            float(value) - self.xmin) / (self.xmax - self.xmin)))
-        print('set value %s' % self.get_value())
+        if self.scale == 'linear':
+            scaled_value = (self.resolution * ( float(value) - self.xmin) / (self.xmax - self.xmin))
+            self.set_value(scaled_value)
+        elif self.scale == 'log':
+            scaled_value = 1000*(np.log(float(value)/self.xmin)/np.log(float(self.xmax/self.xmin)))
+            self.set_value(scaled_value)
 
     def linlog_scale_format(self, widget, value):
         value /= self.resolution
@@ -82,9 +85,9 @@ class ParamSlider(gtk.HScale):
         if name == 'T':
             unit = 'K'
         if self.scale == 'log':
-            vstr = '%s: %.2e %s' % (name,
+            vstr = '%s: %.2e %s (log)' % (name,
                            self.xmin * (self.xmax / self.xmin) ** value, unit)
-        else:
+        elif self.scale == 'linear':
             vstr = '%s: %s %s' % (name,
                            self.xmin + value * (self.xmax - self.xmin), unit)
         return vstr
