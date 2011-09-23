@@ -81,7 +81,6 @@ def evaluate_rate_expression(rate_expr, parameters={}):
             tokens = list(tokenize.generate_tokens(
                             StringIO.StringIO(rate_expr).readline))
         except:
-            print('Trouble with expression: %s' % rate_expr)
             raise
         for i, token, _, _, _ in tokens:
             if token in ['sqrt', 'exp', 'sin', 'cos', 'pi', 'pow']:

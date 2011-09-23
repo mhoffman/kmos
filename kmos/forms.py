@@ -1147,13 +1147,21 @@ class LatticeForm(ProxySlaveDelegate):
                 self.lattice_representation.get_buffer().get_start_iter(),
                 self.lattice_representation.get_buffer().get_end_iter())
             if not cur_text:
-                self.lattice_representation.get_buffer().set_text(
-                    '[%s]' % get_ase_constructor(structure))
+                structures = []
+                if float(self.cell_size_x.get_text()) == 1.:
+                    self.cell_size_x.set_text('%s' % structure[0].cell[0, 0])
+                if float(self.cell_size_y.get_text()) == 1.:
+                    self.cell_size_y.set_text('%s' % structure[0].cell[1, 1])
+                if float(self.cell_size_z.get_text()) == 1.:
+                    self.cell_size_z.set_text('%s' % structure[0].cell[2, 2])
+
             else:
                 structures = eval(cur_text)
-                structures.append(structure)
-                self.lattice_representation.get_buffer().set_text(
-                    '%s' % [get_ase_constructor(x) for x in structures])
+            structures.append(structure)
+            self.lattice_representation.get_buffer().set_text(
+                '[%s]' % (
+                ', '.join(
+                        [get_ase_constructor(x) for x in structures])))
 
 
 class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
