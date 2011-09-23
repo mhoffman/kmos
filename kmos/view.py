@@ -59,6 +59,8 @@ class ParamSlider(gtk.HScale):
         adjustment = gtk.Adjustment(0, 0, self.resolution, 0.1, 1.)
         self.xmin = float(min)
         self.xmax = float(max)
+        if self.xmin == self.xmax :
+            self.xmax = self.xmax + 1.
         self.settings = settings
         self.param_name = name
         self.scale = scale
