@@ -981,7 +981,10 @@ class KMC_Editor(GladeDelegate):
         # Import
         self.project_tree.import_xml_file(filename)
         self.set_title('%s - kmos' % self.project_tree.get_name())
-        self.toast('Imported model %s' % self.project_tree.meta.model_name)
+        if hasattr(self.project_tree.meta, 'model_name'):
+            self.toast('Imported model %s' % self.project_tree.meta.model_name)
+        else:
+            self.toast('Imported model <Untitled>')
         self.saved_state = str(self.project_tree)
 
     def on_btn_save_model__clicked(self, button, force_save=False):
