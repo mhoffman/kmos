@@ -6,6 +6,8 @@ Functionality
     exporting f90 source could and give the user hints
     about inconsistencies in the project
   * add undo function to process editor
+  * improve layer editor: make handling better (removing/cancelling sites)
+    and make better guess for z-position of site
 
 
 Project related
@@ -14,6 +16,13 @@ Project related
 
 Future/optional projects:
   * Allow for non-orthogonal unit cells
+  * do 2D version of process editor using ASE
+    facilities first: basically rid gtkcanvas 
+    in favor or pygoocanvas and include atoms
+    in background
+  * check-out blender and mayb additional 3D programs
+    for good gui design of placing sites or species
+    in 3D space
 
 
 Defered:
