@@ -16,6 +16,7 @@ class Attributes:
     attributes = []
 
     def __init__(self, **kwargs):
+        self.__doc__ += '\nAllowed keywords: %s' % self.attributes
         for attribute in self.attributes:
             if attribute in kwargs:
                 self.__dict__[attribute] = kwargs[attribute]
@@ -25,7 +26,7 @@ class Attributes:
                     'Tried to initialize illegal attribute %s' % key)
 
     def __setattr__(self, attrname, value):
-        if attrname in self.attributes:
+        if attrname in self.attributes + ['__doc__']:
             self.__dict__[attrname] = value
         else:
             raise AttributeError('Tried to set illegal attribute %s' \
@@ -335,6 +336,13 @@ class Meta(object):
             else:
                 self.__setattr__(key, attrib[key])
 
+    def setattribute(self, attr, value):
+        if attr in ['author', 'email', 'debug',
+                    'model_name', 'model_dimension']:
+            self.add({attr: value})
+
+        else:
+            print('%s is not a known meta information')
     def get_extra(self):
         return "%s(%s)" % (self.model_name, self.model_dimension)
 
