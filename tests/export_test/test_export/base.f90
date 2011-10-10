@@ -1,6 +1,6 @@
 !/* ROBODOC this makes robodoc to document this file */
 #include "assert.ppc"
-! Copyright (C)  2009 Max J. Hoffmann
+! Copyright (C)  2009-2011 Max J. Hoffmann
 !
 ! This file is part of kmos.
 !
@@ -68,6 +68,7 @@ public :: add_proc, &
     replace_species, &
     get_kmc_step, &
     get_kmc_time, &
+    set_kmc_time, &
     get_kmc_time_step, &
     get_nrofsites, &
     get_procstat, &
@@ -82,7 +83,7 @@ public :: add_proc, &
     reload_system, &
     reset_site, &
     save_system, &
-    set_rate, &
+    set_rate_const, &
     update_accum_rate, &
     update_clocks
 
@@ -117,7 +118,7 @@ integer(kind=iint), dimension(:), allocatable :: lattice
 !   Species constants can be conveniently defined
 !   in lattice_... and later used directly in the process list.
 !******
-real(kind=rsingle), dimension(:), allocatable :: accum_rates
+real(kind=rdouble), dimension(:), allocatable :: accum_rates
 !****v* base/accum_rates
 ! FUNCTION
 !   Stores the accumulated rate constant multiplied with the number
@@ -144,7 +145,7 @@ integer(kind=iint), dimension(:), allocatable :: nr_of_sites
 ! FUNCTION
 !   Stores the number of sites available for each process.
 !******
-real(kind=rsingle), dimension(:), allocatable :: rates
+real(kind=rdouble), dimension(:), allocatable :: rates
 !****v* base/rates
 ! FUNCTION
 !   Stores the rate constants for each process in s^-1.
@@ -297,7 +298,7 @@ subroutine add_proc(proc, site)
 
 end subroutine add_proc
 
-subroutine can_do(proc, site, can)
+pure function can_do(proc, site)
     !****f* base/can_do
     ! FUNCTION
     !    Returns true if 'site' can do 'proc' right now
@@ -307,12 +308,12 @@ subroutine can_do(proc, site, can)
     !  * can -- writeable boolean, where the result will be stored.
     !******
     !---------------I/O variables---------------
+    logical :: can_do 
     integer(kind=iint), intent(in) :: proc, site
-    logical, intent(out) :: can
 
-    can = avail_sites(proc,site,2).ne.0
+    can_do = avail_sites(proc,site,2).ne.0
 
-end subroutine can_do
+end function can_do
 
 
 subroutine reset_site(site, old_species)
@@ -331,23 +332,21 @@ subroutine reset_site(site, old_species)
     integer(kind=iint), intent(in) :: site, old_species
     !---------------internal variables---------------
     integer(kind=iint) :: proc, species
-    logical :: can
 
-    call get_species(site, species)
+    species = get_species(site)
 
     ! Reset species if stated correctly
     if(old_species.eq.species)then
         call replace_species(site, species, null_species)
     else
         print *,'ERROR: base/reset_site: wrong species given'
-        print *,'Expected',old_species,'but found',species
+        print *,'Expected',old_species,'but found',species,'on',site
         stop
     endif
 
     ! Strip all available capabilities from this site
     do proc = 1, nr_of_proc
-        call can_do(proc, site, can)
-        if(can)then
+        if(can_do(proc, site))then
             call del_proc(proc, site)
         endif
     enddo
@@ -570,10 +569,10 @@ subroutine save_system()
 end subroutine save_system
 
 
-subroutine set_rate(proc_nr, rate)
-    !****f* base/set_rate
+subroutine set_rate_const(proc_nr, rate)
+    !****f* base/set_rate_const
     ! FUNCTION
-    !    set_rate allows to set the rate of the process with the number proc_nr.
+    !    set_rate_const allows to set the rate constant of the process with the number proc_nr.
     ! ARGUMENTS
     !  * proc_nr -- The process number as defined in the corresponding proclist_
     !    module.
@@ -583,16 +582,16 @@ subroutine set_rate(proc_nr, rate)
     !    .
     !******
     integer(kind=iint), intent(in) :: proc_nr
-    real(kind=rsingle), intent(in) :: rate
+    real(kind=rdouble), intent(in) :: rate
 
     ! Make sure proc_nr is in the right range
-    ASSERT(proc_nr.gt.0,"base/set_rate: proc_nr has to be positive")
+    ASSERT(proc_nr.gt.0,"base/set_rate_const: proc_nr has to be positive")
     !   * the field within the process, but the meaning differs as explained
     !     under 'switch'
-    ASSERT(proc_nr.le.nr_of_proc,"base/set_rate: proc_nr less or equal nr_of_proc.")
+    ASSERT(proc_nr.le.nr_of_proc,"base/set_rate_const: proc_nr less or equal nr_of_proc.")
     rates(proc_nr) = rate
 
-end subroutine set_rate
+end subroutine set_rate_const
 
 subroutine update_accum_rate()
     !****f* base/update_accum_rate
@@ -746,7 +745,7 @@ subroutine deallocate_system()
 end subroutine deallocate_system
 
 
-subroutine get_system_name(return_system_name)
+pure function get_system_name()
     !****f* base/get_system_name
     ! FUNCTION
     !    Returns the systems name, that was specified with base/allocate_system
@@ -754,10 +753,25 @@ subroutine get_system_name(return_system_name)
     !    Writeable string of type character(len=200).
     !******
     !---------------I/O variables---------------
-    character(len=200), intent(out) :: return_system_name
+    character(len=200) :: get_system_name
 
-    return_system_name = system_name
-end subroutine get_system_name
+    get_system_name = system_name
+end function get_system_name
+
+
+subroutine set_kmc_time(new_kmc_time)
+    !****f* base/get_kmc_time
+    ! FUNCTION
+    !    Sets current kmc_time as rdouble real as defined in kind_values.f90.
+    ! ARGUMENTS
+    !  * new -- readable real, that the kmc time will be set to
+    !******
+    !---------------I/O variables---------------
+    real(kind=rdouble), intent(in)  :: new_kmc_time
+
+    kmc_time = new_kmc_time
+
+end subroutine set_kmc_time
 
 
 subroutine get_kmc_time(return_kmc_time)
@@ -833,7 +847,7 @@ subroutine get_rate(proc_nr, return_rate)
     !******
     !---------------I/O variables---------------
     integer(kind=iint), intent(in) :: proc_nr
-    real(kind=rsingle), intent(out) :: return_rate
+    real(kind=rdouble), intent(out) :: return_rate
 
     return_rate=rates(proc_nr)
 
@@ -992,7 +1006,7 @@ subroutine update_clocks(ran_time)
 end subroutine update_clocks
 
 
-subroutine get_species(site, return_species)
+pure function get_species(site)
     !****f* base/get_species
     ! FUNCTION
     !    Return the species that occupies site.
@@ -1000,17 +1014,17 @@ subroutine get_species(site, return_species)
     !  * site -- integer representing the site
     !******
     !---------------I/O variables---------------
+    integer(kind=iint) :: get_species
     integer(kind=iint), intent(in) :: site
-    integer(kind=iint), intent(out) :: return_species
 
     !! DEBUG 
     !print *, site
-    ASSERT(site.ge.1,"kmos/base/get_species was asked for a zero or negative site")
-    ASSERT(site.le.volume,"kmos/base/get_species was asked for a site outside the lattice")
+    !ASSERT(site.ge.1,"kmos/base/get_species was asked for a zero or negative site")
+    !ASSERT(site.le.volume,"kmos/base/get_species was asked for a site outside the lattice")
 
-    return_species = lattice(site)
+    get_species = lattice(site)
 
-end subroutine get_species
+end function get_species
 
 
 subroutine replace_species(site, old_species, new_species)
@@ -1068,8 +1082,8 @@ subroutine interval_search_real(arr, value, return_field)
     !
     !******
     !---------------I/O variables---------------
-    real(kind=rsingle),dimension(:), intent(in) :: arr
-    real(kind=rsingle),intent(in) :: value
+    real(kind=rdouble),dimension(:), intent(in) :: arr
+    real(kind=rdouble),intent(in) :: value
     integer(kind=iint), intent(out) :: return_field
     !---------------internal variables---------------
     integer(kind=iint) :: left, mid, right
@@ -1104,9 +1118,9 @@ subroutine interval_search_real(arr, value, return_field)
                     print *,""
                     print *,""
                     print *,"interval_search_real can't find available process"
-                    print *,"This usually means this &
-        that either you forgot to define rate constants or you defined &
-        a dead-lock: e.g. adsorption without corresponding desorption."
+                    print *,"This usually means"
+                    print *,"that either you forgot to define rate constants or you defined"
+                    print *,"a dead-lock: e.g. adsorption without corresponding desorption."
                     stop
                 endif
                 exit nonzerosearch
