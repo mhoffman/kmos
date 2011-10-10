@@ -16,7 +16,7 @@
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 import sys
 sys.path.append('..')
-from kmos import main
+from kmos import gui
 import optparse
 import os
 import shutil
@@ -41,7 +41,7 @@ def main():
     xml_file = args[0]
     export_dir = args[1]
 
-    kmc = main.KMC_Editor()
+    kmc = gui.KMC_Editor()
     kmc.project_tree.import_xml_file(xml_file)
 
     kmc.on_btn_export_src__clicked('', export_dir)
