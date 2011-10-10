@@ -48,7 +48,7 @@ class Site(Attributes):
             if 'default_species' in kwargs else 'default_species'
 
     def __repr__(self):
-        return '<SITE> %s %s %s' % (self.name,
+        return '[SITE] %s %s %s' % (self.name,
                                    (self.x, self.y, self.z), self.site_class)
 
 
@@ -85,7 +85,7 @@ class Grid(Attributes):
         self.offset_z = kwargs['offset_z'] if 'offset_z' in kwargs else 0.0
 
     def __repr__(self):
-        return ('<GRID> %s %s %s\noffset: %s %s %s' %
+        return ('[GRID] %s %s %s\noffset: %s %s %s' %
             (self.x, self.y, self.z,
             self.offset_x,
             self.offset_y,
@@ -106,7 +106,7 @@ class Layer(Attributes, CorrectlyNamed):
         self.sites = []
 
     def __repr__(self):
-        return "<LAYER> %s\n[%s]\n" % (self.name, self.grid)
+        return "[LAYER] %s\n[%s]\n" % (self.name, self.grid)
 
     def add_site(self, site):
         """Add a new site to a layer
@@ -131,7 +131,7 @@ class ConditionAction(Attributes):
         Attributes.__init__(self, **kwargs)
 
     def __repr__(self):
-        return "<COND_ACT> Species: %s Coord:%s\n" % (self.species, self.coord)
+        return "[COND_ACT] Species: %s Coord:%s\n" % (self.species, self.coord)
 
 
 class Coord(Attributes):
@@ -149,7 +149,7 @@ class Coord(Attributes):
             self.offset = (self.offset[0], self.offset[1], 0)
 
     def __repr__(self):
-        return '<COORD> %s.%s.%s' % (self.name, tuple(self.offset), self.layer)
+        return '[COORD] %s.%s.%s' % (self.name, tuple(self.offset), self.layer)
 
     def __eq__(self, other):
         return (self.layer, self.name, self.offset) == \
@@ -236,11 +236,12 @@ class Species(Attributes):
 
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
+        self.name = kwargs['name'] \
+            if 'name' in kwargs else ''
         self.representation = kwargs['representation'] \
             if 'representation' in kwargs else ''
-
     def __repr__(self):
-        return '<SPECIES> Name: %s Color: %s\n' % (self.name, self.color)
+        return '[SPECIES] Name: %s Color: %s\n' % (self.name, self.color)
 
 
 class SpeciesList(Attributes):
@@ -299,8 +300,12 @@ class Parameter(Attributes, CorrectlyNamed):
 
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
+        self.name = kwargs['name'] \
+            if 'name' in kwargs else ''
         self.adjustable = kwargs['adjustable'] \
             if 'adjustable' in kwargs else False
+        self.value = kwargs['value'] \
+            if 'value' in kwargs else 0.
         self.min = float(kwargs['min']) \
             if 'min' in kwargs else 0.0
         self.max = float(kwargs['max']) \
@@ -309,7 +314,7 @@ class Parameter(Attributes, CorrectlyNamed):
             if 'scale' in kwargs else 'linear'
 
     def __repr__(self):
-        return '<PARAMETER> Name: %s Value: %s\n' % (self.name, self.value)
+        return '[PARAMETER] Name: %s Value: %s\n' % (self.name, self.value)
 
     def on_adjustale__do_toggled(self, value):
         print(value)
@@ -360,9 +365,16 @@ class Process(Attributes):
 
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
-        self.condition_list = []
-        self.action_list = []
-        self.tof_count = kwargs['tof_count'] if 'tof_count' in kwargs else None
+        self.name = kwargs['name'] \
+            if 'name' in kwargs else ''
+        self.rate_constant = kwargs['rate_constant'] \
+            if 'rate_constant' in kwargs else '0.'
+        self.condition_list = kwargs['condition_list'] \
+            if 'condition_list' in kwargs else []
+        self.action_list = kwargs['action_list'] \
+         if 'action_list' in kwargs else []
+        self.tof_count = kwargs['tof_count'] \
+            if 'tof_count' in kwargs else None
         self.enabled = kwargs['enabled'] if 'enabled' in kwargs else True
 
     def __repr__(self):
