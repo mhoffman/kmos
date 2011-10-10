@@ -1,17 +1,23 @@
 #!/usr/bin/env python
 
-import os, sys
-import os.path, shutil
-import filecmp
+def test_export():
+    import os, sys
+    import os.path, shutil
+    import filecmp
 
-TEST_DIR = 'test_export'
-#if os.path.exists(TEST_DIR):
-    #shutil.rmtree(TEST_DIR)
+    cwd = os.path.abspath(os.curdir)
+    os.chdir(os.path.dirname(__file__))
 
-os.system('kmos export default.xml %s' % TEST_DIR)
+    TEST_DIR = 'test_export'
+    #if os.path.exists(TEST_DIR):
+        #shutil.rmtree(TEST_DIR)
 
-cmp = filecmp.cmp('reference_test/proclist.f90', '%s/proclist.f90' % TEST_DIR)
-if cmp:
-    print("Test passed")
-else:
-    print("Test failed")
+    os.system('kmos export default.xml %s' % TEST_DIR)
+
+    cmp = filecmp.cmp('reference_test/proclist.f90', '%s/proclist.f90' % TEST_DIR)
+
+    os.chdir(cwd)
+    if cmp:
+        print("Test passed")
+    else:
+        print("Test failed")
