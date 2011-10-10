@@ -1,10 +1,10 @@
 <?xml version="1.0" ?>
-<kmc>
+<kmc version='(0,2)'>
     <meta author="Max J. Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="2" model_name="my_model"/>
     <species_list default_species="empty">
-        <species color="#ff0000" id="2" name="oxygen"/>
-        <species color="#ffffff" id="1" name="empty"/>
-        <species color="#000000" id="3" name="co"/>
+        <species color="#ff0000" name="oxygen"/>
+        <species color="#ffffff" name="empty"/>
+        <species color="#000000" name="co"/>
     </species_list>
     <parameter_list>
         <parameter name="lattice_size" value="20 20"/>
@@ -22,220 +22,220 @@
         <parameter name="total_steps" value="10000000"/>
         <parameter name="m_o2" value="5.313525e-26"/>
     </parameter_list>
-    <lattice_list>
-        <lattice name="ruo2" unit_cell_size="2 1">
-            <site coord="0 0" type="bridge"/>
-            <site coord="1 0" type="cus"/>
-        </lattice>
-    </lattice_list>
+    <lattice cell_size='10. 10. 3.' default_layer='ruo2'>
+        <layer name="ruo2" grid_offset='0.0 0.0 0.0' grid='1 1 1'>
+            <site class='' type="bridge" vector='0. 0. 0.5'/>
+            <site class='' type="cus" vector='0. 0.5 0.5'/>
+        </layer>
+    </lattice>
     <process_list>
         <process name="reaction_oxygen_cus_co_bridge_left" rate_constant="">
-            <condition coord="cus" species="oxygen"/>
-            <condition coord="bridge" species="co"/>
-            <action coord="cus" species="empty"/>
-            <action coord="bridge" species="empty"/>
+            <condition coord_offset='0 0 0' coord_layer='ruo2' coord_name="cus" species="oxygen"/>
+            <condition coord_offset='0 0 0' coord_layer='ruo2' coord_name="bridge" species="co"/>
+            <action coord_offset='0 0 0' coord_layer='ruo2' coord_name="cus" species="empty"/>
+            <action coord_offset='0 0 0' coord_layer='ruo2' coord_name="bridge" species="empty"/>
         </process>
         <process name="co_desorption_cus" rate_constant="">
-            <condition coord="cus" species="co"/>
-            <action coord="cus" species="empty"/>
+            <condition coord_name="cus" coord_offset="0 0 0" coord_layer='ruo2' species="co"/>
+            <action coord_name="cus" coord_offset="0 0 0" coord_layer='ruo2' species="empty"/>
         </process>
         <process name="oxygen_diffusion_bridge_bridge_down" rate_constant="">
-            <condition coord="bridge" species="oxygen"/>
-            <condition coord="bridge.(0, -1)" species="empty"/>
-            <action coord="bridge.(0, -1)" species="oxygen"/>
-            <action coord="bridge" species="empty"/>
+            <condition coord_name="bridge" coord_offset="0 0 0" coord_layer='ruo2' species="oxygen"/>
+            <condition coord_name="bridge" coord_offset="0 -1 0" coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset="0 -1 0" coord_layer='ruo2' species="oxygen"/>
+            <action coord_name="bridge" coord_offset="0 0 0" coord_layer='ruo2' species="empty"/>
         </process>
         <process name="oxygen_desorption_bridge_cus_left" rate_constant="">
-            <condition coord="bridge" species="oxygen"/>
-            <condition coord="cus.(-1, 0)" species="oxygen"/>
-            <action coord="bridge" species="empty"/>
-            <action coord="cus.(-1, 0)" species="empty"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <condition coord_name="cus" coord_offset="-1 0 0" coord_layer='ruo2' species="oxygen"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="cus" coord_offset="-1 0 0" coord_layer='ruo2' species="empty"/>
         </process>
         <process name="co_diffusion_bridge_cus_right" rate_constant="">
-            <condition coord="bridge" species="co"/>
-            <condition coord="cus" species="empty"/>
-            <action coord="bridge" species="empty"/>
-            <action coord="cus" species="co"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="co"/>
+            <condition coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="co"/>
         </process>
         <process name="co_diffusion_bridge_bridge_up" rate_constant="10**8">
-            <condition coord="bridge" species="co"/>
-            <condition coord="bridge.(0, 1)" species="empty"/>
-            <action coord="bridge.(0, 1)" species="co"/>
-            <action coord="bridge" species="empty"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="co"/>
+            <condition coord_name="bridge" coord_offset="0 1 0" coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset="0 1 0" coord_layer='ruo2' species="co"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
         </process>
         <process name="co_adsorption_cus" rate_constant="10**8">
-            <condition coord="cus" species="empty"/>
-            <action coord="cus" species="co"/>
+            <condition coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="co"/>
         </process>
         <process name="co_diffusion_cus_cus_down" rate_constant="">
-            <condition coord="cus" species="co"/>
-            <condition coord="cus.(0, -1)" species="empty"/>
-            <action coord="cus.(0, -1)" species="co"/>
-            <action coord="cus" species="empty"/>
+            <condition coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="co"/>
+            <condition coord_name="cus" coord_offset="0 -1 0" coord_layer='ruo2' species="empty"/>
+            <action coord_name="cus" coord_offset="0 -1 0" coord_layer='ruo2' species="co"/>
+            <action coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
         </process>
         <process name="reaction_oxygen_bridge_co_bridge_down" rate_constant="">
-            <condition coord="bridge" species="oxygen"/>
-            <condition coord="bridge.(0, -1)" species="co"/>
-            <action coord="bridge" species="empty"/>
-            <action coord="bridge.(0, -1)" species="empty"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <condition coord_name="bridge" coord_offset="0 -1 0" coord_layer='ruo2' species="co"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset="0 -1 0" coord_layer='ruo2' species="empty"/>
         </process>
         <process name="co_adsorption_bridge" rate_constant="10**8">
-            <condition coord="bridge" species="empty"/>
-            <action coord="bridge" species="co"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="co"/>
         </process>
         <process name="oxygen_diffusion_cus_cus_up" rate_constant="">
-            <condition coord="cus" species="oxygen"/>
-            <condition coord="cus.(0, 1)" species="empty"/>
-            <action coord="cus.(0, 1)" species="oxygen"/>
-            <action coord="cus" species="empty"/>
+            <condition coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <condition coord_name="cus" coord_offset="0 1 0" coord_layer='ruo2' species="empty"/>
+            <action coord_name="cus" coord_offset="0 1 0" coord_layer='ruo2' species="oxygen"/>
+            <action coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
         </process>
         <process name="oxygen_diffusion_cus_bridge_left" rate_constant="">
-            <condition coord="cus" species="oxygen"/>
-            <condition coord="bridge" species="empty"/>
-            <action coord="bridge" species="oxygen"/>
-            <action coord="cus" species="empty"/>
+            <condition coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <action coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
         </process>
         <process name="oxygen_diffusion_bridge_cus_left" rate_constant="">
-            <condition coord="bridge" species="oxygen"/>
-            <condition coord="cus.(-1, 0)" species="empty"/>
-            <action coord="bridge" species="empty"/>
-            <action coord="cus.(-1, 0)" species="oxygen"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <condition coord_name="cus" coord_offset="-1 0 0" coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="cus" coord_offset="-1 0 0" coord_layer='ruo2' species="oxygen"/>
         </process>
         <process name="oxygen_diffusion_cus_bridge_right" rate_constant="">
-            <condition coord="cus" species="oxygen"/>
-            <condition coord="bridge.(1, 0)" species="empty"/>
-            <action coord="cus" species="empty"/>
-            <action coord="bridge.(1, 0)" species="oxygen"/>
+            <condition coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <condition coord_name="bridge" coord_offset="1 0 0" coord_layer='ruo2' species="empty"/>
+            <action coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset="1 0 0" coord_layer='ruo2' species="oxygen"/>
         </process>
         <process name="oxygen_desorption_bridge_bridge" rate_constant="">
-            <condition coord="bridge" species="oxygen"/>
-            <condition coord="bridge.(0, 1)" species="oxygen"/>
-            <action coord="bridge.(0, 1)" species="empty"/>
-            <action coord="bridge" species="empty"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <condition coord_name="bridge" coord_offset="0 1 0" coord_layer='ruo2' species="oxygen"/>
+            <action coord_name="bridge" coord_offset="0 1 0" coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
         </process>
         <process name="reaction_oxygen_bridge_co_cus_right" rate_constant="">
-            <condition coord="bridge" species="oxygen"/>
-            <condition coord="cus" species="co"/>
-            <action coord="bridge" species="empty"/>
-            <action coord="cus" species="empty"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <condition coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="co"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
         </process>
         <process name="co_diffusion_cus_cus_up" rate_constant="">
-            <condition coord="cus" species="co"/>
-            <condition coord="cus.(0, 1)" species="empty"/>
-            <action coord="cus" species="empty"/>
-            <action coord="cus.(0, 1)" species="co"/>
+            <condition coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="co"/>
+            <condition coord_name="cus" coord_offset="0 1 0" coord_layer='ruo2' species="empty"/>
+            <action coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="cus" coord_offset="0 1 0" coord_layer='ruo2' species="co"/>
         </process>
         <process name="co_diffusion_cus_bridge_right" rate_constant="">
-            <condition coord="cus" species="co"/>
-            <condition coord="bridge.(1, 0)" species="empty"/>
-            <action coord="cus" species="empty"/>
-            <action coord="bridge.(1, 0)" species="co"/>
+            <condition coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="co"/>
+            <condition coord_name="bridge" coord_offset="1 0 0" coord_layer='ruo2' species="empty"/>
+            <action coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset="1 0 0" coord_layer='ruo2' species="co"/>
         </process>
         <process name="reaction_oxygen_bridge_co_bridge_up" rate_constant="">
-            <condition coord="bridge" species="oxygen"/>
-            <condition coord="bridge.(0, 1)" species="co"/>
-            <action coord="bridge.(0, 1)" species="empty"/>
-            <action coord="bridge" species="empty"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <condition coord_name="bridge" coord_offset="0 1 0" coord_layer='ruo2' species="co"/>
+            <action coord_name="bridge" coord_offset="0 1 0" coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
         </process>
         <process name="reaction_oxygen_cus_co_cus_up" rate_constant="">
-            <condition coord="cus" species="oxygen"/>
-            <condition coord="cus.(0, 1)" species="co"/>
-            <action coord="cus" species="empty"/>
-            <action coord="cus.(0, 1)" species="empty"/>
+            <condition coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <condition coord_name="cus" coord_offset="0 1 0" coord_layer='ruo2' species="co"/>
+            <action coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="cus" coord_offset="0 1 0" coord_layer='ruo2' species="empty"/>
         </process>
         <process name="co_diffusion_cus_bridge_left" rate_constant="">
-            <condition coord="cus" species="co"/>
-            <condition coord="bridge" species="empty"/>
-            <action coord="bridge" species="co"/>
-            <action coord="cus" species="empty"/>
+            <condition coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="co"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="co"/>
+            <action coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
         </process>
         <process name="oxygen_adsorption_bridge_bridge" rate_constant="">
-            <condition coord="bridge" species="empty"/>
-            <condition coord="bridge.(0, 1)" species="empty"/>
-            <action coord="bridge.(0, 1)" species="oxygen"/>
-            <action coord="bridge" species="oxygen"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <condition coord_name="bridge" coord_offset="0 1 0" coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset="0 1 0" coord_layer='ruo2' species="oxygen"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
         </process>
         <process name="oxygen_adsorption_cus_cus" rate_constant="">
-            <condition coord="cus" species="empty"/>
-            <condition coord="cus.(0, 1)" species="empty"/>
-            <action coord="cus" species="oxygen"/>
-            <action coord="cus.(0, 1)" species="oxygen"/>
+            <condition coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <condition coord_name="cus" coord_offset="0 1 0" coord_layer='ruo2' species="empty"/>
+            <action coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <action coord_name="cus" coord_offset="0 1 0" coord_layer='ruo2' species="oxygen"/>
         </process>
         <process name="co_diffusion_bridge_cus_left" rate_constant="">
-            <condition coord="bridge" species="co"/>
-            <condition coord="cus.(-1, 0)" species="empty"/>
-            <action coord="bridge" species="empty"/>
-            <action coord="cus.(-1, 0)" species="co"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="co"/>
+            <condition coord_name="cus" coord_offset="-1 0 0" coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="cus" coord_offset="-1 0 0" coord_layer='ruo2' species="co"/>
         </process>
         <process name="oxygen_adsorption_bridge_cus_left" rate_constant="">
-            <condition coord="bridge" species="empty"/>
-            <condition coord="cus.(-1, 0)" species="empty"/>
-            <action coord="bridge" species="oxygen"/>
-            <action coord="cus.(-1, 0)" species="oxygen"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <condition coord_name="cus" coord_offset="-1 0 0" coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <action coord_name="cus" coord_offset="-1 0 0" coord_layer='ruo2' species="oxygen"/>
         </process>
         <process name="oxygen_desorption_cus_cus" rate_constant="">
-            <condition coord="cus" species="oxygen"/>
-            <condition coord="cus.(0, 1)" species="oxygen"/>
-            <action coord="cus.(0, 1)" species="empty"/>
-            <action coord="cus" species="empty"/>
+            <condition coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <condition coord_name="cus" coord_offset="0 1 0" coord_layer='ruo2' species="oxygen"/>
+            <action coord_name="cus" coord_offset="0 1 0" coord_layer='ruo2' species="empty"/>
+            <action coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
         </process>
         <process name="co_desorption_bridge" rate_constant="">
-            <condition coord="bridge" species="co"/>
-            <action coord="bridge" species="empty"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="co"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
         </process>
         <process name="oxygen_adsorption_bridge_cus_right" rate_constant="">
-            <condition coord="bridge" species="empty"/>
-            <condition coord="cus" species="empty"/>
-            <action coord="bridge" species="oxygen"/>
-            <action coord="cus" species="oxygen"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <condition coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <action coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
         </process>
         <process name="oxygen_diffusion_bridge_cus_right" rate_constant="">
-            <condition coord="bridge" species="oxygen"/>
-            <condition coord="cus" species="empty"/>
-            <action coord="bridge" species="empty"/>
-            <action coord="cus" species="oxygen"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <condition coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
         </process>
         <process name="oxygen_diffusion_bridge_bridge_up" rate_constant="">
-            <condition coord="bridge" species="oxygen"/>
-            <condition coord="bridge.(0, 1)" species="empty"/>
-            <action coord="bridge" species="empty"/>
-            <action coord="bridge.(0, 1)" species="oxygen"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <condition coord_name="bridge" coord_offset="0 1 0" coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset="0 1 0" coord_layer='ruo2' species="oxygen"/>
         </process>
         <process name="reaction_oxygen_cus_co_bridge_right" rate_constant="">
-            <condition coord="cus" species="oxygen"/>
-            <condition coord="bridge.(1, 0)" species="co"/>
-            <action coord="cus" species="empty"/>
-            <action coord="bridge.(1, 0)" species="empty"/>
+            <condition coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <condition coord_name="bridge" coord_offset="1 0 0" coord_layer='ruo2' species="co"/>
+            <action coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset="1 0 0" coord_layer='ruo2' species="empty"/>
         </process>
         <process name="reaction_oxygen_bridge_co_cus_left" rate_constant="">
-            <condition coord="bridge" species="oxygen"/>
-            <condition coord="cus.(-1, 0)" species="co"/>
-            <action coord="bridge" species="empty"/>
-            <action coord="cus.(-1, 0)" species="empty"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <condition coord_name="cus" coord_offset="-1 0 0" coord_layer='ruo2' species="co"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="cus" coord_offset="-1 0 0" coord_layer='ruo2' species="empty"/>
         </process>
         <process name="reaction_oxygen_cus_co_cus_down" rate_constant="">
-            <condition coord="cus" species="oxygen"/>
-            <condition coord="cus.(0, -1)" species="co"/>
-            <action coord="cus" species="empty"/>
-            <action coord="cus.(0, -1)" species="empty"/>
+            <condition coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <condition coord_name="cus" coord_offset="0 -1 0" coord_layer='ruo2' species="co"/>
+            <action coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="cus" coord_offset="0 -1 0" coord_layer='ruo2' species="empty"/>
         </process>
         <process name="co_diffusion_bridge_bridge_down" rate_constant="10**8">
-            <condition coord="bridge" species="co"/>
-            <condition coord="bridge.(0, -1)" species="empty"/>
-            <action coord="bridge.(0, -1)" species="co"/>
-            <action coord="bridge" species="empty"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="co"/>
+            <condition coord_name="bridge" coord_offset="0 -1 0" coord_layer='ruo2' species="empty"/>
+            <action coord_name="bridge" coord_offset="0 -1 0" coord_layer='ruo2' species="co"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
         </process>
         <process name="oxygen_diffusion_cus_cus_down" rate_constant="">
-            <condition coord="cus" species="oxygen"/>
-            <condition coord="cus.(0, -1)" species="empty"/>
-            <action coord="cus.(0, -1)" species="oxygen"/>
-            <action coord="cus" species="empty"/>
+            <condition coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <condition coord_name="cus" coord_offset="0 -1 0" coord_layer='ruo2' species="empty"/>
+            <action coord_name="cus" coord_offset="0 -1 0" coord_layer='ruo2' species="oxygen"/>
+            <action coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
         </process>
         <process name="oxygen_desorption_bridge_cus_right" rate_constant="">
-            <condition coord="bridge" species="oxygen"/>
-            <condition coord="cus" species="oxygen"/>
-            <action coord="bridge" species="empty"/>
-            <action coord="cus" species="empty"/>
+            <condition coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <condition coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="oxygen"/>
+            <action coord_name="bridge" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
+            <action coord_name="cus" coord_offset='0 0 0' coord_layer='ruo2' species="empty"/>
         </process>
     </process_list>
     <output_list>
