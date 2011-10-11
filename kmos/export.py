@@ -848,13 +848,16 @@ class ProcListWriter():
         return out
 
 
-def export_source(project_tree, export_dir):
+def export_source(project_tree, export_dir=None):
     """Wrapping function that exports a kmos project into Fortran 90 code
     that can be readily compiled using f2py.
     The model contained in project_tree will be stored under the directory
     export_dir. export_dir will be created if it does not exist. An XML
     file of the model will also be exported.
     """
+    if export_dir is None:
+        export_dir = project_tree.meta.model_name
+
     if not os.path.exists(export_dir):
         os.mkdir(export_dir)
 
