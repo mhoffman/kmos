@@ -103,7 +103,7 @@ class Layer(Attributes, CorrectlyNamed):
         self.name = kwargs['name'] if 'name' in kwargs else ''
         self.active = kwargs['active'] if 'active' in kwargs else True
         self.color = kwargs['color'] if 'color' in kwargs else '#ffffff'
-        self.sites = []
+        self.sites = kwargs['sites'] if 'sites' in kwargs else []
 
     def __repr__(self):
         return "[LAYER] %s\n[%s]\n" % (self.name, self.grid)
@@ -143,6 +143,8 @@ class Coord(Attributes):
 
     def __init__(self, **kwargs):
         Attributes.__init__(self, **kwargs)
+        self.offset = kwargs['offset'] \
+            if 'offset' in kwargs else (0, 0, 0)
         if len(self.offset) == 1:
             self.offset = (self.offset[0], 0, 0)
         if len(self.offset) == 2:
