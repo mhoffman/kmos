@@ -17,7 +17,7 @@
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 
 
-src_files='kind_values_f2py.f90 base.f90  lattice.f90 proclist.f90'
+src_files='kind_values_f2py.f90 base.f90 lattice.f90 proclist.f90'
 extra_flags='-xf95-cpp-input'
 module_name='kmc_model'
 
