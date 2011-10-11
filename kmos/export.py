@@ -236,7 +236,10 @@ class ProcListWriter():
         out.write('    unit_cell_size(2, 2) = %s\n' % data.layer_list_iter.cell_size_y)
         out.write('    unit_cell_size(3, 3) = %s\n' % data.layer_list_iter.cell_size_z)
         for i, (_, _, (x, y, z)) in enumerate(site_params):
-            out.write('    site_positions(%s,:) = (/%s, %s, %s/)\n' % (i + 1, x, y, z))
+            out.write('    site_positions(%s,:) = (/%s, %s, %s/)\n' % (i + 1,
+                                                                       float(x),
+                                                                       float(y),
+                                                                       float(z)))
         out.write('end subroutine allocate_system\n\n')
 
         # all subroutines below simply replicate the base module version
