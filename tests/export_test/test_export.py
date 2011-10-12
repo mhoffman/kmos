@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-def test_export():
+def test_import_export():
     import os, sys
     import os.path, shutil
     import filecmp
@@ -17,7 +17,5 @@ def test_export():
     cmp = filecmp.cmp('reference_test/proclist.f90', '%s/proclist.f90' % TEST_DIR)
 
     os.chdir(cwd)
-    if cmp:
-        print("Test passed")
-    else:
-        print("Test failed")
+
+    assert cmp
