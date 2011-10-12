@@ -1,17 +1,50 @@
 """
-kmos is a vigorous attempt to make lattice kMC modelling more accessible.
+kmos is a vigorous attempt to make (lattice) kMC modelling more accessible.
 
-This package features an XML format to define lattice-kMC models, a graphical
-editor for these XML files, a tools which converts a project description into
-compilable python/Fortran90 code and graphical front end to run and watch kMC
-simulations::
+Feature overview
+================
+With kmos you can:
 
-    kmos [help] (edit|view|export) [options]
+    * easily create and modify kMC models through GUI
+    * store and exchange kMC models through XML
+    * generate fast, platform independent, self-contained code
+    * run kMC models through GUI or python bindings
+
+kmos has been developed in the context of first-principles based modelling
+of surface chemical reactions but might be of help for other kMC models
+as well.
+
+kmos can be invoked directly from the command line in one of the following 
+ways::
+
+    kmos [help] (edit|export|view) [options]
 
 kmos' goal is to significantly reduce the time you need
 to implement and run a lattice kmc simulation. However it can not help
 you plan the model. It is therefore highly recommend that you have clear
 idea of your model before you start implementing it.
+
+
+Installation
+============
+
+You can fetch the current version of kmos using *git* ::
+
+    git clone http://www.github.com/mhoffman/kmos
+
+
+and install it using *setuptools* ::
+
+    ./setup.py install [--user]
+
+
+TODO: add description of dependencies
+
+TODO: add pip way or something alike to automatically
+      install dependencies.
+
+kMC Modelling
+=============
 
 A good way to define a model is to use a paper and pencil to draw
 your lattice, choose the species that you will need, draw

@@ -49,17 +49,47 @@
 <ul class="simple">
 </ul>
 </div>
-<span class="target" id="module-kmos"></span><p>kmos is a vigorous attempt to make lattice kMC modelling more accessible.</p>
-<p>This package features an XML format to define lattice-kMC models, a graphical
-editor for these XML files, a tools which converts a project description into
-compilable python/Fortran90 code and graphical front end to run and watch kMC simulations:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">kmos</span> <span class="p">[</span><span class="n">help</span><span class="p">]</span> <span class="p">(</span><span class="n">edit</span><span class="o">|</span><span class="n">view</span><span class="o">|</span><span class="n">export</span><span class="p">)</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span>
+<span class="target" id="module-kmos"></span><p>kmos is a vigorous attempt to make (lattice) kMC modelling more accessible.</p>
+<div class="section" id="feature-overview">
+<h2>Feature overview<a class="headerlink" href="#feature-overview" title="Permalink to this headline">¶</a></h2>
+<p>With kmos you can:</p>
+<blockquote>
+<ul class="simple">
+<li>easily create and modify kMC models through GUI</li>
+<li>store and exchange kMC models through XML</li>
+<li>generate fast, platform independent, self-contained code</li>
+<li>run kMC models through GUI or python bindings</li>
+</ul>
+</blockquote>
+<p>kmos has been developed in the context of first-principles based modelling
+of surface chemical reactions but might be of help for other kMC models
+as well.</p>
+<p>kmos can be invoked directly from the command line in one of the following 
+ways:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">kmos</span> <span class="p">[</span><span class="n">help</span><span class="p">]</span> <span class="p">(</span><span class="n">edit</span><span class="o">|</span><span class="n">export</span><span class="o">|</span><span class="n">view</span><span class="p">)</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>kmos&#8217; goal is to significantly reduce the time you need
 to implement and run a lattice kmc simulation. However it can not help
 you plan the model. It is therefore highly recommend that you have clear
 idea of your model before you start implementing it.</p>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>You can fetch the current version of kmos using <em>git</em></p>
+<div class="highlight-python"><pre>git clone http://www.github.com/mhoffman/kmos</pre>
+</div>
+<p>and install it using <em>setuptools</em></p>
+<div class="highlight-python"><pre>./setup.py install [--user]</pre>
+</div>
+<p>TODO: add description dependencies</p>
+<dl class="docutils">
+<dt>TODO: add pip way or something alike to automatically</dt>
+<dd>install dependencies.</dd>
+</dl>
+</div>
+<div class="section" id="kmc-modelling">
+<h2>kMC Modelling<a class="headerlink" href="#kmc-modelling" title="Permalink to this headline">¶</a></h2>
 <p>A good way to define a model is to use a paper and pencil to draw
 your lattice, choose the species that you will need, draw
 each process and write down an expression for each rate constant, and
@@ -81,7 +111,7 @@ You enter a new model by filling in</p>
 Fortran90 code, which solves the model. If all necessary dependencies are
 installed you can simply run kmc view in the export folder.</p>
 <div class="section" id="kmos-kmc-project-dtd">
-<h2>kmos kMC project DTD<a class="headerlink" href="#kmos-kmc-project-dtd" title="Permalink to this headline">¶</a></h2>
+<h3>kmos kMC project DTD<a class="headerlink" href="#kmos-kmc-project-dtd" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python"><pre>&lt;!ELEMENT kmc (meta?,species_list?,parameter_list?, lattice, process_list?,output_list?)&gt;
   &lt;!ATTLIST kmc
   version CDATA #REQUIRED
@@ -166,6 +196,7 @@ installed you can simply run kmc view in the export folder.</p>
 </pre>
 </div>
 </div>
+</div>
 <div class="section" id="module-kmos.model">
 <span id="kmc-model"></span><h2>KMC Model<a class="headerlink" href="#module-kmos.model" title="Permalink to this headline">¶</a></h2>
 <p>A python representation of a kMC model. The actual model is
@@ -197,7 +228,12 @@ the model happens through Queues.</p>
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Welcome to kmos&#8217;s documentation!</a><ul>
+<li><a class="reference internal" href="#feature-overview">Feature overview</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#kmc-modelling">kMC Modelling</a><ul>
 <li><a class="reference internal" href="#kmos-kmc-project-dtd">kmos kMC project DTD</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-kmos.model">KMC Model</a></li>
 </ul>
 </li>
