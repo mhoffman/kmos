@@ -49,15 +49,17 @@ def most_common(L):
 
 
 class ProcListWriter():
-    """This class just exports the proclist.f90 module
-    from a kmos project tree, but since this is the most
-    algorithm extensive part, this is stored in an extra
-    submodule"""
+    """Write the different parts of Fortran 90 code needed
+    to run a kMC model.
+    """
     def __init__(self, data, dir):
         self.data = data
         self.dir = dir
 
     def write_lattice(self):
+        """Write the lattice.f90 module, i.e. the geometric
+        information that belongs to a kMC model.
+        """
         # write header section and module imports
         data = self.data
         out = open('%s/lattice.f90' % self.dir, 'w')
@@ -311,6 +313,9 @@ class ProcListWriter():
         out.close()
 
     def write_proclist(self):
+        """Write the proclist.f90 module, i.e. the rules which make up
+        the kMC process list.
+        """
         # make long lines a little shorter
         data = self.data
 
@@ -778,8 +783,12 @@ class ProcListWriter():
             self._write_optimal_iftree(items, indent, out)
 
     def write_settings(self):
+        """Write the kmc_settings.py. This contains all parameters, which
+        can be changed on the fly and without recompilation of the Fortran 90
+        modules.
+        """
         data = self.data
-        out = open('%s/kmc_settings.py' % self.dir, 'w')
+        out = open(os.path.join(self.dir,'kmc_settings.py'), 'w')
         out.write('model_name = \'%s\'\n' % self.data.meta.model_name)
         out.write('simulation_size = 20\n')
         out.write('representations = {\n')
@@ -849,10 +858,10 @@ class ProcListWriter():
 
 
 def export_source(project_tree, export_dir=None):
-    """Wrapping function that exports a kmos project into Fortran 90 code
-    that can be readily compiled using f2py.
-    The model contained in project_tree will be stored under the directory
-    export_dir. export_dir will be created if it does not exist. An XML
+    """Export a kmos project into Fortran 90 code that can be readily
+    compiled using f2py.  The model contained in project_tree
+    will be stored under the directory export_dir. export_dir will
+    be created if it does not exist. An XML
     file of the model will also be exported.
     """
     if export_dir is None:
@@ -883,3 +892,4 @@ def export_source(project_tree, export_dir=None):
     writer.write_lattice()
     writer.write_proclist()
     writer.write_settings()
+    return True
