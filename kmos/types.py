@@ -2,19 +2,28 @@
 """A module holding all the data models used in kmos.
 """
 
-
+# stdlib imports
 from copy import deepcopy
 
+# XML handling
+from lxml import etree as ET
+#Need to pretty print XML
+from xml.dom import minidom
+
+# kmos own modules
 from kmos import evaluate_rate_expression
 from kmos.utils import CorrectlyNamed
+from kmos.config import *
 
+KMCPROJECT_V0_1_DTD = '/kmc_project_v0.1.dtd'
+KMCPROJECT_V0_2_DTD = '/kmc_project_v0.2.dtd'
+XML_API_VERSION = (0, 2)
 
-class Attributes:
+class FixedObject(object):
     """Handy class that easily allows to define data structures
     that can only hold a well-defined set of fields
     """
     attributes = []
-
     def __init__(self, **kwargs):
         self.__doc__ += '\nAllowed keywords: %s' % self.attributes
         for attribute in self.attributes:
@@ -33,14 +42,14 @@ class Attributes:
                                                             % attrname)
 
 
-class Site(Attributes):
+class Site(FixedObject):
     """A class holding exactly one lattice site
     """
     attributes = ['name', 'x', 'y', 'z', 'site_class', 'default_species']
     # vector is now a list of floats for the graphical representation
 
     def __init__(self, **kwargs):
-        Attributes.__init__(self, **kwargs)
+        FixedObject.__init__(self, **kwargs)
         self.site_class = kwargs['site_class'] \
             if  'site_class' in kwargs else ''
         self.name = kwargs['name'] if 'name' in kwargs else ''
@@ -69,14 +78,14 @@ class ProcessFormSite(Site):
         self.layer = kwargs['layer'] if 'layer' in kwargs else ''
 
 
-class Grid(Attributes):
+class Grid(FixedObject):
     """A grid is simply a guide to the eye to set up sites in unit cell
     at specific location. It has no effect for the kMC model itself
     """
     attributes = ['x', 'y', 'z', 'offset_x', 'offset_y', 'offset_z']
 
     def __init__(self, **kwargs):
-        Attributes.__init__(self, **kwargs)
+        FixedObject.__init__(self, **kwargs)
         self.x = kwargs['x'] if 'x' in kwargs else 1
         self.y = kwargs['y'] if 'y' in kwargs else 1
         self.z = kwargs['z'] if 'z' in kwargs else 1
@@ -92,13 +101,13 @@ class Grid(Attributes):
             self.offset_z))
 
 
-class Layer(Attributes, CorrectlyNamed):
+class Layer(FixedObject, CorrectlyNamed):
     """A class that defines exactly one layer
     """
     attributes = ['name', 'grid', 'sites', 'site_classes', 'active', 'color']
 
     def __init__(self, **kwargs):
-        Attributes.__init__(self, **kwargs)
+        FixedObject.__init__(self, **kwargs)
         self.grid = kwargs['grid'] if 'grid' in kwargs else Grid()
         self.name = kwargs['name'] if 'name' in kwargs else ''
         self.active = kwargs['active'] if 'active' in kwargs else True
@@ -120,7 +129,7 @@ class Layer(Attributes, CorrectlyNamed):
             return 'invisible'
 
 
-class ConditionAction(Attributes):
+class ConditionAction(FixedObject):
     """Class that holds either a condition or an action. Since both
     have the same attributes we use the same class here, and just
     store them in different lists, depending on its role
@@ -128,13 +137,13 @@ class ConditionAction(Attributes):
     attributes = ['species', 'coord']
 
     def __init__(self, **kwargs):
-        Attributes.__init__(self, **kwargs)
+        FixedObject.__init__(self, **kwargs)
 
     def __repr__(self):
         return "[COND_ACT] Species: %s Coord:%s\n" % (self.species, self.coord)
 
 
-class Coord(Attributes):
+class Coord(FixedObject):
     """Class that holds exactly one coordinate as used in the description
     of a process. The distinction between a Coord and a Site may seem
     superfluous but it is crucial to avoid to much data duplication
@@ -142,7 +151,7 @@ class Coord(Attributes):
     attributes = ['offset', 'name', 'layer']
 
     def __init__(self, **kwargs):
-        Attributes.__init__(self, **kwargs)
+        FixedObject.__init__(self, **kwargs)
         self.offset = kwargs['offset'] \
             if 'offset' in kwargs else (0, 0, 0)
         if len(self.offset) == 1:
@@ -230,14 +239,14 @@ class Coord(Attributes):
                                            self.offset[2], self.name, )
 
 
-class Species(Attributes):
+class Species(FixedObject):
     """Class that represent a species such as oxygen, empty, ... . Not empty
     is treated just like a species.
     """
     attributes = ['name', 'color', 'representation']
 
     def __init__(self, **kwargs):
-        Attributes.__init__(self, **kwargs)
+        FixedObject.__init__(self, **kwargs)
         self.name = kwargs['name'] \
             if 'name' in kwargs else ''
         self.representation = kwargs['representation'] \
@@ -246,19 +255,20 @@ class Species(Attributes):
         return '[SPECIES] Name: %s Color: %s\n' % (self.name, self.color)
 
 
-class SpeciesList(Attributes):
+class SpeciesList(FixedObject, list):
     """A list of species
     """
     attributes = ['default_species', 'name']
 
     def __init__(self, **kwargs):
         kwargs['name'] = 'Species'
-        Attributes.__init__(self, **kwargs)
+        FixedObject.__init__(self, **kwargs)
 
 
-class ProcessList():
+class ProcessList(FixedObject, list):
     """A list of processes
     """
+    attributes = ['name']
     def __init__(self, **kwargs):
         self.name = 'Processes'
 
@@ -266,21 +276,22 @@ class ProcessList():
         return self.name < other.name
 
 
-class ParameterList():
+class ParameterList(FixedObject, list):
     """A list of parameters
     """
+    attributes = ['name']
     def __init__(self, **kwargs):
         self.name = 'Parameters'
 
 
-class LayerList(Attributes):
+class LayerList(FixedObject, list):
     """A list of layers
     """
     attributes = ['name', 'cell_size_x', 'cell_size_y', 'cell_size_z',
                   'default_layer', 'representation']
 
     def __init__(self, **kwargs):
-        Attributes.__init__(self, **kwargs)
+        FixedObject.__init__(self, **kwargs)
         self.name = 'Lattice(s)'
         self.cell_size_x = kwargs['cell_size_x'] \
             if 'cell_size_x' in kwargs else 1.
@@ -294,14 +305,14 @@ class LayerList(Attributes):
             if 'representation' in kwargs else ''
 
 
-class Parameter(Attributes, CorrectlyNamed):
+class Parameter(FixedObject, CorrectlyNamed):
     """A parameter that can be used in a rate constant expression
     and defined via some init file
     """
     attributes = ['name', 'value', 'adjustable', 'min', 'max', 'scale']
 
     def __init__(self, **kwargs):
-        Attributes.__init__(self, **kwargs)
+        FixedObject.__init__(self, **kwargs)
         self.name = kwargs['name'] \
             if 'name' in kwargs else ''
         self.adjustable = kwargs['adjustable'] \
@@ -354,7 +365,7 @@ class Meta(object):
         return "%s(%s)" % (self.model_name, self.model_dimension)
 
 
-class Process(Attributes):
+class Process(FixedObject):
     """One process in a kMC process list
     """
     attributes = ['name',
@@ -366,7 +377,7 @@ class Process(Attributes):
                   'tof_count']
 
     def __init__(self, **kwargs):
-        Attributes.__init__(self, **kwargs)
+        FixedObject.__init__(self, **kwargs)
         self.name = kwargs['name'] \
             if 'name' in kwargs else ''
         self.rate_constant = kwargs['rate_constant'] \
@@ -398,21 +409,22 @@ class Process(Attributes):
         return self.rate_constant
 
 
-class OutputList():
+class OutputList(FixedObject, list):
     """A dummy class, that will hold the values which are to be
     printed to logfile.
     """
+    attributes = ['name']
     def __init__(self):
         self.name = 'Output'
 
 
-class OutputItem(Attributes):
+class OutputItem(FixedObject):
     """Not implemented yet
     """
     attributes = ['name', 'output']
 
     def __init__(self, *args, **kwargs):
-        Attributes.__init__(self, **kwargs)
+        FixedObject.__init__(self, **kwargs)
 
 
 class ProjectTree(object):
@@ -423,3 +435,305 @@ class ProjectTree(object):
         self.species_list = SpeciesList()
         self.process_list = ProcessList()
         self.output_list = OutputList()
+
+    def __repr__(self):
+        return self._get_xml_string()
+
+    def _get_xml_string(self):
+        """Produces an XML representation of the project data
+        """
+        # build XML Tree
+        root = ET.Element('kmc')
+        root.set('version', str(XML_API_VERSION))
+        meta = ET.SubElement(root, 'meta')
+        if hasattr(self.meta, 'author'):
+            meta.set('author', self.meta.author)
+        if hasattr(self.meta, 'email'):
+            meta.set('email', self.meta.email)
+        if hasattr(self.meta, 'model_name'):
+            meta.set('model_name', self.meta.model_name)
+        if hasattr(self.meta, 'model_dimension'):
+            meta.set('model_dimension', str(self.meta.model_dimension))
+        if hasattr(self.meta, 'debug'):
+            meta.set('debug', str(self.meta.debug))
+        species_list = ET.SubElement(root, 'species_list')
+        if hasattr(self.species_list, 'default_species'):
+            species_list.set('default_species',
+                             self.species_list.default_species)
+        else:
+            species_list.set('default_species', '')
+
+        for species in self.species_list:
+            species_elem = ET.SubElement(species_list, 'species')
+            species_elem.set('name', species.name)
+            species_elem.set('color', species.color)
+            species_elem.set('representation', species.representation)
+        parameter_list = ET.SubElement(root, 'parameter_list')
+        for parameter in self.parameter_list:
+            parameter_elem = ET.SubElement(parameter_list, 'parameter')
+            parameter_elem.set('name', parameter.name)
+            parameter_elem.set('value', str(parameter.value))
+            parameter_elem.set('adjustable', str(parameter.adjustable))
+            parameter_elem.set('min', str(parameter.min))
+            parameter_elem.set('max', str(parameter.max))
+            if hasattr(parameter, 'scale'):
+                parameter_elem.set('scale', str(parameter.scale))
+            else:
+                parameter_elem.set('scale', 'linear')
+
+        lattice_elem = ET.SubElement(root, 'lattice')
+        if (hasattr(self.layer_list, 'cell_size_x') and \
+            hasattr(self.layer_list, 'cell_size_y') and
+            hasattr(self.layer_list, 'cell_size_z')):
+            lattice_elem.set('cell_size', '%s %s %s' %
+            (self.layer_list.cell_size_x,
+            self.layer_list.cell_size_y,
+            self.layer_list.cell_size_z))
+            lattice_elem.set('default_layer',
+                             self.layer_list.default_layer)
+        if hasattr(self.layer_list, 'representation'):
+            lattice_elem.set('representation', self.layer_list.representation)
+        for layer in self.layer_list:
+            layer_elem = ET.SubElement(lattice_elem, 'layer')
+            layer_elem.set('name', layer.name)
+            if (hasattr(layer.grid, 'x') and\
+            hasattr(layer.grid, 'y') and
+            hasattr(layer.grid, 'z')):
+                layer_elem.set('grid',
+                    '%s %s %s' % (layer.grid.x,
+                                  layer.grid.y,
+                                  layer.grid.z))
+            if (hasattr(layer.grid, 'offset_x') and\
+            hasattr(layer.grid, 'offset_y') and
+            hasattr(layer.grid, 'offset_z')):
+                layer_elem.set('grid_offset',
+                    '%s %s %s' % (layer.grid.offset_x,
+                                  layer.grid.offset_y,
+                                  layer.grid.offset_z))
+
+            layer_elem.set('color', layer.color)
+
+            for site in layer.sites:
+                site_elem = ET.SubElement(layer_elem, 'site')
+                site_elem.set('vector', '%s %s %s' % (site.x, site.y, site.z))
+                site_elem.set('type', site.name)
+                site_elem.set('class', site.site_class)
+                site_elem.set('default_species', site.default_species)
+
+        process_list = ET.SubElement(root, 'process_list')
+        for process in self.process_list:
+            process_elem = ET.SubElement(process_list, 'process')
+            process_elem.set('rate_constant', process.rate_constant)
+            process_elem.set('name', process.name)
+            process_elem.set('enabled', str(process.enabled))
+            if process.tof_count:
+                process_elem.set('tof_count', str(process.tof_count))
+            for condition in process.condition_list:
+                condition_elem = ET.SubElement(process_elem, 'condition')
+                condition_elem.set('species', condition.species)
+                condition_elem.set('coord_layer', condition.coord.layer)
+                condition_elem.set('coord_name', condition.coord.name)
+                condition_elem.set('coord_offset',
+                    ' '.join([str(i) for i in condition.coord.offset]))
+            for action in process.action_list:
+                action_elem = ET.SubElement(process_elem, 'action')
+                action_elem.set('species', action.species)
+                action_elem.set('coord_layer', action.coord.layer)
+                action_elem.set('coord_name', action.coord.name)
+                action_elem.set('coord_offset',
+                    ' '.join([str(i) for i in action.coord.offset]))
+        output_list = ET.SubElement(root, 'output_list')
+        for output in self.output_list:
+            if output.output:
+                output_elem = ET.SubElement(output_list, 'output')
+                output_elem.set('item', output.name)
+        return prettify_xml(root)
+
+    def import_xml_file(self, filename):
+        """Takes a filename, validates the content against kmc_project.dtd
+        and import all fields into the current project tree
+        """
+        # TODO: catch XML version first and convert if necessary
+        self.filename = filename
+        xmlparser = ET.XMLParser(remove_comments=True)
+        try:
+            root = ET.parse(filename, parser=xmlparser).getroot()
+        except:
+            print('\nCould not parse file. Are you sure this')
+            print('a kmos project file?\n')
+            raise
+
+        if 'version' in root.attrib:
+            self.version = eval(root.attrib['version'])
+        else:
+            self.version = (0, 1)
+
+        if self.version == (0, 1):
+            dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_V0_1_DTD)
+            if not dtd.validate(root):
+                print(dtd.error_log.filter_from_errors()[0])
+                return
+            nroot = ET.Element('kmc')
+            nroot.set('version', '0.2')
+            raise Exception('No legacy support!')
+            # catch and warn when factored out
+			# kiwi.ui.dialogs.info()
+        elif self.version == (0, 2):
+            dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_V0_2_DTD)
+            if not dtd.validate(root):
+                print(dtd.error_log.filter_from_errors()[0])
+                return
+            for child in root:
+                if child.tag == 'lattice':
+                    cell_size = [float(x)
+                                 for x in child.attrib['cell_size'].split()]
+                    self.layer_list.cell_size_x = cell_size[0]
+                    self.layer_list.cell_size_y = cell_size[1]
+                    self.layer_list.cell_size_z = cell_size[2]
+                    self.layer_list.default_layer = child.attrib['default_layer']
+                    if 'representation' in child.attrib:
+                        self.layer_list.representation = child.attrib[
+                                                             'representation']
+                    else:
+                        self.layer_list.representation = ''
+                    for elem in child:
+                        if elem.tag == 'layer':
+                            name = elem.attrib['name']
+                            x, y, z = [int(i)
+                                       for i in elem.attrib['grid'].split()]
+                            ox, oy, oz = [float(i)
+                                          for i in elem.attrib[
+                                                     'grid_offset'].split()]
+                            grid = Grid(x=x, y=y, z=z,
+                                offset_x=ox, offset_y=oy, offset_z=oz)
+                            if 'color' in elem.attrib:
+                                color = elem.attrib['color']
+                            else:
+                                color = '#ffffff'
+                            layer = Layer(name=name, grid=grid, color=color)
+                            self.add_layer(layer)
+
+                            for site in elem:
+                                name = site.attrib['type']
+                                x, y, z = [float(x)
+                                    for x in site.attrib['vector'].split()]
+                                site_class = site.attrib['class']
+                                if 'default_species' in site.attrib:
+                                    default_species = site.attrib[
+                                                         'default_species']
+                                else:
+                                    default_species = 'default_species'
+                                site_elem = Site(name=name,
+                                    x=x, y=y, z=z,
+                                    site_class=site_class,
+                                    default_species=default_species)
+                                layer.sites.append(site_elem)
+                        elif elem.tag == 'site_class':
+                            # ignored for now
+                            pass
+                elif child.tag == 'meta':
+                    for attrib in ['author',
+                                    'debug',
+                                    'email',
+                                    'model_dimension',
+                                    'model_name']:
+                        if attrib in child.attrib:
+                            self.meta.add({attrib: child.attrib[attrib]})
+                elif child.tag == 'parameter_list':
+                    for parameter in child:
+                        name = parameter.attrib['name']
+                        value = parameter.attrib['value']
+                        if 'adjustable' in parameter.attrib:
+                            adjustable = bool(eval(
+                                            parameter.attrib['adjustable']))
+                        else:
+                            adjustable = False
+
+                        min = parameter.attrib['min'] \
+                            if 'min' in parameter.attrib else 0.0
+                        max = parameter.attrib['max'] \
+                            if 'max' in parameter.attrib else 0.0
+                        scale = parameter.attrib['scale'] \
+                            if 'scale' in parameter.attrib else 'linear'
+
+                        parameter_elem = Parameter(name=name,
+                                                   value=value,
+                                                   adjustable=adjustable,
+                                                   min=min,
+                                                   max=max,
+                                                   scale=scale)
+                        self.add_parameter(parameter_elem)
+                elif child.tag == 'process_list':
+                    for process in child:
+                        name = process.attrib['name']
+                        rate_constant = process.attrib['rate_constant']
+                        if 'tof_count' in process.attrib:
+                            tof_count = process.attrib['tof_count']
+                        else:
+                            tof_count = None
+                        if 'enabled' in process.attrib:
+                            try:
+                                proc_enabled = bool(
+                                    eval(process.attrib['enabled']))
+                            except:
+                                proc_enabled = True
+                        else:
+                            proc_enabled = True
+                        process_elem = Process(name=name,
+                            rate_constant=rate_constant,
+                            enabled=proc_enabled,
+                            tof_count=tof_count)
+                        for sub in process:
+                            if sub.tag == 'action' or sub.tag == 'condition':
+                                species = sub.attrib['species']
+                                coord_layer = sub.attrib['coord_layer']
+                                coord_name = sub.attrib['coord_name']
+                                coord_offset = tuple(
+                                    [int(i) for i in
+                                    sub.attrib['coord_offset'].split()])
+                                coord = Coord(layer=coord_layer,
+                                              name=coord_name,
+                                              offset=coord_offset)
+                                condition_action = ConditionAction(
+                                    species=species, coord=coord)
+                                if sub.tag == 'action':
+                                    process_elem.add_action(condition_action)
+                                elif sub.tag == 'condition':
+                                    process_elem.add_condition(
+                                                            condition_action)
+                        self.add_process(process_elem)
+                elif child.tag == 'species_list':
+                    self.species_list.default_species = child.attrib['default_species']
+                    for species in child:
+                        name = species.attrib['name']
+                        color = species.attrib['color']
+                        representation = species.attrib['representation'] \
+                            if 'representation' in species.attrib else ''
+                        species_elem = Species(name=name,
+                                               color=color,
+                                               representation=representation)
+                        self.species_list.append(species_elem)
+                if child.tag == 'output_list':
+                    for item in child:
+                        output_elem = OutputItem(name=item.attrib['item'],
+                                                 output=True)
+                        self.output_list.append(output_elem)
+
+    def add_parameter(self, parameter):
+        self.parameter_list.append(parameter)
+    
+    def add_layer(self, layer):
+        self.layer_list.append(layer)
+
+    def add_process(self, process):
+        self.process_list.append(process)
+
+def prettify_xml(elem):
+    """This function takes an XML document, which can have one or many lines
+    and turns it into a well-breaked, nicely-indented string
+    """
+    rough_string = ET.tostring(elem, encoding='utf-8')
+    reparsed = minidom.parseString(rough_string)
+    return reparsed.toprettyxml(indent='    ')
+
+

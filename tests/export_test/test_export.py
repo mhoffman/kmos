@@ -12,7 +12,7 @@ def test_import_export():
     #if os.path.exists(TEST_DIR):
         #shutil.rmtree(TEST_DIR)
 
-    os.system('kmos export default.xml %s' % TEST_DIR)
+    assert not os.system('kmos export default.xml %s' % TEST_DIR)
 
     cmp = filecmp.cmp('reference_test/proclist.f90', '%s/proclist.f90' % TEST_DIR)
 

@@ -62,7 +62,7 @@ class ProcListWriter():
         """
         # write header section and module imports
         data = self.data
-        out = open('%s/lattice.f90' % self.dir, 'w')
+        out = open(os.path.join(self.dir,'lattice.f90') , 'w')
         out.write(self._gpl_message())
         out.write('\n\nmodule lattice\n')
         out.write('use kind_values\n')
@@ -102,7 +102,7 @@ class ProcListWriter():
         for i, layer in enumerate(data.layer_list):
             out.write('integer(kind=iint), parameter, public :: %s = %s\n'
                 % (layer.name, i))
-        out.write('integer(kind=iint), parameter, public :: default_layer = %s\n' % data.layer_list_iter.default_layer)
+        out.write('integer(kind=iint), parameter, public :: default_layer = %s\n' % data.layer_list.default_layer)
         out.write('\n ! Site constants\n\n')
         site_params = []
         for layer in data.layer_list:
@@ -234,9 +234,9 @@ class ProcListWriter():
         out.write('        end do\n')
         out.write('    end do\n\n')
         out.write('    call base_allocate_system(nr_of_proc, volume, system_name)\n\n')
-        out.write('    unit_cell_size(1, 1) = %s\n' % data.layer_list_iter.cell_size_x)
-        out.write('    unit_cell_size(2, 2) = %s\n' % data.layer_list_iter.cell_size_y)
-        out.write('    unit_cell_size(3, 3) = %s\n' % data.layer_list_iter.cell_size_z)
+        out.write('    unit_cell_size(1, 1) = %s\n' % data.layer_list.cell_size_x)
+        out.write('    unit_cell_size(2, 2) = %s\n' % data.layer_list.cell_size_y)
+        out.write('    unit_cell_size(3, 3) = %s\n' % data.layer_list.cell_size_z)
         for i, (_, _, (x, y, z)) in enumerate(site_params):
             out.write('    site_positions(%s,:) = (/%s, %s, %s/)\n' % (i + 1,
                                                                        float(x),
@@ -358,7 +358,7 @@ class ProcListWriter():
             % (len(data.species_list)))
         for i, species in enumerate(sorted(data.species_list, key=lambda x: x.name)):
             out.write('integer(kind=iint), parameter, public :: %s = %s\n' % (species.name, i))
-        out.write('integer(kind=iint), parameter, public :: default_species = %s\n' % (data.species_list_iter.default_species))
+        out.write('integer(kind=iint), parameter, public :: default_species = %s\n' % (data.species_list.default_species))
         representation_length = max([len(species.representation) for species in data.species_list])
 
         out.write('integer(kind=iint), parameter, public :: representation_length = %s\n' % representation_length)
@@ -451,7 +451,7 @@ class ProcListWriter():
                     if data.meta.debug > 0:
                         out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","annihilate %s_%s"\n' % (action.coord.layer, action.coord.name))
                     out.write('        call annihilate_%s_%s(%s, %s)\n' % (action.coord.layer, action.coord.name, relative_coord, action.species[1:]))
-                elif action.species == data.species_list_iter.default_species:
+                elif action.species == data.species_list.default_species:
                     try:
                         previous_species = filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list)[0].species
                     except:
@@ -548,7 +548,7 @@ class ProcListWriter():
         # and then use a heuristic algorithm (any theoretical computer scientist
         # knows how to improve on this?) to construct an improved if-tree
         for species in data.species_list:
-            if species.name == data.species_list_iter.default_species:
+            if species.name == data.species_list.default_species:
                 continue  # don't put/take 'empty'
             # iterate over all layers, sites, operations, process, and conditions ...
             for layer in data.layer_list:
@@ -566,15 +566,15 @@ class ProcListWriter():
                         if op == 'put':
                             if data.meta.debug > 0:
                                 out.write('print *,"    LATTICE/REPLACE_SPECIES/SITE",site\n')
-                                out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES","%s"\n' % data.species_list_iter.default_species)
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES","%s"\n' % data.species_list.default_species)
                                 out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES","%s"\n' % species.name)
-                            out.write('    call replace_species(site, %s, %s)\n\n' % (data.species_list_iter.default_species, species.name))
+                            out.write('    call replace_species(site, %s, %s)\n\n' % (data.species_list.default_species, species.name))
                         elif op == 'take':
                             if data.meta.debug > 0:
                                 out.write('print *,"    LATTICE/REPLACE_SPECIES/SITE",site\n')
                                 out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES","%s"\n' % species.name)
-                                out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES","%s"\n' % data.species_list_iter.default_species)
-                            out.write('    call replace_species(site, %s, %s)\n\n' % (species.name, data.species_list_iter.default_species))
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES","%s"\n' % data.species_list.default_species)
+                            out.write('    call replace_species(site, %s, %s)\n\n' % (species.name, data.species_list.default_species))
                         for process in data.process_list:
                             for condition in process.condition_list:
                                 if site.name == condition.coord.name:
@@ -585,7 +585,7 @@ class ProcListWriter():
                                     if op == 'put' \
                                         and  species.name == condition.species \
                                         or op == 'take' \
-                                        and condition.species == data.species_list_iter.default_species:
+                                        and condition.species == data.species_list.default_species:
 
                                         # filter out the current condition, because we know we set it to true
                                         # right now
@@ -602,7 +602,7 @@ class ProcListWriter():
                                     # needs an empty site here or if we take something and the process needs
                                     # something else
                                     elif op == 'put' \
-                                        and condition.species == data.species_list_iter.default_species \
+                                        and condition.species == data.species_list.default_species \
                                         or op == 'take' \
                                         and species.name == condition.species:
                                             coord = process.executing_coord() - condition.coord
@@ -797,7 +797,7 @@ class ProcListWriter():
                 % (species.name,
                 species.representation))
         out.write('    }\n\n')
-        out.write('lattice_representation = "%s"\n\n' % data.lattice.representation)
+        out.write('lattice_representation = "%s"\n\n' % data.layer_list.representation)
         out.write('parameters = {\n')
         for parameter in data.parameter_list:
             out.write(('    "%s":{"value":"%s", "adjustable":%s,'

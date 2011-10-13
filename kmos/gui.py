@@ -24,8 +24,6 @@ import StringIO
 import sys
 import os
 import copy
-# import own modules
-from kmos.config import *
 from kmos.types import ProjectTree
 from kmos.forms import *
 import kmos.export
@@ -35,10 +33,6 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import gtk.glade
-# XML handling
-from lxml import etree as ET
-#Need to pretty print XML
-from xml.dom import minidom
 
 
 #Kiwi imports
@@ -51,11 +45,6 @@ from kiwi.ui.delegates import Delegate, \
                               GladeSlaveDelegate
 from kiwi.ui.objectlist import ObjectList, ObjectTree, Column
 import kiwi.ui.dialogs
-
-
-KMCPROJECT_V0_1_DTD = '/kmc_project_v0.1.dtd'
-KMCPROJECT_V0_2_DTD = '/kmc_project_v0.2.dtd'
-XML_API_VERSION = (0, 2)
 
 
 MENU_LAYOUT = """\
@@ -86,15 +75,6 @@ MENU_LAYOUT = """\
   </menubar>
 </ui>
 """
-
-
-def prettify_xml(elem):
-    """This function takes an XML document, which can have one or many lines
-    and turns it into a well-breaked, nicely-indented string
-    """
-    rough_string = ET.tostring(elem, encoding='utf-8')
-    reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent='    ')
 
 
 def verbose(func):
@@ -133,20 +113,21 @@ class GTKProjectTree(SlaveDelegate):
 
         self.set_parent(parent)
 
-        self.init_data()
+        self.set_treeview_hooks()
 
         self.filename = ''
 
-        self.undo_stack = UndoStack(self._get_xml_string,
-                                    self.import_xml_file,
-                                    self.project_data.select,
-                                    menubar,
-                                    self.meta,
-                                    'Initialization')
+        self.undo_stack = UndoStack(
+            str(self.model_tree),
+            self.import_xml_file,
+            self.project_data.select,
+            menubar,
+            self.meta,
+            'Initialization')
 
         SlaveDelegate.__init__(self, toplevel=self.project_data)
 
-    def init_data(self):
+    def set_treeview_hooks(self):
         self.project_data.clear()
         self.meta = self.project_data.append(None, self.model_tree.meta)
         self.layer_list_iter = self.project_data.append(None,
@@ -215,180 +196,13 @@ class GTKProjectTree(SlaveDelegate):
             print(attr)
             raise UserWarning('%s not found' % attr)
 
+
     def __repr__(self):
-        return self._get_xml_string()
+        return str(self.model_tree)
+
 
     def import_xml_file(self, filename):
-        """Takes a filename, validates the content against kmc_project.dtd
-        and import all fields into the current project tree
-        """
-        # TODO: catch XML version first and convert if necessary
-        self.filename = filename
-        xmlparser = ET.XMLParser(remove_comments=True)
-        try:
-            root = ET.parse(filename, parser=xmlparser).getroot()
-        except:
-            print('\nCould not parse file. Are you sure this')
-            print('a kmos project file?\n')
-            raise
-
-        self.init_data()
-        if 'version' in root.attrib:
-            self.version = eval(root.attrib['version'])
-        else:
-            self.version = (0, 1)
-
-        if self.version == (0, 1):
-            dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_V0_1_DTD)
-            if not dtd.validate(root):
-                print(dtd.error_log.filter_from_errors()[0])
-                return
-            nroot = ET.Element('kmc')
-            nroot.set('version', '0.2')
-            raise Exception('No legacy support!')
-            # catch and warn when factored out
-			# kiwi.ui.dialogs.info()
-        elif self.version == (0, 2):
-            dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_V0_2_DTD)
-            if not dtd.validate(root):
-                print(dtd.error_log.filter_from_errors()[0])
-                return
-            for child in root:
-                if child.tag == 'lattice':
-                    cell_size = [float(x)
-                                 for x in child.attrib['cell_size'].split()]
-                    self.lattice.cell_size_x = cell_size[0]
-                    self.lattice.cell_size_y = cell_size[1]
-                    self.lattice.cell_size_z = cell_size[2]
-                    self.lattice.default_layer = child.attrib['default_layer']
-                    if 'representation' in child.attrib:
-                        self.lattice.representation = child.attrib[
-                                                             'representation']
-                    else:
-                        self.lattice.representation = ''
-                    for elem in child:
-                        if elem.tag == 'layer':
-                            name = elem.attrib['name']
-                            x, y, z = [int(i)
-                                       for i in elem.attrib['grid'].split()]
-                            ox, oy, oz = [float(i)
-                                          for i in elem.attrib[
-                                                     'grid_offset'].split()]
-                            grid = Grid(x=x, y=y, z=z,
-                                offset_x=ox, offset_y=oy, offset_z=oz)
-                            if 'color' in elem.attrib:
-                                color = elem.attrib['color']
-                            else:
-                                color = '#ffffff'
-                            layer = Layer(name=name, grid=grid, color=color)
-                            self.add_layer(layer)
-
-                            for site in elem:
-                                name = site.attrib['type']
-                                x, y, z = [float(x)
-                                    for x in site.attrib['vector'].split()]
-                                site_class = site.attrib['class']
-                                if 'default_species' in site.attrib:
-                                    default_species = site.attrib[
-                                                         'default_species']
-                                else:
-                                    default_species = 'default_species'
-                                site_elem = Site(name=name,
-                                    x=x, y=y, z=z,
-                                    site_class=site_class,
-                                    default_species=default_species)
-                                layer.sites.append(site_elem)
-                        elif elem.tag == 'site_class':
-                            # ignored for now
-                            pass
-                elif child.tag == 'meta':
-                    for attrib in ['author',
-                                    'debug',
-                                    'email',
-                                    'model_dimension',
-                                    'model_name']:
-                        if attrib in child.attrib:
-                            self.meta.add({attrib: child.attrib[attrib]})
-                elif child.tag == 'parameter_list':
-                    for parameter in child:
-                        name = parameter.attrib['name']
-                        value = parameter.attrib['value']
-                        if 'adjustable' in parameter.attrib:
-                            adjustable = bool(eval(
-                                            parameter.attrib['adjustable']))
-                        else:
-                            adjustable = False
-
-                        min = parameter.attrib['min'] \
-                            if 'min' in parameter.attrib else 0.0
-                        max = parameter.attrib['max'] \
-                            if 'max' in parameter.attrib else 0.0
-                        scale = parameter.attrib['scale'] \
-                            if 'scale' in parameter.attrib else 'linear'
-
-                        parameter_elem = Parameter(name=name,
-                                                   value=value,
-                                                   adjustable=adjustable,
-                                                   min=min,
-                                                   max=max,
-                                                   scale=scale)
-                        self.add_parameter(parameter_elem)
-                elif child.tag == 'process_list':
-                    for process in child:
-                        name = process.attrib['name']
-                        rate_constant = process.attrib['rate_constant']
-                        if 'tof_count' in process.attrib:
-                            tof_count = process.attrib['tof_count']
-                        else:
-                            tof_count = None
-                        if 'enabled' in process.attrib:
-                            try:
-                                proc_enabled = bool(
-                                    eval(process.attrib['enabled']))
-                            except:
-                                proc_enabled = True
-                        else:
-                            proc_enabled = True
-                        process_elem = Process(name=name,
-                            rate_constant=rate_constant,
-                            enabled=proc_enabled,
-                            tof_count=tof_count)
-                        for sub in process:
-                            if sub.tag == 'action' or sub.tag == 'condition':
-                                species = sub.attrib['species']
-                                coord_layer = sub.attrib['coord_layer']
-                                coord_name = sub.attrib['coord_name']
-                                coord_offset = tuple(
-                                    [int(i) for i in
-                                    sub.attrib['coord_offset'].split()])
-                                coord = Coord(layer=coord_layer,
-                                              name=coord_name,
-                                              offset=coord_offset)
-                                condition_action = ConditionAction(
-                                    species=species, coord=coord)
-                                if sub.tag == 'action':
-                                    process_elem.add_action(condition_action)
-                                elif sub.tag == 'condition':
-                                    process_elem.add_condition(
-                                                            condition_action)
-                        self.add_process(process_elem)
-                elif child.tag == 'species_list':
-                    self.set_default_species(child.attrib['default_species'])
-                    for species in child:
-                        name = species.attrib['name']
-                        color = species.attrib['color']
-                        representation = species.attrib['representation'] \
-                            if 'representation' in species.attrib else ''
-                        species_elem = Species(name=name,
-                                               color=color,
-                                               representation=representation)
-                        self.add_species(species_elem)
-                if child.tag == 'output_list':
-                    for item in child:
-                        output_elem = OutputItem(name=item.attrib['item'],
-                                                 output=True)
-                        self.output_list.append(output_elem)
-
+        self.model_tree.import_xml_file(filename)
         self.expand_all()
 
     def set_default_species(self, species):
@@ -414,115 +228,6 @@ class GTKProjectTree(SlaveDelegate):
         self.project_data.expand(self.parameter_list_iter)
         self.project_data.expand(self.process_list_iter)
 
-    def _get_xml_string(self):
-        """Produces an XML representation of the project data
-        """
-        # build XML Tree
-        root = ET.Element('kmc')
-        root.set('version', str(XML_API_VERSION))
-        meta = ET.SubElement(root, 'meta')
-        if hasattr(self.meta, 'author'):
-            meta.set('author', self.meta.author)
-        if hasattr(self.meta, 'email'):
-            meta.set('email', self.meta.email)
-        if hasattr(self.meta, 'model_name'):
-            meta.set('model_name', self.meta.model_name)
-        if hasattr(self.meta, 'model_dimension'):
-            meta.set('model_dimension', str(self.meta.model_dimension))
-        if hasattr(self.meta, 'debug'):
-            meta.set('debug', str(self.meta.debug))
-        species_list = ET.SubElement(root, 'species_list')
-        if hasattr(self.species_list_iter, 'default_species'):
-            species_list.set('default_species',
-                             self.species_list_iter.default_species)
-        else:
-            species_list.set('default_species', '')
-
-        for species in self.species_list:
-            species_elem = ET.SubElement(species_list, 'species')
-            species_elem.set('name', species.name)
-            species_elem.set('color', species.color)
-            species_elem.set('representation', species.representation)
-        parameter_list = ET.SubElement(root, 'parameter_list')
-        for parameter in self.parameter_list:
-            parameter_elem = ET.SubElement(parameter_list, 'parameter')
-            parameter_elem.set('name', parameter.name)
-            parameter_elem.set('value', str(parameter.value))
-            parameter_elem.set('adjustable', str(parameter.adjustable))
-            parameter_elem.set('min', str(parameter.min))
-            parameter_elem.set('max', str(parameter.max))
-            if hasattr(parameter, 'scale'):
-                parameter_elem.set('scale', str(parameter.scale))
-            else:
-                parameter_elem.set('scale', 'linear')
-
-        lattice_elem = ET.SubElement(root, 'lattice')
-        if (hasattr(self.layer_list_iter, 'cell_size_x') and \
-            hasattr(self.layer_list_iter, 'cell_size_y') and
-            hasattr(self.layer_list_iter, 'cell_size_z')):
-            lattice_elem.set('cell_size', '%s %s %s' %
-            (self.layer_list_iter.cell_size_x,
-            self.layer_list_iter.cell_size_y,
-            self.layer_list_iter.cell_size_z))
-            lattice_elem.set('default_layer',
-                             self.layer_list_iter.default_layer)
-        if hasattr(self.lattice, 'representation'):
-            lattice_elem.set('representation', self.lattice.representation)
-        for layer in self.layer_list:
-            layer_elem = ET.SubElement(lattice_elem, 'layer')
-            layer_elem.set('name', layer.name)
-            if (hasattr(layer.grid, 'x') and\
-            hasattr(layer.grid, 'y') and
-            hasattr(layer.grid, 'z')):
-                layer_elem.set('grid',
-                    '%s %s %s' % (layer.grid.x,
-                                  layer.grid.y,
-                                  layer.grid.z))
-            if (hasattr(layer.grid, 'offset_x') and\
-            hasattr(layer.grid, 'offset_y') and
-            hasattr(layer.grid, 'offset_z')):
-                layer_elem.set('grid_offset',
-                    '%s %s %s' % (layer.grid.offset_x,
-                                  layer.grid.offset_y,
-                                  layer.grid.offset_z))
-
-            layer_elem.set('color', layer.color)
-
-            for site in layer.sites:
-                site_elem = ET.SubElement(layer_elem, 'site')
-                site_elem.set('vector', '%s %s %s' % (site.x, site.y, site.z))
-                site_elem.set('type', site.name)
-                site_elem.set('class', site.site_class)
-                site_elem.set('default_species', site.default_species)
-
-        process_list = ET.SubElement(root, 'process_list')
-        for process in self.process_list:
-            process_elem = ET.SubElement(process_list, 'process')
-            process_elem.set('rate_constant', process.rate_constant)
-            process_elem.set('name', process.name)
-            process_elem.set('enabled', str(process.enabled))
-            if process.tof_count:
-                process_elem.set('tof_count', str(process.tof_count))
-            for condition in process.condition_list:
-                condition_elem = ET.SubElement(process_elem, 'condition')
-                condition_elem.set('species', condition.species)
-                condition_elem.set('coord_layer', condition.coord.layer)
-                condition_elem.set('coord_name', condition.coord.name)
-                condition_elem.set('coord_offset',
-                    ' '.join([str(i) for i in condition.coord.offset]))
-            for action in process.action_list:
-                action_elem = ET.SubElement(process_elem, 'action')
-                action_elem.set('species', action.species)
-                action_elem.set('coord_layer', action.coord.layer)
-                action_elem.set('coord_name', action.coord.name)
-                action_elem.set('coord_offset',
-                    ' '.join([str(i) for i in action.coord.offset]))
-        output_list = ET.SubElement(root, 'output_list')
-        for output in self.output_list:
-            if output.output:
-                output_elem = ET.SubElement(output_list, 'output')
-                output_elem.set('item', output.name)
-        return prettify_xml(root)
 
     def on_key_press(self, _, event):
         """When the user hits the keyboard focusing the treeview
@@ -978,6 +683,7 @@ class KMC_Editor(GladeDelegate):
             self.import_file(filename)
 
     def import_file(self, filename):
+        self.set_treeview_hooks()
         # Import
         self.project_tree.import_xml_file(filename)
         self.set_title('%s - kmos' % self.project_tree.get_name())
