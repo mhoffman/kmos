@@ -38,10 +38,14 @@ and install it using *setuptools* ::
     ./setup.py install [--user]
 
 
-TODO: add description of dependencies
+.. todo ::
 
-TODO: add pip way or something alike to automatically
-      install dependencies.
+    add description of dependencies
+
+.. todo ::
+
+    add pip way or something alike to automatically
+    install dependencies.
 
 kMC Modelling
 =============
