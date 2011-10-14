@@ -108,12 +108,12 @@ class GTKProjectTree(SlaveDelegate):
 
         self.project_data.connect('row-activated', self.on_row_activated)
         self.model_tree = ProjectTree()
+        self._set_treeview_hooks()
 
         self.menubar = menubar
 
         self.set_parent(parent)
 
-        self._set_treeview_hooks()
 
         self.filename = ''
 
@@ -137,23 +137,23 @@ class GTKProjectTree(SlaveDelegate):
         self.model_tree.meta = self.meta
 
         # Lattice
-        self.layer_list_iter = self.project_data.append(None,
+        self.layer_list = self.project_data.append(None,
                                    self.model_tree.layer_list)
         self.model_tree.add_layer = self.add_layer
-        self.lattice = self.layer_list_iter
+        self.lattice = self.layer_list
 
         # Parameter List
-        self.parameter_list_iter = self.project_data.append(None,
+        self.parameter_iter = self.project_data.append(None,
                                        self.model_tree.parameter_list)
         self.model_tree.add_parameter = self.add_parameter
 
         # Species List
-        self.species_list_iter = self.project_data.append(None,
+        self.species_list = self.project_data.append(None,
                                    self.model_tree.species_list)
         self.model_tree.add_species = self.add_species
 
         # Process List
-        self.process_list_iter = self.project_data.append(None,
+        self.process_list = self.project_data.append(None,
                                      self.model_tree.process_list)
 
         self.model_tree.add_process = self.add_process
@@ -162,7 +162,6 @@ class GTKProjectTree(SlaveDelegate):
         self.output_list = self.project_data.append(None,
                                 self.model_tree.output_list)
         self.model_tree.add_output = self.add_output
-        self.output_list = []
 
     def update(self, model):
         self.project_data.update(model)
@@ -176,46 +175,6 @@ class GTKProjectTree(SlaveDelegate):
             return os.path.basename(self.filename)
         else:
             return 'Untitled'
-
-    def __getattr__(self, attr):
-        if attr == 'species_list':
-            return sorted(
-                self.project_data.get_descendants(
-                    self.species_list_iter),
-                    key=lambda species: species.name)
-        elif attr == 'layer_list':
-            return sorted(
-                self.project_data.get_descendants(
-                    self.layer_list_iter),
-                    key=lambda layer: layer.name)
-        elif attr == 'process_list':
-            return sorted(
-                self.project_data.get_descendants(
-                    self.process_list_iter),
-                    key=lambda process: process.name)
-        elif attr == 'parameter_list':
-            return sorted(
-                self.project_data.get_descendants(
-                    self.parameter_list_iter),
-                    key=lambda parameter: parameter.name)
-        elif attr == 'output_list':
-            return sorted(
-                self.project_data.get_descendants(
-                    self.output_list_iter),
-                    key=lambda output: output.name)
-        elif attr == 'meta':
-            return self.meta
-        elif attr == 'append':
-            return self.project_data.append
-        elif attr == 'expand':
-            return self.project_data.expand
-        elif attr == 'update':
-            return self.project_data.update
-        elif attr == 'select':
-            return self.project_data.select
-        else:
-            print(attr)
-            raise UserWarning('%s not found' % attr)
 
     def __repr__(self):
         return str(self.model_tree)
@@ -231,28 +190,28 @@ class GTKProjectTree(SlaveDelegate):
         self.model_tree.layer_list.default_layer = layer
 
     def add_layer(self, layer):
-        self.project_data.append(self.layer_list_iter, layer)
+        self.project_data.append(self.layer_list, layer)
 
     def add_parameter(self, parameter):
-        self.project_data.append(self.parameter_list_iter, parameter)
+        self.project_data.append(self.parameter_list, parameter)
 
     def add_process(self, process):
-        self.project_data.append(self.process_list_iter, process)
+        self.project_data.append(self.process_list, process)
 
     def add_species(self, species):
-        self.project_data.append(self.species_list_iter, species)
+        self.project_data.append(self.species_list, species)
 
     def add_output(self, output):
-        self.project_data.append(self.output_list_iter, output)
+        self.project_data.append(self.output_list, output)
 
     def expand_all(self):
         """Expand all list of the project tree
         """
-        self.project_data.expand(self.species_list_iter)
-        self.project_data.expand(self.layer_list_iter)
-        self.project_data.expand(self.parameter_list_iter)
-        self.project_data.expand(self.process_list_iter)
-
+        self.project_data.expand(self.species_list)
+        self.project_data.expand(self.layer_list)
+        self.project_data.expand(self.parameter_list)
+        self.project_data.expand(self.process_list)
+        self.project_data.expand(self.output_list)
 
     def on_key_press(self, _, event):
         """When the user hits the keyboard focusing the treeview
@@ -810,5 +769,5 @@ class Editor(GladeDelegate):
             self.hide_and_quit()
             gtk.main_quit()
         # Need to return true, or otherwise the window manager destroys
-        # the windows anywas
+        # the windows anyways
         return True

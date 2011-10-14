@@ -1183,11 +1183,6 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
 
         self.layer_nr = self.project_tree.layer_list.index(model)
 
-        #self.grid_layer = CanvasLayer()
-        #self.site_layer = CanvasLayer()
-        #self.canvas.append(self.grid_layer)
-        #self.canvas.append(self.site_layer)
-
         self.radius_scale = 22
         self.scale = 20
         self.offset_x, self.offset_y = (200, 200)

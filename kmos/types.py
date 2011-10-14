@@ -717,7 +717,7 @@ class ProjectTree(object):
                     for item in child:
                         output_elem = OutputItem(name=item.attrib['item'],
                                                  output=True)
-                        self.output_list.append(output_elem)
+                        self.add_output(output_elem)
 
     def add_parameter(self, parameter):
         self.parameter_list.append(parameter)
@@ -730,6 +730,9 @@ class ProjectTree(object):
 
     def add_species(self, species):
         self.species_list.append(species)
+
+    def add_output(self, output):
+        self.output_list.append(output)
 
 def prettify_xml(elem):
     """This function takes an XML document, which can have one or many lines
