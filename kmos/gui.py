@@ -150,7 +150,7 @@ class GTKProjectTree(SlaveDelegate):
         # Parameter List
         self.parameter_list = self.project_data.append(None,
                                        self.model_tree.parameter_list)
-        self.add_parameter = lambda :\
+        self.add_parameter = lambda parameter :\
             self.project_data.append(self.parameter_list, parameter)
         self.model_tree.add_parameter = self.add_parameter
         self.get_layers = lambda :\
@@ -163,7 +163,7 @@ class GTKProjectTree(SlaveDelegate):
         self.add_species = lambda species :\
             self.project_data.append(self.species_list, species)
         self.model_tree.add_species = self.add_species
-        self.get_species = lambda :\
+        self.get_speciess = lambda :\
             self.project_data.get_descendants(self.species_list)
         self.model_tree.get_speciess = self.get_speciess
 
@@ -171,7 +171,7 @@ class GTKProjectTree(SlaveDelegate):
         # Process List
         self.process_list = self.project_data.append(None,
                                      self.model_tree.process_list)
-        self.add_process = lambda :\
+        self.add_process = lambda process:\
             self.project_data.append(self.process_list, process)
         self.model_tree.add_process = self.add_process
         self.get_processes = lambda :\
