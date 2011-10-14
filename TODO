@@ -1,4 +1,5 @@
 Functionality
+  * make sure test_import_variants are consistent
   * reimplement 'print output' function using old_src
   * add various tooltips and examples using Claudias suggestions
    write autocompletion for output fields
