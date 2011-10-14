@@ -1108,7 +1108,7 @@ class LatticeForm(ProxySlaveDelegate):
         default_layer = model.default_layer
         model.default_layer = None
         ProxySlaveDelegate.__init__(self, model)
-        self.default_layer.prefill([x.name for x in project_tree.layer_list],
+        self.default_layer.prefill([x.name for x in project_tree.get_layers()],
                                    sort=True)
         self.default_layer.select(default_layer)
         self.default_layer.set_tooltip_text(
@@ -1181,7 +1181,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
         self.canvas.connect('button-press-event', self.on_button_press)
 
-        self.layer_nr = self.project_tree.layer_list.index(model)
+        self.layer_nr = self.project_tree.get_layers().index(model)
 
         self.radius_scale = 22
         self.scale = 20

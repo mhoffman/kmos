@@ -436,6 +436,24 @@ class ProjectTree(object):
         self.process_list = ProcessList()
         self.output_list = OutputList()
 
+        # Quick'n'dirty define access functions
+        # needed in context with GTKProjectTree
+        self.add_parameter = lambda parameter: \
+            self.parameter_list.append(parameter)
+        self.get_parameters = lambda : self.parameter_list
+        
+        self.add_layer = lambda layer: self.layer_list.append(layer)
+        self.get_layers = lambda : self.layer_list
+
+        self.add_process = lambda process: self.process_list.append(process)
+        self.get_processes = lambda : self.process_list
+
+        self.add_species = lambda species: self.species_list.append(species)
+        self.get_speciess = lambda : self.species_list
+
+        self.add_output = lambda output: self.output_list.append(output)
+        self.get_outputs = lambda : self.output_list
+
     def __repr__(self):
         return self._get_xml_string()
 
@@ -463,13 +481,13 @@ class ProjectTree(object):
         else:
             species_list.set('default_species', '')
 
-        for species in self.species_list:
+        for species in self.get_speciess():
             species_elem = ET.SubElement(species_list, 'species')
             species_elem.set('name', species.name)
             species_elem.set('color', species.color)
             species_elem.set('representation', species.representation)
         parameter_list = ET.SubElement(root, 'parameter_list')
-        for parameter in self.parameter_list:
+        for parameter in self.get_parameters():
             parameter_elem = ET.SubElement(parameter_list, 'parameter')
             parameter_elem.set('name', parameter.name)
             parameter_elem.set('value', str(parameter.value))
@@ -493,7 +511,7 @@ class ProjectTree(object):
                              self.layer_list.default_layer)
         if hasattr(self.layer_list, 'representation'):
             lattice_elem.set('representation', self.layer_list.representation)
-        for layer in self.layer_list:
+        for layer in self.get_layers():
             layer_elem = ET.SubElement(lattice_elem, 'layer')
             layer_elem.set('name', layer.name)
             if (hasattr(layer.grid, 'x') and\
@@ -521,7 +539,7 @@ class ProjectTree(object):
                 site_elem.set('default_species', site.default_species)
 
         process_list = ET.SubElement(root, 'process_list')
-        for process in self.process_list:
+        for process in self.get_processes():
             process_elem = ET.SubElement(process_list, 'process')
             process_elem.set('rate_constant', process.rate_constant)
             process_elem.set('name', process.name)
@@ -543,7 +561,7 @@ class ProjectTree(object):
                 action_elem.set('coord_offset',
                     ' '.join([str(i) for i in action.coord.offset]))
         output_list = ET.SubElement(root, 'output_list')
-        for output in self.output_list:
+        for output in self.get_outputs():
             if output.output:
                 output_elem = ET.SubElement(output_list, 'output')
                 output_elem.set('item', output.name)
@@ -576,7 +594,7 @@ class ProjectTree(object):
             nroot = ET.Element('kmc')
             nroot.set('version', '0.2')
             raise Exception('No legacy support!')
-            # catch and warn when factored out
+            # TODO: catch and warn when factored out
 			# kiwi.ui.dialogs.info()
         elif self.version == (0, 2):
             dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_V0_2_DTD)
@@ -719,20 +737,7 @@ class ProjectTree(object):
                                                  output=True)
                         self.add_output(output_elem)
 
-    def add_parameter(self, parameter):
-        self.parameter_list.append(parameter)
-    
-    def add_layer(self, layer):
-        self.layer_list.append(layer)
 
-    def add_process(self, process):
-        self.process_list.append(process)
-
-    def add_species(self, species):
-        self.species_list.append(species)
-
-    def add_output(self, output):
-        self.output_list.append(output)
 
 def prettify_xml(elem):
     """This function takes an XML document, which can have one or many lines

@@ -136,32 +136,63 @@ class GTKProjectTree(SlaveDelegate):
         self.meta = self.project_data.append(None, self.model_tree.meta)
         self.model_tree.meta = self.meta
 
-        # Lattice
+        # Layer List
         self.layer_list = self.project_data.append(None,
                                    self.model_tree.layer_list)
+        self.add_layer = lambda layer :\
+            self.project_data.append(self.layer_list, layer)
         self.model_tree.add_layer = self.add_layer
+        self.get_layers = lambda :\
+            self.project_data.get_descendants(self.layer_list)
+        self.model_tree.get_layers = self.get_layers
         self.lattice = self.layer_list
 
         # Parameter List
-        self.parameter_iter = self.project_data.append(None,
+        self.parameter_list = self.project_data.append(None,
                                        self.model_tree.parameter_list)
+        self.add_parameter = lambda :\
+            self.project_data.append(self.parameter_list, parameter)
         self.model_tree.add_parameter = self.add_parameter
+        self.get_layers = lambda :\
+            self.project_data.get_descendants(self.parameter_list)
+        self.model_tree.get_layers = self.get_layers
 
         # Species List
         self.species_list = self.project_data.append(None,
                                    self.model_tree.species_list)
+        self.add_species = lambda species :\
+            self.project_data.append(self.species_list, species)
         self.model_tree.add_species = self.add_species
+        self.get_species = lambda :\
+            self.project_data.get_descendants(self.species_list)
+        self.model_tree.get_speciess = self.get_speciess
+
 
         # Process List
         self.process_list = self.project_data.append(None,
                                      self.model_tree.process_list)
-
+        self.add_process = lambda :\
+            self.project_data.append(self.process_list, process)
         self.model_tree.add_process = self.add_process
+        self.get_processes = lambda :\
+            self.project_data.get_descendants(self.process_list)
+        self.model_tree.get_processes = self.get_processes
 
         # Output List
         self.output_list = self.project_data.append(None,
                                 self.model_tree.output_list)
+        self.add_output = lambda output:\
+            self.project_data.append(self.output_list, output)
         self.model_tree.add_output = self.add_output
+        self.get_outputs = lambda : \
+            self.project_data.get_descendants(self.output_list)
+        self.model_tree.get_outputs = self.get_outputs
+
+    def set_default_species(self, species):
+        self.model_tree.species_list.default_species = species
+
+    def set_default_layer(self, layer):
+        self.model_tree.layer_list.default_layer = layer
 
     def update(self, model):
         self.project_data.update(model)
@@ -182,27 +213,6 @@ class GTKProjectTree(SlaveDelegate):
     def import_xml_file(self, filename):
         self.model_tree.import_xml_file(filename)
         self.expand_all()
-
-    def set_default_species(self, species):
-        self.model_tree.species_list.default_species = species
-
-    def set_default_layer(self, layer):
-        self.model_tree.layer_list.default_layer = layer
-
-    def add_layer(self, layer):
-        self.project_data.append(self.layer_list, layer)
-
-    def add_parameter(self, parameter):
-        self.project_data.append(self.parameter_list, parameter)
-
-    def add_process(self, process):
-        self.project_data.append(self.process_list, process)
-
-    def add_species(self, species):
-        self.project_data.append(self.species_list, species)
-
-    def add_output(self, output):
-        self.project_data.append(self.output_list, output)
 
     def expand_all(self):
         """Expand all list of the project tree
@@ -478,30 +488,29 @@ class Editor(GladeDelegate):
         # add layer
         default_layer_name = 'default'
         default_layer = Layer(name=default_layer_name,)
-        self.project_tree.append(self.project_tree.layer_list_iter,
-            default_layer)
+        self.project_tree.add_layer(default_layer)
         self.project_tree.lattice.default_layer = default_layer_name
 
         # add an empty species
         empty_species = 'empty'
         empty = Species(name=empty_species, color='#fff')
         # set empty as default species
-        self.project_tree.species_list_iter.default_species = empty_species
-        self.project_tree.append(self.project_tree.species_list_iter, empty)
+        self.project_tree.species_list.default_species = empty_species
+        self.project_tree.add_species(empty)
         # add standard parameter
         param = Parameter(name='lattice_size', value='40 40 1')
-        self.project_tree.append(self.project_tree.parameter_list_iter, param)
+        self.project_tree.add_parameter(param)
 
         param = Parameter(name='print_every', value='1.e5')
-        self.project_tree.append(self.project_tree.parameter_list_iter, param)
+        self.project_tree.add_parameter(param)
 
         param = Parameter(name='total_steps', value='1.e7')
-        self.project_tree.append(self.project_tree.parameter_list_iter, param)
+        self.project_tree.add_parameter(param)
 
         # add output entries
-        self.output_list.append(OutputItem(name='kmc_time', output=True))
-        self.output_list.append(OutputItem(name='walltime', output=False))
-        self.output_list.append(OutputItem(name='kmc_step', output=False))
+        self.project_tree.add_output(OutputItem(name='kmc_time', output=True))
+        self.project_tree.add_output(OutputItem(name='walltime', output=False))
+        self.project_tree.add_output(OutputItem(name='kmc_step', output=False))
 
         self.project_tree.expand_all()
 
