@@ -25,5 +25,16 @@ def test_import_export():
 
     os.chdir(cwd)
 
+def test_compare_import_variants():
+    import kmos.gui
+    import kmos.types
+    pt = kmos.types.ProjectTree()
+    editor = kmos.gui.Editor()
+    editor.import_file('default.xml')
+    pt.import_xml_file('default.xml')
+
+    assert str(pt) = str(model.project_tree)
+
 if __name__ == '__main__':
      test_import_export()
+     test_compare_import_variants()
