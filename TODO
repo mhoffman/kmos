@@ -11,6 +11,8 @@ Functionality
 
 
 Project related
+  * configure pip mechanism
+  * build virtualenv test environment(s): 2.4-3.0
   * build deb package
 
 
