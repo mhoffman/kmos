@@ -1,0 +1,5 @@
+#ifdef DEBUG
+#define ASSERT(a, r) if(.not.(a))call assertion_fail(#a ,r)
+#else
+#define ASSERT(a, r)
+#endif
