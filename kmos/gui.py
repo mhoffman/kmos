@@ -113,7 +113,7 @@ class GTKProjectTree(SlaveDelegate):
 
         self.set_parent(parent)
 
-        self.set_treeview_hooks()
+        self._set_treeview_hooks()
 
         self.filename = ''
 
@@ -127,20 +127,41 @@ class GTKProjectTree(SlaveDelegate):
 
         SlaveDelegate.__init__(self, toplevel=self.project_data)
 
-    def set_treeview_hooks(self):
+    def _set_treeview_hooks(self):
+        """Fudge function to import to access function to kmos.types.ProjectTree
+        to kmos.gui.GTKProjectTree
+        """
         self.project_data.clear()
+        # Meta
         self.meta = self.project_data.append(None, self.model_tree.meta)
+        self.model_tree.meta = self.meta
+
+        # Lattice
         self.layer_list_iter = self.project_data.append(None,
                                    self.model_tree.layer_list)
+        self.model_tree.add_layer = self.add_layer
         self.lattice = self.layer_list_iter
+
+        # Parameter List
         self.parameter_list_iter = self.project_data.append(None,
                                        self.model_tree.parameter_list)
+        self.model_tree.add_parameter = self.add_parameter
+
+        # Species List
         self.species_list_iter = self.project_data.append(None,
-                                     self.model_tree.species_list)
+                                   self.model_tree.species_list)
+        self.model_tree.add_species = self.add_species
+
+        # Process List
         self.process_list_iter = self.project_data.append(None,
                                      self.model_tree.process_list)
+
+        self.model_tree.add_process = self.add_process
+
+        # Output List
         self.output_list = self.project_data.append(None,
                                 self.model_tree.output_list)
+        self.model_tree.add_output = self.add_output
         self.output_list = []
 
     def update(self, model):
@@ -206,11 +227,11 @@ class GTKProjectTree(SlaveDelegate):
     def set_default_species(self, species):
         self.model_tree.species_list.default_species = species
 
-    def add_layer(self, layer):
-        self.project_data.append(self.layer_list_iter, layer)
-
     def set_default_layer(self, layer):
         self.model_tree.layer_list.default_layer = layer
+
+    def add_layer(self, layer):
+        self.project_data.append(self.layer_list_iter, layer)
 
     def add_parameter(self, parameter):
         self.project_data.append(self.parameter_list_iter, parameter)
@@ -220,6 +241,9 @@ class GTKProjectTree(SlaveDelegate):
 
     def add_species(self, species):
         self.project_data.append(self.species_list_iter, species)
+
+    def add_output(self, output):
+        self.project_data.append(self.output_list_iter, output)
 
     def expand_all(self):
         """Expand all list of the project tree
@@ -684,7 +708,7 @@ class KMC_Editor(GladeDelegate):
             self.import_file(filename)
 
     def import_file(self, filename):
-        self.project_tree.set_treeview_hooks()
+        self.project_tree._set_treeview_hooks()
         # Import
         self.project_tree.import_xml_file(filename)
         self.set_title('%s - kmos' % self.project_tree.get_name())
