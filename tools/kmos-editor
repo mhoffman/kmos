@@ -18,7 +18,7 @@
 def main():
     import optparse
 
-    from kmos.gui import KMC_Editor
+    import kmos.gui
 
     parser = optparse.OptionParser()
     parser.add_option('-o', '--open',
@@ -28,7 +28,7 @@ def main():
                       dest='export_dir',
                       type=str)
     (options, args) = parser.parse_args()
-    editor = KMC_Editor()
+    editor = kmos.gui.Editor()
     if len(args) >= 1:
         options.import_file = args[0]
 

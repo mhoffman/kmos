@@ -443,7 +443,7 @@ class UndoStack():
             '/MainMenuBar/MenuEdit/EditRedo').set_sensitive(False)
 
 
-class KMC_Editor(GladeDelegate):
+class Editor(GladeDelegate):
     widgets = ['workarea', 'statbar', 'vbox1']
     gladefile = GLADEFILE
     toplevel_name = 'main_window'
