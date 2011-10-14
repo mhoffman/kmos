@@ -153,7 +153,7 @@ class GTKProjectTree(SlaveDelegate):
         self.add_parameter = lambda parameter :\
             self.project_data.append(self.parameter_list, parameter)
         self.model_tree.add_parameter = self.add_parameter
-        self.get_layers = lambda :\
+        self.get_parameters = lambda :\
             self.project_data.get_descendants(self.parameter_list)
         self.model_tree.get_layers = self.get_layers
 

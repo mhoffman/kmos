@@ -1,4 +1,3 @@
-import pdb
 #!/usr/bin/env python
 """A module holding all the data models used in kmos.
 """
@@ -513,7 +512,6 @@ class ProjectTree(object):
         if hasattr(self.layer_list, 'representation'):
             lattice_elem.set('representation', self.layer_list.representation)
         for layer in self.get_layers():
-            pdb.set_trace() ############################## Breakpoint ##############################
             layer_elem = ET.SubElement(lattice_elem, 'layer')
             layer_elem.set('name', layer.name)
             if (hasattr(layer.grid, 'x') and\
@@ -624,7 +622,6 @@ class ProjectTree(object):
                             ox, oy, oz = [float(i)
                                           for i in elem.attrib[
                                                      'grid_offset'].split()]
-                            pdb.set_trace() ############################## Breakpoint ##############################
                             grid = Grid(x=x, y=y, z=z,
                                 offset_x=ox, offset_y=oy, offset_z=oz)
                             if 'color' in elem.attrib:
