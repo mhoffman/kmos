@@ -118,7 +118,7 @@ class GTKProjectTree(SlaveDelegate):
         self.filename = ''
 
         self.undo_stack = UndoStack(
-            str(self.model_tree),
+            self.model_tree.__repr__,
             self.import_xml_file,
             self.project_data.select,
             menubar,
@@ -196,20 +196,21 @@ class GTKProjectTree(SlaveDelegate):
             print(attr)
             raise UserWarning('%s not found' % attr)
 
-
     def __repr__(self):
         return str(self.model_tree)
-
 
     def import_xml_file(self, filename):
         self.model_tree.import_xml_file(filename)
         self.expand_all()
 
     def set_default_species(self, species):
-        self.species_list_iter.default_species = species
+        self.model_tree.species_list.default_species = species
 
     def add_layer(self, layer):
         self.project_data.append(self.layer_list_iter, layer)
+
+    def set_default_layer(self, layer):
+        self.model_tree.layer_list.default_layer = layer
 
     def add_parameter(self, parameter):
         self.project_data.append(self.parameter_list_iter, parameter)
@@ -683,7 +684,7 @@ class KMC_Editor(GladeDelegate):
             self.import_file(filename)
 
     def import_file(self, filename):
-        self.set_treeview_hooks()
+        self.project_tree.set_treeview_hooks()
         # Import
         self.project_tree.import_xml_file(filename)
         self.set_title('%s - kmos' % self.project_tree.get_name())

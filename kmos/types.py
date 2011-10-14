@@ -712,7 +712,7 @@ class ProjectTree(object):
                         species_elem = Species(name=name,
                                                color=color,
                                                representation=representation)
-                        self.species_list.append(species_elem)
+                        self.add_species(species_elem)
                 if child.tag == 'output_list':
                     for item in child:
                         output_elem = OutputItem(name=item.attrib['item'],
@@ -727,6 +727,9 @@ class ProjectTree(object):
 
     def add_process(self, process):
         self.process_list.append(process)
+
+    def add_species(self, species):
+        self.species_list.append(species)
 
 def prettify_xml(elem):
     """This function takes an XML document, which can have one or many lines

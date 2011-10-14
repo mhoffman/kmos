@@ -5,11 +5,18 @@ import os
 
 def generate_model():
     import kmos
-    from kmos.gui import KMC_Editor
-    from kmos.types import *
+    from kmos.types import \
+        ConditionAction, \
+        Coord, \
+        Layer, \
+        Parameter, \
+        Process,\
+        ProjectTree,\
+        Site, \
+        Species
 
-    editor = KMC_Editor()
-    project = editor.project_tree
+    project = ProjectTree()
+
     # set meta information
     model_name = 'test_cli_generated_model'
     project.meta.author = 'Max J. Hoffmann'
@@ -22,11 +29,13 @@ def generate_model():
     project.add_layer(Layer(name='default', sites=[
         Site(name='cus', x=0, y=0.5, z=0.5)]))
 
+    project.layer_list.default_layer = 'default'
+
     # add species
     project.add_species(Species(name='oxygen', color='#ff0000'))
     project.add_species(Species(name='CO', color='#000000'))
     project.add_species(Species(name='empty', color='#ffffff'))
-    project.species_list_iter.default_species = 'empty'
+    project.species_list.default_species = 'empty'
 
     # add parameters
     project.add_parameter(Parameter(name='p_CO', value=0.2, scale='log'))
