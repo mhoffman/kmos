@@ -96,8 +96,8 @@ def verbose(func):
 
 
 class GTKProjectTree(SlaveDelegate):
-    """This class is a facade of a ProjectTree so that pygtk can display
-    in a TreeView
+    """A facade of kmos.types.ProjectTree so that
+    pygtk can display in a TreeView.
     """
     def __init__(self, parent, menubar):
         self.project_data = ObjectTree([Column('name',
