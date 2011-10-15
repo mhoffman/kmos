@@ -1,13 +1,16 @@
 Functionality
-  * reimplement 'print output' function using old_src
-  * add various tooltips and examples using Claudias suggestions
-   write autocompletion for output fields
+  * strip 'grid variables' from types and GUI
+  * change book-keeping/memory management from
+    process based to site based 
+    (better storage for amorphous geometries)
+  * write autocompletion for output fields
   * write consistency check function that runs before
     exporting f90 source could and give the user hints
     about inconsistencies in the project
-  * add undo function to process editor
+  * add/fix undo function to process editor
   * improve layer editor: make handling better (removing/cancelling sites)
     and make better guess for z-position of site
+  * reimplement 'print output' function using old_src
 
 
 Project related
@@ -22,7 +25,7 @@ Future/optional projects:
     facilities first: basically rid gtkcanvas 
     in favor or pygoocanvas and include atoms
     in background
-  * check-out blender and mayb additional 3D programs
+  * check-out blender and maybe additional 3D programs
     for good gui design of placing sites or species
     in 3D space
 
