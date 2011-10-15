@@ -129,7 +129,7 @@ class GTKProjectTree(SlaveDelegate):
 
     def _set_treeview_hooks(self):
         """Fudge function to import to access function to kmos.types.ProjectTree
-        to kmos.gui.GTKProjectTree
+        to kmos.gui.GTKProjectTree.
         """
         self.project_data.clear()
         # Meta
@@ -143,7 +143,8 @@ class GTKProjectTree(SlaveDelegate):
             self.project_data.append(self.layer_list, layer)
         self.model_tree.add_layer = self.add_layer
         self.get_layers = lambda :\
-            self.project_data.get_descendants(self.layer_list)
+            sorted(self.project_data.get_descendants(self.layer_list),
+                   key=lambda x: x.name)
         self.model_tree.get_layers = self.get_layers
         self.lattice = self.layer_list
 
@@ -154,8 +155,9 @@ class GTKProjectTree(SlaveDelegate):
             self.project_data.append(self.parameter_list, parameter)
         self.model_tree.add_parameter = self.add_parameter
         self.get_parameters = lambda :\
-            self.project_data.get_descendants(self.parameter_list)
-        self.model_tree.get_layers = self.get_layers
+            sorted(self.project_data.get_descendants(self.parameter_list),
+                   key=lambda x: x.name)
+        self.model_tree.get_parameters = self.get_parameters
 
         # Species List
         self.species_list = self.project_data.append(None,
@@ -164,7 +166,8 @@ class GTKProjectTree(SlaveDelegate):
             self.project_data.append(self.species_list, species)
         self.model_tree.add_species = self.add_species
         self.get_speciess = lambda :\
-            self.project_data.get_descendants(self.species_list)
+            sorted(self.project_data.get_descendants(self.species_list),
+                   key=lambda x: x.name)
         self.model_tree.get_speciess = self.get_speciess
 
 
@@ -175,7 +178,8 @@ class GTKProjectTree(SlaveDelegate):
             self.project_data.append(self.process_list, process)
         self.model_tree.add_process = self.add_process
         self.get_processes = lambda :\
-            self.project_data.get_descendants(self.process_list)
+            sorted(self.project_data.get_descendants(self.process_list),
+                   key=lambda x: x.name)
         self.model_tree.get_processes = self.get_processes
 
         # Output List
@@ -185,7 +189,8 @@ class GTKProjectTree(SlaveDelegate):
             self.project_data.append(self.output_list, output)
         self.model_tree.add_output = self.add_output
         self.get_outputs = lambda : \
-            self.project_data.get_descendants(self.output_list)
+            sorted(self.project_data.get_descendants(self.output_list),
+                   key=lambda x: x.name)
         self.model_tree.get_outputs = self.get_outputs
 
     def set_default_species(self, species):

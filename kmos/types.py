@@ -440,19 +440,24 @@ class ProjectTree(object):
         # needed in context with GTKProjectTree
         self.add_parameter = lambda parameter: \
             self.parameter_list.append(parameter)
-        self.get_parameters = lambda : self.parameter_list
+        self.get_parameters = lambda : sorted(self.parameter_list,
+                                              key=lambda x: x.name)
         
         self.add_layer = lambda layer: self.layer_list.append(layer)
-        self.get_layers = lambda : self.layer_list
+        self.get_layers = lambda : sorted(self.layer_list,
+                                          key=lambda x: x.name)
 
         self.add_process = lambda process: self.process_list.append(process)
-        self.get_processes = lambda : self.process_list
+        self.get_processes = lambda : sorted(self.process_list,
+                                             key=lambda x: x.name)
 
         self.add_species = lambda species: self.species_list.append(species)
-        self.get_speciess = lambda : self.species_list
+        self.get_speciess = lambda : sorted(self.species_list,
+                                            key=lambda x: x.name)
 
         self.add_output = lambda output: self.output_list.append(output)
-        self.get_outputs = lambda : self.output_list
+        self.get_outputs = lambda : sorted(self.output_list,
+                                           key=lambda x: x.name)
 
     def __repr__(self):
         return self._get_xml_string()
