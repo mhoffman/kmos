@@ -23,11 +23,11 @@ from kmos import evaluate_rate_expression
 from kmos.config import *
 
 
-def flatten(L):
+def _flatten(L):
     return [item for sublist in L for item in sublist]
 
 
-def most_common(L):
+def _most_common(L):
     # thanks go to Alex Martelli for this function
     # get an iterable of (item, iterable) pairs
     SL = sorted((x, i) for i, x in enumerate(L))
@@ -737,13 +737,13 @@ class ProcListWriter():
 
         # now the GENERAL CASE
         # first find site, that is most sought after
-        most_common_coord = most_common([y.coord for y in flatten([x[0] for x in items])])
+        most_common_coord = _most_common([y.coord for y in _flatten([x[0] for x in items])])
 
         #DEBUGGING
         #print("MOST_COMMON_COORD: %s" % most_common_coord)
 
         # filter out list of uniq answers for this site
-        answers = [y.species for y in filter(lambda x: x.coord == most_common_coord, flatten([x[0] for x in items]))]
+        answers = [y.species for y in filter(lambda x: x.coord == most_common_coord, _flatten([x[0] for x in items]))]
         uniq_answers = list(set(answers))
 
         #DEBUGGING
@@ -893,3 +893,16 @@ def export_source(project_tree, export_dir=None):
     writer.write_proclist()
     writer.write_settings()
     return True
+
+def import_xml(filename):
+    import kmos.types
+    project_tree = kmos.types.ProjectTree()
+    project_tree.import_xml_file(filename)
+    return project_tree
+
+def export_xml(project_tree, filename=None):
+    if filename is None:
+        filename = '%s.xml' % project_tree.meta.model_name
+    with open(filename, 'w') as f:
+        for line in str(project_tree):
+            f.write(line)
