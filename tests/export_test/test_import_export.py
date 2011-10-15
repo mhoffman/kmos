@@ -34,7 +34,7 @@ def test_compare_import_variants():
 
     pt = kmos.types.ProjectTree()
     editor = kmos.gui.Editor()
-    editor.import_file('default.xml')
+    editor.import_xml_file('default.xml')
     pt.import_xml_file('default.xml')
     os.chdir(cwd)
     assert str(pt) == str(editor.project_tree)

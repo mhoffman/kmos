@@ -1,5 +1,4 @@
 Functionality
-  * name import_file/import_xml_file consistently
   * reimplement 'print output' function using old_src
   * add various tooltips and examples using Claudias suggestions
    write autocompletion for output fields

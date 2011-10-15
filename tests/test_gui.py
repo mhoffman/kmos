@@ -9,7 +9,7 @@ def test_gui():
     cwd = os.path.abspath(os.curdir)
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     editor = kmos.gui.Editor()
-    editor.import_file('export_test/default.xml')
+    editor.import_xml_file('export_test/default.xml')
     os.chdir(cwd)
     assert len(editor.project_tree.get_processes()) == 36
 

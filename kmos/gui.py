@@ -678,9 +678,9 @@ class Editor(GladeDelegate):
             self.attach_slave('overviewtree', self.project_tree)
             self.set_title('%s - kmos' % self.project_tree.get_name())
             self.project_tree.show()
-            self.import_file(filename)
+            self.import_xml_file(filename)
 
-    def import_file(self, filename):
+    def import_xml_file(self, filename):
         self.project_tree._set_treeview_hooks()
         # Import
         self.project_tree.import_xml_file(filename)
