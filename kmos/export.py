@@ -884,7 +884,7 @@ def export_source(project_tree, export_dir=None):
 
     #export xml file itself to target dir
     xml_export = file(
-        os.path.join(export_dir, '%s.xml' %project_tree.meta.model_name), 'a')
+      os.path.join(export_dir, '%s.xml' % project_tree.meta.model_name), 'w')
     xml_export.write(str(project_tree))
     xml_export.close()
 
