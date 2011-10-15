@@ -26,7 +26,7 @@ import os
 import copy
 from kmos.types import ProjectTree
 from kmos.forms import *
-import kmos.export
+import kmos.io
 #sys.path.append(APP_ABS_PATH)
 import gobject
 import pygtk
@@ -732,7 +732,7 @@ class Editor(GladeDelegate):
             self.toast('No folder selected.')
             return
 
-        kmos.export.export_source(self.project_tree, export_dir)
+        kmos.io.export_source(self.project_tree, export_dir)
 
         # return directory name
         self.toast('Wrote FORTRAN sources to %s\n' % export_dir +

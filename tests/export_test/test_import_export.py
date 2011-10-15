@@ -6,7 +6,7 @@ import filecmp
 def test_import_export():
 
     import kmos.types
-    import kmos.export
+    import kmos.io
 
     cwd = os.path.abspath(os.curdir)
     os.chdir(os.path.abspath(os.path.dirname(__file__)))
@@ -18,7 +18,7 @@ def test_import_export():
 
     pt = kmos.types.ProjectTree()
     pt.import_xml_file('default.xml')
-    kmos.export.export_source(pt, TEST_DIR)
+    kmos.io.export_source(pt, TEST_DIR)
     for filename in ['base', 'lattice', 'proclist']:
         assert filecmp.cmp(os.path.join(REFERENCE_DIR, '%s.f90' % filename),
                           os.path.join(TEST_DIR, '%s.f90' % filename))

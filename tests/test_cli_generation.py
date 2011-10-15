@@ -57,7 +57,7 @@ def generate_model():
 
 
 def test_model_generation_and_export():
-    from kmos.export import export_source
+    from kmos.io import export_source
     model = generate_model()
     cwd = os.path.abspath(os.curdir)
     os.chdir(os.path.dirname(os.path.abspath(__file__)))

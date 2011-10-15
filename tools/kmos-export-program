@@ -22,7 +22,7 @@ import shutil
 
 
 import kmos.types
-import kmos.export
+import kmos.io
 
 def main():
     from kmos.config import *
@@ -47,7 +47,7 @@ def main():
     project_tree = kmos.types.ProjectTree()
     project_tree.import_xml_file(xml_file)
 
-    kmos.export.export_source(project_tree, export_dir)
+    kmos.io.export_source(project_tree, export_dir)
 
     if os.uname()[0] == 'Linux' and not options.source_only:
         os.chdir(export_dir)
