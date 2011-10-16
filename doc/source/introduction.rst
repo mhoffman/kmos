@@ -71,5 +71,5 @@ in roughly this order or open an existing one by opening a kMC XML file.
 If you want to see the model run
 `kmos export <xml-file>` and you will get a subfolder with a self-contained
 Fortran90 code, which solves the model. If all necessary dependencies are
-installed you can simply run kmc view in the export folder.
+installed you can simply run `kmos view` in the export folder.
 

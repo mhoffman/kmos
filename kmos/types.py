@@ -146,7 +146,7 @@ class ConditionAction(FixedObject):
 class Coord(FixedObject):
     """Class that holds exactly one coordinate as used in the description
     of a process. The distinction between a Coord and a Site may seem
-    superfluous but it is crucial to avoid to much data duplication
+    superfluous but it is made to avoid data duplication.
     """
     attributes = ['offset', 'name', 'layer']
 
