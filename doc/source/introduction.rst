@@ -1,30 +1,8 @@
 Introduction
 ============
 
-kmos is a vigorous attempt to make (lattice) kMC modelling more accessible.
+.. automodule:: kmos
 
-Feature overview
-================
-With kmos you can:
-
-    * easily create and modify kMC models through GUI
-    * store and exchange kMC models through XML
-    * generate fast, platform independent, self-contained code
-    * run kMC models through GUI or python bindings
-
-kmos has been developed in the context of first-principles based modelling
-of surface chemical reactions but might be of help for other kMC models
-as well.
-
-kmos' goal is to significantly reduce the time you need
-to implement and run a lattice kmc simulation. However it can not help
-you plan the model. 
-
-
-kmos can be invoked directly from the command line in one of the following 
-ways::
-
-    kmos [help] (edit|export|view) [options]
 
 
 
