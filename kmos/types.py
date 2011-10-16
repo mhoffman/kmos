@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""A module holding all the data models used in kmos.
+"""Holds all the data models used in kmos.
 """
 
 # stdlib imports
@@ -43,7 +43,7 @@ class FixedObject(object):
 
 
 class Site(FixedObject):
-    """A class holding exactly one lattice site
+    """Represents one lattice site.
     """
     attributes = ['name', 'x', 'y', 'z', 'site_class', 'default_species']
     # vector is now a list of floats for the graphical representation
@@ -102,7 +102,7 @@ class Grid(FixedObject):
 
 
 class Layer(FixedObject, CorrectlyNamed):
-    """A class that defines exactly one layer
+    """Represents one layer in a possibly multi-layer geometry
     """
     attributes = ['name', 'grid', 'sites', 'site_classes', 'active', 'color']
 
@@ -118,7 +118,7 @@ class Layer(FixedObject, CorrectlyNamed):
         return "[LAYER] %s\n[%s]\n" % (self.name, self.grid)
 
     def add_site(self, site):
-        """Add a new site to a layer
+        """Adds a new site to a layer.
         """
         self.sites.append(site)
 
@@ -130,9 +130,9 @@ class Layer(FixedObject, CorrectlyNamed):
 
 
 class ConditionAction(FixedObject):
-    """Class that holds either a condition or an action. Since both
+    """Represents either a condition or an action. Since both
     have the same attributes we use the same class here, and just
-    store them in different lists, depending on its role
+    store them in different lists, depending on its role.
     """
     attributes = ['species', 'coord']
 
@@ -240,8 +240,13 @@ class Coord(FixedObject):
 
 
 class Species(FixedObject):
-    """Class that represent a species such as oxygen, empty, ... . Not empty
-    is treated just like a species.
+    """Class that represent a species such as oxygen, empty, ... .
+    Note: `empty` is treated just like a species.
+
+    ..  testcode::
+
+        s = Species; print(s.attributes)
+
     """
     attributes = ['name', 'color', 'representation']
 
@@ -396,9 +401,11 @@ class Process(FixedObject):
                self.condition_list, self.action_list)
 
     def add_condition(self, condition):
+        """Adds a conditions to a process"""
         self.condition_list.append(condition)
 
     def add_action(self, action):
+        """Adds an action to a process"""
         self.action_list.append(action)
 
     def executing_coord(self):

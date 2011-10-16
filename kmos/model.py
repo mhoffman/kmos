@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-""" A python representation of a kMC model. The actual model is
+"""
+A python representation of a kMC model. The actual model is
 imported in kmc_model.so and all parameters are stored in kmc_settings.py.
 
 The model can be used directly like so::

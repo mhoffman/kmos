@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+"""
+Features front-end import/export functions for kMC Projects.
+Currently import and export is supported to XML and export is
+supported to Fortran 90 source code.
+"""
 #    Copyright 2009-2011 Max J. Hoffmann (mjhoffmann@gmail.com)
 #    This file is part of kmos.
 #
@@ -895,12 +900,14 @@ def export_source(project_tree, export_dir=None):
     return True
 
 def import_xml(filename):
+    """Imports and returns project from an XML file."""
     import kmos.types
     project_tree = kmos.types.ProjectTree()
     project_tree.import_xml_file(filename)
     return project_tree
 
 def export_xml(project_tree, filename=None):
+    """Writes a project to an XML file."""
     if filename is None:
         filename = '%s.xml' % project_tree.meta.model_name
     with open(filename, 'w') as f:
