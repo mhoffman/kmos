@@ -16,9 +16,11 @@
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 
 from StringIO import StringIO
-from kiwi.datatypes import ValidationError
-from numpy.linalg import solve
-from numpy import matrix
+
+try:
+    from kiwi.datatypes import ValidationError
+except:
+    ValidationError = UserWarning
 
 
 class CorrectlyNamed:

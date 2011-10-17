@@ -6,7 +6,7 @@
 from copy import deepcopy
 
 # XML handling
-from lxml import etree as ET
+from xml.etree import ElementTree as ET
 #Need to pretty print XML
 from xml.dom import minidom
 

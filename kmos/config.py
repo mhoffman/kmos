@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import os
-import kiwi
 
 #    Copyright 2009-2011 Max J. Hoffmann (mjhoffmann@gmail.com)
 #    This file is part of kmos.
@@ -21,4 +20,8 @@ import kiwi
 APP_ABS_PATH = os.path.dirname(os.path.abspath(__file__))
 GLADEFILE = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
 GLADEFILE = 'kmos/kmc_editor.glade'
-kiwi.environ.environ.add_resource('glade', APP_ABS_PATH)
+try:
+    import kiwi
+    kiwi.environ.environ.add_resource('glade', APP_ABS_PATH)
+except:
+    pass
