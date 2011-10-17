@@ -43,12 +43,6 @@ or it may be used as an API via the kmos module.
 #    You should have received a copy of the GNU General Public License
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 
-import tokenize
-import StringIO
-import math
-from kmos import units, species
-from ase.data import atomic_numbers, atomic_masses
-from ase.atoms import string2symbols
 
 
 def evaluate_rate_expression(rate_expr, parameters={}):
@@ -58,6 +52,12 @@ def evaluate_rate_expression(rate_expr, parameters={}):
         parameters = {'p_CO':{'value':1},
                       'T':{'value':1}}
      """
+    import tokenize
+    import StringIO
+    import math
+    from kmos import units, species
+    from ase.data import atomic_numbers, atomic_masses
+    from ase.atoms import string2symbols
     if not rate_expr:
         rate_const = 0.0
     else:
