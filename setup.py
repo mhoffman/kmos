@@ -6,7 +6,7 @@ author = 'Max J. Hoffmann'
 author_email = 'mjhoffmann@gmail.com'
 description = "kMC modeling on steroids"
 license = 'COPYING'
-long_description = "A vigorous attempt to make lattice kinetic Monte Carlo modelling more accessible"
+long_description = file('README.rst').read()
 name='python-kmos'
 packages = [
            'kmos',
@@ -18,7 +18,7 @@ package_data = {'kmos':['fortran_src/*f90',
                         'fortran_src/assert.ppc',
                         'kmc_project_v0.2.dtd']}
 platforms = ['linux']
-requires = ['kiwi',]
+requires = ['kiwi', 'ase','lxml','matplotlib', 'pygtk', 'gtk']
 scripts = [
         'tools/kmos-editor',
         'tools/kmos-export-program',
