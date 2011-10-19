@@ -77,44 +77,20 @@ class ProcessFormSite(Site):
         self.layer = kwargs['layer'] if 'layer' in kwargs else ''
 
 
-class Grid(FixedObject):
-    """A grid is simply a guide to the eye to set up sites in unit cell
-    at specific location. It has no effect for the kMC model itself
-    """
-    attributes = ['x', 'y', 'z', 'offset_x', 'offset_y', 'offset_z']
-
-    def __init__(self, **kwargs):
-        FixedObject.__init__(self, **kwargs)
-        self.x = kwargs['x'] if 'x' in kwargs else 1
-        self.y = kwargs['y'] if 'y' in kwargs else 1
-        self.z = kwargs['z'] if 'z' in kwargs else 1
-        self.offset_x = kwargs['offset_x'] if 'offset_x' in kwargs else 0.0
-        self.offset_y = kwargs['offset_y'] if 'offset_y' in kwargs else 0.0
-        self.offset_z = kwargs['offset_z'] if 'offset_z' in kwargs else 0.0
-
-    def __repr__(self):
-        return ('[GRID] %s %s %s\noffset: %s %s %s' %
-            (self.x, self.y, self.z,
-            self.offset_x,
-            self.offset_y,
-            self.offset_z))
-
-
 class Layer(FixedObject, CorrectlyNamed):
     """Represents one layer in a possibly multi-layer geometry
     """
-    attributes = ['name', 'grid', 'sites', 'site_classes', 'active', 'color']
+    attributes = ['name', 'sites', 'site_classes', 'active', 'color']
 
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)
-        self.grid = kwargs['grid'] if 'grid' in kwargs else Grid()
         self.name = kwargs['name'] if 'name' in kwargs else ''
         self.active = kwargs['active'] if 'active' in kwargs else True
         self.color = kwargs['color'] if 'color' in kwargs else '#ffffff'
         self.sites = kwargs['sites'] if 'sites' in kwargs else []
 
     def __repr__(self):
-        return "[LAYER] %s\n[%s]\n" % (self.name, self.grid)
+        return "[LAYER] %s\n[%s]\n" % (self.name)
 
     def add_site(self, site):
         """Adds a new site to a layer.
@@ -525,21 +501,6 @@ class ProjectTree(object):
         for layer in self.get_layers():
             layer_elem = ET.SubElement(lattice_elem, 'layer')
             layer_elem.set('name', layer.name)
-            if (hasattr(layer.grid, 'x') and\
-            hasattr(layer.grid, 'y') and
-            hasattr(layer.grid, 'z')):
-                layer_elem.set('grid',
-                    '%s %s %s' % (layer.grid.x,
-                                  layer.grid.y,
-                                  layer.grid.z))
-            if (hasattr(layer.grid, 'offset_x') and\
-            hasattr(layer.grid, 'offset_y') and
-            hasattr(layer.grid, 'offset_z')):
-                layer_elem.set('grid_offset',
-                    '%s %s %s' % (layer.grid.offset_x,
-                                  layer.grid.offset_y,
-                                  layer.grid.offset_z))
-
             layer_elem.set('color', layer.color)
 
             for site in layer.sites:
@@ -631,18 +592,11 @@ class ProjectTree(object):
                     for elem in child:
                         if elem.tag == 'layer':
                             name = elem.attrib['name']
-                            x, y, z = [int(i)
-                                       for i in elem.attrib['grid'].split()]
-                            ox, oy, oz = [float(i)
-                                          for i in elem.attrib[
-                                                     'grid_offset'].split()]
-                            grid = Grid(x=x, y=y, z=z,
-                                offset_x=ox, offset_y=oy, offset_z=oz)
                             if 'color' in elem.attrib:
                                 color = elem.attrib['color']
                             else:
                                 color = '#ffffff'
-                            layer = Layer(name=name, grid=grid, color=color)
+                            layer = Layer(name=name, color=color)
                             self.add_layer(layer)
 
                             for site in elem:

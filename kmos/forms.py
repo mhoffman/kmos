@@ -1027,70 +1027,6 @@ class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
         self.project_tree.update(self.model)
 
 
-class GridForm(ProxyDelegate):
-    """Widget to set the grid for defining the lattice. The grid itself has
-    no meaning for the model but it is merely there to assist setting sites
-    at specific locations
-    """
-    gladefile = GLADEFILE
-    toplevel_name = 'grid_form'
-    widgets = ['grid_x',
-               'grid_y',
-               'grid_z',
-               'grid_offset_x',
-               'grid_offset_y',
-               'grid_offset_z']
-
-    def __init__(self, grid, project_tree, layer):
-        self.old_grid = copy.deepcopy(grid)
-        self.project_tree = project_tree
-        self.layer = layer
-        ProxyDelegate.__init__(self, grid)
-        self.grid_x.grab_focus()
-        if self.project_tree.meta.model_dimension < 3:
-            self.grid_z.hide()
-            self.grid_offset_z.hide()
-
-    def on_grid_x__content_changed(self, widget):
-        self.layer.redraw()
-
-    def on_grid_y__content_changed(self, widget):
-        self.layer.redraw()
-
-    def on_grid_offset_x__validate(self, widget, offset):
-        if not 0 <= offset <= 1:
-            return ValidationError('Offset must between 0 and 1.')
-
-    def on_grid_offset_y__validate(self, widget, offset):
-        if not 0 <= offset <= 1:
-            return ValidationError('Offset must between 0 and 1.')
-
-    def on_grid_offset_x__content_changed(self, widget):
-        self.layer.redraw()
-
-    def on_grid_offset_y__content_changed(self, widget):
-        self.layer.redraw()
-
-    def on_grid_form_cancel__clicked(self, button):
-        self.hide()
-
-    def on_grid_form_ok__clicked(self, button):
-        self.layer.redraw()
-        self.hide()
-
-    def on_grid_x__activate(self, widget):
-        self.on_grid_form_ok__clicked(widget)
-
-    def on_grid_y__activate(self, widget):
-        self.on_grid_form_ok__clicked(widget)
-
-    def on_grid_offset_x__activate(self, widget):
-        self.on_grid_form_ok__clicked(widget)
-
-    def on_grid_offset_y__activate(self, widget):
-        self.on_grid_form_ok__clicked(widget)
-
-
 class LatticeForm(ProxySlaveDelegate):
     """Widget to set global lattice parameter such as the lattice vector,
     a ASE representation string, and the default layer. The program will
@@ -1174,7 +1110,6 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
     def __init__(self, model, project_tree):
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, model)
-        self.grid = self.model.grid
         self.canvas = goocanvas.Canvas()
         self.root = self.canvas.get_root_item()
         self.canvas.set_size_request(400, 400)
@@ -1193,11 +1128,6 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.layer_name.set_tooltip_text(
             'A name is only relevant if you are using more than one\n'
             + 'layer in your model.')
-        self.set_grid_button.set_tooltip_text(
-            'The grid set here help to put sites at specific locations.\n'
-            + 'The position has no direct meaning for the lattice kMC '
-            + 'model.\nMeaning such as nearest neighbor etc. is only gained\n'
-            + 'through corresponding processes')
 
     def redraw(self):
         white = col_str2tuple(self.model.color)
@@ -1284,10 +1214,6 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
 
             self.model.sites.append(new_site)
             SiteForm(new_site, self, self.project_tree, self.model)
-
-    def on_set_grid_button__clicked(self, button):
-        grid_form = GridForm(self.model.grid, self.project_tree, self)
-        grid_form.show()
 
     def on_layer_name__validate(self, widget, layer_name):
         # TODO: validate lattice name to be unique

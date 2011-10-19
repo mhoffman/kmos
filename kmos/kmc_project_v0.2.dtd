@@ -41,8 +41,8 @@
   <!ELEMENT layer (site)*>
   <!ATTLIST layer 
     name CDATA #REQUIRED
-    grid CDATA #REQUIRED
-    grid_offset CDATA #REQUIRED
+    grid CDATA #IMPLIED
+    grid_offset CDATA #IMPLIED
     color CDATA #IMPLIED
   >
   <!ELEMENT site EMPTY>
