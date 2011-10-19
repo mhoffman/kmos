@@ -44,6 +44,9 @@ or it may be used as an API via the kmos module.
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 
 
+import kmos.types
+import kmos.io
+
 
 def evaluate_rate_expression(rate_expr, parameters={}):
     """Evaluates an expression for a typical kMC rate constant.

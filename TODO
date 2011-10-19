@@ -1,4 +1,5 @@
 Functionality
+  * put XML/DTD handling into stdlib only tools
   * strip 'grid variables' from types and GUI
   * change book-keeping/memory management from
     process based to site based 

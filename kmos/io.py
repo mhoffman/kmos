@@ -24,7 +24,6 @@ import operator
 import shutil
 
 from kmos.types import ConditionAction
-from kmos import evaluate_rate_expression
 from kmos.config import *
 
 

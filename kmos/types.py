@@ -11,7 +11,6 @@ from xml.etree import ElementTree as ET
 from xml.dom import minidom
 
 # kmos own modules
-from kmos import evaluate_rate_expression
 from kmos.utils import CorrectlyNamed
 from kmos.config import *
 
@@ -585,7 +584,10 @@ class ProjectTree(object):
         """
         # TODO: catch XML version first and convert if necessary
         self.filename = filename
-        xmlparser = ET.XMLParser(remove_comments=True)
+        #xmlparser = ET.XMLParser(remove_comments=True)
+        #! FIXME : automatic removal of comment not supported in
+        # stdlib version of ElementTree
+        xmlparser = ET.XMLParser()
         try:
             root = ET.parse(filename, parser=xmlparser).getroot()
         except:
@@ -758,5 +760,3 @@ def prettify_xml(elem):
     rough_string = ET.tostring(elem, encoding='utf-8')
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent='    ')
-
-
