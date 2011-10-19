@@ -2,6 +2,8 @@
 
 from distutils.core import setup
 
+maintainer = 'Max J. Hoffmann'
+maintainer_email = 'mjhoffmann@gmail.com'
 author = 'Max J. Hoffmann'
 author_email = 'mjhoffmann@gmail.com'
 description = "kMC modeling on steroids"
@@ -33,6 +35,8 @@ version = '0.1'
 setup(
       author=author,
       author_email=author_email,
+      maintainer=maintainer,
+      maintainer_email=maintainer_email,
       description=description,
       license=license,
       long_description=long_description,
