@@ -584,6 +584,12 @@ class ProjectTree(object):
                 output_elem.set('item', output.name)
         return prettify_xml(root)
 
+    def export_xml_file(self, filename):
+        f = file(filename, 'w')
+        f.write(str(self))
+        f.close()
+
+
     def import_xml_file(self, filename):
         """Takes a filename, validates the content against kmc_project.dtd
         and import all fields into the current project tree
