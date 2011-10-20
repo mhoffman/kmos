@@ -1,3 +1,4 @@
+import pdb
 #!/usr/bin/env python
 """GUI forms used by kmos.gui.
 
@@ -634,7 +635,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                        i * (self.l / self.z), 500,
                        line_width=1, fg=(.6, .6, .6))
         active_layers = filter(lambda x: x.active == True,
-                                         self.project_tree.layer_list)
+                                         self.project_tree.get_layers())
         site_list = []
         for active_layer in active_layers:
             for site in active_layer.sites:
@@ -728,7 +729,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             if matching_sites:
                 coords = matching_sites[0].get_coords()
                 color = filter(lambda x: x.name == elem.species,
-                                     self.project_tree.species_list)[0].color
+                                     self.project_tree.get_speciess())[0].color
                 color = col_str2tuple(color)
                 o = CanvasOval(self.condition_layer,
                                bg=color,
@@ -752,13 +753,13 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 coords = matching_sites[0].get_coords()
                 if elem.species[0] == '^':
                     color = filter(lambda x: x.name == elem.species[1:],
-                                    self.project_tree.species_list)[0].color
+                                    self.project_tree.get_speciess())[0].color
                 elif elem.species[0] == '$':
                     # Don't draw the disappearing particle
                     continue
                 else:
                     color = filter(lambda x: x.name == elem.species,
-                                    self.project_tree.species_list)[0].color
+                                    self.project_tree.get_speciess())[0].color
                 color = col_str2tuple(color)
                 o = CanvasOval(self.action_layer, bg=color,
                                                   fg=black,
