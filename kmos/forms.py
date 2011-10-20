@@ -601,6 +601,11 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         """Places circles on the current lattice according
         to the conditions and actions defined
         """
+
+        def get_species_color(species):
+            return filter(lambda x: x.name == elem.species,
+                                 self.project_tree.get_speciess())[0].color
+
         white = col_str2tuple('#ffffff')
         black = col_str2tuple('#000000')
         if hasattr(self, 'canvas'):
@@ -728,8 +733,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                                     self.site_layer)
             if matching_sites:
                 coords = matching_sites[0].get_coords()
-                color = filter(lambda x: x.name == elem.species,
-                                     self.project_tree.get_speciess())[0].color
+                color = get_species_color(elem.species)
                 color = col_str2tuple(color)
                 o = CanvasOval(self.condition_layer,
                                bg=color,
@@ -752,14 +756,12 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             if matching_sites:
                 coords = matching_sites[0].get_coords()
                 if elem.species[0] == '^':
-                    color = filter(lambda x: x.name == elem.species[1:],
-                                    self.project_tree.get_speciess())[0].color
+                    color = get_species_color(elem.species[1:])
                 elif elem.species[0] == '$':
                     # Don't draw the disappearing particle
                     continue
                 else:
-                    color = filter(lambda x: x.name == elem.species,
-                                    self.project_tree.get_speciess())[0].color
+                    color = get_species_color(elem.species)
                 color = col_str2tuple(color)
                 o = CanvasOval(self.action_layer, bg=color,
                                                   fg=black,
