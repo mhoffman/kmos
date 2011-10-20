@@ -415,6 +415,11 @@ class Process(FixedObject):
     def get_info(self):
         return self.rate_constant
 
+    def evaluate_rate_expression(self, parameters={}):
+        import kmos.evaluate_rate_expression
+        return kmos.evaluate_rate_expression(self.rate_constant, parameters)
+
+
 
 class OutputList(FixedObject, list):
     """A dummy class, that will hold the values which are to be

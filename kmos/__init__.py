@@ -51,6 +51,9 @@ def evaluate_rate_expression(rate_expr, parameters={}):
      following:
         parameters = {'p_CO':{'value':1},
                       'T':{'value':1}}
+
+     or as a list of parameters:
+        parameters = [Parameter(), ... ]
      """
     import tokenize
     import StringIO
@@ -58,6 +61,15 @@ def evaluate_rate_expression(rate_expr, parameters={}):
     from kmos import units, species
     from ase.data import atomic_numbers, atomic_masses
     from ase.atoms import string2symbols
+
+    # convert parameters to dict if passed as list of Parameters()
+    if type(parameters) is list:
+        param_dict = {}
+        for parameter in parameters:
+            param_dict[parameter.name] = {'value': parameter.value}
+        parameters = param_dict
+
+
     if not rate_expr:
         rate_const = 0.0
     else:

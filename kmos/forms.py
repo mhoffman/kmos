@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+"""GUI forms used by kmos.gui.
+
+The classes defined here heavily draw on the interface provided by python-kiwi.
+In the language of underlying MVC (Model-View-Controller) pattern these
+classes form the controller. The view is defined through a *.glade XML file
+and the models are instances of kmos.types.*
+"""
 #    Copyright 2009-2011 Max J. Hoffmann (mjhoffmann@gmail.com)
 #    This file is part of kmos.
 #
@@ -409,26 +416,24 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         'to declare a CO diffusion from site br to site cus or ' +
         'CO@cus->CO@cus.(0,1) for a CO diffusion in the up direction. Hit ' +
         'ENTER to update the graphical representation.')
+
         self.rate_constant.curr_value = 0.0
         expr = self.rate_constant.get_text()
-        if expr:
-            try:
-                parameters = {}
-                for param in self.project_tree.parameter_list:
-                    parameters[param.name] = {'value': param.value}
-                self.rate_constant.set_tooltip_text(
-                    'Current value: %.2e s^{-1}' %
-                    evaluate_rate_expression(expr, parameters))
-            except Exception, e:
-                self.rate_constant.set_tooltip_text(str(e))
-
-        else:
+        if not expr:
+            # if nothing entered show explanation
             self.rate_constant.set_tooltip_text((
                 'Python has to be able to evaluate this expression to a ' +
                 'plain real number. One can use standard mathematical ' +
                 'functions, parameters that are defined under "Parameters"' +
                 'or constants and conversion factor such as c, h, e, ' +
                 'kboltzmann, pi, bar, angstrom'))
+        else:
+            try:
+                self.rate_constant.set_tooltip_text(
+                    'Current value: %.2e s^{-1}' %
+                    evaluate_rate_expression(expr, self.project_tree.get_parameters()))
+            except Exception, e:
+                self.rate_constant.set_tooltip_text(str(e))
         rate_constant_terms = ['bar',
                                'beta',
                                'eV',
@@ -462,11 +467,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 
     def on_rate_constant__validate(self, widget, expr):
         try:
-            parameters = {}
-            for param in self.project_tree.parameter_list:
-                parameters[param.name] = {'value': param.value}
             self.rate_constant.set_tooltip_text('Current value: %.2e s^{-1}' %
-                evaluate_rate_expression(expr, parameters))
+                evaluate_rate_expression(expr, self.project_tree.get_parameters()))
         except Exception, e:
             return ValidationError(e)
 
