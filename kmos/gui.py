@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""The main part of the kmos project
+"""A GUI frontend to create and edit kMC models.
 """
 #    Copyright 2009-2011 Max J. Hoffmann (mjhoffmann@gmail.com)
 #    This file is part of kmos.
