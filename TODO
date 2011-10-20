@@ -1,4 +1,6 @@
 Functionality
+  * fix recognition parameters to evaluate expressions in GUI
+  * fix representation of processes in GUI
   * strip 'grid variables' from types and GUI
   * change book-keeping/memory management from
     process based to site based 
