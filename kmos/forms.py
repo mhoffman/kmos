@@ -441,12 +441,12 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                                'h',
                                'kboltzmann',
                                'umass']
-        for param in self.project_tree.parameter_list:
+        for param in self.project_tree.get_parameters():
             rate_constant_terms.append(param.name)
         self.rate_constant.prefill(rate_constant_terms)
 
         chem_exp_terms = ['->', ]
-        for species in self.project_tree.species_list:
+        for species in self.project_tree.get_speciess():
             chem_exp_terms.append(species.name)
         self.chemical_expression.prefill(chem_exp_terms)
 
@@ -695,7 +695,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         CanvasText(self.frame_layer, 10, 570, size=8, text='Lattice Area')
 
         # draw reservoir circles
-        for k, species in enumerate(self.project_tree.species_list):
+        for k, species in enumerate(self.project_tree.get_speciess()):
             color = col_str2tuple(species.color)
             o = CanvasOval(self.frame_layer,
                            30 + k * 50,
