@@ -58,9 +58,7 @@ def evaluate_rate_expression(rate_expr, parameters={}):
     import tokenize
     import StringIO
     import math
-    from kmos import units, species
-    from ase.data import atomic_numbers, atomic_masses
-    from ase.atoms import string2symbols
+    from kmos import units
 
     # convert parameters to dict if passed as list of Parameters()
     if type(parameters) is list:
@@ -88,12 +86,16 @@ def evaluate_rate_expression(rate_expr, parameters={}):
             elif token in dir(units):
                 replaced_tokens.append((i, str(eval('units.' + token))))
             elif token.startswith('m_'):
+                from ase.atoms import string2symbols
+                from ase.data import atomic_masses
+                from ase.data import atomic_numbers
                 species_name = '_'.join(token.split('_')[1:])
                 symbols = string2symbols(species_name)
                 replaced_tokens.append((i,
                             '%s' % sum([atomic_masses[atomic_numbers[symbol]]
                             for symbol in symbols])))
             elif token.startswith('mu_'):
+                from kmos import species
                 species_name = '_'.join(token.split('_')[1:])
                 if species_name in dir(species):
                     replaced_tokens.append((i, 'species.%s.mu(%s,%s)' % (
