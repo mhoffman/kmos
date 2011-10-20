@@ -24,7 +24,6 @@ import operator
 import shutil
 
 from kmos.types import ConditionAction
-from kmos import evaluate_rate_expression
 from kmos.config import *
 
 
@@ -792,6 +791,9 @@ class ProcListWriter():
         can be changed on the fly and without recompilation of the Fortran 90
         modules.
         """
+
+        from kmos import evaluate_rate_expression
+
         data = self.data
         out = open(os.path.join(self.dir,'kmc_settings.py'), 'w')
         out.write('model_name = \'%s\'\n' % self.data.meta.model_name)

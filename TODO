@@ -1,6 +1,7 @@
 Functionality
   * fix recognition parameters to evaluate expressions in GUI
   * fix representation of processes in GUI
+  * put XML/DTD handling into stdlib only tools
   * strip 'grid variables' from types and GUI
   * change book-keeping/memory management from
     process based to site based 
