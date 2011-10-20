@@ -149,10 +149,10 @@ def parse_chemical_expression(eq, process, project_tree):
     for term in left + right:
         if term[0][0] in ['$', '^'] and term[0][1:]:
             if not  filter(lambda x: x.name == term[0][1:], \
-                                     project_tree.species_list):
+                                     project_tree.get_speciess()):
                 raise UserWarning('Species %s unknown ' % term[0:])
         elif not filter(lambda x: x.name == term[0], \
-                                  project_tree.species_list):
+                                  project_tree.get_speciess()):
             raise UserWarning('Species %s unknown ' % term[0])
 
     condition_list = []
@@ -216,7 +216,7 @@ def parse_chemical_expression(eq, process, project_tree):
         else:
             action_list.append(ConditionAction(species=species, coord=coord))
 
-    default_species = project_tree.species_list_iter.default_species
+    default_species = project_tree.species_list.default_species
     # every condition that does not have a corresponding action on the
     # same coordinate gets complemented with a 'default_species' action
     for condition in condition_list:
@@ -811,12 +811,12 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
 
         self.site_default_species.prefill([x.name
                                             for x in
-                                            project_tree.species_list],
+                                            project_tree.get_speciess()],
                                             sort=True)
 
         if default_species == 'default_species':
             self.site_default_species.select(
-                        self.project_tree.species_list_iter.default_species)
+                        self.project_tree.species_list.default_species)
         else:
             self.site_default_species.select(default_species)
         self.model.default_species = self.site_default_species.get_selected()
@@ -994,7 +994,7 @@ class SpeciesListForm(ProxySlaveDelegate):
         model.default_species = None
         ProxySlaveDelegate.__init__(self, model)
         self.default_species.prefill([x.name
-                                      for x in project_tree.species_list],
+                                      for x in project_tree.get_speciess()],
                                       sort=True)
         self.default_species.select(default_species)
         self.default_species.set_tooltip_text(
