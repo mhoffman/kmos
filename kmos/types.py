@@ -284,6 +284,23 @@ class LayerList(FixedObject, list):
         self.representation = kwargs['representation'] \
             if 'representation' in kwargs else ''
 
+    def generate_coord(self, coord):
+        split = coord.split('.')
+        if len(split) == 3 :
+            return Coord(name=split[0],
+                offset=tuple(split[1]),
+                layer=split[2])
+        elif len(split) == 2 :
+            return Coord(name=split[0],
+                offset=tuple(split[1]),
+                layer=self.default_layer)
+        elif len(split) == 1 :
+            return Coord(name=split[0],
+                offset=(0, 0, 0),
+                layer=self.default_layer)
+        else:
+            raise UserWarning("Cannot parse coord description")
+
 
 class Parameter(FixedObject, CorrectlyNamed):
     """A parameter that can be used in a rate constant expression
