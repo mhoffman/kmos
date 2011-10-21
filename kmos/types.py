@@ -90,7 +90,7 @@ class Layer(FixedObject, CorrectlyNamed):
         self.sites = kwargs['sites'] if 'sites' in kwargs else []
 
     def __repr__(self):
-        return "[LAYER] %s\n[%s]\n" % (self.name)
+        return "[LAYER] %s\n[\n%s\n]" % (self.name, self.sites)
 
     def add_site(self, site):
         """Adds a new site to a layer.
@@ -300,6 +300,16 @@ class LayerList(FixedObject, list):
                 layer=self.default_layer)
         else:
             raise UserWarning("Cannot parse coord description")
+
+    def get_abs_coord(self, coord):
+        import numpy as np
+        offset = np.array(coord.offset)
+        layer = filter(lambda x: x.name == coord.layer, list(self))[0]
+        site = filter(lambda x: x.name == coord.name, layer.sites)[0]
+        pos = np.array([site.x, site.y, site.z])
+        cell = np.diag([self.cell_size_x, self.cell_size_y, self.cell_size_z])
+
+        return np.dot(offset + pos, cell)
 
 
 class Parameter(FixedObject, CorrectlyNamed):
