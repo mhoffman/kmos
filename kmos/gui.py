@@ -577,9 +577,9 @@ class Editor(GladeDelegate):
             return
         new_layer = Layer()
         self.project_tree.undo_stack.start_new_action('Add layer', new_layer)
-        self.project_tree.append(self.project_tree.layer_list_iter, new_layer)
+        self.project_tree.add_layer(new_layer)
         layer_form = LayerEditor(new_layer, self.project_tree)
-        self.project_tree.expand(self.project_tree.layer_list_iter)
+        self.project_tree.project_data.expand(self.project_tree.layer_list)
         if self.get_slave('workarea'):
             self.detach_slave('workarea')
         self.attach_slave('workarea', layer_form)
@@ -591,10 +591,9 @@ class Editor(GladeDelegate):
         new_species = Species(color='#fff', name='')
         self.project_tree.undo_stack.start_new_action('Add species',
                                                       new_species)
-        self.project_tree.append(self.project_tree.species_list_iter,
-                                 new_species)
-        self.project_tree.expand(self.project_tree.species_list_iter)
-        self.project_tree.select(new_species)
+        self.project_tree.add_species(new_species)
+        self.project_tree.project_data.expand(self.project_tree.species_list)
+        self.project_tree.project_data.select(new_species)
         species_form = SpeciesForm(new_species, self.project_tree)
         if self.get_slave('workarea'):
             self.detach_slave('workarea')
@@ -607,16 +606,15 @@ class Editor(GladeDelegate):
         if self.project_tree.meta.model_dimension in [1, 3]:
             self.toast('Only 2d supported')
             return
-        if not self.project_tree.layer_list:
+        if not self.project_tree.get_layers():
             self.toast("No layer defined, yet!")
             return
         new_process = Process(name='', rate_constant='')
         self.project_tree.undo_stack.start_new_action('Add process',
                                                       new_process)
-        self.project_tree.append(self.project_tree.process_list_iter,
-                                 new_process)
-        self.project_tree.expand(self.project_tree.process_list_iter)
-        self.project_tree.select(new_process)
+        self.project_tree.add_process(new_process)
+        self.project_tree.project_data.expand(self.project_tree.process_list)
+        self.project_tree.project_data.select(new_process)
         process_form = ProcessForm(new_process, self.project_tree)
         if self.get_slave('workarea'):
             self.detach_slave('workarea')
@@ -627,10 +625,9 @@ class Editor(GladeDelegate):
         new_parameter = Parameter(name='', value='')
         self.project_tree.undo_stack.start_new_action('Add parameter',
                                                       new_parameter)
-        self.project_tree.append(self.project_tree.parameter_list_iter,
-                                 new_parameter)
-        self.project_tree.expand(self.project_tree.parameter_list_iter)
-        self.project_tree.select(new_parameter)
+        self.project_tree.add_parameter(new_parameter)
+        self.project_tree.project_data.expand(self.project_tree.parameter_list)
+        self.project_tree.project_data.select(new_parameter)
         parameter_form = ParameterForm(new_parameter, self.project_tree)
         if self.get_slave('workarea'):
             self.detach_slave('workarea')
