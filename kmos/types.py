@@ -49,7 +49,7 @@ class Site(FixedObject):
 
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)
-        self.tags = kwargs['tags'] if  'tags' in kwargs else []
+        self.tags = kwargs['tags'] if  'tags' in kwargs else ''
         self.name = kwargs['name'] if 'name' in kwargs else ''
         self.default_species = kwargs['default_species'] \
             if 'default_species' in kwargs else 'default_species'
@@ -95,6 +95,13 @@ class Layer(FixedObject, CorrectlyNamed):
         """Adds a new site to a layer.
         """
         self.sites.append(site)
+
+    def get_site(self, site_name):
+        sites = filter(lambda site: site.name == site_name,
+                       self.sites)
+        if not sites:
+            raise Error('Site not found')
+        return sites[0]
 
     def get_info(self):
         if self.active:
@@ -293,7 +300,7 @@ class LayerList(FixedObject, list):
                 layer=term[2])
         elif len(term) == 2 :
             return Coord(name=term[0],
-                offset=tuple(eval(term[1])),
+                offset=eval(term[1]),
                 layer=self.default_layer)
         elif len(term) == 1 :
             return Coord(name=term[0],
@@ -457,7 +464,7 @@ class ProjectTree(object):
             self.parameter_list.append(parameter)
         self.get_parameters = lambda : sorted(self.parameter_list,
                                               key=lambda x: x.name)
-        
+
         self.add_layer = lambda layer: self.layer_list.append(layer)
         self.get_layers = lambda : sorted(self.layer_list,
                                           key=lambda x: x.name)
@@ -645,7 +652,7 @@ class ProjectTree(object):
                                 if 'tags' in site.attrib:
                                     tags = site.attrib['tags']
                                 else:
-                                    tags = []
+                                    tags = ''
                                 if 'default_species' in site.attrib:
                                     default_species = site.attrib[
                                                          'default_species']
