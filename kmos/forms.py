@@ -83,7 +83,7 @@ def parse_chemical_expression(eq, process, project_tree):
         - each chemical expression has the form
            conditions -> actions
         - each condition or action term has the form (regex)
-          [$^]*SPECIES@SITE\.OFFSET
+          [$^]*SPECIES@SITE\.OFFSET\.LAYER
         - each SPECIES must have been defined before. The special
           species 'empty' exists by default
         - each SITE must have been defined before via the

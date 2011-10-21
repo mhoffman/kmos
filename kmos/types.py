@@ -284,18 +284,18 @@ class LayerList(FixedObject, list):
         self.representation = kwargs['representation'] \
             if 'representation' in kwargs else ''
 
-    def generate_coord(self, coord):
-        split = coord.split('.')
-        if len(split) == 3 :
-            return Coord(name=split[0],
-                offset=tuple(split[1]),
-                layer=split[2])
-        elif len(split) == 2 :
-            return Coord(name=split[0],
-                offset=tuple(split[1]),
+    def generate_coord(self, terms):
+        term = terms.split('.')
+        if len(term) == 3 :
+            return Coord(name=term[0],
+                offset=tuple(term[1]),
+                layer=term[2])
+        elif len(term) == 2 :
+            return Coord(name=term[0],
+                offset=tuple(eval(term[1])),
                 layer=self.default_layer)
-        elif len(split) == 1 :
-            return Coord(name=split[0],
+        elif len(term) == 1 :
+            return Coord(name=term[0],
                 offset=(0, 0, 0),
                 layer=self.default_layer)
         else:
