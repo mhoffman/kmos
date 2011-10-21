@@ -800,7 +800,8 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
                'sitevect_x',
                'sitevect_y',
                'sitevect_z',
-               'default_species']
+               'default_species',
+               'site_tags']
 
     def __init__(self, site, parent, project_tree, layer):
         self.saved_state = copy.deepcopy(site)

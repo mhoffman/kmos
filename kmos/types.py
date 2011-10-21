@@ -284,6 +284,8 @@ class LayerList(FixedObject, list):
             if 'representation' in kwargs else ''
 
     def generate_coord(self, terms):
+        """Expecting something of the form site_name.offset.layer
+        and return a Coord object"""
         term = terms.split('.')
         if len(term) == 3 :
             return Coord(name=term[0],
@@ -538,7 +540,7 @@ class ProjectTree(object):
                 site_elem = ET.SubElement(layer_elem, 'site')
                 site_elem.set('vector', '%s %s %s' % (site.x, site.y, site.z))
                 site_elem.set('type', site.name)
-                site_elem.set('tags', ' '.join(site.tags))
+                site_elem.set('tags', site.tags)
                 site_elem.set('default_species', site.default_species)
 
         process_list = ET.SubElement(root, 'process_list')
@@ -641,7 +643,7 @@ class ProjectTree(object):
                                 x, y, z = [float(x)
                                     for x in site.attrib['vector'].split()]
                                 if 'tags' in site.attrib:
-                                    tags = site.attrib['tags'].split()
+                                    tags = site.attrib['tags']
                                 else:
                                     tags = []
                                 if 'default_species' in site.attrib:
