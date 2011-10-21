@@ -35,7 +35,6 @@
   <!ATTLIST lattice
     cell_size CDATA #REQUIRED
     default_layer CDATA #REQUIRED
-    site_classes CDATA #IMPLIED
     representation CDATA #IMPLIED
   >
   <!ELEMENT layer (site)*>
@@ -49,7 +48,7 @@
   <!ATTLIST site
     vector CDATA #REQUIRED
     type CDATA #REQUIRED
-    class CDATA #IMPLIED
+    tags CDATA #IMPLIED
     default_species CDATA #IMPLIED
   >
   <!ELEMENT process_list (process)*>

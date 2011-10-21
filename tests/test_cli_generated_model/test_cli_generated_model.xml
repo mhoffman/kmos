@@ -13,7 +13,7 @@
     </parameter_list>
     <lattice cell_size="1.0 1.0 1.0" default_layer="default" representation="">
         <layer color="#ffffff" name="default">
-            <site class="" default_species="default_species" type="cus" vector="0 0.5 0.5"/>
+            <site default_species="default_species" tags="" type="cus" vector="0 0.5 0.5"/>
         </layer>
     </lattice>
     <process_list>

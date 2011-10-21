@@ -1,9 +1,9 @@
 model_name = 'test_cli_generated_model'
 simulation_size = 20
 representations = {
-    "CO":"",
-    "empty":"",
     "oxygen":"",
+    "empty":"",
+    "CO":"",
     }
 
 lattice_representation = ""

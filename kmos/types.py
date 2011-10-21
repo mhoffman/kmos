@@ -44,20 +44,19 @@ class FixedObject(object):
 class Site(FixedObject):
     """Represents one lattice site.
     """
-    attributes = ['name', 'x', 'y', 'z', 'site_class', 'default_species']
+    attributes = ['name', 'x', 'y', 'z', 'tags', 'default_species']
     # vector is now a list of floats for the graphical representation
 
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)
-        self.site_class = kwargs['site_class'] \
-            if  'site_class' in kwargs else ''
+        self.tags = kwargs['tags'] if  'tags' in kwargs else []
         self.name = kwargs['name'] if 'name' in kwargs else ''
         self.default_species = kwargs['default_species'] \
             if 'default_species' in kwargs else 'default_species'
 
     def __repr__(self):
         return '[SITE] %s %s %s' % (self.name,
-                                   (self.x, self.y, self.z), self.site_class)
+                                   (self.x, self.y, self.z), self.tags)
 
 
 class ProcessFormSite(Site):
@@ -80,7 +79,7 @@ class ProcessFormSite(Site):
 class Layer(FixedObject, CorrectlyNamed):
     """Represents one layer in a possibly multi-layer geometry
     """
-    attributes = ['name', 'sites', 'site_classes', 'active', 'color']
+    attributes = ['name', 'sites', 'active', 'color']
 
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)
@@ -539,7 +538,7 @@ class ProjectTree(object):
                 site_elem = ET.SubElement(layer_elem, 'site')
                 site_elem.set('vector', '%s %s %s' % (site.x, site.y, site.z))
                 site_elem.set('type', site.name)
-                site_elem.set('class', site.site_class)
+                site_elem.set('tags', ' '.join(site.tags))
                 site_elem.set('default_species', site.default_species)
 
         process_list = ET.SubElement(root, 'process_list')
@@ -641,7 +640,10 @@ class ProjectTree(object):
                                 name = site.attrib['type']
                                 x, y, z = [float(x)
                                     for x in site.attrib['vector'].split()]
-                                site_class = site.attrib['class']
+                                if 'tags' in site.attrib:
+                                    tags = site.attrib['tags'].split()
+                                else:
+                                    tags = []
                                 if 'default_species' in site.attrib:
                                     default_species = site.attrib[
                                                          'default_species']
@@ -649,12 +651,9 @@ class ProjectTree(object):
                                     default_species = 'default_species'
                                 site_elem = Site(name=name,
                                     x=x, y=y, z=z,
-                                    site_class=site_class,
+                                    tags=tags,
                                     default_species=default_species)
                                 layer.sites.append(site_elem)
-                        elif elem.tag == 'site_class':
-                            # ignored for now
-                            pass
                 elif child.tag == 'meta':
                     for attrib in ['author',
                                     'debug',
