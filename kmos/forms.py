@@ -167,7 +167,7 @@ def parse_chemical_expression(eq, process, project_tree):
         if len(coord_term) == 2:
             name = coord_term[0]
             active_layers = filter(lambda x: x.active,
-                                          project_tree.layer_list)
+                                          project_tree.get_layers())
             if len(active_layers) == 1:
                 layer = active_layers[0].name
             else:  # if more than one active try to guess layer from name
@@ -175,7 +175,7 @@ def parse_chemical_expression(eq, process, project_tree):
                 # if no layer visible choose among all of them
                 # else choose among visible
                 if not len(active_layers):
-                    layers = project_tree.layer_list
+                    layers = project_tree.get_layers()
                 else:
                     layers = active_layers
                 for ilayer in layers:
@@ -196,13 +196,13 @@ def parse_chemical_expression(eq, process, project_tree):
             name = coord_term[0]
             offset = eval(coord_term[1])
             layer = coord_term[2]
-            layer_names = [x.name for x in project_tree.layer_list]
+            layer_names = [x.name for x in project_tree.get_layers()]
             if layer not in layer_names:
                 raise UserWarning("Layer %s not known, must be one of %s"
                                   % (layer, layer_names))
             else:
                 layer_instance = filter(lambda x: x.name == layer,
-                                                  project_tree.layer_list)[0]
+                                                  project_tree.get_layers())[0]
                 site_names = [x.name for x in layer_instance.sites]
                 if name not in site_names:
                     raise UserWarning("Site %s not known, must be one of %s"
@@ -1227,7 +1227,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
     def on_layer_name__content_changed(self, widget):
         # Sync layer names in process coords
         new_layer_name = widget.get_text()
-        for process in self.project_tree.process_list:
+        for process in self.project_tree.get_processes():
             for elem in process.condition_list:
                 if elem.coord.layer == self.previous_layer_name:
                     elem.coord.layer = new_layer_name

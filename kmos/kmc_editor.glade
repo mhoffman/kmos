@@ -332,7 +332,7 @@
                                 <property name="invisible_char">*</property>
                                 <property name="invisible_char_set">True</property>
                                 <property name="is_focus">True</property>
-                                <property name="model_attribute">layer_name</property>
+                                <property name="model_attribute">name</property>
                                 <property name="visible">True</property>
                             </widget>
                             <packing>
@@ -1193,7 +1193,7 @@
                                         <property name="invisible_char">*</property>
                                         <property name="invisible_char_set">True</property>
                                         <property name="is_focus">True</property>
-                                        <property name="model_attribute">site_name</property>
+                                        <property name="model_attribute">name</property>
                                         <property name="visible">True</property>
                                     </widget>
                                 </child>
