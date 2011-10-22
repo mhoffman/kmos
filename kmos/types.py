@@ -446,31 +446,33 @@ class LayerList(FixedObject, list):
     def generate_coord(self, terms):
         """Expecting something of the form site_name.offset.layer
         and return a Coord object"""
+
+        import numpy as np
+
         term = terms.split('.')
         if len(term) == 3 :
-            return Coord(name=term[0],
-                offset=tuple(term[1]),
+            coord = Coord(name=term[0],
+                offset=eval(term[1]),
                 layer=term[2])
         elif len(term) == 2 :
-            return Coord(name=term[0],
+            coord = Coord(name=term[0],
                 offset=eval(term[1]),
                 layer=self.default_layer)
         elif len(term) == 1 :
-            return Coord(name=term[0],
+            coord = Coord(name=term[0],
                 offset=(0, 0, 0),
                 layer=self.default_layer)
         else:
             raise UserWarning("Cannot parse coord description")
 
-    def get_abs_coord(self, coord):
-        import numpy as np
         offset = np.array(coord.offset)
         layer = filter(lambda x: x.name == coord.layer, list(self))[0]
         site = filter(lambda x: x.name == coord.name, layer.sites)[0]
         pos = np.array([site.x, site.y, site.z])
         cell = np.diag([self.cell_size_x, self.cell_size_y, self.cell_size_z])
 
-        return np.dot(offset + pos, cell)
+        coord.pos = np.dot(offset + pos, cell)
+        return coord
 
 
 class Layer(FixedObject, CorrectlyNamed):
@@ -547,7 +549,7 @@ class Coord(FixedObject):
     of a process. The distinction between a Coord and a Site may seem
     superfluous but it is made to avoid data duplication.
     """
-    attributes = ['offset', 'name', 'layer']
+    attributes = ['offset', 'name', 'layer', 'pos']
 
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)
@@ -557,6 +559,9 @@ class Coord(FixedObject):
             self.offset = (self.offset[0], 0, 0)
         if len(self.offset) == 2:
             self.offset = (self.offset[0], self.offset[1], 0)
+
+        self.pos = kwargs['pos'] \
+                   if 'pos' in kwargs else [0, 0, 0]
 
     def __repr__(self):
         return '[COORD] %s.%s.%s' % (self.name, tuple(self.offset), self.layer)

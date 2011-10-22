@@ -1,6 +1,8 @@
 #!/usr/bin/env python
-"""kmos.forms - GUI forms used by kmos.gui
-The classes defined here heavily draw on the interface provided by python-kiwi.
+"""
+kmos.forms - GUI forms used by kmos.gui
+The classes defined here heavily draw on the interface provided by
+python-kiwi.
 In the language of underlying MVC (Model-View-Controller) pattern these
 classes form the controller. The view is defined through a *.glade XML file
 and the models are instances of kmos.types.*
@@ -274,8 +276,8 @@ def parse_chemical_expression(eq, process, project_tree):
 
 
 class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
-    """A form  that allows to enter meta information about the project.
-
+    """
+    Allows to enter meta information about the project.
     Please enter author and email so people can credit you for the model.
 
     Increasing the debug level makes the kmos backed create a lot of

@@ -10,7 +10,16 @@ kmos.types
 ==========
 
 .. automodule:: kmos.types
-   :members: ProjectTree, Parameter, Layer, Species, Process, ConditionAction, Coord
+.. autoclass:: kmos.types.ProjectTree
+.. automethod:: kmos.type.ProjectTree.export_xml_file
+.. autoclass:: kmos.types.Meta
+.. autoclass:: kmos.types.Parameter
+.. autoclass:: kmos.types.Layer
+.. autoclass:: kmos.types.Site
+.. autoclass:: kmos.types.Species
+.. autoclass:: kmos.types.Process
+.. autoclass:: kmos.types.ConditionAction
+.. autoclass:: kmos.types.Coord
 
 kmos.io
 =======
@@ -26,6 +35,8 @@ kmos.gui
 ==========
 
 .. automodule:: kmos.gui
+.. autoclass:: kmos.gui.Editor
+.. autoclass:: kmos.gui.GTKProjectTree
 
 kmos.forms
 ==========
