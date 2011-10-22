@@ -41,414 +41,6 @@ class FixedObject(object):
                                                             % attrname)
 
 
-class Site(FixedObject):
-    """Represents one lattice site.
-    """
-    attributes = ['name', 'x', 'y', 'z', 'tags', 'default_species']
-    # vector is now a list of floats for the graphical representation
-
-    def __init__(self, **kwargs):
-        FixedObject.__init__(self, **kwargs)
-        self.tags = kwargs['tags'] if  'tags' in kwargs else ''
-        self.name = kwargs['name'] if 'name' in kwargs else ''
-        self.default_species = kwargs['default_species'] \
-            if 'default_species' in kwargs else 'default_species'
-
-    def __repr__(self):
-        return '[SITE] %s %s %s' % (self.name,
-                                   (self.x, self.y, self.z), self.tags)
-
-
-class ProcessFormSite(Site):
-    """This is just a little varient of the site object,
-    with the sole difference that it has a layer attribute
-    and is meant to be used in the process form. This separation was chosen,
-    since the Site object as in the ProjectTree should not have a layer
-    attribute to avoid data duplication but in the ProcessForm we need this
-    to define processes
-    """
-    attributes = Site.attributes
-    attributes.append('layer')
-    attributes.append('color')
-
-    def __init__(self, **kwargs):
-        Site.__init__(self, **kwargs)
-        self.layer = kwargs['layer'] if 'layer' in kwargs else ''
-
-
-class Layer(FixedObject, CorrectlyNamed):
-    """Represents one layer in a possibly multi-layer geometry
-    """
-    attributes = ['name', 'sites', 'active', 'color']
-
-    def __init__(self, **kwargs):
-        FixedObject.__init__(self, **kwargs)
-        self.name = kwargs['name'] if 'name' in kwargs else ''
-        self.active = kwargs['active'] if 'active' in kwargs else True
-        self.color = kwargs['color'] if 'color' in kwargs else '#ffffff'
-        self.sites = kwargs['sites'] if 'sites' in kwargs else []
-
-    def __repr__(self):
-        return "[LAYER] %s\n[\n%s\n]" % (self.name, self.sites)
-
-    def add_site(self, site):
-        """Adds a new site to a layer.
-        """
-        self.sites.append(site)
-
-    def get_site(self, site_name):
-        sites = filter(lambda site: site.name == site_name,
-                       self.sites)
-        if not sites:
-            raise Error('Site not found')
-        return sites[0]
-
-    def get_info(self):
-        if self.active:
-            return 'visible'
-        else:
-            return 'invisible'
-
-
-class ConditionAction(FixedObject):
-    """Represents either a condition or an action. Since both
-    have the same attributes we use the same class here, and just
-    store them in different lists, depending on its role.
-    """
-    attributes = ['species', 'coord']
-
-    def __init__(self, **kwargs):
-        FixedObject.__init__(self, **kwargs)
-
-    def __repr__(self):
-        return "[COND_ACT] Species: %s Coord:%s\n" % (self.species, self.coord)
-
-
-class Coord(FixedObject):
-    """Class that holds exactly one coordinate as used in the description
-    of a process. The distinction between a Coord and a Site may seem
-    superfluous but it is made to avoid data duplication.
-    """
-    attributes = ['offset', 'name', 'layer']
-
-    def __init__(self, **kwargs):
-        FixedObject.__init__(self, **kwargs)
-        self.offset = kwargs['offset'] \
-            if 'offset' in kwargs else (0, 0, 0)
-        if len(self.offset) == 1:
-            self.offset = (self.offset[0], 0, 0)
-        if len(self.offset) == 2:
-            self.offset = (self.offset[0], self.offset[1], 0)
-
-    def __repr__(self):
-        return '[COORD] %s.%s.%s' % (self.name, tuple(self.offset), self.layer)
-
-    def __eq__(self, other):
-        return (self.layer, self.name, self.offset) == \
-               (other.layer, other.name, other.offset)
-
-    def __add__(a, b):
-        diff = [(x + y) for (x, y) in zip(a.offset, b.offset)]
-        if a.layer and b.layer:
-            name = "%s_%s + %s_%s" % (a.layer, a.name, b.layer, b.name)
-        elif a.layer:
-            name = '%s_%s + %s' % (a.layer, a.name, b.name)
-        elif b.layer:
-            name = "%s + %s_%s" % (a.name, b.layer, b.name)
-        else:
-            name = '%s + %s' % (a.name, b.name)
-        layer = ''
-        return Coord(name=name, layer=layer, offset=offset)
-
-    def __sub__(a, b):
-        """When subtracting to lattice coordinates from each other,
-        i.e. a-b, we want to keep the name and layer from a, and just
-        take the difference in supercells
-        """
-        offset = [(x - y) for (x, y) in zip(a.offset, b.offset)]
-        if a.layer:
-            a_name = '%s_%s' % (a.layer, a.name)
-        else:
-            a_name = a.name
-        if b.layer:
-            b_name = '%s_%s' % (b.layer, b.name)
-        else:
-            b_name = b.name
-
-        if a_name == b_name:
-            name = '0'
-        else:
-            name = '%s - %s' % (a_name, b_name)
-        layer = ''
-        return Coord(name=name, layer=layer, offset=offset)
-
-    def rsub_ff(self):
-        """Build term as if subtrating on the right, omit '-' if 0 anyway
-        (in Fortran Form :-)
-        """
-        ff = self.ff()
-        if ff == '(/0, 0, 0, 0/)':
-            return ''
-        else:
-            return ' - %s' % ff
-
-    def radd_ff(self):
-        """Build term as if adding on the right, omit '+' if 0 anyway
-        (in Fortran Form :-)
-        """
-        ff = self.ff()
-        if ff == '(/0, 0, 0, 0/)':
-            return ''
-        else:
-            return ' + %s' % ff
-
-    def sort_key(self):
-        return "%s_%s_%s_%s_%s" % (self.layer,
-                                   self.name,
-                                   self.offset[0],
-                                   self.offset[1],
-                                   self.offset[2])
-
-    def ff(self):
-        """ff like 'Fortran Form'"""
-        if self.layer:
-            return "(/%s, %s, %s, %s_%s/)" % (self.offset[0], self.offset[1],
-                                              self.offset[2], self.layer,
-                                              self.name,)
-        else:
-            return "(/%s, %s, %s, %s/)" % (self.offset[0], self.offset[1],
-                                           self.offset[2], self.name, )
-
-
-class Species(FixedObject):
-    """Class that represent a species such as oxygen, empty, ... .
-    Note: `empty` is treated just like a species.
-
-    ..  testcode::
-
-        s = Species; print(s.attributes)
-
-    """
-    attributes = ['name', 'color', 'representation']
-
-    def __init__(self, **kwargs):
-        FixedObject.__init__(self, **kwargs)
-        self.name = kwargs['name'] \
-            if 'name' in kwargs else ''
-        self.representation = kwargs['representation'] \
-            if 'representation' in kwargs else ''
-    def __repr__(self):
-        return '[SPECIES] Name: %s Color: %s\n' % (self.name, self.color)
-
-
-class SpeciesList(FixedObject, list):
-    """A list of species
-    """
-    attributes = ['default_species', 'name']
-
-    def __init__(self, **kwargs):
-        kwargs['name'] = 'Species'
-        FixedObject.__init__(self, **kwargs)
-
-
-class ProcessList(FixedObject, list):
-    """A list of processes
-    """
-    attributes = ['name']
-    def __init__(self, **kwargs):
-        self.name = 'Processes'
-
-    def __lt__(self, other):
-        return self.name < other.name
-
-
-class ParameterList(FixedObject, list):
-    """A list of parameters
-    """
-    attributes = ['name']
-    def __init__(self, **kwargs):
-        self.name = 'Parameters'
-
-
-class LayerList(FixedObject, list):
-    """A list of layers
-    """
-    attributes = ['name', 'cell_size_x', 'cell_size_y', 'cell_size_z',
-                  'default_layer', 'representation']
-
-    def __init__(self, **kwargs):
-        FixedObject.__init__(self, **kwargs)
-        self.name = 'Lattice(s)'
-        self.cell_size_x = kwargs['cell_size_x'] \
-            if 'cell_size_x' in kwargs else 1.
-        self.cell_size_y = kwargs['cell_size_y'] \
-            if 'cell_size_y' in kwargs else 1.
-        self.cell_size_z = kwargs['cell_size_z'] \
-            if 'cell_size_z' in kwargs else 1.
-        self.default_layer = kwargs['default_layer'] \
-            if 'default_layer' in kwargs else 'default'
-        self.representation = kwargs['representation'] \
-            if 'representation' in kwargs else ''
-
-    def generate_coord(self, terms):
-        """Expecting something of the form site_name.offset.layer
-        and return a Coord object"""
-        term = terms.split('.')
-        if len(term) == 3 :
-            return Coord(name=term[0],
-                offset=tuple(term[1]),
-                layer=term[2])
-        elif len(term) == 2 :
-            return Coord(name=term[0],
-                offset=eval(term[1]),
-                layer=self.default_layer)
-        elif len(term) == 1 :
-            return Coord(name=term[0],
-                offset=(0, 0, 0),
-                layer=self.default_layer)
-        else:
-            raise UserWarning("Cannot parse coord description")
-
-    def get_abs_coord(self, coord):
-        import numpy as np
-        offset = np.array(coord.offset)
-        layer = filter(lambda x: x.name == coord.layer, list(self))[0]
-        site = filter(lambda x: x.name == coord.name, layer.sites)[0]
-        pos = np.array([site.x, site.y, site.z])
-        cell = np.diag([self.cell_size_x, self.cell_size_y, self.cell_size_z])
-
-        return np.dot(offset + pos, cell)
-
-
-class Parameter(FixedObject, CorrectlyNamed):
-    """A parameter that can be used in a rate constant expression
-    and defined via some init file
-    """
-    attributes = ['name', 'value', 'adjustable', 'min', 'max', 'scale']
-
-    def __init__(self, **kwargs):
-        FixedObject.__init__(self, **kwargs)
-        self.name = kwargs['name'] \
-            if 'name' in kwargs else ''
-        self.adjustable = kwargs['adjustable'] \
-            if 'adjustable' in kwargs else False
-        self.value = kwargs['value'] \
-            if 'value' in kwargs else 0.
-        self.min = float(kwargs['min']) \
-            if 'min' in kwargs else 0.0
-        self.max = float(kwargs['max']) \
-            if 'max' in kwargs else 0.0
-        self.scale = str(kwargs['scale']) \
-            if 'scale' in kwargs else 'linear'
-
-    def __repr__(self):
-        return '[PARAMETER] Name: %s Value: %s\n' % (self.name, self.value)
-
-    def on_adjustable__do_toggled(self, value):
-        print(value)
-
-    def on_name__content_changed(self, _):
-        self.project_tree.update(self.process)
-
-    def get_info(self):
-        return self.value
-
-
-class Meta(object):
-    """Class holding the meta-information about the kMC project
-    """
-    name = 'Meta'
-
-    def __init__(self, *args, **kwargs):
-        self.add(kwargs)
-
-    def add(self, attrib):
-        for key in attrib:
-            if key in ['debug', 'model_dimension']:
-                self.__setattr__(key, int(attrib[key]))
-            else:
-                self.__setattr__(key, attrib[key])
-
-    def setattribute(self, attr, value):
-        if attr in ['author', 'email', 'debug',
-                    'model_name', 'model_dimension']:
-            self.add({attr: value})
-
-        else:
-            print('%s is not a known meta information')
-    def get_extra(self):
-        return "%s(%s)" % (self.model_name, self.model_dimension)
-
-
-class Process(FixedObject):
-    """One process in a kMC process list
-    """
-    attributes = ['name',
-                  'rate_constant',
-                  'condition_list',
-                  'action_list',
-                  'enabled',
-                  'chemical_expression',
-                  'tof_count']
-
-    def __init__(self, **kwargs):
-        FixedObject.__init__(self, **kwargs)
-        self.name = kwargs['name'] \
-            if 'name' in kwargs else ''
-        self.rate_constant = kwargs['rate_constant'] \
-            if 'rate_constant' in kwargs else '0.'
-        self.condition_list = kwargs['condition_list'] \
-            if 'condition_list' in kwargs else []
-        self.action_list = kwargs['action_list'] \
-         if 'action_list' in kwargs else []
-        self.tof_count = kwargs['tof_count'] \
-            if 'tof_count' in kwargs else None
-        self.enabled = kwargs['enabled'] if 'enabled' in kwargs else True
-
-    def __repr__(self):
-        return '[PROCESS] Name:%s Rate: %s\nConditions: %s\nActions: %s' \
-            % (self.name, self.rate_constant,
-               self.condition_list, self.action_list)
-
-    def add_condition(self, condition):
-        """Adds a conditions to a process"""
-        self.condition_list.append(condition)
-
-    def add_action(self, action):
-        """Adds an action to a process"""
-        self.action_list.append(action)
-
-    def executing_coord(self):
-        return sorted(self.action_list,
-                      key=lambda action: action.coord.sort_key())[0].coord
-
-    def get_info(self):
-        return self.rate_constant
-
-    def evaluate_rate_expression(self, parameters={}):
-        import kmos.evaluate_rate_expression
-        return kmos.evaluate_rate_expression(self.rate_constant, parameters)
-
-
-
-class OutputList(FixedObject, list):
-    """A dummy class, that will hold the values which are to be
-    printed to logfile.
-    """
-    attributes = ['name']
-    def __init__(self):
-        self.name = 'Output'
-
-
-class OutputItem(FixedObject):
-    """Not implemented yet
-    """
-    attributes = ['name', 'output']
-
-    def __init__(self, *args, **kwargs):
-        FixedObject.__init__(self, **kwargs)
-
-
 class ProjectTree(object):
     """Represents one kMC project or model. The overall
     structure is given by
@@ -762,6 +354,412 @@ class ProjectTree(object):
                                                  output=True)
                         self.add_output(output_elem)
 
+
+class Meta(object):
+    """Class holding the meta-information about the kMC project
+    """
+    name = 'Meta'
+
+    def __init__(self, *args, **kwargs):
+        self.add(kwargs)
+
+    def add(self, attrib):
+        for key in attrib:
+            if key in ['debug', 'model_dimension']:
+                self.__setattr__(key, int(attrib[key]))
+            else:
+                self.__setattr__(key, attrib[key])
+
+    def setattribute(self, attr, value):
+        if attr in ['author', 'email', 'debug',
+                    'model_name', 'model_dimension']:
+            self.add({attr: value})
+
+        else:
+            print('%s is not a known meta information')
+    def get_extra(self):
+        return "%s(%s)" % (self.model_name, self.model_dimension)
+
+
+class ParameterList(FixedObject, list):
+    """A list of parameters
+    """
+    attributes = ['name']
+    def __init__(self, **kwargs):
+        self.name = 'Parameters'
+
+
+class Parameter(FixedObject, CorrectlyNamed):
+    """A parameter that can be used in a rate constant expression
+    and defined via some init file
+    """
+    attributes = ['name', 'value', 'adjustable', 'min', 'max', 'scale']
+
+    def __init__(self, **kwargs):
+        FixedObject.__init__(self, **kwargs)
+        self.name = kwargs['name'] \
+            if 'name' in kwargs else ''
+        self.adjustable = kwargs['adjustable'] \
+            if 'adjustable' in kwargs else False
+        self.value = kwargs['value'] \
+            if 'value' in kwargs else 0.
+        self.min = float(kwargs['min']) \
+            if 'min' in kwargs else 0.0
+        self.max = float(kwargs['max']) \
+            if 'max' in kwargs else 0.0
+        self.scale = str(kwargs['scale']) \
+            if 'scale' in kwargs else 'linear'
+
+    def __repr__(self):
+        return '[PARAMETER] Name: %s Value: %s\n' % (self.name, self.value)
+
+    def on_adjustable__do_toggled(self, value):
+        print(value)
+
+    def on_name__content_changed(self, _):
+        self.project_tree.update(self.process)
+
+    def get_info(self):
+        return self.value
+
+
+class LayerList(FixedObject, list):
+    """A list of layers
+    """
+    attributes = ['name', 'cell_size_x', 'cell_size_y', 'cell_size_z',
+                  'default_layer', 'representation']
+
+    def __init__(self, **kwargs):
+        FixedObject.__init__(self, **kwargs)
+        self.name = 'Lattice(s)'
+        self.cell_size_x = kwargs['cell_size_x'] \
+            if 'cell_size_x' in kwargs else 1.
+        self.cell_size_y = kwargs['cell_size_y'] \
+            if 'cell_size_y' in kwargs else 1.
+        self.cell_size_z = kwargs['cell_size_z'] \
+            if 'cell_size_z' in kwargs else 1.
+        self.default_layer = kwargs['default_layer'] \
+            if 'default_layer' in kwargs else 'default'
+        self.representation = kwargs['representation'] \
+            if 'representation' in kwargs else ''
+
+    def generate_coord(self, terms):
+        """Expecting something of the form site_name.offset.layer
+        and return a Coord object"""
+        term = terms.split('.')
+        if len(term) == 3 :
+            return Coord(name=term[0],
+                offset=tuple(term[1]),
+                layer=term[2])
+        elif len(term) == 2 :
+            return Coord(name=term[0],
+                offset=eval(term[1]),
+                layer=self.default_layer)
+        elif len(term) == 1 :
+            return Coord(name=term[0],
+                offset=(0, 0, 0),
+                layer=self.default_layer)
+        else:
+            raise UserWarning("Cannot parse coord description")
+
+    def get_abs_coord(self, coord):
+        import numpy as np
+        offset = np.array(coord.offset)
+        layer = filter(lambda x: x.name == coord.layer, list(self))[0]
+        site = filter(lambda x: x.name == coord.name, layer.sites)[0]
+        pos = np.array([site.x, site.y, site.z])
+        cell = np.diag([self.cell_size_x, self.cell_size_y, self.cell_size_z])
+
+        return np.dot(offset + pos, cell)
+
+
+class Layer(FixedObject, CorrectlyNamed):
+    """Represents one layer in a possibly multi-layer geometry
+    """
+    attributes = ['name', 'sites', 'active', 'color']
+
+    def __init__(self, **kwargs):
+        FixedObject.__init__(self, **kwargs)
+        self.name = kwargs['name'] if 'name' in kwargs else ''
+        self.active = kwargs['active'] if 'active' in kwargs else True
+        self.color = kwargs['color'] if 'color' in kwargs else '#ffffff'
+        self.sites = kwargs['sites'] if 'sites' in kwargs else []
+
+    def __repr__(self):
+        return "[LAYER] %s\n[\n%s\n]" % (self.name, self.sites)
+
+    def add_site(self, site):
+        """Adds a new site to a layer.
+        """
+        self.sites.append(site)
+
+    def get_site(self, site_name):
+        sites = filter(lambda site: site.name == site_name,
+                       self.sites)
+        if not sites:
+            raise Error('Site not found')
+        return sites[0]
+
+    def get_info(self):
+        if self.active:
+            return 'visible'
+        else:
+            return 'invisible'
+
+
+class Site(FixedObject):
+    """Represents one lattice site.
+    """
+    attributes = ['name', 'x', 'y', 'z', 'tags', 'default_species']
+    # vector is now a list of floats for the graphical representation
+
+    def __init__(self, **kwargs):
+        FixedObject.__init__(self, **kwargs)
+        self.tags = kwargs['tags'] if  'tags' in kwargs else ''
+        self.name = kwargs['name'] if 'name' in kwargs else ''
+        self.default_species = kwargs['default_species'] \
+            if 'default_species' in kwargs else 'default_species'
+
+    def __repr__(self):
+        return '[SITE] %s %s %s' % (self.name,
+                                   (self.x, self.y, self.z), self.tags)
+
+
+class ProcessFormSite(Site):
+    """This is just a little varient of the site object,
+    with the sole difference that it has a layer attribute
+    and is meant to be used in the process form. This separation was chosen,
+    since the Site object as in the ProjectTree should not have a layer
+    attribute to avoid data duplication but in the ProcessForm we need this
+    to define processes
+    """
+    attributes = Site.attributes
+    attributes.append('layer')
+    attributes.append('color')
+
+    def __init__(self, **kwargs):
+        Site.__init__(self, **kwargs)
+        self.layer = kwargs['layer'] if 'layer' in kwargs else ''
+
+
+class Coord(FixedObject):
+    """Class that holds exactly one coordinate as used in the description
+    of a process. The distinction between a Coord and a Site may seem
+    superfluous but it is made to avoid data duplication.
+    """
+    attributes = ['offset', 'name', 'layer']
+
+    def __init__(self, **kwargs):
+        FixedObject.__init__(self, **kwargs)
+        self.offset = kwargs['offset'] \
+            if 'offset' in kwargs else (0, 0, 0)
+        if len(self.offset) == 1:
+            self.offset = (self.offset[0], 0, 0)
+        if len(self.offset) == 2:
+            self.offset = (self.offset[0], self.offset[1], 0)
+
+    def __repr__(self):
+        return '[COORD] %s.%s.%s' % (self.name, tuple(self.offset), self.layer)
+
+    def __eq__(self, other):
+        return (self.layer, self.name, self.offset) == \
+               (other.layer, other.name, other.offset)
+
+    def __add__(a, b):
+        diff = [(x + y) for (x, y) in zip(a.offset, b.offset)]
+        if a.layer and b.layer:
+            name = "%s_%s + %s_%s" % (a.layer, a.name, b.layer, b.name)
+        elif a.layer:
+            name = '%s_%s + %s' % (a.layer, a.name, b.name)
+        elif b.layer:
+            name = "%s + %s_%s" % (a.name, b.layer, b.name)
+        else:
+            name = '%s + %s' % (a.name, b.name)
+        layer = ''
+        return Coord(name=name, layer=layer, offset=offset)
+
+    def __sub__(a, b):
+        """When subtracting to lattice coordinates from each other,
+        i.e. a-b, we want to keep the name and layer from a, and just
+        take the difference in supercells
+        """
+        offset = [(x - y) for (x, y) in zip(a.offset, b.offset)]
+        if a.layer:
+            a_name = '%s_%s' % (a.layer, a.name)
+        else:
+            a_name = a.name
+        if b.layer:
+            b_name = '%s_%s' % (b.layer, b.name)
+        else:
+            b_name = b.name
+
+        if a_name == b_name:
+            name = '0'
+        else:
+            name = '%s - %s' % (a_name, b_name)
+        layer = ''
+        return Coord(name=name, layer=layer, offset=offset)
+
+    def rsub_ff(self):
+        """Build term as if subtrating on the right, omit '-' if 0 anyway
+        (in Fortran Form :-)
+        """
+        ff = self.ff()
+        if ff == '(/0, 0, 0, 0/)':
+            return ''
+        else:
+            return ' - %s' % ff
+
+    def radd_ff(self):
+        """Build term as if adding on the right, omit '+' if 0 anyway
+        (in Fortran Form :-)
+        """
+        ff = self.ff()
+        if ff == '(/0, 0, 0, 0/)':
+            return ''
+        else:
+            return ' + %s' % ff
+
+    def sort_key(self):
+        return "%s_%s_%s_%s_%s" % (self.layer,
+                                   self.name,
+                                   self.offset[0],
+                                   self.offset[1],
+                                   self.offset[2])
+
+    def ff(self):
+        """ff like 'Fortran Form'"""
+        if self.layer:
+            return "(/%s, %s, %s, %s_%s/)" % (self.offset[0], self.offset[1],
+                                              self.offset[2], self.layer,
+                                              self.name,)
+        else:
+            return "(/%s, %s, %s, %s/)" % (self.offset[0], self.offset[1],
+                                           self.offset[2], self.name, )
+
+
+class Species(FixedObject):
+    """Class that represent a species such as oxygen, empty, ... .
+    Note: `empty` is treated just like a species.
+
+    ..  testcode::
+
+        s = Species; print(s.attributes)
+
+    """
+    attributes = ['name', 'color', 'representation']
+
+    def __init__(self, **kwargs):
+        FixedObject.__init__(self, **kwargs)
+        self.name = kwargs['name'] \
+            if 'name' in kwargs else ''
+        self.representation = kwargs['representation'] \
+            if 'representation' in kwargs else ''
+    def __repr__(self):
+        return '[SPECIES] Name: %s Color: %s\n' % (self.name, self.color)
+
+
+class SpeciesList(FixedObject, list):
+    """A list of species
+    """
+    attributes = ['default_species', 'name']
+
+    def __init__(self, **kwargs):
+        kwargs['name'] = 'Species'
+        FixedObject.__init__(self, **kwargs)
+
+
+class ProcessList(FixedObject, list):
+    """A list of processes
+    """
+    attributes = ['name']
+    def __init__(self, **kwargs):
+        self.name = 'Processes'
+
+    def __lt__(self, other):
+        return self.name < other.name
+
+
+class Process(FixedObject):
+    """One process in a kMC process list
+    """
+    attributes = ['name',
+                  'rate_constant',
+                  'condition_list',
+                  'action_list',
+                  'enabled',
+                  'chemical_expression',
+                  'tof_count']
+
+    def __init__(self, **kwargs):
+        FixedObject.__init__(self, **kwargs)
+        self.name = kwargs['name'] \
+            if 'name' in kwargs else ''
+        self.rate_constant = kwargs['rate_constant'] \
+            if 'rate_constant' in kwargs else '0.'
+        self.condition_list = kwargs['condition_list'] \
+            if 'condition_list' in kwargs else []
+        self.action_list = kwargs['action_list'] \
+         if 'action_list' in kwargs else []
+        self.tof_count = kwargs['tof_count'] \
+            if 'tof_count' in kwargs else None
+        self.enabled = kwargs['enabled'] if 'enabled' in kwargs else True
+
+    def __repr__(self):
+        return '[PROCESS] Name:%s Rate: %s\nConditions: %s\nActions: %s' \
+            % (self.name, self.rate_constant,
+               self.condition_list, self.action_list)
+
+    def add_condition(self, condition):
+        """Adds a conditions to a process"""
+        self.condition_list.append(condition)
+
+    def add_action(self, action):
+        """Adds an action to a process"""
+        self.action_list.append(action)
+
+    def executing_coord(self):
+        return sorted(self.action_list,
+                      key=lambda action: action.coord.sort_key())[0].coord
+
+    def get_info(self):
+        return self.rate_constant
+
+    def evaluate_rate_expression(self, parameters={}):
+        import kmos.evaluate_rate_expression
+        return kmos.evaluate_rate_expression(self.rate_constant, parameters)
+
+
+class ConditionAction(FixedObject):
+    """Represents either a condition or an action. Since both
+    have the same attributes we use the same class here, and just
+    store them in different lists, depending on its role.
+    """
+    attributes = ['species', 'coord']
+
+    def __init__(self, **kwargs):
+        FixedObject.__init__(self, **kwargs)
+
+    def __repr__(self):
+        return "[COND_ACT] Species: %s Coord:%s\n" % (self.species, self.coord)
+
+
+class OutputList(FixedObject, list):
+    """A dummy class, that will hold the values which are to be
+    printed to logfile.
+    """
+    attributes = ['name']
+    def __init__(self):
+        self.name = 'Output'
+
+
+class OutputItem(FixedObject):
+    """Not implemented yet
+    """
+    attributes = ['name', 'output']
+
+    def __init__(self, *args, **kwargs):
+        FixedObject.__init__(self, **kwargs)
 
 
 def prettify_xml(elem):
