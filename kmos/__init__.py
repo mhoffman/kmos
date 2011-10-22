@@ -1,6 +1,4 @@
 """
-kmos is a vigorous attempt to make (lattice) kMC modelling more accessible.
-
 Feature overview
 ================
 With kmos you can:
@@ -11,8 +9,8 @@ With kmos you can:
     * run kMC models through GUI or python bindings
 
 kmos has been developed in the context of first-principles based modelling
-of surface chemical reactions but might be of help for other kMC models
-as well.
+of surface chemical reactions but might be of help for other types of
+kMC models as well.
 
 kmos' goal is to significantly reduce the time you need
 to implement and run a lattice kmc simulation. However it can not help

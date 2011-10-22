@@ -450,6 +450,17 @@ class OutputItem(FixedObject):
 
 
 class ProjectTree(object):
+    """Represents one kMC project or model. The overall
+    structure is given by
+
+    ProjectTree:
+        - Meta
+        - Parameters
+        - Lattice(s)
+        - Species
+        - Processes
+    """
+
     def __init__(self):
         self.meta = Meta()
         self.layer_list = LayerList()
