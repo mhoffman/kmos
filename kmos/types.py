@@ -469,9 +469,8 @@ class LayerList(FixedObject, list):
         layer = filter(lambda x: x.name == coord.layer, list(self))[0]
         site = filter(lambda x: x.name == coord.name, layer.sites)[0]
         pos = np.array([site.x, site.y, site.z])
-        cell = np.diag([self.cell_size_x, self.cell_size_y, self.cell_size_z])
-
         coord.pos = np.dot(offset + pos, cell)
+
         return coord
 
 
@@ -564,7 +563,9 @@ class Coord(FixedObject):
                    if 'pos' in kwargs else [0, 0, 0]
 
     def __repr__(self):
-        return '[COORD] %s.%s.%s' % (self.name, tuple(self.offset), self.layer)
+        return '[COORD] %s.%s.%s' % (self.name,
+                                     tuple(self.offset),
+                                     self.layer.name)
 
     def __eq__(self, other):
         return (self.layer, self.name, self.offset) == \
