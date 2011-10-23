@@ -25,7 +25,6 @@ import kmos.types
 import kmos.io
 
 def main():
-    from kmos.config import *
     usage = 'usage: %prog xml file export dir\n'\
         + '    existing export directory will over-written!'
 
