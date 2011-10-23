@@ -466,10 +466,12 @@ class LayerList(FixedObject, list):
             raise UserWarning("Cannot parse coord description")
 
         offset = np.array(coord.offset)
+        cell = np.diag([self.cell_size_x, self.cell_size_y, self.cell_size_z])
         layer = filter(lambda x: x.name == coord.layer, list(self))[0]
         site = filter(lambda x: x.name == coord.name, layer.sites)[0]
         pos = np.array([site.x, site.y, site.z])
         coord.pos = np.dot(offset + pos, cell)
+        coord.tags = site.tags
 
         return coord
 
@@ -548,7 +550,7 @@ class Coord(FixedObject):
     of a process. The distinction between a Coord and a Site may seem
     superfluous but it is made to avoid data duplication.
     """
-    attributes = ['offset', 'name', 'layer', 'pos']
+    attributes = ['offset', 'name', 'layer', 'pos', 'tags']
 
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)
@@ -562,10 +564,13 @@ class Coord(FixedObject):
         self.pos = kwargs['pos'] \
                    if 'pos' in kwargs else [0, 0, 0]
 
+        self.tags = kwargs['tags'] \
+                    if 'tags' in kwargs else ''
+
     def __repr__(self):
         return '[COORD] %s.%s.%s' % (self.name,
                                      tuple(self.offset),
-                                     self.layer.name)
+                                     self.layer)
 
     def __eq__(self, other):
         return (self.layer, self.name, self.offset) == \
