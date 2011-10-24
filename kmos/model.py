@@ -116,7 +116,7 @@ class KMC_Model(multiprocessing.Process):
     def __repr__(self):
         return (repr(self.parameters) + repr(self.rate_constants))
 
-    def __del__(self):
+    def deallocate(self):
         lattice.deallocate_system()
 
     def do_steps(self, n=10000):
