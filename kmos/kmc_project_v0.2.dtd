@@ -4,16 +4,16 @@
   >
   <!ELEMENT meta EMPTY>
   <!ATTLIST meta
-    author CDATA #REQUIRED
-    debug CDATA #REQUIRED
-    email CDATA #REQUIRED
-    model_dimension CDATA #REQUIRED
-    model_name CDATA #REQUIRED
+    author CDATA #IMPLIED
+    debug CDATA #IMPLIED
+    email CDATA #IMPLIED
+    model_dimension CDATA #IMPLIED
+    model_name CDATA #IMPLIED
   >
 
   <!ELEMENT species_list (species)*>
   <!ATTLIST species_list
-    default_species CDATA #REQUIRED
+    default_species CDATA #IMPLIED
   >
   <!ELEMENT species EMPTY>
   <!ATTLIST species
