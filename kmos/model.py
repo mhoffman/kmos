@@ -56,7 +56,7 @@ try:
     import kmc_settings as settings
 except:
     print('Could not find the settings file')
-    print('The kmos_settings.py contains all changeable model parameters')
+    print('The kmc_settings.py contains all changeable model parameters')
     print('and descriptions for the representation on screen.')
     settings = None
 
