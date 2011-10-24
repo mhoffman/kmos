@@ -338,7 +338,8 @@ class ProjectTree(object):
                                                             condition_action)
                         self.add_process(process_elem)
                 elif child.tag == 'species_list':
-                    self.species_list.default_species = child.attrib['default_species']
+                    self.species_list.default_species = child.attrib['default_species'] \
+                        if 'default_species' in child.attrib else ''
                     for species in child:
                         name = species.attrib['name']
                         color = species.attrib['color']
@@ -442,6 +443,11 @@ class LayerList(FixedObject, list):
             if 'default_layer' in kwargs else 'default'
         self.representation = kwargs['representation'] \
             if 'representation' in kwargs else ''
+
+    def set_representation(self, atoms):
+        from kmos.utils import get_ase_constructor
+
+        self.representation = '[%s]' % get_ase_constructor(atoms)
 
     def generate_coord(self, terms):
         """Expecting something of the form site_name.offset.layer
