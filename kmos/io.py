@@ -899,6 +899,7 @@ def export_source(project_tree, export_dir=None):
     writer.write_lattice()
     writer.write_proclist()
     writer.write_settings()
+    project_tree.validate_model()
     return True
 
 def import_xml(filename):

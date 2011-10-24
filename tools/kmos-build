@@ -20,6 +20,13 @@
 src_files='kind_values_f2py.f90 base.f90 lattice.f90 proclist.f90'
 extra_flags='-xf95-cpp-input'
 module_name='kmc_model'
+while getopts "d" optionName
+do
+  case "${optionName}" in
+  d) extra_flags='${extra_flags} -debug all -DDEBUG'
+  esac
+done
+
 
 for src_file in ${src_files}
 do

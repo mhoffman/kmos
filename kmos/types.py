@@ -187,6 +187,8 @@ class ProjectTree(object):
         f.write(str(self))
         f.close()
 
+        self.validate_model()
+
 
     def import_xml_file(self, filename):
         """Takes a filename, validates the content against kmc_project.dtd
@@ -355,6 +357,65 @@ class ProjectTree(object):
                                                  output=True)
                         self.add_output(output_elem)
 
+    def validate_model(self):
+        pass
+        # check if all  lattice sites are unique
+        # check if all lattice names are unique
+
+        # check if all parameter names are unique
+        for x in self.get_parameters():
+            if len([y for y in self.get_parameters() if x.name == y.name]) > 1 :
+                raise UserWarning('Parameter name %s is not unique' % x.name)
+
+        # check if all process names are unique
+        for x in self.get_processes():
+            if len([y for y in self.get_processes() if x.name == y.name]) > 1 :
+                raise UserWarning('Process name %s is not unique' % x.name)
+
+        # check if all processes have at least one condition
+        for x in self.get_processes():
+            if not x.condition_list:
+                raise UserWarning('Process %s has no conditions!' % x.name)
+
+
+        # check if all processes have at least one action
+        for x in self.get_processes():
+            if not x.action_list:
+                raise UserWarning('Process %s has no action!' % x.name)
+
+        # check if conditions for each process are unique
+        for process in self.get_processes():
+            for x in process.condition_list:
+                if len([y for y in process.condition_list if x == y]) > 1 :
+                    raise UserWarning('%s of process %s is not unique!' %
+                                        (x, process.name))
+        # check if actions for each process are unique 
+        for process in self.get_processes():
+            for x in process.action_list:
+                if len([y for y in process.action_list if x == y]) > 1 :
+                    raise UserWarning('%s of process %s is not unique!' %
+                                        (x, process.name))
+        # check if all processes have a rate expression
+        for x in self.get_processes():
+            if not x.rate_constant:
+                raise UserWarning('Process %s has no rate constant defined')
+        # check if all rate expressions are valid
+
+        # check if all species have a unique name
+        for x in self.get_speciess():
+            for y in self.get_speciess():
+                if len([]) > 1 :
+                    raise UserWarning('Species %s has no unique name!' % x.name)
+                    
+        # check if all species used in condition_action are defined
+        species_names = [x.name for x in self.get_speciess()]
+        for x in self.get_processes():
+            for y in x.condition_list + x.action_list:
+                if not y.species in species_names:
+                    raise UserWarning('Species %s used by %s in process %s is not defined' % (y.species, y, x.name))
+                
+        # check if all sites in processes are defined: actions, conditions
+
 
 class Meta(object):
     """Class holding the meta-information about the kMC project
@@ -501,7 +562,11 @@ class LayerList(FixedObject, list):
         offset = np.array(coord.offset)
         cell = np.diag([self.cell_size_x, self.cell_size_y, self.cell_size_z])
         layer = filter(lambda x: x.name == coord.layer, list(self))[0]
-        site = filter(lambda x: x.name == coord.name, layer.sites)[0]
+        sites = [x for x in layer.sites  if x.name == coord.name]
+        if not sites:
+            raise UserWarning('No site names %s in %s found!' % (coord.name, layer.name))
+        else:
+            site = sites[0]
         pos = np.array([site.x, site.y, site.z])
         coord.pos = np.dot(offset + pos, cell)
         coord.tags = site.tags
@@ -608,6 +673,9 @@ class Coord(FixedObject):
     def __eq__(self, other):
         return (self.layer, self.name, self.offset) == \
                (other.layer, other.name, other.offset)
+
+    def __hash__(self):
+        return self.__repr__()
 
     def __add__(a, b):
         diff = [(x + y) for (x, y) in zip(a.offset, b.offset)]
@@ -786,6 +854,12 @@ class ConditionAction(FixedObject):
 
     def __repr__(self):
         return "[COND_ACT] Species: %s Coord:%s\n" % (self.species, self.coord)
+
+    def __eq__(self, other):
+        return self.__repr__() == other.__repr__()
+
+    def __hash__(self):
+        return self.__repr__()
 
 
 class OutputList(FixedObject, list):

@@ -737,20 +737,6 @@ class Editor(GladeDelegate):
            'If this finished successfully you can run the simulation\n' +
            'by executing "kmos view"')
 
-    def validate_model(self):
-        pass
-        # check if all  lattice sites are unique
-        # check if all lattice names are unique
-        # check if all parameter names are unique
-        # check if all process names are unique
-        # check if all processes have at least one condition
-        # check if all processes have at least one action
-        # check if all processes have a rate expression
-        # check if all rate expressions are valid
-        # check if all species have a unique name
-        # check if all species used in condition_action are defined
-        # check if all sites in processes are defined: actions, conditions
-
     def on_btn_help__clicked(self, button):
         self.toast('"Help" is not implemented, yet.')
 

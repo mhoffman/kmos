@@ -46,16 +46,17 @@ from kmos import evaluate_rate_expression
 try:
     from kmc_model import base, lattice, proclist
 except Exception, e:
+    print(e)
     print('Could not find the kmc module. The kmc implements the actual')
     print('kmc model. This can be created from a kmos xml file using')
     print('kmos-export-program.')
-    print(e)
     base = lattice = proclist = None
 
 try:
     import kmc_settings as settings
-except:
-    print('Could not find the settings file')
+except Exception, e:
+    print(e)
+    print('Could import settings file')
     print('The kmc_settings.py contains all changeable model parameters')
     print('and descriptions for the representation on screen.')
     settings = None
@@ -119,6 +120,7 @@ class KMC_Model(multiprocessing.Process):
         lattice.deallocate_system()
 
     def do_steps(self, n=10000):
+        """Runs `n` kMC steps on the model"""
         for _ in xrange(n):
             proclist.do_kmc_step()
 
