@@ -449,6 +449,33 @@ class LayerList(FixedObject, list):
 
         self.representation = '[%s]' % get_ase_constructor(atoms)
 
+    def generate_coord_set(self, size=[1,1,1], layer_name='default'):
+        """Generates a set of coordinates around unit cell of any
+        desired size. By default it includes exactly all sites in
+        the unit cell. By setting size=[2,1,1] one gets an additional
+        set in the positive and negative x-direction.
+        """
+        def drange(n):
+            return range(1-n, n)
+
+        layers = [layer for layer in self if layer.name == layer_name]
+        if layers:
+            layer = layers[0]
+        else:
+            raise UserWarning('No Layer named %s found.' % layer_name)
+
+        return [
+            self.generate_coord('%s.(%s, %s, %s).%s' % (site.name, i, j, k,
+                                                        layer_name))
+                    for i in drange(size[0])
+                    for j in drange(size[1])
+                    for k in drange(size[2])
+                    for site in layer.sites
+                ]
+
+
+
+
     def generate_coord(self, terms):
         """Expecting something of the form site_name.offset.layer
         and return a Coord object"""
