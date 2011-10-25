@@ -1,9 +1,9 @@
 model_name = 'my_model'
 simulation_size = 20
 representations = {
+    "co":"",
     "empty":"",
     "oxygen":"",
-    "co":"",
     }
 
 lattice_representation = ""

@@ -45,7 +45,7 @@ except:
 
 
 from kmos import species, units, evaluate_rate_expression
-from kmos.model import KMC_Model,\
+from kmos.run import KMC_Model,\
                        base,\
                        get_tof_names,\
                        lattice,\
