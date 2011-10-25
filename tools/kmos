@@ -20,7 +20,7 @@ import os
 import optparse
 
 parser = optparse.OptionParser(
-    """Usage: %prog [help] (edit|export|build|view) [options]""")
+    """Usage: %prog [help] (edit|import|export|build|view) [options]""")
 
 options, args = parser.parse_args()
 
@@ -44,6 +44,10 @@ if args[0] == 'help':
                         Take a kmos xml-file and export all generated
                         source code to the export-path. There it will
                         try to build the kmc_model.so.""")
+    elif args[1] == 'import':
+        print("""Usage: kmos import <xml-file> [<export-path>]
+                        Take a kmos xml-file and opens a ipython shell
+                        with the project_tree imported as pt.""")
     else:
         print("Command not know or not documented.")
 
@@ -60,6 +64,13 @@ elif args[0] == 'export':
         print('No export path provided. Exporting to %s' % out_dir)
         args.append(out_dir)
     os.system('kmos-export-program %s %s' % (args[1], args[2]))
+elif args[0] == 'import' :
+    import kmos.io
+    pt = kmos.io.import_xml(args[1])
+    from IPython.Shell import IPShellEmbed
+    IPShellEmbed(banner='Note: pt = kmos.io.import_xml(\'%s\')' % args[1])()
+
+
 elif args[0] == 'build':
     os.system('kmos-build')
 elif args[0] == 'view':
