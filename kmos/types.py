@@ -56,6 +56,7 @@ class ProjectTree(object):
     def __init__(self):
         self.meta = Meta()
         self.layer_list = LayerList()
+        self.lattice = self.layer_list
         self.parameter_list = ParameterList()
         self.species_list = SpeciesList()
         self.process_list = ProcessList()
@@ -691,7 +692,7 @@ class Coord(FixedObject):
         return Coord(name=name, layer=layer, offset=offset)
 
     def __sub__(a, b):
-        """When subtracting to lattice coordinates from each other,
+        """When subtracting two lattice coordinates from each other,
         i.e. a-b, we want to keep the name and layer from a, and just
         take the difference in supercells
         """
