@@ -955,7 +955,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         """
 
         def get_species_color(species):
-            return filter(lambda x: x.name == elem.species,
+            return filter(lambda x: x.name == species,
                                  self.project_tree.get_speciess())[0].color
 
         white = col_str2tuple('#ffffff')
