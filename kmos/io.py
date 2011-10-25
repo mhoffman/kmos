@@ -108,11 +108,7 @@ class ProcListWriter():
                 % (layer.name, i))
         out.write('integer(kind=iint), parameter, public :: default_layer = %s\n' % data.layer_list.default_layer)
         out.write('\n ! Site constants\n\n')
-        site_params = []
-        for layer in data.layer_list:
-            for site in layer.sites:
-                site_params.append((site.name, layer.name, (site.x, site.y, site.z)))
-
+        site_params = self._get_site_params()
         out.write(('real(kind=rsingle), dimension(3,3), public :: unit_cell_size = 0.\n'))
         out.write('real(kind=rsingle), dimension(%s, 3), public :: site_positions\n' % len(site_params))
         for i, (site, layer, _) in enumerate(site_params):
@@ -805,6 +801,9 @@ class ProcListWriter():
                 species.representation))
         out.write('    }\n\n')
         out.write('lattice_representation = "%s"\n\n' % data.layer_list.representation)
+        site_params = self._get_site_params()
+        out.write('site_names = %s\n' % ['%s_%s' % (x[1], x[0]) for x in site_params])
+
         out.write('parameters = {\n')
         for parameter in data.parameter_list:
             out.write(('    "%s":{"value":"%s", "adjustable":%s,'
@@ -834,6 +833,14 @@ class ProcListWriter():
                 out.write('    "%s":%s,\n' % (process.name, process.tof_count))
         out.write('    }\n\n')
         out.close()
+
+    def _get_site_params(self):
+        data = self.data
+        site_params = []
+        for layer in data.layer_list:
+            for site in layer.sites:
+                site_params.append((site.name, layer.name, (site.x, site.y, site.z)))
+        return site_params
 
     def _gpl_message(self):
         """Prints the GPL statement at the top of the source file"""
