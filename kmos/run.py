@@ -116,6 +116,19 @@ class KMC_Model(multiprocessing.Process):
     def __repr__(self):
         return (repr(self.parameters) + repr(self.rate_constants))
 
+    def get_occupation_header(self):
+        return ' '.join(['%s_%s' % (species, site)
+                           for species in sorted(settings.representations)
+                           for site in settings.site_names])
+
+    def get_tof_header(self):
+        tofs = []
+        for _, value in settings.tof_count.iteritems():
+            for name in value:
+                if name not in tofs:
+                    tofs.append(name)
+        return ' '.join(tofs)
+
     def deallocate(self):
         lattice.deallocate_system()
 
