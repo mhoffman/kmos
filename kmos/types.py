@@ -412,7 +412,7 @@ class ProjectTree(object):
         species_names = [x.name for x in self.get_speciess()]
         for x in self.get_processes():
             for y in x.condition_list + x.action_list:
-                if not y.species in species_names:
+                if not y.species.replace('$', '').replace('^', '') in species_names:
                     raise UserWarning('Species %s used by %s in process %s is not defined' % (y.species, y, x.name))
                 
         # check if all sites in processes are defined: actions, conditions

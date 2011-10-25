@@ -39,7 +39,7 @@ def test_compare_import_variants():
     os.chdir(cwd)
     assert str(pt) == str(editor.project_tree)
 
-def ftest_ml_export():
+def test_ml_export():
     cwd = os.path.abspath(os.curdir)
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -47,6 +47,8 @@ def ftest_ml_export():
     import kmos.io
     pt = kmos.io.import_xml('pdopd.xml')
     kmos.io.export_source(pt)
+    import shutil
+    shutil.rmtree('sqrt5PdO')
 
 
     os.chdir(cwd)
