@@ -46,7 +46,7 @@ then
     fcompiler="intelem"
     extra_flags=' -fast -g -Wall -fpp'
   fi
-else 
+else
   fcompiler='gfortran'
   extra_flags='-ffree-line-length-none -ffree-form -xf95-cpp-input -Wall -g'
 fi

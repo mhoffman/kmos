@@ -14,7 +14,7 @@ kMC models as well.
 
 kmos' goal is to significantly reduce the time you need
 to implement and run a lattice kmc simulation. However it can not help
-you plan the model. 
+you plan the model.
 
 
 kmos can be invoked directly from the command line in one of the following 
