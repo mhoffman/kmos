@@ -2,12 +2,13 @@ model_name = 'test_cli_generated_model'
 simulation_size = 20
 representations = {
     "CO":"",
-    "oxygen":"",
     "empty":"",
+    "oxygen":"",
     }
 
 lattice_representation = ""
 
+site_names = ['default_cus']
 parameters = {
     "p_CO":{"value":"0.2", "adjustable":False, "min":"0.0", "max":"0.0","scale":"log"},
     "T":{"value":"500", "adjustable":True, "min":"0.0", "max":"0.0","scale":"linear"},
