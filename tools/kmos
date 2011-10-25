@@ -41,12 +41,12 @@ if args[0] == 'help':
                         model visually""")
     elif args[1] == 'export':
         print("""Usage: kmos export <xml-file> [<export-path>]
-                        Take a kmos xml-file and export all generated
+                        Takes a kmos xml-file and exports all generated
                         source code to the export-path. There it will
                         try to build the kmc_model.so.""")
     elif args[1] == 'import':
         print("""Usage: kmos import <xml-file> [<export-path>]
-                        Take a kmos xml-file and opens a ipython shell
+                        Takes a kmos xml-file and opens an ipython shell
                         with the project_tree imported as pt.""")
     else:
         print("Command not know or not documented.")
