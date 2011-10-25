@@ -359,7 +359,20 @@ class ProjectTree(object):
                         self.add_output(output_elem)
 
     def validate_model(self):
-        pass
+        # if at least two species are defined
+        if not len(self.get_speciess()) >= 2:
+            raise UserWarning('Model has only one species.')
+        # if at least two processes are defined
+        if not len(self.get_processes()) >= 2:
+            raise UserWarning('Model has less than two processes.')
+
+        # if at least one layer is defined
+        if not len(self.get_layers()) >= 1:
+            raise UserWarning('No layer defined.')
+
+        # if a least one site if defined
+        if not len([x for x in layer.sites for layer in self.get_layers()]) >= 1:
+            raise UserWarning('No site defined.')
         # check if all  lattice sites are unique
         # check if all lattice names are unique
 
