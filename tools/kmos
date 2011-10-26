@@ -20,7 +20,7 @@ import os
 import optparse
 
 parser = optparse.OptionParser(
-    """Usage: %prog [help] (edit|import|export|build|view) [options]""")
+    """Usage: %prog [help] (edit|import|export|build|view|export-view) [options]""")
 
 options, args = parser.parse_args()
 
@@ -48,6 +48,9 @@ if args[0] == 'help':
         print("""Usage: kmos import <xml-file>
                         Takes a kmos xml-file and opens an ipython shell
                         with the project_tree imported as pt.""")
+    elif args[1] == 'export-view':
+        print("""Usage: kmos export-view <xml-file>
+                        Exports an XML file, compiles and runs the simulation.""")
     else:
         print("Command not know or not documented.")
 
@@ -74,6 +77,13 @@ elif args[0] == 'import' :
 elif args[0] == 'build':
     os.system('kmos-build')
 elif args[0] == 'view':
+    os.system('kmos-view')
+elif args[0] == 'export-view':
+    out_dir = os.path.splitext(args[1])[0]
+    print('No export path provided. Exporting to %s' % out_dir)
+    args.append(out_dir)
+    os.system('kmos-export-program %s %s' % (args[1], args[2]))
+    os.chdir(out_dir)
     os.system('kmos-view')
 
 else:

@@ -437,7 +437,7 @@ class ProjectTree(object):
                 if len([y for y in process.condition_list if x == y]) > 1 :
                     raise UserWarning('%s of process %s is not unique!' %
                                         (x, process.name))
-        # check if actions for each process are unique 
+        # check if actions for each process are unique
         for process in self.get_processes():
             for x in process.action_list:
                 if len([y for y in process.action_list if x == y]) > 1 :
@@ -454,15 +454,35 @@ class ProjectTree(object):
             for y in self.get_speciess():
                 if len([]) > 1 :
                     raise UserWarning('Species %s has no unique name!' % x.name)
-                    
+
         # check if all species used in condition_action are defined
         species_names = [x.name for x in self.get_speciess()]
         for x in self.get_processes():
             for y in x.condition_list + x.action_list:
                 if not y.species.replace('$', '').replace('^', '') in species_names:
                     raise UserWarning('Species %s used by %s in process %s is not defined' % (y.species, y, x.name))
-                
+
         # check if all sites in processes are defined: actions, conditions
+    def print_statistics(self):
+        ml = len(self.get_layers()) > 1
+        print('Statistics\n=============')
+        print('Parameters: %s' % len(self.get_parameters()))
+        print('Species: %s' % len(self.get_speciess()))
+        names = ['_'.join(x.name.split('_')[:-1]) for x in self.get_processes()]
+        names = list(set(names))
+        nrates = len(set([x.rate_constant for x in self.get_processes()]))
+        print('Processes (%s/%s/%s)\n-------------' % (len(names),
+                                                    nrates,
+                                                    len(self.get_processes())))
+        for process_type in sorted(names):
+            nprocs = len([x for x in self.get_processes() if x.name.startswith(process_type)])
+            if ml:
+                layer = process_type.split('_')[0]
+                pname = '_'.join(process_type.split('_')[1:])
+                print('\t- [%s] %s : %s' % (layer, pname, nprocs))
+
+            else:
+                print('\t- %s : %s' % (process_type, nprocs))
 
 
 class Meta(object):
@@ -553,10 +573,20 @@ class LayerList(FixedObject, list):
         self.representation = kwargs['representation'] \
             if 'representation' in kwargs else ''
 
-    def set_representation(self, atoms):
+    def set_representation(self, images):
+        """FIXME: If there is more than one representation they should be
+        sorted by their name!!!"""
         from kmos.utils import get_ase_constructor
 
-        self.representation = '[%s]' % get_ase_constructor(atoms)
+        if type(images) is list:
+            repr = '['
+            for atoms in images:
+                repr += '%s, ' % get_ase_constructor(atoms)
+            repr += ']'
+            self.representation = repr
+        else:
+
+            self.representation = '[%s]' % get_ase_constructor(images)
 
     def generate_coord_set(self, size=[1,1,1], layer_name='default'):
         """Generates a set of coordinates around unit cell of any

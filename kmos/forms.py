@@ -516,7 +516,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
 
         self.layer_nr = self.project_tree.get_layers().index(model)
 
-        self.radius_scale = 22
+        self.radius_scale = 20
         self.scale = 20
         self.offset_x, self.offset_y = (200, 200)
         self.lattice_pad.add(self.canvas)
