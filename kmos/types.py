@@ -381,7 +381,7 @@ class ProjectTree(object):
             if len([y for y in self.get_layers() if x.name == y.name]) > 1:
              raise UserWarning('Layer name "%s" is not unique.' % x.name)
 
-        # check if the default species is actually defined
+        # check if the default layer is actually defined
         if self.layer_list.default_layer not in [layer.name
                                                  for layer
                                                  in self.get_layers()]:
@@ -403,6 +403,10 @@ class ProjectTree(object):
         # if at least two species are defined
         if not len(self.get_speciess()) >= 2:
             raise UserWarning('Model has only one species.')
+
+        # if default species is defined
+        if self.species_list.default_species not in [x.name for x in self.get_speciess()]:
+            raise UserWarning('Default species "%s" not found.' % self.species_list.default_species)
 
         #################
         # PROCESSES
