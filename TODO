@@ -1,15 +1,11 @@
 Functionality
-  * fix recognition parameters to evaluate expressions in GUI
-  * fix representation of processes in GUI
+  * build standard class for model builder
+  * put test hook into netbook repository
   * put XML/DTD handling into stdlib only tools
-  * strip 'grid variables' from types and GUI
   * change book-keeping/memory management from
     process based to site based 
     (better storage for amorphous geometries)
   * write autocompletion for output fields
-  * write consistency check function that runs before
-    exporting f90 source could and give the user hints
-    about inconsistencies in the project
   * add/fix undo function to process editor
   * improve layer editor: make handling better (removing/cancelling sites)
     and make better guess for z-position of site
@@ -23,7 +19,7 @@ Project related
 
 
 Future/optional projects:
-  * Allow for non-orthogonal unit cells
+  * Explicitly allow for non-orthogonal unit cells
   * do 2D version of process editor using ASE
     facilities first: basically rid gtkcanvas 
     in favor or pygoocanvas and include atoms
