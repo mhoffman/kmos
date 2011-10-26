@@ -795,7 +795,7 @@ class ProcListWriter():
         out.write('model_name = \'%s\'\n' % self.data.meta.model_name)
         out.write('simulation_size = 20\n')
         out.write('representations = {\n')
-        for species in sorted(data.species_list):
+        for species in sorted(data.species_list, key=lambda x: x.name):
             out.write('    "%s":"%s",\n'
                 % (species.name,
                 species.representation))

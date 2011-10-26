@@ -371,25 +371,33 @@ class ProjectTree(object):
             raise UserWarning('No layer defined.')
 
         # if a least one site if defined
-        if not len([x for x in layer.sites for layer in self.get_layers()]) >= 1:
+        if not len([x  for layer in self.get_layers() for x in layer.sites]) >= 1:
             raise UserWarning('No site defined.')
         # check if all  lattice sites are unique
+        for layer in self.get_layers():
+            for x in layer.sites:
+                if len([y for y in layer.sites if x.name == y.name]) > 1 :
+                    raise UserWarning('Site "%s" in Layer "%s" is not unique' % (x.name,
+                                                                       layer.name))
         # check if all lattice names are unique
+        for x in self.get_layers():
+            if len([y for y in self.get_layers() if x.name == y.name]) > 1:
+             raise UserWarning('Layer name "%s" is not unique' % x.name)
 
         # check if all parameter names are unique
         for x in self.get_parameters():
             if len([y for y in self.get_parameters() if x.name == y.name]) > 1 :
-                raise UserWarning('Parameter name %s is not unique' % x.name)
+                raise UserWarning('Parameter name "%s" is not unique' % x.name)
 
         # check if all process names are unique
         for x in self.get_processes():
             if len([y for y in self.get_processes() if x.name == y.name]) > 1 :
-                raise UserWarning('Process name %s is not unique' % x.name)
+                raise UserWarning('Process name "%s" is not unique' % x.name)
 
         # check if all processes have at least one condition
         for x in self.get_processes():
             if not x.condition_list:
-                raise UserWarning('Process %s has no conditions!' % x.name)
+                raise UserWarning('Process "%s" has no conditions!' % x.name)
 
 
         # check if all processes have at least one action
