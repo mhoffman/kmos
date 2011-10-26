@@ -45,7 +45,7 @@ if args[0] == 'help':
                         source code to the export-path. There it will
                         try to build the kmc_model.so.""")
     elif args[1] == 'import':
-        print("""Usage: kmos import <xml-file> [<export-path>]
+        print("""Usage: kmos import <xml-file>
                         Takes a kmos xml-file and opens an ipython shell
                         with the project_tree imported as pt.""")
     else:
