@@ -876,6 +876,9 @@ class ConditionAction(FixedObject):
         return self.__repr__()
 
 
+Condition = ConditionAction
+Action = ConditionAction
+
 class OutputList(FixedObject, list):
     """A dummy class, that will hold the values which are to be
     printed to logfile.
