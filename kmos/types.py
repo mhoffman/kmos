@@ -359,13 +359,10 @@ class ProjectTree(object):
                         self.add_output(output_elem)
 
     def validate_model(self):
-        # if at least two species are defined
-        if not len(self.get_speciess()) >= 2:
-            raise UserWarning('Model has only one species.')
-        # if at least two processes are defined
-        if not len(self.get_processes()) >= 2:
-            raise UserWarning('Model has less than two processes.')
 
+        #################
+        # LATTICE
+        #################
         # if at least one layer is defined
         if not len(self.get_layers()) >= 1:
             raise UserWarning('No layer defined.')
@@ -377,17 +374,42 @@ class ProjectTree(object):
         for layer in self.get_layers():
             for x in layer.sites:
                 if len([y for y in layer.sites if x.name == y.name]) > 1 :
-                    raise UserWarning('Site "%s" in Layer "%s" is not unique' % (x.name,
+                    raise UserWarning('Site "%s" in Layer "%s" is not unique.' % (x.name,
                                                                        layer.name))
         # check if all lattice names are unique
         for x in self.get_layers():
             if len([y for y in self.get_layers() if x.name == y.name]) > 1:
-             raise UserWarning('Layer name "%s" is not unique' % x.name)
+             raise UserWarning('Layer name "%s" is not unique.' % x.name)
 
+        # check if the default species is actually defined
+        if self.layer_list.default_layer not in [layer.name
+                                                 for layer
+                                                 in self.get_layers()]:
+            raise UserWarning('Default Layer "%s" is not defined.'  %
+                              self.layer_list.default_layer)
+
+
+        #################
+        # PARAMETERS
+        #################
         # check if all parameter names are unique
         for x in self.get_parameters():
             if len([y for y in self.get_parameters() if x.name == y.name]) > 1 :
                 raise UserWarning('Parameter name "%s" is not unique' % x.name)
+
+        #################
+        # Species
+        #################
+        # if at least two species are defined
+        if not len(self.get_speciess()) >= 2:
+            raise UserWarning('Model has only one species.')
+
+        #################
+        # PROCESSES
+        #################
+        # if at least two processes are defined
+        if not len(self.get_processes()) >= 2:
+            raise UserWarning('Model has less than two processes.')
 
         # check if all process names are unique
         for x in self.get_processes():
