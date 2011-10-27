@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -12,18 +10,16 @@
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
+        URL_ROOT:    '#',
         VERSION:     '0.0.1',
-        COLLAPSE_INDEX: false,
+        COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="kmos v0.0.1 documentation" href="#" />
-    <link rel="next" title="Introduction" href="introduction.html" /> 
+    <link rel="top" title="kmos v0.0.1 documentation" href="#" /> 
   </head>
   <body>
     <div class="related">
@@ -33,11 +29,8 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="introduction.html" title="Introduction"
-             accesskey="N">next</a> |</li>
+          <a href="modindex.html" title="Global Module Index"
+             accesskey="M">modules</a> |</li>
         <li><a href="#">kmos v0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -47,40 +40,42 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="welcome-to-kmos-s-documentation">
-<h1>Welcome to kmos&#8217;s documentation!<a class="headerlink" href="#welcome-to-kmos-s-documentation" title="Permalink to this headline">¶</a></h1>
-<p>kmos is a vigorous attempt to make (lattice) kMC modelling more accessible.</p>
-<p>kmos is designed for and by kMC model developers. As of this writing there
-is no standardized way to develop kMC models, thus there is no standardized
-way to use kmos. kmos can be an Editor, an API, a viewer. However all in all
-kmos wants to save time filled with repetitive labor and enlarge your stride.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#feature-overview">Feature overview</a></li>
+  <div class="section" id="module-kmos">
+<h1>Welcome to kmos&#8217;s documentation!<a class="headerlink" href="#module-kmos" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html#installation">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html#kmc-modelling">kMC Modelling</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference.html#data-types">Data Types</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="reference.html#module-kmos.types">kmos.types</a></li>
-<li class="toctree-l2"><a class="reference internal" href="reference.html#module-kmos.io">kmos.io</a></li>
+<div class="section" id="feature-overview">
+<h2>Feature overview<a class="headerlink" href="#feature-overview" title="Permalink to this headline">¶</a></h2>
+<p>With kmos you can:</p>
+<blockquote>
+<ul class="simple">
+<li>easily create and modify kMC models through GUI</li>
+<li>store and exchange kMC models through XML</li>
+<li>generate fast, platform independent, self-contained code</li>
+<li>run kMC models through GUI or python bindings</li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="reference.html#editor-frontend">Editor frontend</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="reference.html#module-kmos.gui">kmos.gui</a></li>
-<li class="toctree-l2"><a class="reference internal" href="reference.html#module-kmos.forms">kmos.forms</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="reference.html#runtime-frontend">Runtime frontend</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="reference.html#module-kmos.model">kmos.model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="reference.html#module-kmos.view">kmos.view</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="reference.html#kmos-kmc-project-dtd">kmos kMC project DTD</a></li>
-</ul>
+</blockquote>
+<p>kmos has been developed in the context of first-principles based modelling
+of surface chemical reactions but might be of help for other types of
+kMC models as well.</p>
+<p>kmos&#8217; goal is to significantly reduce the time you need
+to implement and run a lattice kmc simulation. However it can not help
+you plan the model.</p>
+<p>kmos can be invoked directly from the command line in one of the following 
+ways:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">kmos</span> <span class="p">[</span><span class="n">help</span><span class="p">]</span> <span class="p">(</span><span class="n">edit</span><span class="o">|</span><span class="n">export</span><span class="o">|</span><span class="n">view</span><span class="p">)</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span>
+</pre></div>
 </div>
+<p>or it may be used as an API via the kmos module.</p>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference external" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference external" href="modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference external" href="search.html"><em>Search Page</em></a></li>
+</ul>
 </div>
 
 
@@ -89,27 +84,33 @@ kmos wants to save time filled with repetitive labor and enlarge your stride.</p
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-  <h4>Next topic</h4>
-  <p class="topless"><a href="introduction.html"
-                        title="next chapter">Introduction</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/index.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" size="18" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+            <h3><a href="#">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">Welcome to kmos&#8217;s documentation!</a><ul>
+<li><a class="reference external" href="#feature-overview">Feature overview</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="_sources/index.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -121,17 +122,14 @@ kmos wants to save time filled with repetitive labor and enlarge your stride.</p
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
+          <a href="modindex.html" title="Global Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="introduction.html" title="Introduction"
-             >next</a> |</li>
         <li><a href="#">kmos v0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2009-2011, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+      &copy; Copyright 2011, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
     </div>
   </body>
 </html>
