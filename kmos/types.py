@@ -140,6 +140,8 @@ class ProjectTree(object):
             self.layer_list.cell_size_z))
             lattice_elem.set('default_layer',
                              self.layer_list.default_layer)
+            lattice_elem.set('substrate_layer',
+                             self.layer_list.substrate_layer)
         if hasattr(self.layer_list, 'representation'):
             lattice_elem.set('representation', self.layer_list.representation)
         for layer in self.get_layers():
@@ -236,6 +238,10 @@ class ProjectTree(object):
                     self.layer_list.cell_size_y = cell_size[1]
                     self.layer_list.cell_size_z = cell_size[2]
                     self.layer_list.default_layer = child.attrib['default_layer']
+                    if 'substrate_layer' in child.attrib:
+                        self.layer_list.substrate_layer = child.attrib['substrate_layer']
+                    else:
+                        self.layer_list.substrate_layer = child.attrib['default_layer']
                     if 'representation' in child.attrib:
                         self.layer_list.representation = child.attrib[
                                                              'representation']
@@ -559,7 +565,7 @@ class LayerList(FixedObject, list):
     """A list of layers
     """
     attributes = ['name', 'cell_size_x', 'cell_size_y', 'cell_size_z',
-                  'default_layer', 'representation']
+                  'default_layer', 'substrate_layer', 'representation']
 
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)
@@ -572,6 +578,8 @@ class LayerList(FixedObject, list):
             if 'cell_size_z' in kwargs else 1.
         self.default_layer = kwargs['default_layer'] \
             if 'default_layer' in kwargs else 'default'
+        self.default_layer = kwargs['substrate_layer'] \
+            if 'substrate_layer' in kwargs else 'default'
         self.representation = kwargs['representation'] \
             if 'representation' in kwargs else ''
 

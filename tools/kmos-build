@@ -41,12 +41,10 @@ then
   if [ "$(uname -m)" = "i686" ]
   then
     fcompiler="intel"
-    extra_flags="-fpp -g -Wall  -I/opt/intel/fc/10.1.018/lib"
-    #extra_flags="-fast -fpp -g -Wall  -I/opt/intel/fc/10.1.018/lib"
+    extra_flags="-fast -fpp -g -Wall  -I/opt/intel/fc/10.1.018/lib"
   else
     fcompiler="intelem"
-    extra_flags=' -g -Wall -fpp'
-    #extra_flags=' -fast -g -Wall -fpp'
+    extra_flags=' -fast -g -Wall -fpp'
   fi
 else
   fcompiler='gfortran'

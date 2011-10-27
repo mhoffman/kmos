@@ -35,6 +35,7 @@
   <!ATTLIST lattice
     cell_size CDATA #REQUIRED
     default_layer CDATA #REQUIRED
+    substrate_layer CDATA #IMPLIED
     representation CDATA #IMPLIED
   >
   <!ELEMENT layer (site)*>
