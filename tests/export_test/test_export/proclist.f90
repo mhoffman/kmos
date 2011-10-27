@@ -322,7 +322,7 @@ subroutine init(input_system_size, system_name, layer, species, no_banner)
         print *, "and implemented with the help of kmos,"
         print *, "which is distributed under"
         print *, "GNU/GPL Version 3 (C) Max J. Hoffmann mjhoffmann@gmail.com"
-        print *, "Currently kmos is in a very alphaish stage and there is"
+        print *, "kmos is in a very betaish stage and there is"
         print *, "ABSOLUTELY NO WARRANTY for correctness."
         print *, "Please check back with the author prior to using"
         print *, "results in a publication or presentation."
