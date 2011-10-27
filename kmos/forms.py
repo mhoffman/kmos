@@ -570,22 +570,24 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                               width=self.scale * atoms.cell[0, 0],
                               stroke_color='black',)
 
-        for site in self.model.sites:
-            X = self.scale * np.dot(site.x, atoms.cell[0, 0])
-            Y = self.scale * np.dot(1 - site.y, atoms.cell[1, 1])
-            o = goocanvas.Ellipse(parent=self.root,
-                                  center_x=self.offset_x + X,
-                                  center_y=self.offset_y + Y,
-                                  radius_x=.3 * self.radius_scale,
-                                  radius_y=.3 * self.radius_scale,
-                                  stroke_color='black',
-                                  fill_color='white',
-                                  line_width=1.0,)
+        for x in range(-1, 2):
+            for y in range(-1, 2):
+                for site in self.model.sites:
+                    X = self.scale * np.dot(site.x + x, atoms.cell[0, 0])
+                    Y = self.scale * np.dot(1 - (site.y +y), atoms.cell[1, 1])
+                    o = goocanvas.Ellipse(parent=self.root,
+                                          center_x=self.offset_x + X,
+                                          center_y=self.offset_y + Y,
+                                          radius_x=.3 * self.radius_scale,
+                                          radius_y=.3 * self.radius_scale,
+                                          stroke_color='black',
+                                          fill_color='white',
+                                          line_width=1.0,)
 
-            o.site = site
-            o.connect('query-tooltip', self.query_tooltip)
-        self.canvas.hide()
-        self.canvas.show()
+                    o.site = site
+                    o.connect('query-tooltip', self.query_tooltip)
+                self.canvas.hide()
+                self.canvas.show()
 
     def query_tooltip(self, canvas, widget, tooltip):
         tooltip.set_text(widget.site.name)
