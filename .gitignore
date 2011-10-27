@@ -1,6 +1,6 @@
 *.pyc
 tags
-build
 dist
 MANIFEST
+/build
 example_projects
