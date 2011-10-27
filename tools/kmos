@@ -21,6 +21,7 @@ import optparse
 
 parser = optparse.OptionParser(
     """Usage: %prog [help] (edit|import|export|build|view|export-view) [options]""")
+parser.add_option('-s', '--source-only', dest='source_only', action='store_true', default=False)
 
 options, args = parser.parse_args()
 
@@ -66,7 +67,10 @@ elif args[0] == 'export':
         out_dir = os.path.splitext(args[1])[0]
         print('No export path provided. Exporting to %s' % out_dir)
         args.append(out_dir)
-    os.system('kmos-export-program %s %s' % (args[1], args[2]))
+    if options.source_only:
+        os.system('kmos-export-program -s %s %s' % (args[1], args[2]))
+    else:
+        os.system('kmos-export-program %s %s' % (args[1], args[2]))
 elif args[0] == 'import' :
     import kmos.io
     pt = kmos.io.import_xml(args[1])
