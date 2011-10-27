@@ -1,5 +1,5 @@
 MANIFEST
-build
+/build
 dist
 example_projects
 kmos
