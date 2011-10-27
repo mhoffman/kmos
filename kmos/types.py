@@ -464,18 +464,20 @@ class ProjectTree(object):
 
         # check if all sites in processes are defined: actions, conditions
     def print_statistics(self):
+        get_name = lambda x: '_'.join(x.name.split('_')[:-1])
         ml = len(self.get_layers()) > 1
         print('Statistics\n=============')
         print('Parameters: %s' % len(self.get_parameters()))
         print('Species: %s' % len(self.get_speciess()))
-        names = ['_'.join(x.name.split('_')[:-1]) for x in self.get_processes()]
+
+        names = [get_name(x) for x in self.get_processes()]
         names = list(set(names))
         nrates = len(set([x.rate_constant for x in self.get_processes()]))
         print('Processes (%s/%s/%s)\n-------------' % (len(names),
                                                     nrates,
                                                     len(self.get_processes())))
         for process_type in sorted(names):
-            nprocs = len([x for x in self.get_processes() if x.name.startswith(process_type)])
+            nprocs = len([x for x in self.get_processes() if get_name(x) == process_type])
             if ml:
                 layer = process_type.split('_')[0]
                 pname = '_'.join(process_type.split('_')[1:])
