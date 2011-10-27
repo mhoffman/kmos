@@ -780,6 +780,7 @@ class Coord(FixedObject):
             a_name = '%s_%s' % (a.layer, a.name)
         else:
             a_name = a.name
+
         if b.layer:
             b_name = '%s_%s' % (b.layer, b.name)
         else:
@@ -793,7 +794,7 @@ class Coord(FixedObject):
         return Coord(name=name, layer=layer, offset=offset)
 
     def rsub_ff(self):
-        """Build term as if subtrating on the right, omit '-' if 0 anyway
+        """Build term as if subtracting on the right, omit '-' if 0 anyway
         (in Fortran Form :-)
         """
         ff = self.ff()

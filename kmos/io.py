@@ -677,12 +677,14 @@ class ProcListWriter():
                             out.write('    call replace_species(site, species, null_species)\n\n')
 
                         for process in data.process_list:
-                            for condition in filter(lambda condition: condition.coord.name == site.name, process.condition_list):
+                            for condition in filter(lambda condition: condition.coord.name == site.name and
+                                                                      condition.coord.layer == layer.name,
+                                                                      process.condition_list):
                                 if special_op == 'create':
                                     other_conditions = [ConditionAction(
                                             species=other_condition.species,
-                                            coord=('site%s' % (other_condition.coord - condition.coord).radd_ff())) for
-                                            other_condition in process.condition_list]
+                                            coord=('site%s' % (other_condition.coord - condition.coord).radd_ff()))
+                                            for other_condition in process.condition_list]
                                     enabled_procs.append((other_conditions, (process.name,
                                         'site%s' % (process.executing_coord()
                                         - condition.coord).radd_ff(), True)))
@@ -701,7 +703,6 @@ class ProcListWriter():
                                 + '    endif\n\n') % {'coord': (coord).radd_ff(), 'proc': process.name})
                         if enabled_procs:
                             out.write('    ! enable affected processes\n')
-
                             self._write_optimal_iftree(items=enabled_procs, indent=4, out=out)
                         out.write('\nend subroutine %s\n\n' % routine_name)
         out.write('end module proclist\n')
