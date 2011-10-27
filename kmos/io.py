@@ -481,7 +481,7 @@ class ProcListWriter():
             + '        print *, "and implemented with the help of kmos,"\n'
             + '        print *, "which is distributed under"\n'
             + '        print *, "GNU/GPL Version 3 (C) Max J. Hoffmann mjhoffmann@gmail.com"\n'
-            + '        print *, "Currently kmos is in a very alphaish stage and there is"\n'
+            + '        print *, "kmos is in a very betaish stage and there is"\n'
             + '        print *, "ABSOLUTELY NO WARRANTY for correctness."\n'
             + '        print *, "Please check back with the author prior to using"\n'
             + '        print *, "results in a publication or presentation."\n\n'\
