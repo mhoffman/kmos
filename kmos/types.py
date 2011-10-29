@@ -1,3 +1,4 @@
+import pdb
 #!/usr/bin/env python
 """Holds all the data models used in kmos.
 """
@@ -241,12 +242,13 @@ class ProjectTree(object):
                     if 'substrate_layer' in child.attrib:
                         self.layer_list.substrate_layer = child.attrib['substrate_layer']
                     else:
-                        self.layer_list.substrate_layer = child.attrib['default_layer']
+                        self.layer_list.substrate_layer = self.layer_list.default_layer
                     if 'representation' in child.attrib:
                         self.layer_list.representation = child.attrib[
                                                              'representation']
                     else:
                         self.layer_list.representation = ''
+
                     for elem in child:
                         if elem.tag == 'layer':
                             name = elem.attrib['name']
@@ -578,7 +580,7 @@ class LayerList(FixedObject, list):
             if 'cell_size_z' in kwargs else 1.
         self.default_layer = kwargs['default_layer'] \
             if 'default_layer' in kwargs else 'default'
-        self.default_layer = kwargs['substrate_layer'] \
+        self.substrate_layer = kwargs['substrate_layer'] \
             if 'substrate_layer' in kwargs else 'default'
         self.representation = kwargs['representation'] \
             if 'representation' in kwargs else ''

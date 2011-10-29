@@ -438,6 +438,8 @@ class ProcListWriter():
             out.write('    case(%s)\n' % process.name)
             if data.meta.debug > 0:
                 out.write('print *,"PROCLIST/RUN_PROC_NR/NAME","%s"\n' % process.name)
+                out.write('print *,"PROCLIST/RUN_PROC_NR/LSITE","lsite"\n')
+                out.write('print *,"PROCLIST/RUN_PROC_NR/SITE","site"\n')
             for action in process.action_list:
                 if action.coord == process.executing_coord():
                     relative_coord = 'lsite'
@@ -578,7 +580,8 @@ class ProcListWriter():
                             out.write('    call replace_species(site, %s, %s)\n\n' % (species.name, data.species_list.default_species))
                         for process in data.process_list:
                             for condition in process.condition_list:
-                                if site.name == condition.coord.name:
+                                if site.name == condition.coord.name and \
+                                   layer.name == condition.coord.layer:
                                     # first let's check if we could be enabling any site
                                     # this can be the case if we put down a particle, and
                                     # it is the right one, or if we lift one up and the process
