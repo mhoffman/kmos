@@ -19,11 +19,32 @@
 import os
 import optparse
 
+usage = {}
+usage['edit'] = """kmos edit <xml-file>
+                        open the kmos xml-file in a GUI to edit
+                        the model."""
+
+usage['view'] = """kmos view
+                        Except a kmc_model.so and kmc_settings in the
+                        same directory and will start to simulate the
+                        model visually"""
+usage['export'] = """kmos export <xml-file> [<export-path>]
+                        Takes a kmos xml-file and exports all generated
+                        source code to the export-path. There it will
+                        try to build the kmc_model.so."""
+usage['import'] = """kmos import <xml-file>
+                        Takes a kmos xml-file and opens an ipython shell
+                        with the project_tree imported as pt."""
+usage['export-view'] = """kmos export-view <xml-file>
+                        Exports an XML file, compiles and runs the simulation."""
+
 parser = optparse.OptionParser(
-    """Usage: %prog [help] (edit|import|export|build|view|export-view) [options]""")
+    'Usage: %prog [help] (' + '|'.join(usage.keys()) + ') [options]' )
+
 parser.add_option('-s', '--source-only', dest='source_only', action='store_true', default=False)
 
 options, args = parser.parse_args()
+
 
 if len(args) < 1:
     parser.error('Command expected')
@@ -31,29 +52,10 @@ if len(args) < 1:
 if args[0] == 'help':
     if len(args) < 2:
         parser.error('Which help do you  want?')
-    if args[1] == 'edit':
-        print("""Usage: kmos edit <xml-file>
-                        open the kmos xml-file in a GUI to edit
-                        the model.""")
-    elif args[1] == 'view':
-        print("""Usage: kmos view
-                        Except a kmc_model.so and kmc_settings in the
-                        same directory and will start to simulate the
-                        model visually""")
-    elif args[1] == 'export':
-        print("""Usage: kmos export <xml-file> [<export-path>]
-                        Takes a kmos xml-file and exports all generated
-                        source code to the export-path. There it will
-                        try to build the kmc_model.so.""")
-    elif args[1] == 'import':
-        print("""Usage: kmos import <xml-file>
-                        Takes a kmos xml-file and opens an ipython shell
-                        with the project_tree imported as pt.""")
-    elif args[1] == 'export-view':
-        print("""Usage: kmos export-view <xml-file>
-                        Exports an XML file, compiles and runs the simulation.""")
+    if args[1] in usage:
+        print('Usage: %s\n' % usage[args[1]])
     else:
-        print("Command not know or not documented.")
+        print("Command not known or not documented.")
 
 elif args[0] == 'edit':
     if len(args) < 2:
@@ -81,12 +83,11 @@ elif args[0] == 'import' :
     else:
         from IPython.frontend.terminal.embed import InteractiveShellEmbed
         InteractiveShellEmbed(banner1='Note: pt = kmos.io.import_xml(\'%s\')' % args[1])()
-
-
 elif args[0] == 'build':
     os.system('kmos-build')
 elif args[0] == 'view':
-    os.system('kmos-view')
+    from kmos.view import main
+    main()
 elif args[0] == 'export-view':
     out_dir = os.path.splitext(args[1])[0]
     print('No export path provided. Exporting to %s' % out_dir)

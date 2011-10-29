@@ -339,3 +339,17 @@ class KMC_Viewer():
         base.deallocate_system()
         gtk.main_quit()
         return True
+
+
+
+def main():
+    from kmos.view import KMC_Viewer
+    import gtk
+    import gobject
+    gobject.threads_init()
+    viewer = KMC_Viewer()
+    viewer.model.start()
+    viewer.viewbox.start()
+    print('started model and viewbox processes')
+    gtk.main()
+    print('gtk.main stopped')

@@ -39,7 +39,7 @@
        [ 0.4     ,  0.8     ,  0.      ],
        [ 0.2     ,  0.4     ,  0.      ],
        [ 0.      ,  0.      ,  0.      ],
-       [ 0.8     ,  0.6     ,  0.      ]]))]">
+       [ 0.8     ,  0.6     ,  0.      ]]))]" substrate_layer="default">
         <layer color="#ffffff" name="Pd100">
             <site default_species="empty" tags="strongbridge CO" type="bridge2" vector="0.5992575 0.700819 0.354757545624"/>
             <site default_species="empty" tags="weakbridge CO" type="bridge3" vector="0.291141 0.5970815 0.354671545624"/>

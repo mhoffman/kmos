@@ -20,6 +20,7 @@ def test_import_export():
     pt.import_xml_file('default.xml')
     kmos.io.export_source(pt, TEST_DIR)
     for filename in ['base', 'lattice', 'proclist']:
+        print(filename)
         assert filecmp.cmp(os.path.join(REFERENCE_DIR, '%s.f90' % filename),
                           os.path.join(TEST_DIR, '%s.f90' % filename))
 

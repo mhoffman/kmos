@@ -14,19 +14,5 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
-
-from kmos.view import KMC_Viewer
-import gtk
-import gobject
-
-def main():
-    gobject.threads_init()
-    viewer = KMC_Viewer()
-    viewer.model.start()
-    viewer.viewbox.start()
-    print('started model and viewbox processes')
-    gtk.main()
-    print('gtk.main stopped')
-
-if __name__ == '__main__':
-    main()
+from kmos.view import main
+main()

@@ -5,7 +5,7 @@ With kmos you can:
 
     * easily create and modify kMC models through GUI
     * store and exchange kMC models through XML
-    * generate fast, platform independent, self-contained code
+    * generate fast, platform independent, self-contained code [#code]_
     * run kMC models through GUI or python bindings
 
 kmos has been developed in the context of first-principles based modelling
@@ -17,12 +17,17 @@ to implement and run a lattice kmc simulation. However it can not help
 you plan the model.
 
 
-kmos can be invoked directly from the command line in one of the following 
+kmos can be invoked directly from the command line in one of the following
 ways::
 
     kmos [help] (edit|export|view) [options]
 
 or it may be used as an API via the kmos module.
+
+.. rubric:: Footnotes
+
+.. [#code] The source code is generated in Fortran90, written in a modular
+            fashion. Python bindings are generated using `f2py  <http://cens.ioc.ee/projects/f2py2e/>`_.
 """
 
 #    Copyright 2009-2011 Max J. Hoffmann (mjhoffmann@gmail.com)

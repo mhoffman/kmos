@@ -59,6 +59,7 @@ integer(kind=iint), parameter, public :: nr_of_layers = 1
 integer(kind=iint), parameter, public :: model_dimension = 2
 integer(kind=iint), parameter, public :: default = 0
 integer(kind=iint), parameter, public :: default_layer = default
+integer(kind=iint), parameter, public :: substrate_layer = default
 
  ! Site constants
 
