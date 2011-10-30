@@ -1,4 +1,5 @@
 Functionality
+  * add a tags field to all entities: parameters, process, species, layer
   * build standard class for model builder
   * put test hook into netbook repository
   * put XML/DTD handling into stdlib only tools
