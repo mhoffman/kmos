@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-A python representation of a kMC model. The actual model is
+A front-end module to run a compiled kMC model. The actual model is
 imported in kmc_model.so and all parameters are stored in kmc_settings.py.
 
 The model can be used directly like so::
@@ -14,7 +14,7 @@ The model can be used directly like so::
 
 which, of course can also be part of a python script.
 
-The model also be run in a different process using the
+The model can also be run in a different process using the
 multiprocessing module. This mode is designed for use with
 a GUI so that the CPU intensive kMC integration can run at
 full throttle without impeding the front-end. Interaction with
