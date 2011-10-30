@@ -768,3 +768,33 @@ class Editor(GladeDelegate):
         # Need to return true, or otherwise the window manager destroys
         # the windows anyways
         return True
+
+
+def main():
+    import optparse
+    import kmos.gui
+
+    parser = optparse.OptionParser()
+    parser.add_option('-o', '--open',
+                      dest='xml_file',
+                      help='Immediately import kmos XML file')
+    parser.add_option('-x', '--export-dir',
+                      dest='export_dir',
+                      type=str)
+    (options, args) = parser.parse_args()
+    editor = kmos.gui.Editor()
+    if len(args) >= 2:
+        options.xml_file = args[1]
+
+    if options.xml_file:
+        editor.import_xml_file(options.xml_file)
+        editor.toast('Imported %s' % options.xml_file)
+    else:
+        print('No XML file provided, starting a new model.')
+        editor.add_defaults()
+        editor.saved_state = str(editor.project_tree)
+    if hasattr(options, 'export_dir') and options.export_dir:
+        print('Exporting right-away')
+        editor.on_btn_export_src__clicked(button='', export_dir=options.export_dir)
+        exit()
+    editor.show_and_loop()

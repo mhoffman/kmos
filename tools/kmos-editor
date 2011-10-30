@@ -14,35 +14,5 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
-
-def main():
-    import optparse
-
-    import kmos.gui
-
-    parser = optparse.OptionParser()
-    parser.add_option('-o', '--open',
-                      dest='xml_file',
-                      help='Immediately import kmos XML file')
-    parser.add_option('-x', '--export-dir',
-                      dest='export_dir',
-                      type=str)
-    (options, args) = parser.parse_args()
-    editor = kmos.gui.Editor()
-    if len(args) >= 1:
-        options.xml_file = args[0]
-
-    if options.xml_file:
-        editor.import_xml_file(options.xml_file)
-        editor.toast('Imported %s' % options.xml_file)
-    else:
-        editor.add_defaults()
-        editor.saved_state = str(editor.project_tree)
-    if hasattr(options, 'export_dir') and options.export_dir:
-        print('Exporting right-away')
-        editor.on_btn_export_src__clicked(button='', export_dir=options.export_dir)
-        exit()
-    editor.show_and_loop()
-
-if __name__ == '__main__':
-    main()
+from kmos.gui import main
+main()
