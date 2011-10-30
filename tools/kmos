@@ -77,12 +77,13 @@ elif args[0] == 'import' :
     import kmos.io
     pt = kmos.io.import_xml(args[1])
     import IPython
-    if map(int, IPython.release.version.split('.') ) < [0, 11]:
-        from IPython.Shell import IPShellEmbed
-        IPShellEmbed(banner='Note: pt = kmos.io.import_xml(\'%s\')' % args[1])()
-    else:
+    if hasattr(IPython, 'release') and \
+       map(int, IPython.release.version.split('.') ) > [0, 11]:
         from IPython.frontend.terminal.embed import InteractiveShellEmbed
         InteractiveShellEmbed(banner1='Note: pt = kmos.io.import_xml(\'%s\')' % args[1])()
+    else:
+        from IPython.Shell import IPShellEmbed
+        IPShellEmbed(banner='Note: pt = kmos.io.import_xml(\'%s\')' % args[1])()
 elif args[0] == 'build':
     os.system('kmos-build')
 elif args[0] == 'view':
