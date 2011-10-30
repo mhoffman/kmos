@@ -51,7 +51,6 @@
 <h1>Data Types<a class="headerlink" href="#data-types" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-kmos.types">
 <h2>kmos.types<a class="headerlink" href="#module-kmos.types" title="Permalink to this headline">¶</a></h2>
-<p>Holds all the data models used in kmos.</p>
 <dl class="class">
 <dt id="kmos.types.ProjectTree">
 <em class="property">class </em><tt class="descclassname">kmos.types.</tt><tt class="descname">ProjectTree</tt><a class="headerlink" href="#kmos.types.ProjectTree" title="Permalink to this definition">¶</a></dt>
@@ -328,8 +327,88 @@ process per line in the form:</p>
 </div>
 <div class="section" id="runtime-frontend">
 <h1>Runtime frontend<a class="headerlink" href="#runtime-frontend" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="kmos-model">
-<h2>kmos.model<a class="headerlink" href="#kmos-model" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-kmos.run">
+<h2>kmos.run<a class="headerlink" href="#module-kmos.run" title="Permalink to this headline">¶</a></h2>
+<p>A python representation of a kMC model. The actual model is
+imported in kmc_model.so and all parameters are stored in kmc_settings.py.</p>
+<p>The model can be used directly like so:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">kmos.model</span> <span class="kn">import</span> <span class="n">KMC_Model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">KMC_Model</span><span class="p">()</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="mi">500</span>
+<span class="n">model</span><span class="o">.</span><span class="n">do_steps</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">view</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>which, of course can also be part of a python script.</p>
+<p>The model also be run in a different process using the
+multiprocessing module. This mode is designed for use with
+a GUI so that the CPU intensive kMC integration can run at
+full throttle without impeding the front-end. Interaction with
+the model happens through Queues.</p>
+<dl class="class">
+<dt id="kmos.run.KMC_Model">
+<em class="property">class </em><tt class="descclassname">kmos.run.</tt><tt class="descname">KMC_Model</tt><big>(</big><em>image_queue=None</em>, <em>parameter_queue=None</em>, <em>signal_queue=None</em>, <em>size=None</em>, <em>system_name='kmc_model'</em>, <em>banner=True</em>, <em>print_rates=True</em><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Front end to initialize and run kMC model using python bindings.</p>
+<dl class="method">
+<dt id="kmos.run.KMC_Model.__repr__">
+<tt class="descname">__repr__</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd>Print short summary of current parameters and rate
+constants. It is advisable to include this at the beginning
+of every generated data file for later reconstruction</dd></dl>
+
+<dl class="method">
+<dt id="kmos.run.KMC_Model.deallocate">
+<tt class="descname">deallocate</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.deallocate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deallocate all arrays that are allocated
+by the Fortran module. This needs to be called
+whenever more than one simulation is started
+from one process.</p>
+<p>Note that the currenty state and history of
+the system is lost after calling this method.</p>
+<p>Note: explicit invocation was chosen over the
+__del__ method because there seems to easy
+portable way to control garbage collection.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kmos.run.KMC_Model.do_steps">
+<tt class="descname">do_steps</tt><big>(</big><em>n=10000</em><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.do_steps" title="Permalink to this definition">¶</a></dt>
+<dd>Propagate the model <cite>n</cite> steps.</dd></dl>
+
+<dl class="method">
+<dt id="kmos.run.KMC_Model.get_atoms">
+<tt class="descname">get_atoms</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.get_atoms" title="Permalink to this definition">¶</a></dt>
+<dd>Return an ASE Atoms object with additional 
+information such as coverage and Turn-over-frequencies
+attached.</dd></dl>
+
+<dl class="method">
+<dt id="kmos.run.KMC_Model.get_occupation_header">
+<tt class="descname">get_occupation_header</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.get_occupation_header" title="Permalink to this definition">¶</a></dt>
+<dd>Returns the names of the fields returned by
+self.get_atoms().occupation.</dd></dl>
+
+<dl class="method">
+<dt id="kmos.run.KMC_Model.get_tof_header">
+<tt class="descname">get_tof_header</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.get_tof_header" title="Permalink to this definition">¶</a></dt>
+<dd>Returns the names of the fields returned by
+self.get_atoms().tof_data.</dd></dl>
+
+<dl class="method">
+<dt id="kmos.run.KMC_Model.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.run" title="Permalink to this definition">¶</a></dt>
+<dd>Runs the model indefinitely. To control the
+simulations, model must have been initialized
+with proper Queues.</dd></dl>
+
+<dl class="method">
+<dt id="kmos.run.KMC_Model.view">
+<tt class="descname">view</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.view" title="Permalink to this definition">¶</a></dt>
+<dd>Visualize the current configuration of the model using ASE ag.</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-kmos.view">
 <h2>kmos.view<a class="headerlink" href="#module-kmos.view" title="Permalink to this headline">¶</a></h2>
@@ -374,7 +453,7 @@ the DTD below.</p>
 </ul>
 </li>
 <li><a class="reference external" href="#runtime-frontend">Runtime frontend</a><ul>
-<li><a class="reference external" href="#kmos-model">kmos.model</a></li>
+<li><a class="reference external" href="#module-kmos.run">kmos.run</a></li>
 <li><a class="reference external" href="#module-kmos.view">kmos.view</a></li>
 </ul>
 </li>

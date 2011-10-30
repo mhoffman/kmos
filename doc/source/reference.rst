@@ -52,10 +52,14 @@ Runtime frontend
 ================
 
 
-kmos.model
+kmos.run
 ==========
 
-.. automodule:: kmos.model
+.. automodule:: kmos.run
+.. autoclass:: kmos.run.KMC_Model
+   :members: __repr__, deallocate, do_steps, get_atoms, 
+             get_occupation_header, get_tof_header,
+             run, view
 
 kmos.view
 =========
