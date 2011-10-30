@@ -247,6 +247,9 @@ class KMC_Model(multiprocessing.Process):
 
         return atoms
 
+    def xml(self):
+        return settings.xml
+
 
 class Model_Parameters(object):
     def __init__(self, print_rates=True):

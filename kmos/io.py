@@ -837,7 +837,7 @@ class ProcListWriter():
             if process.tof_count is not None:
                 out.write('    "%s":%s,\n' % (process.name, process.tof_count))
         out.write('    }\n\n')
-        out.write('xml = """%s\n"""\n' % data)
+        out.write('xml = """%s"""\n' % data)
 
         out.close()
 
@@ -882,8 +882,8 @@ def export_source(project_tree, export_dir=None):
     """Export a kmos project into Fortran 90 code that can be readily
     compiled using f2py.  The model contained in project_tree
     will be stored under the directory export_dir. export_dir will
-    be created if it does not exist. An XML
-    file of the model will also be exported.
+    be created if it does not exist. The XML representation of the
+    model will be included in the kmc_settings.py module.
     """
     if export_dir is None:
         export_dir = project_tree.meta.model_name
