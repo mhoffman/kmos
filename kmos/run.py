@@ -63,6 +63,7 @@ except Exception, e:
 
 
 class KMC_Model(multiprocessing.Process):
+    """Front end to initialize and run kMC model using python bindings."""
     def __init__(self, image_queue=None,
                        parameter_queue=None,
                        signal_queue=None,
@@ -114,14 +115,24 @@ class KMC_Model(multiprocessing.Process):
         set_rate_constants(settings.parameters, self.print_rates)
 
     def __repr__(self):
+        """Print short summary of current parameters and rate
+        constants. It is advisable to include this at the beginning
+        of every generated data file for later reconstruction
+        """
         return (repr(self.parameters) + repr(self.rate_constants))
 
     def get_occupation_header(self):
+        """Returns the names of the fields returned by
+        self.get_atoms().occupation.
+        """
         return ' '.join(['%s_%s' % (species, site)
                            for species in sorted(settings.representations)
                            for site in settings.site_names])
 
     def get_tof_header(self):
+        """Returns the names of the fields returned by
+        self.get_atoms().tof_data.
+        """
         tofs = []
         for _, value in settings.tof_count.iteritems():
             for name in value:
@@ -130,14 +141,30 @@ class KMC_Model(multiprocessing.Process):
         return ' '.join(tofs)
 
     def deallocate(self):
+        """Deallocate all arrays that are allocated
+        by the Fortran module. This needs to be called
+        whenever more than one simulation is started
+        from one process.
+
+        Note that the currenty state and history of
+        the system is lost after calling this method.
+
+        Note: explicit invocation was chosen over the
+        __del__ method because there seems to easy
+        portable way to control garbage collection.
+        """
+
         lattice.deallocate_system()
 
     def do_steps(self, n=10000):
-        """Runs `n` kMC steps on the model"""
+        """Propagate the model `n` steps."""
         for _ in xrange(n):
             proclist.do_kmc_step()
 
     def run(self):
+        """Runs the model indefinitely. To control the
+        simulations, model must have been initialized
+        with proper Queues."""
         while True:
             for _ in xrange(500):
                 proclist.do_kmc_step()
@@ -166,10 +193,14 @@ class KMC_Model(multiprocessing.Process):
                 set_rate_constants(parameters, self.print_rates)
 
     def view(self):
+        """Visualize the current configuration of the model using ASE ag."""
         ase = import_ase()
         ase.visualize.view(self.get_atoms())
 
     def get_atoms(self):
+        """Return an ASE Atoms object with additional 
+        information such as coverage and Turn-over-frequencies
+        attached."""
         ase = import_ase()
         atoms = ase.atoms.Atoms()
         atoms.calc = None
