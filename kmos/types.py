@@ -92,6 +92,11 @@ class ProjectTree(object):
     def _get_xml_string(self):
         """Produces an XML representation of the project data
         """
+        return prettify_xml(self._get_etree_xml())
+
+    def _get_etree_xml(self):
+        """Produces an ElemenTree object
+        representing the ProjectTree"""
         # build XML Tree
         root = ET.Element('kmc')
         root.set('version', str(XML_API_VERSION))
@@ -184,7 +189,7 @@ class ProjectTree(object):
             if output.output:
                 output_elem = ET.SubElement(output_list, 'output')
                 output_elem.set('item', output.name)
-        return prettify_xml(root)
+        return root
 
     def export_xml_file(self, filename):
         f = file(filename, 'w')

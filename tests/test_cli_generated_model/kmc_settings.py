@@ -53,5 +53,4 @@ xml = """<?xml version="1.0" ?>
     </process_list>
     <output_list/>
 </kmc>
-
 """

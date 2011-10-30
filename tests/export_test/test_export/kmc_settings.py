@@ -317,5 +317,4 @@ xml = """<?xml version="1.0" ?>
         <output item="walltime"/>
     </output_list>
 </kmc>
-
 """
