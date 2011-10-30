@@ -837,6 +837,8 @@ class ProcListWriter():
             if process.tof_count is not None:
                 out.write('    "%s":%s,\n' % (process.name, process.tof_count))
         out.write('    }\n\n')
+        out.write('xml = """%s\n"""\n' % data)
+
         out.close()
 
     def _get_site_params(self):
@@ -900,12 +902,6 @@ def export_source(project_tree, export_dir=None):
         shutil.copy(os.path.join(APP_ABS_PATH, filename), export_dir)
     for filename in exec_files:
         os.chmod(os.path.join(export_dir, filename), 0755)
-
-    #export xml file itself to target dir
-    xml_export = file(
-      os.path.join(export_dir, '%s.xml' % project_tree.meta.model_name), 'w')
-    xml_export.write(str(project_tree))
-    xml_export.close()
 
     writer = ProcListWriter(project_tree, export_dir)
     writer.write_lattice()
