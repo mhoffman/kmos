@@ -37,6 +37,8 @@ the model happens through Queues.
 #    You should have received a copy of the GNU General Public License
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 
+__all__ = ['base','lattice','proclist','KMC_Model']
+
 from copy import deepcopy
 import multiprocessing
 from math import log
