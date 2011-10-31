@@ -106,8 +106,8 @@ class ProcListWriter():
         for i, layer in enumerate(data.layer_list):
             out.write('integer(kind=iint), parameter, public :: %s = %s\n'
                 % (layer.name, i))
-        out.write('integer(kind=iint), parameter, public :: default_layer = %s\n' % data.layer_list.default_layer)
-        out.write('integer(kind=iint), parameter, public :: substrate_layer = %s\n' % data.layer_list.substrate_layer)
+        out.write('integer(kind=iint), public :: default_layer = %s\n' % data.layer_list.default_layer)
+        out.write('integer(kind=iint), public :: substrate_layer = %s\n' % data.layer_list.substrate_layer)
         out.write('\n ! Site constants\n\n')
         site_params = self._get_site_params()
         out.write(('real(kind=rsingle), dimension(3,3), public :: unit_cell_size = 0.\n'))
@@ -359,7 +359,7 @@ class ProcListWriter():
             % (len(data.species_list)))
         for i, species in enumerate(sorted(data.species_list, key=lambda x: x.name)):
             out.write('integer(kind=iint), parameter, public :: %s = %s\n' % (species.name, i))
-        out.write('integer(kind=iint), parameter, public :: default_species = %s\n' % (data.species_list.default_species))
+        out.write('integer(kind=iint), public :: default_species = %s\n' % (data.species_list.default_species))
         representation_length = max([len(species.representation) for species in data.species_list])
 
         out.write('integer(kind=iint), parameter, public :: representation_length = %s\n' % representation_length)
