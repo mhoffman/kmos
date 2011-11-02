@@ -87,6 +87,14 @@ elif args[0] == 'build':
 elif args[0] == 'view':
     from kmos.view import main
     main()
+elif args[0] == 'benchmark':
+    nsteps = 1000000
+    from time import time
+    from kmos.run import KMC_Model
+    model = KMC_Model(print_rates=False, banner=False)
+    time0 = time()
+    model.do_steps(nsteps)
+    print('%s steps took %.2f seconds' % (nsteps, time()-time0))
 elif args[0] == 'export-view':
     out_dir = os.path.splitext(args[1])[0]
     print('No export path provided. Exporting to %s' % out_dir)
