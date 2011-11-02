@@ -20,10 +20,12 @@
 src_files='kind_values_f2py.f90 base.f90 lattice.f90 proclist.f90'
 extra_flags='-xf95-cpp-input'
 module_name='kmc_model'
-while getopts "d" optionName
+quiet=False
+while getopts "dq" optionName
 do
   case "${optionName}" in
-  d) extra_flags='${extra_flags} -debug all -DDEBUG'
+  d) extra_flags='${extra_flags} -debug all -DDEBUG';;
+  q) quiet=True;;
   esac
 done
 
@@ -51,7 +53,12 @@ else
   extra_flags='-ffree-line-length-none -ffree-form -xf95-cpp-input -Wall -g'
 fi
 
-f2py --f90flags="${extra_flags}"  --fcompiler="${fcompiler}" -c ${src_files} -m ${module_name}
+if [ "${quiet}" == "True" ]
+then
+  f2py --quiet --f90flags="${extra_flags}"  --fcompiler="${fcompiler}" -c ${src_files} -m ${module_name}
+else
+  f2py --f90flags="${extra_flags}"  --fcompiler="${fcompiler}" -c ${src_files} -m ${module_name}
+fi
 cat <<EOF
 #  If you run into strange errors like '... returned NULL from py_object ...' you probably have to play with
 #  kind_values_f2py.f90. Kind values are hardcoded here because f2py

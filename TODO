@@ -1,4 +1,7 @@
 Functionality
+  * integrate most of kmos-tool into cli submodule
+  * offer i/o functionality which returns compiled and
+    initialized model
   * add a tags field to all entities: parameters, process, species, layer
   * build standard class for model builder
   * put test hook into netbook repository
