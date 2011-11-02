@@ -267,7 +267,7 @@ class Model_Parameters(object):
             self.__dict__[attr] = value
 
     def __repr__(self):
-        res = '# kMC model parameters\n'
+        res = '# kMC model parameters (%i)\n' % len(settings.parameters)
         res += '# --------------------\n'
         for attr in sorted(settings.parameters):
             res += ('# %s = %s\n' % (attr, settings.parameters[attr]['value']))
@@ -277,7 +277,7 @@ class Model_Parameters(object):
 
 class Model_Rate_Constants(object):
     def __repr__(self):
-        res = '# kMC rate constants\n'
+        res = '# kMC rate constants (%i)\n' % len(settings.rate_constants)
         res += '# ------------------\n'
         for proc in sorted(settings.rate_constants):
             rate_expr = settings.rate_constants[proc][0]
