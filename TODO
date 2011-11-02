@@ -1,4 +1,8 @@
 Functionality
+  * kmos.gui.Editor should be able to process
+    project_tree passed in automatically 
+    (and save changes directly to it)
+    [should be transparent to the user]
   * integrate most of kmos-tool into cli submodule
   * offer i/o functionality which returns compiled and
     initialized model
