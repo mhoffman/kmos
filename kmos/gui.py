@@ -99,7 +99,7 @@ class GTKProjectTree(SlaveDelegate):
     """A facade of kmos.types.ProjectTree so that
     pygtk can display in a TreeView.
     """
-    def __init__(self, parent, menubar):
+    def __init__(self, parent, menubar, model_tree=None):
         self.project_data = ObjectTree([Column('name',
                                                use_markup=True,
                                                data_type=str,
@@ -107,7 +107,10 @@ class GTKProjectTree(SlaveDelegate):
                                         Column('info')])
 
         self.project_data.connect('row-activated', self.on_row_activated)
-        self.model_tree = ProjectTree()
+        if model_tree is None:
+            self.model_tree = ProjectTree()
+        else:
+            self.model_tree = model_tree
         self._set_treeview_hooks()
 
         self.menubar = menubar
@@ -422,7 +425,7 @@ class Editor(GladeDelegate):
     gladefile = GLADEFILE
     toplevel_name = 'main_window'
 
-    def __init__(self):
+    def __init__(self, interactive=False, model_tree=None):
         GladeDelegate.__init__(self, delete_handler=self.on_btn_quit__clicked)
 
         # Prepare and fill the menu from XML layout
@@ -468,7 +471,10 @@ class Editor(GladeDelegate):
             print('Building menu failed: %s' % (e, mergeid))
 
         # Initialize the project tree, passing in the menu bar
-        self.project_tree = GTKProjectTree(parent=self, menubar=self.menubar)
+        self.project_tree = GTKProjectTree(parent=self,
+                                           menubar=self.menubar,
+                                           model_tree=model_tree)
+
         self.main_window.add_accel_group(self.menubar.get_accel_group())
         self.attach_slave('overviewtree', self.project_tree)
         self.set_title('%s - kmos' % self.project_tree.get_name())
@@ -482,6 +488,8 @@ class Editor(GladeDelegate):
         self.saved_state = str(self.project_tree)
         # Cast initial message
         self.toast('Welcome!')
+        if interactive:
+            self.show_and_loop()
 
     def add_defaults(self):
         """This function adds some useful defaults that are probably
@@ -772,29 +780,5 @@ class Editor(GladeDelegate):
 
 def main():
     import optparse
-    import kmos.gui
 
-    parser = optparse.OptionParser()
-    parser.add_option('-o', '--open',
-                      dest='xml_file',
-                      help='Immediately import kmos XML file')
-    parser.add_option('-x', '--export-dir',
-                      dest='export_dir',
-                      type=str)
-    (options, args) = parser.parse_args()
-    editor = kmos.gui.Editor()
-    if len(args) >= 2:
-        options.xml_file = args[1]
-
-    if options.xml_file:
-        editor.import_xml_file(options.xml_file)
-        editor.toast('Imported %s' % options.xml_file)
-    else:
-        print('No XML file provided, starting a new model.')
-        editor.add_defaults()
-        editor.saved_state = str(editor.project_tree)
-    if hasattr(options, 'export_dir') and options.export_dir:
-        print('Exporting right-away')
-        editor.on_btn_export_src__clicked(button='', export_dir=options.export_dir)
-        exit()
-    editor.show_and_loop()
+    editor = Editor(interactive=True)
