@@ -59,7 +59,7 @@ integer(kind=iint), parameter, public :: nr_of_species = 3
 integer(kind=iint), parameter, public :: co = 0
 integer(kind=iint), parameter, public :: empty = 1
 integer(kind=iint), parameter, public :: oxygen = 2
-integer(kind=iint), parameter, public :: default_species = empty
+integer(kind=iint), public :: default_species = empty
 integer(kind=iint), parameter, public :: representation_length = 0
 
 
