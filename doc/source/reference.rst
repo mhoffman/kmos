@@ -57,7 +57,7 @@ kmos.model
 
 .. automodule:: kmos.model
 
-kmos.view
+kmos.run
 =========
 
 .. automodule:: kmos.view
