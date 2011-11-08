@@ -94,8 +94,8 @@ xml = """<?xml version="1.0" ?>
     </parameter_list>
     <lattice cell_size="10.0 10.0 3.0" default_layer="ruo2" representation="" substrate_layer="ruo2">
         <layer color="#ffffff" name="ruo2">
-            <site default_species="default_species" tags="" type="bridge" vector="0.0 0.0 0.5"/>
-            <site default_species="default_species" tags="" type="cus" vector="0.0 0.5 0.5"/>
+            <site default_species="default_species" pos="0.0 0.0 0.5" tags="" type="bridge"/>
+            <site default_species="default_species" pos="0.0 0.5 0.5" tags="" type="cus"/>
         </layer>
     </lattice>
     <process_list>

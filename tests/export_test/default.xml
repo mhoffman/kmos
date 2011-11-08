@@ -24,8 +24,8 @@
     </parameter_list>
     <lattice cell_size="10.0 10.0 3.0" default_layer="ruo2" representation="">
         <layer color="#ffffff" grid="1 1 1" grid_offset="0.0 0.0 0.0" name="ruo2">
-            <site default_species="default_species" type="bridge" vector="0.0 0.0 0.5"/>
-            <site default_species="default_species" type="cus" vector="0.0 0.5 0.5"/>
+            <site default_species="default_species" type="bridge" pos="0.0 0.0 0.5"/>
+            <site default_species="default_species" type="cus" pos="0.0 0.5 0.5"/>
         </layer>
     </lattice>
     <process_list>

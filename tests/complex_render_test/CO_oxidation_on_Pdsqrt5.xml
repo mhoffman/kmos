@@ -41,17 +41,17 @@
        [ 0.      ,  0.      ,  0.      ],
        [ 0.8     ,  0.6     ,  0.      ]]))]" substrate_layer="default">
         <layer color="#ffffff" name="Pd100">
-            <site default_species="empty" tags="strongbridge CO" type="bridge2" vector="0.5992575 0.700819 0.354757545624"/>
-            <site default_species="empty" tags="weakbridge CO" type="bridge3" vector="0.291141 0.5970815 0.354671545624"/>
-            <site default_species="empty" tags="strongbridge CO" type="bridge1" vector="0.09947 0.2008845 0.354829545624"/>
-            <site default_species="empty" tags="weakbridge CO" type="bridge6" vector="0.203168 0.892546 0.354963545624"/>
-            <site default_species="empty" tags="weakbridge CO" type="bridge4" vector="-0.0044405 0.5091575 0.354623545624"/>
-            <site default_species="empty" tags="weakbridge CO" type="bridge5" vector="0.9075865 0.804622 0.354915545624"/>
-            <site default_species="empty" tags="hollow oxygen" type="hollow1" vector="0.09936375 0.70085175 0.354793545624"/>
-            <site default_species="empty" tags="corner oxygen" type="side4" vector="0.703168 0.892546 0.354963545624"/>
-            <site default_species="empty" tags="corner oxygen" type="side2" vector="0.4955595 0.5091575 0.354623545624"/>
-            <site default_species="empty" tags="corner oxygen" type="side3" vector="0.9075865 0.304622 0.354915545624"/>
-            <site default_species="empty" tags="corner oxygen" type="side1" vector="0.291141 0.0970815 0.354671545624"/>
+            <site default_species="empty" pos="0.5992575 0.700819 0.354757545624" tags="strongbridge CO" type="bridge2"/>
+            <site default_species="empty" pos="0.291141 0.5970815 0.354671545624" tags="weakbridge CO" type="bridge3"/>
+            <site default_species="empty" pos="0.09947 0.2008845 0.354829545624" tags="strongbridge CO" type="bridge1"/>
+            <site default_species="empty" pos="0.203168 0.892546 0.354963545624" tags="weakbridge CO" type="bridge6"/>
+            <site default_species="empty" pos="-0.0044405 0.5091575 0.354623545624" tags="weakbridge CO" type="bridge4"/>
+            <site default_species="empty" pos="0.9075865 0.804622 0.354915545624" tags="weakbridge CO" type="bridge5"/>
+            <site default_species="empty" pos="0.09936375 0.70085175 0.354793545624" tags="hollow oxygen" type="hollow1"/>
+            <site default_species="empty" pos="0.703168 0.892546 0.354963545624" tags="corner oxygen" type="side4"/>
+            <site default_species="empty" pos="0.4955595 0.5091575 0.354623545624" tags="corner oxygen" type="side2"/>
+            <site default_species="empty" pos="0.9075865 0.304622 0.354915545624" tags="corner oxygen" type="side3"/>
+            <site default_species="empty" pos="0.291141 0.0970815 0.354671545624" tags="corner oxygen" type="side1"/>
         </layer>
     </lattice>
     <process_list>

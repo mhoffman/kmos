@@ -160,7 +160,7 @@ class ProjectTree(object):
 
             for site in layer.sites:
                 site_elem = ET.SubElement(layer_elem, 'site')
-                site_elem.set('vector', '%s %s %s' % tuple(site.pos))
+                site_elem.set('pos', '%s %s %s' % tuple(site.pos))
                 site_elem.set('type', site.name)
                 site_elem.set('tags', site.tags)
                 site_elem.set('default_species', site.default_species)
@@ -269,7 +269,7 @@ class ProjectTree(object):
 
                             for site in elem:
                                 name = site.attrib['type']
-                                pos = site.attrib['vector']
+                                pos = site.attrib['pos']
                                 if 'tags' in site.attrib:
                                     tags = site.attrib['tags']
                                 else:
@@ -708,7 +708,7 @@ class Site(FixedObject):
     """Represents one lattice site.
     """
     attributes = ['name', 'pos', 'tags', 'default_species']
-    # vector is now a list of floats for the graphical representation
+    # pos is now a list of floats for the graphical representation
 
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)

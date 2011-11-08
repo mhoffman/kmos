@@ -23,9 +23,9 @@
         <parameter name="m_o2" value="5.313525e-26"/>
     </parameter_list>
     <lattice_list>
-        <lattice name="ruo2" unit_cell_size="2 1">
-            <site coord="0 0" type="bridge"/>
-            <site coord="1 0" type="cus"/>
+        <lattice name="ruo2" unit_cell_size="1 1 0">
+            <site pos="0. 0. 0." type="bridge"/>
+            <site pos=".5 0. 0." type="cus"/>
         </lattice>
     </lattice_list>
     <process_list>
