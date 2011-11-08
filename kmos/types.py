@@ -6,6 +6,9 @@ import pdb
 # stdlib imports
 from copy import deepcopy
 
+# numpy
+import numpy as np
+
 # XML handling
 from lxml import etree as ET
 #Need to pretty print XML
@@ -157,7 +160,7 @@ class ProjectTree(object):
 
             for site in layer.sites:
                 site_elem = ET.SubElement(layer_elem, 'site')
-                site_elem.set('vector', '%s %s %s' % (site.x, site.y, site.z))
+                site_elem.set('vector', '%s %s %s' % tuple(site.pos))
                 site_elem.set('type', site.name)
                 site_elem.set('tags', site.tags)
                 site_elem.set('default_species', site.default_species)
@@ -266,8 +269,7 @@ class ProjectTree(object):
 
                             for site in elem:
                                 name = site.attrib['type']
-                                x, y, z = [float(x)
-                                    for x in site.attrib['vector'].split()]
+                                pos = site.attrib['vector']
                                 if 'tags' in site.attrib:
                                     tags = site.attrib['tags']
                                 else:
@@ -278,7 +280,7 @@ class ProjectTree(object):
                                 else:
                                     default_species = 'default_species'
                                 site_elem = Site(name=name,
-                                    x=x, y=y, z=z,
+                                    pos=pos,
                                     tags=tags,
                                     default_species=default_species)
                                 layer.sites.append(site_elem)
@@ -636,7 +638,6 @@ class LayerList(FixedObject, list):
         """Expecting something of the form site_name.offset.layer
         and return a Coord object"""
 
-        import numpy as np
 
         term = terms.split('.')
         if len(term) == 3 :
@@ -662,7 +663,7 @@ class LayerList(FixedObject, list):
             raise UserWarning('No site names %s in %s found!' % (coord.name, layer.name))
         else:
             site = sites[0]
-        pos = np.array([site.x, site.y, site.z])
+        pos = site.pos
         coord.pos = np.dot(offset + pos, cell)
         coord.tags = site.tags
 
@@ -706,7 +707,7 @@ class Layer(FixedObject, CorrectlyNamed):
 class Site(FixedObject):
     """Represents one lattice site.
     """
-    attributes = ['name', 'x', 'y', 'z', 'tags', 'default_species']
+    attributes = ['name', 'pos', 'tags', 'default_species']
     # vector is now a list of floats for the graphical representation
 
     def __init__(self, **kwargs):
@@ -715,10 +716,19 @@ class Site(FixedObject):
         self.name = kwargs['name'] if 'name' in kwargs else ''
         self.default_species = kwargs['default_species'] \
             if 'default_species' in kwargs else 'default_species'
+        if 'pos' in kwargs:
+            if type(kwargs['pos']) is str:
+                self.pos = np.array([float(i) for i in kwargs['pos'].split()])
+            elif type(kwargs['pos']) is np.ndarray:
+                self.pos = kwargs['pos']
+            else:
+                raise 'Input %s not understood!' % kwargs['pos']
+        else:
+            self.pos = np.array([0., 0., 0.])
 
     def __repr__(self):
         return '[SITE] %s %s %s' % (self.name,
-                                   (self.x, self.y, self.z), self.tags)
+                                   self.pos, self.tags)
 
 
 class ProcessFormSite(Site):
@@ -754,8 +764,8 @@ class Coord(FixedObject):
         if len(self.offset) == 2:
             self.offset = (self.offset[0], self.offset[1], 0)
 
-        self.pos = kwargs['pos'] \
-                   if 'pos' in kwargs else [0, 0, 0]
+        self.pos = np.array([float(i) for i in kwargs['pos'].split()]) \
+                   if 'pos' in kwargs else np.array([0., 0., 0.])
 
         self.tags = kwargs['tags'] \
                     if 'tags' in kwargs else ''

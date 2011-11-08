@@ -846,7 +846,8 @@ class ProcListWriter():
         site_params = []
         for layer in data.layer_list:
             for site in layer.sites:
-                site_params.append((site.name, layer.name, (site.x, site.y, site.z)))
+                print(site.name, layer.name, tuple(site.pos))
+                site_params.append((site.name, layer.name, tuple(site.pos)))
         return site_params
 
     def _gpl_message(self):

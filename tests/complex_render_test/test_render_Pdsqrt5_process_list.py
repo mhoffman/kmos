@@ -49,7 +49,7 @@ class ModelBuilder(object):
                                              default_species='empty',
                                              layer=DEFAULT_LAYER,
                                              tags='weakbridge CO',
-                                             x=pos[0], y=pos[1], z=pos[2]))
+                                             pos=pos))
         self.coord_set = self.pt.layer_list.generate_coord_set(size=[3, 3, 1],
                                                                layer_name=DEFAULT_LAYER)
         self.set_species()
@@ -138,15 +138,12 @@ class ModelBuilder(object):
                             'tags': "hollow oxygen"}
 
         for name, data in sites.iteritems():
-            x, y, z = data['pos']
             tags = data['tags']
             site = Site(name=name,
                         default_species='empty',
                         layer=DEFAULT_LAYER,
                         tags=tags,
-                        x=x,
-                        y=y,
-                        z=z)
+                        pos=data['pos'])
             self.pt.get_layers()[0].sites.append(site)
         # Create 'enlarged' coord set
         self.coord_set = self.pt.layer_list.generate_coord_set(size=[3, 3, 1],

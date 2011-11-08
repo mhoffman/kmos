@@ -22,7 +22,8 @@ def test_import_export():
     for filename in ['base', 'lattice', 'proclist']:
         print(filename)
         assert filecmp.cmp(os.path.join(REFERENCE_DIR, '%s.f90' % filename),
-                          os.path.join(TEST_DIR, '%s.f90' % filename))
+                          os.path.join(TEST_DIR, '%s.f90' % filename)),\
+             '%s changed.' % filename
 
     os.chdir(cwd)
 

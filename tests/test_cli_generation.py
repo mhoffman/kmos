@@ -27,7 +27,7 @@ def generate_model():
 
     # add layer
     project.add_layer(Layer(name='default', sites=[
-        Site(name='cus', x=0, y=0.5, z=0.5)]))
+        Site(name='cus', pos='0 0.5 0.5')]))
 
     project.layer_list.default_layer = 'default'
 
