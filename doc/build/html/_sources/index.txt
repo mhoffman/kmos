@@ -10,9 +10,10 @@ way to use kmos. kmos can be an Editor, an API, a viewer. However all in all
 kmos wants to save time filled with repetitive labor and enlarge your stride.
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
 
    introduction
    tutorials/index
+   topic_guides/index
    reference
 
