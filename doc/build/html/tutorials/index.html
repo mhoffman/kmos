@@ -62,12 +62,66 @@ the GUI and could be considered from first-principles.</p>
 <div class="section" id="meta">
 <h3>Meta<a class="headerlink" href="#meta" title="Permalink to this headline">¶</a></h3>
 </div>
+<div class="section" id="lattice">
+<h3>Lattice<a class="headerlink" href="#lattice" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="species">
+<h3>Species<a class="headerlink" href="#species" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="processes">
+<h3>Processes<a class="headerlink" href="#processes" title="Permalink to this headline">¶</a></h3>
+</div>
 </div>
 <div class="section" id="running-the-model-the-gui-way">
 <h2>Running the Model&#8211;the GUI way<a class="headerlink" href="#running-the-model-the-gui-way" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="a-first-kmc-model-the-api-way">
 <h2>A first kMC Model&#8211;the API way<a class="headerlink" href="#a-first-kmc-model-the-api-way" title="Permalink to this headline">¶</a></h2>
+<p>Since the GUI used in the first subsection is nothing
+but a frontend to the various datatypes, you can just as
+well write models by instantiating and adding different
+parts of the model directly in python. This way might look
+rather arcane for simple models in the beginning, however
+it starts to really pay off as soon as you want to
+make a copy of a model which is almost identical with the
+only difference that ...</p>
+<div class="section" id="from-scratch">
+<h3>From scratch<a class="headerlink" href="#from-scratch" title="Permalink to this headline">¶</a></h3>
+<p>We start by making the necessary import statements:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">kmos.types</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">kmos.io</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>which import all classes that make up a kMC project. The functions
+from <cite>kmos.io</cite> will only be needed at the end to save the project
+or to export compilable code.</p>
+<p>The example sketched out here leads you to a kMC model for CO adsorption
+and desorption on Pd(100) including a simple lateral interaction. Granted
+this hardly excites surface scientists but we need to start somewhere, right?</p>
+<p>Now you have to instantiate a new project and fill in meta information:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span> <span class="o">=</span> <span class="n">ProjectTree</span><span class="p">()</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">author_name</span> <span class="o">=</span> <span class="s">&#39;Your Name&#39;</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">author_email</span> <span class="o">=</span> <span class="s">&#39;your.name@server.com&#39;</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">model_name</span> <span class="o">=</span> <span class="s">&#39;MyFirstModel&#39;</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">model_dimension</span> <span class="o">=</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<p>Next you could add some species or states. For surface science simulations
+it is useful to define an <em>empty</em> state, so we add:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_species</span><span class="p">(</span><span class="n">Species</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>and some surface species. Given you want to simulate CO adsorption and
+desorption on a single crystal surface we say:</p>
+<div class="highlight-python"><pre>pt.add_species(Species(name='CO',
+                       representation='Atoms("CO",[[0,0,0],[0,0,1.2]]))</pre>
+</div>
+<p>where the string passed as <cite>representation</cite> is a string representing
+a CO molecule which can be evaluated in</p>
+</div>
 </div>
 <div class="section" id="running-the-model-the-api-way">
 <h2>Running the Model&#8211;the API way<a class="headerlink" href="#running-the-model-the-api-way" title="Permalink to this headline">¶</a></h2>
@@ -94,10 +148,17 @@ the GUI and could be considered from first-principles.</p>
 <li><a class="reference internal" href="#">Tutorials</a><ul>
 <li><a class="reference internal" href="#a-first-kmc-model-the-gui-way">A first kMC Model&#8211;the GUI way</a><ul>
 <li><a class="reference internal" href="#meta">Meta</a></li>
+<li><a class="reference internal" href="#lattice">Lattice</a></li>
+<li><a class="reference internal" href="#species">Species</a></li>
+<li><a class="reference internal" href="#parameters">Parameters</a></li>
+<li><a class="reference internal" href="#processes">Processes</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#running-the-model-the-gui-way">Running the Model&#8211;the GUI way</a></li>
-<li><a class="reference internal" href="#a-first-kmc-model-the-api-way">A first kMC Model&#8211;the API way</a></li>
+<li><a class="reference internal" href="#a-first-kmc-model-the-api-way">A first kMC Model&#8211;the API way</a><ul>
+<li><a class="reference internal" href="#from-scratch">From scratch</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#running-the-model-the-api-way">Running the Model&#8211;the API way</a></li>
 <li><a class="reference internal" href="#a-more-complicated-structure">A More Complicated Structure</a></li>
 <li><a class="reference internal" href="#more-dimensions">More Dimensions</a></li>

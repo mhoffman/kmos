@@ -45,6 +45,7 @@ From scratch
 ^^^^^^^^^^^^
 
 We start by making the necessary import statements::
+
   from kmos.types import *
   from kmos.io import *
 
@@ -52,9 +53,35 @@ which import all classes that make up a kMC project. The functions
 from `kmos.io` will only be needed at the end to save the project
 or to export compilable code.
 
+The example sketched out here leads you to a kMC model for CO adsorption
+and desorption on Pd(100) including a simple lateral interaction. Granted
+this hardly excites surface scientists but we need to start somewhere, right?
+
 
 Now you have to instantiate a new project and fill in meta information::
+
   pt = ProjectTree()
+  pt.meta.author_name = 'Your Name'
+  pt.meta.author_email = 'your.name@server.com'
+  pt.meta.model_name = 'MyFirstModel'
+  pt.meta.model_dimension = 2
+
+
+Next you could add some species or states. For surface science simulations
+it is useful to define an *empty* state, so we add::
+
+ pt.add_species(Species(name='empty'))
+
+and some surface species. Given you want to simulate CO adsorption and
+desorption on a single crystal surface we say::
+  
+  pt.add_species(Species(name='CO',
+                         representation='Atoms("CO",[[0,0,0],[0,0,1.2]]))
+
+where the string passed as `representation` is a string representing
+a CO molecule which can be evaluated in 
+
+
 
 
 
