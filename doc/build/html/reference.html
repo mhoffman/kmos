@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="kmos v0.0.1 documentation" href="index.html" />
-    <link rel="prev" title="Introduction" href="introduction.html" /> 
+    <link rel="prev" title="Tutorials" href="tutorials/index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -36,7 +36,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="introduction.html" title="Introduction"
+          <a href="tutorials/index.html" title="Tutorials"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
       </ul>
@@ -49,11 +49,10 @@
             
   <div class="section" id="reference">
 <h1>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h1>
-</div>
 <div class="section" id="data-types">
-<h1>Data Types<a class="headerlink" href="#data-types" title="Permalink to this headline">¶</a></h1>
+<h2>Data Types<a class="headerlink" href="#data-types" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="module-kmos.types">
-<span id="kmos-types"></span><h2>kmos.types<a class="headerlink" href="#module-kmos.types" title="Permalink to this headline">¶</a></h2>
+<span id="kmos-types"></span><h3>kmos.types<a class="headerlink" href="#module-kmos.types" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="kmos.types.ProjectTree">
 <em class="property">class </em><tt class="descclassname">kmos.types.</tt><tt class="descname">ProjectTree</tt><a class="headerlink" href="#kmos.types.ProjectTree" title="Permalink to this definition">¶</a></dt>
@@ -71,6 +70,11 @@ structure is given by</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="method">
+<dt id="kmos.types.ProjectTree.export_xml_file">
+<tt class="descclassname">ProjectTree.</tt><tt class="descname">export_xml_file</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#kmos.types.ProjectTree.export_xml_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="class">
 <dt id="kmos.types.Meta">
@@ -131,7 +135,7 @@ superfluous but it is made to avoid data duplication.</p>
 
 </div>
 <div class="section" id="module-kmos.io">
-<span id="kmos-io"></span><h2>kmos.io<a class="headerlink" href="#module-kmos.io" title="Permalink to this headline">¶</a></h2>
+<span id="kmos-io"></span><h3>kmos.io<a class="headerlink" href="#module-kmos.io" title="Permalink to this headline">¶</a></h3>
 <p>Features front-end import/export functions for kMC Projects.
 Currently import and export is supported to XML and export is
 supported to Fortran 90 source code.</p>
@@ -160,9 +164,9 @@ model will be included in the kmc_settings.py module.</p>
 </div>
 </div>
 <div class="section" id="editor-frontend">
-<h1>Editor frontend<a class="headerlink" href="#editor-frontend" title="Permalink to this headline">¶</a></h1>
+<h2>Editor frontend<a class="headerlink" href="#editor-frontend" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="module-kmos.gui">
-<span id="kmos-gui"></span><h2>kmos.gui<a class="headerlink" href="#module-kmos.gui" title="Permalink to this headline">¶</a></h2>
+<span id="kmos-gui"></span><h3>kmos.gui<a class="headerlink" href="#module-kmos.gui" title="Permalink to this headline">¶</a></h3>
 <p>A GUI frontend to create and edit kMC models.</p>
 <dl class="class">
 <dt id="kmos.gui.Editor">
@@ -178,7 +182,7 @@ pygtk can display in a TreeView.</p>
 
 </div>
 <div class="section" id="module-kmos.forms">
-<span id="kmos-forms"></span><h2>kmos.forms<a class="headerlink" href="#module-kmos.forms" title="Permalink to this headline">¶</a></h2>
+<span id="kmos-forms"></span><h3>kmos.forms<a class="headerlink" href="#module-kmos.forms" title="Permalink to this headline">¶</a></h3>
 <p>kmos.forms - GUI forms used by kmos.gui
 The classes defined here heavily draw on the interface provided by
 python-kiwi.
@@ -348,9 +352,9 @@ process per line in the form:</p>
 </div>
 </div>
 <div class="section" id="runtime-frontend">
-<h1>Runtime frontend<a class="headerlink" href="#runtime-frontend" title="Permalink to this headline">¶</a></h1>
+<h2>Runtime frontend<a class="headerlink" href="#runtime-frontend" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="module-kmos.model">
-<span id="kmos-model"></span><h2>kmos.model<a class="headerlink" href="#module-kmos.model" title="Permalink to this headline">¶</a></h2>
+<span id="kmos-model"></span><h3>kmos.model<a class="headerlink" href="#module-kmos.model" title="Permalink to this headline">¶</a></h3>
 <p>A python representation of a kMC model. The actual model is
 imported in kmc_model.so and all parameters are stored in kmc_settings.py.</p>
 <p>The model can be used directly like so:</p>
@@ -370,7 +374,7 @@ full throttle without impeding the front-end. Interaction with
 the model happens through Queues.</p>
 </div>
 <div class="section" id="module-kmos.view">
-<span id="kmos-view"></span><h2>kmos.view<a class="headerlink" href="#module-kmos.view" title="Permalink to this headline">¶</a></h2>
+<span id="kmos-run"></span><h3>kmos.run<a class="headerlink" href="#module-kmos.view" title="Permalink to this headline">¶</a></h3>
 <p>Run and view a kMC model. For this to work one needs a
 kmc_model.so and a kmc_settings.py in the import path.</p>
 <dl class="class">
@@ -383,7 +387,7 @@ and view a kMC model.</p>
 </div>
 </div>
 <div class="section" id="kmos-kmc-project-dtd">
-<h1>kmos kMC project DTD<a class="headerlink" href="#kmos-kmc-project-dtd" title="Permalink to this headline">¶</a></h1>
+<h2>kmos kMC project DTD<a class="headerlink" href="#kmos-kmc-project-dtd" title="Permalink to this headline">¶</a></h2>
 <p>The central storage and exchange format is XML. XML was chosen over
 JSON, pickle or alike because it still seems as the most flexible
 and universal format with good methods to define the overall
@@ -391,6 +395,7 @@ structure of the data.</p>
 <p>One way to define an XML format is by using a document type description
 (DTD) and in fact at every import a kmos file is validated against
 the DTD below.</p>
+</div>
 </div>
 
 
@@ -401,7 +406,7 @@ the DTD below.</p>
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Reference</a></li>
+<li><a class="reference internal" href="#">Reference</a><ul>
 <li><a class="reference internal" href="#data-types">Data Types</a><ul>
 <li><a class="reference internal" href="#module-kmos.types">kmos.types</a></li>
 <li><a class="reference internal" href="#module-kmos.io">kmos.io</a></li>
@@ -414,15 +419,17 @@ the DTD below.</p>
 </li>
 <li><a class="reference internal" href="#runtime-frontend">Runtime frontend</a><ul>
 <li><a class="reference internal" href="#module-kmos.model">kmos.model</a></li>
-<li><a class="reference internal" href="#module-kmos.view">kmos.view</a></li>
+<li><a class="reference internal" href="#module-kmos.view">kmos.run</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#kmos-kmc-project-dtd">kmos kMC project DTD</a></li>
 </ul>
+</li>
+</ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="introduction.html"
-                        title="previous chapter">Introduction</a></p>
+  <p class="topless"><a href="tutorials/index.html"
+                        title="previous chapter">Tutorials</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/reference.txt"
@@ -455,7 +462,7 @@ the DTD below.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="introduction.html" title="Introduction"
+          <a href="tutorials/index.html" title="Tutorials"
              >previous</a> |</li>
         <li><a href="index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
       </ul>

@@ -13,5 +13,6 @@ kmos wants to save time filled with repetitive labor and enlarge your stride.
    :maxdepth: 3
 
    introduction
+   tutorials/index
    reference
 
