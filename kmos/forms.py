@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-kmos.forms - GUI forms used by kmos.gui
+"""kmos.forms - GUI forms used by kmos.gui
 The classes defined here heavily draw on the interface provided by
 python-kiwi.
 In the language of underlying MVC (Model-View-Controller) pattern these

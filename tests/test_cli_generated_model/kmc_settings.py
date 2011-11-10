@@ -38,7 +38,7 @@ xml = """<?xml version="1.0" ?>
     </parameter_list>
     <lattice cell_size="1.0 1.0 1.0" default_layer="default" representation="" substrate_layer="default">
         <layer color="#ffffff" name="default">
-            <site default_species="default_species" tags="" type="cus" vector="0 0.5 0.5"/>
+            <site default_species="default_species" pos="0.0 0.5 0.5" tags="" type="cus"/>
         </layer>
     </lattice>
     <process_list>
