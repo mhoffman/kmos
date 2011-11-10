@@ -32,12 +32,17 @@ from ase.gui.images import Images
 from ase.gui.defaults import read_defaults
 
 
+
 try:
-    import gtk
-    import gobject
     import matplotlib
     matplotlib.use('GTKAgg')
     import matplotlib.pylab as plt
+except:
+    print('Could not import matplotlib frontend. Needed for real-time plotting')
+
+try:
+    import gtk
+    import gobject
     from ase.gui.view import View
     from ase.gui.status import Status
 except:
