@@ -6,7 +6,15 @@
 # let's hope that this changes soon
 # and let's see how we can cut down on this
 # list. 
-# The goal will be to reduce 
+# The goal will be to reduce this list to
+
+# python-dev gfortran python-numpy python-pygoocanvas
+
+# or something like that
+
+print "Simple wrapping script that resolves"
+print "dependency within the APT system"
+
 
 
 sudo add-apt-repository ppa:campos-dev/campos
@@ -17,12 +25,10 @@ sudo apt-get install\
                      gfortran \
                      python-ase \
                      python-dev \
-                     python-glade \
+                     python-glade2 \
                      python-kiwi \
                      python-lxml \
-                     python-matplotlib
+                     python-matplotlib \
                      python-numpy \
                      python-pygoocanvas \
-                     python-scipy \
-                     python-setuptools \
-
+                     python-scipy
