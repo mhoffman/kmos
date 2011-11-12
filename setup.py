@@ -1,12 +1,23 @@
 #!/usr/bin/python
 
-from distutils.core import setup
+from setuptools import setup
 
 maintainer = 'Max J. Hoffmann'
 maintainer_email = 'mjhoffmann@gmail.com'
 author = 'Max J. Hoffmann'
 author_email = 'mjhoffmann@gmail.com'
 description = "kMC modeling on steroids"
+install_requires = [
+                    'ase',
+                    'cairo',
+                    'gobject',
+                    'goocanvas',
+                    'gtk',
+                    'kiwi',
+                    'lxml',
+                    'matplotlib',
+                    'pygtk',
+                   ]
 license = 'COPYING'
 long_description = file('README.rst').read()
 name='python-kmos'
@@ -20,14 +31,14 @@ package_data = {'kmos':['fortran_src/*f90',
                         'fortran_src/assert.ppc',
                         'kmc_project_v0.2.dtd']}
 platforms = ['linux']
-requires = ['kiwi', 'ase','lxml','matplotlib', 'pygtk', 'gtk']
 scripts = [
         'tools/kmos-editor',
         'tools/kmos-export-program',
         'tools/kmos-build',
         'tools/kmos-view',
         'tools/kmos-build-standalone',
-        'tools/kmos'
+        'tools/kmos',
+        'tools/kmos-install-dependencies',
         ]
 url = 'https://github.com/mhoffman/kmos'
 version = '0.1'
@@ -36,6 +47,7 @@ setup(
       author=author,
       author_email=author_email,
       description=description,
+      #install_requires=install_requires,
       license=license,
       long_description=long_description,
       maintainer=maintainer,

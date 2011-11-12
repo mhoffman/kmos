@@ -1,0 +1,28 @@
+#!/bin/bash -eu
+
+# The kmos dependency list is horribly wrong
+# and right now even depends on a repository
+# which is outside the Ubuntu repositories
+# let's hope that this changes soon
+# and let's see how we can cut down on this
+# list. 
+# The goal will be to reduce 
+
+
+sudo add-apt-repository ppa:campos-dev/campos
+sudo apt-get update
+
+sudo apt-get install\
+                     gazpacho \
+                     gfortran \
+                     python-ase \
+                     python-dev \
+                     python-glade \
+                     python-kiwi \
+                     python-lxml \
+                     python-matplotlib
+                     python-numpy \
+                     python-pygoocanvas \
+                     python-scipy \
+                     python-setuptools \
+
