@@ -89,9 +89,7 @@ class ModelBuilder(object):
         cell = tuple(self.atoms.cell.diagonal())
 
         self.pt.layer_list.default_layer = DEFAULT_LAYER
-        self.pt.layer_list.cell_size_x = cell[0]
-        self.pt.layer_list.cell_size_y = cell[1]
-        self.pt.layer_list.cell_size_z = cell[2]
+        self.pt.layer_list.cell = self.atoms.cell
         self.pt.layer_list.set_representation(self.atoms)
 
     def set_layers(self):

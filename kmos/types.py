@@ -140,13 +140,10 @@ class ProjectTree(object):
                 parameter_elem.set('scale', 'linear')
 
         lattice_elem = ET.SubElement(root, 'lattice')
-        if (hasattr(self.layer_list, 'cell_size_x') and \
-            hasattr(self.layer_list, 'cell_size_y') and
-            hasattr(self.layer_list, 'cell_size_z')):
-            lattice_elem.set('cell_size', '%s %s %s' %
-            (self.layer_list.cell_size_x,
-            self.layer_list.cell_size_y,
-            self.layer_list.cell_size_z))
+        if hasattr(self.layer_list, 'cell'):
+            lattice_elem.set('cell_size',
+                             ' '.join([str(i)
+                                       for i in self.layer_list.cell.flatten()]))
             lattice_elem.set('default_layer',
                              self.layer_list.default_layer)
             lattice_elem.set('substrate_layer',
@@ -241,11 +238,14 @@ class ProjectTree(object):
                 return
             for child in root:
                 if child.tag == 'lattice':
-                    cell_size = [float(x)
-                                 for x in child.attrib['cell_size'].split()]
-                    self.layer_list.cell_size_x = cell_size[0]
-                    self.layer_list.cell_size_y = cell_size[1]
-                    self.layer_list.cell_size_z = cell_size[2]
+                    cell = np.array([float(i)
+                                                     for i in child.attrib['cell_size'].split()])
+                    if len(cell) == 3:
+                        self.layer_list.cell = np.diag(cell)
+                    elif len(cell) == 9:
+                        self.layer_list.cell = cell.reshape(3, 3)
+                    else:
+                        raise UserWarning('% not understood' % cell)
                     self.layer_list.default_layer = child.attrib['default_layer']
                     if 'substrate_layer' in child.attrib:
                         self.layer_list.substrate_layer = child.attrib['substrate_layer']
@@ -573,18 +573,27 @@ class Parameter(FixedObject, CorrectlyNamed):
 class LayerList(FixedObject, list):
     """A list of layers
     """
-    attributes = ['name', 'cell_size_x', 'cell_size_y', 'cell_size_z',
-                  'default_layer', 'substrate_layer', 'representation']
+    attributes = ['cell',
+                  'default_layer',
+                  'name',
+                  'representation',
+                  'substrate_layer',]
 
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)
         self.name = 'Lattice(s)'
-        self.cell_size_x = kwargs['cell_size_x'] \
-            if 'cell_size_x' in kwargs else 1.
-        self.cell_size_y = kwargs['cell_size_y'] \
-            if 'cell_size_y' in kwargs else 1.
-        self.cell_size_z = kwargs['cell_size_z'] \
-            if 'cell_size_z' in kwargs else 1.
+        if 'cell' in kwargs:
+            if type(kwargs['cell']) is str:
+                kwargs['cell'] = np.array([float(i) for i in kwargs['cell'].split()])
+            if type(kwargs['cell']) is np.ndarray:
+                if len(l) == 9:
+                    self.cell = kwargs['cell'].resize(3,3)
+                elif len(l) == 3:
+                    self.cell = np.diag(kwargs['cell'])
+            else:
+                raise UserWarning('%s not understood' % kwargs['cell'])
+        else:
+            self.cell = np.identity(3)
         self.default_layer = kwargs['default_layer'] \
             if 'default_layer' in kwargs else 'default'
         self.substrate_layer = kwargs['substrate_layer'] \
@@ -656,7 +665,7 @@ class LayerList(FixedObject, list):
             raise UserWarning("Cannot parse coord description")
 
         offset = np.array(coord.offset)
-        cell = np.diag([self.cell_size_x, self.cell_size_y, self.cell_size_z])
+        cell = self.cell
         layer = filter(lambda x: x.name == coord.layer, list(self))[0]
         sites = [x for x in layer.sites  if x.name == coord.name]
         if not sites:

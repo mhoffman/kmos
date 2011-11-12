@@ -92,7 +92,7 @@ xml = """<?xml version="1.0" ?>
         <parameter adjustable="False" max="0.0" min="0.0" name="print_every" scale="linear" value="100000"/>
         <parameter adjustable="False" max="0.0" min="0.0" name="total_steps" scale="linear" value="10000000"/>
     </parameter_list>
-    <lattice cell_size="10.0 10.0 3.0" default_layer="ruo2" representation="" substrate_layer="ruo2">
+    <lattice cell_size="10.0 0.0 0.0 0.0 10.0 0.0 0.0 0.0 3.0" default_layer="ruo2" representation="" substrate_layer="ruo2">
         <layer color="#ffffff" name="ruo2">
             <site default_species="default_species" pos="0.0 0.0 0.5" tags="" type="bridge"/>
             <site default_species="default_species" pos="0.0 0.5 0.5" tags="" type="cus"/>

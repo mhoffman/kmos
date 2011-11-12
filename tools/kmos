@@ -76,7 +76,7 @@ elif args[0] == 'import' :
     pt = kmos.io.import_xml(args[1])
     import IPython
     if hasattr(IPython, 'release') and \
-       map(int, IPython.release.version.split('.') ) > [0, 11]:
+       map(int, IPython.release.version.split('.') ) >= [0, 11]:
         from IPython.frontend.terminal.embed import InteractiveShellEmbed
         InteractiveShellEmbed(banner1='Note: pt = kmos.io.import_xml(\'%s\')' % args[1])()
     else:

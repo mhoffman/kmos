@@ -19,7 +19,7 @@
         <parameter adjustable="True" max="100.0" min="1e-13" name="p_COgas" scale="log" value="1.0"/>
         <parameter adjustable="True" max="100.0" min="1e-13" name="p_O2gas" scale="log" value="1.0"/>
     </parameter_list>
-    <lattice cell_size="6.2265247 6.2265247 13.0389687" default_layer="Pd100" representation="[Atoms(symbols='Pd15',
+    <lattice cell_size="6.2265247 0.0 0.0 0.0 6.2265247 0.0 0.0 0.0 13.0389687" default_layer="Pd100" representation="[Atoms(symbols='Pd15',
           pbc=np.array([ True,  True,  True], dtype=bool),
           cell=np.array(
       [[  6.2265247,   0.       ,   0.       ],

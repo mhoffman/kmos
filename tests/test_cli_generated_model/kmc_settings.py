@@ -36,7 +36,7 @@ xml = """<?xml version="1.0" ?>
         <parameter adjustable="False" max="0.0" min="0.0" name="p_CO" scale="log" value="0.2"/>
         <parameter adjustable="True" max="0.0" min="0.0" name="p_O2" scale="linear" value="1.0"/>
     </parameter_list>
-    <lattice cell_size="1.0 1.0 1.0" default_layer="default" representation="" substrate_layer="default">
+    <lattice cell_size="1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0" default_layer="default" representation="" substrate_layer="default">
         <layer color="#ffffff" name="default">
             <site default_species="default_species" pos="0.0 0.5 0.5" tags="" type="cus"/>
         </layer>
