@@ -1,13 +1,13 @@
 #!/usr/bin/python
 
-from setuptools import setup
+from distutils.core import setup
 
 maintainer = 'Max J. Hoffmann'
 maintainer_email = 'mjhoffmann@gmail.com'
 author = 'Max J. Hoffmann'
 author_email = 'mjhoffmann@gmail.com'
 description = "kMC modeling on steroids"
-install_requires = [
+requires = [
                     'ase',
                     'cairo',
                     'gobject',
@@ -47,7 +47,7 @@ setup(
       author=author,
       author_email=author_email,
       description=description,
-      #install_requires=install_requires,
+      #requires=requires,
       license=license,
       long_description=long_description,
       maintainer=maintainer,
