@@ -44,7 +44,7 @@ only difference that ...
 From scratch
 ^^^^^^^^^^^^
 
-We start by making the necessary import statements (in *python* or *ipython*)::
+We start by making the necessary import statements (in *python* or better *ipython*)::
 
   from kmos.types import *
   from kmos.io import *
