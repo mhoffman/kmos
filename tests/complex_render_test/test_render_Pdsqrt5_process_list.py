@@ -416,6 +416,7 @@ def main():
     builder = ModelBuilder()
     builder.pd100_build()
     builder.export('CO_oxidation_on_Pd100.xml')
+    builder.pt.print_statistics()
 
 def test_man():
     cwd = os.curdir

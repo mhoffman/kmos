@@ -1,4 +1,6 @@
 Functionality
+  * FIX BUG in most likely generate coord
+    in conjunction with x,y,z -> pos most likely
   * kmos.gui.Editor should be able to process
     project_tree passed in automatically 
     (and save changes directly to it)

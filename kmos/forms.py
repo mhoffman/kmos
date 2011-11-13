@@ -572,8 +572,8 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         for x in range(-1, 2):
             for y in range(-1, 2):
                 for site in self.model.sites:
-                    X = self.scale * np.dot(site.x + x, atoms.cell[0, 0])
-                    Y = self.scale * np.dot(1 - (site.y +y), atoms.cell[1, 1])
+                    X = self.scale * np.dot(site.pos[0] + x, atoms.cell[0, 0])
+                    Y = self.scale * np.dot(1 - (site.pos[1] +y), atoms.cell[1, 1])
                     o = goocanvas.Ellipse(parent=self.root,
                                           center_x=self.offset_x + X,
                                           center_y=self.offset_y + Y,
@@ -599,16 +599,16 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                  (self.upper_right[1] - self.lower_left[1]))
 
         for site in self.model.sites:
-            d = np.sqrt((pos_x - site.x) ** 2 + (pos_y - site.y) ** 2)
+            d = np.sqrt((pos_x - site.pos[0]) ** 2 + (pos_y - site.pos[1]) ** 2)
             if d < 0.03:
                 SiteForm(site, self, self.project_tree, self.model)
                 break
         else:
             new_site = Site()
             new_site.name = ''
-            new_site.x = pos_x
-            new_site.y = pos_y
-            new_site.z = 0.
+            new_site.pos[0] = pos_x
+            new_site.pos[1] = pos_y
+            new_site.pos[2] = 0.
             new_site.layer = self.model.name
 
             self.model.sites.append(new_site)
@@ -1013,8 +1013,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                         l_site = CanvasOval(self.site_layer, 0, 0, 10, 10,
                                                                     fg=color)
 
-                    l_site.set_center(self.l / self.z * (i + float(site.x)),
-                                500 - self.l / self.z * (j + float(site.y)))
+                    l_site.set_center(self.l / self.z * (i + float(site.pos[0])),
+                                500 - self.l / self.z * (j + float(site.pos[1])))
                     l_site.connect('query-tooltip', self.query_tooltip)
                     # 500 - ... for having scientific coordinates
                     # and not screen coordinates
