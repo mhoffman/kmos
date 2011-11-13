@@ -94,14 +94,41 @@ fashion. Python bindings are generated using <a class="reference external" href=
 <p>and install it using <em>setuptools</em></p>
 <div class="highlight-python"><pre>./setup.py install [--user]</pre>
 </div>
-<div class="admonition-todo admonition " id="index-0">
-<p class="first admonition-title">Todo</p>
-<p class="last">add description of dependencies</p>
+<p>In order to use all features of kmos you have to install
+a number of dependencies. This should not be very difficult
+on a recent Linux distribution with package management. So
+on Ubuntu it suffices to call:</p>
+<div class="highlight-python"><pre>sudo apt-get install gazpacho gfortran python-dev \
+                     python-glade2 python-kiwi python-lxml \
+                     python-matplotlib python-numpy \
+                     python-pygoocanvas python-scipy</pre>
 </div>
-<div class="admonition-todo admonition " id="index-1">
+<p>and if you haven&#8217;t already installed it, one way to fetch the
+atomic simulation environment (ASE) is currently to</p>
+<div class="highlight-python"><pre>sudo add-apt-repository ppa:campos-dev/campos
+sudo apt-get update
+sudo apt-get install python-ase</pre>
+</div>
+<p>Or go to their <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/download.html">website</a>
+to fetch the latest version.</p>
+<p>Granted, if you think this dependency list hurts. Yes, it does in
+fact (a little :-) and I am happy about any suggestions how to
+minimize it. However one should note these dependencies are only
+needed in the environment where the model development happens.
+The generated code needed to run a model actually has no
+dependencies at all.</p>
+<p>To ease the installation further on Ubuntu one can also simply run:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">kmos</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">dependencies</span><span class="o">-</span><span class="n">ubuntu</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition " id="index-0">
 <p class="first admonition-title">Todo</p>
 <p class="last">add pip way or something alike to automatically
 install dependencies.</p>
+</div>
+<div class="admonition-todo admonition " id="index-1">
+<p class="first admonition-title">Todo</p>
+<p class="last">test installation on other platmforms</p>
 </div>
 </div>
 <div class="section" id="kmc-modelling">
