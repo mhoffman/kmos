@@ -9,8 +9,8 @@ kmos.types
 ^^^^^^^^^^
 
 .. automodule:: kmos.types
-.. autoclass:: kmos.types.ProjectTree
-.. automethod:: kmos.types.ProjectTree.export_xml_file
+.. autoclass:: kmos.types.Project
+.. automethod:: kmos.types.Project.export_xml_file
 .. autoclass:: kmos.types.Meta
 .. autoclass:: kmos.types.Parameter
 .. autoclass:: kmos.types.Layer
@@ -34,7 +34,7 @@ kmos.gui
 
 .. automodule:: kmos.gui
 .. autoclass:: kmos.gui.Editor
-.. autoclass:: kmos.gui.GTKProjectTree
+.. autoclass:: kmos.gui.GTKProject
 
 kmos.forms
 ^^^^^^^^^^

@@ -40,8 +40,8 @@ atomic simulation environment (ASE) is currently to ::
 Or go to their `website <https://wiki.fysik.dtu.dk/ase/download.html>`_
 to fetch the latest version.
 
-Granted, if you think this dependency list hurts. Yes, it does in
-fact (a little :-) and I am happy about any suggestions how to
+If you think this dependency list hurts. Yes, it does!
+And I am happy about any suggestions how to
 minimize it. However one should note these dependencies are only
 needed in the environment where the model development happens.
 The generated code needed to run a model actually has no

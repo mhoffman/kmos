@@ -47,19 +47,19 @@
 <h1>The kmos data model<a class="headerlink" href="#the-kmos-data-model" title="Permalink to this headline">¶</a></h1>
 <p>The guide explains how kmos handles represent
 a kmc model internally, which is important to know
-if one want to write new functionality.</p>
+if one wants to write new functionality.</p>
 <p>The different functions and front-ends of
 kmos all interact in some way or another
-with instances of the ProjectTree class. A
-ProjectTree instance is a representation of
+with instances of the Project class. A
+Project instance is a representation of
 a kmc model. If you fire up &#8216;kmos edit&#8217; with
 an xml file, kmos validates the XML file and
-stores the content in a ProjectTree instance.
+stores the content in a Project instance.
 If you export source code, kmos runs over the
-ProjectTree and creates the necessary Fortran 90
+Project and creates the necessary Fortran 90
 source code.</p>
 <dl class="docutils">
-<dt>So the following things are in a ProjectTree::</dt>
+<dt>So the following things are in a Project::</dt>
 <dd><ul class="first last simple">
 <li>meta</li>
 <li>lattice(layers)</li>
