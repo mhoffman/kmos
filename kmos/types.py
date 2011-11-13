@@ -46,10 +46,15 @@ class FixedObject(object):
 
 
 class Project(object):
-    """Represents one kMC project or model. The overall
-    structure is given by
+    """A Project is where (almost) everything comes together.
+    A Project holds all other elements needed to describe one
+    kMC Project ready to be manipulated, exported, or imported.
+
+    The overall structure is the following as is also displayed
+    in the editor GUI.
 
     Project::
+
         - Meta
         - Parameters
         - Lattice(s)
