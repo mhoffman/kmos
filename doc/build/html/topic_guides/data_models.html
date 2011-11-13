@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Topic Guides &mdash; kmos v0.0.1 documentation</title>
+    <title>The kmos data model &mdash; kmos v0.0.1 documentation</title>
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -23,8 +23,9 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
-    <link rel="next" title="Workflows" href="workflows.html" />
-    <link rel="prev" title="Tutorials" href="../tutorials/index.html" /> 
+    <link rel="up" title="Topic Guides" href="index.html" />
+    <link rel="next" title="Reference" href="../reference.html" />
+    <link rel="prev" title="Workflows" href="workflows.html" /> 
   </head>
   <body>
     <div class="related">
@@ -37,12 +38,13 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="workflows.html" title="Workflows"
+          <a href="../reference.html" title="Reference"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="../tutorials/index.html" title="Tutorials"
+          <a href="workflows.html" title="Workflows"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Topic Guides</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -51,13 +53,41 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="topic-guides">
-<h1>Topic Guides<a class="headerlink" href="#topic-guides" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
-<li class="toctree-l1"><a class="reference internal" href="data_models.html">The kmos data model</a></li>
+  <div class="section" id="the-kmos-data-model">
+<h1>The kmos data model<a class="headerlink" href="#the-kmos-data-model" title="Permalink to this headline">¶</a></h1>
+<p>The guide explains how kmos handles represent
+a kmc model internally, which is important to know
+if one wants to write new functionality.</p>
+<p>The different functions and front-ends of
+kmos all interact in some way or another
+with instances of the Project class. A
+Project instance is a representation of
+a kmc model. If you fire up &#8216;kmos edit&#8217; with
+an xml file, kmos validates the XML file and
+stores the content in a Project instance.
+If you export source code, kmos runs over the
+Project and creates the necessary Fortran 90
+source code.</p>
+<dl class="docutils">
+<dt>So the following things are in a Project::</dt>
+<dd><ul class="first last simple">
+<li>meta</li>
+<li>lattice(layers)</li>
+<li>species</li>
+<li>parameters</li>
+<li>processes</li>
 </ul>
+</dd>
+</dl>
+<p>The language used here stems from modelling atomic
+movement on a fixed or evolving lattice like
+structure. In a more general
+context one may translates them as:</p>
+<div class="highlight-python"><pre>* meta -&gt; information about project
+* geometry
+* states
+* parameters
+* transitions</pre>
 </div>
 </div>
 
@@ -68,14 +98,14 @@
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="../tutorials/index.html"
-                        title="previous chapter">Tutorials</a></p>
-  <h4>Next topic</h4>
   <p class="topless"><a href="workflows.html"
-                        title="next chapter">Workflows</a></p>
+                        title="previous chapter">Workflows</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../reference.html"
+                        title="next chapter">Reference</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
-    <li><a href="../_sources/topic_guides/index.txt"
+    <li><a href="../_sources/topic_guides/data_models.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
 <div id="searchbox" style="display: none">
@@ -105,12 +135,13 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="workflows.html" title="Workflows"
+          <a href="../reference.html" title="Reference"
              >next</a> |</li>
         <li class="right" >
-          <a href="../tutorials/index.html" title="Tutorials"
+          <a href="workflows.html" title="Workflows"
              >previous</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Topic Guides</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
