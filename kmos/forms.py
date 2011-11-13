@@ -998,9 +998,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         for active_layer in active_layers:
             for site in active_layer.sites:
                 form_site = ProcessFormSite(name=site.name,
-                                            x=site.x,
-                                            y=site.y,
-                                            z=site.z,
+                                            pos=site.pos,
                                             layer=active_layer.name,
                                             color=active_layer.color)
                 site_list.append(form_site)
