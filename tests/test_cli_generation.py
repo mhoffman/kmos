@@ -11,11 +11,11 @@ def generate_model():
         Layer, \
         Parameter, \
         Process,\
-        ProjectTree,\
+        Project,\
         Site, \
         Species
 
-    project = ProjectTree()
+    project = Project()
 
     # set meta information
     model_name = 'test_cli_generated_model'

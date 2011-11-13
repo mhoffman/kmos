@@ -18,7 +18,7 @@ DEFAULT_LAYER = 'Pd100'
 
 class ModelBuilder(object):
     def __init__(self):
-        self.pt = ProjectTree()
+        self.pt = Project()
 
     def standard_build(self):
         self.set_meta()

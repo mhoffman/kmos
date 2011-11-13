@@ -914,7 +914,7 @@ def export_source(project_tree, export_dir=None):
 def import_xml(filename):
     """Imports and returns project from an XML file."""
     import kmos.types
-    project_tree = kmos.types.ProjectTree()
+    project_tree = kmos.types.Project()
     project_tree.import_xml_file(filename)
     return project_tree
 

@@ -16,7 +16,7 @@ def test_import_export():
     #if os.path.exists(TEST_DIR):
         #shutil.rmtree(TEST_DIR)
 
-    pt = kmos.types.ProjectTree()
+    pt = kmos.types.Project()
     pt.import_xml_file('default.xml')
     kmos.io.export_source(pt, TEST_DIR)
     for filename in ['base', 'lattice', 'proclist']:
@@ -34,7 +34,7 @@ def test_compare_import_variants():
     cwd = os.path.abspath(os.curdir)
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-    pt = kmos.types.ProjectTree()
+    pt = kmos.types.Project()
     editor = kmos.gui.Editor()
     editor.import_xml_file('default.xml')
     pt.import_xml_file('default.xml')

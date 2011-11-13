@@ -45,11 +45,11 @@ class FixedObject(object):
                                                             % attrname)
 
 
-class ProjectTree(object):
+class Project(object):
     """Represents one kMC project or model. The overall
     structure is given by
 
-    ProjectTree:
+    Project::
         - Meta
         - Parameters
         - Lattice(s)
@@ -67,7 +67,7 @@ class ProjectTree(object):
         self.output_list = OutputList()
 
         # Quick'n'dirty define access functions
-        # needed in context with GTKProjectTree
+        # needed in context with GTKProject
         self.add_parameter = lambda parameter: \
             self.parameter_list.append(parameter)
         self.get_parameters = lambda : sorted(self.parameter_list,
@@ -99,7 +99,7 @@ class ProjectTree(object):
 
     def _get_etree_xml(self):
         """Produces an ElemenTree object
-        representing the ProjectTree"""
+        representing the Project"""
         # build XML Tree
         root = ET.Element('kmc')
         root.set('version', str(XML_API_VERSION))
@@ -744,7 +744,7 @@ class ProcessFormSite(Site):
     """This is just a little varient of the site object,
     with the sole difference that it has a layer attribute
     and is meant to be used in the process form. This separation was chosen,
-    since the Site object as in the ProjectTree should not have a layer
+    since the Site object as in the Project should not have a layer
     attribute to avoid data duplication but in the ProcessForm we need this
     to define processes
     """

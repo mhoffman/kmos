@@ -24,7 +24,7 @@ import StringIO
 import sys
 import os
 import copy
-from kmos.types import ProjectTree
+from kmos.types import Project
 from kmos.forms import *
 import kmos.io
 #sys.path.append(APP_ABS_PATH)
@@ -95,8 +95,8 @@ def verbose(func):
     return wrapper_func
 
 
-class GTKProjectTree(SlaveDelegate):
-    """A facade of kmos.types.ProjectTree so that
+class GTKProject(SlaveDelegate):
+    """A facade of kmos.types.Project so that
     pygtk can display in a TreeView.
     """
     def __init__(self, parent, menubar):
@@ -107,7 +107,7 @@ class GTKProjectTree(SlaveDelegate):
                                         Column('info')])
 
         self.project_data.connect('row-activated', self.on_row_activated)
-        self.model_tree = ProjectTree()
+        self.model_tree = Project()
         self._set_treeview_hooks()
 
         self.menubar = menubar
@@ -128,8 +128,8 @@ class GTKProjectTree(SlaveDelegate):
         SlaveDelegate.__init__(self, toplevel=self.project_data)
 
     def _set_treeview_hooks(self):
-        """Fudge function to import to access function to kmos.types.ProjectTree
-        to kmos.gui.GTKProjectTree.
+        """Fudge function to import to access function to kmos.types.Project
+        to kmos.gui.GTKProject.
         """
         self.project_data.clear()
         # Meta
@@ -468,7 +468,7 @@ class Editor(GladeDelegate):
             print('Building menu failed: %s' % (e, mergeid))
 
         # Initialize the project tree, passing in the menu bar
-        self.project_tree = GTKProjectTree(parent=self, menubar=self.menubar)
+        self.project_tree = GTKProject(parent=self, menubar=self.menubar)
         self.main_window.add_accel_group(self.menubar.get_accel_group())
         self.attach_slave('overviewtree', self.project_tree)
         self.set_title('%s - kmos' % self.project_tree.get_name())
@@ -554,7 +554,7 @@ class Editor(GladeDelegate):
             elif resp == gtk.RESPONSE_OK:
                 self.on_btn_save_model__clicked(None)
         # Instantiate new project data
-        self.project_tree = GTKProjectTree(parent=self)
+        self.project_tree = GTKProject(parent=self)
         if self.get_slave('overviewtree'):
             self.detach_slave('overviewtree')
         self.attach_slave('overviewtree', self.project_tree)
@@ -669,7 +669,7 @@ class Editor(GladeDelegate):
         filechooser.destroy()
         if resp == gtk.RESPONSE_OK and filename:
             # Initialize blank project tree
-            self.project_tree = GTKProjectTree(parent=self, menubar=self.menubar)
+            self.project_tree = GTKProject(parent=self, menubar=self.menubar)
             if self.get_slave('overviewtree'):
                 self.detach_slave('overviewtree')
             self.attach_slave('overviewtree', self.project_tree)
