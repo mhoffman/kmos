@@ -54,6 +54,29 @@
 <div class="section" id="module-kmos.types">
 <span id="kmos-types"></span><h3>kmos.types<a class="headerlink" href="#module-kmos.types" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
+<dt id="kmos.types.Project">
+<em class="property">class </em><tt class="descclassname">kmos.types.</tt><tt class="descname">Project</tt><a class="headerlink" href="#kmos.types.Project" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Project is where (almost) everything comes together.
+A Project holds all other elements needed to describe one
+kMC Project ready to be manipulated, exported, or imported.</p>
+<p>The overall structure is the following as is also displayed
+in the editor GUI.</p>
+<p>Project:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="o">-</span> <span class="n">Meta</span>
+<span class="o">-</span> <span class="n">Parameters</span>
+<span class="o">-</span> <span class="n">Lattice</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="o">-</span> <span class="n">Species</span>
+<span class="o">-</span> <span class="n">Processes</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="kmos.types.Project.export_xml_file">
+<tt class="descclassname">Project.</tt><tt class="descname">export_xml_file</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#kmos.types.Project.export_xml_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
 <dt id="kmos.types.Meta">
 <em class="property">class </em><tt class="descclassname">kmos.types.</tt><tt class="descname">Meta</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#kmos.types.Meta" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class holding the meta-information about the kMC project</p>
@@ -149,6 +172,13 @@ model will be included in the kmc_settings.py module.</p>
 <dt id="kmos.gui.Editor">
 <em class="property">class </em><tt class="descclassname">kmos.gui.</tt><tt class="descname">Editor</tt><a class="headerlink" href="#kmos.gui.Editor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="class">
+<dt id="kmos.gui.GTKProject">
+<em class="property">class </em><tt class="descclassname">kmos.gui.</tt><tt class="descname">GTKProject</tt><big>(</big><em>parent</em>, <em>menubar</em><big>)</big><a class="headerlink" href="#kmos.gui.GTKProject" title="Permalink to this definition">¶</a></dt>
+<dd><p>A facade of kmos.types.Project so that
+pygtk can display in a TreeView.</p>
+</dd></dl>
 
 </div>
 <div class="section" id="module-kmos.forms">
