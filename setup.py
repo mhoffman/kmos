@@ -38,7 +38,7 @@ scripts = [
         'tools/kmos-view',
         'tools/kmos-build-standalone',
         'tools/kmos',
-        'tools/kmos-install-dependencies',
+        'tools/kmos-install-dependencies-ubuntu',
         ]
 url = 'https://github.com/mhoffman/kmos'
 version = '0.1'
