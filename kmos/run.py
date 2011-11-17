@@ -71,11 +71,13 @@ class KMC_Model(multiprocessing.Process):
                        signal_queue=None,
                        size=None, system_name='kmc_model',
                        banner=True,
-                       print_rates=True):
+                       print_rates=True,
+                       autosend=True):
         super(KMC_Model, self).__init__()
         self.image_queue = image_queue
         self.parameters_queue = parameter_queue
         self.signal_queue = signal_queue
+        self.autosend = autosend
         self.size = int(settings.simulation_size) \
                         if size is None else int(size)
         self.print_rates = print_rates
@@ -173,9 +175,9 @@ class KMC_Model(multiprocessing.Process):
         simulations, model must have been initialized
         with proper Queues."""
         while True:
-            for _ in xrange(500):
+            for _ in xrange(50000):
                 proclist.do_kmc_step()
-            if not self.image_queue.full():
+            if self.autosend and not self.image_queue.full():
                 atoms = self.get_atoms()
                 # attach other quantities need to plot
                 # to the atoms object and let it travel
@@ -184,16 +186,16 @@ class KMC_Model(multiprocessing.Process):
                 self.image_queue.put(atoms)
             if not self.signal_queue.empty():
                 signal = self.signal_queue.get()
-                print('  ... model received %s' % signal)
                 if signal.upper() == 'STOP':
                     self.terminate()
                 elif signal.upper() == 'PAUSE':
-                    while self.signal_queue.empty():
-                        time.sleep(0.03)
+                    print('starting pause')
                 elif signal.upper() == 'RESET_TIME':
                     base.set_kmc_time(0.0)
                 elif signal.upper() == 'START':
                     pass
+                elif signal.upper() == 'ATOMS':
+                    self.image_queue.put(self.get_atoms())
             if not self.parameters_queue.empty():
                 while not self.parameters_queue.empty():
                     parameters = self.parameters_queue.get()
