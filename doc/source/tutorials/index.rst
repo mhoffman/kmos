@@ -77,7 +77,7 @@ and some surface species. Given you want to simulate CO adsorption and
 desorption on a single crystal surface we say::
   
   pt.add_species(Species(name='CO',
-                         representation='Atoms("CO",[[0,0,0],[0,0,1.2]])'))
+                         representation="Atoms('CO',[[0,0,0],[0,0,1.2]])"))
 
 where the string passed as `representation` is a string representing
 a CO molecule which can be evaluated in 
