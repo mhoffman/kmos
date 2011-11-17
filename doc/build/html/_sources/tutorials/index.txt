@@ -173,14 +173,14 @@ adsorption requires at least one site to be empty (condition). Then this
 site can be occupied by CO (action) with a certain rate constant. Written
 down in code this looks as follows. First we need a coord::
   
-  coord = pt.lattice.generate_coord('hollow.simple_cubic')
+  coord = pt.lattice.generate_coord('hollow.(0,0,0).simple_cubic')
 
 which we can now use::
 
-  pt.add_process(name='CO_adsorption',
+  pt.add_process(Process(name='CO_adsorption',
                  condition_list=[Condition(coord=coord, species='empty')],
                  action_list=[Action(coord=coord, species='CO')],
-                 rate_constant='p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)')
+                 rate_constant='p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)'))
 
 Now you might wonder, how come we can simply use m_CO and beta and such.
 Well, that is because we evaluator will to some trickery to resolve such
@@ -191,10 +191,10 @@ that we need conversion factors of bar and umass.
 
 Then the desorption process is almost the same, except the reverse::
 
-  pt.add_process(name='CO_desorption',
+  pt.add_process(Process(name='CO_desorption',
                  condition_list=[Condition(coord=coord, species='CO')],
                  action_list=[Action(coord=coord, species='empty')],
-                 rate_constant='p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(-deltaG*eV)')
+                 rate_constant='p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(-deltaG*eV)'))
 
 
 And that is it! First it is a good idea to save your work::

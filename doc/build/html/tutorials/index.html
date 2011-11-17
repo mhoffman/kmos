@@ -201,14 +201,14 @@ phrased in terms of &#8216;conditions&#8217; and &#8216;actions&#8217;. So for e
 adsorption requires at least one site to be empty (condition). Then this
 site can be occupied by CO (action) with a certain rate constant. Written
 down in code this looks as follows. First we need a coord:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">coord</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">generate_coord</span><span class="p">(</span><span class="s">&#39;hollow.simple_cubic&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">coord</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">generate_coord</span><span class="p">(</span><span class="s">&#39;hollow.(0,0,0).simple_cubic&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>which we can now use:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_process</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;CO_adsorption&#39;</span><span class="p">,</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_process</span><span class="p">(</span><span class="n">Process</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;CO_adsorption&#39;</span><span class="p">,</span>
                <span class="n">condition_list</span><span class="o">=</span><span class="p">[</span><span class="n">Condition</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)],</span>
                <span class="n">action_list</span><span class="o">=</span><span class="p">[</span><span class="n">Action</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;CO&#39;</span><span class="p">)],</span>
-               <span class="n">rate_constant</span><span class="o">=</span><span class="s">&#39;p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)&#39;</span><span class="p">)</span>
+               <span class="n">rate_constant</span><span class="o">=</span><span class="s">&#39;p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Now you might wonder, how come we can simply use m_CO and beta and such.
@@ -218,10 +218,10 @@ long as you have set a parameter <cite>T</cite> before, this will go through. Sa
 is true for m_CO, here the atomic masses are looked up and added. Note
 that we need conversion factors of bar and umass.</p>
 <p>Then the desorption process is almost the same, except the reverse:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_process</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;CO_desorption&#39;</span><span class="p">,</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_process</span><span class="p">(</span><span class="n">Process</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;CO_desorption&#39;</span><span class="p">,</span>
                <span class="n">condition_list</span><span class="o">=</span><span class="p">[</span><span class="n">Condition</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;CO&#39;</span><span class="p">)],</span>
                <span class="n">action_list</span><span class="o">=</span><span class="p">[</span><span class="n">Action</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)],</span>
-               <span class="n">rate_constant</span><span class="o">=</span><span class="s">&#39;p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(-deltaG*eV)&#39;</span><span class="p">)</span>
+               <span class="n">rate_constant</span><span class="o">=</span><span class="s">&#39;p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(-deltaG*eV)&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>And that is it! First it is a good idea to save your work:</p>
