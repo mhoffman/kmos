@@ -1,5 +1,6 @@
 MANIFEST
 /build
+/pylint_reports
 dist
 example_projects
 kmos

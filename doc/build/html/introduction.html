@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -10,17 +12,18 @@
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '#',
+        URL_ROOT:    '',
         VERSION:     '0.0.1',
-        COLLAPSE_MODINDEX: false,
+        COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="kmos v0.0.1 documentation" href="index.html" />
-    <link rel="next" title="Reference" href="reference.html" />
+    <link rel="next" title="Tutorials" href="tutorials/index.html" />
     <link rel="prev" title="Welcome to kmos’s documentation!" href="index.html" /> 
   </head>
   <body>
@@ -31,10 +34,10 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="modindex.html" title="Global Module Index"
-             accesskey="M">modules</a> |</li>
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li class="right" >
-          <a href="reference.html" title="Reference"
+          <a href="tutorials/index.html" title="Tutorials"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to kmos’s documentation!"
@@ -49,7 +52,7 @@
           <div class="body">
             
   <div class="section" id="module-kmos">
-<h1>Introduction<a class="headerlink" href="#module-kmos" title="Permalink to this headline">¶</a></h1>
+<span id="introduction"></span><h1>Introduction<a class="headerlink" href="#module-kmos" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="feature-overview">
 <h2>Feature overview<a class="headerlink" href="#feature-overview" title="Permalink to this headline">¶</a></h2>
 <p>With kmos you can:</p>
@@ -91,14 +94,41 @@ fashion. Python bindings are generated using <a class="reference external" href=
 <p>and install it using <em>setuptools</em></p>
 <div class="highlight-python"><pre>./setup.py install [--user]</pre>
 </div>
-<div class="admonition-todo admonition " id="todo-2">
-<p class="first admonition-title">Todo</p>
-<p class="last">add description of dependencies</p>
+<p>In order to use all features of kmos you have to install
+a number of dependencies. This should not be very difficult
+on a recent Linux distribution with package management. So
+on Ubuntu it suffices to call:</p>
+<div class="highlight-python"><pre>sudo apt-get install gazpacho gfortran python-dev \
+                     python-glade2 python-kiwi python-lxml \
+                     python-matplotlib python-numpy \
+                     python-pygoocanvas python-scipy</pre>
 </div>
-<div class="admonition-todo admonition " id="todo-3">
+<p>and if you haven&#8217;t already installed it, one way to fetch the
+atomic simulation environment (ASE) is currently to</p>
+<div class="highlight-python"><pre>sudo add-apt-repository ppa:campos-dev/campos
+sudo apt-get update
+sudo apt-get install python-ase</pre>
+</div>
+<p>Or go to their <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/download.html">website</a>
+to fetch the latest version.</p>
+<p>If you think this dependency list hurts. Yes, it does!
+And I am happy about any suggestions how to
+minimize it. However one should note these dependencies are only
+needed in the environment where the model development happens.
+The generated code needed to run a model actually has no
+dependencies at all.</p>
+<p>To ease the installation further on Ubuntu one can also simply run:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">kmos</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">dependencies</span><span class="o">-</span><span class="n">ubuntu</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition " id="index-0">
 <p class="first admonition-title">Todo</p>
 <p class="last">add pip way or something alike to automatically
 install dependencies.</p>
+</div>
+<div class="admonition-todo admonition " id="index-1">
+<p class="first admonition-title">Todo</p>
+<p class="last">test installation on other platmforms</p>
 </div>
 </div>
 <div class="section" id="kmc-modelling">
@@ -131,40 +161,40 @@ installed you can simply run <cite>kmos view</cite> in the export folder.</p>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-            <h3><a href="index.html">Table Of Contents</a></h3>
-            <ul>
-<li><a class="reference external" href="#">Introduction</a><ul>
-<li><a class="reference external" href="#feature-overview">Feature overview</a></li>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Introduction</a><ul>
+<li><a class="reference internal" href="#feature-overview">Feature overview</a></li>
 </ul>
 </li>
-<li><a class="reference external" href="#installation">Installation</a></li>
-<li><a class="reference external" href="#kmc-modelling">kMC Modelling</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#kmc-modelling">kMC Modelling</a></li>
 </ul>
 
-            <h4>Previous topic</h4>
-            <p class="topless"><a href="index.html"
-                                  title="previous chapter">Welcome to kmos&#8217;s documentation!</a></p>
-            <h4>Next topic</h4>
-            <p class="topless"><a href="reference.html"
-                                  title="next chapter">Reference</a></p>
-            <h3>This Page</h3>
-            <ul class="this-page-menu">
-              <li><a href="_sources/introduction.txt"
-                     rel="nofollow">Show Source</a></li>
-            </ul>
-          <div id="searchbox" style="display: none">
-            <h3>Quick search</h3>
-              <form class="search" action="search.html" method="get">
-                <input type="text" name="q" size="18" />
-                <input type="submit" value="Go" />
-                <input type="hidden" name="check_keywords" value="yes" />
-                <input type="hidden" name="area" value="default" />
-              </form>
-              <p class="searchtip" style="font-size: 90%">
-              Enter search terms or a module, class or function name.
-              </p>
-          </div>
-          <script type="text/javascript">$('#searchbox').show(0);</script>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to kmos&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tutorials/index.html"
+                        title="next chapter">Tutorials</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/introduction.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -176,10 +206,10 @@ installed you can simply run <cite>kmos view</cite> in the export folder.</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="modindex.html" title="Global Module Index"
+          <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="reference.html" title="Reference"
+          <a href="tutorials/index.html" title="Tutorials"
              >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to kmos’s documentation!"
@@ -188,8 +218,8 @@ installed you can simply run <cite>kmos view</cite> in the export folder.</p>
       </ul>
     </div>
     <div class="footer">
-      &copy; Copyright 2009-2011, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+        &copy; Copyright 2009-2011, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
     </div>
   </body>
 </html>

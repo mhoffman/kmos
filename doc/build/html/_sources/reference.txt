@@ -2,16 +2,15 @@
 Reference
 ====================
 
-==========
 Data Types
 ==========
 
 kmos.types
-==========
+^^^^^^^^^^
 
 .. automodule:: kmos.types
-.. autoclass:: kmos.types.ProjectTree
-.. automethod:: kmos.type.ProjectTree.export_xml_file
+.. autoclass:: kmos.types.Project
+.. automethod:: kmos.types.Project.export_xml_file
 .. autoclass:: kmos.types.Meta
 .. autoclass:: kmos.types.Parameter
 .. autoclass:: kmos.types.Layer
@@ -22,24 +21,23 @@ kmos.types
 .. autoclass:: kmos.types.Coord
 
 kmos.io
-=======
+^^^^^^^
 
 .. automodule:: kmos.io
    :members: export_source, import_xml, export_xml
 
-===============
 Editor frontend
 ===============
 
 kmos.gui
-==========
+^^^^^^^^^^
 
 .. automodule:: kmos.gui
 .. autoclass:: kmos.gui.Editor
-.. autoclass:: kmos.gui.GTKProjectTree
+.. autoclass:: kmos.gui.GTKProject
 
 kmos.forms
-==========
+^^^^^^^^^^
 
 .. automodule:: kmos.forms
    :members: MetaForm, SpeciesListForm, SpeciesForm, ParameterForm,
@@ -47,28 +45,22 @@ kmos.forms
              parse_chemical_expression, BatchProcessForm
 
 
-================
 Runtime frontend
 ================
 
 
+kmos.model
+^^^^^^^^^^
+
+.. automodule:: kmos.model
+
 kmos.run
-==========
-
-.. automodule:: kmos.run
-.. autoclass:: kmos.run.KMC_Model
-   :members: __repr__, deallocate, do_steps, get_atoms, 
-             get_occupation_header, get_tof_header,
-             run, view
-
-kmos.view
-=========
+^^^^^^^^^
 
 .. automodule:: kmos.view
    :members: KMC_Viewer
 
 
-====================
 kmos kMC project DTD
 ====================
 
