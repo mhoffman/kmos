@@ -17,8 +17,8 @@
   >
   <!ELEMENT species EMPTY>
   <!ATTLIST species
-    color CDATA #REQUIRED
     name CDATA #REQUIRED
+    color CDATA #IMPLIED
     representation CDATA #IMPLIED
   >
   <!ELEMENT parameter_list (parameter)*>
