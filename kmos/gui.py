@@ -195,9 +195,13 @@ class GTKProject(SlaveDelegate):
         self.model_tree.add_layer = self.add_layer
         if len(self.get_layer()) == 1 :
             self.set_default_layer(layer.name)
+            self.set_substrate_layer(layer.name)
 
     def set_default_species(self, species):
         self.model_tree.species_list.default_species = species
+
+    def set_substrate_layer(self, layer):
+        self.model_tree.layer_list.substrate_layer = layer
 
     def set_default_layer(self, layer):
         self.model_tree.layer_list.default_layer = layer
