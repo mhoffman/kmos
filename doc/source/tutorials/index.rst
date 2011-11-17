@@ -62,8 +62,8 @@ this hardly excites surface scientists but we need to start somewhere, right?
 Now you have to instantiate a new project and fill in meta information::
 
   pt = Project()
-  pt.meta.author_name = 'Your Name'
-  pt.meta.author_email = 'your.name@server.com'
+  pt.meta.author = 'Your Name'
+  pt.meta.email = 'your.name@server.com'
   pt.meta.model_name = 'MyFirstModel'
   pt.meta.model_dimension = 2
 
