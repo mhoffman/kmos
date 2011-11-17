@@ -128,8 +128,10 @@ class Project(object):
         for species in self.get_speciess():
             species_elem = ET.SubElement(species_list, 'species')
             species_elem.set('name', species.name)
-            species_elem.set('color', species.color)
-            species_elem.set('representation', species.representation)
+            if hasattr(species, 'representation'):
+                species_elem.set('representation', species.representation)
+            if hasattr(species, 'color'):
+                species_elem.set('color', species.color)
         parameter_list = ET.SubElement(root, 'parameter_list')
         for parameter in self.get_parameters():
             parameter_elem = ET.SubElement(parameter_list, 'parameter')
@@ -364,7 +366,8 @@ class Project(object):
                         if 'default_species' in child.attrib else ''
                     for species in child:
                         name = species.attrib['name']
-                        color = species.attrib['color']
+                        color = species.attrib['color'] \
+                            if 'color' in species.attrib else ''
                         representation = species.attrib['representation'] \
                             if 'representation' in species.attrib else ''
                         species_elem = Species(name=name,
