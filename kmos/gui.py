@@ -139,9 +139,6 @@ class GTKProject(SlaveDelegate):
         # Layer List
         self.layer_list = self.project_data.append(None,
                                    self.model_tree.layer_list)
-        self.add_layer = lambda layer :\
-            self.project_data.append(self.layer_list, layer)
-        self.model_tree.add_layer = self.add_layer
         self.get_layers = lambda :\
             sorted(self.project_data.get_descendants(self.layer_list),
                    key=lambda x: x.name)
@@ -192,6 +189,12 @@ class GTKProject(SlaveDelegate):
             sorted(self.project_data.get_descendants(self.output_list),
                    key=lambda x: x.name)
         self.model_tree.get_outputs = self.get_outputs
+
+    def add_layer(self, layer):
+        self.project_data.append(self.layer_list, layer)
+        self.model_tree.add_layer = self.add_layer
+        if len(self.get_layer()) == 1 :
+            self.set_default_layer(layer.name)
 
     def set_default_species(self, species):
         self.model_tree.species_list.default_species = species

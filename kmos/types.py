@@ -77,7 +77,6 @@ class Project(object):
         self.get_parameters = lambda : sorted(self.parameter_list,
                                               key=lambda x: x.name)
 
-        self.add_layer = lambda layer: self.layer_list.append(layer)
         self.get_layers = lambda : sorted(self.layer_list,
                                           key=lambda x: x.name)
 
@@ -85,7 +84,6 @@ class Project(object):
         self.get_processes = lambda : sorted(self.process_list,
                                              key=lambda x: x.name)
 
-        self.add_species = lambda species: self.species_list.append(species)
         self.get_speciess = lambda : sorted(self.species_list,
                                             key=lambda x: x.name)
 
@@ -93,6 +91,15 @@ class Project(object):
         self.get_outputs = lambda : sorted(self.output_list,
                                            key=lambda x: x.name)
 
+    def add_species(self, species):
+        self.species_list.append(species)
+        if len(self.species_list) == 1:
+            self.species_list.default_species = species.name
+
+    def add_layer(self, layer):
+        self.layer_list.append(layer)
+        if len(self.layer_list) == 1 :
+            self.layer_list.default_layer = layer.name
     def __repr__(self):
         return self._get_xml_string()
 
@@ -404,7 +411,8 @@ class Project(object):
              raise UserWarning('Layer name "%s" is not unique.' % x.name)
 
         # check if the default layer is actually defined
-        if self.layer_list.default_layer not in [layer.name
+        if len(self.get_layers()) > 1  and \
+           self.layer_list.default_layer not in [layer.name
                                                  for layer
                                                  in self.get_layers()]:
             raise UserWarning('Default Layer "%s" is not defined.'  %
@@ -516,6 +524,8 @@ class Meta(object):
 
     def __init__(self, *args, **kwargs):
         self.add(kwargs)
+        self.debug = kwargs['debug'] \
+                     if 'debug' in kwargs else 0
 
     def add(self, attrib):
         for key in attrib:
