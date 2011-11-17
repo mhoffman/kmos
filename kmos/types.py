@@ -1,4 +1,3 @@
-import pdb
 #!/usr/bin/env python
 """Holds all the data models used in kmos.
 """
