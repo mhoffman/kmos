@@ -1,6 +1,6 @@
-=========
+*********
 Tutorials
-=========
+*********
 
 A first kMC Model--the GUI way
 ==============================
@@ -80,7 +80,9 @@ desorption on a single crystal surface we say::
                          representation="Atoms('CO',[[0,0,0],[0,0,1.2]])"))
 
 where the string passed as `representation` is a string representing
-a CO molecule which can be evaluated in 
+a CO molecule which can be evaluated in ASE namespace. Note that whichever
+species you add first is the default species with which all sites in the
+system will be initialized.
 
 
 Once you have all species declared is a good time to think about the geometry.

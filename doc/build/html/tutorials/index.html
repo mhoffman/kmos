@@ -104,8 +104,8 @@ and desorption on Pd(100) including a simple lateral interaction. Granted
 this hardly excites surface scientists but we need to start somewhere, right?</p>
 <p>Now you have to instantiate a new project and fill in meta information:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span> <span class="o">=</span> <span class="n">Project</span><span class="p">()</span>
-<span class="n">pt</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">author_name</span> <span class="o">=</span> <span class="s">&#39;Your Name&#39;</span>
-<span class="n">pt</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">author_email</span> <span class="o">=</span> <span class="s">&#39;your.name@server.com&#39;</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">author</span> <span class="o">=</span> <span class="s">&#39;Your Name&#39;</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="s">&#39;your.name@server.com&#39;</span>
 <span class="n">pt</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">model_name</span> <span class="o">=</span> <span class="s">&#39;MyFirstModel&#39;</span>
 <span class="n">pt</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">model_dimension</span> <span class="o">=</span> <span class="mi">2</span>
 </pre></div>
@@ -118,11 +118,13 @@ it is useful to define an <em>empty</em> state, so we add:</p>
 <p>and some surface species. Given you want to simulate CO adsorption and
 desorption on a single crystal surface we say:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_species</span><span class="p">(</span><span class="n">Species</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;CO&#39;</span><span class="p">,</span>
-                       <span class="n">representation</span><span class="o">=</span><span class="s">&#39;Atoms(&quot;CO&quot;,[[0,0,0],[0,0,1.2]])&#39;</span><span class="p">))</span>
+                       <span class="n">representation</span><span class="o">=</span><span class="s">&quot;Atoms(&#39;CO&#39;,[[0,0,0],[0,0,1.2]])&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>where the string passed as <cite>representation</cite> is a string representing
-a CO molecule which can be evaluated in</p>
+a CO molecule which can be evaluated in ASE namespace. Note that whichever
+species you add first is the default species with which all sites in the
+system will be initialized.</p>
 <p>Once you have all species declared is a good time to think about the geometry.
 To keep it simple we will stick with a simple-cubic lattice in 2D which
 could for example represent the (100) surface of a fcc crystal with only
