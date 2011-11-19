@@ -73,6 +73,14 @@ elif args[0] == 'export':
         os.system('kmos-export-program %s %s' % (args[1], args[2]))
 elif args[0] == 'import' :
     import kmos.io
+    try:
+        from kmos.types import *
+    except:
+        pass
+    try:
+        import numpy as np
+    except:
+        pass
     pt = kmos.io.import_xml(args[1])
     import IPython
     if hasattr(IPython, 'release') and \
