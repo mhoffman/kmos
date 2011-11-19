@@ -1,5 +1,5 @@
-Workflows
-===========
+Modelling Workflows
+===================
 
 At the core of modelling lies the art to capture
 the most important features of a system and leave
@@ -12,4 +12,12 @@ A typical type of approach for modelling could be::
   #. calculate outcome
   #. compare various observables and qualitative
      behavior with reference system
-  #. adapt model, goto 1
+  #. adapt model, goto 1 or publish model
+
+So while this procedure is quite generic it may help
+to illustrate that the chances to find and capture
+the relevant features of a system are enhanced
+if the trial/learn loop is as short as possible.
+
+
+

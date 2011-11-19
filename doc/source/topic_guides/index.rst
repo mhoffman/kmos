@@ -1,12 +1,13 @@
-***********
+============
 Topic Guides
-************
+============
 
 .. toctree::
   :maxdepth: 2
 
   workflows
   data_models
+  kmos_speed
 
 ..  Convergence Tests
 ..  Process Description Minilanguage

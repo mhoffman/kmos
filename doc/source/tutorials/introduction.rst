@@ -1,5 +1,8 @@
+Getting Started
+===============
+
 Introduction
-============
+^^^^^^^^^^^^
 
 .. automodule:: kmos
 
@@ -7,7 +10,7 @@ Introduction
 
 
 Installation
-============
+^^^^^^^^^^^^
 
 You can fetch the current version of kmos using *git* ::
 
@@ -63,7 +66,7 @@ To ease the installation further on Ubuntu one can also simply run::
    test installation on other platmforms
 
 kMC Modelling
-=============
+^^^^^^^^^^^^^
 
 A good way to define a model is to use a paper and pencil to draw
 your lattice, choose the species that you will need, draw

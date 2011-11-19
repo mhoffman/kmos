@@ -1,6 +1,8 @@
-#########
+=========
 Tutorials
-#########
+=========
+
+.. include:: introduction.rst
 
 A first kMC Model--the GUI way
 ==============================
@@ -10,20 +12,6 @@ simple adsorption/desorption model on a simple cubic surface.
 Despite its simplicity it touches all elements contained in
 the GUI and could be considered from first-principles.
 
-Meta
-^^^^
-
-Lattice
-^^^^^^^
-
-Species
-^^^^^^^
-
-Parameters
-^^^^^^^^^^
-
-Processes
-^^^^^^^^^
 
 
 Running the Model--the GUI way
@@ -41,8 +29,8 @@ make a copy of a model which is almost identical with the
 only difference that ...
 
 
-From scratch
-^^^^^^^^^^^^
+Construct the model
+^^^^^^^^^^^^^^^^^^^
 
 We start by making the necessary import statements (in *python* or better *ipython*)::
 
@@ -199,7 +187,12 @@ Then the desorption process is almost the same, except the reverse::
                  rate_constant='p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(-deltaG*eV)'))
 
 
-And that is it! First it is a good idea to save your work::
+And that is it!
+
+Export, save, compile
+^^^^^^^^^^^^^^^^^^^^^
+
+Next it is a good idea to save your work::
 
   pt.export_xml_file('myfirst_kmc.xml')
 
