@@ -1,0 +1,486 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Reference &mdash; kmos v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
+    <link rel="next" title="Trouble Shooting" href="../troubleshooting/index.html" />
+    <link rel="prev" title="How the kmos kMC algorithm works" href="../topic_guides/kmos_speed.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../troubleshooting/index.html" title="Trouble Shooting"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../topic_guides/kmos_speed.html" title="How the kmos kMC algorithm works"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="reference">
+<h1>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="data-types">
+<h2>Data Types<a class="headerlink" href="#data-types" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-kmos.types">
+<span id="kmos-types"></span><h3>kmos.types<a class="headerlink" href="#module-kmos.types" title="Permalink to this headline">¶</a></h3>
+<p>Holds all the data models used in kmos.</p>
+<dl class="class">
+<dt id="kmos.types.Project">
+<em class="property">class </em><tt class="descclassname">kmos.types.</tt><tt class="descname">Project</tt><a class="headerlink" href="#kmos.types.Project" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Project is where (almost) everything comes together.
+A Project holds all other elements needed to describe one
+kMC Project ready to be manipulated, exported, or imported.</p>
+<p>The overall structure is the following as is also displayed
+in the editor GUI.</p>
+<p>Project:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="o">-</span> <span class="n">Meta</span>
+<span class="o">-</span> <span class="n">Parameters</span>
+<span class="o">-</span> <span class="n">Lattice</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="o">-</span> <span class="n">Species</span>
+<span class="o">-</span> <span class="n">Processes</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="kmos.types.Project.export_xml_file">
+<tt class="descclassname">Project.</tt><tt class="descname">export_xml_file</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#kmos.types.Project.export_xml_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="kmos.types.Meta">
+<em class="property">class </em><tt class="descclassname">kmos.types.</tt><tt class="descname">Meta</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#kmos.types.Meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class holding the meta-information about the kMC project</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="kmos.types.Parameter">
+<em class="property">class </em><tt class="descclassname">kmos.types.</tt><tt class="descname">Parameter</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#kmos.types.Parameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>A parameter that can be used in a rate constant expression
+and defined via some init file</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="kmos.types.Layer">
+<em class="property">class </em><tt class="descclassname">kmos.types.</tt><tt class="descname">Layer</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#kmos.types.Layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents one layer in a possibly multi-layer geometry</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="kmos.types.Site">
+<em class="property">class </em><tt class="descclassname">kmos.types.</tt><tt class="descname">Site</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#kmos.types.Site" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents one lattice site.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="kmos.types.Species">
+<em class="property">class </em><tt class="descclassname">kmos.types.</tt><tt class="descname">Species</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#kmos.types.Species" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class that represent a species such as oxygen, empty, ... .
+Note: <cite>empty</cite> is treated just like a species.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">s</span> <span class="o">=</span> <span class="n">Species</span><span class="p">;</span> <span class="k">print</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">attributes</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="kmos.types.Process">
+<em class="property">class </em><tt class="descclassname">kmos.types.</tt><tt class="descname">Process</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#kmos.types.Process" title="Permalink to this definition">¶</a></dt>
+<dd><p>One process in a kMC process list</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="kmos.types.ConditionAction">
+<em class="property">class </em><tt class="descclassname">kmos.types.</tt><tt class="descname">ConditionAction</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#kmos.types.ConditionAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents either a condition or an action. Since both
+have the same attributes we use the same class here, and just
+store them in different lists, depending on its role.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="kmos.types.Coord">
+<em class="property">class </em><tt class="descclassname">kmos.types.</tt><tt class="descname">Coord</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#kmos.types.Coord" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class that holds exactly one coordinate as used in the description
+of a process. The distinction between a Coord and a Site may seem
+superfluous but it is made to avoid data duplication.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-kmos.io">
+<span id="kmos-io"></span><h3>kmos.io<a class="headerlink" href="#module-kmos.io" title="Permalink to this headline">¶</a></h3>
+<p>Features front-end import/export functions for kMC Projects.
+Currently import and export is supported to XML and export is
+supported to Fortran 90 source code.</p>
+<dl class="function">
+<dt id="kmos.io.export_source">
+<tt class="descclassname">kmos.io.</tt><tt class="descname">export_source</tt><big>(</big><em>project_tree</em>, <em>export_dir=None</em><big>)</big><a class="headerlink" href="#kmos.io.export_source" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export a kmos project into Fortran 90 code that can be readily
+compiled using f2py.  The model contained in project_tree
+will be stored under the directory export_dir. export_dir will
+be created if it does not exist. The XML representation of the
+model will be included in the kmc_settings.py module.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="kmos.io.import_xml">
+<tt class="descclassname">kmos.io.</tt><tt class="descname">import_xml</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#kmos.io.import_xml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Imports and returns project from an XML file.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="kmos.io.export_xml">
+<tt class="descclassname">kmos.io.</tt><tt class="descname">export_xml</tt><big>(</big><em>project_tree</em>, <em>filename=None</em><big>)</big><a class="headerlink" href="#kmos.io.export_xml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a project to an XML file.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="editor-frontend">
+<h2>Editor frontend<a class="headerlink" href="#editor-frontend" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-kmos.gui">
+<span id="kmos-gui"></span><h3>kmos.gui<a class="headerlink" href="#module-kmos.gui" title="Permalink to this headline">¶</a></h3>
+<p>A GUI frontend to create and edit kMC models.</p>
+<dl class="class">
+<dt id="kmos.gui.Editor">
+<em class="property">class </em><tt class="descclassname">kmos.gui.</tt><tt class="descname">Editor</tt><a class="headerlink" href="#kmos.gui.Editor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="kmos.gui.GTKProject">
+<em class="property">class </em><tt class="descclassname">kmos.gui.</tt><tt class="descname">GTKProject</tt><big>(</big><em>parent</em>, <em>menubar</em><big>)</big><a class="headerlink" href="#kmos.gui.GTKProject" title="Permalink to this definition">¶</a></dt>
+<dd><p>A facade of kmos.types.Project so that
+pygtk can display in a TreeView.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-kmos.forms">
+<span id="kmos-forms"></span><h3>kmos.forms<a class="headerlink" href="#module-kmos.forms" title="Permalink to this headline">¶</a></h3>
+<p>kmos.forms - GUI forms used by kmos.gui
+The classes defined here heavily draw on the interface provided by
+python-kiwi.
+In the language of underlying MVC (Model-View-Controller) pattern these
+classes form the controller. The view is defined through a <em>.glade XML file
+and the models are instances of kmos.types.</em></p>
+<dl class="class">
+<dt id="kmos.forms.MetaForm">
+<em class="property">class </em><tt class="descclassname">kmos.forms.</tt><tt class="descname">MetaForm</tt><big>(</big><em>model</em>, <em>project_tree</em><big>)</big><a class="headerlink" href="#kmos.forms.MetaForm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows to enter meta information about the project.
+Please enter author and email so people can credit you for the model.</p>
+<p>Increasing the debug level makes the kmos backed create a lot of
+output but is typically not needed.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="kmos.forms.SpeciesListForm">
+<em class="property">class </em><tt class="descclassname">kmos.forms.</tt><tt class="descname">SpeciesListForm</tt><big>(</big><em>model</em>, <em>project_tree</em><big>)</big><a class="headerlink" href="#kmos.forms.SpeciesListForm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows to set the default species, <cite>i. e.</cite> the
+system will be globally initialized with this species if
+nothing else is set on a per site basis.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="kmos.forms.SpeciesForm">
+<em class="property">class </em><tt class="descclassname">kmos.forms.</tt><tt class="descname">SpeciesForm</tt><big>(</big><em>model</em>, <em>project_tree</em><big>)</big><a class="headerlink" href="#kmos.forms.SpeciesForm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows to define a new species. Required attribute is name. The
+chosen color will only shop up in the process editor. So choose something
+you will remember and recognize.
+The representation string is meant to be a ASE ase.atoms.Atoms constructor
+that will show up in the ASE visualization.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="kmos.forms.ParameterForm">
+<em class="property">class </em><tt class="descclassname">kmos.forms.</tt><tt class="descname">ParameterForm</tt><big>(</big><em>model</em>, <em>project_tree</em><big>)</big><a class="headerlink" href="#kmos.forms.ParameterForm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows to set parameter. These
+parameters can be used in e.g. Transition State Theory
+formula to calculate rate constants.</p>
+<p>If &#8216;adjustable&#8217; is activated then they maybe be changed via
+the <cite>kmos view</cite> front end while watching the model run.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="kmos.forms.LatticeForm">
+<em class="property">class </em><tt class="descclassname">kmos.forms.</tt><tt class="descname">LatticeForm</tt><big>(</big><em>model</em>, <em>dimension</em>, <em>project_tree</em><big>)</big><a class="headerlink" href="#kmos.forms.LatticeForm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows to set global lattice parameter such as the lattice vector,
+a ASE representation string, and the default layer. The program will
+be initialized using the default layer.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="kmos.forms.LayerEditor">
+<em class="property">class </em><tt class="descclassname">kmos.forms.</tt><tt class="descname">LayerEditor</tt><big>(</big><em>model</em>, <em>project_tree</em><big>)</big><a class="headerlink" href="#kmos.forms.LayerEditor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Widget to define a lattice through the sites
+in the unit cell (i.e. the <cite>basis</cite> in solid state language).</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="kmos.forms.SiteForm">
+<em class="property">class </em><tt class="descclassname">kmos.forms.</tt><tt class="descname">SiteForm</tt><big>(</big><em>site</em>, <em>parent</em>, <em>project_tree</em>, <em>layer</em><big>)</big><a class="headerlink" href="#kmos.forms.SiteForm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows to create or modify a site when setting up a unit cell.</p>
+<dl class="method">
+<dt id="kmos.forms.SiteForm.on_site_cancel__clicked">
+<tt class="descname">on_site_cancel__clicked</tt><big>(</big><em>_</em><big>)</big><a class="headerlink" href="#kmos.forms.SiteForm.on_site_cancel__clicked" title="Permalink to this definition">¶</a></dt>
+<dd><p>If we click cancel revert to previous state
+or don&#8217;t add site, if new.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kmos.forms.SiteForm.on_site_name__validate">
+<tt class="descname">on_site_name__validate</tt><big>(</big><em>widget</em>, <em>site_name</em><big>)</big><a class="headerlink" href="#kmos.forms.SiteForm.on_site_name__validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>check if other site already has the name</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="kmos.forms.ProcessForm">
+<em class="property">class </em><tt class="descclassname">kmos.forms.</tt><tt class="descname">ProcessForm</tt><big>(</big><em>process</em>, <em>project_tree</em><big>)</big><a class="headerlink" href="#kmos.forms.ProcessForm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows to create and manipulate a process by dragging
+species onto respective sites. The the lower species
+represents a condition the upper one an action.</p>
+<p>Rate constants can be entered directly using all defined parameters.
+The tooltip shows the current value if all is entered correctly.</p>
+<dl class="method">
+<dt id="kmos.forms.ProcessForm.draw_from_data">
+<tt class="descname">draw_from_data</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.forms.ProcessForm.draw_from_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Places circles on the current lattice according
+to the conditions and actions defined</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kmos.forms.ProcessForm.on_lattice">
+<tt class="descname">on_lattice</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#kmos.forms.ProcessForm.on_lattice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if (x, y) is in lattice box</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="kmos.forms.parse_chemical_expression">
+<tt class="descclassname">kmos.forms.</tt><tt class="descname">parse_chemical_expression</tt><big>(</big><em>eq</em>, <em>process</em>, <em>project_tree</em><big>)</big><a class="headerlink" href="#kmos.forms.parse_chemical_expression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluates a chemical expression &#8216;eq&#8217; and adds
+conditions and actions accordingly. Rules are:</p>
+<blockquote>
+<ul>
+<li><dl class="first docutils">
+<dt>each chemical expression has the form</dt>
+<dd><p class="first last">conditions -&gt; actions</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">each condition or action term has the form (regex)
+[$^]*SPECIES&#64;SITE.OFFSET.LAYER</p>
+</li>
+<li><p class="first">each SPECIES must have been defined before. The special
+species &#8216;empty&#8217; exists by default</p>
+</li>
+<li><p class="first">each SITE must have been defined before via the
+layer form</p>
+</li>
+<li><p class="first">an offset in units of units cell can be given as
+tuple such as &#8216;(0,0)&#8217;</p>
+</li>
+<li><p class="first">a condition or action term containing the default species,
+i.e. by default &#8216;empty&#8217; may be omitted. However a term containing
+the omitted site and a species other then the default must exist
+on the opposite side of the expression</p>
+</li>
+<li><p class="first">^ and $ are special prefixes for the &#8216;creation&#8217; and
+&#8216;annihilation&#8217; of a site, respectively. In case of &#8216;$&#8217;</p>
+<blockquote>
+<p>the species can be always omitted. In case of ^ the default
+species may be omitted. Creation and annihilation is only
+needed for lattice reconstructions/multi-lattice models and
+they only stand on the right-hand (i.e. action) side of
+the expression</p>
+</blockquote>
+</li>
+<li><p class="first">white spaces may be used for readability but have no effect</p>
+</li>
+</ul>
+</blockquote>
+<dl class="docutils">
+<dt>Examples::</dt>
+<dd><ul class="first last simple">
+<li><a class="reference external" href="mailto:oxygen&#37;&#52;&#48;cus">oxygen<span>&#64;</span>cus</a> -&gt; <a class="reference external" href="mailto:oxygen&#37;&#52;&#48;bridge">oxygen<span>&#64;</span>bridge</a> #diffusion</li>
+<li><a class="reference external" href="mailto:co&#37;&#52;&#48;bridge">co<span>&#64;</span>bridge</a> -&gt; <a class="reference external" href="mailto:co&#37;&#52;&#48;cus">co<span>&#64;</span>cus</a>.(-1,0) # diffusion</li>
+<li>-&gt; <a class="reference external" href="mailto:oxygen&#37;&#52;&#48;cus">oxygen<span>&#64;</span>cus</a> + <a class="reference external" href="mailto:oxygen&#37;&#52;&#48;bridge">oxygen<span>&#64;</span>bridge</a> # adsorption</li>
+<li><a class="reference external" href="mailto:oxygen&#37;&#52;&#48;cus">oxygen<span>&#64;</span>cus</a> + <a class="reference external" href="mailto:co&#37;&#52;&#48;bridge">co<span>&#64;</span>bridge</a> -&gt; # reaction</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="kmos.forms.BatchProcessForm">
+<em class="property">class </em><tt class="descclassname">kmos.forms.</tt><tt class="descname">BatchProcessForm</tt><big>(</big><em>project_tree</em><big>)</big><a class="headerlink" href="#kmos.forms.BatchProcessForm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows to enter many processes at once. The format is one
+process per line in the form:</p>
+<div class="highlight-python"><pre>[process name] ; [chemical expression] ; [rate constant]</pre>
+</div>
+<p>One can omit the fields but not the semicolon.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="runtime-frontend">
+<h2>Runtime frontend<a class="headerlink" href="#runtime-frontend" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-kmos.model">
+<span id="kmos-model"></span><h3>kmos.model<a class="headerlink" href="#module-kmos.model" title="Permalink to this headline">¶</a></h3>
+<p>A python representation of a kMC model. The actual model is
+imported in kmc_model.so and all parameters are stored in kmc_settings.py.</p>
+<p>The model can be used directly like so:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">kmos.model</span> <span class="kn">import</span> <span class="n">KMC_Model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">KMC_Model</span><span class="p">()</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="mi">500</span>
+<span class="n">model</span><span class="o">.</span><span class="n">do_steps</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">view</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>which, of course can also be part of a python script.</p>
+<p>The model also be run in a different process using the
+multiprocessing module. This mode is designed for use with
+a GUI so that the CPU intensive kMC integration can run at
+full throttle without impeding the front-end. Interaction with
+the model happens through Queues.</p>
+</div>
+<div class="section" id="module-kmos.view">
+<span id="kmos-run"></span><h3>kmos.run<a class="headerlink" href="#module-kmos.view" title="Permalink to this headline">¶</a></h3>
+<p>Run and view a kMC model. For this to work one needs a
+kmc_model.so and a kmc_settings.py in the import path.</p>
+<dl class="class">
+<dt id="kmos.view.KMC_Viewer">
+<em class="property">class </em><tt class="descclassname">kmos.view.</tt><tt class="descname">KMC_Viewer</tt><a class="headerlink" href="#kmos.view.KMC_Viewer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A graphical front-end to run, manipulate
+and view a kMC model.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="kmos-kmc-project-dtd">
+<h2>kmos kMC project DTD<a class="headerlink" href="#kmos-kmc-project-dtd" title="Permalink to this headline">¶</a></h2>
+<p>The central storage and exchange format is XML. XML was chosen over
+JSON, pickle or alike because it still seems as the most flexible
+and universal format with good methods to define the overall
+structure of the data.</p>
+<p>One way to define an XML format is by using a document type description
+(DTD) and in fact at every import a kmos file is validated against
+the DTD below.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Reference</a><ul>
+<li><a class="reference internal" href="#data-types">Data Types</a><ul>
+<li><a class="reference internal" href="#module-kmos.types">kmos.types</a></li>
+<li><a class="reference internal" href="#module-kmos.io">kmos.io</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#editor-frontend">Editor frontend</a><ul>
+<li><a class="reference internal" href="#module-kmos.gui">kmos.gui</a></li>
+<li><a class="reference internal" href="#module-kmos.forms">kmos.forms</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#runtime-frontend">Runtime frontend</a><ul>
+<li><a class="reference internal" href="#module-kmos.model">kmos.model</a></li>
+<li><a class="reference internal" href="#module-kmos.view">kmos.run</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kmos-kmc-project-dtd">kmos kMC project DTD</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../topic_guides/kmos_speed.html"
+                        title="previous chapter">How the kmos kMC algorithm works</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../troubleshooting/index.html"
+                        title="next chapter">Trouble Shooting</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/reference/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../troubleshooting/index.html" title="Trouble Shooting"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../topic_guides/kmos_speed.html" title="How the kmos kMC algorithm works"
+             >previous</a> |</li>
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009-2011, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+    </div>
+  </body>
+</html>
