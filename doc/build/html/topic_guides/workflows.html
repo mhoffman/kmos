@@ -23,9 +23,9 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
-    <link rel="up" title="&lt;no title&gt;" href="index.html" />
+    <link rel="up" title="Topic Guides" href="index.html" />
     <link rel="next" title="The kmos data model" href="data_models.html" />
-    <link rel="prev" title="&lt;no title&gt;" href="index.html" /> 
+    <link rel="prev" title="Topic Guides" href="index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -41,10 +41,10 @@
           <a href="data_models.html" title="The kmos data model"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="&lt;no title&gt;"
+          <a href="index.html" title="Topic Guides"
              accesskey="P">previous</a> |</li>
         <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li>
-          <li><a href="index.html" accesskey="U">&lt;no title&gt;</a> &raquo;</li> 
+          <li><a href="index.html" accesskey="U">Topic Guides</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -70,6 +70,29 @@ that modelling is an experimental and creative process.</p>
 to illustrate that the chances to find and capture
 the relevant features of a system are enhanced
 if the trial/learn loop is as short as possible.</p>
+<div class="section" id="kmc-modelling">
+<h2>kMC Modelling<a class="headerlink" href="#kmc-modelling" title="Permalink to this headline">¶</a></h2>
+<p>A good way to define a model is to use a paper and pencil to draw
+your lattice, choose the species that you will need, draw
+each process and write down an expression for each rate constant, and
+finally fix all energy barriers and external parameters that you will need.
+Putting a model prepared like this into a computer is a simple exercise.
+You enter a new model by filling in</p>
+<blockquote>
+<ul class="simple">
+<li>meta information</li>
+<li>lattice</li>
+<li>species</li>
+<li>parameters</li>
+<li>processes</li>
+</ul>
+</blockquote>
+<p>in roughly this order or open an existing one by opening a kMC XML file.</p>
+<p>If you want to see the model run
+<cite>kmos export &lt;xml-file&gt;</cite> and you will get a subfolder with a self-contained
+Fortran90 code, which solves the model. If all necessary dependencies are
+installed you can simply run <cite>kmos view</cite> in the export folder.</p>
+</div>
 </div>
 
 
@@ -78,9 +101,17 @@ if the trial/learn loop is as short as possible.</p>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Modelling Workflows</a><ul>
+<li><a class="reference internal" href="#kmc-modelling">kMC Modelling</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="index.html"
-                        title="previous chapter">&lt;no title&gt;</a></p>
+                        title="previous chapter">Topic Guides</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="data_models.html"
                         title="next chapter">The kmos data model</a></p>
@@ -119,10 +150,10 @@ if the trial/learn loop is as short as possible.</p>
           <a href="data_models.html" title="The kmos data model"
              >next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="&lt;no title&gt;"
+          <a href="index.html" title="Topic Guides"
              >previous</a> |</li>
         <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li>
-          <li><a href="index.html" >&lt;no title&gt;</a> &raquo;</li> 
+          <li><a href="index.html" >Topic Guides</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

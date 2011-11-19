@@ -132,31 +132,8 @@ install dependencies.</p>
 </div>
 <div class="admonition-todo admonition " id="index-1">
 <p class="first admonition-title">Todo</p>
-<p class="last">test installation on other platmforms</p>
+<p class="last">test installation on other platforms</p>
 </div>
-</div>
-<div class="section" id="kmc-modelling">
-<h3>kMC Modelling<a class="headerlink" href="#kmc-modelling" title="Permalink to this headline">¶</a></h3>
-<p>A good way to define a model is to use a paper and pencil to draw
-your lattice, choose the species that you will need, draw
-each process and write down an expression for each rate constant, and
-finally fix all energy barriers and external parameters that you will need.
-Putting a model prepared like this into a computer is a simple exercise.
-You enter a new model by filling in</p>
-<blockquote>
-<ul class="simple">
-<li>meta information</li>
-<li>lattice</li>
-<li>species</li>
-<li>parameters</li>
-<li>processes</li>
-</ul>
-</blockquote>
-<p>in roughly this order or open an existing one by opening a kMC XML file.</p>
-<p>If you want to see the model run
-<cite>kmos export &lt;xml-file&gt;</cite> and you will get a subfolder with a self-contained
-Fortran90 code, which solves the model. If all necessary dependencies are
-installed you can simply run <cite>kmos view</cite> in the export folder.</p>
 </div>
 </div>
 <div class="section" id="a-first-kmc-model-the-gui-way">
@@ -165,9 +142,6 @@ installed you can simply run <cite>kmos view</cite> in the export folder.</p>
 simple adsorption/desorption model on a simple cubic surface.
 Despite its simplicity it touches all elements contained in
 the GUI and could be considered from first-principles.</p>
-</div>
-<div class="section" id="running-the-model-the-gui-way">
-<h2>Running the Model&#8211;the GUI way<a class="headerlink" href="#running-the-model-the-gui-way" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="a-first-kmc-model-the-api-way">
 <h2>A first kMC Model&#8211;the API way<a class="headerlink" href="#a-first-kmc-model-the-api-way" title="Permalink to this headline">¶</a></h2>
@@ -340,11 +314,14 @@ Now run:</p>
 <div class="highlight-python"><pre>kmos view</pre>
 </div>
 <p>... and dada! Your first running kMC model right there!</p>
-<p>If you wonder why the CO molecule are basically just dangling
-there in mid-air that because you have now layer setup, yet.
+<p>If you wonder why the CO molecules are basically just dangling
+there in mid-air that is because you have no background setup, yet.
 Choose a transition metal of your choice and add it to the
 lattice setup for extra credit :-).</p>
 </div>
+</div>
+<div class="section" id="running-the-model-the-gui-way">
+<h2>Running the Model&#8211;the GUI way<a class="headerlink" href="#running-the-model-the-gui-way" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="running-the-model-the-api-way">
 <h2>Running the Model&#8211;the API way<a class="headerlink" href="#running-the-model-the-api-way" title="Permalink to this headline">¶</a></h2>
@@ -375,16 +352,15 @@ lattice setup for extra credit :-).</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
-<li><a class="reference internal" href="#kmc-modelling">kMC Modelling</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#a-first-kmc-model-the-gui-way">A first kMC Model&#8211;the GUI way</a></li>
-<li><a class="reference internal" href="#running-the-model-the-gui-way">Running the Model&#8211;the GUI way</a></li>
 <li><a class="reference internal" href="#a-first-kmc-model-the-api-way">A first kMC Model&#8211;the API way</a><ul>
 <li><a class="reference internal" href="#construct-the-model">Construct the model</a></li>
 <li><a class="reference internal" href="#export-save-compile">Export, save, compile</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#running-the-model-the-gui-way">Running the Model&#8211;the GUI way</a></li>
 <li><a class="reference internal" href="#running-the-model-the-api-way">Running the Model&#8211;the API way</a></li>
 <li><a class="reference internal" href="#a-more-complicated-structure">A More Complicated Structure</a></li>
 <li><a class="reference internal" href="#more-dimensions">More Dimensions</a></li>
