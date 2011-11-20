@@ -63,7 +63,7 @@ it also contains some additional data piggy-backed such as ::
 
 These quantities are often sufficient when running and simulating
 a catalyst surface, but of course the model could be expanded
-to more observable.
+to more observables.
 
 Lastly it is important to call ::
 

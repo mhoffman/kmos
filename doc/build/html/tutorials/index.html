@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -14,13 +12,12 @@
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
         VERSION:     '0.0.1',
-        COLLAPSE_INDEX: false,
+        COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
     <link rel="next" title="Topic Guides" href="../topic_guides/index.html" />
@@ -34,8 +31,8 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
+          <a href="../modindex.html" title="Global Module Index"
+             accesskey="M">modules</a> |</li>
         <li class="right" >
           <a href="../topic_guides/index.html" title="Topic Guides"
              accesskey="N">next</a> |</li>
@@ -56,7 +53,7 @@
 <div class="section" id="getting-started">
 <h2>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="module-kmos">
-<span id="introduction"></span><h3>Introduction<a class="headerlink" href="#module-kmos" title="Permalink to this headline">¶</a></h3>
+<h3>Introduction<a class="headerlink" href="#module-kmos" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="feature-overview">
 <h4>Feature overview<a class="headerlink" href="#feature-overview" title="Permalink to this headline">¶</a></h4>
 <p>With kmos you can:</p>
@@ -118,19 +115,18 @@ to fetch the latest version.</p>
 <p>If you think this dependency list hurts. Yes, it does!
 And I am happy about any suggestions how to
 minimize it. However one should note these dependencies are only
-needed in the environment where the model development happens.
-The generated code needed to run a model actually has no
-dependencies at all.</p>
-<p>To ease the installation further on Ubuntu one can also simply run:</p>
+required for the model development. Running a model has virtually
+no dependencies except for a Fortran compiler.</p>
+<p>To ease the installation further on Ubuntu one can simply run:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">kmos</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">dependencies</span><span class="o">-</span><span class="n">ubuntu</span>
 </pre></div>
 </div>
-<div class="admonition-todo admonition " id="index-0">
+<div class="admonition-todo admonition " id="todo-27">
 <p class="first admonition-title">Todo</p>
 <p class="last">add pip way or something alike to automatically
 install dependencies.</p>
 </div>
-<div class="admonition-todo admonition " id="index-1">
+<div class="admonition-todo admonition " id="todo-28">
 <p class="first admonition-title">Todo</p>
 <p class="last">test installation on other platforms</p>
 </div>
@@ -154,13 +150,13 @@ only difference that ...</p>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 </pre></div>
 </div>
-<p>which import all classes that make up a kMC project. The functions
+<p>which imports all classes that make up a kMC project. The functions
 from <cite>kmos.io</cite> will only be needed at the end to save the project
 or to export compilable code.</p>
 <p>The example sketched out here leads you to a kMC model for CO adsorption
 and desorption on Pd(100) including a simple lateral interaction. Granted
 this hardly excites surface scientists but we need to start somewhere, right?</p>
-<p>Now you have to instantiate a new project and fill in meta information:</p>
+<p>First you should instantiate a new project and fill in meta information</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span> <span class="o">=</span> <span class="n">Project</span><span class="p">()</span>
 <span class="n">pt</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">author</span> <span class="o">=</span> <span class="s">&#39;Your Name&#39;</span>
 <span class="n">pt</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="s">&#39;your.name@server.com&#39;</span>
@@ -168,70 +164,74 @@ this hardly excites surface scientists but we need to start somewhere, right?</p
 <span class="n">pt</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">model_dimension</span> <span class="o">=</span> <span class="mi">2</span>
 </pre></div>
 </div>
-<p>Next you could add some species or states. For surface science simulations
-it is useful to define an <em>empty</em> state, so we add:</p>
+<p>Next you could add some species or states. Note that whichever
+species you add first is the default species with which all sites in the
+system will be initialized. Of course this can be changed later</p>
+<p>For surface science simulations it is useful to define an
+<em>empty</em> state, so we add</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_species</span><span class="p">(</span><span class="n">Species</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>and some surface species. Given you want to simulate CO adsorption and
-desorption on a single crystal surface we say:</p>
+desorption on a single crystal surface you would say</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_species</span><span class="p">(</span><span class="n">Species</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;CO&#39;</span><span class="p">,</span>
                        <span class="n">representation</span><span class="o">=</span><span class="s">&quot;Atoms(&#39;CO&#39;,[[0,0,0],[0,0,1.2]])&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>where the string passed as <cite>representation</cite> is a string representing
-a CO molecule which can be evaluated in ASE namespace. Note that whichever
-species you add first is the default species with which all sites in the
-system will be initialized.</p>
+a CO molecule which can be evaluated in ASE namespace.</p>
 <p>Once you have all species declared is a good time to think about the geometry.
 To keep it simple we will stick with a simple-cubic lattice in 2D which
 could for example represent the (100) surface of a fcc crystal with only
-one adsorption site per unit cell. So we start by giving our layer a name:</p>
+one adsorption site per unit cell. You start by giving your layer a name</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">layer</span> <span class="o">=</span> <span class="n">Layer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;simple_cubic&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>and adding a site:</p>
+<p>and adding a site</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">layer</span><span class="o">.</span><span class="n">sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Site</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;hollow&#39;</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="s">&#39;0.5 0.5 0.5&#39;</span><span class="p">,</span>
                         <span class="n">default_species</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Where <cite>pos</cite> is given in fractional coordinates, so this site
 will be in the center of the unit cell. Finally we have to
-add the newly created layer to our project:</p>
+add the newly created layer to our project</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Simple, huh? Now you wonder where all the rest of the geometry went?
-The reason is simple: the geometric location of a site is actually
-meaningless for the primary task a kMC simulation is solving. In
-order to solve the master equation none of the numerical coordinates
+For a simple reason: the geometric location of a site is
+meaningless from a kMC point of view. In order to solve the master
+equation none of the numerical coordinates
 of any lattice, site matters since the master equation is only
-defined in terms of states and transition between these state. However
+defined in terms of states and transition between these. However
 to allow a graphical representation of the simulation one can add geometry
-as you have already done for the site. The size of the unit cell can
-be set via:</p>
+as you have already done for the site. You set the size of the unit cell
+via</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">cell</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
 </pre></div>
 </div>
-<p>which are proto-typical dimension for single-crystal surface in
-angstrom.</p>
-<p>Ok, let us see we managed so far: you have a lattice with a
-site that can be either empty for occupied with CO.</p>
-<p>The remaining work is to populate the process list and the
-parameter list. The parameter list defines the parameters
-that can be used in the expressions for the rate constants of
-each process. In principle one could to without the parameter
+<p>which are prototypical dimensions for a single-crystal surface in
+Angstrom.</p>
+<p>Ok, let us see what we managed so far: you have a <em>lattice</em> with a
+<em>site</em> that can be either <em>empty</em> for occupied with <em>CO</em>.</p>
+</div>
+<div class="section" id="populate-process-list-and-parameter-list">
+<h3>Populate process list and parameter list<a class="headerlink" href="#populate-process-list-and-parameter-list" title="Permalink to this headline">¶</a></h3>
+<p>The remaining work is to populate the <cite>process list</cite> and the
+<cite>parameter list</cite>. The parameter list defines the parameters
+that can be used in the expressions of the rate constants.
+In principle one could to without the parameter
 list and simply hard code all parameters in the process list,
 however one looses some nifty functionality like easily
-changing parameters on-the-fly or even interactively.
-A second benefit is that you can clearly separate the kinetic
-model from the barrier input which usually has a different
-origin such as a DFT calculation.</p>
+changing parameters on-the-fly or even interactively.</p>
+<p>A second benefit is that you achieve a clear separation
+of the kinetic model from the barrier input,
+which usually has a different origin.</p>
 <p>In practice filling the parameter list and the process
-list is often an interactive process, however since
+list is often an iterative process, however since
 we have a fairly short list, we can try to set all parameters
 at once.</p>
-<p>First of all you went to define the external parameters to
+<p>First of all you want to define the external parameters to
 which our model is coupled. Here we use the temperature
 and the CO partial pressure:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">600.</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">800</span><span class="p">))</span>
@@ -257,10 +257,11 @@ it adjustable:</p>
 <p>Last but not least we need to have at least two processes. A process in kMC
 means that a certain local configuration must be given so that something
 can happen at a certain rate constant. In the framework here this is
-phrased in terms of &#8216;conditions&#8217; and &#8216;actions&#8217;. So for example an
+phrased in terms of &#8216;conditions&#8217; and &#8216;actions&#8217;. <a class="footnote-reference" href="#proc-minilanguage" id="id2">[2]</a> So for example an
 adsorption requires at least one site to be empty (condition). Then this
 site can be occupied by CO (action) with a certain rate constant. Written
-down in code this looks as follows. First we need a coord:</p>
+down in code this looks as follows.
+First we need a coord <a class="footnote-reference" href="#coord-minilanguage" id="id3">[3]</a></p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">coord</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">generate_coord</span><span class="p">(</span><span class="s">&#39;hollow.(0,0,0).simple_cubic&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -311,6 +312,27 @@ Now run:</p>
 there in mid-air that is because you have no background setup, yet.
 Choose a transition metal of your choice and add it to the
 lattice setup for extra credit :-).</p>
+<table class="docutils footnote" frame="void" id="proc-minilanguage" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>You will have describe all processes
+in terms of  <cite>conditions</cite> and
+<cite>actions</cite> and you find a more complete
+description can be found in the
+<a class="reference external" href="../topic_guides/proc_minilanguage.html#proc-mini-language"><em>topic guide</em></a>
+to the process description mini language.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="coord-minilanguage" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>The description of coordinates follows
+the simple syntax of the coordinate
+mini language and the
+<a class="reference external" href="../topic_guides/coord_minilanguage.html#coord-mini-language"><em>topic guide</em></a>
+explains how that works.</td></tr>
+</tbody>
+</table>
 </div>
 </div>
 <div class="section" id="a-first-kmc-model-the-gui-way">
@@ -339,7 +361,7 @@ be even more interactive you set a parameter to be adjustable.
 This can happen either in the generating XML file or directly
 in the kmc_settings.py. Also make sure to set sensible minimum
 and maximum values.</p>
-<div class="admonition-todo admonition " id="index-2">
+<div class="admonition-todo admonition " id="todo-29">
 <p class="first admonition-title">Todo</p>
 <p class="last">add recording function</p>
 </div>
@@ -405,7 +427,7 @@ it also contains some additional data piggy-backed such as</p>
 </div>
 <p>These quantities are often sufficient when running and simulating
 a catalyst surface, but of course the model could be expanded
-to more observable.</p>
+to more observables.</p>
 <p>Lastly it is important to call</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">deallocate</span><span class="p">()</span>
 </pre></div>
@@ -414,15 +436,11 @@ to more observable.</p>
 allocated by the Fortan modules. This is particularly
 necessary if you want to run more than one simulation
 in one script.</p>
+<div class="admonition-todo admonition " id="todo-30">
+<p class="first admonition-title">Todo</p>
+<p class="last">describe modelling more complicated structures
+and e.g. boundary conditions</p>
 </div>
-<div class="section" id="a-more-complicated-structure">
-<h2>A More Complicated Structure<a class="headerlink" href="#a-more-complicated-structure" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="more-dimensions">
-<h2>More Dimensions<a class="headerlink" href="#more-dimensions" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="chess-project">
-<h2>Chess Project<a class="headerlink" href="#chess-project" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
@@ -432,56 +450,54 @@ in one script.</p>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="../index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Tutorials</a><ul>
-<li><a class="reference internal" href="#getting-started">Getting Started</a><ul>
-<li><a class="reference internal" href="#module-kmos">Introduction</a><ul>
-<li><a class="reference internal" href="#feature-overview">Feature overview</a></li>
+            <h3><a href="../index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">Tutorials</a><ul>
+<li><a class="reference external" href="#getting-started">Getting Started</a><ul>
+<li><a class="reference external" href="#module-kmos">Introduction</a><ul>
+<li><a class="reference external" href="#feature-overview">Feature overview</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference external" href="#installation">Installation</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#a-first-kmc-model-the-api-way">A first kMC Model&#8211;the API way</a><ul>
-<li><a class="reference internal" href="#construct-the-model">Construct the model</a></li>
-<li><a class="reference internal" href="#export-save-compile">Export, save, compile</a></li>
+<li><a class="reference external" href="#a-first-kmc-model-the-api-way">A first kMC Model&#8211;the API way</a><ul>
+<li><a class="reference external" href="#construct-the-model">Construct the model</a></li>
+<li><a class="reference external" href="#populate-process-list-and-parameter-list">Populate process list and parameter list</a></li>
+<li><a class="reference external" href="#export-save-compile">Export, save, compile</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#a-first-kmc-model-the-gui-way">A first kMC Model&#8211;the GUI way</a></li>
-<li><a class="reference internal" href="#running-the-model-the-gui-way">Running the Model&#8211;the GUI way</a></li>
-<li><a class="reference internal" href="#running-the-model-the-api-way">Running the Model&#8211;the API way</a></li>
-<li><a class="reference internal" href="#a-more-complicated-structure">A More Complicated Structure</a></li>
-<li><a class="reference internal" href="#more-dimensions">More Dimensions</a></li>
-<li><a class="reference internal" href="#chess-project">Chess Project</a></li>
+<li><a class="reference external" href="#a-first-kmc-model-the-gui-way">A first kMC Model&#8211;the GUI way</a></li>
+<li><a class="reference external" href="#running-the-model-the-gui-way">Running the Model&#8211;the GUI way</a></li>
+<li><a class="reference external" href="#running-the-model-the-api-way">Running the Model&#8211;the API way</a></li>
 </ul>
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="../index.html"
-                        title="previous chapter">Welcome to kmos&#8217;s documentation!</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="../topic_guides/index.html"
-                        title="next chapter">Topic Guides</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="../_sources/tutorials/index.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="../index.html"
+                                  title="previous chapter">Welcome to kmos&#8217;s documentation!</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="../topic_guides/index.html"
+                                  title="next chapter">Topic Guides</a></p>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="../_sources/tutorials/index.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -493,7 +509,7 @@ in one script.</p>
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
+          <a href="../modindex.html" title="Global Module Index"
              >modules</a> |</li>
         <li class="right" >
           <a href="../topic_guides/index.html" title="Topic Guides"
@@ -505,8 +521,8 @@ in one script.</p>
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2009-2011, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+      &copy; Copyright 2009-2011, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
     </div>
   </body>
 </html>

@@ -17,19 +17,21 @@ Project and creates the necessary Fortran 90
 source code.
 
 
-So the following things are in a Project::
- * meta
- * lattice(layers)
- * species
- * parameters
- * processes
+So the following things are in a Project:
+
+- meta
+- lattice(layers)
+- species
+- parameters
+- processes
 
 The language used here stems from modelling atomic
 movement on a fixed or evolving lattice like
 structure. In a more general
-context one may translates them as::
-  * meta -> information about project
-  * geometry
-  * states
-  * parameters
-  * transitions
+context one may rephrase them as :
+
+- meta -> information about project
+- lattice -> geometry
+- species -> states
+- parameters
+- processes -> transitions

@@ -28,4 +28,4 @@ processes which allow to quickly pick the next process. It also
 updates the database of available processes which cost additional
 overhead. However this overhead is independent of the system's size
 and only scales with the degree of interaction between sites, which
-is apparently hard to define in kMC terms.
+is seems hard to define in general terms.

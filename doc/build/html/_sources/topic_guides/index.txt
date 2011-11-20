@@ -8,9 +8,10 @@ Topic Guides
   workflows
   data_models
   kmos_speed
+  proc_minilanguage
+  coord_minilanguage
 
 ..  Convergence Tests
-..  Process Description Minilanguage
 ..  The Editor Frontend
 ..  The Editor API
 ..  The Runtime Frontend
