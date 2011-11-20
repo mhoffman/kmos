@@ -30,11 +30,11 @@ kmos.types.Meta class reference/index.html
 kmos.forms.LayerEditor class reference/index.html
 kmos.types.Species class reference/index.html
 kmos.forms.MetaForm class reference/index.html
-kmos.forms.LatticeForm class reference/index.html
+kmos.io.import_xml function reference/index.html
 kmos.io.export_source function reference/index.html
 kmos.types.Layer class reference/index.html
 kmos.forms.ProcessForm.draw_from_data method reference/index.html
 kmos.types.Process class reference/index.html
 kmos.gui.Editor class reference/index.html
 kmos.types.Coord class reference/index.html
-kmos.io.import_xml function reference/index.html
+kmos.forms.LatticeForm class reference/index.html
