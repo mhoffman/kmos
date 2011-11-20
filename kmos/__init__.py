@@ -87,7 +87,7 @@ def evaluate_rate_expression(rate_expr, parameters={}):
         except:
             raise
         for i, token, _, _, _ in tokens:
-            if token in ['sqrt', 'exp', 'sin', 'cos', 'pi', 'pow']:
+            if token in ['sqrt', 'exp', 'sin', 'cos', 'pi', 'pow', 'log']:
                 replaced_tokens.append((i, 'math.' + token))
             elif token in dir(units):
                 replaced_tokens.append((i, str(eval('units.' + token))))
