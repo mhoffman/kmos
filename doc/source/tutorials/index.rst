@@ -40,22 +40,7 @@ and maximum values.
 
 .. TODO:: add recording function
 
-Running the Model--the API way
-==============================
-
-In order to analyze a model in a more quantitative way it is
-more practical to write small client scripts that directly
-talk to the runtime API. As time passes and more of these
-scripts are written over and over some standard functionality
-will likely be integrated into the runtime API. For starters
-a simple script could look as follows ::
-
-  #!/usr/bin/env python
-
-  from kmos.run import KMC_Model
-
-  
-.. TODO: Finish
+.. include :: run_model_api.rst
 
 A More Complicated Structure
 ==============================
