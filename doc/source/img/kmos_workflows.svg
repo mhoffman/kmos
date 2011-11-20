@@ -13,13 +13,20 @@
    height="542.9566"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.2 r9819"
+   inkscape:version="0.47 r22583"
    sodipodi:docname="kmos_workflows.svg"
    inkscape:export-filename="/home/mhoffman/src/kmos/doc/source/img/kmos_workflows.png"
    inkscape:export-xdpi="31.111067"
    inkscape:export-ydpi="31.111067">
   <defs
      id="defs4">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 271.4783 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="1735.7168 : 271.4783 : 1"
+       inkscape:persp3d-origin="867.8584 : 180.98553 : 1"
+       id="perspective77" />
     <marker
        inkscape:stockid="Arrow2Mend"
        orient="auto"
@@ -57,8 +64,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.6691865"
-     inkscape:cx="1548.8564"
-     inkscape:cy="229.85348"
+     inkscape:cx="442.92845"
+     inkscape:cy="276.58283"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -66,10 +73,10 @@
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:window-width="1024"
-     inkscape:window-height="573"
-     inkscape:window-x="0"
-     inkscape:window-y="1"
+     inkscape:window-width="1920"
+     inkscape:window-height="1175"
+     inkscape:window-x="1920"
+     inkscape:window-y="0"
      inkscape:window-maximized="1" />
   <metadata
      id="metadata7">
@@ -79,7 +86,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -153,7 +160,7 @@
        style="fill:none;stroke:#000000;stroke-width:1.60982692;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
     <g
        id="g4555"
-       transform="translate(-108.8724,21.774479)">
+       transform="translate(-71.120406,-18.779327)">
       <text
          sodipodi:linespacing="125%"
          id="text2993"
@@ -265,32 +272,28 @@
        id="path4319"
        d="m 602.73678,260.04594 c 35.56967,-65.52308 -3.74417,-116.06945 -3.74417,-116.06945"
        style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Mend)" />
-    <g
-       id="g4622"
-       transform="translate(-3.5267334,0)">
-      <text
-         sodipodi:linespacing="125%"
-         id="text4321"
-         y="225.49232"
-         x="463.19678"
-         style="font-size:33.48899841px;font-style:italic;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Times New Roman;-inkscape-font-specification:'Times New Roman, Italic'"
-         xml:space="preserve"><tspan
-           y="225.49232"
-           x="463.19678"
-           id="tspan4323"
-           sodipodi:role="line">inspect</tspan></text>
-      <text
-         sodipodi:linespacing="125%"
-         id="text4325"
-         y="194.08118"
-         x="436.27313"
-         style="font-size:33.48899841px;font-style:italic;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Times New Roman;-inkscape-font-specification:'Times New Roman, Italic'"
-         xml:space="preserve"><tspan
-           y="194.08118"
-           x="436.27313"
-           id="tspan4327"
-           sodipodi:role="line">manipulate</tspan></text>
-    </g>
+    <text
+       xml:space="preserve"
+       style="font-size:33.48899841px;font-style:italic;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Times New Roman;-inkscape-font-specification:'Times New Roman, Italic'"
+       x="459.67004"
+       y="225.49232"
+       id="text4321"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4323"
+         x="459.67004"
+         y="225.49232">inspect</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:33.48899841px;font-style:italic;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Times New Roman;-inkscape-font-specification:'Times New Roman, Italic'"
+       x="482.17047"
+       y="194.08118"
+       id="text4325"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4327"
+         x="482.17047"
+         y="194.08118">edit</tspan></text>
     <g
        id="g4628"
        transform="translate(0,-20)">
@@ -327,32 +330,6 @@
          x="1457.5872"
          y="456.92807"
          id="tspan4590">evaluate</tspan></text>
-    <g
-       id="g4608"
-       transform="translate(0,57.172353)">
-      <text
-         xml:space="preserve"
-         style="font-size:33.48899841px;font-style:italic;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Times New Roman;-inkscape-font-specification:'Times New Roman, Italic'"
-         x="146.07362"
-         y="290.38882"
-         id="text4533"
-         sodipodi:linespacing="125%"><tspan
-           sodipodi:role="line"
-           id="tspan4535"
-           x="146.07362"
-           y="290.38882">inspect</tspan></text>
-      <text
-         xml:space="preserve"
-         style="font-size:33.48899841px;font-style:italic;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Times New Roman;-inkscape-font-specification:'Times New Roman, Italic'"
-         x="119.14996"
-         y="247.23082"
-         id="text4537"
-         sodipodi:linespacing="125%"><tspan
-           sodipodi:role="line"
-           id="tspan4539"
-           x="119.14996"
-           y="247.23082">manipulate</tspan></text>
-    </g>
     <g
        id="g4602"
        transform="translate(-94.370782,20.285308)">
@@ -399,16 +376,42 @@
          id="path4549"
          inkscape:connector-curvature="0" />
     </g>
-    <path
-       inkscape:connector-curvature="0"
-       id="path4551"
-       d="m 128.0362,259.42699 c 117.57514,-12.70417 164.31397,32.02072 164.31397,32.02072"
-       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Mend)" />
-    <path
-       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Mend)"
-       d="M 266.42807,373.50189 C 148.85293,386.20607 102.1141,341.48117 102.1141,341.48117"
-       id="path4553"
-       inkscape:connector-curvature="0" />
+    <g
+       id="g2891"
+       transform="translate(16,-10)">
+      <text
+         xml:space="preserve"
+         style="font-size:33.48899841px;font-style:italic;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Times New Roman;-inkscape-font-specification:'Times New Roman, Italic'"
+         x="146.07362"
+         y="347.56119"
+         id="text4533"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan4535"
+           x="146.07362"
+           y="347.56119">inspect</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:33.48899841px;font-style:italic;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Times New Roman;-inkscape-font-specification:'Times New Roman, Italic'"
+         x="168.57405"
+         y="304.40317"
+         id="text4537"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan4539"
+           x="168.57405"
+           y="304.40317">edit</tspan></text>
+      <path
+         style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Mend)"
+         d="m 128.0362,259.42699 c 117.57514,-12.70417 164.31397,32.02072 164.31397,32.02072"
+         id="path4551"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path4553"
+         d="M 266.42807,373.50189 C 148.85293,386.20607 102.1141,341.48117 102.1141,341.48117"
+         style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Mend)" />
+    </g>
     <path
        inkscape:connector-curvature="0"
        id="path4564"
