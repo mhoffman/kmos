@@ -46,11 +46,10 @@ to fetch the latest version.
 If you think this dependency list hurts. Yes, it does!
 And I am happy about any suggestions how to
 minimize it. However one should note these dependencies are only
-needed in the environment where the model development happens.
-The generated code needed to run a model actually has no
-dependencies at all.
+required for the model development. Running a model has virtually
+no dependencies except for a Fortran compiler.
 
-To ease the installation further on Ubuntu one can also simply run::
+To ease the installation further on Ubuntu one can simply run::
 
  kmos-install-dependencies-ubuntu 
 

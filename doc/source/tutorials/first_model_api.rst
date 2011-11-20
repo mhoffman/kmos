@@ -19,7 +19,7 @@ We start by making the necessary import statements (in *python* or better *ipyth
   from kmos.io import *
   import numpy as np
 
-which import all classes that make up a kMC project. The functions
+which imports all classes that make up a kMC project. The functions
 from `kmos.io` will only be needed at the end to save the project
 or to export compilable code.
 
@@ -28,7 +28,7 @@ and desorption on Pd(100) including a simple lateral interaction. Granted
 this hardly excites surface scientists but we need to start somewhere, right?
 
 
-Now you have to instantiate a new project and fill in meta information::
+First you should instantiate a new project and fill in meta information ::
 
   pt = Project()
   pt.meta.author = 'Your Name'
@@ -37,31 +37,32 @@ Now you have to instantiate a new project and fill in meta information::
   pt.meta.model_dimension = 2
 
 
-Next you could add some species or states. For surface science simulations
-it is useful to define an *empty* state, so we add::
+Next you could add some species or states. Note that whichever
+species you add first is the default species with which all sites in the
+system will be initialized. Of course this can be changed later
+
+For surface science simulations it is useful to define an
+*empty* state, so we add ::
 
  pt.add_species(Species(name='empty'))
 
 and some surface species. Given you want to simulate CO adsorption and
-desorption on a single crystal surface we say::
+desorption on a single crystal surface you would say ::
   
   pt.add_species(Species(name='CO',
                          representation="Atoms('CO',[[0,0,0],[0,0,1.2]])"))
 
 where the string passed as `representation` is a string representing
-a CO molecule which can be evaluated in ASE namespace. Note that whichever
-species you add first is the default species with which all sites in the
-system will be initialized.
-
+a CO molecule which can be evaluated in ASE namespace. 
 
 Once you have all species declared is a good time to think about the geometry.
 To keep it simple we will stick with a simple-cubic lattice in 2D which
 could for example represent the (100) surface of a fcc crystal with only
-one adsorption site per unit cell. So we start by giving our layer a name::
+one adsorption site per unit cell. You start by giving your layer a name ::
 
   layer = Layer(name='simple_cubic')
 
-and adding a site::
+and adding a site ::
   
   layer.sites.append(Site(name='hollow', pos='0.5 0.5 0.5',
                           default_species='empty'))
@@ -69,49 +70,50 @@ and adding a site::
 
 Where `pos` is given in fractional coordinates, so this site
 will be in the center of the unit cell. Finally we have to
-add the newly created layer to our project::
+add the newly created layer to our project ::
 
   pt.add_layer(layer)
 
-
 Simple, huh? Now you wonder where all the rest of the geometry went?
-The reason is simple: the geometric location of a site is actually
-meaningless for the primary task a kMC simulation is solving. In
-order to solve the master equation none of the numerical coordinates
+For a simple reason: the geometric location of a site is
+meaningless from a kMC point of view. In order to solve the master
+equation none of the numerical coordinates
 of any lattice, site matters since the master equation is only
-defined in terms of states and transition between these state. However
+defined in terms of states and transition between these. However
 to allow a graphical representation of the simulation one can add geometry
-as you have already done for the site. The size of the unit cell can
-be set via::
+as you have already done for the site. You set the size of the unit cell
+via ::
 
   pt.lattice.cell = np.diag([3.5, 3.5, 10])
 
-which are proto-typical dimension for single-crystal surface in
-angstrom.
+which are prototypical dimensions for a single-crystal surface in
+Angstrom.
+
+Ok, let us see what we managed so far: you have a *lattice* with a
+*site* that can be either *empty* for occupied with *CO*.
 
 
+Populate process list and parameter list
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Ok, let us see we managed so far: you have a lattice with a
-site that can be either empty for occupied with CO.
-
-The remaining work is to populate the process list and the
-parameter list. The parameter list defines the parameters
-that can be used in the expressions for the rate constants of
-each process. In principle one could to without the parameter
+The remaining work is to populate the `process list` and the
+`parameter list`. The parameter list defines the parameters
+that can be used in the expressions of the rate constants.
+In principle one could to without the parameter
 list and simply hard code all parameters in the process list,
 however one looses some nifty functionality like easily
 changing parameters on-the-fly or even interactively.
-A second benefit is that you can clearly separate the kinetic
-model from the barrier input which usually has a different
-origin such as a DFT calculation.
 
+A second benefit is that you achieve a clear separation
+of the kinetic model from the barrier input,
+which usually has a different origin.
 
 In practice filling the parameter list and the process
-list is often an interactive process, however since
+list is often an iterative process, however since
 we have a fairly short list, we can try to set all parameters
 at once.
 
-First of all you went to define the external parameters to
+First of all you want to define the external parameters to
 which our model is coupled. Here we use the temperature
 and the CO partial pressure::
 
@@ -139,10 +141,11 @@ it adjustable::
 Last but not least we need to have at least two processes. A process in kMC
 means that a certain local configuration must be given so that something
 can happen at a certain rate constant. In the framework here this is
-phrased in terms of 'conditions' and 'actions'. So for example an
+phrased in terms of 'conditions' and 'actions'. [#proc_minilanguage]_ So for example an
 adsorption requires at least one site to be empty (condition). Then this
 site can be occupied by CO (action) with a certain rate constant. Written
-down in code this looks as follows. First we need a coord::
+down in code this looks as follows.
+First we need a coord [#coord_minilanguage]_  ::
   
   coord = pt.lattice.generate_coord('hollow.(0,0,0).simple_cubic')
 
@@ -202,3 +205,16 @@ If you wonder why the CO molecules are basically just dangling
 there in mid-air that is because you have no background setup, yet.
 Choose a transition metal of your choice and add it to the
 lattice setup for extra credit :-).
+
+.. [#proc_minilanguage]  You will have describe all processes
+                         in terms of  `conditions` and
+                         `actions` and you find a more complete
+                         description can be found in the
+                         :ref:`topic guide <proc_mini_language>`
+                         to the process description mini language.
+
+.. [#coord_minilanguage] The description of coordinates follows
+                         the simple syntax of the coordinate
+                         mini language and the
+                         :ref:`topic guide <coord_mini_language>`
+                         explains how that works.

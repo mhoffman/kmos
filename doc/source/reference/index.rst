@@ -49,10 +49,10 @@ Runtime frontend
 ================
 
 
-kmos.model
-^^^^^^^^^^
+kmos.run
+^^^^^^^^
 
-.. automodule:: kmos.model
+.. automodule:: kmos.run
 
 kmos.run
 ^^^^^^^^^
@@ -74,3 +74,24 @@ One way to define an XML format is by using a document type description
 the DTD below.
 
 .. literalinclude:: ../../kmos/kmc_project_v0.2.dtd
+
+
+Backends
+========
+
+Proclist
+^^^^^^^^
+
+.. TODO:: write generic documentation for Fortran
+          proclist module
+
+Lattice
+^^^^^^^
+
+.. TODO:: import documentation string from Fortran
+          lattice module
+Base
+^^^^
+
+.. TODO:: import documentation string from Fortran
+          base module
