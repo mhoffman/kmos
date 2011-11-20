@@ -355,8 +355,65 @@ a simple script could look as follows</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="c">#!/usr/bin/env python</span>
 
 <span class="kn">from</span> <span class="nn">kmos.run</span> <span class="kn">import</span> <span class="n">KMC_Model</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">KMC_Model</span><span class="p">()</span>
 </pre></div>
 </div>
+<p>As you can see by default the model prints a disclaimer
+and all rate constants, which can each be turned off
+by instantiating</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span> <span class="o">=</span> <span class="n">KMC_Model</span><span class="p">(</span><span class="n">print_rates</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">banner</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Let&#8217;s say you want to change the temperature and a partial pressure of
+the model you could type</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="mi">550</span>
+<span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">p_COgas</span> <span class="o">=</span> <span class="mf">0.5</span>
+</pre></div>
+</div>
+<p>and all rate constants will be instantly updated. In order get a quick
+overview of the current settings you can issue e.g.</p>
+<div class="highlight-python"><pre>print(model.parameters)
+print(model.rate_constants</pre>
+</div>
+<p>or just</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now an instantiated und configured model has mainly two functions: run
+kMC steps and report its current configuration.</p>
+<p>In order to propagate the model <cite>n</cite> steps you can say</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">do_steps</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and to analyze the current state you can use</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">get_atoms</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This will return an ASE atoms object of the current system, but
+it also contains some additional data piggy-backed such as</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">get_occupation_header</span><span class="p">()</span>
+<span class="n">atoms</span><span class="o">.</span><span class="n">occupation</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">get_tof_header</span><span class="p">()</span>
+<span class="n">atoms</span><span class="o">.</span><span class="n">tof_data</span>
+
+
+<span class="n">atoms</span><span class="o">.</span><span class="n">kmc_time</span>
+<span class="n">atoms</span><span class="o">.</span><span class="n">kmc_step</span>
+</pre></div>
+</div>
+<p>These quantities are often sufficient when running and simulating
+a catalyst surface, but of course the model could be expanded
+to more observable.</p>
+<p>Lastly it is important to call</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">deallocate</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>once the simulation if finished as this frees the memory
+allocated by the Fortan modules. This is particularly
+necessary if you want to run more than one simulation
+in one script.</p>
 </div>
 <div class="section" id="a-more-complicated-structure">
 <h2>A More Complicated Structure<a class="headerlink" href="#a-more-complicated-structure" title="Permalink to this headline">¶</a></h2>

@@ -1,0 +1,163 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Running the Model–the API way &mdash; kmos v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="running-the-model-the-api-way">
+<h1>Running the Model&#8211;the API way<a class="headerlink" href="#running-the-model-the-api-way" title="Permalink to this headline">¶</a></h1>
+<p>In order to analyze a model in a more quantitative way it is
+more practical to write small client scripts that directly
+talk to the runtime API. As time passes and more of these
+scripts are written over and over some standard functionality
+will likely be integrated into the runtime API. For starters
+a simple script could look as follows</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#!/usr/bin/env python</span>
+
+<span class="kn">from</span> <span class="nn">kmos.run</span> <span class="kn">import</span> <span class="n">KMC_Model</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">KMC_Model</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>As you can see by default the model prints a disclaimer
+and all rate constants, which can each be turned off
+by instantiating</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span> <span class="o">=</span> <span class="n">KMC_Model</span><span class="p">(</span><span class="n">print_rates</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">banner</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Let&#8217;s say you want to change the temperature and a partial pressure of
+the model you could type</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="mi">550</span>
+<span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">p_COgas</span> <span class="o">=</span> <span class="mf">0.5</span>
+</pre></div>
+</div>
+<p>and all rate constants will be instantly updated. In order get a quick
+overview of the current settings you can issue e.g.</p>
+<div class="highlight-python"><pre>print(model.parameters)
+print(model.rate_constants</pre>
+</div>
+<p>or just</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now an instantiated und configured model has mainly two functions: run
+kMC steps and report its current configuration.</p>
+<p>In order to propagate the model <cite>n</cite> steps you can say</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">do_steps</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and to analyze the current state you can use</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">get_atoms</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This will return an ASE atoms object of the current system, but
+it also contains some additional data piggy-backed such as</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">get_occupation_header</span><span class="p">()</span>
+<span class="n">atoms</span><span class="o">.</span><span class="n">occupation</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">get_tof_header</span><span class="p">()</span>
+<span class="n">atoms</span><span class="o">.</span><span class="n">tof_data</span>
+
+
+<span class="n">atoms</span><span class="o">.</span><span class="n">kmc_time</span>
+<span class="n">atoms</span><span class="o">.</span><span class="n">kmc_step</span>
+</pre></div>
+</div>
+<p>These quantities are often sufficient when running and simulating
+a catalyst surface, but of course the model could be expanded
+to more observable.</p>
+<p>Lastly it is important to call</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">deallocate</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>once the simulation if finished as this frees the memory
+allocated by the Fortan modules. This is particularly
+necessary if you want to run more than one simulation
+in one script.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/tutorials/run_model_api.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009-2011, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+    </div>
+  </body>
+</html>
