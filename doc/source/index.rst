@@ -23,3 +23,6 @@ kmos wants to save time filled with repetitive labor and enlarge your stride.
    reference/index
    troubleshooting/index
 
+.. |date| date:: %b %d, %Y
+
+This document was generated |date|.
