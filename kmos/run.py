@@ -187,7 +187,7 @@ class KMC_Model(multiprocessing.Process):
             if not self.signal_queue.empty():
                 signal = self.signal_queue.get()
                 if signal.upper() == 'STOP':
-                    self.terminate()
+                    break
                 elif signal.upper() == 'PAUSE':
                     print('starting pause')
                 elif signal.upper() == 'RESET_TIME':
