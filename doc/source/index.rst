@@ -6,6 +6,7 @@ Welcome to kmos's documentation!
 
   Things you can do with kmos.
 
+
 kmos is a vigorous attempt to make (lattice) kMC modelling more accessible.
 
 
