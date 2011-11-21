@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -12,12 +14,13 @@
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
         VERSION:     '0.0.1',
-        COLLAPSE_MODINDEX: false,
+        COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" /> 
   </head>
@@ -29,8 +32,8 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../modindex.html" title="Global Module Index"
-             accesskey="M">modules</a> |</li>
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -111,6 +114,60 @@ allocated by the Fortan modules. This is particularly
 necessary if you want to run more than one simulation
 in one script.</p>
 </div>
+<div class="section" id="running-models-in-parallel">
+<h1>Running models in parallel<a class="headerlink" href="#running-models-in-parallel" title="Permalink to this headline">¶</a></h1>
+<p>Due to the global clock in kMC there seems to be no
+simple and efficient way to parallelize a kMC program.
+kmos certainly cannot parallelize a single system over
+processors. However one can run several kmos instances
+in parallel which might accelerate sampling or efficiently
+check for steady state conditions.</p>
+<p>The trick is to use the same facilities that the GUI
+frontend is&#8211;the <cite>multiprocessing</cite> module of the
+python standard library. One might argue that this
+uses more memory than threads however since by far the
+largest part of memory is used by the database of available
+processes, which can not be shared, this seems justifiable.
+Furthermore since the <cite>multiprocessing</cite> module sidesteps
+the GIL one can conveniently start and stop instances at
+any time.</p>
+<p>The only difference now is that each simulations starts
+in a new process and communication happens through Queues
+which use pickled objects in memory.</p>
+<p>So besides <cite>kmos</cite> we need to import <cite>multiprocessing</cite></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">kmos.run</span> <span class="kn">import</span> <span class="n">KMC_Model</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Queue</span>
+</pre></div>
+</div>
+<p>The standard communication model uses three queues :</p>
+<dl class="docutils">
+<dt>signal_queue</dt>
+<dd><p class="first">Can be used to send single commands to a
+running model, which control the runtime
+behavior. The command currently understood
+are</p>
+<ul class="last simple">
+<li>STOP: stop execution and deallocate</li>
+<li>PAUSE: sleep until START command</li>
+<li>START: restart from PAUSE state</li>
+<li>ATOMS: call self.get_atoms() and put on image_queue</li>
+<li>RESET_TIME: reset the kMC time</li>
+</ul>
+</dd>
+<dt>image_queue</dt>
+<dd>Is used by the model to send snapshots of
+the running model back. If the model is
+instantiated with <cite>autosend=True</cite>, this
+queue is automatically filled until full.
+Otherwise one needs to issue the <cite>ATOMS</cite>
+signal to trigger a snapshot.</dd>
+<dt>parameter_queue</dt>
+<dd>Can be used to update the model parameters
+at runtime. It expects a parameters object
+such as the one in model.parameters and
+automatically updates all rate constants.</dd>
+</dl>
+</div>
 
 
           </div>
@@ -118,24 +175,30 @@ in one script.</p>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-            <h3>This Page</h3>
-            <ul class="this-page-menu">
-              <li><a href="../_sources/tutorials/run_model_api.txt"
-                     rel="nofollow">Show Source</a></li>
-            </ul>
-          <div id="searchbox" style="display: none">
-            <h3>Quick search</h3>
-              <form class="search" action="../search.html" method="get">
-                <input type="text" name="q" size="18" />
-                <input type="submit" value="Go" />
-                <input type="hidden" name="check_keywords" value="yes" />
-                <input type="hidden" name="area" value="default" />
-              </form>
-              <p class="searchtip" style="font-size: 90%">
-              Enter search terms or a module, class or function name.
-              </p>
-          </div>
-          <script type="text/javascript">$('#searchbox').show(0);</script>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Running the Model&#8211;the API way</a></li>
+<li><a class="reference internal" href="#running-models-in-parallel">Running models in parallel</a></li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/tutorials/run_model_api.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -147,14 +210,14 @@ in one script.</p>
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="../modindex.html" title="Global Module Index"
+          <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-      &copy; Copyright 2009-2011, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+        &copy; Copyright 2009-2011, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
     </div>
   </body>
 </html>
