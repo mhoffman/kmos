@@ -1,12 +1,12 @@
 A first kMC Model--the API way
 ==============================
-Since the GUI used in the first subsection is nothing
+Since the GUI used in the next subsection is nothing
 but a frontend to the various datatypes, you can just as
 well write models by instantiating and adding different
 parts of the model directly in python. This way might look
 rather arcane for simple models in the beginning, however
 it starts to really pay off as soon as you want to 
-make a copy of a model which is almost identical with the
+make a version of a model which is almost identical with the
 only difference that ...
 
 
@@ -121,36 +121,34 @@ and the CO partial pressure::
   pt.add_parameter(Parameter(name='p_CO', value=1., adjustable=True, min=1e-10, max=1.e2))
 
 
-Here the value given should be consideredd a default value and if
-one sets adjustable to True, the viewer front-end will feature
-little scroll bars allowing to adjust them interactively.
+You can also set a default value and a minimum and maximum value
+set defines how the scrollbars a behave later in the runtime GUI.
 
 To describe the adsorption rate constant you will need the area
 of the unit cell::
 
   pt.add_parameter(Parameter(name='A',value='(3.5*angstrom)**2'))
 
-Last but not least one needs a binding energy of the particle on
+Last but not least you need a binding energy of the particle on
 the surface. Since without further ado we have no value for the
 gas phase chemical potential, we'll just call it deltaG and keep
-it adjustable::
+it adjustable ::
 
   pt.add_parameter(Parameter(name='deltaG', value='-0.5', adjustable=True,
                              min=-1.3, max=0.3))
 
-Last but not least we need to have at least two processes. A process in kMC
-means that a certain local configuration must be given so that something
-can happen at a certain rate constant. In the framework here this is
-phrased in terms of 'conditions' and 'actions'. [#proc_minilanguage]_ So for example an
-adsorption requires at least one site to be empty (condition). Then this
-site can be occupied by CO (action) with a certain rate constant. Written
-down in code this looks as follows.
-First we need a coord [#coord_minilanguage]_  ::
+To define processes we first need a coordinate [#coord_minilanguage]_  ::
   
   coord = pt.lattice.generate_coord('hollow.(0,0,0).simple_cubic')
 
-which we can now use::
 
+Then you need to have at least two processes. A process in kMC
+means that a certain local configuration must be given so that something
+can happen at a certain rate constant. In the framework here this is
+phrased in terms of 'conditions' and 'actions'. [#proc_minilanguage]_ 
+So for example an adsorption requires at least one site to be empty
+(condition). Then this site can be occupied by CO (action) with a 
+rate constant. Written down in code this looks as follows.
   pt.add_process(Process(name='CO_adsorption',
                  condition_list=[Condition(coord=coord, species='empty')],
                  action_list=[Action(coord=coord, species='CO')],
