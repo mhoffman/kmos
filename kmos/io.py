@@ -474,8 +474,8 @@ class ProcListWriter():
         # Here we replicate the allocate_system call, initialize
         # all book-keeping databases
         # and calculate the rate constants for the first time
-        out.write(('subroutine init(input_system_size, system_name, layer, species, no_banner)\n\n'
-            + '    integer(kind=iint), intent(in) :: layer, species\n'
+        out.write(('subroutine init(input_system_size, system_name, layer, no_banner)\n\n'
+            + '    integer(kind=iint), intent(in) :: layer\n'
             + '    integer(kind=iint), dimension(%s), intent(in) :: input_system_size\n\n'
             + '    character(len=400), intent(in) :: system_name\n\n'
             + '    logical, optional, intent(in) :: no_banner\n\n'
@@ -493,14 +493,14 @@ class ProcListWriter():
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/INIT/SYSTEM_SIZE",input_system_size\n')
         out.write('    call allocate_system(nr_of_proc, input_system_size, system_name)\n')
-        out.write('    call initialize_state(layer, species)\n')
+        out.write('    call initialize_state(layer)\n')
         out.write('end subroutine init\n\n')
 
         # initialize the system with the default layer and the default species
         # initialize all book-keeping databases
         # and representation strings for ASE representation
-        out.write('subroutine initialize_state(layer, species)\n\n')
-        out.write('    integer(kind=iint), intent(in) :: layer, species\n\n')
+        out.write('subroutine initialize_state(layer)\n\n')
+        out.write('    integer(kind=iint), intent(in) :: layer\n\n')
         out.write('    integer(kind=iint) :: i, j, k, nr\n')
 
         out.write('    do k = 0, system_size(3)-1\n')
