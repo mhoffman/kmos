@@ -12,7 +12,7 @@
     </parameter_list>
     <lattice cell_size="1.0 1.0 1.0" default_layer="default">
         <layer grid="1 1 1" grid_offset="0.0 0.0 0.0" name="default">
-            <site class="" type="a" vector="0.0 0.0 0.0"/>
+            <site type="a" pos="0.0 0.0 0.0"/>
         </layer>
     </lattice>
     <process_list>
