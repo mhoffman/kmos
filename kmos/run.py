@@ -86,7 +86,6 @@ class KMC_Model(multiprocessing.Process):
         proclist.init((self.size,) * int(lattice.model_dimension),
             system_name,
             lattice.default_layer,
-            proclist.default_species,
             not banner)
         self.cell_size = np.dot(lattice.unit_cell_size, lattice.system_size)
 
