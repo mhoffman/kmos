@@ -83,6 +83,11 @@ class KMC_Model(multiprocessing.Process):
         self.print_rates = print_rates
         self.parameters = Model_Parameters(self.print_rates)
         self.rate_constants = Model_Rate_Constants()
+
+        self.base = base
+        self.lattice = lattice
+        self.proclist = proclist
+
         proclist.init((self.size,) * int(lattice.model_dimension),
             system_name,
             lattice.default_layer,
