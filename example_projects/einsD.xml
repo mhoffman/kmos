@@ -27,14 +27,14 @@
         <process name="left" rate_constant="10**8">
             <condition coord_layer="default" coord_name="a" coord_offset="0 0 0" species="C"/>
             <condition coord_layer="default" coord_name="a" coord_offset="-1 0 0" species="empty"/>
-            <action coord_layer="default" coord_name="a" coord_offset="-1 0 0" species="C"/>
             <action coord_layer="default" coord_name="a" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="default" coord_name="a" coord_offset="-1 0 0" species="C"/>
         </process>
         <process name="right" rate_constant="10**8">
             <condition coord_layer="default" coord_name="a" coord_offset="0 0 0" species="C"/>
             <condition coord_layer="default" coord_name="a" coord_offset="1 0 0" species="empty"/>
-            <action coord_layer="default" coord_name="a" coord_offset="1 0 0" species="C"/>
             <action coord_layer="default" coord_name="a" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="default" coord_name="a" coord_offset="1 0 0" species="C"/>
         </process>
     </process_list>
     <output_list/>
