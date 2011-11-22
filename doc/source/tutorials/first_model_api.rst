@@ -148,7 +148,8 @@ can happen at a certain rate constant. In the framework here this is
 phrased in terms of 'conditions' and 'actions'. [#proc_minilanguage]_ 
 So for example an adsorption requires at least one site to be empty
 (condition). Then this site can be occupied by CO (action) with a 
-rate constant. Written down in code this looks as follows.
+rate constant. Written down in code this looks as follows ::
+
   pt.add_process(Process(name='CO_adsorption',
                  condition_list=[Condition(coord=coord, species='empty')],
                  action_list=[Action(coord=coord, species='CO')],
