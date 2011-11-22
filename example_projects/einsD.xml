@@ -12,7 +12,7 @@
     </parameter_list>
     <lattice cell_size="1.0 1.0 1.0" default_layer="default">
         <layer grid="1 1 1" grid_offset="0.0 0.0 0.0" name="default">
-            <site class="" type="a" vector="0.0 0.0 0.0"/>
+            <site type="a" pos="0.0 0.0 0.0"/>
         </layer>
     </lattice>
     <process_list>
@@ -27,14 +27,14 @@
         <process name="left" rate_constant="10**8">
             <condition coord_layer="default" coord_name="a" coord_offset="0 0 0" species="C"/>
             <condition coord_layer="default" coord_name="a" coord_offset="-1 0 0" species="empty"/>
-            <action coord_layer="default" coord_name="a" coord_offset="-1 0 0" species="C"/>
             <action coord_layer="default" coord_name="a" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="default" coord_name="a" coord_offset="-1 0 0" species="C"/>
         </process>
         <process name="right" rate_constant="10**8">
             <condition coord_layer="default" coord_name="a" coord_offset="0 0 0" species="C"/>
             <condition coord_layer="default" coord_name="a" coord_offset="1 0 0" species="empty"/>
-            <action coord_layer="default" coord_name="a" coord_offset="1 0 0" species="C"/>
             <action coord_layer="default" coord_name="a" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="default" coord_name="a" coord_offset="1 0 0" species="C"/>
         </process>
     </process_list>
     <output_list/>
