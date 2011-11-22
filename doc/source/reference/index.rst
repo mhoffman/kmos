@@ -79,19 +79,20 @@ the DTD below.
 Backends
 ========
 
-Proclist
-^^^^^^^^
+Base
+^^^^
 
-.. TODO:: write generic documentation for Fortran
-          proclist module
+.. TODO:: adapt documentation string from Fortran
+          base module
 
 Lattice
 ^^^^^^^
 
 .. TODO:: import documentation string from Fortran
           lattice module
-Base
-^^^^
 
-.. TODO:: import documentation string from Fortran
-          base module
+Proclist
+^^^^^^^^
+
+.. TODO:: write generic documentation for Fortran
+          proclist module
