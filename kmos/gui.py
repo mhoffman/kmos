@@ -137,6 +137,7 @@ class GTKProject(SlaveDelegate):
         self.model_tree.meta = self.meta
 
         # Layer List
+        self.model_tree.add_layer = self.add_layer
         self.layer_list = self.project_data.append(None,
                                    self.model_tree.layer_list)
         self.get_layers = lambda :\
@@ -192,8 +193,7 @@ class GTKProject(SlaveDelegate):
 
     def add_layer(self, layer):
         self.project_data.append(self.layer_list, layer)
-        self.model_tree.add_layer = self.add_layer
-        if len(self.get_layer()) == 1 :
+        if len(self.get_layers()) == 1 :
             self.set_default_layer(layer.name)
             self.set_substrate_layer(layer.name)
 

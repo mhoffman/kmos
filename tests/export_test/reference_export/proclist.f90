@@ -308,9 +308,9 @@ subroutine run_proc_nr(proc, nr_site)
 
 end subroutine run_proc_nr
 
-subroutine init(input_system_size, system_name, layer, species, no_banner)
+subroutine init(input_system_size, system_name, layer, no_banner)
 
-    integer(kind=iint), intent(in) :: layer, species
+    integer(kind=iint), intent(in) :: layer
     integer(kind=iint), dimension(2), intent(in) :: input_system_size
 
     character(len=400), intent(in) :: system_name
@@ -329,12 +329,12 @@ subroutine init(input_system_size, system_name, layer, species, no_banner)
 
     endif
     call allocate_system(nr_of_proc, input_system_size, system_name)
-    call initialize_state(layer, species)
+    call initialize_state(layer)
 end subroutine init
 
-subroutine initialize_state(layer, species)
+subroutine initialize_state(layer)
 
-    integer(kind=iint), intent(in) :: layer, species
+    integer(kind=iint), intent(in) :: layer
 
     integer(kind=iint) :: i, j, k, nr
     do k = 0, system_size(3)-1

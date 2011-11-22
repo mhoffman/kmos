@@ -93,7 +93,8 @@ class Project(object):
 
     def add_species(self, species):
         self.species_list.append(species)
-        if len(self.species_list) == 1:
+        if len(self.species_list) == 1 and \
+           not hasattr(self.species_list, 'default_species') :
             self.species_list.default_species = species.name
 
     def add_layer(self, layer):
@@ -657,8 +658,6 @@ class LayerList(FixedObject, list):
                     for k in drange(size[2])
                     for site in layer.sites
                 ]
-
-
 
 
     def generate_coord(self, terms):
