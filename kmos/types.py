@@ -100,8 +100,10 @@ class Project(object):
     def add_layer(self, layer):
         self.layer_list.append(layer)
         if len(self.layer_list) == 1 :
-            self.layer_list.default_layer = layer.name
-            self.layer_list.substrate_layer = layer.name
+            if not hasattr(self.layer_list, 'default_layer'):
+                self.layer_list.default_layer = layer.name
+            if not hasattr(self.layer_list, 'substrate_layer'):
+                self.layer_list.substrate_layer = layer.name
     def __repr__(self):
         return self._get_xml_string()
 
