@@ -236,7 +236,15 @@ class ProcListWriter():
         out.write('    end do\n\n')
         out.write('    call base_allocate_system(nr_of_proc, volume, system_name)\n\n')
         out.write('    unit_cell_size(1, 1) = %s\n' % data.layer_list.cell[0, 0])
+        out.write('    unit_cell_size(1, 2) = %s\n' % data.layer_list.cell[0, 1])
+        out.write('    unit_cell_size(1, 3) = %s\n' % data.layer_list.cell[0, 2])
+
+        out.write('    unit_cell_size(2, 1) = %s\n' % data.layer_list.cell[1, 0])
         out.write('    unit_cell_size(2, 2) = %s\n' % data.layer_list.cell[1, 1])
+        out.write('    unit_cell_size(2, 3) = %s\n' % data.layer_list.cell[1, 2])
+
+        out.write('    unit_cell_size(3, 1) = %s\n' % data.layer_list.cell[2, 0])
+        out.write('    unit_cell_size(3, 2) = %s\n' % data.layer_list.cell[2, 1])
         out.write('    unit_cell_size(3, 3) = %s\n' % data.layer_list.cell[2, 2])
         for i, (_, _, (x, y, z)) in enumerate(site_params):
             out.write('    site_positions(%s,:) = (/%s, %s, %s/)\n' % (i + 1,
