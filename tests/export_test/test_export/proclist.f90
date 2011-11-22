@@ -59,7 +59,7 @@ integer(kind=iint), parameter, public :: nr_of_species = 3
 integer(kind=iint), parameter, public :: co = 0
 integer(kind=iint), parameter, public :: empty = 1
 integer(kind=iint), parameter, public :: oxygen = 2
-integer(kind=iint), public :: default_species = empty
+integer(kind=iint), public :: default_species = co
 integer(kind=iint), parameter, public :: representation_length = 0
 
 
@@ -165,48 +165,48 @@ subroutine run_proc_nr(proc, nr_site)
 
     select case(proc)
     case(co_adsorption_bridge)
-        call put_co_ruo2_bridge(lsite)
+        call take_empty_ruo2_bridge(lsite)
 
     case(co_adsorption_cus)
-        call put_co_ruo2_cus(lsite)
+        call take_empty_ruo2_cus(lsite)
 
     case(co_desorption_bridge)
-        call take_co_ruo2_bridge(lsite)
+        call put_empty_ruo2_bridge(lsite)
 
     case(co_desorption_cus)
-        call take_co_ruo2_cus(lsite)
+        call put_empty_ruo2_cus(lsite)
 
     case(co_diffusion_bridge_bridge_down)
-        call put_co_ruo2_bridge(lsite)
-        call take_co_ruo2_bridge(lsite + (/0, 1, 0, 0/))
+        call take_empty_ruo2_bridge(lsite)
+        call put_empty_ruo2_bridge(lsite + (/0, 1, 0, 0/))
 
     case(co_diffusion_bridge_bridge_up)
-        call put_co_ruo2_bridge(lsite + (/0, 1, 0, 0/))
-        call take_co_ruo2_bridge(lsite)
+        call take_empty_ruo2_bridge(lsite + (/0, 1, 0, 0/))
+        call put_empty_ruo2_bridge(lsite)
 
     case(co_diffusion_bridge_cus_left)
-        call take_co_ruo2_bridge(lsite)
-        call put_co_ruo2_cus(lsite + (/-1, 0, 0, ruo2_cus - ruo2_bridge/))
+        call put_empty_ruo2_bridge(lsite)
+        call take_empty_ruo2_cus(lsite + (/-1, 0, 0, ruo2_cus - ruo2_bridge/))
 
     case(co_diffusion_bridge_cus_right)
-        call take_co_ruo2_bridge(lsite)
-        call put_co_ruo2_cus(lsite + (/0, 0, 0, ruo2_cus - ruo2_bridge/))
+        call put_empty_ruo2_bridge(lsite)
+        call take_empty_ruo2_cus(lsite + (/0, 0, 0, ruo2_cus - ruo2_bridge/))
 
     case(co_diffusion_cus_bridge_left)
-        call put_co_ruo2_bridge(lsite)
-        call take_co_ruo2_cus(lsite + (/0, 0, 0, ruo2_cus - ruo2_bridge/))
+        call take_empty_ruo2_bridge(lsite)
+        call put_empty_ruo2_cus(lsite + (/0, 0, 0, ruo2_cus - ruo2_bridge/))
 
     case(co_diffusion_cus_bridge_right)
-        call take_co_ruo2_cus(lsite + (/-1, 0, 0, ruo2_cus - ruo2_bridge/))
-        call put_co_ruo2_bridge(lsite)
+        call put_empty_ruo2_cus(lsite + (/-1, 0, 0, ruo2_cus - ruo2_bridge/))
+        call take_empty_ruo2_bridge(lsite)
 
     case(co_diffusion_cus_cus_down)
-        call put_co_ruo2_cus(lsite)
-        call take_co_ruo2_cus(lsite + (/0, 1, 0, 0/))
+        call take_empty_ruo2_cus(lsite)
+        call put_empty_ruo2_cus(lsite + (/0, 1, 0, 0/))
 
     case(co_diffusion_cus_cus_up)
-        call take_co_ruo2_cus(lsite)
-        call put_co_ruo2_cus(lsite + (/0, 1, 0, 0/))
+        call put_empty_ruo2_cus(lsite)
+        call take_empty_ruo2_cus(lsite + (/0, 1, 0, 0/))
 
     case(oxygen_adsorption_bridge_bridge)
         call put_oxygen_ruo2_bridge(lsite + (/0, 1, 0, 0/))
@@ -225,92 +225,92 @@ subroutine run_proc_nr(proc, nr_site)
         call put_oxygen_ruo2_cus(lsite + (/0, 1, 0, 0/))
 
     case(oxygen_desorption_bridge_bridge)
-        call take_oxygen_ruo2_bridge(lsite + (/0, 1, 0, 0/))
-        call take_oxygen_ruo2_bridge(lsite)
+        call put_empty_ruo2_bridge(lsite + (/0, 1, 0, 0/))
+        call put_empty_ruo2_bridge(lsite)
 
     case(oxygen_desorption_bridge_cus_left)
-        call take_oxygen_ruo2_bridge(lsite)
-        call take_oxygen_ruo2_cus(lsite + (/-1, 0, 0, ruo2_cus - ruo2_bridge/))
+        call put_empty_ruo2_bridge(lsite)
+        call put_empty_ruo2_cus(lsite + (/-1, 0, 0, ruo2_cus - ruo2_bridge/))
 
     case(oxygen_desorption_bridge_cus_right)
-        call take_oxygen_ruo2_bridge(lsite)
-        call take_oxygen_ruo2_cus(lsite + (/0, 0, 0, ruo2_cus - ruo2_bridge/))
+        call put_empty_ruo2_bridge(lsite)
+        call put_empty_ruo2_cus(lsite + (/0, 0, 0, ruo2_cus - ruo2_bridge/))
 
     case(oxygen_desorption_cus_cus)
-        call take_oxygen_ruo2_cus(lsite + (/0, 1, 0, 0/))
-        call take_oxygen_ruo2_cus(lsite)
+        call put_empty_ruo2_cus(lsite + (/0, 1, 0, 0/))
+        call put_empty_ruo2_cus(lsite)
 
     case(oxygen_diffusion_bridge_bridge_down)
         call put_oxygen_ruo2_bridge(lsite)
-        call take_oxygen_ruo2_bridge(lsite + (/0, 1, 0, 0/))
+        call put_empty_ruo2_bridge(lsite + (/0, 1, 0, 0/))
 
     case(oxygen_diffusion_bridge_bridge_up)
-        call take_oxygen_ruo2_bridge(lsite)
+        call put_empty_ruo2_bridge(lsite)
         call put_oxygen_ruo2_bridge(lsite + (/0, 1, 0, 0/))
 
     case(oxygen_diffusion_bridge_cus_left)
-        call take_oxygen_ruo2_bridge(lsite)
+        call put_empty_ruo2_bridge(lsite)
         call put_oxygen_ruo2_cus(lsite + (/-1, 0, 0, ruo2_cus - ruo2_bridge/))
 
     case(oxygen_diffusion_bridge_cus_right)
-        call take_oxygen_ruo2_bridge(lsite)
+        call put_empty_ruo2_bridge(lsite)
         call put_oxygen_ruo2_cus(lsite + (/0, 0, 0, ruo2_cus - ruo2_bridge/))
 
     case(oxygen_diffusion_cus_bridge_left)
         call put_oxygen_ruo2_bridge(lsite)
-        call take_oxygen_ruo2_cus(lsite + (/0, 0, 0, ruo2_cus - ruo2_bridge/))
+        call put_empty_ruo2_cus(lsite + (/0, 0, 0, ruo2_cus - ruo2_bridge/))
 
     case(oxygen_diffusion_cus_bridge_right)
-        call take_oxygen_ruo2_cus(lsite + (/-1, 0, 0, ruo2_cus - ruo2_bridge/))
+        call put_empty_ruo2_cus(lsite + (/-1, 0, 0, ruo2_cus - ruo2_bridge/))
         call put_oxygen_ruo2_bridge(lsite)
 
     case(oxygen_diffusion_cus_cus_down)
         call put_oxygen_ruo2_cus(lsite)
-        call take_oxygen_ruo2_cus(lsite + (/0, 1, 0, 0/))
+        call put_empty_ruo2_cus(lsite + (/0, 1, 0, 0/))
 
     case(oxygen_diffusion_cus_cus_up)
         call put_oxygen_ruo2_cus(lsite + (/0, 1, 0, 0/))
-        call take_oxygen_ruo2_cus(lsite)
+        call put_empty_ruo2_cus(lsite)
 
     case(reaction_oxygen_bridge_co_bridge_down)
-        call take_oxygen_ruo2_bridge(lsite + (/0, 1, 0, 0/))
-        call take_co_ruo2_bridge(lsite)
+        call put_empty_ruo2_bridge(lsite + (/0, 1, 0, 0/))
+        call put_empty_ruo2_bridge(lsite)
 
     case(reaction_oxygen_bridge_co_bridge_up)
-        call take_co_ruo2_bridge(lsite + (/0, 1, 0, 0/))
-        call take_oxygen_ruo2_bridge(lsite)
+        call put_empty_ruo2_bridge(lsite + (/0, 1, 0, 0/))
+        call put_empty_ruo2_bridge(lsite)
 
     case(reaction_oxygen_bridge_co_cus_left)
-        call take_oxygen_ruo2_bridge(lsite)
-        call take_co_ruo2_cus(lsite + (/-1, 0, 0, ruo2_cus - ruo2_bridge/))
+        call put_empty_ruo2_bridge(lsite)
+        call put_empty_ruo2_cus(lsite + (/-1, 0, 0, ruo2_cus - ruo2_bridge/))
 
     case(reaction_oxygen_bridge_co_cus_right)
-        call take_oxygen_ruo2_bridge(lsite)
-        call take_co_ruo2_cus(lsite + (/0, 0, 0, ruo2_cus - ruo2_bridge/))
+        call put_empty_ruo2_bridge(lsite)
+        call put_empty_ruo2_cus(lsite + (/0, 0, 0, ruo2_cus - ruo2_bridge/))
 
     case(reaction_oxygen_cus_co_bridge_left)
-        call take_oxygen_ruo2_cus(lsite + (/0, 0, 0, ruo2_cus - ruo2_bridge/))
-        call take_co_ruo2_bridge(lsite)
+        call put_empty_ruo2_cus(lsite + (/0, 0, 0, ruo2_cus - ruo2_bridge/))
+        call put_empty_ruo2_bridge(lsite)
 
     case(reaction_oxygen_cus_co_bridge_right)
-        call take_oxygen_ruo2_cus(lsite + (/-1, 0, 0, ruo2_cus - ruo2_bridge/))
-        call take_co_ruo2_bridge(lsite)
+        call put_empty_ruo2_cus(lsite + (/-1, 0, 0, ruo2_cus - ruo2_bridge/))
+        call put_empty_ruo2_bridge(lsite)
 
     case(reaction_oxygen_cus_co_cus_down)
-        call take_oxygen_ruo2_cus(lsite + (/0, 1, 0, 0/))
-        call take_co_ruo2_cus(lsite)
+        call put_empty_ruo2_cus(lsite + (/0, 1, 0, 0/))
+        call put_empty_ruo2_cus(lsite)
 
     case(reaction_oxygen_cus_co_cus_up)
-        call take_oxygen_ruo2_cus(lsite)
-        call take_co_ruo2_cus(lsite + (/0, 1, 0, 0/))
+        call put_empty_ruo2_cus(lsite)
+        call put_empty_ruo2_cus(lsite + (/0, 1, 0, 0/))
 
     end select
 
 end subroutine run_proc_nr
 
-subroutine init(input_system_size, system_name, layer, species, no_banner)
+subroutine init(input_system_size, system_name, layer, no_banner)
 
-    integer(kind=iint), intent(in) :: layer, species
+    integer(kind=iint), intent(in) :: layer
     integer(kind=iint), dimension(2), intent(in) :: input_system_size
 
     character(len=400), intent(in) :: system_name
@@ -329,12 +329,12 @@ subroutine init(input_system_size, system_name, layer, species, no_banner)
 
     endif
     call allocate_system(nr_of_proc, input_system_size, system_name)
-    call initialize_state(layer, species)
+    call initialize_state(layer)
 end subroutine init
 
-subroutine initialize_state(layer, species)
+subroutine initialize_state(layer)
 
-    integer(kind=iint), intent(in) :: layer, species
+    integer(kind=iint), intent(in) :: layer
 
     integer(kind=iint) :: i, j, k, nr
     do k = 0, system_size(3)-1
@@ -367,7 +367,92 @@ subroutine initialize_state(layer, species)
 
 end subroutine initialize_state
 
-subroutine put_co_ruo2_bridge(site)
+subroutine put_empty_ruo2_bridge(site)
+
+    integer(kind=iint), dimension(4), intent(in) :: site
+
+    ! update lattice
+    call replace_species(site, co, empty)
+
+    ! disable affected processes
+    if(can_do(co_desorption_bridge, site))then
+        call del_proc(co_desorption_bridge, site)
+    endif
+
+    if(can_do(co_diffusion_bridge_bridge_down, site + (/0, -1, 0, 0/)))then
+        call del_proc(co_diffusion_bridge_bridge_down, site + (/0, -1, 0, 0/))
+    endif
+
+    if(can_do(co_diffusion_bridge_bridge_up, site))then
+        call del_proc(co_diffusion_bridge_bridge_up, site)
+    endif
+
+    if(can_do(co_diffusion_bridge_cus_left, site))then
+        call del_proc(co_diffusion_bridge_cus_left, site)
+    endif
+
+    if(can_do(co_diffusion_bridge_cus_right, site))then
+        call del_proc(co_diffusion_bridge_cus_right, site)
+    endif
+
+    if(can_do(reaction_oxygen_bridge_co_bridge_down, site))then
+        call del_proc(reaction_oxygen_bridge_co_bridge_down, site)
+    endif
+
+    if(can_do(reaction_oxygen_bridge_co_bridge_up, site + (/0, -1, 0, 0/)))then
+        call del_proc(reaction_oxygen_bridge_co_bridge_up, site + (/0, -1, 0, 0/))
+    endif
+
+    if(can_do(reaction_oxygen_cus_co_bridge_left, site))then
+        call del_proc(reaction_oxygen_cus_co_bridge_left, site)
+    endif
+
+    if(can_do(reaction_oxygen_cus_co_bridge_right, site))then
+        call del_proc(reaction_oxygen_cus_co_bridge_right, site)
+    endif
+
+    ! enable affected processes
+    call add_proc(co_adsorption_bridge, site)
+    select case(get_species(site + (/0, 1, 0, 0/)))
+    case(co)
+        call add_proc(co_diffusion_bridge_bridge_down, site)
+    case(oxygen)
+        call add_proc(oxygen_diffusion_bridge_bridge_down, site)
+    case(empty)
+        call add_proc(oxygen_adsorption_bridge_bridge, site)
+    end select
+
+    select case(get_species(site + (/0, -1, 0, 0/)))
+    case(co)
+        call add_proc(co_diffusion_bridge_bridge_up, site + (/0, -1, 0, 0/))
+    case(oxygen)
+        call add_proc(oxygen_diffusion_bridge_bridge_up, site + (/0, -1, 0, 0/))
+    case(empty)
+        call add_proc(oxygen_adsorption_bridge_bridge, site + (/0, -1, 0, 0/))
+    end select
+
+    select case(get_species(site + (/0, 0, 0, ruo2_cus - ruo2_bridge/)))
+    case(co)
+        call add_proc(co_diffusion_cus_bridge_left, site)
+    case(oxygen)
+        call add_proc(oxygen_diffusion_cus_bridge_left, site)
+    case(empty)
+        call add_proc(oxygen_adsorption_bridge_cus_right, site)
+    end select
+
+    select case(get_species(site + (/-1, 0, 0, ruo2_cus - ruo2_bridge/)))
+    case(co)
+        call add_proc(co_diffusion_cus_bridge_right, site)
+    case(oxygen)
+        call add_proc(oxygen_diffusion_cus_bridge_right, site)
+    case(empty)
+        call add_proc(oxygen_adsorption_bridge_cus_left, site)
+    end select
+
+
+end subroutine put_empty_ruo2_bridge
+
+subroutine take_empty_ruo2_bridge(site)
 
     integer(kind=iint), dimension(4), intent(in) :: site
 
@@ -458,9 +543,9 @@ subroutine put_co_ruo2_bridge(site)
     end select
 
 
-end subroutine put_co_ruo2_bridge
+end subroutine take_empty_ruo2_bridge
 
-subroutine take_co_ruo2_bridge(site)
+subroutine put_empty_ruo2_cus(site)
 
     integer(kind=iint), dimension(4), intent(in) :: site
 
@@ -468,84 +553,84 @@ subroutine take_co_ruo2_bridge(site)
     call replace_species(site, co, empty)
 
     ! disable affected processes
-    if(can_do(co_desorption_bridge, site))then
-        call del_proc(co_desorption_bridge, site)
+    if(can_do(co_desorption_cus, site))then
+        call del_proc(co_desorption_cus, site)
     endif
 
-    if(can_do(co_diffusion_bridge_bridge_down, site + (/0, -1, 0, 0/)))then
-        call del_proc(co_diffusion_bridge_bridge_down, site + (/0, -1, 0, 0/))
+    if(can_do(co_diffusion_cus_bridge_left, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/)))then
+        call del_proc(co_diffusion_cus_bridge_left, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(can_do(co_diffusion_bridge_bridge_up, site))then
-        call del_proc(co_diffusion_bridge_bridge_up, site)
+    if(can_do(co_diffusion_cus_bridge_right, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/)))then
+        call del_proc(co_diffusion_cus_bridge_right, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(can_do(co_diffusion_bridge_cus_left, site))then
-        call del_proc(co_diffusion_bridge_cus_left, site)
+    if(can_do(co_diffusion_cus_cus_down, site + (/0, -1, 0, 0/)))then
+        call del_proc(co_diffusion_cus_cus_down, site + (/0, -1, 0, 0/))
     endif
 
-    if(can_do(co_diffusion_bridge_cus_right, site))then
-        call del_proc(co_diffusion_bridge_cus_right, site)
+    if(can_do(co_diffusion_cus_cus_up, site))then
+        call del_proc(co_diffusion_cus_cus_up, site)
     endif
 
-    if(can_do(reaction_oxygen_bridge_co_bridge_down, site))then
-        call del_proc(reaction_oxygen_bridge_co_bridge_down, site)
+    if(can_do(reaction_oxygen_bridge_co_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/)))then
+        call del_proc(reaction_oxygen_bridge_co_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(can_do(reaction_oxygen_bridge_co_bridge_up, site + (/0, -1, 0, 0/)))then
-        call del_proc(reaction_oxygen_bridge_co_bridge_up, site + (/0, -1, 0, 0/))
+    if(can_do(reaction_oxygen_bridge_co_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/)))then
+        call del_proc(reaction_oxygen_bridge_co_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(can_do(reaction_oxygen_cus_co_bridge_left, site))then
-        call del_proc(reaction_oxygen_cus_co_bridge_left, site)
+    if(can_do(reaction_oxygen_cus_co_cus_down, site))then
+        call del_proc(reaction_oxygen_cus_co_cus_down, site)
     endif
 
-    if(can_do(reaction_oxygen_cus_co_bridge_right, site))then
-        call del_proc(reaction_oxygen_cus_co_bridge_right, site)
+    if(can_do(reaction_oxygen_cus_co_cus_up, site + (/0, -1, 0, 0/)))then
+        call del_proc(reaction_oxygen_cus_co_cus_up, site + (/0, -1, 0, 0/))
     endif
 
     ! enable affected processes
-    call add_proc(co_adsorption_bridge, site)
+    call add_proc(co_adsorption_cus, site)
+    select case(get_species(site + (/1, 0, 0, ruo2_bridge - ruo2_cus/)))
+    case(co)
+        call add_proc(co_diffusion_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
+    case(oxygen)
+        call add_proc(oxygen_diffusion_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
+    case(empty)
+        call add_proc(oxygen_adsorption_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
+    end select
+
+    select case(get_species(site + (/0, 0, 0, ruo2_bridge - ruo2_cus/)))
+    case(co)
+        call add_proc(co_diffusion_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
+    case(oxygen)
+        call add_proc(oxygen_diffusion_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
+    case(empty)
+        call add_proc(oxygen_adsorption_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
+    end select
+
     select case(get_species(site + (/0, 1, 0, 0/)))
     case(co)
-        call add_proc(co_diffusion_bridge_bridge_down, site)
+        call add_proc(co_diffusion_cus_cus_down, site)
     case(oxygen)
-        call add_proc(oxygen_diffusion_bridge_bridge_down, site)
+        call add_proc(oxygen_diffusion_cus_cus_down, site)
     case(empty)
-        call add_proc(oxygen_adsorption_bridge_bridge, site)
+        call add_proc(oxygen_adsorption_cus_cus, site)
     end select
 
     select case(get_species(site + (/0, -1, 0, 0/)))
     case(co)
-        call add_proc(co_diffusion_bridge_bridge_up, site + (/0, -1, 0, 0/))
+        call add_proc(co_diffusion_cus_cus_up, site + (/0, -1, 0, 0/))
     case(oxygen)
-        call add_proc(oxygen_diffusion_bridge_bridge_up, site + (/0, -1, 0, 0/))
+        call add_proc(oxygen_diffusion_cus_cus_up, site + (/0, -1, 0, 0/))
     case(empty)
-        call add_proc(oxygen_adsorption_bridge_bridge, site + (/0, -1, 0, 0/))
-    end select
-
-    select case(get_species(site + (/0, 0, 0, ruo2_cus - ruo2_bridge/)))
-    case(co)
-        call add_proc(co_diffusion_cus_bridge_left, site)
-    case(oxygen)
-        call add_proc(oxygen_diffusion_cus_bridge_left, site)
-    case(empty)
-        call add_proc(oxygen_adsorption_bridge_cus_right, site)
-    end select
-
-    select case(get_species(site + (/-1, 0, 0, ruo2_cus - ruo2_bridge/)))
-    case(co)
-        call add_proc(co_diffusion_cus_bridge_right, site)
-    case(oxygen)
-        call add_proc(oxygen_diffusion_cus_bridge_right, site)
-    case(empty)
-        call add_proc(oxygen_adsorption_bridge_cus_left, site)
+        call add_proc(oxygen_adsorption_cus_cus, site + (/0, -1, 0, 0/))
     end select
 
 
-end subroutine take_co_ruo2_bridge
+end subroutine put_empty_ruo2_cus
 
-subroutine put_co_ruo2_cus(site)
+subroutine take_empty_ruo2_cus(site)
 
     integer(kind=iint), dimension(4), intent(in) :: site
 
@@ -636,151 +721,50 @@ subroutine put_co_ruo2_cus(site)
     end select
 
 
-end subroutine put_co_ruo2_cus
-
-subroutine take_co_ruo2_cus(site)
-
-    integer(kind=iint), dimension(4), intent(in) :: site
-
-    ! update lattice
-    call replace_species(site, co, empty)
-
-    ! disable affected processes
-    if(can_do(co_desorption_cus, site))then
-        call del_proc(co_desorption_cus, site)
-    endif
-
-    if(can_do(co_diffusion_cus_bridge_left, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/)))then
-        call del_proc(co_diffusion_cus_bridge_left, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
-    endif
-
-    if(can_do(co_diffusion_cus_bridge_right, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/)))then
-        call del_proc(co_diffusion_cus_bridge_right, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
-    endif
-
-    if(can_do(co_diffusion_cus_cus_down, site + (/0, -1, 0, 0/)))then
-        call del_proc(co_diffusion_cus_cus_down, site + (/0, -1, 0, 0/))
-    endif
-
-    if(can_do(co_diffusion_cus_cus_up, site))then
-        call del_proc(co_diffusion_cus_cus_up, site)
-    endif
-
-    if(can_do(reaction_oxygen_bridge_co_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/)))then
-        call del_proc(reaction_oxygen_bridge_co_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
-    endif
-
-    if(can_do(reaction_oxygen_bridge_co_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/)))then
-        call del_proc(reaction_oxygen_bridge_co_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
-    endif
-
-    if(can_do(reaction_oxygen_cus_co_cus_down, site))then
-        call del_proc(reaction_oxygen_cus_co_cus_down, site)
-    endif
-
-    if(can_do(reaction_oxygen_cus_co_cus_up, site + (/0, -1, 0, 0/)))then
-        call del_proc(reaction_oxygen_cus_co_cus_up, site + (/0, -1, 0, 0/))
-    endif
-
-    ! enable affected processes
-    call add_proc(co_adsorption_cus, site)
-    select case(get_species(site + (/1, 0, 0, ruo2_bridge - ruo2_cus/)))
-    case(co)
-        call add_proc(co_diffusion_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
-    case(oxygen)
-        call add_proc(oxygen_diffusion_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
-    case(empty)
-        call add_proc(oxygen_adsorption_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
-    end select
-
-    select case(get_species(site + (/0, 0, 0, ruo2_bridge - ruo2_cus/)))
-    case(co)
-        call add_proc(co_diffusion_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
-    case(oxygen)
-        call add_proc(oxygen_diffusion_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
-    case(empty)
-        call add_proc(oxygen_adsorption_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
-    end select
-
-    select case(get_species(site + (/0, 1, 0, 0/)))
-    case(co)
-        call add_proc(co_diffusion_cus_cus_down, site)
-    case(oxygen)
-        call add_proc(oxygen_diffusion_cus_cus_down, site)
-    case(empty)
-        call add_proc(oxygen_adsorption_cus_cus, site)
-    end select
-
-    select case(get_species(site + (/0, -1, 0, 0/)))
-    case(co)
-        call add_proc(co_diffusion_cus_cus_up, site + (/0, -1, 0, 0/))
-    case(oxygen)
-        call add_proc(oxygen_diffusion_cus_cus_up, site + (/0, -1, 0, 0/))
-    case(empty)
-        call add_proc(oxygen_adsorption_cus_cus, site + (/0, -1, 0, 0/))
-    end select
-
-
-end subroutine take_co_ruo2_cus
+end subroutine take_empty_ruo2_cus
 
 subroutine put_oxygen_ruo2_bridge(site)
 
     integer(kind=iint), dimension(4), intent(in) :: site
 
     ! update lattice
-    call replace_species(site, empty, oxygen)
+    call replace_species(site, co, oxygen)
 
     ! disable affected processes
-    if(can_do(co_adsorption_bridge, site))then
-        call del_proc(co_adsorption_bridge, site)
+    if(can_do(co_desorption_bridge, site))then
+        call del_proc(co_desorption_bridge, site)
     endif
 
-    if(can_do(co_diffusion_bridge_bridge_down, site))then
-        call del_proc(co_diffusion_bridge_bridge_down, site)
+    if(can_do(co_diffusion_bridge_bridge_down, site + (/0, -1, 0, 0/)))then
+        call del_proc(co_diffusion_bridge_bridge_down, site + (/0, -1, 0, 0/))
     endif
 
-    if(can_do(co_diffusion_bridge_bridge_up, site + (/0, -1, 0, 0/)))then
-        call del_proc(co_diffusion_bridge_bridge_up, site + (/0, -1, 0, 0/))
+    if(can_do(co_diffusion_bridge_bridge_up, site))then
+        call del_proc(co_diffusion_bridge_bridge_up, site)
     endif
 
-    if(can_do(co_diffusion_cus_bridge_left, site))then
-        call del_proc(co_diffusion_cus_bridge_left, site)
+    if(can_do(co_diffusion_bridge_cus_left, site))then
+        call del_proc(co_diffusion_bridge_cus_left, site)
     endif
 
-    if(can_do(co_diffusion_cus_bridge_right, site))then
-        call del_proc(co_diffusion_cus_bridge_right, site)
+    if(can_do(co_diffusion_bridge_cus_right, site))then
+        call del_proc(co_diffusion_bridge_cus_right, site)
     endif
 
-    if(can_do(oxygen_adsorption_bridge_bridge, site))then
-        call del_proc(oxygen_adsorption_bridge_bridge, site)
+    if(can_do(reaction_oxygen_bridge_co_bridge_down, site))then
+        call del_proc(reaction_oxygen_bridge_co_bridge_down, site)
     endif
 
-    if(can_do(oxygen_adsorption_bridge_bridge, site + (/0, -1, 0, 0/)))then
-        call del_proc(oxygen_adsorption_bridge_bridge, site + (/0, -1, 0, 0/))
+    if(can_do(reaction_oxygen_bridge_co_bridge_up, site + (/0, -1, 0, 0/)))then
+        call del_proc(reaction_oxygen_bridge_co_bridge_up, site + (/0, -1, 0, 0/))
     endif
 
-    if(can_do(oxygen_adsorption_bridge_cus_left, site))then
-        call del_proc(oxygen_adsorption_bridge_cus_left, site)
+    if(can_do(reaction_oxygen_cus_co_bridge_left, site))then
+        call del_proc(reaction_oxygen_cus_co_bridge_left, site)
     endif
 
-    if(can_do(oxygen_adsorption_bridge_cus_right, site))then
-        call del_proc(oxygen_adsorption_bridge_cus_right, site)
-    endif
-
-    if(can_do(oxygen_diffusion_bridge_bridge_down, site))then
-        call del_proc(oxygen_diffusion_bridge_bridge_down, site)
-    endif
-
-    if(can_do(oxygen_diffusion_bridge_bridge_up, site + (/0, -1, 0, 0/)))then
-        call del_proc(oxygen_diffusion_bridge_bridge_up, site + (/0, -1, 0, 0/))
-    endif
-
-    if(can_do(oxygen_diffusion_cus_bridge_left, site))then
-        call del_proc(oxygen_diffusion_cus_bridge_left, site)
-    endif
-
-    if(can_do(oxygen_diffusion_cus_bridge_right, site))then
-        call del_proc(oxygen_diffusion_cus_bridge_right, site)
+    if(can_do(reaction_oxygen_cus_co_bridge_right, site))then
+        call del_proc(reaction_oxygen_cus_co_bridge_right, site)
     endif
 
     ! enable affected processes
@@ -828,7 +812,7 @@ subroutine take_oxygen_ruo2_bridge(site)
     integer(kind=iint), dimension(4), intent(in) :: site
 
     ! update lattice
-    call replace_species(site, oxygen, empty)
+    call replace_species(site, oxygen, co)
 
     ! disable affected processes
     if(can_do(oxygen_desorption_bridge_bridge, site))then
@@ -880,41 +864,33 @@ subroutine take_oxygen_ruo2_bridge(site)
     endif
 
     ! enable affected processes
-    call add_proc(co_adsorption_bridge, site)
-    select case(get_species(site + (/0, 1, 0, 0/)))
-    case(co)
-        call add_proc(co_diffusion_bridge_bridge_down, site)
-    case(oxygen)
-        call add_proc(oxygen_diffusion_bridge_bridge_down, site)
-    case(empty)
-        call add_proc(oxygen_adsorption_bridge_bridge, site)
-    end select
-
+    call add_proc(co_desorption_bridge, site)
     select case(get_species(site + (/0, -1, 0, 0/)))
-    case(co)
-        call add_proc(co_diffusion_bridge_bridge_up, site + (/0, -1, 0, 0/))
     case(oxygen)
-        call add_proc(oxygen_diffusion_bridge_bridge_up, site + (/0, -1, 0, 0/))
+        call add_proc(reaction_oxygen_bridge_co_bridge_up, site + (/0, -1, 0, 0/))
     case(empty)
-        call add_proc(oxygen_adsorption_bridge_bridge, site + (/0, -1, 0, 0/))
+        call add_proc(co_diffusion_bridge_bridge_down, site + (/0, -1, 0, 0/))
     end select
 
-    select case(get_species(site + (/0, 0, 0, ruo2_cus - ruo2_bridge/)))
-    case(co)
-        call add_proc(co_diffusion_cus_bridge_left, site)
+    select case(get_species(site + (/0, 1, 0, 0/)))
     case(oxygen)
-        call add_proc(oxygen_diffusion_cus_bridge_left, site)
+        call add_proc(reaction_oxygen_bridge_co_bridge_down, site)
     case(empty)
-        call add_proc(oxygen_adsorption_bridge_cus_right, site)
+        call add_proc(co_diffusion_bridge_bridge_up, site)
     end select
 
     select case(get_species(site + (/-1, 0, 0, ruo2_cus - ruo2_bridge/)))
-    case(co)
-        call add_proc(co_diffusion_cus_bridge_right, site)
     case(oxygen)
-        call add_proc(oxygen_diffusion_cus_bridge_right, site)
+        call add_proc(reaction_oxygen_cus_co_bridge_right, site)
     case(empty)
-        call add_proc(oxygen_adsorption_bridge_cus_left, site)
+        call add_proc(co_diffusion_bridge_cus_left, site)
+    end select
+
+    select case(get_species(site + (/0, 0, 0, ruo2_cus - ruo2_bridge/)))
+    case(oxygen)
+        call add_proc(reaction_oxygen_cus_co_bridge_left, site)
+    case(empty)
+        call add_proc(co_diffusion_bridge_cus_right, site)
     end select
 
 
@@ -925,59 +901,43 @@ subroutine put_oxygen_ruo2_cus(site)
     integer(kind=iint), dimension(4), intent(in) :: site
 
     ! update lattice
-    call replace_species(site, empty, oxygen)
+    call replace_species(site, co, oxygen)
 
     ! disable affected processes
-    if(can_do(co_adsorption_cus, site))then
-        call del_proc(co_adsorption_cus, site)
+    if(can_do(co_desorption_cus, site))then
+        call del_proc(co_desorption_cus, site)
     endif
 
-    if(can_do(co_diffusion_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/)))then
-        call del_proc(co_diffusion_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
+    if(can_do(co_diffusion_cus_bridge_left, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/)))then
+        call del_proc(co_diffusion_cus_bridge_left, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(can_do(co_diffusion_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/)))then
-        call del_proc(co_diffusion_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
+    if(can_do(co_diffusion_cus_bridge_right, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/)))then
+        call del_proc(co_diffusion_cus_bridge_right, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(can_do(co_diffusion_cus_cus_down, site))then
-        call del_proc(co_diffusion_cus_cus_down, site)
+    if(can_do(co_diffusion_cus_cus_down, site + (/0, -1, 0, 0/)))then
+        call del_proc(co_diffusion_cus_cus_down, site + (/0, -1, 0, 0/))
     endif
 
-    if(can_do(co_diffusion_cus_cus_up, site + (/0, -1, 0, 0/)))then
-        call del_proc(co_diffusion_cus_cus_up, site + (/0, -1, 0, 0/))
+    if(can_do(co_diffusion_cus_cus_up, site))then
+        call del_proc(co_diffusion_cus_cus_up, site)
     endif
 
-    if(can_do(oxygen_adsorption_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/)))then
-        call del_proc(oxygen_adsorption_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
+    if(can_do(reaction_oxygen_bridge_co_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/)))then
+        call del_proc(reaction_oxygen_bridge_co_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(can_do(oxygen_adsorption_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/)))then
-        call del_proc(oxygen_adsorption_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
+    if(can_do(reaction_oxygen_bridge_co_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/)))then
+        call del_proc(reaction_oxygen_bridge_co_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(can_do(oxygen_adsorption_cus_cus, site))then
-        call del_proc(oxygen_adsorption_cus_cus, site)
+    if(can_do(reaction_oxygen_cus_co_cus_down, site))then
+        call del_proc(reaction_oxygen_cus_co_cus_down, site)
     endif
 
-    if(can_do(oxygen_adsorption_cus_cus, site + (/0, -1, 0, 0/)))then
-        call del_proc(oxygen_adsorption_cus_cus, site + (/0, -1, 0, 0/))
-    endif
-
-    if(can_do(oxygen_diffusion_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/)))then
-        call del_proc(oxygen_diffusion_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
-    endif
-
-    if(can_do(oxygen_diffusion_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/)))then
-        call del_proc(oxygen_diffusion_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
-    endif
-
-    if(can_do(oxygen_diffusion_cus_cus_down, site))then
-        call del_proc(oxygen_diffusion_cus_cus_down, site)
-    endif
-
-    if(can_do(oxygen_diffusion_cus_cus_up, site + (/0, -1, 0, 0/)))then
-        call del_proc(oxygen_diffusion_cus_cus_up, site + (/0, -1, 0, 0/))
+    if(can_do(reaction_oxygen_cus_co_cus_up, site + (/0, -1, 0, 0/)))then
+        call del_proc(reaction_oxygen_cus_co_cus_up, site + (/0, -1, 0, 0/))
     endif
 
     ! enable affected processes
@@ -1025,7 +985,7 @@ subroutine take_oxygen_ruo2_cus(site)
     integer(kind=iint), dimension(4), intent(in) :: site
 
     ! update lattice
-    call replace_species(site, oxygen, empty)
+    call replace_species(site, oxygen, co)
 
     ! disable affected processes
     if(can_do(oxygen_desorption_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/)))then
@@ -1077,41 +1037,33 @@ subroutine take_oxygen_ruo2_cus(site)
     endif
 
     ! enable affected processes
-    call add_proc(co_adsorption_cus, site)
-    select case(get_species(site + (/1, 0, 0, ruo2_bridge - ruo2_cus/)))
-    case(co)
-        call add_proc(co_diffusion_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
-    case(oxygen)
-        call add_proc(oxygen_diffusion_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
-    case(empty)
-        call add_proc(oxygen_adsorption_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
-    end select
-
+    call add_proc(co_desorption_cus, site)
     select case(get_species(site + (/0, 0, 0, ruo2_bridge - ruo2_cus/)))
-    case(co)
-        call add_proc(co_diffusion_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
     case(oxygen)
-        call add_proc(oxygen_diffusion_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
+        call add_proc(reaction_oxygen_bridge_co_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
     case(empty)
-        call add_proc(oxygen_adsorption_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
+        call add_proc(co_diffusion_cus_bridge_left, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
     end select
 
-    select case(get_species(site + (/0, 1, 0, 0/)))
-    case(co)
-        call add_proc(co_diffusion_cus_cus_down, site)
+    select case(get_species(site + (/1, 0, 0, ruo2_bridge - ruo2_cus/)))
     case(oxygen)
-        call add_proc(oxygen_diffusion_cus_cus_down, site)
+        call add_proc(reaction_oxygen_bridge_co_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
     case(empty)
-        call add_proc(oxygen_adsorption_cus_cus, site)
+        call add_proc(co_diffusion_cus_bridge_right, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
     end select
 
     select case(get_species(site + (/0, -1, 0, 0/)))
-    case(co)
-        call add_proc(co_diffusion_cus_cus_up, site + (/0, -1, 0, 0/))
     case(oxygen)
-        call add_proc(oxygen_diffusion_cus_cus_up, site + (/0, -1, 0, 0/))
+        call add_proc(reaction_oxygen_cus_co_cus_up, site + (/0, -1, 0, 0/))
     case(empty)
-        call add_proc(oxygen_adsorption_cus_cus, site + (/0, -1, 0, 0/))
+        call add_proc(co_diffusion_cus_cus_down, site + (/0, -1, 0, 0/))
+    end select
+
+    select case(get_species(site + (/0, 1, 0, 0/)))
+    case(oxygen)
+        call add_proc(reaction_oxygen_cus_co_cus_down, site)
+    case(empty)
+        call add_proc(co_diffusion_cus_cus_up, site)
     end select
 
 
