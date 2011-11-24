@@ -40,7 +40,7 @@
        [ 0.2      ,  0.4      ,  0.       ],
        [ 0.       ,  0.       ,  0.       ],
        [ 0.8      ,  0.6      ,  0.       ],
-       [ 0.5992575,  0.200819 ,  0.293403 ]]))]" substrate_layer="Pd100">
+       [ 0.5992575,  0.200819 ,  0.293403 ]]))]" substrate_layer="default">
         <layer color="#ffffff" name="Pd100">
             <site default_species="empty" pos="0.5992575 0.700819 0.354757545624" tags="strongbridge CO" type="bridge2"/>
             <site default_species="empty" pos="0.291141 0.5970815 0.354671545624" tags="weakbridge CO" type="bridge3"/>
