@@ -60,7 +60,7 @@ from kmos.run import KMC_Model,\
 
 class ParamSlider(gtk.HScale):
     def __init__(self, name, value, min, max, scale, parameter_callback):
-        print('%s %s %s %s' % (name, value, min, max))
+        #print('%s %s %s %s' % (name, value, min, max))
         self.parameter_callback = parameter_callback
         self.resolution = 1000.
         adjustment = gtk.Adjustment(0, 0, self.resolution, 0.1, 1.)
@@ -195,7 +195,7 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.occupation_diagram.set_xlabel('$t$ in s')
         self.occupation_diagram.set_ylabel('Coverage')
 
-        print('initialized viewbox')
+        #print('initialized viewbox')
 
     def update_vbox(self, atoms):
         if not self.center.any():
@@ -252,7 +252,7 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
 
     def kill(self):
         self.killed = True
-        print('  ... viewbox received kill')
+        #print('  ... viewbox received kill')
 
     def run(self):
         time.sleep(1.)
@@ -320,10 +320,10 @@ class KMC_Viewer():
             self.vbox.set_child_packing(slider, expand=False,
                                         fill=False, padding=0,
                                         pack_type=gtk.PACK_START)
-        print('initialized kmc_viewer')
-        print(self.window.get_title())
+        #print('initialized kmc_viewer')
+        #print(self.window.get_title())
         self.window.set_title('kmos GUI')
-        print(self.window.get_title())
+        #print(self.window.get_title())
         self.window.show_all()
 
     def parameter_callback(self, name, value):
@@ -331,16 +331,16 @@ class KMC_Viewer():
         self.parameter_queue.put(settings.parameters)
 
     def exit(self, widget, event):
-        print('Starting shutdown procedure')
+        #print('Starting shutdown procedure')
         self.viewbox.kill()
-        print(' ... sent kill to viewbox')
+        #print(' ... sent kill to viewbox')
         self.viewbox.join()
-        print(' ... viewbox thread joined')
+        #print(' ... viewbox thread joined')
         self.signal_queue.put('STOP')
-        print(' ... sent stop to model')
+        #print(' ... sent stop to model')
         self.model.terminate()
         self.model.join()
-        print(' ... model thread joined')
+        #print(' ... model thread joined')
         base.deallocate_system()
         gtk.main_quit()
         return True
@@ -355,6 +355,6 @@ def main():
     viewer = KMC_Viewer()
     viewer.model.start()
     viewer.viewbox.start()
-    print('started model and viewbox processes')
+    #print('started model and viewbox processes')
     gtk.main()
-    print('gtk.main stopped')
+    #print('gtk.main stopped')
