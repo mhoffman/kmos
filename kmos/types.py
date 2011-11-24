@@ -72,15 +72,12 @@ class Project(object):
 
         # Quick'n'dirty define access functions
         # needed in context with GTKProject
-        self.add_parameter = lambda parameter: \
-            self.parameter_list.append(parameter)
         self.get_parameters = lambda : sorted(self.parameter_list,
                                               key=lambda x: x.name)
 
         self.get_layers = lambda : sorted(self.layer_list,
                                           key=lambda x: x.name)
 
-        self.add_process = lambda process: self.process_list.append(process)
         self.get_processes = lambda : sorted(self.process_list,
                                              key=lambda x: x.name)
 
@@ -91,14 +88,38 @@ class Project(object):
         self.get_outputs = lambda : sorted(self.output_list,
                                            key=lambda x: x.name)
 
-    def add_species(self, species):
-        self.species_list.append(species)
+    def add_parameter(self, *parameters, **kwargs):
+        for parameter in parameters:
+            self.parameter_list.append(parameter)
+        if kwargs:
+            parameter = Parameter(**kwargs)
+            self.parameter_list.append(parameter)
+
+    def add_process(self, *processes, **kwargs):
+        for process in processes:
+            self.process_list.append(process)
+        if kwargs:
+            process = Process(**kwargs)
+            self.process_list.append(process)
+
+    def add_species(self, *speciess, **kwargs):
+        for species in speciess:
+            self.species_list.append(species)
+        if kwargs:
+            species = Species(**kwargs)
+            self.species_list.append(species)
+
         if len(self.species_list) == 1 and \
            not hasattr(self.species_list, 'default_species') :
             self.species_list.default_species = species.name
 
-    def add_layer(self, layer):
-        self.layer_list.append(layer)
+    def add_layer(self, *layers, **kwargs):
+        for layer in layers:
+            self.layer_list.append(layer)
+        if kwargs:
+            layer = Layer(**kwargs)
+            self.layer_list.append(layer)
+
         if len(self.layer_list) == 1 :
             if not hasattr(self.layer_list, 'default_layer'):
                 self.layer_list.default_layer = layer.name
