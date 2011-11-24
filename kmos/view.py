@@ -296,7 +296,7 @@ class KMC_Viewer():
     """A graphical front-end to run, manipulate
     and view a kMC model.
     """
-    def __init__(self):
+    def __init__(self, model=None):
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_position(gtk.WIN_POS_CENTER)
         self.window.connect('delete-event', self.exit)
@@ -306,7 +306,13 @@ class KMC_Viewer():
         queue = multiprocessing.Queue(maxsize=3)
         self.parameter_queue = multiprocessing.Queue(maxsize=50)
         self.signal_queue = multiprocessing.Queue(maxsize=10)
-        self.model = KMC_Model(queue, self.parameter_queue, self.signal_queue)
+        if model is None:
+            self.model = KMC_Model(queue, self.parameter_queue, self.signal_queue)
+        else:
+            self.model = model
+            self.model.image_queue = queue
+            self.model.parameter_queue = self.parameter_queue
+            self.model.signal_queue = self.signal_queue
         self.viewbox = KMC_ViewBox(queue, self.signal_queue,
                                    self.vbox, self.window)
 
@@ -347,12 +353,12 @@ class KMC_Viewer():
 
 
 
-def main():
+def main(model=None):
     from kmos.view import KMC_Viewer
     import gtk
     import gobject
     gobject.threads_init()
-    viewer = KMC_Viewer()
+    viewer = KMC_Viewer(model)
     viewer.model.start()
     viewer.viewbox.start()
     #print('started model and viewbox processes')

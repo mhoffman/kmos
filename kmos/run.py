@@ -75,7 +75,7 @@ class KMC_Model(multiprocessing.Process):
                        autosend=True):
         super(KMC_Model, self).__init__()
         self.image_queue = image_queue
-        self.parameters_queue = parameter_queue
+        self.parameter_queue = parameter_queue
         self.signal_queue = signal_queue
         self.autosend = autosend
         self.size = int(settings.simulation_size) \
@@ -211,9 +211,9 @@ class KMC_Model(multiprocessing.Process):
                     pass
                 elif signal.upper() == 'ATOMS':
                     self.image_queue.put(self.get_atoms())
-            if not self.parameters_queue.empty():
-                while not self.parameters_queue.empty():
-                    parameters = self.parameters_queue.get()
+            if not self.parameter_queue.empty():
+                while not self.parameter_queue.empty():
+                    parameters = self.parameter_queue.get()
                 set_rate_constants(parameters, self.print_rates)
 
     def view(self):
