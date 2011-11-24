@@ -134,6 +134,16 @@ class KMC_Model(multiprocessing.Process):
         """
         return (repr(self.parameters) + repr(self.rate_constants))
 
+    def put(self, site, species):
+        species = species.lower()
+
+        cell, name = np.array(site[:3]), site[3].lower()
+        site_nr = eval('lattice.%s' % name)
+        site = np.array(list(cell) + [site_nr])
+        species = lattice.get_species(site)
+        if species:
+            pass
+
     def get_occupation_header(self):
         """Returns the names of the fields returned by
         self.get_atoms().occupation.
