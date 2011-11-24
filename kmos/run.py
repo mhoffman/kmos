@@ -211,32 +211,38 @@ class KMC_Model(multiprocessing.Process):
         ase = import_ase()
         ase.visualize.view(self.get_atoms())
 
-    def get_atoms(self):
+    def get_atoms(self, geometry=True):
         """Return an ASE Atoms object with additional 
         information such as coverage and Turn-over-frequencies
         attached."""
-        ase = import_ase()
-        atoms = ase.atoms.Atoms()
+
+        if geometry:
+            ase = import_ase()
+            atoms = ase.atoms.Atoms()
+            for i in xrange(lattice.system_size[0]):
+                for j in xrange(lattice.system_size[1]):
+                    for k in xrange(lattice.system_size[2]):
+                        for n in xrange(1, 1 + lattice.spuck):
+                            species = lattice.get_species([i, j, k, n])
+                            if self.species_representation[species]:
+                                atom = deepcopy(
+                                    self.species_representation[species])
+                                atom.translate(np.dot(lattice.unit_cell_size,
+                                np.array([i, j, k]) \
+                                + lattice.site_positions[n - 1]))
+                                atoms += atom
+                        lattice_repr = deepcopy(self.lattice_representation)
+                        lattice_repr.translate(np.dot(lattice.unit_cell_size,
+                                    np.array([i, j, k])))
+                        atoms += lattice_repr
+            atoms.set_cell(self.cell_size)
+        else:
+            class Expando():
+                pass
+            atoms = Expando()
         atoms.calc = None
-        atoms.set_cell(self.cell_size)
         atoms.kmc_time = base.get_kmc_time()
         atoms.kmc_step = base.get_kmc_step()
-        for i in xrange(lattice.system_size[0]):
-            for j in xrange(lattice.system_size[1]):
-                for k in xrange(lattice.system_size[2]):
-                    for n in xrange(1, 1 + lattice.spuck):
-                        species = lattice.get_species([i, j, k, n])
-                        if self.species_representation[species]:
-                            atom = deepcopy(
-                                self.species_representation[species])
-                            atom.translate(np.dot(lattice.unit_cell_size,
-                            np.array([i, j, k]) \
-                            + lattice.site_positions[n - 1]))
-                            atoms += atom
-                    lattice_repr = deepcopy(self.lattice_representation)
-                    lattice_repr.translate(np.dot(lattice.unit_cell_size,
-                                np.array([i, j, k])))
-                    atoms += lattice_repr
 
         # calculate TOF since last call
         atoms.procstat = np.zeros((proclist.nr_of_proc,))
