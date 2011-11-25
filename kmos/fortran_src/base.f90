@@ -27,6 +27,7 @@
 !    lattice. Virtually any lattice kMC model can be build on top of this.
 !    The methods
 !    offered are:
+!
 !    * de/allocation of memory
 !    * book-keeping of the lattice configuration and all available processes
 !    * updating and tracking kMC time, kMC step and wall time
@@ -98,8 +99,11 @@ integer(kind=iint), dimension(:,:,:), allocatable :: avail_sites
 !   Main book-keeping array that stores for each process the sites
 !   that are available and for each site the address
 !   in this very array. The meaning of the fields are:
+!
 !       avail_sites(proc, field, switch)
+!
 !   where:
+!
 !   * proc -- refers to a process in the process list
 !   * the field within the process, but the meaning differs as explained
 !     under 'switch'
@@ -116,7 +120,7 @@ integer(kind=iint), dimension(:), allocatable :: lattice
 !   on each slot represents the species on that site.
 !
 !   Species constants can be conveniently defined
-!   in lattice_... and later used directly in the process list.
+!   in lattice\_... and later used directly in the process list.
 !******
 real(kind=rdouble), dimension(:), allocatable :: accum_rates
 !****v* base/accum_rates
@@ -201,7 +205,7 @@ character(len=200) :: system_name
 ! FUNCTION
 !   Unique indentifier of this simulation to be used for restart files.
 !   This name should not contain any characters that you don't want to
-!   have in a filename either, i.e. only [A-Za-z0-9_-].
+!   have in a filename either, i.e. only [A-Za-z0-9\_-].
 !******
 
 !****************
@@ -272,7 +276,7 @@ subroutine add_proc(proc, site)
     ! ARGUMENTS
     !  * proc -- positive integer number that represents the process to be added.
     !  * site -- positive integer number that represents the site to be
-    !  manipulated
+    !    manipulated
     !******
     integer(kind=iint), intent(in) :: proc, site
 
@@ -357,10 +361,12 @@ end subroutine reset_site
 subroutine reload_system(input_system_name, reloaded)
     !****f* base/reload_system
     ! FUNCTION
-    !    Restore state of simulation from *.reload file as save by
+    !    Restore state of simulation from \*.reload file as saved by
     !    save_system(). This function also allocates the system's memory
     !    so calling allocate_system again, will cause a runtime failure.
+    !
     ! ARGUMENTS
+    !
     !  * system_name -- string of 200 characters which will make the
     !    the reload_system look for a file called
     !    ./<system_name>.reload
@@ -515,7 +521,9 @@ subroutine save_system()
     !    save_system stores the entire system information in a simple ASCII
     !    filed names <system_name>.reload. All fields except avail_sites are
     !    stored in the simple scheme:
-    !     variable value
+    !
+    !        variable value
+    !
     !    In the case of array variables, multiple values are seperated by one or
     !    more spaces, and the record is terminated with a newline. The variable
     !    avail_sites is treated slightly differently, since printed on a single
@@ -574,7 +582,7 @@ subroutine set_rate_const(proc_nr, rate)
     ! FUNCTION
     !    set_rate_const allows to set the rate constant of the process with the number proc_nr.
     ! ARGUMENTS
-    !  * proc_nr -- The process number as defined in the corresponding proclist_
+    !  * proc_nr -- The process number as defined in the corresponding proclist\_
     !    module.
     !  * rate -- the rate in
     !     |latex $s^{-1}$
@@ -760,7 +768,7 @@ end function get_system_name
 
 
 subroutine set_kmc_time(new_kmc_time)
-    !****f* base/get_kmc_time
+    !****f* base/set_kmc_time
     ! FUNCTION
     !    Sets current kmc_time as rdouble real as defined in kind_values.f90.
     ! ARGUMENTS
@@ -920,6 +928,7 @@ subroutine determine_procsite(ran_proc, ran_site, proc, site)
     !    issues with wrong interval_search_real implementation or rounding
     !    errors I decided to take two random numbers.
     ! ARGUMENTS
+    !
     !  * ran_proc -- Random real number from
     !     |latex  $\in[0,1]$
     !     |html from [0,1]
@@ -1060,6 +1069,7 @@ subroutine interval_search_real(arr, value, return_field)
     !   This is basically a standard binary search algorithm that expects an array
     !   of ascending real numbers and a scalar real and return the key of the
     !   corresponding fiel, with the following modification:
+    !
     !   * the value of the returned field is equal of larger of the given
     !     value. This is important because the given value is between 0 and the
     !     largest value in the array and otherwise the last field is never
