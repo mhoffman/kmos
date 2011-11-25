@@ -1,4 +1,6 @@
 Functionality
+  * generate backend reference automatically from minimal
+    generated project
   * make sure one can (re)start and stop viewer from ipython
   * kmos.gui.Editor should be able to process
     project_tree passed in automatically 
