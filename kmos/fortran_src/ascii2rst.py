@@ -23,7 +23,7 @@ for i, line in enumerate(asci):
         continue
     elif '------' in line:
         new_asci.append(asci[i+1])
-        new_asci.append(line)
+        new_asci.append('===================================================')
         jump = 1
     else:
         new_asci.append(line)
