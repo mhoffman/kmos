@@ -8,9 +8,11 @@ Tutorials
 
 .. include:: first_model_gui.rst
 
+.. TODO:: describe modelling more complicated structures
+          and e.g. boundary conditions
+
 .. include:: run_model_gui.rst
 
 .. include:: run_model_api.rst
 
-.. TODO:: describe modelling more complicated structures
-          and e.g. boundary conditions
+.. include:: development.rst

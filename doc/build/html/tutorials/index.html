@@ -8,7 +8,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
     <title>Tutorials &mdash; kmos v0.0.1 documentation</title>
-    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -44,7 +44,61 @@
              accesskey="P">previous</a> |</li>
         <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
       </ul>
-    </div>  
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Tutorials</a><ul>
+<li><a class="reference internal" href="#getting-started">Getting Started</a><ul>
+<li><a class="reference internal" href="#module-kmos">Introduction</a><ul>
+<li><a class="reference internal" href="#feature-overview">Feature overview</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#a-first-kmc-model-the-api-way">A first kMC Model&#8211;the API way</a><ul>
+<li><a class="reference internal" href="#construct-the-model">Construct the model</a></li>
+<li><a class="reference internal" href="#populate-process-list-and-parameter-list">Populate process list and parameter list</a></li>
+<li><a class="reference internal" href="#export-save-compile">Export, save, compile</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#a-first-kmc-model-the-gui-way">A first kMC Model&#8211;the GUI way</a></li>
+<li><a class="reference internal" href="#running-the-model-the-gui-way">Running the Model&#8211;the GUI way</a></li>
+<li><a class="reference internal" href="#running-the-model-the-api-way">Running the Model&#8211;the API way</a></li>
+<li><a class="reference internal" href="#running-models-in-parallel">Running models in parallel</a></li>
+<li><a class="reference internal" href="#development">Development</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../index.html"
+                        title="previous chapter">Welcome to kmos&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../topic_guides/index.html"
+                        title="next chapter">Topic Guides</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/tutorials/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
 
     <div class="document">
       <div class="documentwrapper">
@@ -137,13 +191,13 @@ install dependencies.</p>
 </div>
 <div class="section" id="a-first-kmc-model-the-api-way">
 <h2>A first kMC Model&#8211;the API way<a class="headerlink" href="#a-first-kmc-model-the-api-way" title="Permalink to this headline">¶</a></h2>
-<p>Since the GUI used in the first subsection is nothing
+<p>Since the GUI used in the next subsection is nothing
 but a frontend to the various datatypes, you can just as
 well write models by instantiating and adding different
 parts of the model directly in python. This way might look
 rather arcane for simple models in the beginning, however
 it starts to really pay off as soon as you want to
-make a copy of a model which is almost identical with the
+make a version of a model which is almost identical with the
 only difference that ...</p>
 <div class="section" id="construct-the-model">
 <h3>Construct the model<a class="headerlink" href="#construct-the-model" title="Permalink to this headline">¶</a></h3>
@@ -241,34 +295,32 @@ and the CO partial pressure:</p>
 <span class="n">pt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;p_CO&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">1.e2</span><span class="p">))</span>
 </pre></div>
 </div>
-<p>Here the value given should be consideredd a default value and if
-one sets adjustable to True, the viewer front-end will feature
-little scroll bars allowing to adjust them interactively.</p>
+<p>You can also set a default value and a minimum and maximum value
+set defines how the scrollbars a behave later in the runtime GUI.</p>
 <p>To describe the adsorption rate constant you will need the area
 of the unit cell:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;A&#39;</span><span class="p">,</span><span class="n">value</span><span class="o">=</span><span class="s">&#39;(3.5*angstrom)**2&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
-<p>Last but not least one needs a binding energy of the particle on
+<p>Last but not least you need a binding energy of the particle on
 the surface. Since without further ado we have no value for the
 gas phase chemical potential, we&#8217;ll just call it deltaG and keep
-it adjustable:</p>
+it adjustable</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;deltaG&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s">&#39;-0.5&#39;</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                            <span class="nb">min</span><span class="o">=-</span><span class="mf">1.3</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">0.3</span><span class="p">))</span>
 </pre></div>
 </div>
-<p>Last but not least we need to have at least two processes. A process in kMC
-means that a certain local configuration must be given so that something
-can happen at a certain rate constant. In the framework here this is
-phrased in terms of &#8216;conditions&#8217; and &#8216;actions&#8217;. <a class="footnote-reference" href="#proc-minilanguage" id="id2">[2]</a> So for example an
-adsorption requires at least one site to be empty (condition). Then this
-site can be occupied by CO (action) with a certain rate constant. Written
-down in code this looks as follows.
-First we need a coord <a class="footnote-reference" href="#coord-minilanguage" id="id3">[3]</a></p>
+<p>To define processes we first need a coordinate <a class="footnote-reference" href="#coord-minilanguage" id="id2">[3]</a></p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">coord</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">generate_coord</span><span class="p">(</span><span class="s">&#39;hollow.(0,0,0).simple_cubic&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>which we can now use:</p>
+<p>Then you need to have at least two processes. A process in kMC
+means that a certain local configuration must be given so that something
+can happen at a certain rate constant. In the framework here this is
+phrased in terms of &#8216;conditions&#8217; and &#8216;actions&#8217;. <a class="footnote-reference" href="#proc-minilanguage" id="id3">[2]</a>
+So for example an adsorption requires at least one site to be empty
+(condition). Then this site can be occupied by CO (action) with a
+rate constant. Written down in code this looks as follows</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_process</span><span class="p">(</span><span class="n">Process</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;CO_adsorption&#39;</span><span class="p">,</span>
                <span class="n">condition_list</span><span class="o">=</span><span class="p">[</span><span class="n">Condition</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)],</span>
                <span class="n">action_list</span><span class="o">=</span><span class="p">[</span><span class="n">Action</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;CO&#39;</span><span class="p">)],</span>
@@ -318,7 +370,7 @@ lattice setup for extra credit :-).</p>
 <table class="docutils footnote" frame="void" id="proc-minilanguage" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>You will have describe all processes
+<tr><td class="label"><a class="fn-backref" href="#id3">[2]</a></td><td>You will have describe all processes
 in terms of  <cite>conditions</cite> and
 <cite>actions</cite> and you find a more complete
 description can be found in the
@@ -329,7 +381,7 @@ to the process description mini language.</td></tr>
 <table class="docutils footnote" frame="void" id="coord-minilanguage" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>The description of coordinates follows
+<tr><td class="label"><a class="fn-backref" href="#id2">[3]</a></td><td>The description of coordinates follows
 the simple syntax of the coordinate
 mini language and the
 <a class="reference internal" href="../topic_guides/coord_minilanguage.html#coord-mini-language"><em>topic guide</em></a>
@@ -344,6 +396,11 @@ explains how that works.</td></tr>
 simple adsorption/desorption model on a simple cubic surface.
 Despite its simplicity it touches all elements contained in
 the GUI and could be considered from first-principles.</p>
+<div class="admonition-todo admonition " id="index-2">
+<p class="first admonition-title">Todo</p>
+<p class="last">describe modelling more complicated structures
+and e.g. boundary conditions</p>
+</div>
 </div>
 <div class="section" id="running-the-model-the-gui-way">
 <h2>Running the Model&#8211;the GUI way<a class="headerlink" href="#running-the-model-the-gui-way" title="Permalink to this headline">¶</a></h2>
@@ -364,7 +421,7 @@ be even more interactive you set a parameter to be adjustable.
 This can happen either in the generating XML file or directly
 in the kmc_settings.py. Also make sure to set sensible minimum
 and maximum values.</p>
-<div class="admonition-todo admonition " id="index-2">
+<div class="admonition-todo admonition " id="index-3">
 <p class="first admonition-title">Todo</p>
 <p class="last">add recording function</p>
 </div>
@@ -493,69 +550,29 @@ at runtime. It expects a parameters object
 such as the one in model.parameters and
 automatically updates all rate constants.</dd>
 </dl>
-<div class="admonition-todo admonition " id="index-3">
-<p class="first admonition-title">Todo</p>
-<p class="last">describe modelling more complicated structures
-and e.g. boundary conditions</p>
 </div>
+<div class="section" id="development">
+<h2>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h2>
+<p>Contributions of any sort are of course quite welcome.
+Patches and comments can be  send in form of email, pull request, or github issues.</p>
+<p>To make synergizing a most pleasing experience I suggest you use
+git, nose, pep8, and pylint</p>
+<div class="highlight-python"><pre>sudo apt-get install git python-nose pep8 pylint</pre>
+</div>
+<p>When sending a patch please make sure the nose tests pass, i.e. run
+from the top project directory</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">nosetests</span>
+</pre></div>
+</div>
+<p>Furthermore run</p>
+<div class="highlight-python"><pre>pep8 &lt;filename&gt;</pre>
+</div>
+<p>Thank you.</p>
 </div>
 </div>
 
 
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="../index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Tutorials</a><ul>
-<li><a class="reference internal" href="#getting-started">Getting Started</a><ul>
-<li><a class="reference internal" href="#module-kmos">Introduction</a><ul>
-<li><a class="reference internal" href="#feature-overview">Feature overview</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#installation">Installation</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#a-first-kmc-model-the-api-way">A first kMC Model&#8211;the API way</a><ul>
-<li><a class="reference internal" href="#construct-the-model">Construct the model</a></li>
-<li><a class="reference internal" href="#populate-process-list-and-parameter-list">Populate process list and parameter list</a></li>
-<li><a class="reference internal" href="#export-save-compile">Export, save, compile</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#a-first-kmc-model-the-gui-way">A first kMC Model&#8211;the GUI way</a></li>
-<li><a class="reference internal" href="#running-the-model-the-gui-way">Running the Model&#8211;the GUI way</a></li>
-<li><a class="reference internal" href="#running-the-model-the-api-way">Running the Model&#8211;the API way</a></li>
-<li><a class="reference internal" href="#running-models-in-parallel">Running models in parallel</a></li>
-</ul>
-</li>
-</ul>
-
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="../index.html"
-                        title="previous chapter">Welcome to kmos&#8217;s documentation!</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="../topic_guides/index.html"
-                        title="next chapter">Topic Guides</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="../_sources/tutorials/index.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
