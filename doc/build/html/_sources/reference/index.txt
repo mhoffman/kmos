@@ -82,8 +82,7 @@ Backends
 Base
 ^^^^
 
-.. TODO:: adapt documentation string from Fortran
-          base module
+.. include:: base.rst
 
 Lattice
 ^^^^^^^
