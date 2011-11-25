@@ -37,4 +37,5 @@ for line in new_asci:
 rst.close()
 
 
-os.system('rst2html base.rst > base.html')
+os.system('rm base.txt')
+#os.system('rst2html base.rst > base.html')
