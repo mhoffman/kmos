@@ -760,7 +760,7 @@ end function get_system_name
 
 
 subroutine set_kmc_time(new_kmc_time)
-    !****f* base/get_kmc_time
+    !****f* base/set_kmc_time
     ! FUNCTION
     !    Sets current kmc_time as rdouble real as defined in kind_values.f90.
     ! ARGUMENTS
