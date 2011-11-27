@@ -285,7 +285,7 @@ base/save_system
     each process starts a new line, and the first number on the line stands
     for the process number and the remaining fields, hold the values.
 
-    none
+    ``none``
 
 base/set_kmc_time
 """"""""""""""""""""""""""""""""""""""""""""""""""

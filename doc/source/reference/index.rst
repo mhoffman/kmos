@@ -84,16 +84,10 @@ Backend
 Lattice
 ^^^^^^^
 
-.. TODO:: import documentation string from Fortran
-          lattice module
-
 .. include:: lattice.rst
 
 
 Proclist
 ^^^^^^^^
-
-.. TODO:: write generic documentation for Fortran
-          proclist module
 
 .. include:: proclist.rst
