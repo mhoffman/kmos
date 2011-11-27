@@ -48,7 +48,7 @@ pt.add_process(name='ba',
                )
 export_source(pt, outdir)
 
-for prefix in ['base']:
+for prefix in ['base', 'lattice', 'proclist']:
     os.system('robodoc --src %s.f90 --doc %s --singlefile --ascii'
                % (os.path.join(outdir, prefix), prefix))
 
