@@ -68,6 +68,17 @@ class ProcListWriter():
         data = self.data
         out = open(os.path.join(self.dir,'lattice.f90') , 'w')
         out.write(self._gpl_message())
+        out.write('!****h* kmos/lattice\n')
+        out.write('! FUNCTION\n')
+        out.write('!    Implements the mappings between the real space lattice\n')
+        out.write('!    and the 1-D lattice, which kmos/base operates on.\n')
+        out.write('!    Furthermore replicates all geometry specific functions of kmos/base\n')
+        out.write('!    in terms of lattice coordinates.\n')
+        out.write('!    Using this module each site can be addressed with 4-tuple\n')
+        out.write('!    ``(i, j, k, n)`` where ``i, j, k`` define the unit cell and\n')
+        out.write('!    ``n`` the site within the unit cell.\n')
+        out.write('!\n')
+        out.write('!******\n')
         out.write('\n\nmodule lattice\n')
         out.write('use kind_values\n')
         out.write('use base, only: &\n')
@@ -348,6 +359,11 @@ class ProcListWriter():
         # write header section and module imports
         out = open('%s/proclist.f90' % self.dir, 'w')
         out.write(self._gpl_message())
+        out.write('!****h* kmos/proclist\n')
+        out.write('! FUNCTION\n')
+        out.write('!    Implements the kMC process list.\n')
+        out.write('!\n')
+        out.write('!******\n')
         out.write('\n\nmodule proclist\n'
             + 'use kind_values\n'
             + 'use base, only: &\n'

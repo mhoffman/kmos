@@ -18,6 +18,17 @@
 !  along with kmos; if not, write to the Free Software
 !  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 !  USA
+!****h* kmos/lattice
+! FUNCTION
+!    Implements the mappings between the real space lattice
+!    and the 1-D lattice, which kmos/base operates on.
+!    Furthermore replicates all geometry specific functions of kmos/base
+!    in terms of lattice coordinates.
+!    Using this module each site can be addressed with 4-tuple
+!    ``(i, j, k, n)`` where ``i, j, k`` define the unit cell and
+!    ``n`` the site within the unit cell.
+!
+!******
 
 
 module lattice
