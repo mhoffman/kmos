@@ -65,7 +65,7 @@ for prefix in ['base', 'lattice', 'proclist']:
         # make first line header
             new_asci.append(line)
             new_asci.append('^' * 40 + '\n')
-        elif i == len(asci) - 1:
+        elif i >= len(asci) - 2:
         # ignore last line
             continue
         elif 'FUNCTION' in line:

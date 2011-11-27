@@ -81,13 +81,6 @@ Backend
 
 .. include:: base.rst
 
-Lattice
-^^^^^^^
-
 .. include:: lattice.rst
-
-
-Proclist
-^^^^^^^^
 
 .. include:: proclist.rst
