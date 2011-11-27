@@ -8,6 +8,16 @@ import shutil
 from kmos.types import *
 from kmos.io import *
 
+# Copy DTD
+import kmos
+shutil.copy(os.path.join(os.path.dirname(kmos.__file__),
+                                'kmc_project_v0.2.dtd'),
+            '.')
+
+
+
+# Fetch doc from dummy project
+
 pt = Project()
 outdir = tempfile.mkdtemp()
 outdir = 'outdir'

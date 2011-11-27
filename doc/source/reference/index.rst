@@ -73,7 +73,7 @@ One way to define an XML format is by using a document type description
 (DTD) and in fact at every import a kmos file is validated against
 the DTD below.
 
-.. literalinclude:: ../../kmos/kmc_project_v0.2.dtd
+.. literalinclude:: kmc_project_v0.2.dtd
 
 
 Backend
