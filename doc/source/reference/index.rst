@@ -76,11 +76,8 @@ the DTD below.
 .. literalinclude:: ../../kmos/kmc_project_v0.2.dtd
 
 
-Backends
+Backend
 ========
-
-Base
-^^^^
 
 .. include:: base.rst
 
