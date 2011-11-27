@@ -39,7 +39,7 @@
     representation CDATA #IMPLIED
   >
   <!ELEMENT layer (site)*>
-  <!ATTLIST layer 
+  <!ATTLIST layer
     name CDATA #REQUIRED
     grid CDATA #IMPLIED
     grid_offset CDATA #IMPLIED
