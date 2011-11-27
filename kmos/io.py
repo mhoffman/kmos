@@ -175,6 +175,15 @@ class ProcListWriter():
         # tests the lattice mappings for correctness
         # and initialized a lot more parameter type of data
         out.write('subroutine allocate_system(nr_of_proc, input_system_size, system_name)\n\n')
+        out.write('!****f* lattice/allocate_system\n')
+        out.write('! FUNCTION\n')
+        out.write('!    Allocates system, fills mapping cache, and\n')
+        out.write('!    checks whether mapping is consistent\n')
+        out.write('!\n')
+        out.write('! ARGUMENTS\n')
+        out.write('!\n')
+        out.write('!    ``none``\n')
+        out.write('!******\n')
         out.write('    integer(kind=iint), intent(in) :: nr_of_proc\n')
         out.write('    integer(kind=iint), dimension(%s), intent(in) :: input_system_size\n' % data.meta.model_dimension)
         out.write('    character(len=200), intent(in) :: system_name\n\n')
@@ -258,6 +267,14 @@ class ProcListWriter():
         # but are kept here for completeness and readability
 
         out.write('subroutine deallocate_system()\n\n')
+        out.write('!****f* lattice/deallocate_system\n')
+        out.write('! FUNCTION\n')
+        out.write('!    Deallocates system including mapping cache.\n')
+        out.write('!\n')
+        out.write('! ARGUMENTS\n')
+        out.write('!\n')
+        out.write('!    ``none``\n')
+        out.write('!******\n')
         out.write('    deallocate(lattice2nr)\n')
         out.write('    deallocate(nr2lattice)\n')
         out.write('    call base_deallocate_system()\n\n')
@@ -383,6 +400,14 @@ class ProcListWriter():
 
         # do exactly one kmc step
         out.write('subroutine do_kmc_step()\n\n')
+        out.write('!****f* proclist/do_kmc_step\n')
+        out.write('! FUNCTION\n')
+        out.write('!    Performs exactly one kMC step.\n')
+        out.write('!\n')
+        out.write('! ARGUMENTS\n')
+        out.write('!\n')
+        out.write('!    ``none``\n')
+        out.write('!******\n')
         out.write('    real(kind=rsingle) :: ran_proc, ran_time, ran_site\n')
         out.write('    integer(kind=iint) :: nr_site, proc_nr\n\n')
         out.write('    call random_number(ran_time)\n')
@@ -401,6 +426,17 @@ class ProcListWriter():
         out.write('end subroutine do_kmc_step\n\n')
 
         out.write('subroutine get_occupation(occupation)\n\n')
+        out.write('!****f* proclist/get_occupation\n')
+        out.write('! FUNCTION\n')
+        out.write('!    Evaluate current lattice configuration and returns\n')
+        out.write('!    the normalized occupation as matrix. Different species\n')
+        out.write('!    run along the first axis and different sites run\n')
+        out.write('!    along the second.\n')
+        out.write('!\n')
+        out.write('! ARGUMENTS\n')
+        out.write('!\n')
+        out.write('!    ``none``\n')
+        out.write('!******\n')
         out.write('    ! nr_of_species = %s, spuck = %s\n' % (len(data.species_list), len(site_params)))
         out.write('    real(kind=rdouble), dimension(0:%s, 1:%s), intent(out) :: occupation\n\n' % (len(data.species_list) - 1, len(site_params)))
         out.write('    integer(kind=iint) :: i, j, k, nr, species\n\n')
@@ -435,6 +471,15 @@ class ProcListWriter():
         # should probably change.
 
         out.write('subroutine run_proc_nr(proc, nr_site)\n\n')
+        out.write('!****f* proclist/run_proc_nr\n')
+        out.write('! FUNCTION\n')
+        out.write('!    Runs process ``proc`` on site ``nr_site``.\n')
+        out.write('!\n')
+        out.write('! ARGUMENTS\n')
+        out.write('!\n')
+        out.write('!    * ``proc`` integer representing the process number\n')
+        out.write('!    * ``nr_site``  integer representing the site\n')
+        out.write('!******\n')
         out.write('    integer(kind=iint), intent(in) :: proc\n')
         out.write('    integer(kind=iint), intent(in) :: nr_site\n\n')
         out.write('    integer(kind=iint), dimension(4) :: lsite\n\n')
@@ -483,6 +528,18 @@ class ProcListWriter():
         # all book-keeping databases
         # and calculate the rate constants for the first time
         out.write(('subroutine init(input_system_size, system_name, layer, no_banner)\n\n'
+            + '!****f* proclist/init\n'
+            + '! FUNCTION\n'
+            + '!     Allocates the system and initializes all sites in the given\n'
+            + '!     layer.\n'
+            + '!\n'
+            + '! ARGUMENTS\n'
+            + '!\n'
+            + '!    * ``input_system_size`` number of unit cell per axis.\n'
+            + '!    * ``system_name`` identifier for reload file.\n'
+            + '!    * ``layer`` initial layer.\n'
+            + '!    * ``no_banner`` [optional] if True no copyright is issued.\n'
+            + '!******\n'
             + '    integer(kind=iint), intent(in) :: layer\n'
             + '    integer(kind=iint), dimension(%s), intent(in) :: input_system_size\n\n'
             + '    character(len=400), intent(in) :: system_name\n\n'
@@ -508,6 +565,15 @@ class ProcListWriter():
         # initialize all book-keeping databases
         # and representation strings for ASE representation
         out.write('subroutine initialize_state(layer)\n\n')
+        out.write('!****f* proclist/initialize_state\n')
+        out.write('! FUNCTION\n')
+        out.write('!    Initialize all sites and book-keeping array\n')
+        out.write('!    for the given layer.\n')
+        out.write('!\n')
+        out.write('! ARGUMENTS\n')
+        out.write('!\n')
+        out.write('!    * ``layer`` integer representing layer\n')
+        out.write('!******\n')
         out.write('    integer(kind=iint), intent(in) :: layer\n\n')
         out.write('    integer(kind=iint) :: i, j, k, nr\n')
 

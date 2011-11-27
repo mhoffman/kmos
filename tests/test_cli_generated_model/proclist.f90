@@ -75,6 +75,14 @@ contains
 
 subroutine do_kmc_step()
 
+!****f* proclist/do_kmc_step
+! FUNCTION
+!    Performs exactly one kMC step.
+!
+! ARGUMENTS
+!
+!    ``none``
+!******
     real(kind=rsingle) :: ran_proc, ran_time, ran_site
     integer(kind=iint) :: nr_site, proc_nr
 
@@ -90,6 +98,17 @@ end subroutine do_kmc_step
 
 subroutine get_occupation(occupation)
 
+!****f* proclist/get_occupation
+! FUNCTION
+!    Evaluate current lattice configuration and returns
+!    the normalized occupation as matrix. Different species
+!    run along the first axis and different sites run
+!    along the second.
+!
+! ARGUMENTS
+!
+!    ``none``
+!******
     ! nr_of_species = 3, spuck = 1
     real(kind=rdouble), dimension(0:2, 1:1), intent(out) :: occupation
 
@@ -118,6 +137,15 @@ end subroutine get_occupation
 
 subroutine run_proc_nr(proc, nr_site)
 
+!****f* proclist/run_proc_nr
+! FUNCTION
+!    Runs process ``proc`` on site ``nr_site``.
+!
+! ARGUMENTS
+!
+!    * ``proc`` integer representing the process number
+!    * ``nr_site``  integer representing the site
+!******
     integer(kind=iint), intent(in) :: proc
     integer(kind=iint), intent(in) :: nr_site
 
@@ -141,6 +169,18 @@ end subroutine run_proc_nr
 
 subroutine init(input_system_size, system_name, layer, no_banner)
 
+!****f* proclist/init
+! FUNCTION
+!     Allocates the system and initializes all sites in the given
+!     layer.
+!
+! ARGUMENTS
+!
+!    * ``input_system_size`` number of unit cell per axis.
+!    * ``system_name`` identifier for reload file.
+!    * ``layer`` initial layer.
+!    * ``no_banner`` [optional] if True no copyright is issued.
+!******
     integer(kind=iint), intent(in) :: layer
     integer(kind=iint), dimension(2), intent(in) :: input_system_size
 
@@ -165,6 +205,15 @@ end subroutine init
 
 subroutine initialize_state(layer)
 
+!****f* proclist/initialize_state
+! FUNCTION
+!    Initialize all sites and book-keeping array
+!    for the given layer.
+!
+! ARGUMENTS
+!
+!    * ``layer`` integer representing layer
+!******
     integer(kind=iint), intent(in) :: layer
 
     integer(kind=iint) :: i, j, k, nr

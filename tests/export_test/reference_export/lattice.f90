@@ -105,6 +105,15 @@ end function calculate_nr2lattice
 
 subroutine allocate_system(nr_of_proc, input_system_size, system_name)
 
+!****f* lattice/allocate_system
+! FUNCTION
+!    Allocates system, fills mapping cache, and
+!    checks whether mapping is consistent
+!
+! ARGUMENTS
+!
+!    ``none``
+!******
     integer(kind=iint), intent(in) :: nr_of_proc
     integer(kind=iint), dimension(2), intent(in) :: input_system_size
     character(len=200), intent(in) :: system_name
@@ -178,6 +187,14 @@ end subroutine allocate_system
 
 subroutine deallocate_system()
 
+!****f* lattice/deallocate_system
+! FUNCTION
+!    Deallocates system including mapping cache.
+!
+! ARGUMENTS
+!
+!    ``none``
+!******
     deallocate(lattice2nr)
     deallocate(nr2lattice)
     call base_deallocate_system()
