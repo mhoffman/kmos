@@ -113,7 +113,7 @@ real(kind=rdouble), dimension(:), allocatable :: accum_rates
 !   of sites available for that process to be used by determine_procsite.
 !   Let :math:`\mathbf{c}` be the rate constants :math:`\mathbf{n}`
 !   the number of available sites, and :math:`\mathbf{a}`
-!   the accumulated rates, then :math:`a_{i}$`
+!   the accumulated rates, then :math:`a_{i}`
 !   is calculated according to :math:`a_{i}=\sum_{j=1}^{i} c_{j} n_{j}`.
 !
 !******
