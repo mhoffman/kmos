@@ -14,16 +14,22 @@ for i, line in enumerate(asci):
     if jump:
         jump += -1
         continue
+    if not i :
+    # make first line header
+        new_asci.append(line)
+        new_asci.append('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n')
+    elif i == len(asci) - 1:
+    # ignore last line
+        continue
     elif 'FUNCTION' in line:
+    # ignore the function string
         continue
     elif 'ARGUMENTS' in line:
-        new_asci.append('\nArguments\n')
-        new_asci.append('^^^^^^^^^\n')
-    elif i == len(asci) - 1:
-        continue
+    # ignore the arguments string
+        new_asci.append('\n')
     elif '------' in line:
         new_asci.append(asci[i+1])
-        new_asci.append('===================================================')
+        new_asci.append('"""""""""""""""""""""""""""""""""""""""""""""""""""')
         jump = 1
     else:
         new_asci.append(line)
@@ -38,4 +44,4 @@ rst.close()
 
 
 os.system('rm base.txt')
-#os.system('rst2html base.rst > base.html')
+os.system('rst2html base.rst > base.html')
