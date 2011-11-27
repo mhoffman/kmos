@@ -65,7 +65,10 @@ except Exception, e:
 
 
 class KMC_Model(multiprocessing.Process):
-    """Front end to initialize and run kMC model using python bindings."""
+    """API Front-end to initialize and run a kMC model using python bindings.
+    Depending on the constructor cal the model can be run either via directory
+    calls or in a separate processes access via multiprocessing.Queues.
+    Only one model instance can exist simultaneously per process."""
     def __init__(self, image_queue=None,
                        parameter_queue=None,
                        signal_queue=None,
@@ -135,6 +138,9 @@ class KMC_Model(multiprocessing.Process):
         return (repr(self.parameters) + repr(self.rate_constants))
 
     def put(self, site, species):
+        """Puts a certain species at a certain site.
+        (Not implemented)
+        """
         species = species.lower()
 
         cell, name = np.array(site[:3]), site[3].lower()
@@ -147,6 +153,7 @@ class KMC_Model(multiprocessing.Process):
     def get_occupation_header(self):
         """Returns the names of the fields returned by
         self.get_atoms().occupation.
+        Useful for the header line of an ASCII output.
         """
         return ' '.join(['%s_%s' % (species, site)
                            for species in sorted(settings.representations)
@@ -155,6 +162,7 @@ class KMC_Model(multiprocessing.Process):
     def get_tof_header(self):
         """Returns the names of the fields returned by
         self.get_atoms().tof_data.
+        Useful for the header line of an ASCII output.
         """
         tofs = []
         for _, value in settings.tof_count.iteritems():
@@ -278,10 +286,18 @@ class KMC_Model(multiprocessing.Process):
         return atoms
 
     def xml(self):
+        """Returns the XML representation that this model was created from.
+        """
         return settings.xml
 
 
 class Model_Parameters(object):
+    """Holds all user defined parameters of a model in
+    concise form. All user defined parameters can be
+    accessed and set as attributes, like so ::
+    
+        model.parameters.<parameter> = X.Y
+    """
     def __init__(self, print_rates=True):
         object.__init__(self)
         self.__dict__.update(settings.parameters)
@@ -305,6 +321,7 @@ class Model_Parameters(object):
 
 class Model_Rate_Constants(object):
     def __repr__(self):
+        """Compact representation of all current rate_constants."""
         res = '# kMC rate constants (%i)\n' % len(settings.rate_constants)
         res += '# ------------------\n'
         for proc in sorted(settings.rate_constants):
@@ -319,8 +336,8 @@ class Model_Rate_Constants(object):
 def set_rate_constants(parameters=None, print_rates=True):
     """Tries to evaluate the supplied expression for a rate constant
     to a simple real number and sets it for the corresponding process.
-    For the evaluation we draw on predefined natural constants, user defined
-    parameters and mathematical functions
+    For the evaluation it draws on predefined natural constants, user defined
+    parameters and mathematical functions.
     """
     if parameters is None:
         parameters = settings.parameters
