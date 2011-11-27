@@ -21,12 +21,9 @@
 
 !****h* kmos/base
 ! FUNCTION
-!    base is the base kMC module, which implements the kMC method on a
-!     |latex $ d = 1 $
-!     |html d = 1
+!    The base kMC module, which implements the kMC method on a :math:`d = 1`
 !    lattice. Virtually any lattice kMC model can be build on top of this.
-!    The methods
-!    offered are:
+!    The methods offered are:
 !
 !    * de/allocation of memory
 !    * book-keeping of the lattice configuration and all available processes
@@ -34,19 +31,6 @@
 !    * saving and reloading the current state
 !    * determine the process and site to be executed
 !
-!    To implement a new system one will have to write 2 modules:
-!    a lattice module that essentially maps the desired lattice onto the
-!    simple cubic
-!     |latex $d = 1$
-!     |html d = 1
-!    lattice and a process list module that implements
-!    all processes that can take place on this lattice. I suggest to
-!    make use of the kMC_generator.py script which allow to define the
-!    process list in an XML scheme and generates Fortran source code
-!    from it. It is convenient to
-!    define all I/O handling like reading physical parameters in a third
-!    module. To add more convenience one can wrap all files belonging
-!    to one system in a python module via f2py.
 !******
 module base
 use kind_values
@@ -127,22 +111,11 @@ real(kind=rdouble), dimension(:), allocatable :: accum_rates
 ! FUNCTION
 !   Stores the accumulated rate constant multiplied with the number
 !   of sites available for that process to be used by determine_procsite.
-!   Let
-!    |latex $\mathbf{c}$
-!    |html <strong>c</strong>
-!   be the rate constants,
-!    |latex $\mathbf{n}$
-!    |html <strong>n</strong>
-!   the number of available sites, and
-!    |latex $\mathbf{a}$
-!    |html <strong>a</strong>
-!   the accumulated rates, then
-!    |latex $a_{i}$
-!    |html a<sub>i</sub>
-!   is calculated according to
-!    |latex \[a_{i}=\sum_{j=1}^{i} c_{j} n_{j}.\]
-!    |html <br><center>a<sub>i</sub>=c<sub>1</sub>n<sub>1</sub>+ ... +c<sub>i</sub>n<sub>i</sub></center>.
-
+!   Let :math:`\mathbf{c}` be the rate constants :math:`\mathbf{n}`
+!   the number of available sites, and :math:`\mathbf{a}`
+!   the accumulated rates, then :math:`a_{i}$`
+!   is calculated according to :math:`a_{i}=\sum_{j=1}^{i} c_{j} n_{j}`.
+!
 !******
 integer(kind=iint), dimension(:), allocatable :: nr_of_sites
 !****v* base/nr_of_sites
@@ -226,9 +199,11 @@ subroutine del_proc(proc, site)
     !    avail_site(:,:,1). If a site needs to be removed this subroutine first
     !    looks up the location via avail_sites(:,:,1) and replaces it with the
     !    site that is stored as the last element for this process.
+    !
     ! ARGUMENTS
-    !  * proc -- positive integer that states the process
-    !  * site -- positive integer that encodes the site to be manipulated
+    !
+    !    * ``proc`` positive integer that states the process
+    !    * ``site`` positive integer that encodes the site to be manipulated
     !******
     integer(kind=iint), intent(in) :: proc, site
 
@@ -273,10 +248,11 @@ subroutine add_proc(proc, site)
     !    The main idea of this subroutine is described in del_proc. Adding one
     !    process to one capability is programmatically simpler since we can just
     !    add it to the end of the respective array in avail_sites.
+    !
     ! ARGUMENTS
-    !  * proc -- positive integer number that represents the process to be added.
-    !  * site -- positive integer number that represents the site to be
-    !    manipulated
+    !
+    !    * ``proc`` positive integer number that represents the process to be added.
+    !    * ``site`` positive integer number that represents the site to be manipulated
     !******
     integer(kind=iint), intent(in) :: proc, site
 
@@ -306,13 +282,15 @@ pure function can_do(proc, site)
     !****f* base/can_do
     ! FUNCTION
     !    Returns true if 'site' can do 'proc' right now
+    !
     ! ARGUMENTS
-    !  * proc -- integer representing the requested process.
-    !  * site -- integer representing the requested site.
-    !  * can -- writeable boolean, where the result will be stored.
+    !
+    !    * ``proc`` integer representing the requested process.
+    !    * ``site`` integer representing the requested site.
+    !    * ``can`` writeable boolean, where the result will be stored.
     !******
     !---------------I/O variables---------------
-    logical :: can_do 
+    logical :: can_do
     integer(kind=iint), intent(in) :: proc, site
 
     can_do = avail_sites(proc,site,2).ne.0
@@ -327,10 +305,11 @@ subroutine reset_site(site, old_species)
     !    as if it never existed. To achieve this the species
     !    is set to null_species and all available processes
     !    are stripped from the site via del_proc.
+    !
     ! ARGUMENTS
-    !  * site -- integer representing the requested site.
-    !  * species -- integer representing the species that
-    !    ought to be at the site, for consistency checks
+    !
+    !    * ``site`` integer representing the requested site.
+    !    * ``species`` integer representing the species that ought to be at the site, for consistency checks
     !******
     !---------------I/O variables---------------
     integer(kind=iint), intent(in) :: site, old_species
@@ -367,11 +346,8 @@ subroutine reload_system(input_system_name, reloaded)
     !
     ! ARGUMENTS
     !
-    !  * system_name -- string of 200 characters which will make the
-    !    the reload_system look for a file called
-    !    ./<system_name>.reload
-    !  * reloaded -- logical return variable, that is .true. reload of system
-    !    could be completed successfully, and .false. otherwise.
+    !    * ``system_name`` string of 200 characters which will make the reload_system look for a file called ./<system_name>.reload
+    !    * ``reloaded`` logical return variable, that is .true. reload of system could be completed successfully, and .false. otherwise.
     !******
     !---------------I/O variables---------------
     character(len=200), intent(in) :: input_system_name
@@ -530,7 +506,9 @@ subroutine save_system()
     !    line it is almost impossible to interpret from the ASCII files. Instead
     !    each process starts a new line, and the first number on the line stands
     !    for the process number and the remaining fields, hold the values.
+    !
     ! ARGUMENTS
+    !
     !    none
     !******
     integer, parameter :: filehandler = 15
@@ -580,14 +558,12 @@ end subroutine save_system
 subroutine set_rate_const(proc_nr, rate)
     !****f* base/set_rate_const
     ! FUNCTION
-    !    set_rate_const allows to set the rate constant of the process with the number proc_nr.
+    !  Allows to set the rate constant of the process with the number proc_nr.
+    !
     ! ARGUMENTS
-    !  * proc_nr -- The process number as defined in the corresponding proclist\_
-    !    module.
-    !  * rate -- the rate in
-    !     |latex $s^{-1}$
-    !     |html s<sup>-1</sup>
-    !    .
+    !
+    !  * ``proc_n`` The process number as defined in the corresponding proclist\_ module.
+    !  * ``rate`` the rate in :math:`s^{-1}`
     !******
     integer(kind=iint), intent(in) :: proc_nr
     real(kind=rdouble), intent(in) :: rate
@@ -605,8 +581,10 @@ subroutine update_accum_rate()
     !****f* base/update_accum_rate
     ! FUNCTION
     !    Updates the vector of accum_rates.
+    !
     ! ARGUMENTS
-    !    none
+    !
+    !    ``none``
     !******
 
     integer(kind=iint) :: i
@@ -626,12 +604,12 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
     !****f* base/allocate_system
     ! FUNCTION
     !   Allocates all book-keeping structures and stores
-    !   local copies of system name and size(s).
+    !   local copies of system name and size(s):
+    !
     ! ARGUMENTS
-    !   * systen_name: identifier of this simulation, used for
-    !                  name punch files
-    !   * volume: the total number of sites
-    !   * nr_of_proc the total number of processes
+    !   * ``systen_name`` identifier of this simulation, used as name of punch file
+    !   * ``volume`` the total number of sites
+    !   * ``nr_of_proc`` the total number of processes
     !******
     !---------------I/O variables---------------
     character(len=200), intent(in) :: input_system_name
@@ -716,8 +694,10 @@ subroutine deallocate_system()
     ! FUNCTION
     !    Deallocate all allocatable arrays: avail_sites, lattice, rates,
     !    accum_rates, procstat.
+    !
     ! ARGUMENTS
-    !    none
+    !
+    !    ``none``
     !******
     if(allocated(avail_sites))then
         deallocate(avail_sites)
@@ -757,8 +737,10 @@ pure function get_system_name()
     !****f* base/get_system_name
     ! FUNCTION
     !    Returns the systems name, that was specified with base/allocate_system
+    !
     ! ARGUMENTS
-    !    Writeable string of type character(len=200).
+    !
+    !    * ``system_name`` Writeable string of type character(len=200).
     !******
     !---------------I/O variables---------------
     character(len=200) :: get_system_name
@@ -771,8 +753,10 @@ subroutine set_kmc_time(new_kmc_time)
     !****f* base/set_kmc_time
     ! FUNCTION
     !    Sets current kmc_time as rdouble real as defined in kind_values.f90.
+    !
     ! ARGUMENTS
-    !  * new -- readable real, that the kmc time will be set to
+    !
+    !    * ``new`` readable real, that the kmc time will be set to
     !******
     !---------------I/O variables---------------
     real(kind=rdouble), intent(in)  :: new_kmc_time
@@ -786,8 +770,10 @@ subroutine get_kmc_time(return_kmc_time)
     !****f* base/get_kmc_time
     ! FUNCTION
     !    Returns current kmc_time as rdouble real as defined in kind_values.f90.
+    !
     ! ARGUMENTS
-    !  * return_kmc_time -- writeable real, where the kmc_time will be stored.
+    !
+    !    * ``return_kmc_time`` writeable real, where the kmc_time will be stored.
     !******
     !---------------I/O variables---------------
     real(kind=rdouble), intent(out)  :: return_kmc_time
@@ -801,8 +787,10 @@ subroutine get_kmc_time_step(return_kmc_time_step)
     !****f* base/get_kmc_time_step
     ! FUNCTION
     !    Returns current kmc_time_step (the time increment).
+    !
     ! ARGUMENTS
-    !  * return_kmc_step -- writeable real, where the kmc_time_step will be stored.
+    !
+    !    * ``return_kmc_step`` writeable real, where the kmc_time_step will be stored.
     !******
     !---------------I/O variables---------------
     real(kind=rdouble), intent(out) :: return_kmc_time_step
@@ -816,9 +804,11 @@ subroutine get_procstat(proc, return_procstat)
     !****f* base/get_procstat
     ! FUNCTION
     !    Return process counter for process proc as integer.
+    !
     ! ARGUMENTS
-    !  * proc -- integer representing the requested process.
-    !  * return_procstat -- writeable integer, where the process counter will be stored.
+    !
+    !    * ``proc`` integer representing the requested process.
+    !    * ``return_procstat`` writeable integer, where the process counter will be stored.
     !******
     !---------------I/O variables---------------
     integer(kind=iint),intent(in) :: proc
@@ -834,9 +824,11 @@ subroutine get_nrofsites(proc, return_nrofsites)
     ! FUNCTION
     !    Return how many sites are available for a certain process.
     !    Usually used for debugging
+    !
     ! ARGUMENTS
-    !  * proc -- integer  representing the requested process
-    !  * return_nrofsites -- writeable integer, where nr of sites gets stored
+    !
+    !    * ``proc`` integer  representing the requested process
+    !    * ``return_nrofsites`` writeable integer, where nr of sites gets stored
     !******
     integer(kind=iint), intent(in) :: proc
     integer(kind=iint), intent(out) :: return_nrofsites
@@ -849,9 +841,11 @@ subroutine get_rate(proc_nr, return_rate)
     !****f* base/get_rate
     ! FUNCTION
     !    Return rate of given process.
+    !
     ! ARGUMENTS
-    !  * proc_nr -- integer representing the requested process.
-    !  * return_rate -- writeable real, where the requested rate will be stored.
+    !
+    !    * ``proc_nr`` integer representing the requested process.
+    !    * ``return_rate`` writeable real, where the requested rate will be stored.
     !******
     !---------------I/O variables---------------
     integer(kind=iint), intent(in) :: proc_nr
@@ -866,8 +860,10 @@ subroutine increment_procstat(proc)
     !****f* base/increment_procstat
     ! FUNCTION
     !    Increment the process counter for process proc by one.
+    !
     ! ARGUMENTS
-    !  * proc -- integer representing the process to be increment.
+    !
+    !    * ``proc`` integer representing the process to be increment.
     !******
     integer(kind=iint),intent(in) :: proc
 
@@ -880,8 +876,10 @@ subroutine get_walltime(return_walltime)
     !****f* base/get_walltime
     ! FUNCTION
     !    Return the current walltime.
+    !
     ! ARGUMENTS
-    !  * return_walltime -- writeable real where the walltime will be stored.
+    !
+    !    * ``return_walltime`` writeable real where the walltime will be stored.
     !******
     !---------------I/O variables---------------
     real(kind=rsingle), intent(out) :: return_walltime
@@ -894,8 +892,10 @@ subroutine get_volume(return_volume)
     !****f* base/get_kmc_volume
     ! FUNCTION
     !    Return the total number of sites.
+    !
     ! ARGUMENTS
-    !    * volume -- Writeable integer.
+    !
+    !    * ``volume`` Writeable integer.
     !******
     !---------------I/O variables---------------
     integer(kind=iint), intent(out) :: return_volume
@@ -908,8 +908,10 @@ subroutine get_kmc_step(return_kmc_step)
     !****f* base/get_kmc_step
     ! FUNCTION
     !    Return the current kmc_step
+    !
     ! ARGUMENTS
-    !    * kmc_step -- Writeable integer
+    !
+    !    * ``kmc_step`` Writeable integer
     !******
     !---------------I/O variables---------------
     integer(kind=iint), intent(out) :: return_kmc_step
@@ -926,23 +928,14 @@ subroutine determine_procsite(ran_proc, ran_site, proc, site)
     !    corresponding process and site from accum_rates and avail_sites.
     !    Technically one random number would be sufficient but to circumvent
     !    issues with wrong interval_search_real implementation or rounding
-    !    errors I decided to take two random numbers.
-    ! ARGUMENTS
+    !    errors I decided to take two random numbers:
     !
-    !  * ran_proc -- Random real number from
-    !     |latex  $\in[0,1]$
-    !     |html from [0,1]
-    !    that selects the next process
-    !  * ran_site -- Random real number from
-    !     |latex $\in[0,1] $
-    !     |html from [0,1]
-    !    that selects the next site
-    !  * proc  -- Return integer
-    !     |latex $\in[1,\mathrm{nr\_of\_proc}]$
-    !     |html from [1,nr_of_proc]
-    !  * site  -- Return integer
-    !     |latex $\in [1,\mathrm{volume}]$
-    !     |html from [1,volume]
+    ! ARGUMENTS
+    !    * ``ran_proc`` Random real number from :math:`\in[0,1]` that selects the next process
+    !    * ``ran_site`` Random real number from :math:`\in[0,1]` that selects the next site
+    !    * ``proc`` Return integer :math:`\in[1,\mathrm{nr\_of\_proc}`
+    !    * ``site`` Return integer :math:`\in [1,\mathrm{volume}`
+    !
     !******
     !---------------I/O variables---------------
     real(kind=rsingle), intent(in) :: ran_proc, ran_site
@@ -980,10 +973,10 @@ subroutine update_clocks(ran_time)
     !****f* base/update_clocks
     ! FUNCTION
     !    Updates walltime, kmc_step and kmc_time.
+    !
     ! ARGUMENTS
-    !  * ran_time -- Random real number
-    !     |html [0,1]
-    !     |latex $\in [0,1]$
+    !
+    !    * ``ran_time`` Random real number :math:`\in [0,1]`
     !******
     real(kind=rsingle), intent(in) :: ran_time
     real(kind=rsingle) :: runtime
@@ -1019,14 +1012,16 @@ pure function get_species(site)
     !****f* base/get_species
     ! FUNCTION
     !    Return the species that occupies site.
+    !
     ! ARGUMENTS
-    !  * site -- integer representing the site
+    !
+    !    * ``site`` integer representing the site
     !******
     !---------------I/O variables---------------
     integer(kind=iint) :: get_species
     integer(kind=iint), intent(in) :: site
 
-    !! DEBUG 
+    !! DEBUG
     !print *, site
     !ASSERT(site.ge.1,"kmos/base/get_species was asked for a zero or negative site")
     !ASSERT(site.le.volume,"kmos/base/get_species was asked for a site outside the lattice")
@@ -1042,10 +1037,12 @@ subroutine replace_species(site, old_species, new_species)
     !   Replaces the species at a given site with new_species, given
     !   that old_species is correct, i.e. identical to the site that
     !   is already there.
+    !
     ! ARGUMENTS
-    !  * site -- integer representing the site
-    !  * old_species -- integer representing the species to be removed
-    !  * new_species -- integer representing the species to be placed
+    !
+    !   * ``site`` integer representing the site
+    !   * ``old_species`` integer representing the species to be removed
+    !   * ``new_species`` integer representing the species to be placed
     !******
     integer(kind=iint), intent(in) :: site, old_species, new_species
 
@@ -1068,7 +1065,7 @@ subroutine interval_search_real(arr, value, return_field)
     ! FUNCTION
     !   This is basically a standard binary search algorithm that expects an array
     !   of ascending real numbers and a scalar real and return the key of the
-    !   corresponding fiel, with the following modification:
+    !   corresponding field, with the following modification :
     !
     !   * the value of the returned field is equal of larger of the given
     !     value. This is important because the given value is between 0 and the
@@ -1085,10 +1082,11 @@ subroutine interval_search_real(arr, value, return_field)
     !   However: as everyone knows the binary search is trickier than it appears
     !   at first site especially real numbers. So intensive testing is
     !   suggested here!
+    !
     ! ARGUMENTS
-    !  * arr -- real array of type rsingle (kind_values.f90) in monotonically
-    !    (not strictly) increasing order
-    !  * value -- real positive number from [0, max_arr_value]
+    !
+    !   * ``arr`` real array of type rsingle (kind_values.f90) in monotonically (not strictly) increasing order
+    !   * ``value`` real positive number from [0, max_arr_value]
     !
     !******
     !---------------I/O variables---------------
@@ -1172,9 +1170,11 @@ subroutine assertion_fail(a, r)
     ! FUNCTION
     !    Function that shall be used by all parts of the program to print a
     !    proper message in case some assertion fails.
+    !
     ! ARGUMENTS
-    !  * a -- condition that is supposed to hold true
-    !  * r -- message that is printed to the poor user in case it fails
+    !
+    !    * ``a`` condition that is supposed to hold true
+    !    * ``r`` message that is printed to the poor user in case it fails
     !******
     character(*), intent(in)::r, a
     character(len=30)::st, wt, kt
