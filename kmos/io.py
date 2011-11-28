@@ -922,7 +922,7 @@ class ProcListWriter():
 
         out.write('    }\n\n')
         out.write('tof_count = {\n')
-        print('len(process_list): %s' % len(data.process_list))
+        #print('len(process_list): %s' % len(data.process_list))
         for process in data.get_processes():
             if process.tof_count is not None:
                 out.write('    "%s":%s,\n' % (process.name, process.tof_count))
@@ -936,7 +936,7 @@ class ProcListWriter():
         site_params = []
         for layer in data.layer_list:
             for site in layer.sites:
-                print(site.name, layer.name, tuple(site.pos))
+                #print(site.name, layer.name, tuple(site.pos))
                 site_params.append((site.name, layer.name, tuple(site.pos)))
         return site_params
 
