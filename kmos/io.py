@@ -441,6 +441,31 @@ class ProcListWriter():
         out.write('    call update_clocks(ran_time)\n\n')
         out.write('end subroutine do_kmc_step\n\n')
 
+        # useful for debugging
+        out.write('subroutine get_kmc_step(proc_nr, nr_site)\n\n')
+        out.write('!****f* proclist/get_kmc_step\n')
+        out.write('! FUNCTION\n')
+        out.write('!    Determines next step without executing it.\n')
+        out.write('!\n')
+        out.write('! ARGUMENTS\n')
+        out.write('!\n')
+        out.write('!    ``none``\n')
+        out.write('!******\n')
+        out.write('    real(kind=rsingle) :: ran_proc, ran_time, ran_site\n')
+        out.write('    integer(kind=iint), intent(out) :: nr_site, proc_nr\n\n')
+        out.write('    call random_number(ran_time)\n')
+        out.write('    call random_number(ran_proc)\n')
+        out.write('    call random_number(ran_site)\n')
+        if data.meta.debug > 0:
+            out.write('print *,"PROCLIST/GET_KMC_STEP/RAN_TIME",ran_time\n')
+            out.write('print *,"PROCLIST/GET_KMC_STEP/RAN_PROC",ran_proc\n')
+            out.write('print *,"PROCLIST/GET_KMC_STEP/RAN_site",ran_site\n')
+        out.write('    call update_accum_rate\n')
+        out.write('    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
+        if data.meta.debug > 0:
+            out.write('print *,"PROCLIST/GET_KMC_STEP/PROC_NR", proc_nr\n')
+        out.write('end subroutine get_kmc_step\n\n')
+
         out.write('subroutine get_occupation(occupation)\n\n')
         out.write('!****f* proclist/get_occupation\n')
         out.write('! FUNCTION\n')

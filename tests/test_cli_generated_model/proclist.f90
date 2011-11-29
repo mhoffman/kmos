@@ -101,6 +101,26 @@ subroutine do_kmc_step()
 
 end subroutine do_kmc_step
 
+subroutine get_kmc_step(proc_nr, nr_site)
+
+!****f* proclist/get_kmc_step
+! FUNCTION
+!    Determines next step without executing it.
+!
+! ARGUMENTS
+!
+!    ``none``
+!******
+    real(kind=rsingle) :: ran_proc, ran_time, ran_site
+    integer(kind=iint), intent(out) :: nr_site, proc_nr
+
+    call random_number(ran_time)
+    call random_number(ran_proc)
+    call random_number(ran_site)
+    call update_accum_rate
+    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)
+end subroutine get_kmc_step
+
 subroutine get_occupation(occupation)
 
 !****f* proclist/get_occupation
