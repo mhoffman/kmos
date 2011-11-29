@@ -290,6 +290,13 @@ class KMC_Model(multiprocessing.Process):
         """
         return settings.xml
 
+    def nr2site(self, n):
+        """Accepts a site index and return the site in human readable
+        coordinates"""
+        site = list(lattice.calculate_nr2lattice(n))
+        site[-1] = settings.site_names[site[-1]+1]
+        return site
+
 
 class Model_Parameters(object):
     """Holds all user defined parameters of a model in
