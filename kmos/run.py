@@ -294,8 +294,25 @@ class KMC_Model(multiprocessing.Process):
         """Accepts a site index and return the site in human readable
         coordinates"""
         site = list(lattice.calculate_nr2lattice(n))
-        site[-1] = settings.site_names[site[-1]+1]
+        site[-1] = settings.site_names[site[-1]-1]
         return site
+
+    def post_mortem(self, steps=None):
+        """Accepts an integer and generates a post-mortem report
+        by running that many steps and returning which process
+        would be executed next without executing it.
+        """
+        if steps is not None:
+            self.do_steps(steps)
+        else:
+            steps = base.get_kmc_step()
+        process, site = proclist.get_kmc_step()
+        process = list(sorted(settings.rate_constants.keys()))[process-1]
+        site = self.nr2site(site)
+
+        res = "kmos ran %s steps and next it would execute\n" % steps
+        res += "process '%s' on site %s." % (process, site)
+        print(res)
 
 
 class Model_Parameters(object):
