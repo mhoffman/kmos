@@ -297,7 +297,7 @@ class KMC_Model(multiprocessing.Process):
         site[-1] = settings.site_names[site[-1]-1]
         return site
 
-    def post_mortem(self, steps=None):
+    def post_mortem(self, steps=None, propagate=False):
         """Accepts an integer and generates a post-mortem report
         by running that many steps and returning which process
         would be executed next without executing it.
@@ -306,13 +306,16 @@ class KMC_Model(multiprocessing.Process):
             self.do_steps(steps)
         else:
             steps = base.get_kmc_step()
-        process, site = proclist.get_kmc_step()
-        process = list(sorted(settings.rate_constants.keys()))[process-1]
-        site = self.nr2site(site)
+        nprocess, nsite = proclist.get_kmc_step()
+        process = list(sorted(settings.rate_constants.keys()))[nprocess-1]
+        site = self.nr2site(nsite)
 
-        res = "kmos ran %s steps and next it would execute\n" % steps
+        res = "kmos ran %s steps and next it will execute\n" % steps
         res += "process '%s' on site %s." % (process, site)
         print(res)
+
+        if propagate:
+            proclist.run_proc_nr(nprocess, nsite)
 
 
 class Model_Parameters(object):
