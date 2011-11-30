@@ -1050,9 +1050,19 @@ subroutine replace_species(site, old_species, new_species)
 
     ! Double-check that we actually remove the atom that we think is there
     if(old_species.ne.lattice(site))then
-        print *,"kmos/base/replace_species Tried to remove species from sites which is not there!"
-        print *,"Attempted replacement:", old_species, "->", new_species
-        print *,"Found species:", lattice(site),"on site", site,"at step",kmc_step
+        print '(a)', "kmos/base/replace_species Tried to remove species from sites which is not there!"
+        print '(a,i,a,i)', "Attempted replacement:", old_species, "->", new_species
+        print '(a,i,a,i,a,i)', "Found species:", lattice(site),"on site", site,"at step",kmc_step
+        print '(a)', "For a more human-readable error message, please run"
+        print '(a)', "in a python console"
+        print '(a)', "--"
+        print '(a)', " "
+        print '(a)',"from kmos.run import KMC_Model"
+        print '(a)',"model = KMC_Model(banner=False, print_rates=False)"
+        print '(a,i2,a,i2,a,i2,a,i10,a,i10,a)', &
+        "model.post_mortem(err_code=(",old_species,", ",new_species, ", ",  lattice(site), ", ", site, ", ", kmc_step, "))"
+        print '(a)', "model.view()"
+
         stop
     endif
 
