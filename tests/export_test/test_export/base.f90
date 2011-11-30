@@ -1057,8 +1057,8 @@ subroutine replace_species(site, old_species, new_species)
         print '(a)', "in a python console"
         print '(a)', "--"
         print '(a)', " "
-        print '(a)',"from kmos.run import KMC_Model"
-        print '(a)',"model = KMC_Model(banner=False, print_rates=False)"
+        print '(a)', "from kmos.run import KMC_Model"
+        print '(a)', "model = KMC_Model(banner=False, print_rates=False)"
         print '(a,i2,a,i2,a,i2,a,i10,a,i10,a)', &
         "model.post_mortem(err_code=(",old_species,", ",new_species, ", ",  lattice(site), ", ", site, ", ", kmc_step, "))"
         print '(a)', "model.view()"
