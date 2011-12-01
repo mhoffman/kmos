@@ -65,9 +65,6 @@ The offset is a tuple of three integer numbers and specifies the relative
 unit cell of this coordinate. Of course this only becomes meaningful
 as soon as you use more than one coordinate in a process.
 
-.. TODO:: describe name.offset.layer syntax
-
-
 Autogeneration of sets
 ^^^^^^^^^^^^^^^^^^^^^^
 
