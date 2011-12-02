@@ -297,25 +297,57 @@ class KMC_Model(multiprocessing.Process):
         site[-1] = settings.site_names[site[-1]-1]
         return site
 
-    def post_mortem(self, steps=None, propagate=False):
+    def post_mortem(self, steps=None, propagate=False, err_code=None):
         """Accepts an integer and generates a post-mortem report
         by running that many steps and returning which process
         would be executed next without executing it.
         """
-        if steps is not None:
+        if err_code is not None:
+            old, new, found, err_site, steps = err_code
+            err_site = self.nr2site(err_site)
+            if old >= 0 :
+                old = sorted(settings.representations.keys())[old]
+            else:
+                old = 'NULL'
+
+            if new >= 0 :
+                new = sorted(settings.representations.keys())[new]
+            else:
+                new = 'NULL'
+
+            if found >= 0 :
+                found = sorted(settings.representations.keys())[found]
+            else:
+                found = 'NULL'
+
             self.do_steps(steps)
+            nprocess, nsite = proclist.get_kmc_step()
+            process = list(sorted(settings.rate_constants.keys()))[nprocess-1]
+            site = self.nr2site(nsite)
+            print('=====================================')
+            print('Post-Mortem Error Report')
+            print('=====================================')
+            print('  kmos ran %s steps and the next process is "%s"' % (steps, process))
+            print('  on site %s,  however this causes oops' %  site)
+            print('  on site %s because it trys to' % err_site)
+            print('  replace "%s" by "%s" but it will find "%s".' % (old, new, found))
+            print('  Go fish!')
+
         else:
-            steps = base.get_kmc_step()
-        nprocess, nsite = proclist.get_kmc_step()
-        process = list(sorted(settings.rate_constants.keys()))[nprocess-1]
-        site = self.nr2site(nsite)
+            if steps is not None:
+                self.do_steps(steps)
+            else:
+                steps = base.get_kmc_step()
+            nprocess, nsite = proclist.get_kmc_step()
+            process = list(sorted(settings.rate_constants.keys()))[nprocess-1]
+            site = self.nr2site(nsite)
 
-        res = "kmos ran %s steps and next it will execute\n" % steps
-        res += "process '%s' on site %s." % (process, site)
-        print(res)
+            res = "kmos ran %s steps and next it will execute\n" % steps
+            res += "process '%s' on site %s." % (process, site)
+            print(res)
 
-        if propagate:
-            proclist.run_proc_nr(nprocess, nsite)
+            if propagate:
+                proclist.run_proc_nr(nprocess, nsite)
 
 
 class Model_Parameters(object):
