@@ -91,9 +91,12 @@ class Project(object):
     def add_parameter(self, *parameters, **kwargs):
         for parameter in parameters:
             self.parameter_list.append(parameter)
+
         if kwargs:
             parameter = Parameter(**kwargs)
             self.parameter_list.append(parameter)
+            return parameter
+    
 
     def add_process(self, *processes, **kwargs):
         for process in processes:
@@ -101,6 +104,7 @@ class Project(object):
         if kwargs:
             process = Process(**kwargs)
             self.process_list.append(process)
+            return process
 
     def add_species(self, *speciess, **kwargs):
         for species in speciess:
@@ -108,7 +112,11 @@ class Project(object):
         if kwargs:
             species = Species(**kwargs)
             self.species_list.append(species)
+            return species
 
+        # if it is the first species and the
+        # default species has not been set
+        # do it now!
         if len(self.species_list) == 1 and \
            not hasattr(self.species_list, 'default_species') :
             self.species_list.default_species = species.name
@@ -119,7 +127,11 @@ class Project(object):
         if kwargs:
             layer = Layer(**kwargs)
             self.layer_list.append(layer)
+            return layer
 
+        # if it is the first layer and default_layer
+        # or substrate_layer have not been set
+        # do it now!
         if len(self.layer_list) == 1 :
             if not hasattr(self.layer_list, 'default_layer'):
                 self.layer_list.default_layer = layer.name
