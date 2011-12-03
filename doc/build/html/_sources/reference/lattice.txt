@@ -16,6 +16,21 @@ lattice/allocate_system
 
     ``none``
 
+lattice/calculate_lattice2nr
+""""""""""""""""""""""""""""""""""""""""""""""""""
+    Maps all lattice coordinates onto a continuous
+    set of integer :math:`\in [1,volume]`
+
+    - ``site`` integer array of size (4) a lattice coordinate
+
+lattice/calculate_nr2lattice
+""""""""""""""""""""""""""""""""""""""""""""""""""
+    Maps a continuous set of
+    of integers :math:`\in [1,volume]` to a
+    4-tuple representing a lattice coordinate
+
+    - ``nr`` integer representing the site index
+
 lattice/deallocate_system
 """"""""""""""""""""""""""""""""""""""""""""""""""
     Deallocates system including mapping cache.
