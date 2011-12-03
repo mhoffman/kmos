@@ -9,6 +9,12 @@ proclist/do_kmc_step
 
     ``none``
 
+proclist/get_kmc_step
+""""""""""""""""""""""""""""""""""""""""""""""""""
+    Determines next step without executing it.
+
+    ``none``
+
 proclist/get_occupation
 """"""""""""""""""""""""""""""""""""""""""""""""""
     Evaluate current lattice configuration and returns
