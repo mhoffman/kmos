@@ -140,6 +140,15 @@ class ProcListWriter():
         # we write slightly different versions for d=1,2,3
         # where the lower dimension version simply ignore some fields
         out.write('pure function calculate_lattice2nr(site)\n\n')
+        out.write('!****f* lattice/calculate_lattice2nr\n')
+        out.write('! FUNCTION\n')
+        out.write('!    Maps all lattice coordinates onto a continuous\n')
+        out.write('!    set of integer :math:`\\in [1,volume]`\n')
+        out.write('!\n')
+        out.write('! ARGUMENTS\n')
+        out.write('!\n')
+        out.write('!    - ``site`` integer array of size (4) a lattice coordinate\n')
+        out.write('!******\n')
         out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n')
         out.write('    integer(kind=iint) :: calculate_lattice2nr\n\n')
         out.write('    ! site = (x,y,z,local_index)\n')
@@ -160,6 +169,16 @@ class ProcListWriter():
         out.write('\nend function calculate_lattice2nr\n\n')
 
         out.write('pure function calculate_nr2lattice(nr)\n\n')
+        out.write('!****f* lattice/calculate_nr2lattice\n')
+        out.write('! FUNCTION\n')
+        out.write('!    Maps a continuous set of\n')
+        out.write('!    of integers :math:`\\in [1,volume]` to a\n')
+        out.write('!    4-tuple representing a lattice coordinate\n')
+        out.write('!\n')
+        out.write('! ARGUMENTS\n')
+        out.write('!\n')
+        out.write('!    - ``nr`` integer representing the site index\n')
+        out.write('!******\n')
         out.write('    integer(kind=iint), intent(in) :: nr\n')
         out.write('    integer(kind=iint), dimension(4) :: calculate_nr2lattice\n\n')
 
