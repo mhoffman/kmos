@@ -49,6 +49,16 @@
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">The Process Syntax</a><ul>
+<li><a class="reference internal" href="#adsorption">Adsorption</a></li>
+<li><a class="reference internal" href="#diffusion">Diffusion</a></li>
+<li><a class="reference internal" href="#avoid-double-counting">Avoid Double Counting</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="kmos_speed.html"
                         title="previous chapter">How the kmos kMC algorithm works</a></p>
@@ -83,24 +93,26 @@
             
   <div class="section" id="the-process-syntax">
 <span id="proc-mini-language"></span><h1>The Process Syntax<a class="headerlink" href="#the-process-syntax" title="Permalink to this headline">¶</a></h1>
-<p>A process in kMC language can be uniquely defined by a
-configuration that has to exist <cite>before</cite> the process,
+<p>In kMC language a process is uniquely defined by a
+configuration <cite>before</cite> the process is executed,
 a configuration <cite>after</cite> the process is executed,
-and a rate constant. Here we use this model for the
-description of a process by giving each process a :
-- condition_list
-- action_list
-- rate_constant</p>
+and a rate constant. Here this model is used to
+define a process by giving it a :</p>
+<ul class="simple">
+<li>condition_list</li>
+<li>action_list</li>
+<li>rate_constant</li>
+</ul>
 <p>As you might guess each <cite>condition</cite> corresponds to one
 <cite>before</cite>, and each <cite>action</cite> coresponds to one <cite>after</cite>.
 In fact conditions and actions are actually of the same
-class: each condition and action consists of a coordinate
-and a species which has to be or will be at the coordinate.
-This model of process definition also means that each
-process in one unit cell has to be defined explicitly.
-So typically one a single crystal surface one
-will have not one diffusion per species but as many
-as there are degenerate direction :</p>
+class or data type: each condition and action consists of
+a coordinate and a species which has to <cite>be</cite> or <cite>will be</cite> at
+the coordinate.  This model of process definition also
+means that each process in one unit cell has to be
+defined explicitly.  Typically one a single crystal
+surface one will have not one diffusion per species but
+as many as there are equivalent directions :</p>
 <blockquote>
 <ul class="simple">
 <li>species_diffusion_right</li>
@@ -109,24 +121,90 @@ as there are degenerate direction :</p>
 <li>species_diffusion_down</li>
 </ul>
 </blockquote>
-<p>while this seems like a lot of work, it allows for
-a very clean definition and you can use things like
-distance measure to abstract these case as you will see
+<p>while this seems like a lot of work to define that
+many processes, it allows for a very clean and simple
+definition of a process itself.  Later you can use
+geometric measures to abstract these cases as you will see
 further down.</p>
+<div class="section" id="adsorption">
+<h2>Adsorption<a class="headerlink" href="#adsorption" title="Permalink to this headline">¶</a></h2>
 <p>Let&#8217;s start with a very simple and basic process: molecular
-adsorption of a gas phase species, let call it <tt class="docutils literal"><span class="pre">A</span></tt> on a surface site. For this
-we need a species</p>
+adsorption of a gas phase species, let call it <tt class="docutils literal"><span class="pre">A</span></tt> on a
+surface site. For this we need a species</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">kmos.types</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="n">species</span> <span class="o">=</span> <span class="n">Species</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;A&#39;</span><span class="p">)</span>
+<span class="n">pt</span> <span class="o">=</span> <span class="n">Project</span><span class="p">()</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">Species</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;A&#39;</span><span class="p">)</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">add_species</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+
+<span class="n">empty</span> <span class="o">=</span> <span class="n">Species</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">add_species</span><span class="p">(</span><span class="n">empty</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>and the coordinate of a surface site</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span> <span class="o">=</span> <span class="n">Project</span><span class="p">()</span>
-<span class="n">layer</span> <span class="o">=</span> <span class="n">Layer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;default&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">layer</span> <span class="o">=</span> <span class="n">Layer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;default&#39;</span><span class="p">)</span>
 <span class="n">pt</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
 <span class="n">layer</span><span class="o">.</span><span class="n">sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Site</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;a&#39;</span><span class="p">))</span>
 <span class="n">coord</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">generate_coord</span><span class="p">(</span><span class="s">&#39;a.(0,0,0).default&#39;</span><span class="p">)</span>
 </pre></div>
+</div>
+<p>which is for now all we need to define an adsorption
+process:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">adsorption</span> <span class="o">=</span> <span class="n">Proces</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;adsorption_A_a&#39;</span><span class="p">,</span>
+                    <span class="n">condition_list</span><span class="o">=</span><span class="p">[</span><span class="n">Condition</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span>
+                                              <span class="n">species</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)],</span>
+                    <span class="n">action_list</span><span class="o">=</span><span class="p">[</span><span class="n">Action</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span>
+                                        <span class="n">species</span><span class="o">=</span><span class="s">&#39;A&#39;</span><span class="p">)])</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">add_process</span><span class="p">(</span><span class="n">adsorption</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now this wasn&#8217;t hard, was it?</p>
+</div>
+<div class="section" id="diffusion">
+<h2>Diffusion<a class="headerlink" href="#diffusion" title="Permalink to this headline">¶</a></h2>
+<p>Let&#8217;s move to another example, namely the <cite>diffusion</cite> of
+a particle to the next unit cell in the y-direction.
+You first need the coordinate of the final site</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">final</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">generate_coord</span><span class="p">(</span><span class="s">&#39;a.(0,1,0).default&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and you are good to go</p>
+<div class="highlight-python"><pre>diffusion_up = Process('diffusion_A_up',
+                       condition_list=[Condition(coord=coord,
+                                                 species='A'),
+                                       Condition(coord=final,
+                                                 species='empty')],
+                       condition_list=[Condition(coord=coord,
+                                                 species='empty'),
+                                       Condition(coord=final,
+                                                 species='A')],
+pt.add_process(diffusion_up)</pre>
+</div>
+<p>You can complicated this <cite>ad infinitum</cite> but you now no elements
+needed to define processes.</p>
+</div>
+<div class="section" id="avoid-double-counting">
+<h2>Avoid Double Counting<a class="headerlink" href="#avoid-double-counting" title="Permalink to this headline">¶</a></h2>
+<p>Finally a word of warning: <cite>double counting</cite> is a phenomenon
+sometimes encountered for those process where there is more
+than one equivalent direction for a process and the coordinates
+within the process are also equivalent. Think of dissociative
+oxygen adsorption. Novices typically collect all possible
+directions (e.g. right, up, left, down) and then define this
+process for each direction. Later they realize that in fact
+they <cite>double counted</cite> the process because e.g. adsorption_up is
+the same processes as adsorption_down, just executed from one
+site above or below. Then they compensate by dividing each
+adsorption rate constant by 2. Later realizing that they
+have to do the same for desorption. Ok, I have done this
+and believe me it is really bad when you are looking for an
+error if at the same you already divide the unit cell size
+by 2 for some reason.</p>
+<p>The smart way out is to save the pain and to avoid double
+counting completely from the beginning and just think
+how many process are geometrically inequivalent in the
+unit cell. A simple trick is to only consider processes
+in the <cite>positive</cite> directions.</p>
 </div>
 </div>
 
