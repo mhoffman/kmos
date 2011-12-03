@@ -53,6 +53,12 @@ kmos.run
 ^^^^^^^^
 
 .. automodule:: kmos.run
+  
+.. autoclass:: kmos.run.KMC_Model
+  :members: deallocate, do_steps, get_atoms, get_occupation_header,
+            get_tof_header, parameters, print_rates, put, rate_constants,
+            run, start, view, xml
+  
 
 kmos.view
 ^^^^^^^^^

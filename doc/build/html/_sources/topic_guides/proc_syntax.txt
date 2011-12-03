@@ -23,8 +23,7 @@ This model of process definition also means that each
 process in one unit cell has to be defined explicitly.
 So typically one a single crystal surface one
 will have not one diffusion per species but as many
-as there are degenerate directions :
-
+as there are degenerate direction :
   - species_diffusion_right
   - species_diffusion_up
   - species_diffusion_left

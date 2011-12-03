@@ -1,0 +1,163 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>The Process Syntax &mdash; kmos v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
+    <link rel="up" title="Topic Guides" href="index.html" />
+    <link rel="next" title="The Site/Coordinate Syntax" href="coord_syntax.html" />
+    <link rel="prev" title="How the kmos kMC algorithm works" href="kmos_speed.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="coord_syntax.html" title="The Site/Coordinate Syntax"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="kmos_speed.html" title="How the kmos kMC algorithm works"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Topic Guides</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="kmos_speed.html"
+                        title="previous chapter">How the kmos kMC algorithm works</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="coord_syntax.html"
+                        title="next chapter">The Site/Coordinate Syntax</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/topic_guides/proc_syntax.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="the-process-syntax">
+<span id="proc-mini-language"></span><h1>The Process Syntax<a class="headerlink" href="#the-process-syntax" title="Permalink to this headline">¶</a></h1>
+<p>A process in kMC language can be uniquely defined by a
+configuration that has to exist <cite>before</cite> the process,
+a configuration <cite>after</cite> the process is executed,
+and a rate constant. Here we use this model for the
+description of a process by giving each process a :
+- condition_list
+- action_list
+- rate_constant</p>
+<p>As you might guess each <cite>condition</cite> corresponds to one
+<cite>before</cite>, and each <cite>action</cite> coresponds to one <cite>after</cite>.
+In fact conditions and actions are actually of the same
+class: each condition and action consists of a coordinate
+and a species which has to be or will be at the coordinate.
+This model of process definition also means that each
+process in one unit cell has to be defined explicitly.
+So typically one a single crystal surface one
+will have not one diffusion per species but as many
+as there are degenerate direction :</p>
+<blockquote>
+<ul class="simple">
+<li>species_diffusion_right</li>
+<li>species_diffusion_up</li>
+<li>species_diffusion_left</li>
+<li>species_diffusion_down</li>
+</ul>
+</blockquote>
+<p>while this seems like a lot of work, it allows for
+a very clean definition and you can use things like
+distance measure to abstract these case as you will see
+further down.</p>
+<p>Let&#8217;s start with a very simple and basic process: molecular
+adsorption of a gas phase species, let call it <tt class="docutils literal"><span class="pre">A</span></tt> on a surface site. For this
+we need a species</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">kmos.types</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">species</span> <span class="o">=</span> <span class="n">Species</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;A&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and the coordinate of a surface site</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span> <span class="o">=</span> <span class="n">Project</span><span class="p">()</span>
+<span class="n">layer</span> <span class="o">=</span> <span class="n">Layer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;default&#39;</span><span class="p">)</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
+<span class="n">layer</span><span class="o">.</span><span class="n">sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Site</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;a&#39;</span><span class="p">))</span>
+<span class="n">coord</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">generate_coord</span><span class="p">(</span><span class="s">&#39;a.(0,0,0).default&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="coord_syntax.html" title="The Site/Coordinate Syntax"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="kmos_speed.html" title="How the kmos kMC algorithm works"
+             >previous</a> |</li>
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Topic Guides</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009-2011, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+    </div>
+  </body>
+</html>
