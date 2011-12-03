@@ -97,7 +97,7 @@ and you are good to go ::
                                                    species='A')],
   pt.add_process(diffusion_up)
 
-You can complicated this `ad infinitum` but you now no elements
+You can complicated this `ad infinitum` but you know all elements
 needed to define processes.
 
 
@@ -127,3 +127,8 @@ unit cell. A simple trick is to only consider processes
 in the `positive` directions.
 
 
+Taking It Home
+^^^^^^^^^^^^^^^
+
+- A process consists of conditions, actions and a rate constant
+- `double counting` is best avoided from the beginning

@@ -205,15 +205,24 @@ there in mid-air that is because you have no background setup, yet.
 Choose a transition metal of your choice and add it to the
 lattice setup for extra credit :-).
 
+Taking it home
+^^^^^^^^^^^^^^^
+
+Despite its simplicity you have now seen all elements needed
+to implement a kMC model and hopefully gotten a first feeling for
+the workflow.
+
+
+
 .. [#proc_minilanguage]  You will have describe all processes
                          in terms of  `conditions` and
                          `actions` and you find a more complete
                          description can be found in the
                          :ref:`topic guide <proc_mini_language>`
-                         to the process description mini language.
+                         to the process description syntax.
 
 .. [#coord_minilanguage] The description of coordinates follows
                          the simple syntax of the coordinate
-                         mini language and the
+                         syntax and the
                          :ref:`topic guide <coord_mini_language>`
                          explains how that works.

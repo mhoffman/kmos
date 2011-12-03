@@ -130,3 +130,5 @@ parameter_queue
   at runtime. It expects a parameters object
   such as the one in model.parameters and
   automatically updates all rate constants.
+
+.. TODO:: Finish with sample script of running model in parallel
