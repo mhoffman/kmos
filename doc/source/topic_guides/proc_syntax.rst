@@ -13,7 +13,7 @@ description of a process by giving each process a :
 -rate_constant
 
 
-As you might guess each `condition` corresponds to one 
+As you might guess each `condition` corresponds to one
 `before`, and each `action` coresponds to one `after`.
 In fact conditions and actions are actually of the same
 class: each condition and action consists of a coordinate
