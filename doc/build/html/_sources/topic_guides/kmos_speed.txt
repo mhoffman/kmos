@@ -29,3 +29,5 @@ updates the database of available processes which cost additional
 overhead. However this overhead is independent of the system's size
 and only scales with the degree of interaction between sites, which
 is seems hard to define in general terms.
+
+.. TODO:: describe translation algorithm

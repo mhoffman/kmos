@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
     <link rel="next" title="Trouble Shooting" href="../troubleshooting/index.html" />
-    <link rel="prev" title="The Coordinate Mini Language" href="../topic_guides/coord_minilanguage.html" /> 
+    <link rel="prev" title="The Site/Coordinate Syntax" href="../topic_guides/coord_syntax.html" /> 
   </head>
   <body>
     <div class="related">
@@ -40,7 +40,7 @@
           <a href="../troubleshooting/index.html" title="Trouble Shooting"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="../topic_guides/coord_minilanguage.html" title="The Coordinate Mini Language"
+          <a href="../topic_guides/coord_syntax.html" title="The Site/Coordinate Syntax"
              accesskey="P">previous</a> |</li>
         <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
       </ul>
@@ -113,11 +113,14 @@
 </li>
 <li><a class="reference internal" href="#kmos-lattice">kmos/lattice</a><ul>
 <li><a class="reference internal" href="#lattice-allocate-system">lattice/allocate_system</a></li>
+<li><a class="reference internal" href="#lattice-calculate-lattice2nr">lattice/calculate_lattice2nr</a></li>
+<li><a class="reference internal" href="#lattice-calculate-nr2lattice">lattice/calculate_nr2lattice</a></li>
 <li><a class="reference internal" href="#lattice-deallocate-system">lattice/deallocate_system</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#kmos-proclist">kmos/proclist</a><ul>
 <li><a class="reference internal" href="#proclist-do-kmc-step">proclist/do_kmc_step</a></li>
+<li><a class="reference internal" href="#proclist-get-kmc-step">proclist/get_kmc_step</a></li>
 <li><a class="reference internal" href="#proclist-get-occupation">proclist/get_occupation</a></li>
 <li><a class="reference internal" href="#proclist-init">proclist/init</a></li>
 <li><a class="reference internal" href="#proclist-initialize-state">proclist/initialize_state</a></li>
@@ -131,8 +134,8 @@
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="../topic_guides/coord_minilanguage.html"
-                        title="previous chapter">The Coordinate Mini Language</a></p>
+  <p class="topless"><a href="../topic_guides/coord_syntax.html"
+                        title="previous chapter">The Site/Coordinate Syntax</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="../troubleshooting/index.html"
                         title="next chapter">Trouble Shooting</a></p>
@@ -488,6 +491,92 @@ multiprocessing module. This mode is designed for use with
 a GUI so that the CPU intensive kMC integration can run at
 full throttle without impeding the front-end. Interaction with
 the model happens through Queues.</p>
+<dl class="class">
+<dt id="kmos.run.KMC_Model">
+<em class="property">class </em><tt class="descclassname">kmos.run.</tt><tt class="descname">KMC_Model</tt><big>(</big><em>image_queue=None</em>, <em>parameter_queue=None</em>, <em>signal_queue=None</em>, <em>size=None</em>, <em>system_name='kmc_model'</em>, <em>banner=True</em>, <em>print_rates=True</em>, <em>autosend=True</em><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model" title="Permalink to this definition">¶</a></dt>
+<dd><p>API Front-end to initialize and run a kMC model using python bindings.
+Depending on the constructor cal the model can be run either via directory
+calls or in a separate processes access via multiprocessing.Queues.
+Only one model instance can exist simultaneously per process.</p>
+<dl class="method">
+<dt id="kmos.run.KMC_Model.deallocate">
+<tt class="descname">deallocate</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.deallocate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deallocate all arrays that are allocated
+by the Fortran module. This needs to be called
+whenever more than one simulation is started
+from one process.</p>
+<p>Note that the currenty state and history of
+the system is lost after calling this method.</p>
+<p>Note: explicit invocation was chosen over the
+__del__ method because there seems to easy
+portable way to control garbage collection.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kmos.run.KMC_Model.do_steps">
+<tt class="descname">do_steps</tt><big>(</big><em>n=10000</em><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.do_steps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Propagate the model <cite>n</cite> steps.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kmos.run.KMC_Model.get_atoms">
+<tt class="descname">get_atoms</tt><big>(</big><em>geometry=True</em><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.get_atoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an ASE Atoms object with additional 
+information such as coverage and Turn-over-frequencies
+attached.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kmos.run.KMC_Model.get_occupation_header">
+<tt class="descname">get_occupation_header</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.get_occupation_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the names of the fields returned by
+self.get_atoms().occupation.
+Useful for the header line of an ASCII output.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kmos.run.KMC_Model.get_tof_header">
+<tt class="descname">get_tof_header</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.get_tof_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the names of the fields returned by
+self.get_atoms().tof_data.
+Useful for the header line of an ASCII output.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kmos.run.KMC_Model.put">
+<tt class="descname">put</tt><big>(</big><em>site</em>, <em>species</em><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.put" title="Permalink to this definition">¶</a></dt>
+<dd><p>Puts a certain species at a certain site.
+(Not implemented)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kmos.run.KMC_Model.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs the model indefinitely. To control the
+simulations, model must have been initialized
+with proper Queues.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kmos.run.KMC_Model.start">
+<tt class="descname">start</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start child process</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kmos.run.KMC_Model.view">
+<tt class="descname">view</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visualize the current configuration of the model using ASE ag.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kmos.run.KMC_Model.xml">
+<tt class="descname">xml</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.xml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the XML representation that this model was created from.</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-kmos.view">
 <span id="kmos-view"></span><h3>kmos.view<a class="headerlink" href="#module-kmos.view" title="Permalink to this headline">¶</a></h3>
@@ -495,7 +584,7 @@ the model happens through Queues.</p>
 kmc_model.so and a kmc_settings.py in the import path.</p>
 <dl class="class">
 <dt id="kmos.view.KMC_Viewer">
-<em class="property">class </em><tt class="descclassname">kmos.view.</tt><tt class="descname">KMC_Viewer</tt><a class="headerlink" href="#kmos.view.KMC_Viewer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">kmos.view.</tt><tt class="descname">KMC_Viewer</tt><big>(</big><em>model=None</em><big>)</big><a class="headerlink" href="#kmos.view.KMC_Viewer" title="Permalink to this definition">¶</a></dt>
 <dd><p>A graphical front-end to run, manipulate
 and view a kMC model.</p>
 </dd></dl>
@@ -1038,6 +1127,27 @@ checks whether mapping is consistent</p>
 <p><tt class="docutils literal"><span class="pre">none</span></tt></p>
 </blockquote>
 </div>
+<div class="section" id="lattice-calculate-lattice2nr">
+<h4>lattice/calculate_lattice2nr<a class="headerlink" href="#lattice-calculate-lattice2nr" title="Permalink to this headline">¶</a></h4>
+<blockquote>
+<p>Maps all lattice coordinates onto a continuous
+set of integer <img class="math" src="../_images/math/be7459e2d0b8d4daf6242fc283f26a20d9d23c75.png" alt="\in [1,volume]"/></p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">site</span></tt> integer array of size (4) a lattice coordinate</li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="lattice-calculate-nr2lattice">
+<h4>lattice/calculate_nr2lattice<a class="headerlink" href="#lattice-calculate-nr2lattice" title="Permalink to this headline">¶</a></h4>
+<blockquote>
+<p>Maps a continuous set of
+of integers <img class="math" src="../_images/math/be7459e2d0b8d4daf6242fc283f26a20d9d23c75.png" alt="\in [1,volume]"/> to a
+4-tuple representing a lattice coordinate</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">nr</span></tt> integer representing the site index</li>
+</ul>
+</blockquote>
+</div>
 <div class="section" id="lattice-deallocate-system">
 <h4>lattice/deallocate_system<a class="headerlink" href="#lattice-deallocate-system" title="Permalink to this headline">¶</a></h4>
 <blockquote>
@@ -1054,6 +1164,13 @@ Implements the kMC process list.</blockquote>
 <h4>proclist/do_kmc_step<a class="headerlink" href="#proclist-do-kmc-step" title="Permalink to this headline">¶</a></h4>
 <blockquote>
 <p>Performs exactly one kMC step.</p>
+<p><tt class="docutils literal"><span class="pre">none</span></tt></p>
+</blockquote>
+</div>
+<div class="section" id="proclist-get-kmc-step">
+<h4>proclist/get_kmc_step<a class="headerlink" href="#proclist-get-kmc-step" title="Permalink to this headline">¶</a></h4>
+<blockquote>
+<p>Determines next step without executing it.</p>
 <p><tt class="docutils literal"><span class="pre">none</span></tt></p>
 </blockquote>
 </div>
@@ -1124,7 +1241,7 @@ for the given layer.</p>
           <a href="../troubleshooting/index.html" title="Trouble Shooting"
              >next</a> |</li>
         <li class="right" >
-          <a href="../topic_guides/coord_minilanguage.html" title="The Coordinate Mini Language"
+          <a href="../topic_guides/coord_syntax.html" title="The Site/Coordinate Syntax"
              >previous</a> |</li>
         <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
       </ul>

@@ -4,7 +4,7 @@ The Site/Coordinate Syntax
 ============================
 
 In the atomistic kMC simulations pursued here
-one defines processes in terms of sites
+one defines processes in terms of sites 
 on some more or less fixed lattice.
 This reflects the physical observation that
 molecules on surfaces adsorb on very specific
@@ -48,7 +48,7 @@ is as follows ::
 
 
 The second part is to generate the coordinates that are
-used in the process description.
+used in the process description. 
 
 Manual generation
 ^^^^^^^^^^^^^^^^^

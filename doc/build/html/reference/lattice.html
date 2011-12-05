@@ -43,6 +43,8 @@
   <ul>
 <li><a class="reference internal" href="#">kmos/lattice</a><ul>
 <li><a class="reference internal" href="#lattice-allocate-system">lattice/allocate_system</a></li>
+<li><a class="reference internal" href="#lattice-calculate-lattice2nr">lattice/calculate_lattice2nr</a></li>
+<li><a class="reference internal" href="#lattice-calculate-nr2lattice">lattice/calculate_nr2lattice</a></li>
 <li><a class="reference internal" href="#lattice-deallocate-system">lattice/deallocate_system</a></li>
 </ul>
 </li>
@@ -90,6 +92,27 @@ Using this module each site can be addressed with 4-tuple
 <p>Allocates system, fills mapping cache, and
 checks whether mapping is consistent</p>
 <p><tt class="docutils literal"><span class="pre">none</span></tt></p>
+</blockquote>
+</div>
+<div class="section" id="lattice-calculate-lattice2nr">
+<h2>lattice/calculate_lattice2nr<a class="headerlink" href="#lattice-calculate-lattice2nr" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<p>Maps all lattice coordinates onto a continuous
+set of integer <img class="math" src="../_images/math/be7459e2d0b8d4daf6242fc283f26a20d9d23c75.png" alt="\in [1,volume]"/></p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">site</span></tt> integer array of size (4) a lattice coordinate</li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="lattice-calculate-nr2lattice">
+<h2>lattice/calculate_nr2lattice<a class="headerlink" href="#lattice-calculate-nr2lattice" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<p>Maps a continuous set of
+of integers <img class="math" src="../_images/math/be7459e2d0b8d4daf6242fc283f26a20d9d23c75.png" alt="\in [1,volume]"/> to a
+4-tuple representing a lattice coordinate</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">nr</span></tt> integer representing the site index</li>
+</ul>
 </blockquote>
 </div>
 <div class="section" id="lattice-deallocate-system">

@@ -8,8 +8,8 @@ Topic Guides
   workflows
   data_models
   kmos_speed
-  proc_minilanguage
-  coord_minilanguage
+  proc_syntax
+  coord_syntax
 
 ..  Convergence Tests
 ..  The Editor Frontend

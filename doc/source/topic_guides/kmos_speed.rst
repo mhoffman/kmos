@@ -32,3 +32,5 @@ is seems hard to define in general terms.
 
 
 .. TODO:: explain algorithm underlying kmos.base
+
+.. TODO:: describe translation algorithm

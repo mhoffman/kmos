@@ -62,6 +62,7 @@
 <li><a class="reference internal" href="#construct-the-model">Construct the model</a></li>
 <li><a class="reference internal" href="#populate-process-list-and-parameter-list">Populate process list and parameter list</a></li>
 <li><a class="reference internal" href="#export-save-compile">Export, save, compile</a></li>
+<li><a class="reference internal" href="#taking-it-home">Taking it home</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#a-first-kmc-model-the-gui-way">A first kMC Model&#8211;the GUI way</a></li>
@@ -367,6 +368,12 @@ Now run:</p>
 there in mid-air that is because you have no background setup, yet.
 Choose a transition metal of your choice and add it to the
 lattice setup for extra credit :-).</p>
+</div>
+<div class="section" id="taking-it-home">
+<h3>Taking it home<a class="headerlink" href="#taking-it-home" title="Permalink to this headline">¶</a></h3>
+<p>Despite its simplicity you have now seen all elements needed
+to implement a kMC model and hopefully gotten a first feeling for
+the workflow.</p>
 <table class="docutils footnote" frame="void" id="proc-minilanguage" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
@@ -374,8 +381,8 @@ lattice setup for extra credit :-).</p>
 in terms of  <cite>conditions</cite> and
 <cite>actions</cite> and you find a more complete
 description can be found in the
-<a class="reference internal" href="../topic_guides/proc_minilanguage.html#proc-mini-language"><em>topic guide</em></a>
-to the process description mini language.</td></tr>
+<a class="reference internal" href="../topic_guides/proc_syntax.html#proc-mini-language"><em>topic guide</em></a>
+to the process description syntax.</td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="coord-minilanguage" rules="none">
@@ -383,8 +390,8 @@ to the process description mini language.</td></tr>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id2">[3]</a></td><td>The description of coordinates follows
 the simple syntax of the coordinate
-mini language and the
-<a class="reference internal" href="../topic_guides/coord_minilanguage.html#coord-mini-language"><em>topic guide</em></a>
+syntax and the
+<a class="reference internal" href="../topic_guides/coord_syntax.html#coord-mini-language"><em>topic guide</em></a>
 explains how that works.</td></tr>
 </tbody>
 </table>
@@ -550,6 +557,10 @@ at runtime. It expects a parameters object
 such as the one in model.parameters and
 automatically updates all rate constants.</dd>
 </dl>
+<div class="admonition-todo admonition " id="index-4">
+<p class="first admonition-title">Todo</p>
+<p class="last">Finish with sample script of running model in parallel</p>
+</div>
 </div>
 <div class="section" id="development">
 <h2>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h2>

@@ -1,0 +1,249 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>The Process Syntax &mdash; kmos v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
+    <link rel="up" title="Topic Guides" href="index.html" />
+    <link rel="next" title="The Site/Coordinate Syntax" href="coord_syntax.html" />
+    <link rel="prev" title="How the kmos kMC algorithm works" href="kmos_speed.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="coord_syntax.html" title="The Site/Coordinate Syntax"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="kmos_speed.html" title="How the kmos kMC algorithm works"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Topic Guides</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">The Process Syntax</a><ul>
+<li><a class="reference internal" href="#adsorption">Adsorption</a></li>
+<li><a class="reference internal" href="#diffusion">Diffusion</a></li>
+<li><a class="reference internal" href="#avoid-double-counting">Avoid Double Counting</a></li>
+<li><a class="reference internal" href="#taking-it-home">Taking It Home</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="kmos_speed.html"
+                        title="previous chapter">How the kmos kMC algorithm works</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="coord_syntax.html"
+                        title="next chapter">The Site/Coordinate Syntax</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/topic_guides/proc_syntax.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="the-process-syntax">
+<span id="proc-mini-language"></span><h1>The Process Syntax<a class="headerlink" href="#the-process-syntax" title="Permalink to this headline">¶</a></h1>
+<p>In kMC language a process is uniquely defined by a
+configuration <cite>before</cite> the process is executed,
+a configuration <cite>after</cite> the process is executed,
+and a rate constant. Here this model is used to
+define a process by giving it a :</p>
+<ul class="simple">
+<li>condition_list</li>
+<li>action_list</li>
+<li>rate_constant</li>
+</ul>
+<p>As you might guess each <cite>condition</cite> corresponds to one
+<cite>before</cite>, and each <cite>action</cite> coresponds to one <cite>after</cite>.
+In fact conditions and actions are actually of the same
+class or data type: each condition and action consists of
+a coordinate and a species which has to <cite>be</cite> or <cite>will be</cite> at
+the coordinate.  This model of process definition also
+means that each process in one unit cell has to be
+defined explicitly.  Typically one a single crystal
+surface one will have not one diffusion per species but
+as many as there are equivalent directions :</p>
+<blockquote>
+<ul class="simple">
+<li>species_diffusion_right</li>
+<li>species_diffusion_up</li>
+<li>species_diffusion_left</li>
+<li>species_diffusion_down</li>
+</ul>
+</blockquote>
+<p>while this seems like a lot of work to define that
+many processes, it allows for a very clean and simple
+definition of a process itself.  Later you can use
+geometric measures to abstract these cases as you will see
+further down.</p>
+<div class="section" id="adsorption">
+<h2>Adsorption<a class="headerlink" href="#adsorption" title="Permalink to this headline">¶</a></h2>
+<p>Let&#8217;s start with a very simple and basic process: molecular
+adsorption of a gas phase species, let call it <tt class="docutils literal"><span class="pre">A</span></tt> on a
+surface site. For this we need a species</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">kmos.types</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">pt</span> <span class="o">=</span> <span class="n">Project</span><span class="p">()</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">Species</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;A&#39;</span><span class="p">)</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">add_species</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+
+<span class="n">empty</span> <span class="o">=</span> <span class="n">Species</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">add_species</span><span class="p">(</span><span class="n">empty</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and the coordinate of a surface site</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">layer</span> <span class="o">=</span> <span class="n">Layer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;default&#39;</span><span class="p">)</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
+<span class="n">layer</span><span class="o">.</span><span class="n">sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Site</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;a&#39;</span><span class="p">))</span>
+<span class="n">coord</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">generate_coord</span><span class="p">(</span><span class="s">&#39;a.(0,0,0).default&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>which is for now all we need to define an adsorption
+process:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">adsorption</span> <span class="o">=</span> <span class="n">Proces</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;adsorption_A_a&#39;</span><span class="p">,</span>
+                    <span class="n">condition_list</span><span class="o">=</span><span class="p">[</span><span class="n">Condition</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span>
+                                              <span class="n">species</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)],</span>
+                    <span class="n">action_list</span><span class="o">=</span><span class="p">[</span><span class="n">Action</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span>
+                                        <span class="n">species</span><span class="o">=</span><span class="s">&#39;A&#39;</span><span class="p">)])</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">add_process</span><span class="p">(</span><span class="n">adsorption</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now this wasn&#8217;t hard, was it?</p>
+</div>
+<div class="section" id="diffusion">
+<h2>Diffusion<a class="headerlink" href="#diffusion" title="Permalink to this headline">¶</a></h2>
+<p>Let&#8217;s move to another example, namely the <cite>diffusion</cite> of
+a particle to the next unit cell in the y-direction.
+You first need the coordinate of the final site</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">final</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">generate_coord</span><span class="p">(</span><span class="s">&#39;a.(0,1,0).default&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and you are good to go</p>
+<div class="highlight-python"><pre>diffusion_up = Process('diffusion_A_up',
+                       condition_list=[Condition(coord=coord,
+                                                 species='A'),
+                                       Condition(coord=final,
+                                                 species='empty')],
+                       condition_list=[Condition(coord=coord,
+                                                 species='empty'),
+                                       Condition(coord=final,
+                                                 species='A')],
+pt.add_process(diffusion_up)</pre>
+</div>
+<p>You can complicated this <cite>ad infinitum</cite> but you know all elements
+needed to define processes.</p>
+</div>
+<div class="section" id="avoid-double-counting">
+<h2>Avoid Double Counting<a class="headerlink" href="#avoid-double-counting" title="Permalink to this headline">¶</a></h2>
+<p>Finally a word of warning: <cite>double counting</cite> is a phenomenon
+sometimes encountered for those process where there is more
+than one equivalent direction for a process and the coordinates
+within the process are also equivalent. Think of dissociative
+oxygen adsorption. Novices typically collect all possible
+directions (e.g. right, up, left, down) and then define this
+process for each direction. Later they realize that in fact
+they <cite>double counted</cite> the process because e.g. adsorption_up is
+the same processes as adsorption_down, just executed from one
+site above or below. Then they compensate by dividing each
+adsorption rate constant by 2. Later realizing that they
+have to do the same for desorption. Ok, I have done this
+and believe me it is really bad when you are looking for an
+error if at the same you already divide the unit cell size
+by 2 for some reason.</p>
+<p>The smart way out is to save the pain and to avoid double
+counting completely from the beginning and just think
+how many process are geometrically inequivalent in the
+unit cell. A simple trick is to only consider processes
+in the <cite>positive</cite> directions.</p>
+</div>
+<div class="section" id="taking-it-home">
+<h2>Taking It Home<a class="headerlink" href="#taking-it-home" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>A process consists of conditions, actions and a rate constant</li>
+<li><cite>double counting</cite> is best avoided from the beginning</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="coord_syntax.html" title="The Site/Coordinate Syntax"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="kmos_speed.html" title="How the kmos kMC algorithm works"
+             >previous</a> |</li>
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Topic Guides</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009-2011, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+    </div>
+  </body>
+</html>

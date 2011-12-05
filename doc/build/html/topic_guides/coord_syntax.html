@@ -1,0 +1,221 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>The Site/Coordinate Syntax &mdash; kmos v0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
+    <link rel="up" title="Topic Guides" href="index.html" />
+    <link rel="next" title="Reference" href="../reference/index.html" />
+    <link rel="prev" title="The Process Syntax" href="proc_syntax.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../reference/index.html" title="Reference"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="proc_syntax.html" title="The Process Syntax"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Topic Guides</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">The Site/Coordinate Syntax</a><ul>
+<li><a class="reference internal" href="#manual-generation">Manual generation</a></li>
+<li><a class="reference internal" href="#autogeneration-of-sets">Autogeneration of sets</a></li>
+<li><a class="reference internal" href="#taking-it-home">Taking it home</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="proc_syntax.html"
+                        title="previous chapter">The Process Syntax</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../reference/index.html"
+                        title="next chapter">Reference</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/topic_guides/coord_syntax.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="the-site-coordinate-syntax">
+<span id="coord-mini-language"></span><h1>The Site/Coordinate Syntax<a class="headerlink" href="#the-site-coordinate-syntax" title="Permalink to this headline">¶</a></h1>
+<p>In the atomistic kMC simulations pursued here
+one defines processes in terms of sites
+on some more or less fixed lattice.
+This reflects the physical observation that
+molecules on surfaces adsorb on very specific
+locations above a solid.</p>
+<p>To represent this in a computer program, we first need to
+make a small but crucial differentiation: namely the difference
+between the <em>sites</em> of a (surface) structure and the <em>coordinates</em>
+of a process. The difference is that a given structure contains
+each site defined exactly one, whereas a process may use the same
+site several times however in a different unit cell. So this
+differentation owes to the fact that we commonly simulate highly
+periodic structures.</p>
+<p>Ok, having this out of the way you start to define
+and use sites and coordinates. The minimum constructor for a
+site is</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">site</span> <span class="o">=</span> <span class="n">Site</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;site_name&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <tt class="docutils literal"><span class="pre">site_name</span></tt> can be a string without spaces and all names
+should be unique within one layer. Usually it is reasonable to
+add a position in relative coordinates right-away like so</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">site</span> <span class="o">=</span> <span class="n">Site</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;hollow&#39;</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="s">&#39;0.5 0.5 0.0&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>which would place the site at the bottom center of the cell. A direct
+benefit is that you can measure distances between coordinates
+later on to, e.g. select all nearest neighbor or next-nearest neighbor
+sites.</p>
+<p>A site can have some more attributes. Some of them are only needed
+in conjunction with GUI use. It is worth to know that each site
+can have one or more tags. This way one create types of site and
+conveniently select all sites with a one more tags. The syntax here
+is as follows</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">site</span> <span class="o">=</span> <span class="n">Site</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;hollow&#39;</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="s">&#39;0.5 0.5 0.0&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="s">&#39;tag1 tag2 ...&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The second part is to generate the coordinates that are
+used in the process description.</p>
+<div class="section" id="manual-generation">
+<h2>Manual generation<a class="headerlink" href="#manual-generation" title="Permalink to this headline">¶</a></h2>
+<p>To quickly generate single coordinates you can generate it
+from a Project like so</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">generate_coord</span><span class="p">(</span><span class="s">&#39;hollow.(0,0,0).layer_name&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Let&#8217;s look at the generation string. The general syntax is</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">site_name</span><span class="o">.</span><span class="n">offset</span><span class="o">.</span><span class="n">layer_name</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">site_name</span></tt> and the <tt class="docutils literal"><span class="pre">layer_name</span></tt> must have been defined before.
+The offset is a tuple of three integer numbers and specifies the relative
+unit cell of this coordinate. Of course this only becomes meaningful
+as soon as you use more than one coordinate in a process.</p>
+</div>
+<div class="section" id="autogeneration-of-sets">
+<h2>Autogeneration of sets<a class="headerlink" href="#autogeneration-of-sets" title="Permalink to this headline">¶</a></h2>
+<p>Often times it is more handy (less typing) to generate a larger set
+of coordinates at first and then select different subsets from it
+in a process definition. For this purpose you can use</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pset</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">generate_coord_set</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">],</span> <span class="n">layer_name</span><span class="o">=</span><span class="s">&#39;layer_name&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This collects all sites from the given layer and generates
+all coordinates in the first unit cell (<tt class="docutils literal"><span class="pre">offset=(1,1,1)</span></tt>)
+and all <tt class="docutils literal"><span class="pre">x</span></tt>, <tt class="docutils literal"><span class="pre">y</span></tt>, and <tt class="docutils literal"><span class="pre">z</span></tt> unit cells in the respective
+direction.</p>
+<p>To to select subsets in a readable way I suggest you list comprehensions
+like for example so</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">pset</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">x</span><span class="o">.</span><span class="n">offset</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="p">]</span>
+</pre></div>
+</div>
+<p>which again selects all sites in the first unit cell. Or to select all
+site tagged with <tt class="docutils literal"><span class="pre">foo</span></tt> you could use</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">pset</span> <span class="k">if</span> <span class="s">&#39;foo&#39;</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="p">]</span>
+</pre></div>
+</div>
+<p>or having defined a unit cell size and a site position your can measure
+real-space distances between coordinate like so</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">pos</span><span class="o">-</span><span class="n">y</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Or of course you can use any combination of the above.</p>
+</div>
+<div class="section" id="taking-it-home">
+<h2>Taking it home<a class="headerlink" href="#taking-it-home" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>site belong to the structure while coordinates belong to the process</li>
+<li>coordinates are generated from sites</li>
+<li>coordinate sets can be selected and chopped using list comprehensions</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../reference/index.html" title="Reference"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="proc_syntax.html" title="The Process Syntax"
+             >previous</a> |</li>
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Topic Guides</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009-2011, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+    </div>
+  </body>
+</html>
