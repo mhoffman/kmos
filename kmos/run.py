@@ -90,6 +90,7 @@ class KMC_Model(multiprocessing.Process):
         self.base = base
         self.lattice = lattice
         self.proclist = proclist
+        self.settings = settings
 
         proclist.init((self.size,) * int(lattice.model_dimension),
             system_name,
