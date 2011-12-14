@@ -19,6 +19,7 @@ sys.path.append('..')
 import optparse
 import os
 import shutil
+from glob import glob
 
 
 import kmos.types
@@ -41,16 +42,19 @@ def main():
         exit()
 
     xml_file = args[0]
-    export_dir = args[1]
+    export_dir = os.path.join(args[1], 'src')
 
     project = kmos.types.Project()
     project.import_xml_file(xml_file)
 
     kmos.io.export_source(project, export_dir)
 
+    cwd = os.path.abspath(os.curdir)
     if os.uname()[0] == 'Linux' and not options.source_only:
         os.chdir(export_dir)
         os.system("kmos-build")
+        for out in glob('kmc_*'):
+            shutil.move(out, '..')
 
 if __name__ == '__main__':
     main()

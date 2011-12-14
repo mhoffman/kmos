@@ -1024,7 +1024,7 @@ def export_source(project_tree, export_dir=None):
         export_dir = project_tree.meta.model_name
 
     if not os.path.exists(export_dir):
-        os.mkdir(export_dir)
+        os.makedirs(export_dir)
 
     # copy files
     cp_files = [os.path.join('fortran_src', 'assert.ppc'),
