@@ -1030,7 +1030,7 @@ def export_source(project_tree, export_dir=None):
     cp_files = [os.path.join('fortran_src', 'assert.ppc'),
                 os.path.join('fortran_src', 'base.f90'),
                 os.path.join('fortran_src', 'kind_values_f2py.f90'),
-                os.path.join('fortran_src', 'run_kmc.f90')]
+                ]
     exec_files = []
 
     for filename in cp_files + exec_files:
