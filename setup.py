@@ -1,5 +1,5 @@
 #!/usr/bin/python
-"""kMC modeling on steroids""""
+"""kMC modeling on steroids"""
 
 from distutils.core import setup
 
