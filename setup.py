@@ -1,4 +1,5 @@
 #!/usr/bin/python
+"""kMC modeling on steroids""""
 
 from distutils.core import setup
 
@@ -6,7 +7,23 @@ maintainer = 'Max J. Hoffmann'
 maintainer_email = 'mjhoffmann@gmail.com'
 author = 'Max J. Hoffmann'
 author_email = 'mjhoffmann@gmail.com'
-description = "kMC modeling on steroids"
+description =  __doc__
+classifiers = [
+        'Development Status :: 4 - Beta',
+        'Environment :: Console',
+        'Environment :: X11 Applications :: GTK',
+        'Intended Audience :: Science/Research',
+        'Intended Audience :: Developers',
+        'OSI Approved :: GNU General Public License (GPL)',
+        'Natural Language :: English',
+        'Operating System :: POSIX :: Linux',
+        'Programming Language :: Fortran',
+        'Programming Language :: Python',
+        'Topic :: Education',
+        'Topic :: Scientific/Engineering :: Chemistry',
+        'Topic :: Scientific/Engineering :: Physics',
+        'Topic :: Scientific/Engineering :: Visualization',
+              ]
 requires = [
                     'ase',
                     'cairo',
