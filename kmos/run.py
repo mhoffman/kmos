@@ -231,7 +231,7 @@ class KMC_Model(multiprocessing.Process):
         ase.visualize.view(self.get_atoms())
 
     def get_atoms(self, geometry=True):
-        """Return an ASE Atoms object with additional 
+        """Return an ASE Atoms object with additional
         information such as coverage and Turn-over-frequencies
         attached."""
 
@@ -350,12 +350,16 @@ class KMC_Model(multiprocessing.Process):
             if propagate:
                 proclist.run_proc_nr(nprocess, nsite)
 
+    def procstat_pprint(self):
+        for i, name in enumerate(sorted(self.settings.rate_constants.keys())):
+            print('%s : %.2e' % (name, self.base.get_procstat(i+1)))
+
 
 class Model_Parameters(object):
     """Holds all user defined parameters of a model in
     concise form. All user defined parameters can be
     accessed and set as attributes, like so ::
-    
+
         model.parameters.<parameter> = X.Y
     """
     def __init__(self, print_rates=True):
