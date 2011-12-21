@@ -351,8 +351,29 @@ class KMC_Model(multiprocessing.Process):
                 proclist.run_proc_nr(nprocess, nsite)
 
     def procstat_pprint(self):
+        """Print an overview view process names along with
+        the number of times it has been executed."""
         for i, name in enumerate(sorted(self.settings.rate_constants.keys())):
-            print('%s : %.2e' % (name, self.base.get_procstat(i+1)))
+            print('%s : %.4e' % (name, self.base.get_procstat(i+1)))
+
+    def procstat_normalized(self):
+        """Print an overview view process names along with
+        the number of times it has been executed divided by
+        the current rate constant times the kmc time.
+
+        Can help to find those processes which are kinetically
+        hindered."""
+        kmc_time = self.base.get_kmc_time()
+
+        for i, name in enumerate(sorted(self.settings.rate_constants.keys())):
+            if kmc_time:
+                print('%s : %.4e' % (name, self.base.get_procstat(i+1)/
+                                           self.lattice.system_size.prod()/
+                                           self.base.get_kmc_time()/
+                                           self.base.get_rate(i+1)))
+            else:
+                print('%s : %.4e' % (name, 0.))
+
 
 
 class Model_Parameters(object):
