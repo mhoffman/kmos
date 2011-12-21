@@ -101,9 +101,18 @@ def evaluate_rate_expression(rate_expr, parameters={}):
                             '%s' % sum([atomic_masses[atomic_numbers[symbol]]
                             for symbol in symbols])))
             elif token.startswith('mu_'):
+                # evaluate gas phase chemical potential if among
+                # available JANAF tables if from current temperature
+                # and corresponding partial pressure
                 from kmos import species
                 species_name = '_'.join(token.split('_')[1:])
                 if species_name in dir(species):
+                    if not 'T' in parameters:
+                        raise Exception('Need "T" in parameters to evaluate chemical potential.')
+
+                    if not ('p_%s' % species_name) in parameters:
+                        raise Exception('Need "p_%s" in parameters to evaluate chemical potential.' % species_name)
+
                     replaced_tokens.append((i, 'species.%s.mu(%s,%s)' % (
                                    species_name,
                                    parameters['T']['value'],
