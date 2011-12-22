@@ -30,4 +30,24 @@ overhead. However this overhead is independent of the system's size
 and only scales with the degree of interaction between sites, which
 is seems hard to define in general terms.
 
+The second way reason why it is fast is because you can formulate
+processes in a intuitive fashion and let kmos figure how to
+make fast running code out of it. So we save in human time and
+CPU time, which is essentially human time as well. Yay!
+
+To illustrate just how fast the algorithm is the graph below shows
+the CPU time needed to simulate 1 million kMC steps on a simple
+cubic lattice in 2 dimension with two reacting species and
+without lateral interaction. As this shows the CPU time
+spent per kMC step as nearly constant for up nearly 10^5 sites.
+
+.. figure:: ../img/benchmark.png
+  :align: center
+
+  Benchmark for a simple surface reaction model. All simulations have been
+  performed on a single CPU of Intel I7-2600K with 3.40 GHz clock speed
+  and 1333 MHz memory.
+
+.. TODO:: explain algorithm underlying kmos.base
+
 .. TODO:: describe translation algorithm

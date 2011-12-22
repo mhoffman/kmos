@@ -4,22 +4,6 @@ The Process Syntax
 =========================
 
 
-A process in kMC language is defined by a configuration that has to
-exist `before` the process, a configuration `after` the process
-is executed, and a rate constant. Here we use this model for the
-description of a process by giving each process a :
--condition_list
--action_list
--rate_constant
-
-
-As you might guess each `condition` corresponds to one
-`before`, and each `action` coresponds to one `after`.
-In fact conditions and actions are actually of the same
-class: each condition and action consists of a coordinate
-and a species which has to be or will be at the coordinate.
-
-.. TODO:: add single-layer description
 In kMC language a process is uniquely defined by a
 configuration `before` the process is executed,
 a configuration `after` the process is executed,
@@ -31,7 +15,7 @@ define a process by giving it a :
 - rate_constant
 
 
-As you might guess each `condition` corresponds to one 
+As you might guess each `condition` corresponds to one
 `before`, and each `action` coresponds to one `after`.
 In fact conditions and actions are actually of the same
 class or data type: each condition and action consists of
@@ -50,7 +34,7 @@ as many as there are equivalent directions :
 
 while this seems like a lot of work to define that
 many processes, it allows for a very clean and simple
-definition of a process itself.  Later you can use 
+definition of a process itself.  Later you can use
 geometric measures to abstract these cases as you will see
 further down.
 
@@ -103,11 +87,11 @@ You first need the coordinate of the final site ::
 and you are good to go ::
 
   diffusion_up = Process('diffusion_A_up',
-                         condition_list=[Condition(coord=coord, 
+                         condition_list=[Condition(coord=coord,
                                                    species='A'),
                                          Condition(coord=final,
                                                    species='empty')],
-                         condition_list=[Condition(coord=coord, 
+                         condition_list=[Condition(coord=coord,
                                                    species='empty'),
                                          Condition(coord=final,
                                                    species='A')],
@@ -129,7 +113,7 @@ directions (e.g. right, up, left, down) and then define this
 process for each direction. Later they realize that in fact
 they `double counted` the process because e.g. adsorption_up is
 the same processes as adsorption_down, just executed from one
-site above or below. Then they compensate by dividing each 
+site above or below. Then they compensate by dividing each
 adsorption rate constant by 2. Later realizing that they
 have to do the same for desorption. Ok, I have done this
 and believe me it is really bad when you are looking for an
