@@ -232,12 +232,12 @@ NO = Species(ase.atoms.Atoms('NO', [[0, 0, 0], [0, 0, 1.2]],
 NO2gas = Species(ase.atoms.Atoms(),
                  gas=True,
                  janaf_file='C-007.txt',
-                 names='NO2gas')
+                 name='NO2gas')
 
 NO3gas = Species(ase.atoms.Atoms(),
                  gas=True,
                  janaf_file='C-009.txt',
-                 names='NO3gas')
+                 name='NO3gas')
 
 COgas = Species(ase.atoms.Atoms('CO', [[0, 0, 0], [0, 0, 1.2]],
                                 cell=[10, 10, 10],),
@@ -276,4 +276,4 @@ NH3gas = Species(ase.atoms.Atoms(symbols='NH3',
 C2H4gas = Species(ase.atoms.Atoms(),
                   gas=True,
                   janaf_file='C-128.txt',
-                  names='C2H4gas')
+                  name='C2H4gas')
