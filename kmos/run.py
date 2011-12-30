@@ -37,7 +37,7 @@ the model happens through Queues.
 #    You should have received a copy of the GNU General Public License
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 
-__all__ = ['base','lattice','proclist','KMC_Model']
+__all__ = ['base', 'lattice', 'proclist', 'KMC_Model']
 
 from copy import deepcopy
 import multiprocessing
@@ -256,6 +256,7 @@ class KMC_Model(multiprocessing.Process):
                         atoms += lattice_repr
             atoms.set_cell(self.cell_size)
         else:
+
             class Expando():
                 pass
             atoms = Expando()
@@ -295,7 +296,7 @@ class KMC_Model(multiprocessing.Process):
         """Accepts a site index and return the site in human readable
         coordinates"""
         site = list(lattice.calculate_nr2lattice(n))
-        site[-1] = settings.site_names[site[-1]-1]
+        site[-1] = settings.site_names[site[-1] - 1]
         return site
 
     def post_mortem(self, steps=None, propagate=False, err_code=None):
@@ -306,32 +307,35 @@ class KMC_Model(multiprocessing.Process):
         if err_code is not None:
             old, new, found, err_site, steps = err_code
             err_site = self.nr2site(err_site)
-            if old >= 0 :
+            if old >= 0:
                 old = sorted(settings.representations.keys())[old]
             else:
                 old = 'NULL'
 
-            if new >= 0 :
+            if new >= 0:
                 new = sorted(settings.representations.keys())[new]
             else:
                 new = 'NULL'
 
-            if found >= 0 :
+            if found >= 0:
                 found = sorted(settings.representations.keys())[found]
             else:
                 found = 'NULL'
 
             self.do_steps(steps)
             nprocess, nsite = proclist.get_kmc_step()
-            process = list(sorted(settings.rate_constants.keys()))[nprocess-1]
+            process = list(
+                sorted(settings.rate_constants.keys()))[nprocess - 1]
             site = self.nr2site(nsite)
             print('=====================================')
             print('Post-Mortem Error Report')
             print('=====================================')
-            print('  kmos ran %s steps and the next process is "%s"' % (steps, process))
-            print('  on site %s,  however this causes oops' %  site)
+            print('  kmos ran %s steps and the next process is "%s"' %
+                    (steps, process))
+            print('  on site %s,  however this causes oops' % site)
             print('  on site %s because it trys to' % err_site)
-            print('  replace "%s" by "%s" but it will find "%s".' % (old, new, found))
+            print('  replace "%s" by "%s" but it will find "%s".' %
+                  (old, new, found))
             print('  Go fish!')
 
         else:
@@ -340,7 +344,8 @@ class KMC_Model(multiprocessing.Process):
             else:
                 steps = base.get_kmc_step()
             nprocess, nsite = proclist.get_kmc_step()
-            process = list(sorted(settings.rate_constants.keys()))[nprocess-1]
+            process = list(
+                sorted(settings.rate_constants.keys()))[nprocess - 1]
             site = self.nr2site(nsite)
 
             res = "kmos ran %s steps and next it will execute\n" % steps
@@ -354,7 +359,7 @@ class KMC_Model(multiprocessing.Process):
         """Print an overview view process names along with
         the number of times it has been executed."""
         for i, name in enumerate(sorted(self.settings.rate_constants.keys())):
-            print('%s : %.4e' % (name, self.base.get_procstat(i+1)))
+            print('%s : %.4e' % (name, self.base.get_procstat(i + 1)))
 
     def procstat_normalized(self):
         """Print an overview view process names along with
@@ -367,13 +372,28 @@ class KMC_Model(multiprocessing.Process):
 
         for i, name in enumerate(sorted(self.settings.rate_constants.keys())):
             if kmc_time:
-                print('%s : %.4e' % (name, self.base.get_procstat(i+1)/
-                                           self.lattice.system_size.prod()/
-                                           self.base.get_kmc_time()/
-                                           self.base.get_rate(i+1)))
+                print('%s : %.4e' % (name, self.base.get_procstat(i + 1) /
+                                           self.lattice.system_size.prod() /
+                                           self.base.get_kmc_time() /
+                                           self.base.get_rate(i + 1)))
             else:
                 print('%s : %.4e' % (name, 0.))
 
+    def rate_ratios(self):
+        ratios = []
+        for i, iname in enumerate(self.settings.rate_constants.keys()):
+            for j, jname in enumerate(self.settings.rate_constants.keys()):
+                if i != j:  # i == 1 -> 1., don't need that
+                    irate = self.base.get_rate(i + 1)
+                    jrate = self.base.get_rate(j + 1)
+                    ratios.append(('%s/%s' % (iname, jname), irate / jrate))
+
+        # sort ratios in descending order
+        ratios.sort(key=lambda x: -x[1])
+        res = ''
+        for label, ratio in ratios:
+            res.append('%s: %s\n' % (label, ratio))
+        return res
 
 
 class Model_Parameters(object):
@@ -436,8 +456,8 @@ def set_rate_constants(parameters=None, print_rates=True):
         try:
             base.set_rate_const(eval('proclist.%s' % proc.lower()), rate_const)
             if print_rates:
-                n = int(4*log(rate_const))
-                print('%30s: %.3e s^{-1}: %s' % (proc, rate_const, '#'*n))
+                n = int(4 * log(rate_const))
+                print('%30s: %.3e s^{-1}: %s' % (proc, rate_const, '#' * n))
         except Exception as e:
             raise UserWarning(
                 "Could not set %s for process %s!\nException: %s" \
