@@ -394,7 +394,7 @@ class KMC_Model(multiprocessing.Process):
         ratios.sort(key=lambda x: -x[1])
         res = ''
         for label, ratio in ratios:
-            res.append('%s: %s\n' % (label, ratio))
+            res += ('%s: %s\n' % (label, ratio))
         return res
 
 

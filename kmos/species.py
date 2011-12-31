@@ -227,16 +227,18 @@ NOgas = Species(ase.atoms.Atoms('NO',
 
 NO = Species(ase.atoms.Atoms('NO', [[0, 0, 0], [0, 0, 1.2]],
                              cell=[10, 10, 10], ),
-    name='NO')
+                name='NO',
+                janaf_file='N-005.txt',
+    )
 
 NO2gas = Species(ase.atoms.Atoms(),
                  gas=True,
-                 janaf_file='C-007.txt',
+                 janaf_file='N-007.txt',
                  name='NO2gas')
 
 NO3gas = Species(ase.atoms.Atoms(),
                  gas=True,
-                 janaf_file='C-009.txt',
+                 janaf_file='N-009.txt',
                  name='NO3gas')
 
 COgas = Species(ase.atoms.Atoms('CO', [[0, 0, 0], [0, 0, 1.2]],
