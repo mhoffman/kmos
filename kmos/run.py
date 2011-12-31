@@ -381,8 +381,10 @@ class KMC_Model(multiprocessing.Process):
 
     def rate_ratios(self):
         ratios = []
-        for i, iname in enumerate(self.settings.rate_constants.keys()):
-            for j, jname in enumerate(self.settings.rate_constants.keys()):
+        for i, iname in enumerate(
+                        sorted(self.settings.rate_constants.keys())):
+            for j, jname in enumerate(
+                            sorted(self.settings.rate_constants.keys())):
                 if i != j:  # i == 1 -> 1., don't need that
                     irate = self.base.get_rate(i + 1)
                     jrate = self.base.get_rate(j + 1)
