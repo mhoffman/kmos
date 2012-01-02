@@ -54,7 +54,13 @@ def main():
         os.chdir(export_dir)
         os.system("kmos-build")
         for out in glob('kmc_*'):
-            shutil.move(out, '..')
+            try:
+                shutil.move(out, '..')
+            except:
+                print('%s already exists. I refuse to overwrite it.' % out)
+                print('Please move it somewhere else or rename it and')
+                print('rerun me.')
+                raise
 
 if __name__ == '__main__':
     main()
