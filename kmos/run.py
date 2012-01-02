@@ -287,6 +287,38 @@ class KMC_Model(multiprocessing.Process):
 
         return atoms
 
+    def double_size(self):
+        """Double the size of the model in each direction and initialize
+        larger model with current configuration in each copy."""
+
+        # store current configuration of model
+        config = np.zeros(list(self.lattice.system_size) + \
+            [int(self.lattice.spuck)])
+        for x in range(self.lattice.system_size[0]):
+            for y in range(self.lattice.system_size[1]):
+                for z in range(self.lattice.system_size[2]):
+                    for n in range(self.lattice.spuck):
+                        config[x, y, z, n] = \
+                            self.lattice.get_species(
+                                [x, y, z, n+1])
+        old_system_size = deepcopy(self.lattice.system_size)
+
+        # initialize new version of model w/ twice the size in each direction
+        self.deallocate()
+        self.settings.simulation_size *= 2
+        self.__init__()
+
+        # initialize new model w/ copies of current state in each of
+        # the new copies
+        for x in range(self.lattice.system_size[0]):
+            for y in range(self.lattice.system_size[1]):
+                for z in range(self.lattice.system_size[2]):
+                    for n in range(self.lattice.spuck):
+                        site_name = self.settings.site_names[n]
+                        eval('self.proclist.touchup_%s([%i, %i, %i, %i])'
+                            % (site_name, x, y, z, n + 1))
+
+
     def xml(self):
         """Returns the XML representation that this model was created from.
         """
