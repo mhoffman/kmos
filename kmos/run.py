@@ -69,6 +69,7 @@ class KMC_Model(multiprocessing.Process):
     Depending on the constructor cal the model can be run either via directory
     calls or in a separate processes access via multiprocessing.Queues.
     Only one model instance can exist simultaneously per process."""
+
     def __init__(self, image_queue=None,
                        parameter_queue=None,
                        signal_queue=None,
@@ -81,21 +82,27 @@ class KMC_Model(multiprocessing.Process):
         self.parameter_queue = parameter_queue
         self.signal_queue = signal_queue
         self.autosend = autosend
-        self.size = int(settings.simulation_size) \
-                        if size is None else int(size)
         self.print_rates = print_rates
         self.parameters = Model_Parameters(self.print_rates)
         self.rate_constants = Model_Rate_Constants()
+        self.size = int(settings.simulation_size) \
+                        if size is None else int(size)
 
         self.base = base
         self.lattice = lattice
         self.proclist = proclist
         self.settings = settings
+        self.system_name = system_name
+        self.banner = banner
 
+        self.reset()
+
+    def reset(self):
+        self.size = int(settings.simulation_size)
         proclist.init((self.size,) * int(lattice.model_dimension),
-            system_name,
+            self.system_name,
             lattice.default_layer,
-            not banner)
+            not self.banner)
         self.cell_size = np.dot(lattice.unit_cell_size, lattice.system_size)
 
         # prepare structures for TOF evaluation
@@ -287,9 +294,11 @@ class KMC_Model(multiprocessing.Process):
 
         return atoms
 
-    def double_size(self):
-        """Double the size of the model in each direction and initialize
-        larger model with current configuration in each copy."""
+    def double(self):
+        """[buggy]
+        Double the size of the model in each direction and initialize
+        larger model with current configuration in each copy.
+        """
 
         # store current configuration of model
         config = np.zeros(list(self.lattice.system_size) + \
@@ -300,13 +309,13 @@ class KMC_Model(multiprocessing.Process):
                     for n in range(self.lattice.spuck):
                         config[x, y, z, n] = \
                             self.lattice.get_species(
-                                [x, y, z, n+1])
+                                [x, y, z, n + 1])
         old_system_size = deepcopy(self.lattice.system_size)
 
         # initialize new version of model w/ twice the size in each direction
         self.deallocate()
         self.settings.simulation_size *= 2
-        self.__init__()
+        self.reset()
 
         # initialize new model w/ copies of current state in each of
         # the new copies
@@ -314,10 +323,24 @@ class KMC_Model(multiprocessing.Process):
             for y in range(self.lattice.system_size[1]):
                 for z in range(self.lattice.system_size[2]):
                     for n in range(self.lattice.spuck):
+                        xi, yi, zi = np.array([x, y, z]) % \
+                                     old_system_size
+                        #self.lattice.replace_species(
+                            #[x, y, z, n + 1],
+                            #self.proclist.default_species,
+                            #config.take([xi, yi, zi, n]))
+        self._adjust_database()
+
+    def _adjust_database(self):
+        """Set the database of processes currently
+        possible according to the current configuration."""
+        for x in range(self.lattice.system_size[0]):
+            for y in range(self.lattice.system_size[1]):
+                for z in range(self.lattice.system_size[2]):
+                    for n in range(self.lattice.spuck):
                         site_name = self.settings.site_names[n]
                         eval('self.proclist.touchup_%s([%i, %i, %i, %i])'
                             % (site_name, x, y, z, n + 1))
-
 
     def xml(self):
         """Returns the XML representation that this model was created from.
@@ -423,7 +446,7 @@ class KMC_Model(multiprocessing.Process):
                     ratios.append(('%s/%s' % (iname, jname), irate / jrate))
 
         # sort ratios in descending order
-        ratios.sort(key=lambda x: -x[1])
+        ratios.sort(key=lambda x: - x[1])
         res = ''
         for label, ratio in ratios:
             res += ('%s: %s\n' % (label, ratio))
@@ -437,6 +460,7 @@ class Model_Parameters(object):
 
         model.parameters.<parameter> = X.Y
     """
+
     def __init__(self, print_rates=True):
         object.__init__(self)
         self.__dict__.update(settings.parameters)
@@ -459,6 +483,7 @@ class Model_Parameters(object):
 
 
 class Model_Rate_Constants(object):
+
     def __repr__(self):
         """Compact representation of all current rate_constants."""
         res = '# kMC rate constants (%i)\n' % len(settings.rate_constants)
