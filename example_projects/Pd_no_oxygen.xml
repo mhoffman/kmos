@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <kmc version="(0, 2)">
-    <meta author="Max J. Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="3" model_name="Pd_no_oxygen"/>
+    <meta author="Max J. Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="2" model_name="Pd_no_oxygen"/>
     <species_list default_species="CO">
         <species color="#ff0000" name="CO" representation="Atoms(symbols='CO',           pbc=np.array([False, False, False], dtype=bool),           cell=np.array(       [[ 10.,   0.,   0.],        [  0.,  10.,   0.],        [  0.,   0.,  10.]]),           positions=np.array(       [[  2.79993974e-20,  -7.97587347e-19,   7.19809738e-02],        [ -3.91814225e-18,   2.21439140e-19,   1.12801903e+00]]))"/>
         <species color="#ff0000" name="ON" representation="Atoms(symbols='NO',           pbc=np.array([False, False, False], dtype=bool),           cell=np.array(       [[ 10.,   0.,   0.],        [  0.,  10.,   0.],        [  0.,   0.,  10.]]),           positions=np.array(       [[  0.00000000e+00,   0.00000000e+00,   7.02378583e-02],        [  2.86446771e-19,  -1.96631971e-20,   1.12976214e+00]]))"/>
