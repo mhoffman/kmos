@@ -325,10 +325,11 @@ class KMC_Model(multiprocessing.Process):
                     for n in range(self.lattice.spuck):
                         xi, yi, zi = np.array([x, y, z]) % \
                                      old_system_size
-                        #self.lattice.replace_species(
-                            #[x, y, z, n + 1],
-                            #self.proclist.default_species,
-                            #config.take([xi, yi, zi, n]))
+                        self.lattice.replace_species(
+                            [x, y, z, n + 1],
+                            config.take([xi, yi, zi, n]),
+                            self.proclist.default_species,
+                            )
         self._adjust_database()
 
     def _adjust_database(self):
