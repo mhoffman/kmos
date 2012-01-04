@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Run and view a kMC model. For this to work one needs a
 kmc_model.so and a kmc_settings.py in the import path."""
-#    Copyright 2009-2011 Max J. Hoffmann (mjhoffmann@gmail.com)
+#    Copyright 2009-2012 Max J. Hoffmann (mjhoffmann@gmail.com)
 #    This file is part of kmos.
 #
 #    kmos is free software: you can redistribute it and/or modify

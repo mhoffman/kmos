@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 """Very simple module that keeps several species
 commonly needed to model heterogeneous catalyst kinetics
 """
-#    Copyright 2009-2011 Max J. Hoffmann (mjhoffmann@gmail.com)
+#    Copyright 2009-2012 Max J. Hoffmann (mjhoffmann@gmail.com)
 #    This file is part of kmos.
 
 #    kmos is free software: you can redistribute it and/or modify

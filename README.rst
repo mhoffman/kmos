@@ -1,7 +1,7 @@
 kmos: kMC modelling on steroids - a vigorous attempt to make lattice kinetic
 Monte Carlo modelling more accessible.
 
-Copyright (C) 2009-11 Max J. Hoffmann <mjhoffmann@gmail.com>
+Copyright (C) 2009-12 Max J. Hoffmann <mjhoffmann@gmail.com>
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software

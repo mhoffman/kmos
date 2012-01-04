@@ -30,7 +30,7 @@ or it may be used as an API via the kmos module.
             fashion. Python bindings are generated using `f2py  <http://cens.ioc.ee/projects/f2py2e/>`_.
 """
 
-#    Copyright 2009-2011 Max J. Hoffmann (mjhoffmann@gmail.com)
+#    Copyright 2009-2012 Max J. Hoffmann (mjhoffmann@gmail.com)
 #    This file is part of kmos.
 #
 #    kmos is free software: you can redistribute it and/or modify
