@@ -107,8 +107,10 @@ class Project(object):
             # for convenience
             if 'conditions' in kwargs:
                 kwargs['condition_list'] = kwargs['conditions']
+                kwargs.pop('conditions')
             if 'actions' in kwargs:
                 kwargs['action_list'] = kwargs['actions']
+                kwargs.pop('actions')
             process = Process(**kwargs)
             self.process_list.append(process)
             return process
