@@ -102,6 +102,13 @@ class Project(object):
         for process in processes:
             self.process_list.append(process)
         if kwargs:
+            # make conditions override condition_list
+            # and actions override action_list
+            # for convenience
+            if 'conditions' in kwargs:
+                kwargs['condition_list'] = kwargs['conditions']
+            if 'actions' in kwargs:
+                kwargs['action_list'] = kwargs['actions']
             process = Process(**kwargs)
             self.process_list.append(process)
             return process
