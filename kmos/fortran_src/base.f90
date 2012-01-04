@@ -1135,10 +1135,11 @@ subroutine interval_search_real(arr, value, return_field)
                 if(mid.ge.size(arr))then
                     print *,""
                     print *,""
-                    print *,"interval_search_real can't find available process"
-                    print *,"This usually means"
-                    print *,"that either you forgot to define rate constants or you defined"
-                    print *,"a dead-lock: e.g. adsorption without corresponding desorption."
+                    print *,"ERROR: interval_search_real can't find available process"
+                    print *,"This usually means one of the following:"
+                    print *," - you forgot to define rate constants"
+                    print *," - you create a dead-lock: e.g. adsorption without corresponding desorption."
+                    print *," - you started the model in an initial state without transitions"
                     stop
                 endif
                 exit nonzerosearch
