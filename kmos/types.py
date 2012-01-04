@@ -553,6 +553,20 @@ class Project(object):
             else:
                 print('\t- %s : %s' % (process_type, nprocs))
 
+    def set_meta(self,
+                 author=None,
+                 email=None,
+                 model_name=None,
+                 model_dimension=None):
+        if author is not None:
+            self.meta.author = author
+        if email is not None:
+            self.meta.email = email
+        if model_name is not None:
+            self.meta.model_name = model_name
+        if model_dimension is not None:
+            self.meta.model_dimension = model_dimension
+
 
 class Meta(object):
     """Class holding the meta-information about the kMC project
