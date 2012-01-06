@@ -559,6 +559,13 @@ class ProcListWriter():
                 else:
                     relative_coord = 'lsite%s' % (action.coord - process.executing_coord()).radd_ff()
 
+                try:
+                    previous_species = filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list)[0].species
+                except:
+                    UserWarning("""Process %s seems to be ill-defined.
+                                   Every action needs a corresponding condition
+                                   for the same site.""" % process.name)
+
                 if action.species[0] == '^':
                     if data.meta.debug > 0:
                         out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","create %s_%s"\n' % (action.coord.layer, action.coord.name))
@@ -568,17 +575,19 @@ class ProcListWriter():
                         out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","annihilate %s_%s"\n' % (action.coord.layer, action.coord.name))
                     out.write('        call annihilate_%s_%s(%s, %s)\n' % (action.coord.layer, action.coord.name, relative_coord, action.species[1:]))
                 elif action.species == data.species_list.default_species:
-                    try:
-                        previous_species = filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list)[0].species
-                    except:
-                        UserWarning("Process %s seems to be ill-defined\n" % process.name)
                     if data.meta.debug > 0:
                         out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","take %s_%s %s"\n' % (action.coord.layer, action.coord.name, previous_species))
                     out.write('        call take_%s_%s_%s(%s)\n' % (previous_species, action.coord.layer, action.coord.name, relative_coord))
                 else:
-                    if data.meta.debug > 0:
-                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","put %s_%s %s"\n' % (action.coord.layer, action.coord.name, action.species))
-                    out.write('        call put_%s_%s_%s(%s)\n' % (action.species, action.coord.layer, action.coord.name, relative_coord))
+                    if not previous_species == action.species:
+                        if not previous_species == data.species_list.default_species:
+                            if data.meta.debug > 0:
+                                out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","take %s_%s %s"\n' % (action.coord.layer, action.coord.name, previous_species))
+                            out.write('        call take_%s_%s_%s(%s)\n' % (previous_species, action.coord.layer, action.coord.name, relative_coord))
+                        if data.meta.debug > 0:
+                            out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","put %s_%s %s"\n' % (action.coord.layer, action.coord.name, action.species))
+                        out.write('        call put_%s_%s_%s(%s)\n' % (action.species, action.coord.layer, action.coord.name, relative_coord))
+                            
 
             out.write('\n')
         out.write('    end select\n\n')
@@ -933,16 +942,9 @@ class ProcListWriter():
         out = open(os.path.join(self.dir,'kmc_settings.py'), 'w')
         out.write('model_name = \'%s\'\n' % self.data.meta.model_name)
         out.write('simulation_size = 20\n')
-        out.write('representations = {\n')
-        for species in sorted(data.species_list, key=lambda x: x.name):
-            out.write('    "%s":"%s",\n'
-                % (species.name,
-                species.representation))
-        out.write('    }\n\n')
-        out.write('lattice_representation = "%s"\n\n' % data.layer_list.representation)
-        site_params = self._get_site_params()
-        out.write('site_names = %s\n' % ['%s_%s' % (x[1], x[0]) for x in site_params])
 
+
+        # Parameters
         out.write('parameters = {\n')
         for parameter in data.parameter_list:
             out.write(('    "%s":{"value":"%s", "adjustable":%s,'
@@ -953,6 +955,8 @@ class ProcListWriter():
                                           parameter.max,
                                           parameter.scale))
         out.write('    }\n\n')
+
+        # Rate constants
         out.write('rate_constants = {\n')
         for process in data.process_list:
             out.write('    "%s":("%s", %s),\n' % (process.name, process.rate_constant, process.enabled))
@@ -963,14 +967,29 @@ class ProcListWriter():
                 evaluate_rate_expression(process.rate_constant, parameters)
             except Exception, e:
                 raise UserWarning('%s\nProcess: %s' % (e, process.name))
-
         out.write('    }\n\n')
+
+        # Site Names
+        site_params = self._get_site_params()
+        out.write('site_names = %s\n' % ['%s_%s' % (x[1], x[0]) for x in site_params])
+
+        # Graphical Representations
+        out.write('representations = {\n')
+        for species in sorted(data.species_list, key=lambda x: x.name):
+            out.write('    "%s":"%s",\n'
+                % (species.name,
+                species.representation))
+        out.write('    }\n\n')
+        out.write('lattice_representation = "%s"\n\n' % data.layer_list.representation)
+
+        # TOF counting
         out.write('tof_count = {\n')
-        #print('len(process_list): %s' % len(data.process_list))
         for process in data.get_processes():
             if process.tof_count is not None:
                 out.write('    "%s":%s,\n' % (process.name, process.tof_count))
         out.write('    }\n\n')
+
+        # XML
         out.write('xml = """%s"""\n' % data)
 
         out.close()
