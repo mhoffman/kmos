@@ -41,6 +41,7 @@ __all__ = ['base', 'lattice', 'proclist', 'KMC_Model']
 
 from copy import deepcopy
 import multiprocessing
+import random
 from math import log
 import numpy as np
 from ase.atoms import Atoms
@@ -295,21 +296,12 @@ class KMC_Model(multiprocessing.Process):
         return atoms
 
     def double(self):
-        """[buggy]
+        """
         Double the size of the model in each direction and initialize
         larger model with current configuration in each copy.
         """
 
-        # store current configuration of model
-        config = np.zeros(list(self.lattice.system_size) + \
-            [int(self.lattice.spuck)])
-        for x in range(self.lattice.system_size[0]):
-            for y in range(self.lattice.system_size[1]):
-                for z in range(self.lattice.system_size[2]):
-                    for n in range(self.lattice.spuck):
-                        config[x, y, z, n] = \
-                            self.lattice.get_species(
-                                [x, y, z, n + 1])
+        config = self._get_configuration()
         old_system_size = deepcopy(self.lattice.system_size)
 
         # initialize new version of model w/ twice the size in each direction
@@ -331,6 +323,60 @@ class KMC_Model(multiprocessing.Process):
                             config.take([xi, yi, zi, n]),
                             )
         self._adjust_database()
+
+    def halve(self):
+        """
+        Halve the size of the model and initialize each site in the new model
+        with a species randomly drawn from the sites that are reduced onto
+        one. It is necessary that the simulation size is even
+        """
+        if self.settings.simulation_size % 2:
+            print("Can only halve system with even size!")
+            return
+
+        config = self._get_configuration()
+
+        self.deallocate()
+        self.settings.simulation_size /= 2
+        self.reset()
+
+        X, Y, Z = self.lattice.system_size
+        N = self.lattice.spuck
+        for x in range(X):
+            for y in range(Y):
+                for z in range(Z):
+                    for n in range(N):
+                        # collect species
+                        # from the 8 sites that are
+                        # reduced onto one
+                        choices = [config[(x + i * X) % X,
+                                         (y + j * Y) % Y,
+                                         (z + k * Z) % Z,
+                                         n]
+                            for i in range(2)
+                            for j in range(2)
+                            for k in range(2)]
+
+                        # use random.choice
+                        # to randomly select one
+                        self.lattice.replace_species(
+                            [x, y, z, n + 1],
+                            self.proclist.default_species,
+                            random.choice(choices))
+        self._adjust_database()
+
+    def _get_configuration(self):
+        """ Return current configuration of model."""
+        config = np.zeros(list(self.lattice.system_size) + \
+            [int(self.lattice.spuck)])
+        for x in range(self.lattice.system_size[0]):
+            for y in range(self.lattice.system_size[1]):
+                for z in range(self.lattice.system_size[2]):
+                    for n in range(self.lattice.spuck):
+                        config[x, y, z, n] = \
+                            self.lattice.get_species(
+                                [x, y, z, n + 1])
+        return config
 
     def _adjust_database(self):
         """Set the database of processes currently
