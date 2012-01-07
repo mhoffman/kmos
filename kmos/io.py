@@ -47,7 +47,7 @@ def _most_common(L):
             count += 1
             min_index = min(min_index, where)
         # print 'item %r, count %r, minind %r' % (item, count, min_index)
-        return count, -min_index
+        return count, - min_index
     # pick the highest-count/earliest item
     return max(groups, key=_auxfun)[0]
 
@@ -56,6 +56,7 @@ class ProcListWriter():
     """Write the different parts of Fortran 90 code needed
     to run a kMC model.
     """
+
     def __init__(self, data, dir):
         self.data = data
         self.dir = dir
@@ -66,7 +67,7 @@ class ProcListWriter():
         """
         # write header section and module imports
         data = self.data
-        out = open(os.path.join(self.dir,'lattice.f90') , 'w')
+        out = open(os.path.join(self.dir, 'lattice.f90'), 'w')
         out.write(self._gpl_message())
         out.write('!****h* kmos/lattice\n')
         out.write('! FUNCTION\n')
@@ -587,7 +588,6 @@ class ProcListWriter():
                         if data.meta.debug > 0:
                             out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","put %s_%s %s"\n' % (action.coord.layer, action.coord.name, action.species))
                         out.write('        call put_%s_%s_%s(%s)\n' % (action.species, action.coord.layer, action.coord.name, relative_coord))
-                            
 
             out.write('\n')
         out.write('    end select\n\n')
@@ -720,7 +720,8 @@ class ProcListWriter():
                                 out.write('print *,"    LATTICE/REPLACE_SPECIES/SITE",site\n')
                                 out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES","%s"\n' % species.name)
                                 out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES","%s"\n' % data.species_list.default_species)
-                            out.write('    call replace_species(site, %s, %s)\n\n' % (species.name, data.species_list.default_species))
+                            out.write('    call replace_species(site, %s, %s)\n\n' %
+                                      (species.name, data.species_list.default_species))
                         for process in data.process_list:
                             for condition in process.condition_list:
                                 if site.name == condition.coord.name and \
@@ -782,6 +783,12 @@ class ProcListWriter():
                 routine_name = 'touchup_%s_%s' % (layer.name, site.name)
                 out.write('subroutine %s(site)\n\n' % routine_name)
                 out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
+                # First remove all process from this site
+                for process in data.process_list:
+                    out.write('    if (can_do(%s, site)) then\n' % process.name)
+                    out.write('        call del_proc(%s, site)\n' % process.name)
+                    out.write('    endif\n')
+                # Then add all available one
                 items = []
                 for process in data.process_list:
                     executing_coord = process.executing_coord()
@@ -939,7 +946,7 @@ class ProcListWriter():
         from kmos import evaluate_rate_expression
 
         data = self.data
-        out = open(os.path.join(self.dir,'kmc_settings.py'), 'w')
+        out = open(os.path.join(self.dir, 'kmc_settings.py'), 'w')
         out.write('model_name = \'%s\'\n' % self.data.meta.model_name)
         out.write('simulation_size = 20\n')
 
@@ -959,7 +966,9 @@ class ProcListWriter():
         # Rate constants
         out.write('rate_constants = {\n')
         for process in data.process_list:
-            out.write('    "%s":("%s", %s),\n' % (process.name, process.rate_constant, process.enabled))
+            out.write('    "%s":("%s", %s),\n' % (process.name,
+                                                  process.rate_constant,
+                                                  process.enabled))
             try:
                 parameters = {}
                 for param in data.parameter_list:
@@ -1064,12 +1073,14 @@ def export_source(project_tree, export_dir=None):
     project_tree.validate_model()
     return True
 
+
 def import_xml(filename):
     """Imports and returns project from an XML file."""
     import kmos.types
     project_tree = kmos.types.Project()
     project_tree.import_xml_file(filename)
     return project_tree
+
 
 def export_xml(project_tree, filename=None):
     """Writes a project to an XML file."""
@@ -1078,6 +1089,7 @@ def export_xml(project_tree, filename=None):
     with open(filename, 'w') as f:
         for line in str(project_tree):
             f.write(line)
+
 
 def compile_model(project_tree):
     from tempfile import mkdtemp
