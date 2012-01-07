@@ -327,8 +327,8 @@ class KMC_Model(multiprocessing.Process):
                                      old_system_size
                         self.lattice.replace_species(
                             [x, y, z, n + 1],
-                            config.take([xi, yi, zi, n]),
                             self.proclist.default_species,
+                            config.take([xi, yi, zi, n]),
                             )
         self._adjust_database()
 
