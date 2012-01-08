@@ -314,14 +314,13 @@ class KMC_Model(multiprocessing.Process):
         for x in range(self.lattice.system_size[0]):
             for y in range(self.lattice.system_size[1]):
                 for z in range(self.lattice.system_size[2]):
+                    xi, yi, zi = np.array([x, y, z]) % \
+                                 old_system_size
                     for n in range(self.lattice.spuck):
-                        xi, yi, zi = np.array([x, y, z]) % \
-                                     old_system_size
                         self.lattice.replace_species(
                             [x, y, z, n + 1],
                             self.proclist.default_species,
-                            config.take([xi, yi, zi, n]),
-                            )
+                            config[xi, yi, zi, n],)
         self._adjust_database()
 
     def halve(self):
