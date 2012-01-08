@@ -376,6 +376,27 @@ class KMC_Model(multiprocessing.Process):
                             self.lattice.get_species(
                                 [x, y, z, n + 1])
         return config
+    def _set_configuration(self, config):
+        """Set the current lattice configuration.
+
+           Expects a 4-dimensional array, with dimensions [X, Y, Z, N]
+           where X, Y, Z are the lattice size and N the number of
+           sites in each unit cell."""
+        X, Y, Z = self.lattice.system_size
+        N = self.lattice.spuck
+        if not all(config.shape == np.array([X, Y, Z, N])):
+            print('Config shape %s does not match' % config.shape)
+            print('with model shape %s.' % [X, Y, Z, N])
+            return
+        for x in range(X):
+            for y in range(Y):
+                for z in range(Z):
+                    for n in range(N):
+                        species = self.lattice.get_species([x, y, z, n+1])
+                        self.lattice.replace_species([x, y, z, n+1],
+                                                     species,
+                                                     config[x, y, z, n])
+        self._adjust_database()
 
     def _adjust_database(self):
         """Set the database of processes currently
