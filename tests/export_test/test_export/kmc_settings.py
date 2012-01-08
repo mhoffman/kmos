@@ -1,14 +1,5 @@
 model_name = 'my_model'
 simulation_size = 20
-representations = {
-    "co":"",
-    "empty":"",
-    "oxygen":"",
-    }
-
-lattice_representation = ""
-
-site_names = ['ruo2_bridge', 'ruo2_cus']
 parameters = {
     "A":{"value":"20.e-19", "adjustable":False, "min":"0.0", "max":"0.0","scale":"linear"},
     "E_co_bridge":{"value":".1", "adjustable":False, "min":"0.0", "max":"0.0","scale":"linear"},
@@ -64,6 +55,15 @@ rate_constants = {
     "reaction_oxygen_cus_co_cus_down":("100000", True),
     "reaction_oxygen_cus_co_cus_up":("100000", True),
     }
+
+site_names = ['ruo2_bridge', 'ruo2_cus']
+representations = {
+    "co":"",
+    "empty":"",
+    "oxygen":"",
+    }
+
+lattice_representation = ""
 
 tof_count = {
     }

@@ -1195,6 +1195,114 @@ subroutine touchup_ruo2_bridge(site)
 
     integer(kind=iint), dimension(4), intent(in) :: site
 
+    if (can_do(co_adsorption_bridge, site)) then
+        call del_proc(co_adsorption_bridge, site)
+    endif
+    if (can_do(co_adsorption_cus, site)) then
+        call del_proc(co_adsorption_cus, site)
+    endif
+    if (can_do(co_desorption_bridge, site)) then
+        call del_proc(co_desorption_bridge, site)
+    endif
+    if (can_do(co_desorption_cus, site)) then
+        call del_proc(co_desorption_cus, site)
+    endif
+    if (can_do(co_diffusion_bridge_bridge_down, site)) then
+        call del_proc(co_diffusion_bridge_bridge_down, site)
+    endif
+    if (can_do(co_diffusion_bridge_bridge_up, site)) then
+        call del_proc(co_diffusion_bridge_bridge_up, site)
+    endif
+    if (can_do(co_diffusion_bridge_cus_left, site)) then
+        call del_proc(co_diffusion_bridge_cus_left, site)
+    endif
+    if (can_do(co_diffusion_bridge_cus_right, site)) then
+        call del_proc(co_diffusion_bridge_cus_right, site)
+    endif
+    if (can_do(co_diffusion_cus_bridge_left, site)) then
+        call del_proc(co_diffusion_cus_bridge_left, site)
+    endif
+    if (can_do(co_diffusion_cus_bridge_right, site)) then
+        call del_proc(co_diffusion_cus_bridge_right, site)
+    endif
+    if (can_do(co_diffusion_cus_cus_down, site)) then
+        call del_proc(co_diffusion_cus_cus_down, site)
+    endif
+    if (can_do(co_diffusion_cus_cus_up, site)) then
+        call del_proc(co_diffusion_cus_cus_up, site)
+    endif
+    if (can_do(oxygen_adsorption_bridge_bridge, site)) then
+        call del_proc(oxygen_adsorption_bridge_bridge, site)
+    endif
+    if (can_do(oxygen_adsorption_bridge_cus_left, site)) then
+        call del_proc(oxygen_adsorption_bridge_cus_left, site)
+    endif
+    if (can_do(oxygen_adsorption_bridge_cus_right, site)) then
+        call del_proc(oxygen_adsorption_bridge_cus_right, site)
+    endif
+    if (can_do(oxygen_adsorption_cus_cus, site)) then
+        call del_proc(oxygen_adsorption_cus_cus, site)
+    endif
+    if (can_do(oxygen_desorption_bridge_bridge, site)) then
+        call del_proc(oxygen_desorption_bridge_bridge, site)
+    endif
+    if (can_do(oxygen_desorption_bridge_cus_left, site)) then
+        call del_proc(oxygen_desorption_bridge_cus_left, site)
+    endif
+    if (can_do(oxygen_desorption_bridge_cus_right, site)) then
+        call del_proc(oxygen_desorption_bridge_cus_right, site)
+    endif
+    if (can_do(oxygen_desorption_cus_cus, site)) then
+        call del_proc(oxygen_desorption_cus_cus, site)
+    endif
+    if (can_do(oxygen_diffusion_bridge_bridge_down, site)) then
+        call del_proc(oxygen_diffusion_bridge_bridge_down, site)
+    endif
+    if (can_do(oxygen_diffusion_bridge_bridge_up, site)) then
+        call del_proc(oxygen_diffusion_bridge_bridge_up, site)
+    endif
+    if (can_do(oxygen_diffusion_bridge_cus_left, site)) then
+        call del_proc(oxygen_diffusion_bridge_cus_left, site)
+    endif
+    if (can_do(oxygen_diffusion_bridge_cus_right, site)) then
+        call del_proc(oxygen_diffusion_bridge_cus_right, site)
+    endif
+    if (can_do(oxygen_diffusion_cus_bridge_left, site)) then
+        call del_proc(oxygen_diffusion_cus_bridge_left, site)
+    endif
+    if (can_do(oxygen_diffusion_cus_bridge_right, site)) then
+        call del_proc(oxygen_diffusion_cus_bridge_right, site)
+    endif
+    if (can_do(oxygen_diffusion_cus_cus_down, site)) then
+        call del_proc(oxygen_diffusion_cus_cus_down, site)
+    endif
+    if (can_do(oxygen_diffusion_cus_cus_up, site)) then
+        call del_proc(oxygen_diffusion_cus_cus_up, site)
+    endif
+    if (can_do(reaction_oxygen_bridge_co_bridge_down, site)) then
+        call del_proc(reaction_oxygen_bridge_co_bridge_down, site)
+    endif
+    if (can_do(reaction_oxygen_bridge_co_bridge_up, site)) then
+        call del_proc(reaction_oxygen_bridge_co_bridge_up, site)
+    endif
+    if (can_do(reaction_oxygen_bridge_co_cus_left, site)) then
+        call del_proc(reaction_oxygen_bridge_co_cus_left, site)
+    endif
+    if (can_do(reaction_oxygen_bridge_co_cus_right, site)) then
+        call del_proc(reaction_oxygen_bridge_co_cus_right, site)
+    endif
+    if (can_do(reaction_oxygen_cus_co_bridge_left, site)) then
+        call del_proc(reaction_oxygen_cus_co_bridge_left, site)
+    endif
+    if (can_do(reaction_oxygen_cus_co_bridge_right, site)) then
+        call del_proc(reaction_oxygen_cus_co_bridge_right, site)
+    endif
+    if (can_do(reaction_oxygen_cus_co_cus_down, site)) then
+        call del_proc(reaction_oxygen_cus_co_cus_down, site)
+    endif
+    if (can_do(reaction_oxygen_cus_co_cus_up, site)) then
+        call del_proc(reaction_oxygen_cus_co_cus_up, site)
+    endif
     select case(get_species(site))
     case(co)
         call add_proc(co_desorption_bridge, site)
@@ -1284,6 +1392,114 @@ subroutine touchup_ruo2_cus(site)
 
     integer(kind=iint), dimension(4), intent(in) :: site
 
+    if (can_do(co_adsorption_bridge, site)) then
+        call del_proc(co_adsorption_bridge, site)
+    endif
+    if (can_do(co_adsorption_cus, site)) then
+        call del_proc(co_adsorption_cus, site)
+    endif
+    if (can_do(co_desorption_bridge, site)) then
+        call del_proc(co_desorption_bridge, site)
+    endif
+    if (can_do(co_desorption_cus, site)) then
+        call del_proc(co_desorption_cus, site)
+    endif
+    if (can_do(co_diffusion_bridge_bridge_down, site)) then
+        call del_proc(co_diffusion_bridge_bridge_down, site)
+    endif
+    if (can_do(co_diffusion_bridge_bridge_up, site)) then
+        call del_proc(co_diffusion_bridge_bridge_up, site)
+    endif
+    if (can_do(co_diffusion_bridge_cus_left, site)) then
+        call del_proc(co_diffusion_bridge_cus_left, site)
+    endif
+    if (can_do(co_diffusion_bridge_cus_right, site)) then
+        call del_proc(co_diffusion_bridge_cus_right, site)
+    endif
+    if (can_do(co_diffusion_cus_bridge_left, site)) then
+        call del_proc(co_diffusion_cus_bridge_left, site)
+    endif
+    if (can_do(co_diffusion_cus_bridge_right, site)) then
+        call del_proc(co_diffusion_cus_bridge_right, site)
+    endif
+    if (can_do(co_diffusion_cus_cus_down, site)) then
+        call del_proc(co_diffusion_cus_cus_down, site)
+    endif
+    if (can_do(co_diffusion_cus_cus_up, site)) then
+        call del_proc(co_diffusion_cus_cus_up, site)
+    endif
+    if (can_do(oxygen_adsorption_bridge_bridge, site)) then
+        call del_proc(oxygen_adsorption_bridge_bridge, site)
+    endif
+    if (can_do(oxygen_adsorption_bridge_cus_left, site)) then
+        call del_proc(oxygen_adsorption_bridge_cus_left, site)
+    endif
+    if (can_do(oxygen_adsorption_bridge_cus_right, site)) then
+        call del_proc(oxygen_adsorption_bridge_cus_right, site)
+    endif
+    if (can_do(oxygen_adsorption_cus_cus, site)) then
+        call del_proc(oxygen_adsorption_cus_cus, site)
+    endif
+    if (can_do(oxygen_desorption_bridge_bridge, site)) then
+        call del_proc(oxygen_desorption_bridge_bridge, site)
+    endif
+    if (can_do(oxygen_desorption_bridge_cus_left, site)) then
+        call del_proc(oxygen_desorption_bridge_cus_left, site)
+    endif
+    if (can_do(oxygen_desorption_bridge_cus_right, site)) then
+        call del_proc(oxygen_desorption_bridge_cus_right, site)
+    endif
+    if (can_do(oxygen_desorption_cus_cus, site)) then
+        call del_proc(oxygen_desorption_cus_cus, site)
+    endif
+    if (can_do(oxygen_diffusion_bridge_bridge_down, site)) then
+        call del_proc(oxygen_diffusion_bridge_bridge_down, site)
+    endif
+    if (can_do(oxygen_diffusion_bridge_bridge_up, site)) then
+        call del_proc(oxygen_diffusion_bridge_bridge_up, site)
+    endif
+    if (can_do(oxygen_diffusion_bridge_cus_left, site)) then
+        call del_proc(oxygen_diffusion_bridge_cus_left, site)
+    endif
+    if (can_do(oxygen_diffusion_bridge_cus_right, site)) then
+        call del_proc(oxygen_diffusion_bridge_cus_right, site)
+    endif
+    if (can_do(oxygen_diffusion_cus_bridge_left, site)) then
+        call del_proc(oxygen_diffusion_cus_bridge_left, site)
+    endif
+    if (can_do(oxygen_diffusion_cus_bridge_right, site)) then
+        call del_proc(oxygen_diffusion_cus_bridge_right, site)
+    endif
+    if (can_do(oxygen_diffusion_cus_cus_down, site)) then
+        call del_proc(oxygen_diffusion_cus_cus_down, site)
+    endif
+    if (can_do(oxygen_diffusion_cus_cus_up, site)) then
+        call del_proc(oxygen_diffusion_cus_cus_up, site)
+    endif
+    if (can_do(reaction_oxygen_bridge_co_bridge_down, site)) then
+        call del_proc(reaction_oxygen_bridge_co_bridge_down, site)
+    endif
+    if (can_do(reaction_oxygen_bridge_co_bridge_up, site)) then
+        call del_proc(reaction_oxygen_bridge_co_bridge_up, site)
+    endif
+    if (can_do(reaction_oxygen_bridge_co_cus_left, site)) then
+        call del_proc(reaction_oxygen_bridge_co_cus_left, site)
+    endif
+    if (can_do(reaction_oxygen_bridge_co_cus_right, site)) then
+        call del_proc(reaction_oxygen_bridge_co_cus_right, site)
+    endif
+    if (can_do(reaction_oxygen_cus_co_bridge_left, site)) then
+        call del_proc(reaction_oxygen_cus_co_bridge_left, site)
+    endif
+    if (can_do(reaction_oxygen_cus_co_bridge_right, site)) then
+        call del_proc(reaction_oxygen_cus_co_bridge_right, site)
+    endif
+    if (can_do(reaction_oxygen_cus_co_cus_down, site)) then
+        call del_proc(reaction_oxygen_cus_co_cus_down, site)
+    endif
+    if (can_do(reaction_oxygen_cus_co_cus_up, site)) then
+        call del_proc(reaction_oxygen_cus_co_cus_up, site)
+    endif
     select case(get_species(site))
     case(co)
         call add_proc(co_desorption_cus, site)

@@ -91,6 +91,15 @@ contains
 
 pure function calculate_lattice2nr(site)
 
+!****f* lattice/calculate_lattice2nr
+! FUNCTION
+!    Maps all lattice coordinates onto a continuous
+!    set of integer :math:`\in [1,volume]`
+!
+! ARGUMENTS
+!
+!    - ``site`` integer array of size (4) a lattice coordinate
+!******
     integer(kind=iint), dimension(4), intent(in) :: site
     integer(kind=iint) :: calculate_lattice2nr
 
@@ -104,6 +113,16 @@ end function calculate_lattice2nr
 
 pure function calculate_nr2lattice(nr)
 
+!****f* lattice/calculate_nr2lattice
+! FUNCTION
+!    Maps a continuous set of
+!    of integers :math:`\in [1,volume]` to a
+!    4-tuple representing a lattice coordinate
+!
+! ARGUMENTS
+!
+!    - ``nr`` integer representing the site index
+!******
     integer(kind=iint), intent(in) :: nr
     integer(kind=iint), dimension(4) :: calculate_nr2lattice
 

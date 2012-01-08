@@ -1,6 +1,6 @@
 !/* ROBODOC this makes robodoc to document this file */
 #include "assert.ppc"
-! Copyright (C)  2009-2011 Max J. Hoffmann
+! Copyright (C)  2009-2012 Max J. Hoffmann
 !
 ! This file is part of kmos.
 !
@@ -1051,8 +1051,8 @@ subroutine replace_species(site, old_species, new_species)
     ! Double-check that we actually remove the atom that we think is there
     if(old_species.ne.lattice(site))then
         print '(a)', "kmos/base/replace_species Tried to remove species from sites which is not there!"
-        print '(a,i,a,i)', "Attempted replacement:", old_species, "->", new_species
-        print '(a,i,a,i,a,i)', "Found species:", lattice(site),"on site", site,"at step",kmc_step
+        print '(a,i2,a,i2)', "Attempted replacement:", old_species, "->", new_species
+        print '(a,i2,a,i2,a,i2)', "Found species:", lattice(site),"on site", site,"at step",kmc_step
         print '(a)', "For a more human-readable error message, please run"
         print '(a)', "in a python console"
         print '(a)', "--"
@@ -1135,10 +1135,11 @@ subroutine interval_search_real(arr, value, return_field)
                 if(mid.ge.size(arr))then
                     print *,""
                     print *,""
-                    print *,"interval_search_real can't find available process"
-                    print *,"This usually means"
-                    print *,"that either you forgot to define rate constants or you defined"
-                    print *,"a dead-lock: e.g. adsorption without corresponding desorption."
+                    print *,"ERROR: interval_search_real can't find available process"
+                    print *,"This usually means one of the following:"
+                    print *," - you forgot to define rate constants"
+                    print *," - you create a dead-lock: e.g. adsorption without corresponding desorption."
+                    print *," - you started the model in an initial state without transitions"
                     stop
                 endif
                 exit nonzerosearch

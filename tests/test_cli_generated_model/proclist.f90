@@ -335,6 +335,12 @@ subroutine touchup_default_cus(site)
 
     integer(kind=iint), dimension(4), intent(in) :: site
 
+    if (can_do(CO_adsorption, site)) then
+        call del_proc(CO_adsorption, site)
+    endif
+    if (can_do(CO_desorption, site)) then
+        call del_proc(CO_desorption, site)
+    endif
     select case(get_species(site))
     case(CO)
         call add_proc(CO_desorption, site)
