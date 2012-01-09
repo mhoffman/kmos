@@ -117,14 +117,14 @@ or states each site can have and the elementary steps. Typically that
 changes most often while developing a model.
 
 The rate constants and physical parameters of the system are not implemented
-in the backend as all, since in the physical sense they are too high-level
+in the backend at all, since in the physical sense they are too high-level
 to justify encoding and compilation at the Fortran level and so they
 are typical read and parsed from a python script.
 
 
 The `kmos.run.KMC_Model` class implements a convenient interface for most of
 these functions, however all public methods (in Fortran called subroutines)
-and variables can also be accessed diretly like so ::
+and variables can also be accessed directly like so ::
 
   from kmos.run import KMC_Model
   model = KMC_Model(print_rates=False, banner=False)
