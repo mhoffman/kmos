@@ -81,7 +81,7 @@ Justification of the Algorithm
 ------------------------------
 
 Let's understand why this simulates a physical process.
-The Markow approximation mentioned above implies several things:
+The Markov approximation mentioned above implies several things:
 not only does it mean one can determine the next process from
 the current state. It also implies that all processes happen
 independently of one another because any memory of the system
