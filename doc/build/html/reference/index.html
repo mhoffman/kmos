@@ -496,6 +496,12 @@ portable way to control garbage collection.</p>
 <dd>Propagate the model <cite>n</cite> steps.</dd></dl>
 
 <dl class="method">
+<dt id="kmos.run.KMC_Model.double">
+<tt class="descname">double</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.double" title="Permalink to this definition">¶</a></dt>
+<dd>Double the size of the model in each direction and initialize
+larger model with current configuration in each copy.</dd></dl>
+
+<dl class="method">
 <dt id="kmos.run.KMC_Model.get_atoms">
 <tt class="descname">get_atoms</tt><big>(</big><em>geometry=True</em><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.get_atoms" title="Permalink to this definition">¶</a></dt>
 <dd>Return an ASE Atoms object with additional
@@ -515,6 +521,20 @@ Useful for the header line of an ASCII output.</dd></dl>
 <dd>Returns the names of the fields returned by
 self.get_atoms().tof_data.
 Useful for the header line of an ASCII output.</dd></dl>
+
+<dl class="method">
+<dt id="kmos.run.KMC_Model.halve">
+<tt class="descname">halve</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.halve" title="Permalink to this definition">¶</a></dt>
+<dd>Halve the size of the model and initialize each site in the new model
+with a species randomly drawn from the sites that are reduced onto
+one. It is necessary that the simulation size is even</dd></dl>
+
+<dl class="method">
+<dt id="kmos.run.KMC_Model.post_mortem">
+<tt class="descname">post_mortem</tt><big>(</big><em>steps=None</em>, <em>propagate=False</em>, <em>err_code=None</em><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.post_mortem" title="Permalink to this definition">¶</a></dt>
+<dd>Accepts an integer and generates a post-mortem report
+by running that many steps and returning which process
+would be executed next without executing it.</dd></dl>
 
 <dl class="method">
 <dt id="kmos.run.KMC_Model.put">
@@ -543,6 +563,20 @@ with proper Queues.</dd></dl>
 <dt id="kmos.run.KMC_Model.xml">
 <tt class="descname">xml</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.xml" title="Permalink to this definition">¶</a></dt>
 <dd>Returns the XML representation that this model was created from.</dd></dl>
+
+<dl class="method">
+<dt id="kmos.run.KMC_Model._get_configuration">
+<tt class="descname">_get_configuration</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model._get_configuration" title="Permalink to this definition">¶</a></dt>
+<dd>Return current configuration of model.</dd></dl>
+
+<dl class="method">
+<dt id="kmos.run.KMC_Model._set_configuration">
+<tt class="descname">_set_configuration</tt><big>(</big><em>config</em><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model._set_configuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the current lattice configuration.</p>
+<p>Expects a 4-dimensional array, with dimensions [X, Y, Z, N]
+where X, Y, Z are the lattice size and N the number of
+sites in each unit cell.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -654,6 +688,35 @@ the DTD below.</p>
 </div>
 <div class="section" id="backend">
 <h2>Backend<a class="headerlink" href="#backend" title="Permalink to this headline">¶</a></h2>
+<p>In general the backend includes all functions that are implemented in Fortran90,
+which therefore should not have to be changed by hand often. The backend is
+divided into three modules, which import each other in the following way</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">base</span> <span class="o">&lt;-</span> <span class="n">lattice</span> <span class="o">&lt;-</span> <span class="n">proclist</span>
+</pre></div>
+</div>
+<p>The key for this division is reusability of the code. The <cite>base</cite> module
+implement all aspects of the kMC code, which do not depend on the described
+model. Thus it &#8220;never&#8221; has to change. The <cite>latttice</cite> module basically
+repeats all methods of the <cite>base</cite> model in terms of lattice coordinates.
+Thus the <cite>lattice</cite> module only changes, when the geometry of the model
+changes, <em>e.g.</em> when you add or delete sites.
+The <cite>proclist</cite> module implements the process list, that is the species
+or states each site can have and the elementary steps. Typically that
+changes most often while developing a model.</p>
+<p>The rate constants and physical parameters of the system are not implemented
+in the backend at all, since in the physical sense they are too high-level
+to justify encoding and compilation at the Fortran level and so they
+are typical read and parsed from a python script.</p>
+<p>The <cite>kmos.run.KMC_Model</cite> class implements a convenient interface for most of
+these functions, however all public methods (in Fortran called subroutines)
+and variables can also be accessed directly like so</p>
+<div class="highlight-python"><pre>from kmos.run import KMC_Model
+model = KMC_Model(print_rates=False, banner=False)
+model.base.&lt;TAB&gt;
+model.lattice.&lt;TAB&gt;
+model.proclist.&lt;TAB&gt;</pre>
+</div>
+<p>which works best in conjunction with <a class="reference external" href="ipython.org">ipython</a>.</p>
 <div class="section" id="kmos-base">
 <h3>kmos/base<a class="headerlink" href="#kmos-base" title="Permalink to this headline">¶</a></h3>
 <blockquote>
@@ -1215,7 +1278,7 @@ for the given layer.</p>
       </ul>
     </div>
     <div class="footer">
-      &copy; Copyright 2009-2011, Max J. Hoffmann.
+      &copy; Copyright 2009-2012, Max J. Hoffmann.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
     </div>
   </body>

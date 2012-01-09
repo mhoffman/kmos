@@ -41,8 +41,8 @@ future.
 As a quick estimate consider a system with 100
 sites and 3 possible states for each site, thus having
 :math:`3^{100}` different configurations. The matrix
-to store all transition elements would have 
-:math:`(3^{100})^2 \approx 2.66\ 10^{95}` entries, which 
+to store all transition elements would have
+:math:`(3^{100})^2 \approx 2.66\ 10^{95}` entries, which
 exceeds the number of atoms on our planet by roughly 45 orders of
 magnitude. [1]_ And even though most of these elements
 would be zero since the number of accessible states is
@@ -56,11 +56,11 @@ configuration and figure out the next process as
 well as the time it takes to get there and obtain
 ensemble averages from time averages taken over
 a sufficiently long trajectory. The basic steps can
-be described as follows 
+be described as follows
 
 Basic Kinetic Carlo Algorithm
 -----------------------------
-  
+
   - Fix rate constants :math:`k_{ij}`
      initial state :math:`x_{i}`, and
      initial time :math:`t`
@@ -90,7 +90,7 @@ that rate constants simply add to a total rate, which is
 sometimes referred to as
 `Matthiessen's rule
 <http://en.wikipedia.org/wiki/Matthiessen%27s_rule#Matthiessen.27s_rule>`_,
-*viz* the rate with which *any* process occurs is simply 
+*viz* the rate with which *any* process occurs is simply
 :math:`\sum_{i}k_{i}`.
 
 First, one can show that the probability that :math:`n` such processes
@@ -107,7 +107,7 @@ is characterized by the probability that *zero* such processes have occured
 
 .. math::
   :label: poisson_0
-  
+
   P(0, t_{w}) = \mathrm{e}^{-k_{\mathrm{tot}} t_{w}},
 
 which, as expected, leads to an average waiting time of
@@ -115,7 +115,7 @@ which, as expected, leads to an average waiting time of
 .. math::
 
   \langle t_{w} \rangle = \frac{\int_{0}^{\infty}\mathrm{d}t_w\ t_w \mathrm{e}^{-k_{\mathrm{tot}} t_w}}
-                               {\int_{0}^{\infty}\mathrm{d}t_w\ \mathrm{e}^{-k_{\mathrm{tot}} t_w}} 
+                               {\int_{0}^{\infty}\mathrm{d}t_w\ \mathrm{e}^{-k_{\mathrm{tot}} t_w}}
                         = \frac{1}{k_{\mathrm{tot}}}.
 
 Therefore at  every step, we need to advance the time by a random number that

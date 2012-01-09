@@ -41,7 +41,7 @@ kmos.forms
 
 .. automodule:: kmos.forms
    :members: MetaForm, SpeciesListForm, SpeciesForm, ParameterForm,
-             LatticeForm, LayerEditor, SiteForm, ProcessForm, 
+             LatticeForm, LayerEditor, SiteForm, ProcessForm,
              parse_chemical_expression, BatchProcessForm
 
 
@@ -53,12 +53,27 @@ kmos.run
 ^^^^^^^^
 
 .. automodule:: kmos.run
-  
+
 .. autoclass:: kmos.run.KMC_Model
-  :members: deallocate, do_steps, get_atoms, get_occupation_header,
-            get_tof_header, parameters, print_rates, put, rate_constants,
-            run, start, view, xml
-  
+  :members: deallocate,
+            do_steps,
+            double,
+            get_atoms,
+            get_occupation_header,
+            get_tof_header,
+            halve,
+            parameters,
+            print_rates,
+            post_mortem,
+            put,
+            rate_constants,
+            run,
+            start,
+            view,
+            xml,
+            _get_configuration,
+            _set_configuration,
+
 
 kmos.view
 ^^^^^^^^^
@@ -84,6 +99,40 @@ the DTD below.
 
 Backend
 ========
+
+In general the backend includes all functions that are implemented in Fortran90,
+which therefore should not have to be changed by hand often. The backend is
+divided into three modules, which import each other in the following way ::
+
+  base <- lattice <- proclist
+
+The key for this division is reusability of the code. The `base` module
+implement all aspects of the kMC code, which do not depend on the described
+model. Thus it "never" has to change. The `latttice` module basically
+repeats all methods of the `base` model in terms of lattice coordinates.
+Thus the `lattice` module only changes, when the geometry of the model
+changes, *e.g.* when you add or delete sites.
+The `proclist` module implements the process list, that is the species
+or states each site can have and the elementary steps. Typically that
+changes most often while developing a model.
+
+The rate constants and physical parameters of the system are not implemented
+in the backend at all, since in the physical sense they are too high-level
+to justify encoding and compilation at the Fortran level and so they
+are typical read and parsed from a python script.
+
+
+The `kmos.run.KMC_Model` class implements a convenient interface for most of
+these functions, however all public methods (in Fortran called subroutines)
+and variables can also be accessed directly like so ::
+
+  from kmos.run import KMC_Model
+  model = KMC_Model(print_rates=False, banner=False)
+  model.base.<TAB>
+  model.lattice.<TAB>
+  model.proclist.<TAB>
+
+which works best in conjunction with `ipython <ipython.org>`_.
 
 .. include:: base.rst
 
