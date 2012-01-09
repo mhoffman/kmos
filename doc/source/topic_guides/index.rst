@@ -5,6 +5,7 @@ Topic Guides
 .. toctree::
   :maxdepth: 2
 
+  kmc_concept
   workflows
   data_models
   kmos_speed
