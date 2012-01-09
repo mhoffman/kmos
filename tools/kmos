@@ -36,12 +36,16 @@ usage['import'] = """kmos import <xml-file>
                         Takes a kmos xml-file and opens an ipython shell
                         with the project_tree imported as pt."""
 usage['export-view'] = """kmos export-view <xml-file>
-                        Exports an XML file, compiles and runs the simulation."""
+                        Exports an XML file, compiles and runs the simulation.
+                        """
 
 parser = optparse.OptionParser(
-    'Usage: %prog [help] (' + '|'.join(usage.keys()) + ') [options]' )
+    'Usage: %prog [help] (' + '|'.join(usage.keys()) + ') [options]')
 
-parser.add_option('-s', '--source-only', dest='source_only', action='store_true', default=False)
+parser.add_option('-s', '--source-only',
+                  dest='source_only',
+                  action='store_true',
+                  default=False)
 
 options, args = parser.parse_args()
 
@@ -71,7 +75,7 @@ elif args[0] == 'export':
         os.system('kmos-export-program -s %s %s' % (args[1], args[2]))
     else:
         os.system('kmos-export-program %s %s' % (args[1], args[2]))
-elif args[0] == 'import' :
+elif args[0] == 'import':
     import kmos.io
     try:
         from kmos.types import *
@@ -84,12 +88,14 @@ elif args[0] == 'import' :
     pt = kmos.io.import_xml(args[1])
     import IPython
     if hasattr(IPython, 'release') and \
-       map(int, IPython.release.version.split('.') ) >= [0, 11]:
+       map(int, IPython.release.version.split('.')) >= [0, 11]:
         from IPython.frontend.terminal.embed import InteractiveShellEmbed
-        InteractiveShellEmbed(banner1='Note: pt = kmos.io.import_xml(\'%s\')' % args[1])()
+        InteractiveShellEmbed(banner1='Note: pt = kmos.io.import_xml(\'%s\')'
+                              % args[1])()
     else:
         from IPython.Shell import IPShellEmbed
-        IPShellEmbed(banner='Note: pt = kmos.io.import_xml(\'%s\')' % args[1])()
+        IPShellEmbed(banner='Note: pt = kmos.io.import_xml(\'%s\')'
+                     % args[1])()
 elif args[0] == 'build':
     os.system('kmos-build')
 elif args[0] == 'view':
@@ -102,7 +108,7 @@ elif args[0] == 'benchmark':
     model = KMC_Model(print_rates=False, banner=False)
     time0 = time()
     model.do_steps(nsteps)
-    print('%s steps took %.2f seconds' % (nsteps, time()-time0))
+    print('%s steps took %.2f seconds' % (nsteps, time() - time0))
 elif args[0] == 'export-view':
     out_dir = os.path.splitext(args[1])[0]
     print('No export path provided. Exporting to %s' % out_dir)
@@ -120,7 +126,6 @@ elif args[0] == 'rebuild':
         exit()
 
     from kmos.run import KMC_Model
-
 
     model = KMC_Model(print_rates=False, banner=False)
 
