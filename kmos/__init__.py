@@ -135,7 +135,7 @@ def evaluate_rate_expression(rate_expr, parameters={}):
         rate_expr = tokenize.untokenize(replaced_tokens)
         try:
             rate_const = eval(rate_expr)
-        except Exception as e:
+        except Exception, e:
             raise UserWarning(
             "Could not evaluate rate expression: %s\nException: %s" \
                 % (rate_expr, e))

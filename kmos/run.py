@@ -228,6 +228,11 @@ class KMC_Model(multiprocessing.Process):
                     pass
                 elif signal.upper() == 'ATOMS':
                     self.image_queue.put(self.get_atoms())
+                elif signal.upper() == 'DOUBLE':
+                    self.double()
+                elif signal.upper() == 'HALVE':
+                    self.halve()
+
             if not self.parameter_queue.empty():
                 while not self.parameter_queue.empty():
                     parameters = self.parameter_queue.get()
@@ -584,7 +589,7 @@ def set_rate_constants(parameters=None, print_rates=True):
             if print_rates:
                 n = int(4 * log(rate_const))
                 print('%30s: %.3e s^{-1}: %s' % (proc, rate_const, '#' * n))
-        except Exception as e:
+        except Exception, e:
             raise UserWarning(
                 "Could not set %s for process %s!\nException: %s" \
                     % (rate_expr, proc, e))

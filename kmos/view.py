@@ -271,6 +271,10 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
             else:
                 self.signal_queue.put('START')
                 self.paused = False
+        elif event.string == 'd':
+            self.signal_queue.put('DOUBLE')
+        elif event.string == 'h':
+            self.signal_queue.put('HALVE')
 
     def scroll_event(self, window, event):
         """Zoom in/out when using mouse wheel"""

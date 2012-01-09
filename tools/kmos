@@ -110,6 +110,26 @@ elif args[0] == 'export-view':
     os.system('kmos-export-program %s %s' % (args[1], args[2]))
     os.chdir(out_dir)
     os.system('kmos-view')
+elif args[0] == 'rebuild':
+    if not os.path.exists('kmc_model.so'):
+        print('No kmc_model.so found, exiting.')
+        exit()
+
+    if not os.path.exists('kmc_settings.py'):
+        print('No kmc_settings.py found, exiting.')
+        exit()
+
+    from kmos.run import KMC_Model
+
+
+    model = KMC_Model(print_rates=False, banner=False)
+
+    f = file('model.xml', 'w')
+    f.write(model.xml())
+    f.close()
+
+    os.system('rm kmc_*')
+    os.system('kmos export model.xml .')
 
 else:
     parser.error('Command not understood.')
