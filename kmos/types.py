@@ -121,7 +121,6 @@ class Project(object):
         if kwargs:
             species = Species(**kwargs)
             self.species_list.append(species)
-            return species
 
         # if it is the first species and the
         # default species has not been set
@@ -130,13 +129,14 @@ class Project(object):
            not hasattr(self.species_list, 'default_species') :
             self.species_list.default_species = species.name
 
+        return species
+
     def add_layer(self, *layers, **kwargs):
         for layer in layers:
             self.layer_list.append(layer)
         if kwargs:
             layer = Layer(**kwargs)
             self.layer_list.append(layer)
-            return layer
 
         # if it is the first layer and default_layer
         # or substrate_layer have not been set
@@ -146,6 +146,7 @@ class Project(object):
                 self.layer_list.default_layer = layer.name
             if not hasattr(self.layer_list, 'substrate_layer'):
                 self.layer_list.substrate_layer = layer.name
+        return layer
     def __repr__(self):
         return self._get_xml_string()
 
