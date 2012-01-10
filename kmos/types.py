@@ -542,6 +542,7 @@ class Project(object):
                     raise UserWarning('Species %s used by %s in process %s is not defined' % (y.species, y, x.name))
 
         # check if all sites in processes are defined: actions, conditions
+        return True
     def print_statistics(self):
         get_name = lambda x: '_'.join(x.name.split('_')[:-1])
         ml = len(self.get_layers()) > 1
