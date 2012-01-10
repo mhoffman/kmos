@@ -31,10 +31,10 @@ this hardly excites surface scientists but we need to start somewhere, right?
 First you should instantiate a new project and fill in meta information ::
 
   pt = Project()
-  pt.meta.author = 'Your Name'
-  pt.meta.email = 'your.name@server.com'
-  pt.meta.model_name = 'MyFirstModel'
-  pt.meta.model_dimension = 2
+  pt.set_meta(author = 'Your Name',
+              email = 'your.name@server.com',
+              model_name = 'MyFirstModel',
+              model_dimension = 2,)
 
 
 Next you could add some species or states. Note that whichever
@@ -44,13 +44,13 @@ system will be initialized. Of course this can be changed later
 For surface science simulations it is useful to define an
 *empty* state, so we add ::
 
- pt.add_species(Species(name='empty'))
+ pt.add_species(name='empty')
 
 and some surface species. Given you want to simulate CO adsorption and
 desorption on a single crystal surface you would say ::
   
-  pt.add_species(Species(name='CO',
-                         representation="Atoms('CO',[[0,0,0],[0,0,1.2]])"))
+  pt.add_species(name='CO',
+                 representation="Atoms('CO',[[0,0,0],[0,0,1.2]])")
 
 where the string passed as `representation` is a string representing
 a CO molecule which can be evaluated in ASE namespace. 
@@ -117,8 +117,8 @@ First of all you want to define the external parameters to
 which our model is coupled. Here we use the temperature
 and the CO partial pressure::
 
-  pt.add_parameter(Parameter(name='T', value=600., adjustable=True, min=400, max=800))
-  pt.add_parameter(Parameter(name='p_CO', value=1., adjustable=True, min=1e-10, max=1.e2))
+  pt.add_parameter(name='T', value=600., adjustable=True, min=400, max=800)
+  pt.add_parameter(name='p_CO', value=1., adjustable=True, min=1e-10, max=1.e2)
 
 
 You can also set a default value and a minimum and maximum value
@@ -127,15 +127,15 @@ set defines how the scrollbars a behave later in the runtime GUI.
 To describe the adsorption rate constant you will need the area
 of the unit cell::
 
-  pt.add_parameter(Parameter(name='A',value='(3.5*angstrom)**2'))
+  pt.add_parameter(name='A',value='(3.5*angstrom)**2')
 
 Last but not least you need a binding energy of the particle on
 the surface. Since without further ado we have no value for the
 gas phase chemical potential, we'll just call it deltaG and keep
 it adjustable ::
 
-  pt.add_parameter(Parameter(name='deltaG', value='-0.5', adjustable=True,
-                             min=-1.3, max=0.3))
+  pt.add_parameter(name='deltaG', value='-0.5', adjustable=True,
+                             min=-1.3, max=0.3)
 
 To define processes we first need a coordinate [#coord_minilanguage]_  ::
   
@@ -150,10 +150,10 @@ So for example an adsorption requires at least one site to be empty
 (condition). Then this site can be occupied by CO (action) with a 
 rate constant. Written down in code this looks as follows ::
 
-  pt.add_process(Process(name='CO_adsorption',
+  pt.add_process(name='CO_adsorption',
                  condition_list=[Condition(coord=coord, species='empty')],
                  action_list=[Action(coord=coord, species='CO')],
-                 rate_constant='p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)'))
+                 rate_constant='p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)')
 
 Now you might wonder, how come we can simply use m_CO and beta and such.
 Well, that is because we evaluator will to some trickery to resolve such
@@ -164,10 +164,10 @@ that we need conversion factors of bar and umass.
 
 Then the desorption process is almost the same, except the reverse::
 
-  pt.add_process(Process(name='CO_desorption',
+  pt.add_process(name='CO_desorption',
                  condition_list=[Condition(coord=coord, species='CO')],
                  action_list=[Action(coord=coord, species='empty')],
-                 rate_constant='p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(-deltaG*eV)'))
+                 rate_constant='p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(-deltaG*eV)')
 
 
 And that is it!
