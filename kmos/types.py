@@ -204,10 +204,12 @@ class Project(object):
             lattice_elem.set('cell_size',
                              ' '.join([str(i)
                                        for i in self.layer_list.cell.flatten()]))
-            lattice_elem.set('default_layer',
-                             self.layer_list.default_layer)
-            lattice_elem.set('substrate_layer',
-                             self.layer_list.substrate_layer)
+            if hasattr(self.layer_list, 'default_layer'):
+                lattice_elem.set('default_layer',
+                                 self.layer_list.default_layer)
+            if hasattr(self.layer_list, 'substrate_layer'):
+                lattice_elem.set('substrate_layer',
+                                 self.layer_list.substrate_layer)
         if hasattr(self.layer_list, 'representation'):
             lattice_elem.set('representation', self.layer_list.representation)
         for layer in self.get_layers():
