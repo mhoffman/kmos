@@ -672,10 +672,6 @@ class LayerList(FixedObject, list):
                 raise UserWarning('%s not understood' % kwargs['cell'])
         else:
             self.cell = np.identity(3)
-        self.default_layer = kwargs['default_layer'] \
-            if 'default_layer' in kwargs else 'default'
-        self.substrate_layer = kwargs['substrate_layer'] \
-            if 'substrate_layer' in kwargs else 'default'
         self.representation = kwargs['representation'] \
             if 'representation' in kwargs else ''
 

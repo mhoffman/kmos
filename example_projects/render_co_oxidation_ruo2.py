@@ -22,7 +22,7 @@ pt.add_species(name='O',
                representation="Atoms('O')")
 
 # Layer/Sites
-layer = Layer(name='Ruo2')
+layer = Layer(name='ruo2')
 layer.sites.append(Site(name='bridge', pos='0.0 0.5 0.5'))
 layer.sites.append(Site(name='cus', pos='0.5 0.5 0.5'))
 
@@ -66,19 +66,19 @@ pt.add_parameter(name='E_Odiff_cus_bridge', value=1.0)
 
 # Coordinates
 
-cus = pt.lattice.generate_coord('cus.(0,0,0).Ruo2')
-cus_right = pt.lattice.generate_coord('bridge.(0,0,0).Ruo2')
-cus_left = pt.lattice.generate_coord('bridge.(-1,0,0).Ruo2')
+cus = pt.lattice.generate_coord('cus.(0,0,0).ruo2')
+cus_right = pt.lattice.generate_coord('bridge.(0,0,0).ruo2')
+cus_left = pt.lattice.generate_coord('bridge.(-1,0,0).ruo2')
 
-cus_up = pt.lattice.generate_coord('cus.(0,1,0).Ruo2')
-cus_down = pt.lattice.generate_coord('cus.(0,-1,0).Ruo2')
+cus_up = pt.lattice.generate_coord('cus.(0,1,0).ruo2')
+cus_down = pt.lattice.generate_coord('cus.(0,-1,0).ruo2')
 
-bridge = pt.lattice.generate_coord('bridge.(0,0,0).Ruo2')
-bridge_right = pt.lattice.generate_coord('cus.(1,0,0).Ruo2')
-bridge_left = pt.lattice.generate_coord('cus.(0,0,0).Ruo2')
+bridge = pt.lattice.generate_coord('bridge.(0,0,0).ruo2')
+bridge_right = pt.lattice.generate_coord('cus.(1,0,0).ruo2')
+bridge_left = pt.lattice.generate_coord('cus.(0,0,0).ruo2')
 
-bridge_up = pt.lattice.generate_coord('bridge.(0,1,0).Ruo2')
-bridge_down = pt.lattice.generate_coord('bridge.(0,-1,0).Ruo2')
+bridge_up = pt.lattice.generate_coord('bridge.(0,1,0).ruo2')
+bridge_down = pt.lattice.generate_coord('bridge.(0,-1,0).ruo2')
 
 # Processes
 
@@ -90,7 +90,7 @@ pt.add_process(name='CO_adsorption_cus',
 pt.add_process(name='CO_desorption_cus',
                conditions=[Condition(species='CO', coord=cus)],
                actions=[Action(species='empty', coord=cus)],
-               rate_constant='p_COgas*bar*A/2/sqrt(2*pi*umass*m_CO/beta)*exp(beta*(mu_COgas-E_CO_cus)*eV)')
+               rate_constant='p_COgas*bar*A/2/sqrt(2*pi*umass*m_CO/beta)*exp(beta*(E_CO_cus-mu_COgas)*eV)')
 
 pt.add_process(name='CO_adsorption_bridge',
                conditions=[Condition(species='empty', coord=bridge)],
@@ -99,7 +99,7 @@ pt.add_process(name='CO_adsorption_bridge',
 pt.add_process(name='CO_desorption_bridge',
                conditions=[Condition(species='CO', coord=bridge)],
                actions=[Action(species='empty', coord=bridge)],
-               rate_constant='p_COgas*bar*A/2/sqrt(2*pi*umass*m_CO/beta)*exp(beta*(mu_COgas-E_CO_bridge)*eV)')
+               rate_constant='p_COgas*bar*A/2/sqrt(2*pi*umass*m_CO/beta)*exp(beta*(E_CO_bridge-mu_COgas)*eV)')
 
 # CO diffusion
 
@@ -109,14 +109,14 @@ pt.add_process(name='COdiff_cus_up',
                            Condition(species='empty', coord=cus_up)],
                actions=[Condition(species='empty', coord=cus),
                         Condition(species='CO', coord=cus_up)],
-                rate_constant='(beta*h)**(-1)*exp(beta*(E_COdiff_cus_cus)*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*(E_COdiff_cus_cus)*eV)')
 
 pt.add_process(name='COdiff_cus_down',
                conditions=[Condition(species='CO', coord=cus),
                            Condition(species='empty', coord=cus_down)],
                actions=[Condition(species='empty', coord=cus),
                         Condition(species='CO', coord=cus_down)],
-                rate_constant='(beta*h)**(-1)*exp(beta*(E_COdiff_cus_cus)*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*(E_COdiff_cus_cus)*eV)')
 
 
 # bridge/bridge
@@ -125,27 +125,27 @@ pt.add_process(name='COdiff_bridge_up',
                            Condition(species='empty', coord=bridge_up)],
                actions=[Condition(species='empty', coord=bridge),
                         Condition(species='CO', coord=bridge_up)],
-                rate_constant='(beta*h)**(-1)*exp(beta*(E_COdiff_bridge_bridge)*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*(E_COdiff_bridge_bridge)*eV)')
 pt.add_process(name='COdiff_bridge_down',
                conditions=[Condition(species='CO', coord=bridge),
                            Condition(species='empty', coord=bridge_down)],
                actions=[Condition(species='empty', coord=bridge),
                         Condition(species='CO', coord=bridge_down)],
-                rate_constant='(beta*h)**(-1)*exp(beta*(E_COdiff_bridge_bridge)*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*(E_COdiff_bridge_bridge)*eV)')
 # bridge/cus
 pt.add_process(name='COdiff_bridge_right',
                conditions=[Condition(species='CO', coord=bridge),
                            Condition(species='empty', coord=bridge_right)],
                actions=[Condition(species='empty', coord=bridge),
                         Condition(species='CO', coord=bridge_right)],
-                rate_constant='(beta*h)**(-1)*exp(beta*(E_COdiff_bridge_cus)*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*(E_COdiff_bridge_cus)*eV)')
 
 pt.add_process(name='COdiff_bridge_left',
                conditions=[Condition(species='CO', coord=bridge),
                            Condition(species='empty', coord=bridge_left)],
                actions=[Condition(species='empty', coord=bridge),
                         Condition(species='CO', coord=bridge_left)],
-                rate_constant='(beta*h)**(-1)*exp(beta*(E_COdiff_bridge_cus)*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*(E_COdiff_bridge_cus)*eV)')
 
 # bridge/cus
 pt.add_process(name='COdiff_cus_left',
@@ -153,14 +153,14 @@ pt.add_process(name='COdiff_cus_left',
                            Condition(species='empty', coord=cus_left)],
                actions=[Condition(species='empty', coord=cus),
                         Condition(species='CO', coord=cus_left)],
-                rate_constant='(beta*h)**(-1)*exp(beta*(E_COdiff_cus_bridge)*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*(E_COdiff_cus_bridge)*eV)')
 
 pt.add_process(name='COdiff_cus_right',
                conditions=[Condition(species='CO', coord=cus),
                            Condition(species='empty', coord=cus_right)],
                actions=[Condition(species='empty', coord=cus),
                         Condition(species='CO', coord=cus_right)],
-                rate_constant='(beta*h)**(-1)*exp(beta*(E_COdiff_cus_bridge)*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*(E_COdiff_cus_bridge)*eV)')
 
 
 
@@ -180,7 +180,7 @@ pt.add_process(name='O2_desorption_cus_up',
                         Condition(species='O', coord=cus_up),],
                actions=[Condition(species='empty', coord=cus),
                         Condition(species='empty', coord=cus_up),],
-               rate_constant='p_O2gas*bar*A/sqrt(2*pi*umass*m_O2/beta)*exp(beta*(mu_O2gas-2*E_O_cus)*eV)')
+               rate_constant='p_O2gas*bar*A/sqrt(2*pi*umass*m_O2/beta)*exp(beta*(2*E_O_cus-mu_O2gas)*eV)')
 
 pt.add_process(name='O2_adsorption_cus_right',
                conditions=[Condition(species='empty', coord=cus),
@@ -194,7 +194,7 @@ pt.add_process(name='O2_desorption_cus_right',
                         Condition(species='O', coord=cus_right),],
                actions=[Condition(species='empty', coord=cus),
                         Condition(species='empty', coord=cus_right),],
-               rate_constant='p_O2gas*bar*A/sqrt(2*pi*umass*m_O2/beta)*exp(beta*(mu_O2gas-(E_O_cus+E_O_bridge))*eV)')
+               rate_constant='p_O2gas*bar*A/sqrt(2*pi*umass*m_O2/beta)*exp(beta*((E_O_cus+E_O_bridge)-mu_O2gas)*eV)')
 
 pt.add_process(name='O2_adsorption_bridge_up',
                conditions=[Condition(species='empty', coord=bridge),
@@ -208,7 +208,7 @@ pt.add_process(name='O2_desorption_bridge_up',
                         Condition(species='O', coord=bridge_up),],
                actions=[Condition(species='empty', coord=bridge),
                         Condition(species='empty', coord=bridge_up),],
-               rate_constant='p_O2gas*bar*A/sqrt(2*pi*umass*m_O2/beta)*exp(beta*(mu_O2gas-2*E_O_bridge)*eV)')
+               rate_constant='p_O2gas*bar*A/sqrt(2*pi*umass*m_O2/beta)*exp(beta*(2*E_O_bridge-mu_O2gas)*eV)')
 
 pt.add_process(name='O2_adsorption_bridge_right',
                conditions=[Condition(species='empty', coord=bridge),
@@ -222,7 +222,7 @@ pt.add_process(name='O2_desorption_bridge_right',
                         Condition(species='O', coord=bridge_right),],
                actions=[Condition(species='empty', coord=bridge),
                         Condition(species='empty', coord=bridge_right),],
-               rate_constant='p_O2gas*bar*A/sqrt(2*pi*umass*m_O2/beta)*exp(beta*(mu_O2gas-(E_O_bridge+E_O_cus))*eV)')
+               rate_constant='p_O2gas*bar*A/sqrt(2*pi*umass*m_O2/beta)*exp(beta*((E_O_bridge+E_O_cus)-mu_O2gas)*eV)')
 
 
 # O diffusion
@@ -233,14 +233,14 @@ pt.add_process(name='Odiff_cus_up',
                            Condition(species='empty', coord=cus_up)],
                actions=[Condition(species='empty', coord=cus),
                         Condition(species='O', coord=cus_up)],
-                rate_constant='(beta*h)**(-1)*exp(beta*(E_Odiff_cus_cus)*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*(E_Odiff_cus_cus)*eV)')
 
 pt.add_process(name='Odiff_cus_down',
                conditions=[Condition(species='O', coord=cus),
                            Condition(species='empty', coord=cus_down)],
                actions=[Condition(species='empty', coord=cus),
                         Condition(species='O', coord=cus_down)],
-                rate_constant='(beta*h)**(-1)*exp(beta*(E_Odiff_cus_cus)*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*(E_Odiff_cus_cus)*eV)')
 
 
 # bridge/bridge
@@ -249,27 +249,27 @@ pt.add_process(name='Odiff_bridge_up',
                            Condition(species='empty', coord=bridge_up)],
                actions=[Condition(species='empty', coord=bridge),
                         Condition(species='O', coord=bridge_up)],
-                rate_constant='(beta*h)**(-1)*exp(beta*(E_Odiff_bridge_bridge)*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*(E_Odiff_bridge_bridge)*eV)')
 pt.add_process(name='Odiff_bridge_down',
                conditions=[Condition(species='O', coord=bridge),
                            Condition(species='empty', coord=bridge_down)],
                actions=[Condition(species='empty', coord=bridge),
                         Condition(species='O', coord=bridge_down)],
-                rate_constant='(beta*h)**(-1)*exp(beta*(E_Odiff_bridge_bridge)*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*(E_Odiff_bridge_bridge)*eV)')
 # bridge/cus
 pt.add_process(name='Odiff_bridge_right',
                conditions=[Condition(species='O', coord=bridge),
                            Condition(species='empty', coord=bridge_right)],
                actions=[Condition(species='empty', coord=bridge),
                         Condition(species='O', coord=bridge_right)],
-                rate_constant='(beta*h)**(-1)*exp(beta*(E_Odiff_bridge_cus)*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*(E_Odiff_bridge_cus)*eV)')
 
 pt.add_process(name='Odiff_bridge_left',
                conditions=[Condition(species='O', coord=bridge),
                            Condition(species='empty', coord=bridge_left)],
                actions=[Condition(species='empty', coord=bridge),
                         Condition(species='O', coord=bridge_left)],
-                rate_constant='(beta*h)**(-1)*exp(beta*(E_Odiff_bridge_cus)*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*(E_Odiff_bridge_cus)*eV)')
 
 # bridge/cus
 pt.add_process(name='Odiff_cus_left',
@@ -277,14 +277,14 @@ pt.add_process(name='Odiff_cus_left',
                            Condition(species='empty', coord=cus_left)],
                actions=[Condition(species='empty', coord=cus),
                         Condition(species='O', coord=cus_left)],
-                rate_constant='(beta*h)**(-1)*exp(beta*(E_Odiff_cus_bridge)*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*(E_Odiff_cus_bridge)*eV)')
 
 pt.add_process(name='Odiff_cus_right',
                conditions=[Condition(species='O', coord=cus),
                            Condition(species='empty', coord=cus_right)],
                actions=[Condition(species='empty', coord=cus),
                         Condition(species='O', coord=cus_right)],
-                rate_constant='(beta*h)**(-1)*exp(beta*(E_Odiff_cus_bridge)*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*(E_Odiff_cus_bridge)*eV)')
 
 
 # Reaction
@@ -293,54 +293,62 @@ pt.add_process(name='React_cus_up',
                            Condition(species='CO', coord=cus_up)],
                actions=[Action(species='empty', coord=cus),
                         Action(species='empty', coord=cus_up)],
-                rate_constant='(beta*h)**(-1)*exp(-beta*E_react_Ocus_COcus*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*E_react_Ocus_COcus*eV)',
+                tof_count={'CO_oxidation':1})
 
 pt.add_process(name='React_cus_down',
                conditions=[Condition(species='O', coord=cus),
                            Condition(species='CO', coord=cus_down)],
                actions=[Action(species='empty', coord=cus),
                         Action(species='empty', coord=cus_down)],
-                rate_constant='(beta*h)**(-1)*exp(-beta*E_react_Ocus_COcus*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*E_react_Ocus_COcus*eV)',
+                tof_count={'CO_oxidation':1})
 
 pt.add_process(name='React_cus_right',
                conditions=[Condition(species='O', coord=cus),
                            Condition(species='CO', coord=cus_right)],
                actions=[Action(species='empty', coord=cus),
                         Action(species='empty', coord=cus_right)],
-                rate_constant='(beta*h)**(-1)*exp(-beta*E_react_Ocus_CObridge*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*E_react_Ocus_CObridge*eV)',
+                tof_count={'CO_oxidation':1})
 
 pt.add_process(name='React_cus_left',
                conditions=[Condition(species='O', coord=cus),
                            Condition(species='CO', coord=cus_left)],
                actions=[Action(species='empty', coord=cus),
                         Action(species='empty', coord=cus_left)],
-                rate_constant='(beta*h)**(-1)*exp(-beta*E_react_Ocus_CObridge*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*E_react_Ocus_CObridge*eV)',
+                tof_count={'CO_oxidation':1})
 
 pt.add_process(name='React_bridge_up',
                conditions=[Condition(species='O', coord=bridge),
                            Condition(species='CO', coord=bridge_up)],
                actions=[Action(species='empty', coord=bridge),
                         Action(species='empty', coord=bridge_up)],
-                rate_constant='(beta*h)**(-1)*exp(-beta*E_react_Obridge_CObridge*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*E_react_Obridge_CObridge*eV)',
+                tof_count={'CO_oxidation':1})
 pt.add_process(name='React_bridge_down',
                conditions=[Condition(species='O', coord=bridge),
                            Condition(species='CO', coord=bridge_down)],
                actions=[Action(species='empty', coord=bridge),
                         Action(species='empty', coord=bridge_down)],
-                rate_constant='(beta*h)**(-1)*exp(-beta*E_react_Obridge_CObridge*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*E_react_Obridge_CObridge*eV)',
+                tof_count={'CO_oxidation':1})
 pt.add_process(name='React_bridge_right',
                conditions=[Condition(species='O', coord=bridge),
                            Condition(species='CO', coord=bridge_right)],
                actions=[Action(species='empty', coord=bridge),
                         Action(species='empty', coord=bridge_right)],
-                rate_constant='(beta*h)**(-1)*exp(-beta*E_react_Obridge_COcus*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*E_react_Obridge_COcus*eV)',
+                tof_count={'CO_oxidation':1})
 
 pt.add_process(name='React_bridge_left',
                conditions=[Condition(species='O', coord=bridge),
                            Condition(species='CO', coord=bridge_left)],
                actions=[Action(species='empty', coord=bridge),
                         Action(species='empty', coord=bridge_left)],
-                rate_constant='(beta*h)**(-1)*exp(-beta*E_react_Obridge_COcus*eV)')
+                rate_constant='(beta*h)**(-1)*exp(-beta*E_react_Obridge_COcus*eV)',
+                tof_count={'CO_oxidation':1})
 
 
 
