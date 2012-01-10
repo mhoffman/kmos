@@ -117,6 +117,7 @@ elif args[0] == 'export-view':
     os.chdir(out_dir)
     os.system('kmos-view')
 elif args[0] == 'rebuild':
+    from tempfile import mktemp
     if not os.path.exists('kmc_model.so'):
         print('No kmc_model.so found, exiting.')
         exit()
@@ -129,12 +130,15 @@ elif args[0] == 'rebuild':
 
     model = KMC_Model(print_rates=False, banner=False)
 
-    f = file('model.xml', 'w')
+    tempfile = mktemp()
+    f = file(tempfile, 'w')
     f.write(model.xml())
     f.close()
 
     os.system('rm kmc_*')
-    os.system('kmos export model.xml .')
+    os.system('kmos export %s .' % tempfile)
+    os.remove(tempfile)
+
 
 else:
     parser.error('Command not understood.')
