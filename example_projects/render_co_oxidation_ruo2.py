@@ -23,12 +23,13 @@ pt.add_species(name='O',
 
 # Layer/Sites
 layer = Layer(name='ruo2')
-layer.sites.append(Site(name='bridge', pos='0.0 0.5 0.5'))
-layer.sites.append(Site(name='cus', pos='0.5 0.5 0.5'))
+layer.sites.append(Site(name='bridge', pos='0.0 0.5 0.7'))
+layer.sites.append(Site(name='cus', pos='0.5 0.5 0.7'))
 
 pt.add_layer(layer)
 
-pt.lattice.cell = np.diag([6.43, 3.12, 10])
+pt.lattice.representation = """[Atoms(symbols='O11Ru6',\n          pbc=np.array([False, False, False], dtype=bool),\n          cell=np.array(\n      [[  6.39 ,   0.   ,   0.   ],\n       [  0.   ,   3.116,   0.   ],\n       [  0.   ,   0.   ,  20.   ]]),\n          scaled_positions=np.array(\n      [[-0.        ,  0.50007885,  0.26035664],\n       [ 0.69420673,  0.        ,  0.31692564],\n       [ 0.30581593,  0.        ,  0.31692564],\n       [-0.        ,  0.50007885,  0.3814254 ],\n       [ 0.50001133,  0.50007885,  0.41721538],\n       [ 0.1941954 ,  0.        ,  0.47926097],\n       [ 0.80582726,  0.        ,  0.47926097],\n       [ 0.50001133,  0.50007885,  0.54130656],\n       [-0.        ,  0.50007885,  0.57696872],\n       [ 0.69420673,  0.        ,  0.63901431],\n       [ 0.30581593,  0.        ,  0.63901431],\n       [-0.        ,  0.        ,  0.31502134],\n       [ 0.50001133,  0.50007885,  0.32362425],\n       [-0.        ,  0.50007885,  0.47926097],\n       [ 0.50001133,  0.        ,  0.47926097],\n       [-0.        ,  0.        ,  0.63901431],\n       [ 0.50001133,  0.50007885,  0.63901431]]))]"""
+pt.lattice.cell = np.diag([6.43, 3.12, 20])
 
 # Parameters
 
