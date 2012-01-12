@@ -15,10 +15,12 @@ pt.set_meta(author='Max J. Hoffmann',
             model_dimension=2)
 
 # Species
-pt.add_species(name='empty')
+pt.add_species(name='empty', color='#ffffff')
 pt.add_species(name='CO',
+               color='#000000',
                representation="Atoms('CO',[[0,0,0],[0,0,1.2]])")
 pt.add_species(name='O',
+               color='#ff0000',
                representation="Atoms('O')")
 
 # Layer/Sites
@@ -68,15 +70,15 @@ pt.add_parameter(name='E_Odiff_cus_bridge', value=1.0)
 # Coordinates
 
 cus = pt.lattice.generate_coord('cus.(0,0,0).ruo2')
-cus_right = pt.lattice.generate_coord('bridge.(0,0,0).ruo2')
-cus_left = pt.lattice.generate_coord('bridge.(-1,0,0).ruo2')
+cus_right = pt.lattice.generate_coord('bridge.(1,0,0).ruo2')
+cus_left = pt.lattice.generate_coord('bridge.(0,0,0).ruo2')
 
 cus_up = pt.lattice.generate_coord('cus.(0,1,0).ruo2')
 cus_down = pt.lattice.generate_coord('cus.(0,-1,0).ruo2')
 
 bridge = pt.lattice.generate_coord('bridge.(0,0,0).ruo2')
-bridge_right = pt.lattice.generate_coord('cus.(1,0,0).ruo2')
-bridge_left = pt.lattice.generate_coord('cus.(0,0,0).ruo2')
+bridge_right = pt.lattice.generate_coord('cus.(0,0,0).ruo2')
+bridge_left = pt.lattice.generate_coord('cus.(-1,0,0).ruo2')
 
 bridge_up = pt.lattice.generate_coord('bridge.(0,1,0).ruo2')
 bridge_down = pt.lattice.generate_coord('bridge.(0,-1,0).ruo2')
