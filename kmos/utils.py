@@ -88,6 +88,9 @@ def get_ase_constructor(atoms):
 
 
 def product(*args, **kwds):
+    """Take two lists and return iterator producing
+    all combinations of tuples between elements
+    of the two lists."""
     # product('ABCD', 'xy') --> Ax Ay Bx By Cx Cy Dx Dy
     # product(range(2), repeat=3) --> 000 001 010 011 100 101 110 111
     pools = map(tuple, args) * kwds.get('repeat', 1)
@@ -96,3 +99,14 @@ def product(*args, **kwds):
         result = [x+[y] for x in result for y in pool]
     for prod in result:
         yield tuple(prod)
+
+
+def split_seq(seq, size):
+    """Take a list and a number n and return list
+       divided into n sublists of roughly equal size.
+    """
+    newseq = []
+    splitsize = 1.0/size*len(seq)
+    for i in range(size):
+            newseq.append(seq[int(round(i*splitsize)):int(round((i+1)*splitsize))])
+    return newseq
