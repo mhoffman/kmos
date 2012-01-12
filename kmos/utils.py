@@ -101,7 +101,7 @@ def product(*args, **kwds):
         yield tuple(prod)
 
 
-def split_seq(seq, size):
+def split_sequence(seq, size):
     """Take a list and a number n and return list
        divided into n sublists of roughly equal size.
     """
