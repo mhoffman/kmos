@@ -120,7 +120,7 @@ and runs the simulation for each ::
           model.deallocate()
 
 
-In order to split our fill range of input parameters, we
+In order to split our full range of input parameters, we
 can use a utility function ::
 
   from kmos.utils import split_sequence
