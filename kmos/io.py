@@ -70,44 +70,43 @@ class ProcListWriter():
         out = open(os.path.join(self.dir, 'lattice.f90'), 'w')
         out.write(self._gpl_message())
         out.write('!****h* kmos/lattice\n')
-        out.write('! FUNCTION\n')
-        out.write('!    Implements the mappings between the real space lattice\n')
-        out.write('!    and the 1-D lattice, which kmos/base operates on.\n')
-        out.write('!    Furthermore replicates all geometry specific functions of kmos/base\n')
-        out.write('!    in terms of lattice coordinates.\n')
-        out.write('!    Using this module each site can be addressed with 4-tuple\n')
-        out.write('!    ``(i, j, k, n)`` where ``i, j, k`` define the unit cell and\n')
-        out.write('!    ``n`` the site within the unit cell.\n')
-        out.write('!\n')
-        out.write('!******\n')
-        out.write('\n\nmodule lattice\n')
-        out.write('use kind_values\n')
-        out.write('use base, only: &\n')
-        out.write('    assertion_fail, &\n')
-        out.write('    base_deallocate_system => deallocate_system, &\n')
-        out.write('    get_kmc_step, &\n')
-        out.write('    get_kmc_time, &\n')
-        out.write('    get_kmc_time_step, &\n')
-        out.write('    get_rate, &\n')
-        out.write('    increment_procstat, &\n')
-        out.write('    base_add_proc => add_proc, &\n')
-        out.write('    base_reset_site => reset_site, &\n')
-        out.write('    base_allocate_system => allocate_system, &\n')
-        out.write('    base_can_do => can_do, &\n')
-        out.write('    base_del_proc => del_proc, &\n')
-        out.write('    determine_procsite, &\n')
-        out.write('    base_replace_species => replace_species, &\n')
-        out.write('    base_get_species => get_species, &\n')
-        out.write('    base_get_volume => get_volume, &\n')
-        out.write('    reload_system => reload_system, &\n')
-        out.write('    save_system, &\n')
-        out.write('    assertion_fail, &\n')
-        out.write('    null_species, &\n')
-        out.write('    set_rate_const, &\n')
-        out.write('    update_accum_rate, &\n')
-        out.write('    update_clocks\n\n')
-
-        out.write('\n\nimplicit none\n\n')
+        out.write('! FUNCTION\n'
+                  '!    Implements the mappings between the real space lattice\n'
+                  '!    and the 1-D lattice, which kmos/base operates on.\n'
+                  '!    Furthermore replicates all geometry specific functions of kmos/base\n'
+                  '!    in terms of lattice coordinates.\n'
+                  '!    Using this module each site can be addressed with 4-tuple\n'
+                  '!    ``(i, j, k, n)`` where ``i, j, k`` define the unit cell and\n'
+                  '!    ``n`` the site within the unit cell.\n'
+                  '!\n'
+                  '!******\n'
+                  '\n\nmodule lattice\n'
+                  'use kind_values\n'
+                  'use base, only: &\n'
+                  '    assertion_fail, &\n'
+                  '    base_deallocate_system => deallocate_system, &\n'
+                  '    get_kmc_step, &\n'
+                  '    get_kmc_time, &\n'
+                  '    get_kmc_time_step, &\n'
+                  '    get_rate, &\n'
+                  '    increment_procstat, &\n'
+                  '    base_add_proc => add_proc, &\n'
+                  '    base_reset_site => reset_site, &\n'
+                  '    base_allocate_system => allocate_system, &\n'
+                  '    base_can_do => can_do, &\n'
+                  '    base_del_proc => del_proc, &\n'
+                  '    determine_procsite, &\n'
+                  '    base_replace_species => replace_species, &\n'
+                  '    base_get_species => get_species, &\n'
+                  '    base_get_volume => get_volume, &\n'
+                  '    reload_system => reload_system, &\n'
+                  '    save_system, &\n'
+                  '    assertion_fail, &\n'
+                  '    null_species, &\n'
+                  '    set_rate_const, &\n'
+                  '    update_accum_rate, &\n'
+                  '    update_clocks\n\n'
+                  '\n\nimplicit none\n\n')
 
         # define module wide variables
 
@@ -140,48 +139,48 @@ class ProcListWriter():
         # For reasons of performance (modulo operation is usually considered expensive)
         # we write slightly different versions for d=1,2,3
         # where the lower dimension version simply ignore some fields
-        out.write('pure function calculate_lattice2nr(site)\n\n')
-        out.write('!****f* lattice/calculate_lattice2nr\n')
-        out.write('! FUNCTION\n')
-        out.write('!    Maps all lattice coordinates onto a continuous\n')
-        out.write('!    set of integer :math:`\\in [1,volume]`\n')
-        out.write('!\n')
-        out.write('! ARGUMENTS\n')
-        out.write('!\n')
-        out.write('!    - ``site`` integer array of size (4) a lattice coordinate\n')
-        out.write('!******\n')
-        out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n')
-        out.write('    integer(kind=iint) :: calculate_lattice2nr\n\n')
-        out.write('    ! site = (x,y,z,local_index)\n')
+        out.write('pure function calculate_lattice2nr(site)\n\n'
+                  '!****f* lattice/calculate_lattice2nr\n'
+                  '! FUNCTION\n'
+                  '!    Maps all lattice coordinates onto a continuous\n'
+                  '!    set of integer :math:`\\in [1,volume]`\n'
+                  '!\n'
+                  '! ARGUMENTS\n'
+                  '!\n'
+                  '!    - ``site`` integer array of size (4) a lattice coordinate\n'
+                  '!******\n'
+                  '    integer(kind=iint), dimension(4), intent(in) :: site\n'
+                  '    integer(kind=iint) :: calculate_lattice2nr\n\n'
+                  '    ! site = (x,y,z,local_index)\n')
 
         if data.meta.model_dimension == 1:
             out.write('    calculate_lattice2nr = spuck*(modulo(site(1), system_size(1)))+site(4)')
         elif data.meta.model_dimension == 2:
             out.write('    calculate_lattice2nr = spuck*(&\n'
-                + '      modulo(site(1), system_size(1))&\n'
-                + '      + system_size(1)*modulo(site(2), system_size(2)))&\n'
-                + '      + site(4)\n')
+                  '      modulo(site(1), system_size(1))&\n'
+                  '      + system_size(1)*modulo(site(2), system_size(2)))&\n'
+                  '      + site(4)\n')
         elif data.meta.model_dimension == 3:
             out.write('    calculate_lattice2nr = spuck*(&\n'
-                + '      modulo(site(1), system_size(1))&\n'
-                + '      + system_size(1)*modulo(site(2), system_size(2))&\n'
-                + '      + system_size(1)*system_size(2)*modulo(site(3), system_size(3)))&\n'
-                + '      + site(4)\n')
+                  '      modulo(site(1), system_size(1))&\n'
+                  '      + system_size(1)*modulo(site(2), system_size(2))&\n'
+                  '      + system_size(1)*system_size(2)*modulo(site(3), system_size(3)))&\n'
+                  '      + site(4)\n')
         out.write('\nend function calculate_lattice2nr\n\n')
 
-        out.write('pure function calculate_nr2lattice(nr)\n\n')
-        out.write('!****f* lattice/calculate_nr2lattice\n')
-        out.write('! FUNCTION\n')
-        out.write('!    Maps a continuous set of\n')
-        out.write('!    of integers :math:`\\in [1,volume]` to a\n')
-        out.write('!    4-tuple representing a lattice coordinate\n')
-        out.write('!\n')
-        out.write('! ARGUMENTS\n')
-        out.write('!\n')
-        out.write('!    - ``nr`` integer representing the site index\n')
-        out.write('!******\n')
-        out.write('    integer(kind=iint), intent(in) :: nr\n')
-        out.write('    integer(kind=iint), dimension(4) :: calculate_nr2lattice\n\n')
+        out.write('pure function calculate_nr2lattice(nr)\n\n'
+                  '!****f* lattice/calculate_nr2lattice\n'
+                  '! FUNCTION\n'
+                  '!    Maps a continuous set of\n'
+                  '!    of integers :math:`\\in [1,volume]` to a\n'
+                  '!    4-tuple representing a lattice coordinate\n'
+                  '!\n'
+                  '! ARGUMENTS\n'
+                  '!\n'
+                  '!    - ``nr`` integer representing the site index\n'
+                  '!******\n'
+                  '    integer(kind=iint), intent(in) :: nr\n'
+                  '    integer(kind=iint), dimension(4) :: calculate_nr2lattice\n\n')
 
         if data.meta.model_dimension == 3:
             out.write('    calculate_nr2lattice(3) = (nr - 1) /  (system_size(1)*system_size(2)*spuck)\n')
@@ -205,22 +204,22 @@ class ProcListWriter():
         # allocate system replicates the base_allocate function
         # tests the lattice mappings for correctness
         # and initialized a lot more parameter type of data
-        out.write('subroutine allocate_system(nr_of_proc, input_system_size, system_name)\n\n')
-        out.write('!****f* lattice/allocate_system\n')
-        out.write('! FUNCTION\n')
-        out.write('!    Allocates system, fills mapping cache, and\n')
-        out.write('!    checks whether mapping is consistent\n')
-        out.write('!\n')
-        out.write('! ARGUMENTS\n')
-        out.write('!\n')
-        out.write('!    ``none``\n')
-        out.write('!******\n')
-        out.write('    integer(kind=iint), intent(in) :: nr_of_proc\n')
+        out.write('subroutine allocate_system(nr_of_proc, input_system_size, system_name)\n\n'
+                  '!****f* lattice/allocate_system\n'
+                  '! FUNCTION\n'
+                  '!    Allocates system, fills mapping cache, and\n'
+                  '!    checks whether mapping is consistent\n'
+                  '!\n'
+                  '! ARGUMENTS\n'
+                  '!\n'
+                  '!    ``none``\n'
+                  '!******\n'
+                  '    integer(kind=iint), intent(in) :: nr_of_proc\n')
         out.write('    integer(kind=iint), dimension(%s), intent(in) :: input_system_size\n' % data.meta.model_dimension)
-        out.write('    character(len=200), intent(in) :: system_name\n\n')
-        out.write('    integer(kind=iint) :: i, j, k, nr\n')
-        out.write('    integer(kind=iint) :: check_nr\n')
-        out.write('    integer(kind=iint) :: volume\n\n')
+        out.write('    character(len=200), intent(in) :: system_name\n\n'
+                  '    integer(kind=iint) :: i, j, k, nr\n'
+                  '    integer(kind=iint) :: check_nr\n'
+                  '    integer(kind=iint) :: volume\n\n'
         out.write('    ! Copy to module wide variable\n')
         if data.meta.model_dimension == 3:
             out.write('    system_size = input_system_size\n')
@@ -229,52 +228,50 @@ class ProcListWriter():
         elif data.meta.model_dimension == 1:
             out.write('    system_size = (/input_system_size(1), 1, 1/)\n')
 
-        out.write('    volume = system_size(1)*system_size(2)*system_size(3)*spuck\n')
-
-        out.write('    ! Let\'s check if the works correctly, first\n')
-        out.write('    ! and if so populate lookup tables\n')
-        out.write('    do k = 0, system_size(3)-1\n')
-        out.write('        do j = 0, system_size(2)-1\n')
-        out.write('            do i = 0, system_size(1)-1\n')
-        out.write('                do nr = 1, spuck\n')
-        out.write('                    if(.not.all((/i,j,k,nr/).eq. &\n'
-        + '                    calculate_nr2lattice(calculate_lattice2nr((/i,j,k,nr/)))))then\n')
-        out.write('                        print *,"Error in Mapping:"\n')
-        out.write('                        print *, (/i,j,k,nr/), "was mapped on", calculate_lattice2nr((/i,j,k,nr/))\n')
-        out.write('                        print *, "but that was mapped on", calculate_nr2lattice(calculate_lattice2nr((/i,j,k,nr/)))\n')
-        out.write('                        stop\n')
-        out.write('                    endif\n')
-        out.write('                end do\n')
-        out.write('            end do\n')
-        out.write('        end do\n')
-        out.write('    end do\n\n')
-
-        out.write('    do check_nr=1, product(system_size)*spuck\n')
-        out.write('        if(.not.check_nr.eq.calculate_lattice2nr(calculate_nr2lattice(check_nr)))then\n')
-        out.write('            print *, "ERROR in Mapping:", check_nr\n')
-        out.write('            print *, "was mapped on", calculate_nr2lattice(check_nr)\n')
-        out.write('            print *, "but that was mapped on",calculate_lattice2nr(calculate_nr2lattice(check_nr))\n')
-        out.write('            stop\n')
-        out.write('        endif\n')
-        out.write('    end do\n\n')
-        out.write('    allocate(nr2lattice(1:product(system_size)*spuck,4))\n')
-        out.write('    allocate(lattice2nr(-system_size(1):2*system_size(1)-1, &\n'
-            + '        -system_size(2):2*system_size(2)-1, &\n'
-            + '        -system_size(3):2*system_size(3)-1, &\n'
-            + '         1:spuck))\n')
-        out.write('    do check_nr=1, product(system_size)*spuck\n')
-        out.write('        nr2lattice(check_nr, :) = calculate_nr2lattice(check_nr)\n')
-        out.write('    end do\n')
-        out.write('    do k = -system_size(3), 2*system_size(3)-1\n')
-        out.write('        do j = -system_size(2), 2*system_size(2)-1\n')
-        out.write('            do i = -system_size(1), 2*system_size(1)-1\n')
-        out.write('                do nr = 1, spuck\n')
-        out.write('                    lattice2nr(i, j, k, nr) = calculate_lattice2nr((/i, j, k, nr/))\n')
-        out.write('                end do\n')
-        out.write('            end do\n')
-        out.write('        end do\n')
-        out.write('    end do\n\n')
-        out.write('    call base_allocate_system(nr_of_proc, volume, system_name)\n\n')
+        out.write('    volume = system_size(1)*system_size(2)*system_size(3)*spuck\n'
+          '    ! Let\'s check if the works correctly, first\n'
+          '    ! and if so populate lookup tables\n'
+          '    do k = 0, system_size(3)-1\n'
+          '        do j = 0, system_size(2)-1\n'
+          '            do i = 0, system_size(1)-1\n'
+          '                do nr = 1, spuck\n'
+          '                    if(.not.all((/i,j,k,nr/).eq. &\n'
+          '                    calculate_nr2lattice(calculate_lattice2nr((/i,j,k,nr/)))))then\n'
+          '                        print *,"Error in Mapping:"\n'
+          '                        print *, (/i,j,k,nr/), "was mapped on", calculate_lattice2nr((/i,j,k,nr/))\n'
+          '                        print *, "but that was mapped on", calculate_nr2lattice(calculate_lattice2nr((/i,j,k,nr/)))\n'
+          '                        stop\n'
+          '                    endif\n'
+          '                end do\n'
+          '            end do\n'
+          '        end do\n'
+          '    end do\n\n'
+          '    do check_nr=1, product(system_size)*spuck\n'
+          '        if(.not.check_nr.eq.calculate_lattice2nr(calculate_nr2lattice(check_nr)))then\n'
+          '            print *, "ERROR in Mapping:", check_nr\n'
+          '            print *, "was mapped on", calculate_nr2lattice(check_nr)\n'
+          '            print *, "but that was mapped on",calculate_lattice2nr(calculate_nr2lattice(check_nr))\n'
+          '            stop\n'
+          '        endif\n'
+          '    end do\n\n'
+          '    allocate(nr2lattice(1:product(system_size)*spuck,4))\n'
+          '    allocate(lattice2nr(-system_size(1):2*system_size(1)-1, &\n'
+          '        -system_size(2):2*system_size(2)-1, &\n'
+          '        -system_size(3):2*system_size(3)-1, &\n'
+          '         1:spuck))\n')
+          '    do check_nr=1, product(system_size)*spuck\n'
+          '        nr2lattice(check_nr, :) = calculate_nr2lattice(check_nr)\n'
+          '    end do\n'
+          '    do k = -system_size(3), 2*system_size(3)-1\n'
+          '        do j = -system_size(2), 2*system_size(2)-1\n'
+          '            do i = -system_size(1), 2*system_size(1)-1\n'
+          '                do nr = 1, spuck\n'
+          '                    lattice2nr(i, j, k, nr) = calculate_lattice2nr((/i, j, k, nr/))\n'
+          '                end do\n'
+          '            end do\n'
+          '        end do\n'
+          '    end do\n\n'
+          '    call base_allocate_system(nr_of_proc, volume, system_name)\n\n')
         out.write('    unit_cell_size(1, 1) = %s\n' % data.layer_list.cell[0, 0])
         out.write('    unit_cell_size(1, 2) = %s\n' % data.layer_list.cell[0, 1])
         out.write('    unit_cell_size(1, 3) = %s\n' % data.layer_list.cell[0, 2])
@@ -297,24 +294,24 @@ class ProcListWriter():
         # in terms of lattice coordinates. Could be stored in fixed template
         # but are kept here for completeness and readability
 
-        out.write('subroutine deallocate_system()\n\n')
-        out.write('!****f* lattice/deallocate_system\n')
-        out.write('! FUNCTION\n')
-        out.write('!    Deallocates system including mapping cache.\n')
-        out.write('!\n')
-        out.write('! ARGUMENTS\n')
-        out.write('!\n')
-        out.write('!    ``none``\n')
-        out.write('!******\n')
-        out.write('    deallocate(lattice2nr)\n')
-        out.write('    deallocate(nr2lattice)\n')
-        out.write('    call base_deallocate_system()\n\n')
-        out.write('end subroutine deallocate_system\n\n')
+        out.write('subroutine deallocate_system()\n\n'
+                  '!****f* lattice/deallocate_system\n'
+                  '! FUNCTION\n'
+                  '!    Deallocates system including mapping cache.\n'
+                  '!\n'
+                  '! ARGUMENTS\n'
+                  '!\n'
+                  '!    ``none``\n'
+                  '!******\n'
+                  '    deallocate(lattice2nr)\n'
+                  '    deallocate(nr2lattice)\n'
+                  '    call base_deallocate_system()\n\n'
+                  'end subroutine deallocate_system\n\n'
 
-        out.write('subroutine add_proc(proc, site)\n\n')
-        out.write('    integer(kind=iint), intent(in) :: proc\n')
-        out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
-        out.write('    integer(kind=iint) :: nr\n\n')
+                  'subroutine add_proc(proc, site)\n\n'
+                  '    integer(kind=iint), intent(in) :: proc\n'
+                  '    integer(kind=iint), dimension(4), intent(in) :: site\n\n'
+                  '    integer(kind=iint) :: nr\n\n')
         if data.meta.debug > 1:
             out.write('print *,"    LATTICE/ADD_PROC/PROC",proc\n')
             out.write('print *,"    LATTICE/ADD_PROC/SITE",site\n')
@@ -342,31 +339,31 @@ class ProcListWriter():
         out.write('    can_do = base_can_do(proc, nr)\n\n')
         out.write('end function can_do\n\n')
 
-        out.write('subroutine replace_species(site,  old_species, new_species)\n\n')
-        out.write('    integer(kind=iint), dimension(4), intent(in) ::site\n')
-        out.write('    integer(kind=iint), intent(in) :: old_species, new_species\n\n')
-        out.write('    integer(kind=iint) :: nr\n\n')
-        out.write('    nr = lattice2nr(site(1), site(2), site(3), site(4))\n')
-        out.write('    call base_replace_species(nr, old_species, new_species)\n\n')
-        out.write('end subroutine replace_species\n\n')
+        out.write('subroutine replace_species(site,  old_species, new_species)\n\n'
+                  '    integer(kind=iint), dimension(4), intent(in) ::site\n'
+                  '    integer(kind=iint), intent(in) :: old_species, new_species\n\n'
+                  '    integer(kind=iint) :: nr\n\n'
+                  '    nr = lattice2nr(site(1), site(2), site(3), site(4))\n'
+                  '    call base_replace_species(nr, old_species, new_species)\n\n'
+                  'end subroutine replace_species\n\n')
 
-        out.write('pure function get_species(site)\n\n')
-        out.write('    integer(kind=iint) :: get_species\n')
-        out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n')
-        out.write('    integer(kind=iint) :: nr\n\n')
-        out.write('    nr = lattice2nr(site(1), site(2), site(3), site(4))\n')
-        out.write('    get_species = base_get_species(nr)\n\n')
-        out.write('end function get_species\n\n')
+        out.write('pure function get_species(site)\n\n'
+                  '    integer(kind=iint) :: get_species\n'
+                  '    integer(kind=iint), dimension(4), intent(in) :: site\n'
+                  '    integer(kind=iint) :: nr\n\n'
+                  '    nr = lattice2nr(site(1), site(2), site(3), site(4))\n'
+                  '    get_species = base_get_species(nr)\n\n'
+                  'end function get_species\n\n'
 
-        out.write('subroutine reset_site(site, old_species)\n\n')
-        out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n')
-        out.write('    integer(kind=iint), intent(in) :: old_species\n\n')
-        out.write('    integer(kind=iint) :: nr\n\n')
-        out.write('    nr = lattice2nr(site(1), site(2), site(3), site(4))\n')
-        out.write('    call base_reset_site(nr, old_species)\n\n')
-        out.write('end subroutine reset_site\n\n')
+                  'subroutine reset_site(site, old_species)\n\n'
+                  '    integer(kind=iint), dimension(4), intent(in) :: site\n'
+                  '    integer(kind=iint), intent(in) :: old_species\n\n'
+                  '    integer(kind=iint) :: nr\n\n'
+                  '    nr = lattice2nr(site(1), site(2), site(3), site(4))\n'
+                  '    call base_reset_site(nr, old_species)\n\n'
+                  'end subroutine reset_site\n\n'
 
-        out.write('end module lattice\n')
+                  'end module lattice\n')
         out.close()
 
     def write_proclist(self):
@@ -379,19 +376,19 @@ class ProcListWriter():
         # write header section and module imports
         out = open('%s/proclist.f90' % self.dir, 'w')
         out.write(self._gpl_message())
-        out.write('!****h* kmos/proclist\n')
-        out.write('! FUNCTION\n')
-        out.write('!    Implements the kMC process list.\n')
-        out.write('!\n')
-        out.write('!******\n')
-        out.write('\n\nmodule proclist\n'
-            + 'use kind_values\n'
-            + 'use base, only: &\n'
-            + '    update_accum_rate, &\n'
-            + '    determine_procsite, &\n'
-            + '    update_clocks, &\n'
-            + '    increment_procstat\n\n')
-        out.write('use lattice, only: &\n')
+        out.write('!****h* kmos/proclist\n'
+                  '! FUNCTION\n'
+                  '!    Implements the kMC process list.\n'
+                  '!\n'
+                  '!******\n'
+                  '\n\nmodule proclist\n'
+                  'use kind_values\n'
+                  'use base, only: &\n'
+                  '    update_accum_rate, &\n'
+                  '    determine_procsite, &\n'
+                  '    update_clocks, &\n'
+                  '    increment_procstat\n\n'
+                  'use lattice, only: &\n')
         site_params = []
         for layer in data.layer_list:
             out.write('    %s, &\n' % layer.name)
@@ -400,19 +397,19 @@ class ProcListWriter():
         for i, (site, layer) in enumerate(site_params):
             out.write(('    %s_%s, &\n') % (layer, site))
         out.write('    allocate_system, &\n'
-            + '    nr2lattice, &\n'
-            + '    lattice2nr, &\n'
-            + '    add_proc, &\n'
-            + '    can_do, &\n'
-            + '    set_rate_const, &\n'
-            + '    replace_species, &\n'
-            + '    del_proc, &\n'
-            + '    reset_site, &\n'
-            + '    system_size, &\n'
-            + '    spuck, &\n'
-            + '    null_species, &\n'
-            + '    get_species\n')
-        out.write('\n\nimplicit none\n\n')
+              '    nr2lattice, &\n'
+              '    lattice2nr, &\n'
+              '    add_proc, &\n'
+              '    can_do, &\n'
+              '    set_rate_const, &\n'
+              '    replace_species, &\n'
+              '    del_proc, &\n'
+              '    reset_site, &\n'
+              '    system_size, &\n'
+              '    spuck, &\n'
+              '    null_species, &\n'
+              '    get_species\n')
+              '\n\nimplicit none\n\n')
 
         # initialize various parameter kind of data
         out.write('\n\n ! Species constants\n\n')
@@ -435,90 +432,90 @@ class ProcListWriter():
         out.write('\n\ncontains\n\n')
 
         # do exactly one kmc step
-        out.write('subroutine do_kmc_step()\n\n')
-        out.write('!****f* proclist/do_kmc_step\n')
-        out.write('! FUNCTION\n')
-        out.write('!    Performs exactly one kMC step.\n')
-        out.write('!\n')
-        out.write('! ARGUMENTS\n')
-        out.write('!\n')
-        out.write('!    ``none``\n')
-        out.write('!******\n')
-        out.write('    real(kind=rsingle) :: ran_proc, ran_time, ran_site\n')
-        out.write('    integer(kind=iint) :: nr_site, proc_nr\n\n')
-        out.write('    call random_number(ran_time)\n')
-        out.write('    call random_number(ran_proc)\n')
-        out.write('    call random_number(ran_site)\n')
+        out.write('subroutine do_kmc_step()\n\n'
+                  '!****f* proclist/do_kmc_step\n'
+                  '! FUNCTION\n'
+                  '!    Performs exactly one kMC step.\n'
+                  '!\n'
+                  '! ARGUMENTS\n'
+                  '!\n'
+                  '!    ``none``\n'
+                  '!******\n'
+                  '    real(kind=rsingle) :: ran_proc, ran_time, ran_site\n'
+                  '    integer(kind=iint) :: nr_site, proc_nr\n\n'
+                  '    call random_number(ran_time)\n'
+                  '    call random_number(ran_proc)\n'
+                  '    call random_number(ran_site)\n')
         if data.meta.debug > 0:
-            out.write('print *,"PROCLIST/DO_KMC_STEP/RAN_TIME",ran_time\n')
-            out.write('print *,"PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc\n')
-            out.write('print *,"PROCLIST/DO_KMC_STEP/RAN_site",ran_site\n')
-        out.write('    call update_accum_rate\n')
-        out.write('    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
+            out.write('print *,"PROCLIST/DO_KMC_STEP/RAN_TIME",ran_time\n'
+                      'print *,"PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc\n'
+                      'print *,"PROCLIST/DO_KMC_STEP/RAN_site",ran_site\n')
+        out.write('    call update_accum_rate\n'
+                  '    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr\n')
-        out.write('    call run_proc_nr(proc_nr, nr_site)\n')
-        out.write('    call update_clocks(ran_time)\n\n')
-        out.write('end subroutine do_kmc_step\n\n')
+        out.write('    call run_proc_nr(proc_nr, nr_site)\n'
+                  '    call update_clocks(ran_time)\n\n'
+                  'end subroutine do_kmc_step\n\n')
 
         # useful for debugging
-        out.write('subroutine get_kmc_step(proc_nr, nr_site)\n\n')
-        out.write('!****f* proclist/get_kmc_step\n')
-        out.write('! FUNCTION\n')
-        out.write('!    Determines next step without executing it.\n')
-        out.write('!\n')
-        out.write('! ARGUMENTS\n')
-        out.write('!\n')
-        out.write('!    ``none``\n')
-        out.write('!******\n')
-        out.write('    real(kind=rsingle) :: ran_proc, ran_time, ran_site\n')
-        out.write('    integer(kind=iint), intent(out) :: nr_site, proc_nr\n\n')
-        out.write('    call random_number(ran_time)\n')
-        out.write('    call random_number(ran_proc)\n')
-        out.write('    call random_number(ran_site)\n')
+        out.write('subroutine get_kmc_step(proc_nr, nr_site)\n\n'
+                  '!****f* proclist/get_kmc_step\n'
+                  '! FUNCTION\n'
+                  '!    Determines next step without executing it.\n'
+                  '!\n'
+                  '! ARGUMENTS\n'
+                  '!\n'
+                  '!    ``none``\n'
+                  '!******\n'
+                  '    real(kind=rsingle) :: ran_proc, ran_time, ran_site\n'
+                  '    integer(kind=iint), intent(out) :: nr_site, proc_nr\n\n'
+                  '    call random_number(ran_time)\n'
+                  '    call random_number(ran_proc)\n'
+                  '    call random_number(ran_site)\n')
         if data.meta.debug > 0:
-            out.write('print *,"PROCLIST/GET_KMC_STEP/RAN_TIME",ran_time\n')
-            out.write('print *,"PROCLIST/GET_KMC_STEP/RAN_PROC",ran_proc\n')
-            out.write('print *,"PROCLIST/GET_KMC_STEP/RAN_site",ran_site\n')
+            out.write('print *,"PROCLIST/GET_KMC_STEP/RAN_TIME",ran_time\n'
+                      'print *,"PROCLIST/GET_KMC_STEP/RAN_PROC",ran_proc\n'
+                      'print *,"PROCLIST/GET_KMC_STEP/RAN_site",ran_site\n')
         out.write('    call update_accum_rate\n')
         out.write('    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/GET_KMC_STEP/PROC_NR", proc_nr\n')
         out.write('end subroutine get_kmc_step\n\n')
 
-        out.write('subroutine get_occupation(occupation)\n\n')
-        out.write('!****f* proclist/get_occupation\n')
-        out.write('! FUNCTION\n')
-        out.write('!    Evaluate current lattice configuration and returns\n')
-        out.write('!    the normalized occupation as matrix. Different species\n')
-        out.write('!    run along the first axis and different sites run\n')
-        out.write('!    along the second.\n')
-        out.write('!\n')
-        out.write('! ARGUMENTS\n')
-        out.write('!\n')
-        out.write('!    ``none``\n')
-        out.write('!******\n')
-        out.write('    ! nr_of_species = %s, spuck = %s\n' % (len(data.species_list), len(site_params)))
-        out.write('    real(kind=rdouble), dimension(0:%s, 1:%s), intent(out) :: occupation\n\n' % (len(data.species_list) - 1, len(site_params)))
-        out.write('    integer(kind=iint) :: i, j, k, nr, species\n\n')
-        out.write('    occupation = 0\n\n')
-        out.write('    do k = 0, system_size(3)-1\n')
-        out.write('        do j = 0, system_size(2)-1\n')
-        out.write('            do i = 0, system_size(1)-1\n')
-        out.write('                do nr = 1, spuck\n')
-        out.write('                    ! shift position by 1, so it can be accessed\n')
-        out.write('                    ! more straightforwardly from f2py interface\n')
-        out.write('                    species = get_species((/i,j,k,nr/))\n')
-        out.write('                    if(species.gt.null_species) then\n')
-        out.write('                    occupation(species, nr) = &\n')
-        out.write('                        occupation(species, nr) + 1\n')
-        out.write('                    endif\n')
-        out.write('                end do\n')
-        out.write('            end do\n')
-        out.write('        end do\n')
-        out.write('    end do\n\n')
-        out.write('    occupation = occupation/real(system_size(1)*system_size(2)*system_size(3))\n')
-        out.write('end subroutine get_occupation\n\n')
+        out.write('subroutine get_occupation(occupation)\n\n'
+                  '!****f* proclist/get_occupation\n'
+                  '! FUNCTION\n'
+                  '!    Evaluate current lattice configuration and returns\n'
+                  '!    the normalized occupation as matrix. Different species\n'
+                  '!    run along the first axis and different sites run\n'
+                  '!    along the second.\n'
+                  '!\n'
+                  '! ARGUMENTS\n'
+                  '!\n'
+                  '!    ``none``\n'
+                  '!******\n'
+                  '    ! nr_of_species = %s, spuck = %s\n' % (len(data.species_list), len(site_params))
+                  '    real(kind=rdouble), dimension(0:%s, 1:%s), intent(out) :: occupation\n\n' % (len(data.species_list) - 1, len(site_params))
+                  '    integer(kind=iint) :: i, j, k, nr, species\n\n'
+                  '    occupation = 0\n\n'
+                  '    do k = 0, system_size(3)-1\n'
+                  '        do j = 0, system_size(2)-1\n'
+                  '            do i = 0, system_size(1)-1\n'
+                  '                do nr = 1, spuck\n'
+                  '                    ! shift position by 1, so it can be accessed\n'
+                  '                    ! more straightforwardly from f2py interface\n'
+                  '                    species = get_species((/i,j,k,nr/))\n'
+                  '                    if(species.gt.null_species) then\n'
+                  '                    occupation(species, nr) = &\n'
+                  '                        occupation(species, nr) + 1\n'
+                  '                    endif\n'
+                  '                end do\n'
+                  '            end do\n'
+                  '        end do\n'
+                  '    end do\n\n'
+                  '    occupation = occupation/real(system_size(1)*system_size(2)*system_size(3))\n'
+                  'end subroutine get_occupation\n\n')
         # run_proc_nr runs the process selected by determine_procsite
         # for sake of simplicity each process is formulated in terms
         # of take and put operations. This is due to the fact that
@@ -531,29 +528,29 @@ class ProcListWriter():
         # if this make code maintainability a lot worse. So this
         # should probably change.
 
-        out.write('subroutine run_proc_nr(proc, nr_site)\n\n')
-        out.write('!****f* proclist/run_proc_nr\n')
-        out.write('! FUNCTION\n')
-        out.write('!    Runs process ``proc`` on site ``nr_site``.\n')
-        out.write('!\n')
-        out.write('! ARGUMENTS\n')
-        out.write('!\n')
-        out.write('!    * ``proc`` integer representing the process number\n')
-        out.write('!    * ``nr_site``  integer representing the site\n')
-        out.write('!******\n')
-        out.write('    integer(kind=iint), intent(in) :: proc\n')
-        out.write('    integer(kind=iint), intent(in) :: nr_site\n\n')
-        out.write('    integer(kind=iint), dimension(4) :: lsite\n\n')
-        out.write('    call increment_procstat(proc)\n\n')
-        out.write('    ! lsite = lattice_site, (vs. scalar site)\n')
-        out.write('    lsite = nr2lattice(nr_site, :)\n\n')
-        out.write('    select case(proc)\n')
+        out.write('subroutine run_proc_nr(proc, nr_site)\n\n'
+                  '!****f* proclist/run_proc_nr\n'
+                  '! FUNCTION\n'
+                  '!    Runs process ``proc`` on site ``nr_site``.\n'
+                  '!\n'
+                  '! ARGUMENTS\n'
+                  '!\n'
+                  '!    * ``proc`` integer representing the process number\n'
+                  '!    * ``nr_site``  integer representing the site\n'
+                  '!******\n'
+                  '    integer(kind=iint), intent(in) :: proc\n'
+                  '    integer(kind=iint), intent(in) :: nr_site\n\n'
+                  '    integer(kind=iint), dimension(4) :: lsite\n\n'
+                  '    call increment_procstat(proc)\n\n'
+                  '    ! lsite = lattice_site, (vs. scalar site)\n'
+                  '    lsite = nr2lattice(nr_site, :)\n\n'
+                  '    select case(proc)\n')
         for process in data.process_list:
             out.write('    case(%s)\n' % process.name)
             if data.meta.debug > 0:
-                out.write('print *,"PROCLIST/RUN_PROC_NR/NAME","%s"\n' % process.name)
-                out.write('print *,"PROCLIST/RUN_PROC_NR/LSITE","lsite"\n')
-                out.write('print *,"PROCLIST/RUN_PROC_NR/SITE","site"\n')
+                out.write('print *,"PROCLIST/RUN_PROC_NR/NAME","%s"\n' % process.name
+                          'print *,"PROCLIST/RUN_PROC_NR/LSITE","lsite"\n'
+                          'print *,"PROCLIST/RUN_PROC_NR/SITE","site"\n')
             for action in process.action_list:
                 if action.coord == process.executing_coord():
                     relative_coord = 'lsite'
@@ -597,32 +594,32 @@ class ProcListWriter():
         # all book-keeping databases
         # and calculate the rate constants for the first time
         out.write(('subroutine init(input_system_size, system_name, layer, no_banner)\n\n'
-            + '!****f* proclist/init\n'
-            + '! FUNCTION\n'
-            + '!     Allocates the system and initializes all sites in the given\n'
-            + '!     layer.\n'
-            + '!\n'
-            + '! ARGUMENTS\n'
-            + '!\n'
-            + '!    * ``input_system_size`` number of unit cell per axis.\n'
-            + '!    * ``system_name`` identifier for reload file.\n'
-            + '!    * ``layer`` initial layer.\n'
-            + '!    * ``no_banner`` [optional] if True no copyright is issued.\n'
-            + '!******\n'
-            + '    integer(kind=iint), intent(in) :: layer\n'
-            + '    integer(kind=iint), dimension(%s), intent(in) :: input_system_size\n\n'
-            + '    character(len=400), intent(in) :: system_name\n\n'
-            + '    logical, optional, intent(in) :: no_banner\n\n'
-            + '    if (.not. no_banner) then\n'
-            + '        print *, "This kMC Model \'%s\' was written by %s (%s)"\n'
-            + '        print *, "and implemented with the help of kmos,"\n'
-            + '        print *, "which is distributed under"\n'
-            + '        print *, "GNU/GPL Version 3 (C) Max J. Hoffmann mjhoffmann@gmail.com"\n'
-            + '        print *, "kmos is in a very betaish stage and there is"\n'
-            + '        print *, "ABSOLUTELY NO WARRANTY for correctness."\n'
-            + '        print *, "Please check back with the author prior to using"\n'
-            + '        print *, "results in a publication or presentation."\n\n'\
-            + '    endif\n')
+              '!****f* proclist/init\n'
+              '! FUNCTION\n'
+              '!     Allocates the system and initializes all sites in the given\n'
+              '!     layer.\n'
+              '!\n'
+              '! ARGUMENTS\n'
+              '!\n'
+              '!    * ``input_system_size`` number of unit cell per axis.\n'
+              '!    * ``system_name`` identifier for reload file.\n'
+              '!    * ``layer`` initial layer.\n'
+              '!    * ``no_banner`` [optional] if True no copyright is issued.\n'
+              '!******\n'
+              '    integer(kind=iint), intent(in) :: layer\n'
+              '    integer(kind=iint), dimension(%s), intent(in) :: input_system_size\n\n'
+              '    character(len=400), intent(in) :: system_name\n\n'
+              '    logical, optional, intent(in) :: no_banner\n\n'
+              '    if (.not. no_banner) then\n'
+              '        print *, "This kMC Model \'%s\' was written by %s (%s)"\n'
+              '        print *, "and implemented with the help of kmos,"\n'
+              '        print *, "which is distributed under"\n'
+              '        print *, "GNU/GPL Version 3 (C) Max J. Hoffmann mjhoffmann@gmail.com"\n'
+              '        print *, "kmos is in a very betaish stage and there is"\n'
+              '        print *, "ABSOLUTELY NO WARRANTY for correctness."\n'
+              '        print *, "Please check back with the author prior to using"\n'
+              '        print *, "results in a publication or presentation."\n\n'\
+              '    endif\n')
             % (data.meta.model_dimension, data.meta.model_name, data.meta.author, data.meta.email, ))
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/INIT/SYSTEM_SIZE",input_system_size\n')
@@ -633,26 +630,26 @@ class ProcListWriter():
         # initialize the system with the default layer and the default species
         # initialize all book-keeping databases
         # and representation strings for ASE representation
-        out.write('subroutine initialize_state(layer)\n\n')
-        out.write('!****f* proclist/initialize_state\n')
-        out.write('! FUNCTION\n')
-        out.write('!    Initialize all sites and book-keeping array\n')
-        out.write('!    for the given layer.\n')
-        out.write('!\n')
-        out.write('! ARGUMENTS\n')
-        out.write('!\n')
-        out.write('!    * ``layer`` integer representing layer\n')
-        out.write('!******\n')
-        out.write('    integer(kind=iint), intent(in) :: layer\n\n')
-        out.write('    integer(kind=iint) :: i, j, k, nr\n')
+        out.write('subroutine initialize_state(layer)\n\n'
+                  '!****f* proclist/initialize_state\n'
+                  '! FUNCTION\n'
+                  '!    Initialize all sites and book-keeping array\n'
+                  '!    for the given layer.\n'
+                  '!\n'
+                  '! ARGUMENTS\n'
+                  '!\n'
+                  '!    * ``layer`` integer representing layer\n'
+                  '!******\n'
+                  '    integer(kind=iint), intent(in) :: layer\n\n'
+                  '    integer(kind=iint) :: i, j, k, nr\n'
 
-        out.write('    do k = 0, system_size(3)-1\n')
-        out.write('        do j = 0, system_size(2)-1\n')
-        out.write('            do i = 0, system_size(1)-1\n')
-        out.write('                do nr = 1, spuck\n')
-        out.write('                    call reset_site((/i, j, k, nr/), null_species)\n')
-        out.write('                end do\n')
-        out.write('                select case(layer)\n')
+                  '    do k = 0, system_size(3)-1\n'
+                  '        do j = 0, system_size(2)-1\n'
+                  '            do i = 0, system_size(1)-1\n'
+                  '                do nr = 1, spuck\n'
+                  '                    call reset_site((/i, j, k, nr/), null_species)\n'
+                  '                end do\n'
+                  '                select case(layer)\n')
         for layer in data.layer_list:
             out.write('                case (%s)\n' % layer.name)
             for site in layer.sites:
