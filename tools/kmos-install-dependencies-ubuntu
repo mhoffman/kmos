@@ -30,5 +30,4 @@ sudo apt-get install\
                      python-lxml \
                      python-matplotlib \
                      python-numpy \
-                     python-pygoocanvas \
-                     python-scipy
+                     python-pygoocanvas

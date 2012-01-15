@@ -20,7 +20,7 @@ commonly needed to model heterogeneous catalyst kinetics
 
 import ase
 import numpy as np
-from scipy.interpolate import interp1d
+from numpy import interp as interp1d
 from math import log
 import re
 import os
@@ -53,10 +53,10 @@ class Species:
             kboltzmann_in_eVK = 8.6173324e-5
             # interpolate given grid
             try:
-                val =  interp1d(self.T_grid, self.G_grid)(T) + \
+                val =  interp1d(T, self.T_grid, self.G_grid) + \
                        kboltzmann_in_eVK * T * log(p)
             except Exception, e:
-                print('Possibly forgot to intall JANAF tables?')
+                print('Did you install JANAF tables?')
                 raise
             else:
                 return val
