@@ -84,51 +84,54 @@ processors. However one can run several kmos instances
 in parallel which might accelerate sampling or efficiently
 check for steady state conditions.
 
-The trick is to use the same facilities that the GUI
-frontend is--the `multiprocessing` module of the
-python standard library. One might argue that this
-uses more memory than threads however since by far the
-largest part of memory is used by the database of available
-processes, which can not be shared, this seems justifiable.
-Furthermore since the `multiprocessing` module sidesteps
-the GIL one can conveniently start and stop instances at
-any time.
+However in many applications it is still useful to
+run several models seperately at once, for example to scan
+some set of parameters one a multicore computer. This
+kind of problem can be considered `embarrasingly parallel`
+since the require no communication between the runs.
 
-The only difference now is that each simulations starts
-in a new process and communication happens through Queues
-which use pickled objects in memory.
+This is made very simple through the `multiprocessing`,
+which is in the Pythion standard library since version 2.6.
+For older versions this needs to be `downloaded <http://pypi.python.org/pypi/multiprocessing/>`
+and installed manually. The latter is very
+straightforward.
 
-So besides `kmos` we need to import `multiprocessing` ::
 
+Then besides `kmos` we need to import `multiprocessing` ::
+
+  from multiprocessing import Process
+  form numpy import linspace
   from kmos.run import KMC_Model
-  from multiprocessing import Queue
 
-The standard communication model uses three queues :
+and let's say you wanted to scan a range of temperature,
+while keeping all other parameteres constant. You first
+define a function, that takes a set of temperatures
+and runs the simulation for each ::
 
-signal_queue
-  Can be used to send single commands to a
-  running model, which control the runtime
-  behavior. The command currently understood
-  are
 
-  - STOP: stop execution and deallocate
-  - PAUSE: sleep until START command
-  - START: restart from PAUSE state
-  - ATOMS: call self.get_atoms() and put on image_queue
-  - RESET_TIME: reset the kMC time
+  def run_temperatures(temperatures):
+      for T in temperatures:
+          model = KMC_Model()
+          model.parameters.T = T
+          model.do_steps(100000)
 
-image_queue
-  Is used by the model to send snapshots of
-  the running model back. If the model is
-  instantiated with `autosend=True`, this
-  queue is automatically filled until full.
-  Otherwise one needs to issue the `ATOMS`
-  signal to trigger a snapshot.
+          # do some evaluation
 
-parameter_queue
-  Can be used to update the model parameters
-  at runtime. It expects a parameters object
-  such as the one in model.parameters and
-  automatically updates all rate constants.
+          model.deallocate()
 
-.. TODO:: Finish with sample script of running model in parallel
+
+In order to split our full range of input parameters, we
+can use a utility function ::
+
+  from kmos.utils import split_sequence
+
+
+All that is left to do, is to define the input parameters,
+split the list and start subprocesses for each sublist ::
+
+  if __name__ == '__main__':
+      temperatures = linspace(300, 600, 50)
+      nproc = 8
+      for temperatures in split_sequence(temperatures, nproc):
+          p = Process(target=run_temperatures, args=(temperatures, ))
+          p.start()

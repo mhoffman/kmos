@@ -30,7 +30,7 @@ on Ubuntu it suffices to call::
   sudo apt-get install gazpacho gfortran python-dev \
                        python-glade2 python-kiwi python-lxml \
                        python-matplotlib python-numpy \
-                       python-pygoocanvas python-scipy
+                       python-pygoocanvas
 
 
 and if you haven't already installed it, one way to fetch the

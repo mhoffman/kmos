@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -12,12 +14,13 @@
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
         VERSION:     '0.0.1',
-        COLLAPSE_MODINDEX: false,
+        COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
     <link rel="next" title="The Concept of Kinetic Monte Carlo" href="kmc_concept.html" />
@@ -31,8 +34,8 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../modindex.html" title="Global Module Index"
-             accesskey="M">modules</a> |</li>
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li class="right" >
           <a href="kmc_concept.html" title="The Concept of Kinetic Monte Carlo"
              accesskey="N">next</a> |</li>
@@ -44,30 +47,30 @@
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-            <h4>Previous topic</h4>
-            <p class="topless"><a href="../tutorials/index.html"
-                                  title="previous chapter">Tutorials</a></p>
-            <h4>Next topic</h4>
-            <p class="topless"><a href="kmc_concept.html"
-                                  title="next chapter">The Concept of Kinetic Monte Carlo</a></p>
-            <h3>This Page</h3>
-            <ul class="this-page-menu">
-              <li><a href="../_sources/topic_guides/index.txt"
-                     rel="nofollow">Show Source</a></li>
-            </ul>
-          <div id="searchbox" style="display: none">
-            <h3>Quick search</h3>
-              <form class="search" action="../search.html" method="get">
-                <input type="text" name="q" size="18" />
-                <input type="submit" value="Go" />
-                <input type="hidden" name="check_keywords" value="yes" />
-                <input type="hidden" name="area" value="default" />
-              </form>
-              <p class="searchtip" style="font-size: 90%">
-              Enter search terms or a module, class or function name.
-              </p>
-          </div>
-          <script type="text/javascript">$('#searchbox').show(0);</script>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../tutorials/index.html"
+                        title="previous chapter">Tutorials</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="kmc_concept.html"
+                        title="next chapter">The Concept of Kinetic Monte Carlo</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/topic_guides/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
 
@@ -78,33 +81,38 @@
             
   <div class="section" id="topic-guides">
 <h1>Topic Guides<a class="headerlink" href="#topic-guides" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference external" href="kmc_concept.html">The Concept of Kinetic Monte Carlo</a><ul>
-<li class="toctree-l2"><a class="reference external" href="kmc_concept.html#why-use-kinetic-monte-carlo">Why use Kinetic Monte Carlo?</a></li>
-<li class="toctree-l2"><a class="reference external" href="kmc_concept.html#basic-kinetic-carlo-algorithm">Basic Kinetic Carlo Algorithm</a></li>
-<li class="toctree-l2"><a class="reference external" href="kmc_concept.html#justification-of-the-algorithm">Justification of the Algorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kmc_concept.html">The Concept of Kinetic Monte Carlo</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="kmc_concept.html#why-use-kinetic-monte-carlo">Why use Kinetic Monte Carlo?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kmc_concept.html#basic-kinetic-carlo-algorithm">Basic Kinetic Carlo Algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kmc_concept.html#justification-of-the-algorithm">Justification of the Algorithm</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference external" href="workflows.html">Modelling Workflows</a><ul>
-<li class="toctree-l2"><a class="reference external" href="workflows.html#kmc-modelling">kMC Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Modelling Workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflows.html#kmc-modelling">kMC Modelling</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference external" href="data_models.html">The kmos data model</a></li>
-<li class="toctree-l1"><a class="reference external" href="kmos_speed.html">How the kmos kMC algorithm works</a></li>
-<li class="toctree-l1"><a class="reference external" href="proc_syntax.html">The Process Syntax</a><ul>
-<li class="toctree-l2"><a class="reference external" href="proc_syntax.html#adsorption">Adsorption</a></li>
-<li class="toctree-l2"><a class="reference external" href="proc_syntax.html#diffusion">Diffusion</a></li>
-<li class="toctree-l2"><a class="reference external" href="proc_syntax.html#avoid-double-counting">Avoid Double Counting</a></li>
-<li class="toctree-l2"><a class="reference external" href="proc_syntax.html#taking-it-home">Taking It Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_models.html">The kmos data model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kmos_speed.html">How the kmos kMC algorithm works</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="kmos_speed.html#the-kmos-o-1-solver">The kmos O(1) solver</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference external" href="coord_syntax.html">The Site/Coordinate Syntax</a><ul>
-<li class="toctree-l2"><a class="reference external" href="coord_syntax.html#manual-generation">Manual generation</a></li>
-<li class="toctree-l2"><a class="reference external" href="coord_syntax.html#autogeneration-of-sets">Autogeneration of sets</a></li>
-<li class="toctree-l2"><a class="reference external" href="coord_syntax.html#taking-it-home">Taking it home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proc_syntax.html">The Process Syntax</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="proc_syntax.html#adsorption">Adsorption</a></li>
+<li class="toctree-l2"><a class="reference internal" href="proc_syntax.html#diffusion">Diffusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="proc_syntax.html#avoid-double-counting">Avoid Double Counting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="proc_syntax.html#taking-it-home">Taking It Home</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="coord_syntax.html">The Site/Coordinate Syntax</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="coord_syntax.html#manual-generation">Manual generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="coord_syntax.html#autogeneration-of-sets">Autogeneration of sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="coord_syntax.html#taking-it-home">Taking it home</a></li>
 </ul>
 </li>
 </ul>
+</div>
 </div>
 
 
@@ -120,7 +128,7 @@
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="../modindex.html" title="Global Module Index"
+          <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
           <a href="kmc_concept.html" title="The Concept of Kinetic Monte Carlo"
@@ -132,8 +140,8 @@
       </ul>
     </div>
     <div class="footer">
-      &copy; Copyright 2009-2012, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+        &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
     </div>
   </body>
 </html>

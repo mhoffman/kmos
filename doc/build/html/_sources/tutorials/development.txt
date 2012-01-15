@@ -3,7 +3,8 @@ Development
 
 
 Contributions of any sort are of course quite welcome.
-Patches and comments can be  send in form of email, pull request, or github issues.
+Patches and comments are ideally sent in form of email,
+pull request, or github issues.
 
 To make synergizing a most pleasing experience I suggest you use
 git, nose, pep8, and pylint ::

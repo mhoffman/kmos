@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -12,12 +14,13 @@
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
         VERSION:     '0.0.1',
-        COLLAPSE_MODINDEX: false,
+        COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" /> 
   </head>
@@ -29,42 +32,42 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../modindex.html" title="Global Module Index"
-             accesskey="M">modules</a> |</li>
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-            <h3><a href="../index.html">Table Of Contents</a></h3>
-            <ul>
-<li><a class="reference external" href="#">A first kMC Model&#8211;the API way</a><ul>
-<li><a class="reference external" href="#construct-the-model">Construct the model</a></li>
-<li><a class="reference external" href="#populate-process-list-and-parameter-list">Populate process list and parameter list</a></li>
-<li><a class="reference external" href="#export-save-compile">Export, save, compile</a></li>
-<li><a class="reference external" href="#taking-it-home">Taking it home</a></li>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">A first kMC Model&#8211;the API way</a><ul>
+<li><a class="reference internal" href="#construct-the-model">Construct the model</a></li>
+<li><a class="reference internal" href="#populate-process-list-and-parameter-list">Populate process list and parameter list</a></li>
+<li><a class="reference internal" href="#export-save-compile">Export, save, compile</a></li>
+<li><a class="reference internal" href="#taking-it-home">Taking it home</a></li>
 </ul>
 </li>
 </ul>
 
-            <h3>This Page</h3>
-            <ul class="this-page-menu">
-              <li><a href="../_sources/tutorials/first_model_api.txt"
-                     rel="nofollow">Show Source</a></li>
-            </ul>
-          <div id="searchbox" style="display: none">
-            <h3>Quick search</h3>
-              <form class="search" action="../search.html" method="get">
-                <input type="text" name="q" size="18" />
-                <input type="submit" value="Go" />
-                <input type="hidden" name="check_keywords" value="yes" />
-                <input type="hidden" name="area" value="default" />
-              </form>
-              <p class="searchtip" style="font-size: 90%">
-              Enter search terms or a module, class or function name.
-              </p>
-          </div>
-          <script type="text/javascript">$('#searchbox').show(0);</script>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/tutorials/first_model_api.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
 
@@ -99,10 +102,10 @@ and desorption on Pd(100) including a simple lateral interaction. Granted
 this hardly excites surface scientists but we need to start somewhere, right?</p>
 <p>First you should instantiate a new project and fill in meta information</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span> <span class="o">=</span> <span class="n">Project</span><span class="p">()</span>
-<span class="n">pt</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">author</span> <span class="o">=</span> <span class="s">&#39;Your Name&#39;</span>
-<span class="n">pt</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="s">&#39;your.name@server.com&#39;</span>
-<span class="n">pt</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">model_name</span> <span class="o">=</span> <span class="s">&#39;MyFirstModel&#39;</span>
-<span class="n">pt</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">model_dimension</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">set_meta</span><span class="p">(</span><span class="n">author</span> <span class="o">=</span> <span class="s">&#39;Your Name&#39;</span><span class="p">,</span>
+            <span class="n">email</span> <span class="o">=</span> <span class="s">&#39;your.name@server.com&#39;</span><span class="p">,</span>
+            <span class="n">model_name</span> <span class="o">=</span> <span class="s">&#39;MyFirstModel&#39;</span><span class="p">,</span>
+            <span class="n">model_dimension</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,)</span>
 </pre></div>
 </div>
 <p>Next you could add some species or states. Note that whichever
@@ -110,13 +113,13 @@ species you add first is the default species with which all sites in the
 system will be initialized. Of course this can be changed later</p>
 <p>For surface science simulations it is useful to define an
 <em>empty</em> state, so we add</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_species</span><span class="p">(</span><span class="n">Species</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_species</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>and some surface species. Given you want to simulate CO adsorption and
 desorption on a single crystal surface you would say</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_species</span><span class="p">(</span><span class="n">Species</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;CO&#39;</span><span class="p">,</span>
-                       <span class="n">representation</span><span class="o">=</span><span class="s">&quot;Atoms(&#39;CO&#39;,[[0,0,0],[0,0,1.2]])&quot;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_species</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;CO&#39;</span><span class="p">,</span>
+               <span class="n">representation</span><span class="o">=</span><span class="s">&quot;Atoms(&#39;CO&#39;,[[0,0,0],[0,0,1.2]])&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where the string passed as <cite>representation</cite> is a string representing
@@ -175,23 +178,23 @@ at once.</p>
 <p>First of all you want to define the external parameters to
 which our model is coupled. Here we use the temperature
 and the CO partial pressure:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">600.</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">800</span><span class="p">))</span>
-<span class="n">pt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;p_CO&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">1.e2</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">600.</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;p_CO&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">1.e2</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>You can also set a default value and a minimum and maximum value
 set defines how the scrollbars a behave later in the runtime GUI.</p>
 <p>To describe the adsorption rate constant you will need the area
 of the unit cell:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;A&#39;</span><span class="p">,</span><span class="n">value</span><span class="o">=</span><span class="s">&#39;(3.5*angstrom)**2&#39;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;A&#39;</span><span class="p">,</span><span class="n">value</span><span class="o">=</span><span class="s">&#39;(3.5*angstrom)**2&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Last but not least you need a binding energy of the particle on
 the surface. Since without further ado we have no value for the
 gas phase chemical potential, we&#8217;ll just call it deltaG and keep
 it adjustable</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;deltaG&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s">&#39;-0.5&#39;</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                           <span class="nb">min</span><span class="o">=-</span><span class="mf">1.3</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">0.3</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;deltaG&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s">&#39;-0.5&#39;</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                           <span class="nb">min</span><span class="o">=-</span><span class="mf">1.3</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>To define processes we first need a coordinate <a class="footnote-reference" href="#coord-minilanguage" id="id1">[2]</a></p>
@@ -205,10 +208,10 @@ phrased in terms of &#8216;conditions&#8217; and &#8216;actions&#8217;. <a class
 So for example an adsorption requires at least one site to be empty
 (condition). Then this site can be occupied by CO (action) with a
 rate constant. Written down in code this looks as follows</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_process</span><span class="p">(</span><span class="n">Process</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;CO_adsorption&#39;</span><span class="p">,</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_process</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;CO_adsorption&#39;</span><span class="p">,</span>
                <span class="n">condition_list</span><span class="o">=</span><span class="p">[</span><span class="n">Condition</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)],</span>
                <span class="n">action_list</span><span class="o">=</span><span class="p">[</span><span class="n">Action</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;CO&#39;</span><span class="p">)],</span>
-               <span class="n">rate_constant</span><span class="o">=</span><span class="s">&#39;p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)&#39;</span><span class="p">))</span>
+               <span class="n">rate_constant</span><span class="o">=</span><span class="s">&#39;p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Now you might wonder, how come we can simply use m_CO and beta and such.
@@ -218,10 +221,10 @@ long as you have set a parameter <cite>T</cite> before, this will go through. Sa
 is true for m_CO, here the atomic masses are looked up and added. Note
 that we need conversion factors of bar and umass.</p>
 <p>Then the desorption process is almost the same, except the reverse:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_process</span><span class="p">(</span><span class="n">Process</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;CO_desorption&#39;</span><span class="p">,</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_process</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;CO_desorption&#39;</span><span class="p">,</span>
                <span class="n">condition_list</span><span class="o">=</span><span class="p">[</span><span class="n">Condition</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;CO&#39;</span><span class="p">)],</span>
                <span class="n">action_list</span><span class="o">=</span><span class="p">[</span><span class="n">Action</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)],</span>
-               <span class="n">rate_constant</span><span class="o">=</span><span class="s">&#39;p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(-deltaG*eV)&#39;</span><span class="p">))</span>
+               <span class="n">rate_constant</span><span class="o">=</span><span class="s">&#39;p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(-deltaG*eV)&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>And that is it!</p>
@@ -264,7 +267,7 @@ the workflow.</p>
 in terms of  <cite>conditions</cite> and
 <cite>actions</cite> and you find a more complete
 description can be found in the
-<a class="reference external" href="../topic_guides/proc_syntax.html#proc-mini-language"><em>topic guide</em></a>
+<a class="reference internal" href="../topic_guides/proc_syntax.html#proc-mini-language"><em>topic guide</em></a>
 to the process description syntax.</td></tr>
 </tbody>
 </table>
@@ -274,7 +277,7 @@ to the process description syntax.</td></tr>
 <tr><td class="label"><a class="fn-backref" href="#id1">[2]</a></td><td>The description of coordinates follows
 the simple syntax of the coordinate
 syntax and the
-<a class="reference external" href="../topic_guides/coord_syntax.html#coord-mini-language"><em>topic guide</em></a>
+<a class="reference internal" href="../topic_guides/coord_syntax.html#coord-mini-language"><em>topic guide</em></a>
 explains how that works.</td></tr>
 </tbody>
 </table>
@@ -294,14 +297,14 @@ explains how that works.</td></tr>
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="../modindex.html" title="Global Module Index"
+          <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-      &copy; Copyright 2009-2012, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+        &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
     </div>
   </body>
 </html>

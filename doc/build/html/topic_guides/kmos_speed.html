@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -12,12 +14,13 @@
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
         VERSION:     '0.0.1',
-        COLLAPSE_MODINDEX: false,
+        COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
     <link rel="up" title="Topic Guides" href="index.html" />
@@ -32,8 +35,8 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../modindex.html" title="Global Module Index"
-             accesskey="M">modules</a> |</li>
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li class="right" >
           <a href="proc_syntax.html" title="The Process Syntax"
              accesskey="N">next</a> |</li>
@@ -46,30 +49,38 @@
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-            <h4>Previous topic</h4>
-            <p class="topless"><a href="data_models.html"
-                                  title="previous chapter">The kmos data model</a></p>
-            <h4>Next topic</h4>
-            <p class="topless"><a href="proc_syntax.html"
-                                  title="next chapter">The Process Syntax</a></p>
-            <h3>This Page</h3>
-            <ul class="this-page-menu">
-              <li><a href="../_sources/topic_guides/kmos_speed.txt"
-                     rel="nofollow">Show Source</a></li>
-            </ul>
-          <div id="searchbox" style="display: none">
-            <h3>Quick search</h3>
-              <form class="search" action="../search.html" method="get">
-                <input type="text" name="q" size="18" />
-                <input type="submit" value="Go" />
-                <input type="hidden" name="check_keywords" value="yes" />
-                <input type="hidden" name="area" value="default" />
-              </form>
-              <p class="searchtip" style="font-size: 90%">
-              Enter search terms or a module, class or function name.
-              </p>
-          </div>
-          <script type="text/javascript">$('#searchbox').show(0);</script>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">How the kmos kMC algorithm works</a><ul>
+<li><a class="reference internal" href="#the-kmos-o-1-solver">The kmos O(1) solver</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="data_models.html"
+                        title="previous chapter">The kmos data model</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="proc_syntax.html"
+                        title="next chapter">The Process Syntax</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/topic_guides/kmos_speed.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
 
@@ -119,13 +130,80 @@ spent per kMC step as nearly constant for up nearly 10^5 sites.</p>
 performed on a single CPU of Intel I7-2600K with 3.40 GHz clock speed
 and 1333 MHz memory.</p>
 </div>
-<div class="admonition-todo admonition " id="todo-44">
-<p class="first admonition-title">Todo</p>
-<p class="last">explain algorithm underlying kmos.base</p>
+<div class="section" id="the-kmos-o-1-solver">
+<h2>The kmos O(1) solver<a class="headerlink" href="#the-kmos-o-1-solver" title="Permalink to this headline">¶</a></h2>
+<div class="figure align-center">
+<img alt="../_images/data_structures.png" src="../_images/data_structures.png" style="width: 800px;" />
+<p class="caption">The data model underlying the kmos solver. The central component
+is the <cite>avail_sites</cite> array which stores for each elementary
+step the sites for which it is executable. Secondly
+it stores the location in memory, where the availability
+of the site is stored for direct access. The array of
+<cite>rate constants</cite> holds the numeric rate constant and only
+changes, when one a physical parameter is changed. The
+<cite>nr of sites</cite> array holds the total number of sites for each
+process and needs to be updated whenever
+a process becomes available und unavailable. The <cite>accum. rates</cite>
+has to be updated once per kMC step and holds the accumulated
+rate constant for each processes. That is, the last field
+of accum. rates holds <img class="math" src="../_images/math/5656deba55594bc49512579323064607f7f662ae.png" alt="k_{\mathrm{tot}}"/>,
+the total rate of the system.</p>
 </div>
-<div class="admonition-todo admonition " id="todo-45">
+<p>So what makes the kMC solver so furiously fast? The underlying
+data structure is shown in the picture above. The most important
+part is that the solver never scans the entire system for
+available processes except at program initialization.</p>
+<p>Please have a look at the sketch of data structures above. Given that
+all arrays are initialized and populated, in each kMC step the
+following things happen:</p>
+<p>In the first step we need to identify the next process and site.
+To do so we draw a random number <img class="math" src="../_images/math/369d9e771ff483e3138fb7d1995268cafda74473.png" alt="R_{1} \in [0, 1]"/>.
+This number has to be scaled to <img class="math" src="../_images/math/5656deba55594bc49512579323064607f7f662ae.png" alt="k_{\mathrm{tot}}"/>,
+so we multiply it with the last field in <cite>accum. rates</cite>.  Next
+we simply perform a
+<a class="reference external" href="http://en.wikipedia.org/wiki/Binary_search_algorithm">binary search</a>
+for the right process on <cite>accum. rates</cite>. Having determined the
+process, we pick a site using a second random number <img class="math" src="../_images/math/f43e1a4e85442c2b96198b720d674e58077ae88c.png" alt="R_{2}"/>,
+which is constant in time since <cite>avail sites</cite> is filled up with
+the available site for each process from the left.</p>
+<p>Totally independent of this we calculate the duration of the
+current step with another random number <img class="math" src="../_images/math/049680fc475590e3302c08973c2416e40d650d69.png" alt="R_3"/> using</p>
+<div class="math">
+<p><img src="../_images/math/011cb322159a14d0c323565fa64d08735459b541.png" alt="\Delta t = \frac{-\log(R_{3})}{k_{\mathrm{tot}}}" /></p>
+</div><p>So, while the determination of process and site is
+extremely straightforward, the CPU intensive part
+just starts now. The <cite>proclist</cite> module is written
+in such a way, for each elementary step it
+updates the <cite>avail sites</cite> array only in the
+local neighborhood of the site, where the process
+is executed. It is furthermore heuristically
+optimized in order to require only a minimal
+number of <cite>if</cite>-statement to figure out which
+database updates are necessary. This will be
+explained in greate detail in the next subsection.</p>
+<p>For the current description it is sufficient to
+know that for all database updates by the <cite>proclist</cite>
+module :</p>
+<blockquote>
+<ul class="simple">
+<li>the <cite>nr of sites</cite> array is updated as well.</li>
+<li>adding or deleting an available site only
+takes constant time, since the number of
+available sites as well as the memory addresses
+is always updated. Thus new sites are simply
+add at the end of the list of available sites.
+When a site has to be deleted the last site
+in the array is moved to the memory slot
+available now.</li>
+</ul>
+</blockquote>
+<p>Thus once all local updates are finished the
+<cite>accum. rates</cite> array is simply updated once.
+And ready we are for the next kMC step.</p>
+<div class="admonition-todo admonition " id="index-0">
 <p class="first admonition-title">Todo</p>
 <p class="last">describe translation algorithm</p>
+</div>
 </div>
 </div>
 
@@ -142,7 +220,7 @@ and 1333 MHz memory.</p>
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="../modindex.html" title="Global Module Index"
+          <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
           <a href="proc_syntax.html" title="The Process Syntax"
@@ -155,8 +233,8 @@ and 1333 MHz memory.</p>
       </ul>
     </div>
     <div class="footer">
-      &copy; Copyright 2009-2012, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+        &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
     </div>
   </body>
 </html>
