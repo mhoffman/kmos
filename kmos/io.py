@@ -220,7 +220,7 @@ class ProcListWriter():
                   '    integer(kind=iint) :: i, j, k, nr\n'
                   '    integer(kind=iint) :: check_nr\n'
                   '    integer(kind=iint) :: volume\n\n'
-        out.write('    ! Copy to module wide variable\n')
+                  '    ! Copy to module wide variable\n')
         if data.meta.model_dimension == 3:
             out.write('    system_size = input_system_size\n')
         elif data.meta.model_dimension == 2:
@@ -258,7 +258,7 @@ class ProcListWriter():
           '    allocate(lattice2nr(-system_size(1):2*system_size(1)-1, &\n'
           '        -system_size(2):2*system_size(2)-1, &\n'
           '        -system_size(3):2*system_size(3)-1, &\n'
-          '         1:spuck))\n')
+          '         1:spuck))\n'
           '    do check_nr=1, product(system_size)*spuck\n'
           '        nr2lattice(check_nr, :) = calculate_nr2lattice(check_nr)\n'
           '    end do\n'
@@ -408,7 +408,7 @@ class ProcListWriter():
               '    system_size, &\n'
               '    spuck, &\n'
               '    null_species, &\n'
-              '    get_species\n')
+              '    get_species\n'
               '\n\nimplicit none\n\n')
 
         # initialize various parameter kind of data
@@ -494,10 +494,10 @@ class ProcListWriter():
                   '! ARGUMENTS\n'
                   '!\n'
                   '!    ``none``\n'
-                  '!******\n'
-                  '    ! nr_of_species = %s, spuck = %s\n' % (len(data.species_list), len(site_params))
-                  '    real(kind=rdouble), dimension(0:%s, 1:%s), intent(out) :: occupation\n\n' % (len(data.species_list) - 1, len(site_params))
-                  '    integer(kind=iint) :: i, j, k, nr, species\n\n'
+                  '!******\n')
+        out.write('    ! nr_of_species = %s, spuck = %s\n' % (len(data.species_list), len(site_params)))
+        out.write('    real(kind=rdouble), dimension(0:%s, 1:%s), intent(out) :: occupation\n\n' % (len(data.species_list) - 1, len(site_params)))
+        out.write('    integer(kind=iint) :: i, j, k, nr, species\n\n'
                   '    occupation = 0\n\n'
                   '    do k = 0, system_size(3)-1\n'
                   '        do j = 0, system_size(2)-1\n'
@@ -548,9 +548,9 @@ class ProcListWriter():
         for process in data.process_list:
             out.write('    case(%s)\n' % process.name)
             if data.meta.debug > 0:
-                out.write('print *,"PROCLIST/RUN_PROC_NR/NAME","%s"\n' % process.name
-                          'print *,"PROCLIST/RUN_PROC_NR/LSITE","lsite"\n'
-                          'print *,"PROCLIST/RUN_PROC_NR/SITE","site"\n')
+                out.write(('print *,"PROCLIST/RUN_PROC_NR/NAME","%s"\n' 
+                           'print *,"PROCLIST/RUN_PROC_NR/LSITE","lsite"\n'
+                           'print *,"PROCLIST/RUN_PROC_NR/SITE","site"\n') % process.name)
             for action in process.action_list:
                 if action.coord == process.executing_coord():
                     relative_coord = 'lsite'
