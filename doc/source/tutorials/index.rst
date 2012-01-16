@@ -4,6 +4,8 @@ Tutorials
 
 .. include:: introduction.rst
 
+.. include:: screenshots.rst
+
 .. include:: first_model_api.rst
 
 .. include:: first_model_gui.rst
