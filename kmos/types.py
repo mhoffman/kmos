@@ -575,7 +575,8 @@ class Project(object):
                  author=None,
                  email=None,
                  model_name=None,
-                 model_dimension=None):
+                 model_dimension=None,
+                 debug=None):
         if author is not None:
             self.meta.author = author
         if email is not None:
@@ -584,6 +585,8 @@ class Project(object):
             self.meta.model_name = model_name
         if model_dimension is not None:
             self.meta.model_dimension = model_dimension
+        if debug is not None:
+            self.meta.debug = debug
 
 
 class Meta(object):
