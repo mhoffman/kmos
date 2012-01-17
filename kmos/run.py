@@ -257,19 +257,24 @@ class KMC_Model(multiprocessing.Process):
                         for n in xrange(1, 1 + lattice.spuck):
                             species = lattice.get_species([i, j, k, n])
                             if self.species_representation[species]:
+                                # create the atom
                                 atom = deepcopy(
                                     self.species_representation[species])
-                                atom.translate(np.dot(lattice.unit_cell_size,
-                                np.array([i, j, k]) \
-                                + lattice.site_positions[n - 1]))
+
+                                # move to the correct location
+                                atom.translate(
+                                    np.dot(
+                                        np.array([i, j, k]) +
+                                        lattice.site_positions[n - 1],
+                                            lattice.unit_cell_size))
+                                # add to existing slab
                                 atoms += atom
                         lattice_repr = deepcopy(self.lattice_representation)
-                        lattice_repr.translate(np.dot(lattice.unit_cell_size,
-                                    np.array([i, j, k])))
+                        lattice_repr.translate(np.dot(np.array([i, j, k]),
+                                                      lattice.unit_cell_size))
                         atoms += lattice_repr
             atoms.set_cell(self.cell_size)
         else:
-
             class Expando():
                 pass
             atoms = Expando()
