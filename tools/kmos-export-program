@@ -54,13 +54,13 @@ def main():
         os.chdir(export_dir)
         os.system("kmos-build")
         for out in glob('kmc_*'):
-            try:
+            if os.path.exists('../%s' % out):
+                overwrite = raw_input('Should I overwrite existing %s ? [y/N]  ' % out).lower()
+                if overwrite.startswith('y'):
+                    os.remove('../%s' % out)
+                    shutil.move(out, '..')
+            else:
                 shutil.move(out, '..')
-            except:
-                print('%s already exists. I refuse to overwrite it.' % out)
-                print('Please move it somewhere else or rename it and')
-                print('rerun me.')
-                raise
 
 if __name__ == '__main__':
     main()
