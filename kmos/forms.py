@@ -365,11 +365,20 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                                 stroke_color='black',
                                 fill_color_rgba=color,
                                 line_width=1.0)
-        cell = goocanvas.Rect(parent=self.root,
-                              x=self.offset_x,
-                              y=self.offset_y,
-                              height=self.scale * atoms.cell[1, 1],
-                              width=self.scale * atoms.cell[0, 0],
+        A = (self.offset_x, self.offset_y)
+        B = (self.offset_x + self.scale*(atoms.cell[0, 0]),
+             self.offset_y + self.scale*(atoms.cell[0, 1]))
+
+        C = (self.offset_x + self.scale*(atoms.cell[0, 0]
+                                       - atoms.cell[1, 0]),
+             self.offset_y + self.scale*(atoms.cell[0, 1]
+                                       + atoms.cell[1, 1]))
+
+        D = (self.offset_x - self.scale*(atoms.cell[1, 0]),
+             self.offset_y + self.scale*(atoms.cell[1, 1]))
+        cell = goocanvas.Polyline(parent=self.root,
+                              close_path=True,
+                              points=goocanvas.Points([A, B, C, D]),
                               stroke_color='black',)
 
         for x in range(-1, 2):
