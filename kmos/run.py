@@ -104,7 +104,7 @@ class KMC_Model(multiprocessing.Process):
             self.system_name,
             lattice.default_layer,
             not self.banner)
-        self.cell_size = np.dot(lattice.unit_cell_size, lattice.system_size)
+        self.cell_size = lattice.unit_cell_size*lattice.system_size
 
         # prepare structures for TOF evaluation
         self.tofs = tofs = get_tof_names()
