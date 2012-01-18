@@ -8,9 +8,8 @@ import numpy as np
 
 
 slab = fcc111('Pt', [1,1,4], vacuum=10)
-#ase.visualize.view(slab)
 
-positions = slab.positions
+positions = slab.get_scaled_positions()
 pt = Project()
 pt.set_meta(model_name='pt111',
             model_dimension='2',
@@ -21,17 +20,24 @@ pt.set_meta(model_name='pt111',
 pt.lattice.representation = get_ase_constructor(slab)
 pt.lattice.cell = slab.cell
 layer = Layer(name='pt111')
-pos1 = [positions[1, 0], positions[1, 1], 24]
-layer.add_site(Site(name='hollow1',
-                    pos=np.linalg.solve(slab.cell, pos1)))
+pos1 = np.array([positions[1, 0],
+        positions[1, 1], 0.672])
 
-pos2 = [positions[2, 0], positions[2, 1], 24]
+layer.add_site(Site(name='hollow1',
+                    pos=pos1))
+
+pos2 = np.array([positions[2, 0],
+                positions[2, 1], 0.672])
+
+slab += ase.atoms.Atoms('H', cell=slab.cell, scaled_positions=[pos1])
+slab += ase.atoms.Atoms('H', cell=slab.cell, scaled_positions=[pos2])
+ase.visualize.view(slab, repeat=(1,1,1))
+rpos = np.linalg.solve(slab.cell, np.array(pos2))
 layer.add_site(Site(name='hollow2',
-                    pos=np.linalg.solve(slab.cell, pos2)))
+                    pos=pos2))
 
 pt.add_layer(layer)
 pt.lattice.representation = '[%s]' % get_ase_constructor(slab)
-
 
 # Add species
 pt.add_species(name='empty', color='#ffffff')
