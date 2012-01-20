@@ -29,7 +29,7 @@ from copy import deepcopy
 import ase.gui.ag
 from ase.atoms import Atoms
 from ase.gui.images import Images
-from ase.gui.defaults import read_defaults
+#from ase.gui.defaults import read_defaults
 
 
 
