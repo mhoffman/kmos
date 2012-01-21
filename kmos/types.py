@@ -692,6 +692,7 @@ class LayerList(FixedObject, list):
     def set_representation(self, images):
         """FIXME: If there is more than one representation they should be
         sorted by their name!!!"""
+        import ase.atoms
         from kmos.utils import get_ase_constructor
 
         if type(images) is list:
