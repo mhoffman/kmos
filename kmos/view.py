@@ -242,6 +242,10 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.occupation_diagram.set_xlim([self.times[0], self.times[-1]])
 
         self.data_plot.canvas.draw_idle()
+        manager = plt.get_current_fig_manager()
+        toolbar = manager.toolbar
+        toolbar.set_visible(False)
+
         plt.show()
 
         # [:] is necessary so that it copies the
