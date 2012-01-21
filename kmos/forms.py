@@ -233,10 +233,7 @@ class LatticeForm(ProxySlaveDelegate):
     """
     gladefile = GLADEFILE
     toplevel_name = 'lattice_form'
-    widgets = ['cell_size_x',
-               'cell_size_y',
-               'cell_size_z',
-               'default_layer',
+    widgets = ['default_layer',
                'lattice_representation']
 
     def __init__(self, model, dimension, project_tree):
@@ -250,9 +247,6 @@ class LatticeForm(ProxySlaveDelegate):
         'By default the system will be initialized with this layer.'
         + 'This only matters if using using more than one layer'
         + '(multi-lattice kMC).')
-        self.cell_size_label.set_tooltip_text(
-        'Set the size of your unit cell in Angstrom for the'
-        + 'auto-generated movie')
 
     def on_add_structure__clicked(self, _):
         try:

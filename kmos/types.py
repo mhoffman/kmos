@@ -700,6 +700,19 @@ class LayerList(FixedObject, list):
         else:
 
             self.representation = '[%s]' % get_ase_constructor(images)
+    def __setattr__(self, key, value):
+        if key == 'representation':
+            from kmos.utils import get_ase_constructor
+            from ase.atoms import Atoms
+            if value:
+                value = eval(value)
+                if (not hasattr(self, 'representation') or \
+                   not self.representation):
+                        self.cell = value[0].cell
+                value = '[%s]' % get_ase_constructor(value)
+            self.__dict__[key] = '%s' % value
+        else:
+            self.__dict__[key] = value
 
     def generate_coord_set(self, size=[1,1,1], layer_name='default'):
         """Generates a set of coordinates around unit cell of any
