@@ -97,7 +97,6 @@ class Project(object):
             parameter = Parameter(**kwargs)
             self.parameter_list.append(parameter)
             return parameter
-    
 
     def add_process(self, *processes, **kwargs):
         for process in processes:
@@ -697,9 +696,14 @@ class LayerList(FixedObject, list):
                 repr += '%s, ' % get_ase_constructor(atoms)
             repr += ']'
             self.representation = repr
-        else:
-
+        elif type(images) is str:
+            self.representation = images
+        elif type(images) is ase.atoms.Atoms:
             self.representation = '[%s]' % get_ase_constructor(images)
+        else:
+            raise UserWarning("Data type %s of %s not understood." %
+                (type(images), images))
+
     def __setattr__(self, key, value):
         if key == 'representation':
             from kmos.utils import get_ase_constructor
