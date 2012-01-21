@@ -17,8 +17,6 @@ pt.set_meta(model_name='pt111',
             email='mjhoffmann@gmail.com',
             debug=0)
 
-pt.lattice.representation = get_ase_constructor(slab)
-pt.lattice.cell = slab.cell
 layer = Layer(name='pt111')
 pos1 = np.array([positions[1, 0],
         positions[1, 1], 0.672])
@@ -31,7 +29,7 @@ pos2 = np.array([positions[2, 0],
 
 slab += ase.atoms.Atoms('H', cell=slab.cell, scaled_positions=[pos1])
 slab += ase.atoms.Atoms('H', cell=slab.cell, scaled_positions=[pos2])
-ase.visualize.view(slab, repeat=(1,1,1))
+#ase.visualize.view(slab, repeat=(1,1,1))
 rpos = np.linalg.solve(slab.cell, np.array(pos2))
 layer.add_site(Site(name='hollow2',
                     pos=pos2))
@@ -51,6 +49,6 @@ pt.parse_process('H_desorption_hollow1; H@hollow1->; 100000')
 pt.parse_process('H_desorption_hollow2; H@hollow2->; 100000')
 
 # Export, Save
-xmlfile = file('Pt_111.xml', 'w')
+xmlfile = file('new_Pt_111.xml', 'w')
 xmlfile.write(str(pt))
 xmlfile.close()
