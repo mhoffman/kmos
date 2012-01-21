@@ -986,7 +986,7 @@ class ProcListWriter():
                 % (species.name,
                 species.representation))
         out.write('    }\n\n')
-        out.write('lattice_representation = "%s"\n\n' % data.layer_list.representation)
+        out.write('lattice_representation = """%s"""\n\n' % data.layer_list.representation)
 
         # TOF counting
         out.write('tof_count = {\n')
