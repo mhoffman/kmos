@@ -63,7 +63,7 @@ representations = {
     "oxygen":"",
     }
 
-lattice_representation = ""
+lattice_representation = """"""
 
 tof_count = {
     }
