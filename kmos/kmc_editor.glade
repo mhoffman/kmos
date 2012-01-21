@@ -1131,27 +1131,15 @@
                                     <widget class="GtkHBox" id="hbox12">
                                         <property name="visible">True</property>
                                         <child>
-                                            <widget class="ProxySpinButton" id="sitevect_x">
-                                                <property name="adjustment">0 0 100 1 10 0</property>
-                                                <property name="data_type">float</property>
-                                                <property name="digits">5</property>
-                                                <property name="invisible_char">*</property>
-                                                <property name="invisible_char_set">True</property>
+                                            <widget class="GtkEntry" id="sitevect_x">
+                                                <property name="editable">False</property>
                                                 <property name="is_focus">True</property>
-                                                <property name="model_attribute">x</property>
-                                                <property name="text" context="yes" translatable="yes">0.00000</property>
                                                 <property name="visible">True</property>
                                             </widget>
                                         </child>
                                         <child>
-                                            <widget class="ProxySpinButton" id="sitevect_y">
-                                                <property name="adjustment">0 0 100 1 10 0</property>
-                                                <property name="data_type">float</property>
-                                                <property name="digits">5</property>
-                                                <property name="invisible_char">*</property>
-                                                <property name="invisible_char_set">True</property>
-                                                <property name="model_attribute">y</property>
-                                                <property name="text" context="yes" translatable="yes">0.00000</property>
+                                            <widget class="GtkEntry" id="sitevect_y">
+                                                <property name="editable">False</property>
                                                 <property name="visible">True</property>
                                             </widget>
                                             <packing>
@@ -1159,15 +1147,9 @@
                                             </packing>
                                         </child>
                                         <child>
-                                            <widget class="ProxySpinButton" id="sitevect_z">
-                                                <property name="adjustment">0 0 100 1 10 0</property>
-                                                <property name="data_type">float</property>
-                                                <property name="digits">5</property>
-                                                <property name="invisible_char">*</property>
-                                                <property name="invisible_char_set">True</property>
+                                            <widget class="GtkEntry" id="sitevect_z">
+                                                <property name="editable">False</property>
                                                 <property name="is_focus">True</property>
-                                                <property name="model_attribute">z</property>
-                                                <property name="text" context="yes" translatable="yes">0.00000</property>
                                                 <property name="visible">True</property>
                                             </widget>
                                             <packing>
@@ -1193,6 +1175,7 @@
                                 <child>
                                     <widget class="ProxyEntry" id="site_tags">
                                         <property name="data_type">str</property>
+                                        <property name="invisible_char">*</property>
                                         <property name="is_focus">True</property>
                                         <property name="model_attribute">tags</property>
                                         <property name="visible">True</property>

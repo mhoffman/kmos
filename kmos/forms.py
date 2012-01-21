@@ -445,9 +445,6 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
     gladefile = GLADEFILE
     toplevel_name = 'site_form'
     widgets = ['site_name',
-               'sitevect_x',
-               'sitevect_y',
-               'sitevect_z',
                'default_species',
                'site_tags']
 
@@ -458,11 +455,11 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
         site.default_species = None
         ProxyDelegate.__init__(self, site)
 
+        # fill species dialog with correct available choices
         self.site_default_species.prefill([x.name
                                             for x in
                                             project_tree.get_speciess()],
                                             sort=True)
-
         if default_species == 'default_species':
             self.site_default_species.select(
                         self.project_tree.species_list.default_species)
@@ -472,6 +469,12 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
 
         self.site_ok.grab_default()
         self.site = site
+
+        # set site coordinates
+        self.sitevect_x.set_text(str(site.pos[0]))
+        self.sitevect_y.set_text(str(site.pos[1]))
+        self.sitevect_z.set_text(str(site.pos[2]))
+
         self.parent = parent
         self.project_tree = project_tree
         self.layer = layer
@@ -484,18 +487,6 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
 
     def on_site_name__validate(self, widget, name):
         return self.on_name__validate(widget, model_name)
-
-    def on_sitevect_x__validate(self, widget, value):
-        if not 0 <= value <= 1:
-            return ValidationError('Each component must be between 0 and 1.')
-
-    def on_sitevect_y__validate(self, widget, value):
-        if not 0 <= value <= 1:
-            return ValidationError('Each component must be between 0 and 1.')
-
-    def on_sitevect_z__validate(self, widget, value):
-        if not 0 <= value <= 1:
-            return ValidationError('Each component must be between 0 and 1.')
 
     def on_sitevect_x__activate(self, _):
         self.on_site_ok__clicked(_)
