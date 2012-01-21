@@ -117,6 +117,10 @@ class Project(object):
 
     def parse_process(self, string):
         process = parse_process(string, self)
+        return process
+
+    def parse_and_add_process(self, string):
+        process = parse_process(string, self)
         self.process_list.append(process)
 
     def add_species(self, *speciess, **kwargs):
