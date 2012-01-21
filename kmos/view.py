@@ -177,8 +177,9 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.data_plot = plt.figure()
         #plt.xlabel('$t$ in s')
         self.tof_diagram = self.data_plot.add_subplot(211)
-        self.tof_diagram.get_yaxis().get_major_formatter().set_powerlimits(
-                                                                    (3, 3))
+        self.tof_diagram.set_yscale('log')
+        #self.tof_diagram.get_yaxis().get_major_formatter().set_powerlimits(
+                                                                    #(3, 3))
         self.tof_plots = []
         for tof in self.tofs:
             self.tof_plots.append(self.tof_diagram.plot([], [], label=tof)[0])
@@ -231,8 +232,8 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
             self.tof_plots[i].set_xdata(self.times)
             self.tof_plots[i].set_ydata([tof[i] for tof in self.tof_hist])
             self.tof_diagram.set_xlim(self.times[0], self.times[-1])
-            self.tof_diagram.set_ylim(0,
-                                      max([tof[i] for tof in self.tof_hist]))
+            self.tof_diagram.set_ylim(1e-3,
+                      max([tof[i] for tof in self.tof_hist]))
 
         # plot occupation
         for i, occupation_plot in enumerate(self.occupation_plots):
