@@ -42,13 +42,19 @@ pt.add_species(name='empty', color='#ffffff')
 pt.add_species(name='H', representation="Atoms('H')", color='#ffff00')
 
 #Add Processes
-pt.parse_process('H_adsorption_hollow1; ->H@hollow1; 100000')
-pt.parse_process('H_adsorption_hollow2; ->H@hollow2; 100000')
+pt.parse_and_add_process('H_adsorption_hollow1; ->H@hollow1; 100000')
+pt.parse_and_add_process('H_adsorption_hollow2; ->H@hollow2; 100000')
 
-pt.parse_process('H_desorption_hollow1; H@hollow1->; 100000')
-pt.parse_process('H_desorption_hollow2; H@hollow2->; 100000')
+pt.parse_and_add_process('H_desorption_hollow1; H@hollow1->; 100000')
+pt.parse_and_add_process('H_desorption_hollow2; H@hollow2->; 100000')
+
+
+pt.parse_and_add_process('H_diff_h1h2; H@hollow1 -> H@hollow2; 1000000000')
+pt.parse_and_add_process('H_diff_h2h1; H@hollow2 -> H@hollow1; 1000000000')
+
+
 
 # Export, Save
-xmlfile = file('new_Pt_111.xml', 'w')
+xmlfile = file('Pt_111.xml', 'w')
 xmlfile.write(str(pt))
 xmlfile.close()
