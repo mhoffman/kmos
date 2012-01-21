@@ -114,7 +114,6 @@ class GTKProject(SlaveDelegate):
 
         self.set_parent(parent)
 
-
         self.filename = ''
 
         self.undo_stack = UndoStack(
@@ -223,6 +222,7 @@ class GTKProject(SlaveDelegate):
         return str(self.model_tree)
 
     def import_xml_file(self, filename):
+        self.filename = filename
         self.model_tree.import_xml_file(filename)
         self.expand_all()
 
