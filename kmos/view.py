@@ -29,16 +29,13 @@ from copy import deepcopy
 import ase.gui.ag
 from ase.atoms import Atoms
 from ase.gui.images import Images
-#from ase.gui.defaults import read_defaults
-
-
 
 try:
     import matplotlib
     matplotlib.use('GTKAgg')
     import matplotlib.pylab as plt
 except:
-    print('Could not import matplotlib frontend. Needed for real-time plotting')
+    print('Could not import matplotlib frontend for real-time plotting')
 
 try:
     import gtk
@@ -59,6 +56,7 @@ from kmos.run import KMC_Model,\
 
 
 class ParamSlider(gtk.HScale):
+
     def __init__(self, name, value, min, max, scale, parameter_callback):
         #print('%s %s %s %s' % (name, value, min, max))
         self.parameter_callback = parameter_callback
@@ -66,7 +64,7 @@ class ParamSlider(gtk.HScale):
         adjustment = gtk.Adjustment(0, 0, self.resolution, 0.1, 1.)
         self.xmin = float(min)
         self.xmax = float(max)
-        if self.xmin == self.xmax :
+        if self.xmin == self.xmax:
             self.xmax = self.xmax + 1.
         self.settings = settings
         self.param_name = name
@@ -76,10 +74,12 @@ class ParamSlider(gtk.HScale):
         self.connect('value-changed', self.value_changed)
         self.set_tooltip_text(self.param_name)
         if self.scale == 'linear':
-            scaled_value = (self.resolution * ( float(value) - self.xmin) / (self.xmax - self.xmin))
+            scaled_value = (self.resolution * (float(value) - self.xmin) /
+                                               (self.xmax - self.xmin))
             self.set_value(scaled_value)
         elif self.scale == 'log':
-            scaled_value = 1000*(np.log(float(value)/self.xmin)/np.log(float(self.xmax/self.xmin)))
+            scaled_value = 1000 * (np.log(float(value) / self.xmin) /
+                                   np.log(float(self.xmax / self.xmin)))
             self.set_value(scaled_value)
 
     def linlog_scale_format(self, widget, value):
@@ -111,6 +111,10 @@ class ParamSlider(gtk.HScale):
 
 
 class FakeWidget():
+    """This widget is used by FakeUI containing the menu
+    base settings that the ase.gui.images modules expects.
+    """
+
     def __init__(self, path):
         self.active = False
         if path.endswith('ShowUnitCell'):
@@ -128,6 +132,7 @@ class FakeUI():
     """This is a fudge class to simulate to the View class a non-existing
     menu with included settings
     """
+
     def __init__(self):
         return self
 
@@ -137,6 +142,10 @@ class FakeUI():
 
 
 class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
+    """The part of the viewer GUI that displays the model's
+    current configuration.
+    """
+
     def __init__(self, queue, signal_queue, vbox, window,
                 rotations='', show_unit_cell=True, show_bonds=False):
 
@@ -233,7 +242,7 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
             self.tof_plots[i].set_ydata([tof[i] for tof in self.tof_hist])
             self.tof_diagram.set_xlim(self.times[0], self.times[-1])
             self.tof_diagram.set_ylim(1e-3,
-                      10*max([tof[i] for tof in self.tof_hist]))
+                      10 * max([tof[i] for tof in self.tof_hist]))
 
         # plot occupation
         for i, occupation_plot in enumerate(self.occupation_plots):
@@ -305,6 +314,7 @@ class KMC_Viewer():
     """A graphical front-end to run, manipulate
     and view a kMC model.
     """
+
     def __init__(self, model=None):
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_position(gtk.WIN_POS_CENTER)
@@ -316,7 +326,9 @@ class KMC_Viewer():
         self.parameter_queue = multiprocessing.Queue(maxsize=50)
         self.signal_queue = multiprocessing.Queue(maxsize=10)
         if model is None:
-            self.model = KMC_Model(queue, self.parameter_queue, self.signal_queue)
+            self.model = KMC_Model(queue,
+                                   self.parameter_queue,
+                                   self.signal_queue)
         else:
             self.model = model
             self.model.image_queue = queue
@@ -337,10 +349,7 @@ class KMC_Viewer():
             self.vbox.set_child_packing(slider, expand=False,
                                         fill=False, padding=0,
                                         pack_type=gtk.PACK_START)
-        #print('initialized kmc_viewer')
-        #print(self.window.get_title())
         self.window.set_title('kmos GUI')
-        #print(self.window.get_title())
         self.window.show_all()
 
     def parameter_callback(self, name, value):
@@ -361,7 +370,6 @@ class KMC_Viewer():
         base.deallocate_system()
         gtk.main_quit()
         return True
-
 
 
 def main(model=None):
