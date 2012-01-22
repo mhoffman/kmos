@@ -39,12 +39,17 @@ from kiwi.ui.delegates import ProxySlaveDelegate, \
 from kiwi.ui.views import SlaveView
 from kiwi.datatypes import ValidationError
 from kiwi.ui.objectlist import Column
-import kiwi.ui.dialogs
 
 # own modules
 from kmos.config import GLADEFILE
 from kmos.utils import CorrectlyNamed, get_ase_constructor
-from kmos.types import *
+from kmos.types import ProcessFormSite, \
+                       Process, \
+                       OutputItem, \
+                       Coord, \
+                       ConditionAction, \
+                       Site
+
 from kmos import evaluate_rate_expression
 from kmos.types import parse_chemical_expression
 
@@ -52,7 +57,6 @@ from kmos.types import parse_chemical_expression
 import numpy as np
 from ase.atoms import Atoms
 from ase.data import covalent_radii
-from ase.data.colors import jmol_colors
 
 # Canvas Import
 from kmos.pygtkcanvas.canvas import Canvas
@@ -69,8 +73,9 @@ def col_str2tuple(hex_string):
 
 
 def jmolcolor_in_hex(i):
+    """Return a given jmol color in hexadecimal representation."""
     from ase.data.colors import jmol_colors
-    color = map(int, 255 * jmol_colors[i])
+    color = [int(x) for x in 255 * jmol_colors[i]]
     r, g, b = color
     a = 255
     color = (r << 24) | (g << 16) | (b << 8) | a
@@ -115,11 +120,10 @@ class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
     def on_model_name__validate(self, widget, model_name):
         return self.on_name__validate(widget, model_name)
 
-    def on_model_name__content_changed(self, text):
+    def on_model_name__content_changed(self, _text):
         self.project_tree.update(self.model)
 
-    def on_model_dimension__content_changed(self, widget):
-        dimension = int(widget.get_text())
+    def on_model_dimension__content_changed(self, _widget):
         self.project_tree.update(self.model)
 
 
@@ -175,7 +179,7 @@ class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
         'Set an ASE Atoms(\n\'...\') like string to representation in the '
         + 'auto-generated movie. Please only use \'\' for quotation')
 
-    def on_name__content_changed(self, text):
+    def on_name__content_changed(self, _text):
         self.project_tree.update(self.model)
 
 
@@ -213,15 +217,15 @@ class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
         self.value.set_tooltip_text(
             'This defines the initial value for the parameter.')
 
-    def on_parameter_adjustable__content_changed(self, form):
+    def on_parameter_adjustable__content_changed(self, _form):
         value = self.parameter_adjustable.get_active()
         self.parameter_max.set_sensitive(value)
         self.parameter_min.set_sensitive(value)
 
-    def on_value__content_changed(self, text):
+    def on_value__content_changed(self, _text):
         self.project_tree.update(self.model)
 
-    def on_parameter_name__content_changed(self, text):
+    def on_parameter_name__content_changed(self, _text):
         self.project_tree.update(self.model)
         self.project_tree.project_data.sort_by_attribute('name')
 
@@ -240,7 +244,8 @@ class LatticeForm(ProxySlaveDelegate):
         default_layer = model.default_layer
         model.default_layer = None
         ProxySlaveDelegate.__init__(self, model)
-        self.default_layer.prefill([x.name for x in project_tree.get_layers()],
+        self.default_layer.prefill([x.name
+                                    for x in project_tree.get_layers()],
                                    sort=True)
         self.default_layer.select(default_layer)
         self.default_layer.set_tooltip_text(
@@ -331,8 +336,6 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         """Draw the current lattice with unit cell
            and sites defined on it.
         """
-        white = col_str2tuple(self.model.color)
-        black = col_str2tuple('#000000')
 
         atoms = self._get_atoms()
 
@@ -351,35 +354,36 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
 
             X = atom.position[0]
             Y = atoms.cell[1, 1] - atom.position[1]
-            ellipse = goocanvas.Ellipse(parent=self.root,
-                                center_x=(self.offset_x + self.scale * X),
-                                center_y=(self.offset_y + self.scale * Y),
-                                radius_x=radius,
-                                radius_y=radius,
-                                stroke_color='black',
-                                fill_color_rgba=color,
-                                line_width=1.0)
+            goocanvas.Ellipse(parent=self.root,
+                              center_x=(self.offset_x + self.scale * X),
+                              center_y=(self.offset_y + self.scale * Y),
+                              radius_x=radius,
+                              radius_y=radius,
+                              stroke_color='black',
+                              fill_color_rgba=color,
+                              line_width=1.0)
         A = (self.offset_x, self.offset_y)
-        B = (self.offset_x + self.scale*(atoms.cell[0, 0]),
-             self.offset_y + self.scale*(atoms.cell[0, 1]))
+        B = (self.offset_x + self.scale * (atoms.cell[0, 0]),
+             self.offset_y + self.scale * (atoms.cell[0, 1]))
 
-        C = (self.offset_x + self.scale*(atoms.cell[0, 0]
+        C = (self.offset_x + self.scale * (atoms.cell[0, 0]
                                        - atoms.cell[1, 0]),
-             self.offset_y + self.scale*(atoms.cell[0, 1]
+             self.offset_y + self.scale * (atoms.cell[0, 1]
                                        + atoms.cell[1, 1]))
 
-        D = (self.offset_x - self.scale*(atoms.cell[1, 0]),
-             self.offset_y + self.scale*(atoms.cell[1, 1]))
-        cell = goocanvas.Polyline(parent=self.root,
-                              close_path=True,
-                              points=goocanvas.Points([A, B, C, D]),
-                              stroke_color='black',)
+        D = (self.offset_x - self.scale * (atoms.cell[1, 0]),
+             self.offset_y + self.scale * (atoms.cell[1, 1]))
+        goocanvas.Polyline(parent=self.root,
+                           close_path=True,
+                           points=goocanvas.Points([A, B, C, D]),
+                           stroke_color='black',)
 
         for x in range(-1, 2):
             for y in range(-1, 2):
                 for site in self.model.sites:
                     X = self.scale * np.dot(site.pos[0] + x, atoms.cell[0, 0])
-                    Y = self.scale * np.dot(1 - (site.pos[1] +y), atoms.cell[1, 1])
+                    Y = self.scale * np.dot(1 - (site.pos[1] + y),
+                                            atoms.cell[1, 1])
                     o = goocanvas.Ellipse(parent=self.root,
                                           center_x=self.offset_x + X,
                                           center_y=self.offset_y + Y,
@@ -394,18 +398,19 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                 self.canvas.hide()
                 self.canvas.show()
 
-    def query_tooltip(self, canvas, widget, tooltip):
+    def query_tooltip(self, _canvas, widget, tooltip):
         tooltip.set_text(widget.site.name)
         return True
 
-    def on_button_press(self, item, event):
+    def on_button_press(self, _item, event):
         pos_x = ((event.x - self.lower_left[0]) /
                  (self.upper_right[0] - self.lower_left[0]))
         pos_y = ((event.y - self.lower_left[1]) /
                  (self.upper_right[1] - self.lower_left[1]))
 
         for site in self.model.sites:
-            d = np.sqrt((pos_x - site.pos[0]) ** 2 + (pos_y - site.pos[1]) ** 2)
+            d = np.sqrt((pos_x - site.pos[0]) ** 2 +
+                        (pos_y - site.pos[1]) ** 2)
             if d < 0.03:
                 SiteForm(site, self, self.project_tree, self.model)
                 break
@@ -419,8 +424,8 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
             # top atom as a first guess.
             # Assumes a binding distance of 1.3 Angstrom
             atoms = self._get_atoms()
-            Z = max(atoms.get_positions()[: ,2]) + 1.3
-            z = Z/atoms.cell[2,2]
+            Z = max(atoms.get_positions()[:, 2]) + 1.3
+            z = Z / atoms.cell[2, 2]
             new_site.pos[2] = z
 
             new_site.layer = self.model.name
@@ -492,9 +497,6 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
             'type this name a lot, so keep' +
             'it short but unambiguous')
 
-    def on_site_name__validate(self, widget, name):
-        return self.on_name__validate(widget, model_name)
-
     def on_sitevect_x__activate(self, _):
         self.on_site_ok__clicked(_)
 
@@ -507,9 +509,9 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
     def on_site_name__activate(self, _):
         self.on_site_ok__clicked(_)
 
-    def on_site_name__validate(self, widget, site_name):
+    def on_site_name__validate(self, _widget, site_name):
         """check if other site already has the name"""
-        if filter(lambda x: x.name == site_name, self.layer.sites):
+        if [x for x in self.layer.sites if x.name == site_name]:
             self.site_ok.set_sensitive(False)
             return ValidationError('Site name needs to be unique')
         else:
@@ -528,7 +530,7 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
         self.hide()
         self.parent.redraw()
 
-    def on_site_ok__clicked(self, button):
+    def on_site_ok__clicked(self, _button):
         self.model.default_species = self.site_default_species.get_selected()
         if not len(self.site_name.get_text()):
             self.layer.sites.remove(self.model)
@@ -589,7 +591,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             try:
                 self.rate_constant.set_tooltip_text(
                     'Current value: %.2e s^{-1}' %
-                    evaluate_rate_expression(expr, self.project_tree.get_parameters()))
+                    evaluate_rate_expression(expr,
+                        self.project_tree.get_parameters()))
             except Exception, e:
                 self.rate_constant.set_tooltip_text(str(e))
         rate_constant_terms = ['bar',
@@ -623,14 +626,15 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             expr += '%s@%s' % (action.species, action.coord.name)
         return expr
 
-    def on_rate_constant__validate(self, widget, expr):
+    def on_rate_constant__validate(self, _widget, expr):
         try:
             self.rate_constant.set_tooltip_text('Current value: %.2e s^{-1}' %
-                evaluate_rate_expression(expr, self.project_tree.get_parameters()))
+                evaluate_rate_expression(expr,
+                    self.project_tree.get_parameters()))
         except Exception, e:
             return ValidationError(e)
 
-    def on_chemical_expression__activate(self, entry, **kwargs):
+    def on_chemical_expression__activate(self, entry):
         text = entry.get_text()
         if not text:
             self.process.condition_list = []
@@ -674,7 +678,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         finally:
             self.draw_from_data()
 
-    def query_tooltip(self, canvas, widget, tooltip):
+    def query_tooltip(self, _canvas, widget, tooltip):
         tooltip.set_text(widget.tooltip_text)
         return True
 
@@ -699,7 +703,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             self.prev_pos = self.item.get_center()
             self.canvas.redraw()
 
-    def drag_motion(self, widget, item, event):
+    def drag_motion(self, _widget, _item, event):
         if self.item.clicked:
             d = event.x - self.prev_pos[0], event.y - self.prev_pos[1]
             self.item.move(*d)
@@ -739,8 +743,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                     condition_action = ConditionAction(species=species,
                                                        coord=kmc_coord)
 
-                    if filter(lambda x: x.get_center() == coord,
-                                            self.condition_layer):
+                    if [x for x in self.condition_layer
+                        if x.get_center() == coord]:
                         self.item.new_parent(self.action_layer)
                         self.item.set_radius(self.r_act)
                         self.process.action_list.append(condition_action)
@@ -760,8 +764,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         """
 
         def get_species_color(species):
-            return filter(lambda x: x.name == species,
-                                 self.project_tree.get_speciess())[0].color
+            return [x for x in self.project_tree.get_speciess()
+                    if x.name == species][0].color
 
         white = col_str2tuple('#ffffff')
         black = col_str2tuple('#000000')
@@ -796,8 +800,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                        i * (self.l / self.z), 0,
                        i * (self.l / self.z), 500,
                        line_width=1, fg=(.6, .6, .6))
-        active_layers = filter(lambda x: x.active == True,
-                                         self.project_tree.get_layers())
+        active_layers = [x for x in self.project_tree.get_layers() if x.active]
         site_list = []
         for active_layer in active_layers:
             for site in active_layer.sites:
@@ -817,8 +820,10 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                         l_site = CanvasOval(self.site_layer, 0, 0, 10, 10,
                                                                     fg=color)
 
-                    l_site.set_center(self.l / self.z * (i + float(site.pos[0])),
-                                500 - self.l / self.z * (j + float(site.pos[1])))
+                    l_site.set_center(self.l /
+                                      self.z * (i + float(site.pos[0])),
+                                      500 - self.l /
+                                      self.z * (j + float(site.pos[1])))
                     l_site.connect('query-tooltip', self.query_tooltip)
                     # 500 - ... for having scientific coordinates
                     # and not screen coordinates
@@ -880,12 +885,12 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.prev_pos = None
         black = col_str2tuple('#003333')
         for elem in self.process.condition_list:
-            matching_sites = filter(lambda x: isinstance(x, CanvasOval)
-                                    and x.i == self.X + elem.coord.offset[0]
-                                    and x.j == self.Y + elem.coord.offset[1]
-                                    and x.name == elem.coord.name
-                                    and x.layer == elem.coord.layer,
-                                    self.site_layer)
+            matching_sites = [x for x in self.site_layer
+                              if isinstance(x, CanvasOval)
+                              and x.i == self.X + elem.coord.offset[0]
+                              and x.j == self.Y + elem.coord.offset[1]
+                              and x.name == elem.coord.name
+                              and x.layer == elem.coord.layer]
             if matching_sites:
                 coords = matching_sites[0].get_coords()
                 color = get_species_color(elem.species)
@@ -902,12 +907,12 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 o.condition = elem
 
         for elem in self.process.action_list:
-            matching_sites = filter(lambda x: isinstance(x, CanvasOval)
-                                    and x.i == self.X + elem.coord.offset[0]
-                                    and x.j == self.Y + elem.coord.offset[1]
-                                    and x.name == elem.coord.name
-                                    and x.layer == elem.coord.layer,
-                                    self.site_layer)
+            matching_sites = [x for x in self.site_layer
+                              if isinstance(x, CanvasOval)
+                              and x.i == self.X + elem.coord.offset[0]
+                              and x.j == self.Y + elem.coord.offset[1]
+                              and x.name == elem.coord.name
+                              and x.layer == elem.coord.layer]
             if matching_sites:
                 coords = matching_sites[0].get_coords()
                 if elem.species[0] == '^':
@@ -929,7 +934,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 o.type = 'action'
                 o.action = elem
 
-    def on_condition_action_clicked(self, canvas, widget, event):
+    def on_condition_action_clicked(self, _canvas, widget, event):
         if event.button == 2:
             if widget.type == 'action':
                 self.process.action_list.remove(widget.action)
@@ -937,11 +942,11 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 self.process.condition_list.remove(widget.condition)
             widget.delete()
 
-    def on_process_name__content_changed(self, text):
+    def on_process_name__content_changed(self, _text):
         self.project_tree.project_data.sort_by_attribute('name')
         self.project_tree.update(self.process)
 
-    def on_rate_constant__content_changed(self, text):
+    def on_rate_constant__content_changed(self, _text):
         self.project_tree.update(self.process)
 
 
@@ -961,9 +966,9 @@ class BatchProcessForm(SlaveDelegate):
         SlaveDelegate.__init__(self)
 
     def on_btn_evaluate__clicked(self, _):
-        buffer = self.batch_processes.get_buffer()
-        bounds = buffer.get_bounds()
-        text = buffer.get_text(*bounds)
+        batch_buffer = self.batch_processes.get_buffer()
+        bounds = batch_buffer.get_bounds()
+        text = batch_buffer.get_text(*bounds)
         text = text.split('\n')
         for i, line in enumerate(text):
             # Ignore empty lines
@@ -973,17 +978,13 @@ class BatchProcessForm(SlaveDelegate):
                 raise UserWarning(
                     ("Line %s: the number of fields you entered is %s, " \
                      "but I expected 3") % (i, line.count(';') + 1))
-                continue
             line = line.split(';')
             name = line[0]
             if len(line) == 1:
-                eq = ''
                 rate_constant = ''
             elif len(line) == 2:
-                eq = line[1]
                 rate_constant = ''
             elif len(line) == 3:
-                eq = line[1]
                 rate_constant = line[2]
             else:
                 raise UserWarning(
@@ -1001,12 +1002,12 @@ class BatchProcessForm(SlaveDelegate):
                 raise
             else:
                 # replace any existing process with identical names
-                for dublette_proc in filter(lambda x: x.name == name,
-                                            self.project_tree.process_list):
+                for dublette_proc in [x for x in self.project_tree.process_list
+                                      if x.name == name]:
                     self.project_tree.process_list.remove(dublette_proc)
                 self.project_tree.append(self.project_tree.process_list_iter,
                                                                      process)
-        buffer.delete(*bounds)
+        batch_buffer.delete(*bounds)
 
 
 class OutputForm(GladeDelegate):

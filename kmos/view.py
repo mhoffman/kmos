@@ -21,24 +21,18 @@ import multiprocessing
 import threading
 
 import numpy as np
-import math
 import time
-from copy import deepcopy
 
 
 import ase.gui.ag
-from ase.atoms import Atoms
 from ase.gui.images import Images
-#from ase.gui.defaults import read_defaults
-
-
 
 try:
     import matplotlib
     matplotlib.use('GTKAgg')
     import matplotlib.pylab as plt
 except:
-    print('Could not import matplotlib frontend. Needed for real-time plotting')
+    print('Could not import matplotlib frontend for real-time plotting')
 
 try:
     import gtk
@@ -49,24 +43,25 @@ except:
     print('Warning: GTK not available. Cannot run graphical front-end')
 
 
-from kmos import species, units, evaluate_rate_expression
-from kmos.run import KMC_Model,\
-                       base,\
-                       get_tof_names,\
-                       lattice,\
-                       proclist,\
+from kmos.run import KMC_Model, \
+                       base, \
+                       get_tof_names, \
+                       lattice, \
                        settings
 
 
 class ParamSlider(gtk.HScale):
-    def __init__(self, name, value, min, max, scale, parameter_callback):
-        #print('%s %s %s %s' % (name, value, min, max))
+    """A horizontal slider bar allowing the user to adjust a model parameter
+    at runtime.
+    """
+
+    def __init__(self, name, value, xmin, xmax, scale, parameter_callback):
         self.parameter_callback = parameter_callback
         self.resolution = 1000.
         adjustment = gtk.Adjustment(0, 0, self.resolution, 0.1, 1.)
-        self.xmin = float(min)
-        self.xmax = float(max)
-        if self.xmin == self.xmax :
+        self.xmin = float(xmin)
+        self.xmax = float(xmax)
+        if self.xmin == self.xmax:
             self.xmax = self.xmax + 1.
         self.settings = settings
         self.param_name = name
@@ -76,20 +71,25 @@ class ParamSlider(gtk.HScale):
         self.connect('value-changed', self.value_changed)
         self.set_tooltip_text(self.param_name)
         if self.scale == 'linear':
-            scaled_value = (self.resolution * ( float(value) - self.xmin) / (self.xmax - self.xmin))
+            scaled_value = (self.resolution * (float(value) - self.xmin) /
+                                               (self.xmax - self.xmin))
             self.set_value(scaled_value)
         elif self.scale == 'log':
-            scaled_value = 1000*(np.log(float(value)/self.xmin)/np.log(float(self.xmax/self.xmin)))
+            scaled_value = 1000 * (np.log(float(value) / self.xmin) /
+                                   np.log(float(self.xmax / self.xmin)))
             self.set_value(scaled_value)
 
-    def linlog_scale_format(self, widget, value):
+    def linlog_scale_format(self, _widget, value):
+        """Format a model parameter's name for display above
+        the slider bar.
+        """
         value /= self.resolution
         name = self.param_name
         unit = ''
         if self.param_name.endswith('gas'):
             name = name[:-3]
         if self.param_name.startswith('p_'):
-            name = name[2:]
+            name = 'p(%s)' % name[2:]
             unit = 'bar'
         if name == 'T':
             unit = 'K'
@@ -101,7 +101,8 @@ class ParamSlider(gtk.HScale):
                            self.xmin + value * (self.xmax - self.xmin), unit)
         return vstr
 
-    def value_changed(self, widget):
+    def value_changed(self, _widget):
+        """Handle the event, that slider bar has been dragged."""
         scale_value = self.get_value() / self.resolution
         if self.scale == 'log':
             value = self.xmin * (self.xmax / self.xmin) ** scale_value
@@ -111,6 +112,10 @@ class ParamSlider(gtk.HScale):
 
 
 class FakeWidget():
+    """This widget is used by FakeUI containing the menu
+    base settings that the ase.gui.images modules expects.
+    """
+
     def __init__(self, path):
         self.active = False
         if path.endswith('ShowUnitCell'):
@@ -128,6 +133,7 @@ class FakeUI():
     """This is a fudge class to simulate to the View class a non-existing
     menu with included settings
     """
+
     def __init__(self):
         return self
 
@@ -137,6 +143,10 @@ class FakeUI():
 
 
 class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
+    """The part of the viewer GUI that displays the model's
+    current configuration.
+    """
+
     def __init__(self, queue, signal_queue, vbox, window,
                 rotations='', show_unit_cell=True, show_bonds=False):
 
@@ -196,9 +206,8 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.occupation_diagram.set_xlabel('$t$ in s')
         self.occupation_diagram.set_ylabel('Coverage')
 
-        #print('initialized viewbox')
-
     def update_vbox(self, atoms):
+        """Update the ViewBox."""
         if not self.center.any():
             self.center = atoms.cell.diagonal() * .5
         self.images = Images([atoms])
@@ -210,9 +219,9 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
                                                     atoms.kmc_step))
 
     def update_plots(self, atoms):
+        """Update the coverage and TOF plots."""
         # fetch data piggy-backed on atoms object
         new_time = atoms.kmc_time
-        new_procstat = atoms.procstat
 
         occupations = atoms.occupation.sum(axis=1) / lattice.spuck
         tof_data = atoms.tof_data
@@ -229,16 +238,16 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
 
         # plot TOFs
         for i, tof_plot in enumerate(self.tof_plots):
-            self.tof_plots[i].set_xdata(self.times)
-            self.tof_plots[i].set_ydata([tof[i] for tof in self.tof_hist])
+            tof_plot.set_xdata(self.times)
+            tof_plot.set_ydata([tof[i] for tof in self.tof_hist])
             self.tof_diagram.set_xlim(self.times[0], self.times[-1])
             self.tof_diagram.set_ylim(1e-3,
-                      max([tof[i] for tof in self.tof_hist]))
+                      10 * max([tof[i] for tof in self.tof_hist]))
 
         # plot occupation
         for i, occupation_plot in enumerate(self.occupation_plots):
-            self.occupation_plots[i].set_xdata(self.times)
-            self.occupation_plots[i].set_ydata(
+            occupation_plot.set_xdata(self.times)
+            occupation_plot.set_ydata(
                             [occ[i] for occ in self.occupation_hist])
         self.occupation_diagram.set_xlim([self.times[0], self.times[-1]])
 
@@ -268,7 +277,8 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
                 gobject.idle_add(self.update_vbox, atoms)
                 gobject.idle_add(self.update_plots, atoms)
 
-    def on_key_press(self, window, event):
+    def on_key_press(self, _widget, event):
+        """Process key press event on view box."""
         if event.string in [' ', 'p']:
             if not self.paused:
                 self.signal_queue.put('PAUSE')
@@ -281,7 +291,7 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         elif event.string == 'h':
             self.signal_queue.put('HALVE')
 
-    def scroll_event(self, window, event):
+    def scroll_event(self, _window, event):
         """Zoom in/out when using mouse wheel"""
         x = 1.0
         if event.direction == gtk.gdk.SCROLL_UP:
@@ -305,6 +315,7 @@ class KMC_Viewer():
     """A graphical front-end to run, manipulate
     and view a kMC model.
     """
+
     def __init__(self, model=None):
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_position(gtk.WIN_POS_CENTER)
@@ -316,7 +327,9 @@ class KMC_Viewer():
         self.parameter_queue = multiprocessing.Queue(maxsize=50)
         self.signal_queue = multiprocessing.Queue(maxsize=10)
         if model is None:
-            self.model = KMC_Model(queue, self.parameter_queue, self.signal_queue)
+            self.model = KMC_Model(queue,
+                                   self.parameter_queue,
+                                   self.signal_queue)
         else:
             self.model = model
             self.model.image_queue = queue
@@ -325,8 +338,10 @@ class KMC_Viewer():
         self.viewbox = KMC_ViewBox(queue, self.signal_queue,
                                    self.vbox, self.window)
 
-        for param_name in filter(lambda p: \
-            settings.parameters[p]['adjustable'], settings.parameters):
+        adjustable_params = [param for param in settings.parameters
+                             if settings.parameters[param]['adjustable']]
+
+        for param_name in sorted(adjustable_params):
             param = settings.parameters[param_name]
             slider = ParamSlider(param_name, param['value'],
                                  param['min'], param['max'],
@@ -335,18 +350,20 @@ class KMC_Viewer():
             self.vbox.set_child_packing(slider, expand=False,
                                         fill=False, padding=0,
                                         pack_type=gtk.PACK_START)
-        #print('initialized kmc_viewer')
-        #print(self.window.get_title())
         self.window.set_title('kmos GUI')
-        #print(self.window.get_title())
         self.window.show_all()
 
     def parameter_callback(self, name, value):
+        """Sent (updated) parameters to the model process."""
         settings.parameters[name]['value'] = value
         self.parameter_queue.put(settings.parameters)
 
-    def exit(self, widget, event):
-        #print('Starting shutdown procedure')
+    def exit(self, _widget, _event):
+        """Exit the viewer application cleanly
+        killing all subprocesses before the main
+        process.
+        """
+
         self.viewbox.kill()
         #print(' ... sent kill to viewbox')
         self.viewbox.join()
@@ -361,15 +378,19 @@ class KMC_Viewer():
         return True
 
 
-
 def main(model=None):
-    from kmos.view import KMC_Viewer
-    import gtk
-    import gobject
+    """The entry point for the kmos viewer application. In order to
+    run and view a model the corresponding kmc_settings.py and
+    kmc_model.so must be in the current import path, e.g. ::
+
+        from sys import path
+        path.append('/path/to/model')
+        from kmos.view import main
+        main() # launch viewer
+    """
+
     gobject.threads_init()
     viewer = KMC_Viewer(model)
     viewer.model.start()
     viewer.viewbox.start()
-    #print('started model and viewbox processes')
     gtk.main()
-    #print('gtk.main stopped')

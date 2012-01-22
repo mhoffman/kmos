@@ -24,8 +24,31 @@ import StringIO
 import sys
 import os
 import copy
-from kmos.types import Project
-from kmos.forms import *
+from kmos.types import Project, \
+                       Layer, \
+                       LayerList, \
+                       Meta, \
+                       OutputList, \
+                       Parameter, \
+                       Process, \
+                       ProcessList, \
+                       SpeciesList, \
+                       OutputItem, \
+                       Species
+
+from kmos.forms import LayerEditor, \
+                       MetaForm, \
+                       InlineMessage, \
+                       OutputForm, \
+                       ParameterForm, \
+                       ProcessForm, \
+                       BatchProcessForm, \
+                       SpeciesForm, \
+                       SpeciesListForm, \
+                       LatticeForm
+
+from kmos.config import GLADEFILE
+
 import kmos.io
 #sys.path.append(APP_ABS_PATH)
 import gobject
@@ -208,7 +231,7 @@ class GTKProject(SlaveDelegate):
     def update(self, model):
         self.project_data.update(model)
 
-    def on_row_activated(self, tree, data):
+    def on_row_activated(self, _tree, data):
         if isinstance(data, Layer):
             data.active = not data.active
 
@@ -471,8 +494,8 @@ class Editor(GladeDelegate):
         self.menubar.insert_action_group(actions, 0)
         try:
             mergeid = self.menubar.add_ui_from_string(MENU_LAYOUT)
-        except gobject.GError as error:
-            print('Building menu failed: %s' % (e, mergeid))
+        except gobject.GError, error:
+            print('Building menu failed: %s' % (error, mergeid))
 
         # Initialize the project tree, passing in the menu bar
         self.project_tree = GTKProject(parent=self, menubar=self.menubar)
@@ -536,7 +559,7 @@ class Editor(GladeDelegate):
         self.attach_slave('workarea', inline_message)
         inline_message.show()
 
-    def on_btn_new_project__clicked(self, button):
+    def on_btn_new_project__clicked(self, _button):
         """Start a new project
         """
         if str(self.project_tree) != self.saved_state:
@@ -571,7 +594,7 @@ class Editor(GladeDelegate):
             'lattice, species, parameters, and processes or open\n' +
             'an existing one by opening a kMC XML file')
 
-    def on_btn_add_layer__clicked(self, button):
+    def on_btn_add_layer__clicked(self, _button):
         """Add a new layer to the model
         """
         if len(self.project_tree.layer_list) == 1:
@@ -592,7 +615,7 @@ class Editor(GladeDelegate):
         self.attach_slave('workarea', layer_form)
         layer_form.focus_topmost()
 
-    def on_btn_add_species__clicked(self, button):
+    def on_btn_add_species__clicked(self, _button):
         """Add a new species to the model
         """
         new_species = Species(color='#fff', name='')
@@ -607,7 +630,7 @@ class Editor(GladeDelegate):
         self.attach_slave('workarea', species_form)
         species_form.focus_topmost()
 
-    def on_btn_add_process__clicked(self, button):
+    def on_btn_add_process__clicked(self, _button):
         """Add a new process to the model
         """
         if self.project_tree.meta.model_dimension in [1, 3]:
@@ -628,7 +651,7 @@ class Editor(GladeDelegate):
         self.attach_slave('workarea', process_form)
         process_form.focus_topmost()
 
-    def on_btn_add_parameter__clicked(self, button):
+    def on_btn_add_parameter__clicked(self, _button):
         new_parameter = Parameter(name='', value='')
         self.project_tree.undo_stack.start_new_action('Add parameter',
                                                       new_parameter)
@@ -641,7 +664,7 @@ class Editor(GladeDelegate):
         self.attach_slave('workarea', parameter_form)
         parameter_form.focus_topmost()
 
-    def on_btn_open_model__clicked(self, button):
+    def on_btn_open_model__clicked(self, _button):
         """Import project from XML
         """
         if str(self.project_tree) != self.saved_state:
@@ -695,7 +718,7 @@ class Editor(GladeDelegate):
             self.toast('Imported model <Untitled>')
         self.saved_state = str(self.project_tree)
 
-    def on_btn_save_model__clicked(self, button, force_save=False):
+    def on_btn_save_model__clicked(self, _button, force_save=False):
         #Write Out XML File
         xml_string = str(self.project_tree)
         if xml_string == self.saved_state and not force_save:
@@ -713,7 +736,7 @@ class Editor(GladeDelegate):
             self.saved_state = xml_string
             self.toast('Saved %s' % self.project_tree.filename)
 
-    def on_btn_save_as__clicked(self, button):
+    def on_btn_save_as__clicked(self, _button):
         filechooser = gtk.FileChooserDialog(title='Save Project As ...',
             action=gtk.FILE_CHOOSER_ACTION_SAVE,
             parent=None,
