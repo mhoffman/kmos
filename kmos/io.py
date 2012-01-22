@@ -1044,6 +1044,10 @@ def export_source(project_tree, export_dir=None):
     will be stored under the directory export_dir. export_dir will
     be created if it does not exist. The XML representation of the
     model will be included in the kmc_settings.py module.
+
+    `export_source` is *the* central feature of the `kmos` approach.
+    In order to generate different *backend* solvers, additional candidates
+    of this methods could be implemented.
     """
     if export_dir is None:
         export_dir = project_tree.meta.model_name
