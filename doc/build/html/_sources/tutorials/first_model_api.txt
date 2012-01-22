@@ -170,6 +170,25 @@ Then the desorption process is almost the same, except the reverse::
                  rate_constant='p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(-deltaG*eV)')
 
 
+To reduce typing, kmos also knows a shorthand notation for processes.
+In order to produce the same process you could also type ::
+
+  pt.parse_process('CO_desorption; CO@hollow->empty@hollow ; p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(-deltaG*eV)')
+
+and since any non-existing on either the left or the right side
+of the `->` symbol is replaced by a corresponding term with
+the `default_species` (in this case `empty`) you could as
+well type ::
+
+  pt.parse_process('CO_desorption; CO@hollow->; p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(-deltaG*eV)')
+
+
+and to make it even shorter you can parse and add the process on one line ::
+
+  pt.parse_and_add_process('CO_desorption; CO@hollow->; p_CO*bar*A/sqrt(2*pi*umss*m_CO/beta)*exp(-deltaG*eV)')
+
+
+
 And that is it!
 
 Export, save, compile

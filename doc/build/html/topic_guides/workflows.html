@@ -49,7 +49,8 @@
             <h3><a href="../index.html">Table Of Contents</a></h3>
             <ul>
 <li><a class="reference external" href="#">Modelling Workflows</a><ul>
-<li><a class="reference external" href="#kmc-modelling">kMC Modelling</a></li>
+<li><a class="reference external" href="#kmc-modeling">kMC Modeling</a></li>
+<li><a class="reference external" href="#kmos-workflows">kmos workflows</a></li>
 </ul>
 </li>
 </ul>
@@ -104,8 +105,8 @@ behavior with reference system</li>
 to illustrate that the chances to find and capture
 the relevant features of a system are enhanced
 if the trial/learn loop is as short as possible.</p>
-<div class="section" id="kmc-modelling">
-<h2>kMC Modelling<a class="headerlink" href="#kmc-modelling" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="kmc-modeling">
+<h2>kMC Modeling<a class="headerlink" href="#kmc-modeling" title="Permalink to this headline">¶</a></h2>
 <p>A good way to define a model is to use a paper and pencil to draw
 your lattice, choose the species that you will need, draw
 each process and write down an expression for each rate constant, and
@@ -126,6 +127,39 @@ You enter a new model by filling in</p>
 <cite>kmos export &lt;xml-file&gt;</cite> and you will get a subfolder with a self-contained
 Fortran90 code, which solves the model. If all necessary dependencies are
 installed you can simply run <cite>kmos view</cite> in the export folder.</p>
+</div>
+<div class="section" id="kmos-workflows">
+<h2>kmos workflows<a class="headerlink" href="#kmos-workflows" title="Permalink to this headline">¶</a></h2>
+<p>Since <cite>kmos</cite> has several entry points, there are several ways of using it.
+This section will outline different ways of using kmos:</p>
+<ul>
+<li><p class="first"><em>the render script</em></p>
+<p>Just write complete scripts as outlined in
+<a class="reference external" href="../tutorials/first_model_api.html"><em>A first kMC Model&#8211;the API way</em></a>. Export
+source from there or inspect XML file with one
+of the next methods below.</p>
+</li>
+<li><p class="first"><em>the GUI editor</em></p>
+<p>Open an existing project *.xml file with</p>
+<div class="highlight-python"><pre>kmos edit &lt;project_name&gt;.xml</pre>
+</div>
+<p>and inspect or edit it through on screen</p>
+</li>
+<li><p class="first"><em>the CLI editor</em></p>
+<p>Open an existing project *.xml file with</p>
+<div class="highlight-python"><pre>kmos import &lt;project_name&gt;.xml</pre>
+</div>
+<p>and edit the project interactively on the ipython console.</p>
+</li>
+<li><p class="first"><em>edit the XML file</em></p>
+<p>Just open the XML file of your kmos project with a text
+editor of your choice and inspect or your model right
+there. This might only be a last resort to figure out
+what is going on. XML is often not considered very
+readable and note that changing variable names in
+one place might often break inconsistencies in other.</p>
+</li>
+</ul>
 </div>
 </div>
 

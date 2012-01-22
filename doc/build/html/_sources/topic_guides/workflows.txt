@@ -20,7 +20,7 @@ the relevant features of a system are enhanced
 if the trial/learn loop is as short as possible.
 
 
-kMC Modelling
+kMC Modeling
 ^^^^^^^^^^^^^
 
 A good way to define a model is to use a paper and pencil to draw
@@ -42,3 +42,43 @@ If you want to see the model run
 `kmos export <xml-file>` and you will get a subfolder with a self-contained
 Fortran90 code, which solves the model. If all necessary dependencies are
 installed you can simply run `kmos view` in the export folder.
+
+
+
+kmos workflows
+^^^^^^^^^^^^^^
+
+Since `kmos` has several entry points, there are several ways of using it.
+This section will outline different ways of using kmos:
+
+- *the render script*
+
+  Just write complete scripts as outlined in
+  :doc:`../tutorials/first_model_api`. Export
+  source from there or inspect XML file with one
+  of the next methods below.
+
+- *the GUI editor*
+
+  Open an existing project \*.xml file with ::
+
+    kmos edit <project_name>.xml
+
+  and inspect or edit it through on screen
+
+- *the CLI editor*
+
+  Open an existing project \*.xml file with ::
+
+    kmos import <project_name>.xml
+
+  and edit the project interactively on the ipython console.
+
+- *edit the XML file*
+
+  Just open the XML file of your kmos project with a text
+  editor of your choice and inspect or your model right
+  there. This might only be a last resort to figure out
+  what is going on. XML is often not considered very
+  readable and note that changing variable names in
+  one place might often break inconsistencies in other.

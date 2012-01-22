@@ -64,6 +64,26 @@ These quantities are often sufficient when running and simulating
 a catalyst surface, but of course the model could be expanded
 to more observables.
 
+The `occupation` is a 2-dimensional array which contains
+the `occupation` for each surface `site` divided by
+the number of unit cell. The first slot
+denotes the species and the second slot denotes the
+surface site, i.e. ::
+
+  occupation[species, site-1]
+
+So given there is a `hydrogen` species
+in the model, the occupation of `hydrogen` across all site
+type can be accessed like ::
+
+  hydrogen_occupation = occupation[model.proclist.hydrogen]
+
+To access the coverage of one surface site, we have to
+remember to subtract 1, when using the the builtin constants,
+like so ::
+
+  hollow_occupation = occupation[:, model.lattice.hollow-1]
+
 Lastly it is important to call ::
 
   model.deallocate()

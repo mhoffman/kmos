@@ -26,6 +26,9 @@ kmos.io
 .. automodule:: kmos.io
    :members: export_source, import_xml, export_xml
 
+.. autoclass:: kmos.io.ProcListWriter
+   :members: write_lattice, write_proclist, write_settings
+
 Editor frontend
 ===============
 
