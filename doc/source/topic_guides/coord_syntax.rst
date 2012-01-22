@@ -66,10 +66,15 @@ The offset is a tuple of three integer numbers and specifies the relative
 unit cell of this coordinate. Of course this only becomes meaningful
 as soon as you use more than one coordinate in a process.
 
-Autogeneration of sets
-^^^^^^^^^^^^^^^^^^^^^^
+Advanced Coordinate Techniques
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Often times it is more handy (less typing) to generate a larger set
+Generating large process lists with a lot of similar or even
+degenerate processes is a very boring task. So we should try
+to use programming logic as much as possible. Here I will outline
+a couple of idioms you can use here.
+
+Often times it is handier (less typing) to generate a larger set
 of coordinates at first and then select different subsets from it
 in a process definition. For this purpose you can use ::
 
@@ -81,9 +86,8 @@ all coordinates in the first unit cell (``offset=(1,1,1)``)
 and all ``x``, ``y``, and ``z`` unit cells in the respective
 direction.
 
-
-To to select subsets in a readable way I suggest you list comprehensions
-like for example so ::
+To select subsets in a readable way I suggest you use list comprehensions,
+like so ::
 
   [ x for x in pset if not x.offset.any() ]
 
