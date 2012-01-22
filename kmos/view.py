@@ -89,7 +89,7 @@ class ParamSlider(gtk.HScale):
         if self.param_name.endswith('gas'):
             name = name[:-3]
         if self.param_name.startswith('p_'):
-            name = name[2:]
+            name = 'p(%s)' % name[2:]
             unit = 'bar'
         if name == 'T':
             unit = 'K'
@@ -233,7 +233,7 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
             self.tof_plots[i].set_ydata([tof[i] for tof in self.tof_hist])
             self.tof_diagram.set_xlim(self.times[0], self.times[-1])
             self.tof_diagram.set_ylim(1e-3,
-                      max([tof[i] for tof in self.tof_hist]))
+                      10*max([tof[i] for tof in self.tof_hist]))
 
         # plot occupation
         for i, occupation_plot in enumerate(self.occupation_plots):
@@ -325,8 +325,10 @@ class KMC_Viewer():
         self.viewbox = KMC_ViewBox(queue, self.signal_queue,
                                    self.vbox, self.window)
 
-        for param_name in filter(lambda p: \
-            settings.parameters[p]['adjustable'], settings.parameters):
+        adjustable_params = [param for param in settings.parameters
+                             if settings.parameters[param]['adjustable']]
+
+        for param_name in sorted(adjustable_params):
             param = settings.parameters[param_name]
             slider = ParamSlider(param_name, param['value'],
                                  param['min'], param['max'],
