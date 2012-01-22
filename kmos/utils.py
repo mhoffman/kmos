@@ -72,6 +72,10 @@ def write_py(fileobj, images, **kwargs):
 
 
 def get_ase_constructor(atoms):
+    if type(atoms) is type(str):
+        atoms = eval(atoms)
+    if type(atoms) is list :
+        atoms = atoms[0]
     f = StringIO()
     write_py(f, atoms)
     for line in f:

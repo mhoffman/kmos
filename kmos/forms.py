@@ -233,10 +233,7 @@ class LatticeForm(ProxySlaveDelegate):
     """
     gladefile = GLADEFILE
     toplevel_name = 'lattice_form'
-    widgets = ['cell_size_x',
-               'cell_size_y',
-               'cell_size_z',
-               'default_layer',
+    widgets = ['default_layer',
                'lattice_representation']
 
     def __init__(self, model, dimension, project_tree):
@@ -250,9 +247,6 @@ class LatticeForm(ProxySlaveDelegate):
         'By default the system will be initialized with this layer.'
         + 'This only matters if using using more than one layer'
         + '(multi-lattice kMC).')
-        self.cell_size_label.set_tooltip_text(
-        'Set the size of your unit cell in Angstrom for the'
-        + 'auto-generated movie')
 
     def on_add_structure__clicked(self, _):
         try:
@@ -283,13 +277,6 @@ class LatticeForm(ProxySlaveDelegate):
                 self.lattice_representation.get_buffer().get_end_iter())
             if not cur_text:
                 structures = []
-                if float(self.cell_size_x.get_text()) == 1.:
-                    self.cell_size_x.set_text('%s' % structure[0].cell[0, 0])
-                if float(self.cell_size_y.get_text()) == 1.:
-                    self.cell_size_y.set_text('%s' % structure[0].cell[1, 1])
-                if float(self.cell_size_z.get_text()) == 1.:
-                    self.cell_size_z.set_text('%s' % structure[0].cell[2, 2])
-
             else:
                 structures = eval(cur_text)
             structures.append(structure)
@@ -329,11 +316,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
             'A name is only relevant if you are using more than one\n'
             + 'layer in your model.')
 
-    def redraw(self):
-        white = col_str2tuple(self.model.color)
-        black = col_str2tuple('#000000')
-
-        atoms = []
+    def _get_atoms(self):
         if self.project_tree.lattice.representation:
             representations = eval(self.project_tree.lattice.representation)
             if len(representations) > self.layer_nr:
@@ -342,6 +325,17 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                 atoms = representations[0]
         else:
             atoms = Atoms()
+        return atoms
+
+    def redraw(self):
+        """Draw the current lattice with unit cell
+           and sites defined on it.
+        """
+        white = col_str2tuple(self.model.color)
+        black = col_str2tuple('#000000')
+
+        atoms = self._get_atoms()
+
         self.lower_left = (self.offset_x,
                            self.offset_y
                            + self.scale * atoms.cell[1, 1])
@@ -420,9 +414,16 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
             new_site.name = ''
             new_site.pos[0] = pos_x
             new_site.pos[1] = pos_y
-            new_site.pos[2] = 0.
-            new_site.layer = self.model.name
 
+            # Put z position slightly above
+            # top atom as a first guess.
+            # Assumes a binding distance of 1.3 Angstrom
+            atoms = self._get_atoms()
+            Z = max(atoms.get_positions()[: ,2]) + 1.3
+            z = Z/atoms.cell[2,2]
+            new_site.pos[2] = z
+
+            new_site.layer = self.model.name
             self.model.sites.append(new_site)
             SiteForm(new_site, self, self.project_tree, self.model)
 
@@ -451,9 +452,6 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
     gladefile = GLADEFILE
     toplevel_name = 'site_form'
     widgets = ['site_name',
-               'sitevect_x',
-               'sitevect_y',
-               'sitevect_z',
                'default_species',
                'site_tags']
 
@@ -464,11 +462,11 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
         site.default_species = None
         ProxyDelegate.__init__(self, site)
 
+        # fill species dialog with correct available choices
         self.site_default_species.prefill([x.name
                                             for x in
                                             project_tree.get_speciess()],
                                             sort=True)
-
         if default_species == 'default_species':
             self.site_default_species.select(
                         self.project_tree.species_list.default_species)
@@ -478,6 +476,12 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
 
         self.site_ok.grab_default()
         self.site = site
+
+        # set site coordinates
+        self.sitevect_x.set_text(str(site.pos[0]))
+        self.sitevect_y.set_text(str(site.pos[1]))
+        self.sitevect_z.set_text(str(site.pos[2]))
+
         self.parent = parent
         self.project_tree = project_tree
         self.layer = layer
@@ -490,18 +494,6 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
 
     def on_site_name__validate(self, widget, name):
         return self.on_name__validate(widget, model_name)
-
-    def on_sitevect_x__validate(self, widget, value):
-        if not 0 <= value <= 1:
-            return ValidationError('Each component must be between 0 and 1.')
-
-    def on_sitevect_y__validate(self, widget, value):
-        if not 0 <= value <= 1:
-            return ValidationError('Each component must be between 0 and 1.')
-
-    def on_sitevect_z__validate(self, widget, value):
-        if not 0 <= value <= 1:
-            return ValidationError('Each component must be between 0 and 1.')
 
     def on_sitevect_x__activate(self, _):
         self.on_site_ok__clicked(_)

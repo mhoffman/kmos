@@ -97,7 +97,6 @@ class Project(object):
             parameter = Parameter(**kwargs)
             self.parameter_list.append(parameter)
             return parameter
-    
 
     def add_process(self, *processes, **kwargs):
         for process in processes:
@@ -117,6 +116,10 @@ class Project(object):
             return process
 
     def parse_process(self, string):
+        process = parse_process(string, self)
+        return process
+
+    def parse_and_add_process(self, string):
         process = parse_process(string, self)
         self.process_list.append(process)
 
@@ -689,6 +692,7 @@ class LayerList(FixedObject, list):
     def set_representation(self, images):
         """FIXME: If there is more than one representation they should be
         sorted by their name!!!"""
+        import ase.atoms
         from kmos.utils import get_ase_constructor
 
         if type(images) is list:
@@ -697,9 +701,27 @@ class LayerList(FixedObject, list):
                 repr += '%s, ' % get_ase_constructor(atoms)
             repr += ']'
             self.representation = repr
-        else:
-
+        elif type(images) is str:
+            self.representation = images
+        elif type(images) is ase.atoms.Atoms:
             self.representation = '[%s]' % get_ase_constructor(images)
+        else:
+            raise UserWarning("Data type %s of %s not understood." %
+                (type(images), images))
+
+    def __setattr__(self, key, value):
+        if key == 'representation':
+            from kmos.utils import get_ase_constructor
+            from ase.atoms import Atoms
+            if value:
+                value = eval(value)
+                if (not hasattr(self, 'representation') or \
+                   not self.representation):
+                        self.cell = value[0].cell
+                value = '[%s]' % get_ase_constructor(value)
+            self.__dict__[key] = '%s' % value
+        else:
+            self.__dict__[key] = value
 
     def generate_coord_set(self, size=[1,1,1], layer_name='default'):
         """Generates a set of coordinates around unit cell of any

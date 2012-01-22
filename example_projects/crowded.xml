@@ -83,10 +83,10 @@
       [[  1.37532269e+00,   1.37532269e+00,   5.05755467e+00],
        [ -3.44846559e-20,  -1.02778108e-20,   6.88744533e+00]]))]">
         <layer color="#ffffff" grid="1 1 1" grid_offset="0.0 0.0 0.0" name="default">
-            <site class="" default_species="empty" type="top_0" vector="0.0 0.0 0.706990372541"/>
-            <site class="" default_species="empty" type="bridge_1" vector="0.0 0.5 0.706990372541"/>
-            <site class="" default_species="empty" type="bridge_2" vector="0.5 0.0 0.706990372541"/>
-            <site class="" default_species="empty" type="hollow4_6" vector="0.5 0.5 0.706990372541"/>
+            <site default_species="empty" type="top_0" pos="0.0 0.0 0.706990372541"/>
+            <site default_species="empty" type="bridge_1" pos="0.0 0.5 0.706990372541"/>
+            <site default_species="empty" type="bridge_2" pos="0.5 0.0 0.706990372541"/>
+            <site default_species="empty" type="hollow4_6" pos="0.5 0.5 0.706990372541"/>
         </layer>
     </lattice>
     <process_list>

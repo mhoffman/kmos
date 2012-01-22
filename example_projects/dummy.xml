@@ -33,14 +33,10 @@
     <parameter_list>
         <parameter adjustable="True" max="800.0" min="300.0" name="T" value="600"/>
         <parameter adjustable="False" max="0.0" min="0.0" name="m_CO" value="28.0104"/>
-        <parameter adjustable="False" max="0.0" min="0.0" name="m_CO" value="28.0104"/>
         <parameter adjustable="False" max="0.0" min="0.0" name="m_CO2" value="44.0098"/>
         <parameter adjustable="False" max="0.0" min="0.0" name="m_ON" value="30.0061"/>
-        <parameter adjustable="False" max="0.0" min="0.0" name="m_ON" value="30.0061"/>
-        <parameter adjustable="True" max="10.0" min="0.01" name="p_CO" value="1.0"/>
         <parameter adjustable="True" max="10.0" min="0.01" name="p_CO" value="1.0"/>
         <parameter adjustable="True" max="10.0" min="0.01" name="p_CO2" value="1.0"/>
-        <parameter adjustable="True" max="10.0" min="0.01" name="p_ON" value="1.0"/>
         <parameter adjustable="True" max="10.0" min="0.01" name="p_ON" value="1.0"/>
     </parameter_list>
     <lattice cell_size="2.75064537882 2.75064537882 11.945" default_layer="default" representation="[Atoms(symbols='Pd2',
@@ -53,10 +49,10 @@
       [[ 1.37532269,  1.37532269,  5.05755467],
        [ 0.        ,  0.        ,  6.88744533]]))]">
         <layer color="#ffffff" grid="1 1 1" grid_offset="0.0 0.0 0.0" name="default">
-            <site class="" default_species="empty" type="top_0" vector="0.0 0.0 0.706990372541"/>
-            <site class="" default_species="empty" type="bridge_1" vector="0.0 0.5 0.706990372541"/>
-            <site class="" default_species="empty" type="bridge_2" vector="0.5 0.0 0.706990372541"/>
-            <site class="" default_species="empty" type="hollow4_13" vector="0.5 0.5 0.706990372541"/>
+            <site default_species="empty" type="top_0" pos="0.0 0.0 0.706990372541"/>
+            <site default_species="empty" type="bridge_1" pos="0.0 0.5 0.706990372541"/>
+            <site default_species="empty" type="bridge_2" pos="0.5 0.0 0.706990372541"/>
+            <site default_species="empty" type="hollow4_13" pos="0.5 0.5 0.706990372541"/>
         </layer>
     </lattice>
     <process_list>

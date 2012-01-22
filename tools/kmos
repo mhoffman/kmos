@@ -99,6 +99,8 @@ elif args[0] == 'import':
 elif args[0] == 'build':
     os.system('kmos-build')
 elif args[0] == 'view':
+    from sys import path
+    path.append(os.path.abspath(os.curdir))
     from kmos.view import main
     main()
 elif args[0] == 'benchmark':
