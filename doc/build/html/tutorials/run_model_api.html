@@ -130,6 +130,26 @@ it also contains some additional data piggy-backed such as</p>
 <p>These quantities are often sufficient when running and simulating
 a catalyst surface, but of course the model could be expanded
 to more observables.</p>
+<p>The <cite>occupation</cite> is a 2-dimensional array which contains
+the <cite>occupation</cite> for each surface <cite>site</cite> divided by
+the number of unit cell. The first slot
+denotes the species and the second slot denotes the
+surface site, i.e.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">occupation</span><span class="p">[</span><span class="n">species</span><span class="p">,</span> <span class="n">site</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>So given there is a <cite>hydrogen</cite> species
+in the model, the occupation of <cite>hydrogen</cite> across all site
+type can be accessed like</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">hydrogen_occupation</span> <span class="o">=</span> <span class="n">occupation</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">proclist</span><span class="o">.</span><span class="n">hydrogen</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>To access the coverage of one surface site, we have to
+remember to subtract 1, when using the the builtin constants,
+like so</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">hollow_occupation</span> <span class="o">=</span> <span class="n">occupation</span><span class="p">[:,</span> <span class="n">model</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">hollow</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
 <p>Lastly it is important to call</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">deallocate</span><span class="p">()</span>
 </pre></div>

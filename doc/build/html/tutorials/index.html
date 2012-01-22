@@ -181,12 +181,12 @@ no dependencies except for a Fortran compiler.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">kmos</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">dependencies</span><span class="o">-</span><span class="n">ubuntu</span>
 </pre></div>
 </div>
-<div class="admonition-todo admonition " id="todo-21">
+<div class="admonition-todo admonition " id="todo-27">
 <p class="first admonition-title">Todo</p>
 <p class="last">add pip way or something alike to automatically
 install dependencies.</p>
 </div>
-<div class="admonition-todo admonition " id="todo-22">
+<div class="admonition-todo admonition " id="todo-28">
 <p class="first admonition-title">Todo</p>
 <p class="last">test installation on other platforms</p>
 </div>
@@ -378,6 +378,22 @@ that we need conversion factors of bar and umass.</p>
                <span class="n">rate_constant</span><span class="o">=</span><span class="s">&#39;p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(-deltaG*eV)&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>To reduce typing, kmos also knows a shorthand notation for processes.
+In order to produce the same process you could also type</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">parse_process</span><span class="p">(</span><span class="s">&#39;CO_desorption; CO@hollow-&gt;empty@hollow ; p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(-deltaG*eV)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and since any non-existing on either the left or the right side
+of the <cite>-&gt;</cite> symbol is replaced by a corresponding term with
+the <cite>default_species</cite> (in this case <cite>empty</cite>) you could as
+well type</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">parse_process</span><span class="p">(</span><span class="s">&#39;CO_desorption; CO@hollow-&gt;; p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(-deltaG*eV)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and to make it even shorter you can parse and add the process on one line</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">parse_and_add_process</span><span class="p">(</span><span class="s">&#39;CO_desorption; CO@hollow-&gt;; p_CO*bar*A/sqrt(2*pi*umss*m_CO/beta)*exp(-deltaG*eV)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>And that is it!</p>
 </div>
 <div class="section" id="export-save-compile">
@@ -440,7 +456,7 @@ explains how that works.</td></tr>
 simple adsorption/desorption model on a simple cubic surface.
 Despite its simplicity it touches all elements contained in
 the GUI and could be considered from first-principles.</p>
-<div class="admonition-todo admonition " id="todo-23">
+<div class="admonition-todo admonition " id="todo-29">
 <p class="first admonition-title">Todo</p>
 <p class="last">describe modelling more complicated structures
 and e.g. boundary conditions</p>
@@ -465,7 +481,7 @@ be even more interactive you set a parameter to be adjustable.
 This can happen either in the generating XML file or directly
 in the kmc_settings.py. Also make sure to set sensible minimum
 and maximum values.</p>
-<div class="admonition-todo admonition " id="todo-24">
+<div class="admonition-todo admonition " id="todo-30">
 <p class="first admonition-title">Todo</p>
 <p class="last">add recording function</p>
 </div>
@@ -532,6 +548,26 @@ it also contains some additional data piggy-backed such as</p>
 <p>These quantities are often sufficient when running and simulating
 a catalyst surface, but of course the model could be expanded
 to more observables.</p>
+<p>The <cite>occupation</cite> is a 2-dimensional array which contains
+the <cite>occupation</cite> for each surface <cite>site</cite> divided by
+the number of unit cell. The first slot
+denotes the species and the second slot denotes the
+surface site, i.e.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">occupation</span><span class="p">[</span><span class="n">species</span><span class="p">,</span> <span class="n">site</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>So given there is a <cite>hydrogen</cite> species
+in the model, the occupation of <cite>hydrogen</cite> across all site
+type can be accessed like</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">hydrogen_occupation</span> <span class="o">=</span> <span class="n">occupation</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">proclist</span><span class="o">.</span><span class="n">hydrogen</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>To access the coverage of one surface site, we have to
+remember to subtract 1, when using the the builtin constants,
+like so</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">hollow_occupation</span> <span class="o">=</span> <span class="n">occupation</span><span class="p">[:,</span> <span class="n">model</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">hollow</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
 <p>Lastly it is important to call</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">deallocate</span><span class="p">()</span>
 </pre></div>
