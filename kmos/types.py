@@ -22,11 +22,13 @@ KMCPROJECT_V0_1_DTD = '/kmc_project_v0.1.dtd'
 KMCPROJECT_V0_2_DTD = '/kmc_project_v0.2.dtd'
 XML_API_VERSION = (0, 2)
 
+
 class FixedObject(object):
     """Handy class that easily allows to define data structures
     that can only hold a well-defined set of fields
     """
     attributes = []
+
     def __init__(self, **kwargs):
         self.__doc__ += '\nAllowed keywords: %s' % self.attributes
         for attribute in self.attributes:
@@ -73,20 +75,20 @@ class Project(object):
 
         # Quick'n'dirty define access functions
         # needed in context with GTKProject
-        self.get_parameters = lambda : sorted(self.parameter_list,
+        self.get_parameters = lambda: sorted(self.parameter_list,
                                               key=lambda x: x.name)
 
-        self.get_layers = lambda : sorted(self.layer_list,
+        self.get_layers = lambda: sorted(self.layer_list,
                                           key=lambda x: x.name)
 
-        self.get_processes = lambda : sorted(self.process_list,
+        self.get_processes = lambda: sorted(self.process_list,
                                              key=lambda x: x.name)
 
-        self.get_speciess = lambda : sorted(self.species_list,
+        self.get_speciess = lambda: sorted(self.species_list,
                                             key=lambda x: x.name)
 
         self.add_output = lambda output: self.output_list.append(output)
-        self.get_outputs = lambda : sorted(self.output_list,
+        self.get_outputs = lambda: sorted(self.output_list,
                                            key=lambda x: x.name)
 
     def add_parameter(self, *parameters, **kwargs):
@@ -134,7 +136,7 @@ class Project(object):
         # default species has not been set
         # do it now!
         if len(self.species_list) == 1 and \
-           not hasattr(self.species_list, 'default_species') :
+           not hasattr(self.species_list, 'default_species'):
             self.species_list.default_species = species.name
 
         return species
@@ -149,12 +151,13 @@ class Project(object):
         # if it is the first layer and default_layer
         # or substrate_layer have not been set
         # do it now!
-        if len(self.layer_list) == 1 :
+        if len(self.layer_list) == 1:
             if not hasattr(self.layer_list, 'default_layer'):
                 self.layer_list.default_layer = layer.name
             if not hasattr(self.layer_list, 'substrate_layer'):
                 self.layer_list.substrate_layer = layer.name
         return layer
+
     def __repr__(self):
         return self._get_xml_string()
 
@@ -211,7 +214,7 @@ class Project(object):
         if hasattr(self.layer_list, 'cell'):
             lattice_elem.set('cell_size',
                              ' '.join([str(i)
-                                       for i in self.layer_list.cell.flatten()]))
+                                   for i in self.layer_list.cell.flatten()]))
             if hasattr(self.layer_list, 'default_layer'):
                 lattice_elem.set('default_layer',
                                  self.layer_list.default_layer)
@@ -268,7 +271,6 @@ class Project(object):
 
         self.validate_model()
 
-
     def import_xml_file(self, filename):
         """Takes a filename, validates the content against kmc_project.dtd
         and import all fields into the current project tree
@@ -299,8 +301,6 @@ class Project(object):
             nroot = ET.Element('kmc')
             nroot.set('version', '0.2')
             raise Exception('No legacy support!')
-            # TODO: catch and warn when factored out
-			# kiwi.ui.dialogs.info()
         elif self.version == (0, 2):
             dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_V0_2_DTD)
             if not dtd.validate(root):
@@ -309,18 +309,21 @@ class Project(object):
             for child in root:
                 if child.tag == 'lattice':
                     cell = np.array([float(i)
-                                                     for i in child.attrib['cell_size'].split()])
+                        for i in child.attrib['cell_size'].split()])
                     if len(cell) == 3:
                         self.layer_list.cell = np.diag(cell)
                     elif len(cell) == 9:
                         self.layer_list.cell = cell.reshape(3, 3)
                     else:
                         raise UserWarning('% not understood' % cell)
-                    self.layer_list.default_layer = child.attrib['default_layer']
+                    self.layer_list.default_layer = \
+                        child.attrib['default_layer']
                     if 'substrate_layer' in child.attrib:
-                        self.layer_list.substrate_layer = child.attrib['substrate_layer']
+                        self.layer_list.substrate_layer = \
+                            child.attrib['substrate_layer']
                     else:
-                        self.layer_list.substrate_layer = self.layer_list.default_layer
+                        self.layer_list.substrate_layer = \
+                            self.layer_list.default_layer
                     if 'representation' in child.attrib:
                         self.layer_list.representation = child.attrib[
                                                              'representation']
@@ -426,7 +429,8 @@ class Project(object):
                                                             condition_action)
                         self.add_process(process_elem)
                 elif child.tag == 'species_list':
-                    self.species_list.default_species = child.attrib['default_species'] \
+                    self.species_list.default_species = \
+                        child.attrib['default_species'] \
                         if 'default_species' in child.attrib else ''
                     for species in child:
                         name = species.attrib['name']
@@ -454,25 +458,27 @@ class Project(object):
             raise UserWarning('No layer defined.')
 
         # if a least one site if defined
-        if not len([x  for layer in self.get_layers() for x in layer.sites]) >= 1:
+        if not len([x  for layer in self.get_layers()
+                       for x in layer.sites]) >= 1:
             raise UserWarning('No site defined.')
         # check if all  lattice sites are unique
         for layer in self.get_layers():
             for x in layer.sites:
-                if len([y for y in layer.sites if x.name == y.name]) > 1 :
-                    raise UserWarning('Site "%s" in Layer "%s" is not unique.' % (x.name,
-                                                                       layer.name))
+                if len([y for y in layer.sites if x.name == y.name]) > 1:
+                    raise UserWarning(('Site "%s" in Layer "%s"'
+                                       'is not unique.') % (x.name,
+                                                            layer.name))
         # check if all lattice names are unique
         for x in self.get_layers():
             if len([y for y in self.get_layers() if x.name == y.name]) > 1:
-             raise UserWarning('Layer name "%s" is not unique.' % x.name)
+                raise UserWarning('Layer name "%s" is not unique.' % x.name)
 
         # check if the default layer is actually defined
         if len(self.get_layers()) > 1  and \
            self.layer_list.default_layer not in [layer.name
                                                  for layer
                                                  in self.get_layers()]:
-            raise UserWarning('Default Layer "%s" is not defined.'  %
+            raise UserWarning('Default Layer "%s" is not defined.' %
                               self.layer_list.default_layer)
 
 
@@ -481,7 +487,7 @@ class Project(object):
         #################
         # check if all parameter names are unique
         for x in self.get_parameters():
-            if len([y for y in self.get_parameters() if x.name == y.name]) > 1 :
+            if len([y for y in self.get_parameters() if x.name == y.name]) > 1:
                 raise UserWarning('Parameter name "%s" is not unique' % x.name)
 
         #################
@@ -492,8 +498,11 @@ class Project(object):
             raise UserWarning('Model has only one species.')
 
         # if default species is defined
-        if self.species_list.default_species not in [x.name for x in self.get_speciess()]:
-            raise UserWarning('Default species "%s" not found.' % self.species_list.default_species)
+        if self.species_list.default_species not in [x.name
+                                                     for x in
+                                                     self.get_speciess()]:
+            raise UserWarning('Default species "%s" not found.' %
+                              self.species_list.default_species)
 
         #################
         # PROCESSES
@@ -504,7 +513,7 @@ class Project(object):
 
         # check if all process names are unique
         for x in self.get_processes():
-            if len([y for y in self.get_processes() if x.name == y.name]) > 1 :
+            if len([y for y in self.get_processes() if x.name == y.name]) > 1:
                 raise UserWarning('Process name "%s" is not unique' % x.name)
 
         # check if all processes have at least one condition
@@ -521,13 +530,13 @@ class Project(object):
         # check if conditions for each process are unique
         for process in self.get_processes():
             for x in process.condition_list:
-                if len([y for y in process.condition_list if x == y]) > 1 :
+                if len([y for y in process.condition_list if x == y]) > 1:
                     raise UserWarning('%s of process %s is not unique!' %
                                         (x, process.name))
         # check if actions for each process are unique
         for process in self.get_processes():
             for x in process.action_list:
-                if len([y for y in process.action_list if x == y]) > 1 :
+                if len([y for y in process.action_list if x == y]) > 1:
                     raise UserWarning('%s of process %s is not unique!' %
                                         (x, process.name))
         # check if all processes have a rate expression
@@ -539,18 +548,24 @@ class Project(object):
         # check if all species have a unique name
         for x in self.get_speciess():
             for y in self.get_speciess():
-                if len([]) > 1 :
-                    raise UserWarning('Species %s has no unique name!' % x.name)
+                if len([]) > 1:
+                    raise UserWarning('Species %s has no unique name!' %
+                                      x.name)
 
         # check if all species used in condition_action are defined
+        # after stripping ^ and $ operators
         species_names = [x.name for x in self.get_speciess()]
         for x in self.get_processes():
             for y in x.condition_list + x.action_list:
-                if not y.species.replace('$', '').replace('^', '') in species_names:
-                    raise UserWarning('Species %s used by %s in process %s is not defined' % (y.species, y, x.name))
+                stripped_species = y.species.replace('$', '').replace('^', '')
+                if not stripped_species in species_names:
+                    raise UserWarning(('Species %s used by %s in process %s'
+                                       'is not defined') %
+                                       (y.species, y, x.name))
 
         # check if all sites in processes are defined: actions, conditions
         return True
+
     def print_statistics(self):
         get_name = lambda x: '_'.join(x.name.split('_')[:-1])
         ml = len(self.get_layers()) > 1
@@ -565,7 +580,8 @@ class Project(object):
                                                     nrates,
                                                     len(self.get_processes())))
         for process_type in sorted(names):
-            nprocs = len([x for x in self.get_processes() if get_name(x) == process_type])
+            nprocs = len([x for x in self.get_processes()
+                          if get_name(x) == process_type])
             if ml:
                 layer = process_type.split('_')[0]
                 pname = '_'.join(process_type.split('_')[1:])
@@ -616,6 +632,7 @@ class Meta(object):
 
         else:
             print('%s is not a known meta information')
+
     def get_extra(self):
         return "%s(%s)" % (self.model_name, self.model_dimension)
 
@@ -624,6 +641,7 @@ class ParameterList(FixedObject, list):
     """A list of parameters
     """
     attributes = ['name']
+
     def __init__(self, **kwargs):
         self.name = 'Parameters'
 
@@ -669,17 +687,18 @@ class LayerList(FixedObject, list):
                   'default_layer',
                   'name',
                   'representation',
-                  'substrate_layer',]
+                  'substrate_layer']
 
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)
         self.name = 'Lattice(s)'
         if 'cell' in kwargs:
             if type(kwargs['cell']) is str:
-                kwargs['cell'] = np.array([float(i) for i in kwargs['cell'].split()])
+                kwargs['cell'] = np.array([float(i)
+                                           for i in kwargs['cell'].split()])
             if type(kwargs['cell']) is np.ndarray:
                 if len(l) == 9:
-                    self.cell = kwargs['cell'].resize(3,3)
+                    self.cell = kwargs['cell'].resize(3, 3)
                 elif len(l) == 3:
                     self.cell = np.diag(kwargs['cell'])
             else:
@@ -723,14 +742,15 @@ class LayerList(FixedObject, list):
         else:
             self.__dict__[key] = value
 
-    def generate_coord_set(self, size=[1,1,1], layer_name='default'):
+    def generate_coord_set(self, size=[1, 1, 1], layer_name='default'):
         """Generates a set of coordinates around unit cell of any
         desired size. By default it includes exactly all sites in
         the unit cell. By setting size=[2,1,1] one gets an additional
         set in the positive and negative x-direction.
         """
+
         def drange(n):
-            return range(1-n, n)
+            return range(1 - n, n)
 
         layers = [layer for layer in self if layer.name == layer_name]
         if layers:
@@ -744,9 +764,7 @@ class LayerList(FixedObject, list):
                     for i in drange(size[0])
                     for j in drange(size[1])
                     for k in drange(size[2])
-                    for site in layer.sites
-                ]
-
+                    for site in layer.sites]
 
     def generate_coord(self, terms):
         """Expecting something of the form site_name.offset.layer
@@ -754,15 +772,15 @@ class LayerList(FixedObject, list):
 
 
         term = terms.split('.')
-        if len(term) == 3 :
+        if len(term) == 3:
             coord = Coord(name=term[0],
                 offset=eval(term[1]),
                 layer=term[2])
-        elif len(term) == 2 :
+        elif len(term) == 2:
             coord = Coord(name=term[0],
                 offset=eval(term[1]),
                 layer=self.default_layer)
-        elif len(term) == 1 :
+        elif len(term) == 1:
             coord = Coord(name=term[0],
                 offset=(0, 0, 0),
                 layer=self.default_layer)
@@ -774,7 +792,8 @@ class LayerList(FixedObject, list):
         layer = filter(lambda x: x.name == coord.layer, list(self))[0]
         sites = [x for x in layer.sites  if x.name == coord.name]
         if not sites:
-            raise UserWarning('No site names %s in %s found!' % (coord.name, layer.name))
+            raise UserWarning('No site names %s in %s found!' %
+                              (coord.name, layer.name))
         else:
             site = sites[0]
         pos = site.pos
@@ -987,6 +1006,7 @@ class Species(FixedObject):
             if 'name' in kwargs else ''
         self.representation = kwargs['representation'] \
             if 'representation' in kwargs else ''
+
     def __repr__(self):
         return '[SPECIES] Name: %s Color: %s\n' % (self.name, self.color)
 
@@ -1005,6 +1025,7 @@ class ProcessList(FixedObject, list):
     """A list of processes
     """
     attributes = ['name']
+
     def __init__(self, **kwargs):
         self.name = 'Processes'
 
@@ -1082,14 +1103,18 @@ class ConditionAction(FixedObject):
         return self.__repr__()
 
 
+# Add aliases for ConditionAction
+# to make API using code more readable
 Condition = ConditionAction
 Action = ConditionAction
+
 
 class OutputList(FixedObject, list):
     """A dummy class, that will hold the values which are to be
     printed to logfile.
     """
     attributes = ['name']
+
     def __init__(self):
         self.name = 'Output'
 
@@ -1308,6 +1333,7 @@ def parse_chemical_expression(eq, process, project_tree):
 
     process.condition_list += condition_list
     process.action_list += action_list
+
 
 def parse_process(string, project_tree):
     name, chem_exp, rate_constant = string.split(';')
