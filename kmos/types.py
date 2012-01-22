@@ -261,6 +261,12 @@ class Project(object):
                 output_elem.set('item', output.name)
         return root
 
+    def save(self):
+        if hasattr(self, 'filename'):
+            self.export_xml_file(self.filename)
+        else:
+            print('Not saved because filename is not set.')
+
     def export_xml_file(self, filename):
         f = file(filename, 'w')
         f.write(str(self))
