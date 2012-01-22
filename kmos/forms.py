@@ -360,16 +360,16 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                                 fill_color_rgba=color,
                                 line_width=1.0)
         A = (self.offset_x, self.offset_y)
-        B = (self.offset_x + self.scale*(atoms.cell[0, 0]),
-             self.offset_y + self.scale*(atoms.cell[0, 1]))
+        B = (self.offset_x + self.scale * (atoms.cell[0, 0]),
+             self.offset_y + self.scale * (atoms.cell[0, 1]))
 
-        C = (self.offset_x + self.scale*(atoms.cell[0, 0]
+        C = (self.offset_x + self.scale * (atoms.cell[0, 0]
                                        - atoms.cell[1, 0]),
-             self.offset_y + self.scale*(atoms.cell[0, 1]
+             self.offset_y + self.scale * (atoms.cell[0, 1]
                                        + atoms.cell[1, 1]))
 
-        D = (self.offset_x - self.scale*(atoms.cell[1, 0]),
-             self.offset_y + self.scale*(atoms.cell[1, 1]))
+        D = (self.offset_x - self.scale * (atoms.cell[1, 0]),
+             self.offset_y + self.scale * (atoms.cell[1, 1]))
         cell = goocanvas.Polyline(parent=self.root,
                               close_path=True,
                               points=goocanvas.Points([A, B, C, D]),
@@ -379,7 +379,8 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
             for y in range(-1, 2):
                 for site in self.model.sites:
                     X = self.scale * np.dot(site.pos[0] + x, atoms.cell[0, 0])
-                    Y = self.scale * np.dot(1 - (site.pos[1] +y), atoms.cell[1, 1])
+                    Y = self.scale * np.dot(1 - (site.pos[1] + y),
+                                            atoms.cell[1, 1])
                     o = goocanvas.Ellipse(parent=self.root,
                                           center_x=self.offset_x + X,
                                           center_y=self.offset_y + Y,
@@ -405,7 +406,8 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                  (self.upper_right[1] - self.lower_left[1]))
 
         for site in self.model.sites:
-            d = np.sqrt((pos_x - site.pos[0]) ** 2 + (pos_y - site.pos[1]) ** 2)
+            d = np.sqrt((pos_x - site.pos[0]) ** 2 +
+                        (pos_y - site.pos[1]) ** 2)
             if d < 0.03:
                 SiteForm(site, self, self.project_tree, self.model)
                 break
@@ -419,8 +421,8 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
             # top atom as a first guess.
             # Assumes a binding distance of 1.3 Angstrom
             atoms = self._get_atoms()
-            Z = max(atoms.get_positions()[: ,2]) + 1.3
-            z = Z/atoms.cell[2,2]
+            Z = max(atoms.get_positions()[:, 2]) + 1.3
+            z = Z / atoms.cell[2, 2]
             new_site.pos[2] = z
 
             new_site.layer = self.model.name
@@ -589,7 +591,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             try:
                 self.rate_constant.set_tooltip_text(
                     'Current value: %.2e s^{-1}' %
-                    evaluate_rate_expression(expr, self.project_tree.get_parameters()))
+                    evaluate_rate_expression(expr,
+                        self.project_tree.get_parameters()))
             except Exception, e:
                 self.rate_constant.set_tooltip_text(str(e))
         rate_constant_terms = ['bar',
@@ -626,7 +629,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     def on_rate_constant__validate(self, widget, expr):
         try:
             self.rate_constant.set_tooltip_text('Current value: %.2e s^{-1}' %
-                evaluate_rate_expression(expr, self.project_tree.get_parameters()))
+                evaluate_rate_expression(expr,
+                    self.project_tree.get_parameters()))
         except Exception, e:
             return ValidationError(e)
 
@@ -817,8 +821,10 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                         l_site = CanvasOval(self.site_layer, 0, 0, 10, 10,
                                                                     fg=color)
 
-                    l_site.set_center(self.l / self.z * (i + float(site.pos[0])),
-                                500 - self.l / self.z * (j + float(site.pos[1])))
+                    l_site.set_center(self.l /
+                                      self.z * (i + float(site.pos[0])),
+                                      500 - self.l /
+                                      self.z * (j + float(site.pos[1])))
                     l_site.connect('query-tooltip', self.query_tooltip)
                     # 500 - ... for having scientific coordinates
                     # and not screen coordinates
