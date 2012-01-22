@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+"""Several utility functions that do not seem to fit somewhere
+   else.
+"""
 #    Copyright 2009-2012 Max J. Hoffmann (mjhoffmann@gmail.com)
 #    This file is part of kmos.
 #
@@ -28,6 +31,7 @@ class CorrectlyNamed:
     field of the class has a name field, that always complys with the rules
     for variables.
     """
+
     def __init__(self):
         pass
 
@@ -41,6 +45,9 @@ class CorrectlyNamed:
 
 
 def write_py(fileobj, images, **kwargs):
+    """Write a ASE atoms construction string for `images`
+       into `fileobj`.
+    """
     if isinstance(fileobj, str):
         fileobj = open(fileobj, 'w')
 
@@ -72,14 +79,13 @@ def write_py(fileobj, images, **kwargs):
 
 
 def get_ase_constructor(atoms):
+    """Return the ASE constructor string for `atoms`."""
     if type(atoms) is type(str):
         atoms = eval(atoms)
-    if type(atoms) is list :
+    if type(atoms) is list:
         atoms = atoms[0]
     f = StringIO()
     write_py(f, atoms)
-    for line in f:
-        astr += line.strip()
     f.seek(0)
     lines = f.readlines()
     f.close()
@@ -97,10 +103,10 @@ def product(*args, **kwds):
     of the two lists."""
     # product('ABCD', 'xy') --> Ax Ay Bx By Cx Cy Dx Dy
     # product(range(2), repeat=3) --> 000 001 010 011 100 101 110 111
-    pools = map(tuple, args) * kwds.get('repeat', 1)
+    pools = [tuple(arg) for arg in args] * kwds.get('repeat', 1)
     result = [[]]
     for pool in pools:
-        result = [x+[y] for x in result for y in pool]
+        result = [x + [y] for x in result for y in pool]
     for prod in result:
         yield tuple(prod)
 
@@ -110,7 +116,8 @@ def split_sequence(seq, size):
        divided into n sublists of roughly equal size.
     """
     newseq = []
-    splitsize = 1.0/size*len(seq)
+    splitsize = 1.0 / size * len(seq)
     for i in range(size):
-            newseq.append(seq[int(round(i*splitsize)):int(round((i+1)*splitsize))])
+        newseq.append(seq[int(round(i * splitsize)):
+                      int(round((i + 1) * splitsize))])
     return newseq
