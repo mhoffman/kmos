@@ -993,10 +993,6 @@ class Species(FixedObject):
     """Class that represent a species such as oxygen, empty, ... .
     Note: `empty` is treated just like a species.
 
-    ..  testcode::
-
-        s = Species; print(s.attributes)
-
     """
     attributes = ['name', 'color', 'representation']
 
