@@ -316,11 +316,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
             'A name is only relevant if you are using more than one\n'
             + 'layer in your model.')
 
-    def redraw(self):
-        white = col_str2tuple(self.model.color)
-        black = col_str2tuple('#000000')
-
-        atoms = []
+    def _get_atoms(self):
         if self.project_tree.lattice.representation:
             representations = eval(self.project_tree.lattice.representation)
             if len(representations) > self.layer_nr:
@@ -329,6 +325,17 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                 atoms = representations[0]
         else:
             atoms = Atoms()
+        return atoms
+
+    def redraw(self):
+        """Draw the current lattice with unit cell
+           and sites defined on it.
+        """
+        white = col_str2tuple(self.model.color)
+        black = col_str2tuple('#000000')
+
+        atoms = self._get_atoms()
+
         self.lower_left = (self.offset_x,
                            self.offset_y
                            + self.scale * atoms.cell[1, 1])
@@ -407,9 +414,16 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
             new_site.name = ''
             new_site.pos[0] = pos_x
             new_site.pos[1] = pos_y
-            new_site.pos[2] = 0.
-            new_site.layer = self.model.name
 
+            # Put z position slightly above
+            # top atom as a first guess.
+            # Assumes a binding distance of 1.3 Angstrom
+            atoms = self._get_atoms()
+            Z = max(atoms.get_positions()[: ,2]) + 1.3
+            z = Z/atoms.cell[2,2]
+            new_site.pos[2] = z
+
+            new_site.layer = self.model.name
             self.model.sites.append(new_site)
             SiteForm(new_site, self, self.project_tree, self.model)
 
