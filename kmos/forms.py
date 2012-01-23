@@ -420,8 +420,6 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         pos /= self.scale
         pos = np.linalg.solve(atoms.cell.T, pos)
 
-
-
         for site in self.model.sites:
             d = np.sqrt((pos[0] - site.pos[0]) ** 2 +
                         (pos[1] - site.pos[1]) ** 2)
@@ -814,7 +812,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                        i * (self.l / self.z), 0,
                        i * (self.l / self.z), 500,
                        line_width=1, fg=(.6, .6, .6))
-        active_layers = [x for x in self.project_tree.get_layers() if x.active]
+        active_layers = [x for x in self.project_tree.get_layers()
+                         if x.active]
         site_list = []
         for active_layer in active_layers:
             for site in active_layer.sites:
@@ -1016,7 +1015,8 @@ class BatchProcessForm(SlaveDelegate):
                 raise
             else:
                 # replace any existing process with identical names
-                for dublette_proc in [x for x in self.project_tree.process_list
+                for dublette_proc in [x for x in
+                                      self.project_tree.process_list
                                       if x.name == name]:
                     self.project_tree.process_list.remove(dublette_proc)
                 self.project_tree.append(self.project_tree.process_list_iter,
