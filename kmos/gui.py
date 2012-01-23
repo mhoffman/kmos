@@ -19,11 +19,9 @@
 
 # standard modules
 import optparse
-from ConfigParser import SafeConfigParser
 import StringIO
 import sys
 import os
-import copy
 from kmos.types import Project, \
                        Layer, \
                        LayerList, \
@@ -59,18 +57,15 @@ import gtk.glade
 
 
 #Kiwi imports
-from kiwi.ui.views import BaseView
-from kiwi.controllers import BaseController
 import kiwi.ui
-from kiwi.ui.delegates import Delegate, \
-                              SlaveDelegate, \
-                              GladeDelegate, \
-                              GladeSlaveDelegate
-from kiwi.ui.objectlist import ObjectList, ObjectTree, Column
+from kiwi.ui.delegates import SlaveDelegate, \
+                              GladeDelegate
+
+from kiwi.ui.objectlist import ObjectTree, Column
 import kiwi.ui.dialogs
 
 
-MENU_LAYOUT = """\
+menu_layout = """\
 <ui>
   <menubar name="MainMenuBar">
     <menu action="MenuFile">
@@ -122,6 +117,7 @@ class GTKProject(SlaveDelegate):
     """A facade of kmos.types.Project so that
     pygtk can display in a TreeView.
     """
+
     def __init__(self, parent, menubar):
         self.project_data = ObjectTree([Column('name',
                                                use_markup=True,
@@ -162,7 +158,7 @@ class GTKProject(SlaveDelegate):
         self.model_tree.add_layer = self.add_layer
         self.layer_list = self.project_data.append(None,
                                    self.model_tree.layer_list)
-        self.get_layers = lambda :\
+        self.get_layers = lambda: \
             sorted(self.project_data.get_descendants(self.layer_list),
                    key=lambda x: x.name)
         self.model_tree.get_layers = self.get_layers
@@ -171,10 +167,10 @@ class GTKProject(SlaveDelegate):
         # Parameter List
         self.parameter_list = self.project_data.append(None,
                                        self.model_tree.parameter_list)
-        self.add_parameter = lambda parameter :\
+        self.add_parameter = lambda parameter: \
             self.project_data.append(self.parameter_list, parameter)
         self.model_tree.add_parameter = self.add_parameter
-        self.get_parameters = lambda :\
+        self.get_parameters = lambda: \
             sorted(self.project_data.get_descendants(self.parameter_list),
                    key=lambda x: x.name)
         self.model_tree.get_parameters = self.get_parameters
@@ -182,10 +178,10 @@ class GTKProject(SlaveDelegate):
         # Species List
         self.species_list = self.project_data.append(None,
                                    self.model_tree.species_list)
-        self.add_species = lambda species :\
+        self.add_species = lambda species: \
             self.project_data.append(self.species_list, species)
         self.model_tree.add_species = self.add_species
-        self.get_speciess = lambda :\
+        self.get_speciess = lambda: \
             sorted(self.project_data.get_descendants(self.species_list),
                    key=lambda x: x.name)
         self.model_tree.get_speciess = self.get_speciess
@@ -197,7 +193,7 @@ class GTKProject(SlaveDelegate):
         self.add_process = lambda process:\
             self.project_data.append(self.process_list, process)
         self.model_tree.add_process = self.add_process
-        self.get_processes = lambda :\
+        self.get_processes = lambda: \
             sorted(self.project_data.get_descendants(self.process_list),
                    key=lambda x: x.name)
         self.model_tree.get_processes = self.get_processes
@@ -208,14 +204,14 @@ class GTKProject(SlaveDelegate):
         self.add_output = lambda output:\
             self.project_data.append(self.output_list, output)
         self.model_tree.add_output = self.add_output
-        self.get_outputs = lambda : \
+        self.get_outputs = lambda:  \
             sorted(self.project_data.get_descendants(self.output_list),
                    key=lambda x: x.name)
         self.model_tree.get_outputs = self.get_outputs
 
     def add_layer(self, layer):
         self.project_data.append(self.layer_list, layer)
-        if len(self.get_layers()) == 1 :
+        if len(self.get_layers()) == 1:
             self.set_default_layer(layer.name)
             self.set_substrate_layer(layer.name)
 
@@ -229,6 +225,7 @@ class GTKProject(SlaveDelegate):
         self.model_tree.layer_list.default_layer = layer
 
     def update(self, model):
+        """Update the object tree."""
         self.project_data.update(model)
 
     def on_row_activated(self, _tree, data):
@@ -236,6 +233,7 @@ class GTKProject(SlaveDelegate):
             data.active = not data.active
 
     def get_name(self):
+        """Return project name."""
         if self.filename:
             return os.path.basename(self.filename)
         else:
@@ -245,6 +243,10 @@ class GTKProject(SlaveDelegate):
         return str(self.model_tree)
 
     def import_xml_file(self, filename):
+        """Import XML project file into editor GUI,
+        unfolding the object tree.
+
+        """
         self.filename = filename
         self.model_tree.import_xml_file(filename)
         self.expand_all()
@@ -346,6 +348,11 @@ class GTKProject(SlaveDelegate):
 
 
 class UndoStack():
+    """Work in progress attempt to have a 'back' button
+    for the editor.
+
+    """
+
     def __init__(self, get_state_cb, set_state_from_file_cb,
                     select_elem_cb, menubar, elem, action=''):
         self.menubar = menubar
@@ -379,6 +386,7 @@ class UndoStack():
         self.set_state_from_file_cb(tmpfile)
 
     def start_new_action(self, action, elem):
+        """Puts a new diff on the stack of actions."""
         if self.get_state_cb() != self.state:
             self.head += 1
             self.stack = self.stack[:self.head] + [{
@@ -399,6 +407,7 @@ class UndoStack():
             '/MainMenuBar/MenuEdit/EditRedo').set_sensitive(False)
 
     def undo(self, _):
+        """Undo one action."""
         if self.head < 0:
             return
         if self.state != self.get_state_cb():
@@ -426,10 +435,11 @@ class UndoStack():
             '/MainMenuBar/MenuEdit/EditRedo').set_sensitive(True)
 
     def redo(self, _):
+        """Repeat an undone action."""
         if self.head >= len(self.stack) - 1:
             return UserWarning('TopReached')
         else:
-            self.head += +1
+            self.head += 1
             self.state = self.stack[self.head]['state']
             self._set_state_cb(self.state)
             self.current_action = self.stack[self.head]['action']
@@ -448,6 +458,7 @@ class UndoStack():
 
 
 class Editor(GladeDelegate):
+    """The editor GUI frontend."""
     widgets = ['workarea', 'statbar', 'vbox1']
     gladefile = GLADEFILE
     toplevel_name = 'main_window'
@@ -493,9 +504,9 @@ class Editor(GladeDelegate):
 
         self.menubar.insert_action_group(actions, 0)
         try:
-            mergeid = self.menubar.add_ui_from_string(MENU_LAYOUT)
+            mergeid = self.menubar.add_ui_from_string(menu_layout)
         except gobject.GError, error:
-            print('Building menu failed: %s' % (error, mergeid))
+            print('Building menu failed: %s, %s' % (error, mergeid))
 
         # Initialize the project tree, passing in the menu bar
         self.project_tree = GTKProject(parent=self, menubar=self.menubar)
@@ -543,9 +554,12 @@ class Editor(GladeDelegate):
         self.project_tree.add_parameter(param)
 
         # add output entries
-        self.project_tree.add_output(OutputItem(name='kmc_time', output=True))
-        self.project_tree.add_output(OutputItem(name='walltime', output=False))
-        self.project_tree.add_output(OutputItem(name='kmc_step', output=False))
+        self.project_tree.add_output(OutputItem(name='kmc_time',
+                                                output=True))
+        self.project_tree.add_output(OutputItem(name='walltime',
+                                                output=False))
+        self.project_tree.add_output(OutputItem(name='kmc_step',
+                                                output=False))
 
         self.project_tree.expand_all()
 
@@ -656,7 +670,8 @@ class Editor(GladeDelegate):
         self.project_tree.undo_stack.start_new_action('Add parameter',
                                                       new_parameter)
         self.project_tree.add_parameter(new_parameter)
-        self.project_tree.project_data.expand(self.project_tree.parameter_list)
+        self.project_tree.project_data.expand(
+                                       self.project_tree.parameter_list)
         self.project_tree.project_data.select(new_parameter)
         parameter_form = ParameterForm(new_parameter, self.project_tree)
         if self.get_slave('workarea'):
@@ -713,7 +728,8 @@ class Editor(GladeDelegate):
         self.project_tree.import_xml_file(filename)
         self.set_title('%s - kmos' % self.project_tree.get_name())
         if hasattr(self.project_tree.meta, 'model_name'):
-            self.toast('Imported model %s' % self.project_tree.meta.model_name)
+            self.toast('Imported model %s' %
+                       self.project_tree.meta.model_name)
         else:
             self.toast('Imported model <Untitled>')
         self.saved_state = str(self.project_tree)
@@ -750,7 +766,7 @@ class Editor(GladeDelegate):
         filechooser.destroy()
 
     #@verbose
-    def on_btn_export_src__clicked(self, button, export_dir=''):
+    def on_btn_export_src__clicked(self, _button, export_dir=''):
         self.toast('Exporting source code ...')
         if not export_dir:
             export_dir = kiwi.ui.dialogs.selectfolder(
@@ -767,10 +783,20 @@ class Editor(GladeDelegate):
            'If this finished successfully you can run the simulation\n' +
            'by executing "kmos view"')
 
-    def on_btn_help__clicked(self, button):
-        self.toast('"Help" is not implemented, yet.')
+    def on_btn_help__clicked(self, _button):
+        """Preliminary help function."""
+        help_url = 'http://mhoffman.github.com/kmos/doc/build/html/index.html'
+        issues_url = 'https://github.com/mhoffman/kmos/issues'
+        gtk.show_uri(None, help_url, gtk.gdk.CURRENT_TIME)
+        self.toast(('Please refer to online help at\n%s.\n\n'
+                    'Or post issues at\n%s.') %
+                    (help_url, issues_url))
 
-    def on_btn_quit__clicked(self, button, *args):
+    def on_btn_quit__clicked(self, _button, *_args):
+        """Checks if unsaved changes. If so offer file save dialog.
+           Otherwise quit directly.
+
+        """
         if self.saved_state != str(self.project_tree):
             save_changes_dialog = gtk.Dialog(
                       buttons=(gtk.STOCK_DISCARD, gtk.RESPONSE_DELETE_EVENT,
@@ -801,9 +827,7 @@ class Editor(GladeDelegate):
 
 
 def main():
-    import optparse
-    import kmos.gui
-
+    """Main entry point to GUI Editor."""
     parser = optparse.OptionParser()
     parser.add_option('-o', '--open',
                       dest='xml_file',
@@ -825,6 +849,7 @@ def main():
         editor.saved_state = str(editor.project_tree)
     if hasattr(options, 'export_dir') and options.export_dir:
         print('Exporting right-away')
-        editor.on_btn_export_src__clicked(button='', export_dir=options.export_dir)
+        editor.on_btn_export_src__clicked(_button='',
+                                          export_dir=options.export_dir)
         exit()
     editor.show_and_loop()
