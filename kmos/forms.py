@@ -312,7 +312,8 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
 
         self.radius_scale = 20
         self.scale = 20
-        self.offset_x, self.offset_y = (200, 200)
+        self.offset_x, self.offset_y = (150, 300)
+        self.offset = np.array([self.offset_x, self.offset_y, 0])
         self.lattice_pad.add(self.canvas)
         self.previous_layer_name = self.layer_name.get_text()
         self.redraw()
@@ -337,6 +338,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
            and sites defined on it.
         """
 
+        # draw atoms in background
         atoms = self._get_atoms()
 
         self.lower_left = (self.offset_x,
@@ -346,14 +348,12 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                            + self.scale * atoms.cell[0, 0],
                            self.offset_y)
         big_atoms = atoms * (3, 3, 1)
-        big_atoms.translate(-atoms.cell.diagonal())
         for atom in sorted(big_atoms, key=lambda x: x.position[2]):
             i = atom.number
             radius = self.radius_scale * covalent_radii[i]
             color = jmolcolor_in_hex(i)
-
             X = atom.position[0]
-            Y = atoms.cell[1, 1] - atom.position[1]
+            Y = - atom.position[1]
             goocanvas.Ellipse(parent=self.root,
                               center_x=(self.offset_x + self.scale * X),
                               center_y=(self.offset_y + self.scale * Y),
@@ -362,31 +362,40 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                               stroke_color='black',
                               fill_color_rgba=color,
                               line_width=1.0)
-        A = (self.offset_x, self.offset_y)
+
+        # draw unit cell
+        A = tuple(self.offset[:2])
         B = (self.offset_x + self.scale * (atoms.cell[0, 0]),
              self.offset_y + self.scale * (atoms.cell[0, 1]))
 
         C = (self.offset_x + self.scale * (atoms.cell[0, 0]
-                                       - atoms.cell[1, 0]),
-             self.offset_y + self.scale * (atoms.cell[0, 1]
+                                       + atoms.cell[1, 0]),
+             self.offset_y - self.scale * (atoms.cell[0, 1]
                                        + atoms.cell[1, 1]))
 
-        D = (self.offset_x - self.scale * (atoms.cell[1, 0]),
-             self.offset_y + self.scale * (atoms.cell[1, 1]))
+        D = (self.offset_x + self.scale * (atoms.cell[1, 0]),
+             self.offset_y - self.scale * (atoms.cell[1, 1]))
         goocanvas.Polyline(parent=self.root,
                            close_path=True,
                            points=goocanvas.Points([A, B, C, D]),
                            stroke_color='black',)
 
-        for x in range(-1, 2):
-            for y in range(-1, 2):
+        # draw sites
+        for x in range(3):
+            for y in range(3):
                 for site in self.model.sites:
-                    X = self.scale * np.dot(site.pos[0] + x, atoms.cell[0, 0])
-                    Y = self.scale * np.dot(1 - (site.pos[1] + y),
-                                            atoms.cell[1, 1])
+
+                    # convert to screen coordinates
+                    pos = np.dot(site.pos + np.array([x, y, 0]), atoms.cell)
+                    pos *= np.array([1, -1, 1])
+                    pos *= self.scale
+                    pos += self.offset
+                    X = pos[0]
+                    Y = pos[1]
+
                     o = goocanvas.Ellipse(parent=self.root,
-                                          center_x=self.offset_x + X,
-                                          center_y=self.offset_y + Y,
+                                          center_x=X,
+                                          center_y=Y,
                                           radius_x=.3 * self.radius_scale,
                                           radius_y=.3 * self.radius_scale,
                                           stroke_color='black',
@@ -403,22 +412,26 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         return True
 
     def on_button_press(self, _item, event):
-        pos_x = ((event.x - self.lower_left[0]) /
-                 (self.upper_right[0] - self.lower_left[0]))
-        pos_y = ((event.y - self.lower_left[1]) /
-                 (self.upper_right[1] - self.lower_left[1]))
+        atoms = self._get_atoms()
+        pos = (np.array([event.x, event.y, 0]) - self.offset)
+
+        # convert from screen coordinates
+        pos *= [1, -1, 1]
+        pos /= self.scale
+        pos = np.linalg.solve(atoms.cell.T, pos)
+
+
 
         for site in self.model.sites:
-            d = np.sqrt((pos_x - site.pos[0]) ** 2 +
-                        (pos_y - site.pos[1]) ** 2)
-            if d < 0.03:
+            d = np.sqrt((pos[0] - site.pos[0]) ** 2 +
+                        (pos[1] - site.pos[1]) ** 2)
+            if d < 0.10:
                 SiteForm(site, self, self.project_tree, self.model)
                 break
         else:
             new_site = Site()
             new_site.name = ''
-            new_site.pos[0] = pos_x
-            new_site.pos[1] = pos_y
+            new_site.pos = pos
 
             # Put z position slightly above
             # top atom as a first guess.
@@ -492,10 +505,11 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
         self.layer = layer
         self.show_all()
         self.site_name.set_tooltip_text(
-            'The site name has to be uniquely identify a site (at least ' +
-            'within each layer for multi-lattice mode). You may have to ' +
-            'type this name a lot, so keep' +
-            'it short but unambiguous')
+            'The site name has to be uniquely identify a site (at least '
+            'within each layer for multi-lattice mode). You may have to '
+            'type this name a lot, so keep '
+            'it short but unambiguous. '
+            'To delete a site, erase name.')
 
     def on_sitevect_x__activate(self, _):
         self.on_site_ok__clicked(_)
