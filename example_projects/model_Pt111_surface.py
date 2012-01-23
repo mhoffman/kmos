@@ -27,8 +27,8 @@ layer.add_site(Site(name='hollow1',
 pos2 = np.array([positions[2, 0],
                 positions[2, 1], 0.672])
 
-slab += ase.atoms.Atoms('H', cell=slab.cell, scaled_positions=[pos1])
-slab += ase.atoms.Atoms('H', cell=slab.cell, scaled_positions=[pos2])
+#slab += ase.atoms.Atoms('H', cell=slab.cell, scaled_positions=[pos1])
+#slab += ase.atoms.Atoms('H', cell=slab.cell, scaled_positions=[pos2])
 #ase.visualize.view(slab, repeat=(1,1,1))
 rpos = np.linalg.solve(slab.cell, np.array(pos2))
 layer.add_site(Site(name='hollow2',
