@@ -155,6 +155,18 @@ class Project(object):
                 self.layer_list.substrate_layer = layer.name
         return layer
 
+    def add_site(self, **kwargs):
+        try:
+            layer_name = kwargs.pop('layer')
+        except:
+            raise UserWarning('Argument layer required.')
+
+        try:
+            layer = [layer for layer in self.get_layers() if layer.name == layer_name][0]
+        except:
+            raise UserWarning('Layer %s not found.' % layer_name)
+        layer.add_site(**kwargs)
+
     def __repr__(self):
         return self._get_xml_string()
 
@@ -824,7 +836,6 @@ class Layer(FixedObject, CorrectlyNamed):
     def add_site(self, *sites, **kwargs):
         """Adds a new site to a layer.
         """
-        self.sites.append(site)
         for site in sites:
             self.sites.append(site)
 
