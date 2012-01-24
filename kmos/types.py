@@ -104,9 +104,6 @@ class Project(object):
         for process in processes:
             self.process_list.append(process)
         if kwargs:
-            # make conditions override condition_list
-            # and actions override action_list
-            # for convenience
             if 'conditions' in kwargs:
                 kwargs['condition_list'] = kwargs['conditions']
                 kwargs.pop('conditions')
@@ -824,10 +821,16 @@ class Layer(FixedObject, CorrectlyNamed):
     def __repr__(self):
         return "[LAYER] %s\n[\n%s\n]" % (self.name, self.sites)
 
-    def add_site(self, site):
+    def add_site(self, *sites, **kwargs):
         """Adds a new site to a layer.
         """
         self.sites.append(site)
+        for site in sites:
+            self.sites.append(site)
+
+        if kwargs:
+            site = Site(**kwargs)
+            self.sites.append(site)
 
     def get_site(self, site_name):
         sites = filter(lambda site: site.name == site_name,
