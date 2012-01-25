@@ -104,7 +104,7 @@ class KMC_Model(multiprocessing.Process):
             self.system_name,
             lattice.default_layer,
             not self.banner)
-        self.cell_size = lattice.unit_cell_size*lattice.system_size
+        self.cell_size = lattice.unit_cell_size * lattice.system_size
 
         # prepare structures for TOF evaluation
         self.tofs = tofs = get_tof_names()
@@ -232,6 +232,11 @@ class KMC_Model(multiprocessing.Process):
                     self.double()
                 elif signal.upper() == 'HALVE':
                     self.halve()
+                elif signal.upper() == 'SWITCH_OFF_SURFACE_PROCESSES':
+                    self.switch_off_surface_processes()
+                elif signal.upper() == 'SWITCH_ON_SURFACE_PROCESSES':
+                    set_rate_constants(settings.parameters, self.print_rates)
+
 
             if not self.parameter_queue.empty():
                 while not self.parameter_queue.empty():
@@ -275,6 +280,7 @@ class KMC_Model(multiprocessing.Process):
                         atoms += lattice_repr
             atoms.set_cell(self.cell_size)
         else:
+
             class Expando():
                 pass
             atoms = Expando()
@@ -333,6 +339,17 @@ class KMC_Model(multiprocessing.Process):
                             config[xi, yi, zi, n],)
         self._adjust_database()
 
+    def switch_off_surface_processes(self):
+        """Set rate constant to zero if process
+        has 'diff' or 'react' in the name.
+
+        """
+        for i, process_name in enumerate(
+                               sorted(
+                               self.settings.rate_constants)):
+            if 'diff' in process_name or 'react' in process_name:
+                self.base.set_rate_const(i, .0)
+
     def halve(self):
         """
         Halve the size of the model and initialize each site in the new model
@@ -386,6 +403,7 @@ class KMC_Model(multiprocessing.Process):
                             self.lattice.get_species(
                                 [x, y, z, n + 1])
         return config
+
     def _set_configuration(self, config):
         """Set the current lattice configuration.
 
@@ -402,8 +420,8 @@ class KMC_Model(multiprocessing.Process):
             for y in range(Y):
                 for z in range(Z):
                     for n in range(N):
-                        species = self.lattice.get_species([x, y, z, n+1])
-                        self.lattice.replace_species([x, y, z, n+1],
+                        species = self.lattice.get_species([x, y, z, n + 1])
+                        self.lattice.replace_species([x, y, z, n + 1],
                                                      species,
                                                      config[x, y, z, n])
         self._adjust_database()

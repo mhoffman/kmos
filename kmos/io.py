@@ -35,7 +35,6 @@ def _most_common(L):
     # thanks go to Alex Martelli for this function
     # get an iterable of (item, iterable) pairs
     SL = sorted((x, i) for i, x in enumerate(L))
-    # print 'SL:', SL
     groups = itertools.groupby(SL, key=operator.itemgetter(0))
     # auxiliary function to get "quality" for an item
 
@@ -46,7 +45,6 @@ def _most_common(L):
         for _, where in iterable:
             count += 1
             min_index = min(min_index, where)
-        # print 'item %r, count %r, minind %r' % (item, count, min_index)
         return count, - min_index
     # pick the highest-count/earliest item
     return max(groups, key=_auxfun)[0]
@@ -867,9 +865,6 @@ class ProcListWriter():
         # So consider this a heuristic solution which should give
         # on average better results than the brute force way
 
-        # DEBUGGING
-        #print(len(items))
-        #print(items)
         for item in filter(lambda x: not x[0], items):
             # [1][2] field of the item determine if this search is intended for enabling (=True) or
             # disabling (=False) a process
@@ -883,24 +878,14 @@ class ProcListWriter():
         if not items:
             return
 
-        # DEBUGGING
-        #print(len(items))
-        #print(items)
 
         # now the GENERAL CASE
         # first find site, that is most sought after
         most_common_coord = _most_common([y.coord for y in _flatten([x[0] for x in items])])
 
-        #DEBUGGING
-        #print("MOST_COMMON_COORD: %s" % most_common_coord)
-
         # filter out list of uniq answers for this site
         answers = [y.species for y in filter(lambda x: x.coord == most_common_coord, _flatten([x[0] for x in items]))]
         uniq_answers = list(set(answers))
-
-        #DEBUGGING
-        #print("ANSWERS %s" % answers)
-        #print("UNIQ_ANSWERS %s" % uniq_answers)
 
         if self.data.meta.debug > 1:
             out.write('print *,"    LATTICE/GET_SPECIES/VSITE","%s"\n' % most_common_coord)
@@ -924,8 +909,6 @@ class ProcListWriter():
                 pruned_items.append((conditions, nested_item[1]))
 
             items = filter(lambda x: x not in nested_items, items)
-            #print(len(nested_items))
-            #print(nested_items)
             self._write_optimal_iftree(pruned_items, indent + 4, out)
         out.write('%send select\n\n' % (indent * ' ',))
 
@@ -1005,7 +988,6 @@ class ProcListWriter():
         site_params = []
         for layer in data.layer_list:
             for site in layer.sites:
-                #print(site.name, layer.name, tuple(site.pos))
                 site_params.append((site.name, layer.name, tuple(site.pos)))
         return site_params
 

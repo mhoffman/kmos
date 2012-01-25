@@ -266,7 +266,6 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
 
     def kill(self):
         self.killed = True
-        #print('  ... viewbox received kill')
 
     def run(self):
         time.sleep(1.)
@@ -290,6 +289,11 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
             self.signal_queue.put('DOUBLE')
         elif event.string == 'h':
             self.signal_queue.put('HALVE')
+        elif event.string == 's':
+            self.signal_queue.put('SWITCH_OFF_SURFACE_PROCESSES')
+        elif event.string == 'S':
+            self.signal_queue.put('SWITCH_ON_SURFACE_PROCESSES')
+
 
     def scroll_event(self, _window, event):
         """Zoom in/out when using mouse wheel"""
