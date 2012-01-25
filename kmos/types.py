@@ -3,7 +3,6 @@
 """
 
 # stdlib imports
-from copy import deepcopy
 import re
 
 # numpy
@@ -18,9 +17,9 @@ from xml.dom import minidom
 from kmos.utils import CorrectlyNamed
 from kmos.config import *
 
-KMCPROJECT_V0_1_DTD = '/kmc_project_v0.1.dtd'
-KMCPROJECT_V0_2_DTD = '/kmc_project_v0.2.dtd'
-XML_API_VERSION = (0, 2)
+kmcproject_v0_1_dtd = '/kmc_project_v0.1.dtd'
+kmcproject_v0_2_dtd = '/kmc_project_v0.2.dtd'
+xml_api_version = (0, 2)
 
 
 class FixedObject(object):
@@ -162,7 +161,8 @@ class Project(object):
             raise UserWarning('Argument layer required.')
 
         try:
-            layer = [layer for layer in self.get_layers() if layer.name == layer_name][0]
+            layer = [layer for layer in self.get_layers()
+                     if layer.name == layer_name][0]
         except:
             raise UserWarning('Layer %s not found.' % layer_name)
         layer.add_site(**kwargs)
@@ -180,7 +180,7 @@ class Project(object):
         representing the Project"""
         # build XML Tree
         root = ET.Element('kmc')
-        root.set('version', str(XML_API_VERSION))
+        root.set('version', str(xml_api_version))
         meta = ET.SubElement(root, 'meta')
         if hasattr(self.meta, 'author'):
             meta.set('author', self.meta.author)
@@ -309,7 +309,7 @@ class Project(object):
             self.version = (0, 1)
 
         if self.version == (0, 1):
-            dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_V0_1_DTD)
+            dtd = ET.DTD(APP_ABS_PATH + kmcproject_v0_1_dtd)
             if not dtd.validate(root):
                 print(dtd.error_log.filter_from_errors()[0])
                 return
@@ -317,7 +317,7 @@ class Project(object):
             nroot.set('version', '0.2')
             raise Exception('No legacy support!')
         elif self.version == (0, 2):
-            dtd = ET.DTD(APP_ABS_PATH + KMCPROJECT_V0_2_DTD)
+            dtd = ET.DTD(APP_ABS_PATH + kmcproject_v0_2_dtd)
             if not dtd.validate(root):
                 print(dtd.error_log.filter_from_errors()[0])
                 return
@@ -330,7 +330,7 @@ class Project(object):
                     elif len(cell) == 9:
                         self.layer_list.cell = cell.reshape(3, 3)
                     else:
-                        raise UserWarning('% not understood' % cell)
+                        raise UserWarning('%s not understood' % cell)
                     self.layer_list.default_layer = \
                         child.attrib['default_layer']
                     if 'substrate_layer' in child.attrib:
@@ -464,6 +464,11 @@ class Project(object):
                         self.add_output(output_elem)
 
     def validate_model(self):
+        """Run various consistency and completeness
+        test of the model to make sure we have a
+        minimally complete model.
+
+        """
 
         #################
         # LATTICE
@@ -502,8 +507,10 @@ class Project(object):
         #################
         # check if all parameter names are unique
         for x in self.get_parameters():
-            if len([y for y in self.get_parameters() if x.name == y.name]) > 1:
-                raise UserWarning('Parameter name "%s" is not unique' % x.name)
+            if len([y for y in self.get_parameters()
+                    if x.name == y.name]) > 1:
+                raise UserWarning('Parameter name "%s" is not unique' %
+                                  x.name)
 
         #################
         # Species
@@ -591,9 +598,9 @@ class Project(object):
         names = [get_name(x) for x in self.get_processes()]
         names = list(set(names))
         nrates = len(set([x.rate_constant for x in self.get_processes()]))
-        print('Processes (%s/%s/%s)\n-------------' % (len(names),
-                                                    nrates,
-                                                    len(self.get_processes())))
+        print('Processes (%s/%s/%s)\n-------------' %
+               (len(names), nrates, len(self.get_processes())))
+
         for process_type in sorted(names):
             nprocs = len([x for x in self.get_processes()
                           if get_name(x) == process_type])
@@ -712,9 +719,9 @@ class LayerList(FixedObject, list):
                 kwargs['cell'] = np.array([float(i)
                                            for i in kwargs['cell'].split()])
             if type(kwargs['cell']) is np.ndarray:
-                if len(l) == 9:
+                if len(kwargs['cell']) == 9:
                     self.cell = kwargs['cell'].resize(3, 3)
-                elif len(l) == 3:
+                elif len(kwargs['cell']) == 3:
                     self.cell = np.diag(kwargs['cell'])
             else:
                 raise UserWarning('%s not understood' % kwargs['cell'])
@@ -751,7 +758,7 @@ class LayerList(FixedObject, list):
                 value = eval(value)
                 if (not hasattr(self, 'representation') or \
                    not self.representation):
-                        self.cell = value[0].cell
+                    self.cell = value[0].cell
                 value = '[%s]' % get_ase_constructor(value)
             self.__dict__[key] = '%s' % value
         else:
@@ -1110,7 +1117,8 @@ class ConditionAction(FixedObject):
         FixedObject.__init__(self, **kwargs)
 
     def __repr__(self):
-        return "[COND_ACT] Species: %s Coord:%s\n" % (self.species, self.coord)
+        return ("[COND_ACT] Species: %s Coord:%s\n" %
+               (self.species, self.coord))
 
     def __eq__(self, other):
         return self.__repr__() == other.__repr__()
@@ -1278,7 +1286,7 @@ def parse_chemical_expression(eq, process, project_tree):
                                   % (layer, layer_names))
             else:
                 layer_instance = filter(lambda x: x.name == layer,
-                                                  project_tree.get_layers())[0]
+                                              project_tree.get_layers())[0]
                 site_names = [x.name for x in layer_instance.sites]
                 if name not in site_names:
                     raise UserWarning("Site %s not known, must be one of %s"
