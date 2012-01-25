@@ -232,10 +232,10 @@ class KMC_Model(multiprocessing.Process):
                     self.double()
                 elif signal.upper() == 'HALVE':
                     self.halve()
-                elif signal.upper() == 'SWITCH_OFF_SURFACE_PROCESSES':
-                    self.switch_off_surface_processes()
-                elif signal.upper() == 'SWITCH_ON_SURFACE_PROCESSES':
-                    set_rate_constants(settings.parameters, self.print_rates)
+                elif signal.upper() == 'SWITCH_SURFACE_PROCESSES_OFF':
+                    self.switch_surface_processes_off()
+                elif signal.upper() == 'SWITCH_SURFACE_PROCESSES_ON':
+                    self.switch_surface_processes_on()
 
 
             if not self.parameter_queue.empty():
@@ -339,7 +339,7 @@ class KMC_Model(multiprocessing.Process):
                             config[xi, yi, zi, n],)
         self._adjust_database()
 
-    def switch_off_surface_processes(self):
+    def switch_surface_processes_off(self):
         """Set rate constant to zero if process
         has 'diff' or 'react' in the name.
 
@@ -349,6 +349,9 @@ class KMC_Model(multiprocessing.Process):
                                self.settings.rate_constants)):
             if 'diff' in process_name or 'react' in process_name:
                 self.base.set_rate_const(i, .0)
+
+    def  switch_surface_processes_on(self):
+        set_rate_constants(settings.parameters, self.print_rates)
 
     def halve(self):
         """

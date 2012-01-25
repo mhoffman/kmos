@@ -290,9 +290,9 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         elif event.string == 'h':
             self.signal_queue.put('HALVE')
         elif event.string == 's':
-            self.signal_queue.put('SWITCH_OFF_SURFACE_PROCESSES')
+            self.signal_queue.put('SWITCH_SURFACE_PROCESSES_OFF')
         elif event.string == 'S':
-            self.signal_queue.put('SWITCH_ON_SURFACE_PROCESSES')
+            self.signal_queue.put('SWITCH_SURFACE_PROCESSES_ON')
 
 
     def scroll_event(self, _window, event):
