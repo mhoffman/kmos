@@ -43,7 +43,7 @@ THANKS
 ######
 This project draws on several other great Python modules, which are in turn
 each free software and I would like to thank each of these projects for
-making their code avalaible for freely, namely:
+making their code avalaible freely, namely:
 
 * `Python <http://www.python.org>`_
 * `ASE <https://wiki.fysik.dtu.dk/ase/>`_
