@@ -241,6 +241,7 @@ class KMC_Model(multiprocessing.Process):
             if not self.parameter_queue.empty():
                 while not self.parameter_queue.empty():
                     parameters = self.parameter_queue.get()
+                    settings.parameters.update(parameters)
                 set_rate_constants(parameters, self.print_rates)
 
     def view(self):
