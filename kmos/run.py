@@ -349,7 +349,7 @@ class KMC_Model(multiprocessing.Process):
                                sorted(
                                self.settings.rate_constants)):
             if 'diff' in process_name or 'react' in process_name:
-                self.base.set_rate_const(i, .0)
+                self.base.set_rate_const(i + 1, .0)
 
     def  switch_surface_processes_on(self):
         set_rate_constants(settings.parameters, self.print_rates)
