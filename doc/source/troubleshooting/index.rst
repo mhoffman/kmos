@@ -2,6 +2,41 @@
 Trouble Shooting
 ================
 
+When I run kmos the GUI way and close it, it seems to hang
+and I need to use the window manager to kill it.
+  This is a bug waiting to be fixed. To avoid it close
+  the window showing the atoms object by clicking on its 
+  close button or Alt-F4 or whichever shortcut your FM uses.
+
+Running a model it sometimes prints 
+`Warning: numerical precision too low, to resolve time-steps`
+  This means that the kMC step of the current process was so
+  small compared to the current kMC time that for the processor
+  :math:`t + \Delta t = t`. This should under normal circumstances
+  only occur if you changed external conditions during a kMC run.
+
+  Otherwise it could mean that your rate constants vary over
+  12 or more orders of magnitude. If this is the case one needs
+  to wonder whether non-coarse graind kMC is actually the right
+  approach for the system. On the hand because the selection of
+  the next process will no longer be reliable and second because
+  reasonable sampling of all involved process may no longer happen.
+
+
+When running a model without GUI evaluation steps seem very slow.
+  If you have a `kmos.run.KMC_Model` instance and call `model.get_atoms()`
+  the generation of the real-space geometry takes the longest time. If you
+  only have to evaluate coverage or turn-over frequency you might you are
+  better of using `model.get_atoms(geometry=False)`, which returns and
+  object with all numbers but without the actual geometry.
+
+What units is kmos using ?
+  By default length are measured in angstrom, energies in eV, pressure
+  in bar, constants are taken from CODATA 2010. Note that the rate
+  expressions though contain explicit conversion factors like `bar`,
+  `eV` etc. If in doubt check the resulting rate constants by hand.
+
+  
 More to follow. Please post issues 
 `here <https://github.com/mhoffman/kmos/issues>`_
 or via email mjhoffmann .at. gmail .dot. com
