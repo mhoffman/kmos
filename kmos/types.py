@@ -469,6 +469,11 @@ class Project(object):
         minimally complete model.
 
         """
+        # define regular expression
+        # for fortran valid fortran
+        # variable names
+        variable_regex = re.compile('^[a-zA-Z][a-zA-z0-9_]*$')
+
 
         #################
         # LATTICE
@@ -488,10 +493,18 @@ class Project(object):
                     raise UserWarning(('Site "%s" in Layer "%s"'
                                        'is not unique.') % (x.name,
                                                             layer.name))
-        # check if all lattice names are unique
+
+
         for x in self.get_layers():
+            # check if all lattice names are unique
             if len([y for y in self.get_layers() if x.name == y.name]) > 1:
                 raise UserWarning('Layer name "%s" is not unique.' % x.name)
+
+            # check if all lattice have a valid name
+            if not variable_regex.match(layer.name):
+                raise UserWarning('Lattice %s is not a valid variable name.\n'
+                                  'Only letters, numerals and "_" allowed.\n'
+                                  'First character has to be a letter.\n')
 
         # check if the default layer is actually defined
         if len(self.get_layers()) > 1  and \
@@ -526,6 +539,19 @@ class Project(object):
             raise UserWarning('Default species "%s" not found.' %
                               self.species_list.default_species)
 
+        for species in self.get_speciess():
+            # if species names are valid variable names
+            if not variable_regex.match(species.name):
+                raise UserWarning('Species %s is not a valid variable name.\n'
+                                  'Only letters, numerals and "_" allowed.\n'
+                                  'First character has to be a letter.\n')
+
+        # check if all species have a unique name
+        for x in self.get_speciess():
+            if [y.name for y in self.get_speciess()].count(x.name) > 1:
+                raise UserWarning('Species %s has no unique name!' %
+                                      x.name)
+
         #################
         # PROCESSES
         #################
@@ -533,10 +559,18 @@ class Project(object):
         if not len(self.get_processes()) >= 2:
             raise UserWarning('Model has less than two processes.')
 
+        # check if all process names are valid
+        for x in self.get_processes():
+            if not variable_regex.match(x.name):
+                raise UserWarning('Model %s is not a valid variable name.\n'
+                                  'Only letters, numerals and "_" allowed.\n'
+                                  'First character has to be a letter.\n')
+
         # check if all process names are unique
         for x in self.get_processes():
             if len([y for y in self.get_processes() if x.name == y.name]) > 1:
                 raise UserWarning('Process name "%s" is not unique' % x.name)
+
 
         # check if all processes have at least one condition
         for x in self.get_processes():
@@ -565,14 +599,9 @@ class Project(object):
         for x in self.get_processes():
             if not x.rate_constant:
                 raise UserWarning('Process %s has no rate constant defined')
+
         # check if all rate expressions are valid
 
-        # check if all species have a unique name
-        for x in self.get_speciess():
-            for y in self.get_speciess():
-                if len([]) > 1:
-                    raise UserWarning('Species %s has no unique name!' %
-                                      x.name)
 
         # check if all species used in condition_action are defined
         # after stripping ^ and $ operators
