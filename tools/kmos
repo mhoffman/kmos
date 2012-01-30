@@ -20,24 +20,44 @@ import os
 import optparse
 
 usage = {}
-usage['edit'] = """kmos edit <xml-file>
-                        open the kmos xml-file in a GUI to edit
-                        the model."""
+usage['all'] = """kmos help all
+    Display documentation for all commands.
+                """
+usage['benchmark'] = """kmos benchmark
+    Run 1 mio. kMC steps on model in current directory
+    and report runtime.
+                     """
 
-usage['view'] = """kmos view
-                        Except a kmc_model.so and kmc_settings in the
-                        same directory and will start to simulate the
-                        model visually"""
+usage['build'] = """kmos build
+    Build kmc_model.so from *f90 files in the
+    current directory.
+                 """
 usage['export'] = """kmos export <xml-file> [<export-path>]
-                        Takes a kmos xml-file and exports all generated
-                        source code to the export-path. There it will
-                        try to build the kmc_model.so."""
-usage['import'] = """kmos import <xml-file>
-                        Takes a kmos xml-file and opens an ipython shell
-                        with the project_tree imported as pt."""
+    Take a kmos xml-file and export all generated
+    source code to the export-path. There try to
+    build the kmc_model.so.
+                    """
 usage['export-view'] = """kmos export-view <xml-file>
-                        Exports an XML file, compiles and runs the simulation.
+    Export an XML file, compile and run the simulation.
                         """
+usage['edit'] = """kmos edit <xml-file>
+    Open the kmos xml-file in a GUI to edit
+    the model.
+                """
+usage['import'] = """kmos import <xml-file>
+    Take a kmos xml-file and open an ipython shell
+    with the project_tree imported as pt.
+                  """
+usage['rebuild'] = """kmos rebuild
+    Export code and rebuild binary module from XML
+    information included in kmc_settings.py in
+    current directory.
+                    """
+usage['view'] = """kmos view
+    Take a kmc_model.so and kmc_settings.py in the
+    same directory and start to simulate the
+    model visually.
+                 """
 
 parser = optparse.OptionParser(
     'Usage: %prog [help] (' + '|'.join(usage.keys()) + ') [options]')
@@ -56,7 +76,10 @@ if len(args) < 1:
 if args[0] == 'help':
     if len(args) < 2:
         parser.error('Which help do you  want?')
-    if args[1] in usage:
+    if args[1] == 'all':
+        for command in usage:
+            print(usage[command])
+    elif args[1] in usage:
         print('Usage: %s\n' % usage[args[1]])
     else:
         print("Command not known or not documented.")
@@ -104,6 +127,8 @@ elif args[0] == 'view':
     from kmos.view import main
     main()
 elif args[0] == 'benchmark':
+    from sys import path
+    path.append(os.path.abspath(os.curdir))
     nsteps = 1000000
     from time import time
     from kmos.run import KMC_Model
