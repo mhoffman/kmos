@@ -26,8 +26,8 @@ Running a model it sometimes prints
 When running a model without GUI evaluation steps seem very slow.
   If you have a `kmos.run.KMC_Model` instance and call `model.get_atoms()`
   the generation of the real-space geometry takes the longest time. If you
-  only have to evaluate coverage or turn-over frequency you might you are
-  better of using `model.get_atoms(geometry=False)`, which returns and
+  only have to evaluate coverages or turn-over frequencies you are
+  better off using `model.get_atoms(geometry=False)`, which returns an
   object with all numbers but without the actual geometry.
 
 What units is kmos using ?
