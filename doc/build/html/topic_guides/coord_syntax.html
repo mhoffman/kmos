@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -12,12 +14,13 @@
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
         VERSION:     '0.0.1',
-        COLLAPSE_MODINDEX: false,
+        COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
     <link rel="up" title="Topic Guides" href="index.html" />
@@ -32,8 +35,8 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../modindex.html" title="Global Module Index"
-             accesskey="M">modules</a> |</li>
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li class="right" >
           <a href="../reference/index.html" title="Reference"
              accesskey="N">next</a> |</li>
@@ -46,40 +49,40 @@
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-            <h3><a href="../index.html">Table Of Contents</a></h3>
-            <ul>
-<li><a class="reference external" href="#">The Site/Coordinate Syntax</a><ul>
-<li><a class="reference external" href="#manual-generation">Manual generation</a></li>
-<li><a class="reference external" href="#autogeneration-of-sets">Autogeneration of sets</a></li>
-<li><a class="reference external" href="#taking-it-home">Taking it home</a></li>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">The Site/Coordinate Syntax</a><ul>
+<li><a class="reference internal" href="#manual-generation">Manual generation</a></li>
+<li><a class="reference internal" href="#advanced-coordinate-techniques">Advanced Coordinate Techniques</a></li>
+<li><a class="reference internal" href="#taking-it-home">Taking it home</a></li>
 </ul>
 </li>
 </ul>
 
-            <h4>Previous topic</h4>
-            <p class="topless"><a href="proc_syntax.html"
-                                  title="previous chapter">The Process Syntax</a></p>
-            <h4>Next topic</h4>
-            <p class="topless"><a href="../reference/index.html"
-                                  title="next chapter">Reference</a></p>
-            <h3>This Page</h3>
-            <ul class="this-page-menu">
-              <li><a href="../_sources/topic_guides/coord_syntax.txt"
-                     rel="nofollow">Show Source</a></li>
-            </ul>
-          <div id="searchbox" style="display: none">
-            <h3>Quick search</h3>
-              <form class="search" action="../search.html" method="get">
-                <input type="text" name="q" size="18" />
-                <input type="submit" value="Go" />
-                <input type="hidden" name="check_keywords" value="yes" />
-                <input type="hidden" name="area" value="default" />
-              </form>
-              <p class="searchtip" style="font-size: 90%">
-              Enter search terms or a module, class or function name.
-              </p>
-          </div>
-          <script type="text/javascript">$('#searchbox').show(0);</script>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="proc_syntax.html"
+                        title="previous chapter">The Process Syntax</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../reference/index.html"
+                        title="next chapter">Reference</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/topic_guides/coord_syntax.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
 
@@ -146,9 +149,13 @@ The offset is a tuple of three integer numbers and specifies the relative
 unit cell of this coordinate. Of course this only becomes meaningful
 as soon as you use more than one coordinate in a process.</p>
 </div>
-<div class="section" id="autogeneration-of-sets">
-<h2>Autogeneration of sets<a class="headerlink" href="#autogeneration-of-sets" title="Permalink to this headline">¶</a></h2>
-<p>Often times it is more handy (less typing) to generate a larger set
+<div class="section" id="advanced-coordinate-techniques">
+<h2>Advanced Coordinate Techniques<a class="headerlink" href="#advanced-coordinate-techniques" title="Permalink to this headline">¶</a></h2>
+<p>Generating large process lists with a lot of similar or even
+degenerate processes is a very boring task. So we should try
+to use programming logic as much as possible. Here I will outline
+a couple of idioms you can use here.</p>
+<p>Often times it is handier (less typing) to generate a larger set
 of coordinates at first and then select different subsets from it
 in a process definition. For this purpose you can use</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pset</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">generate_coord_set</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">],</span> <span class="n">layer_name</span><span class="o">=</span><span class="s">&#39;layer_name&#39;</span><span class="p">)</span>
@@ -158,8 +165,8 @@ in a process definition. For this purpose you can use</p>
 all coordinates in the first unit cell (<tt class="docutils literal"><span class="pre">offset=(1,1,1)</span></tt>)
 and all <tt class="docutils literal"><span class="pre">x</span></tt>, <tt class="docutils literal"><span class="pre">y</span></tt>, and <tt class="docutils literal"><span class="pre">z</span></tt> unit cells in the respective
 direction.</p>
-<p>To to select subsets in a readable way I suggest you list comprehensions
-like for example so</p>
+<p>To select subsets in a readable way I suggest you use list comprehensions,
+like so</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="p">[</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">pset</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">x</span><span class="o">.</span><span class="n">offset</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="p">]</span>
 </pre></div>
 </div>
@@ -198,7 +205,7 @@ real-space distances between coordinate like so</p>
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="../modindex.html" title="Global Module Index"
+          <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
           <a href="../reference/index.html" title="Reference"
@@ -211,8 +218,8 @@ real-space distances between coordinate like so</p>
       </ul>
     </div>
     <div class="footer">
-      &copy; Copyright 2009-2012, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+        &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
     </div>
   </body>
 </html>

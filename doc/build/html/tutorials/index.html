@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -12,12 +14,13 @@
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
         VERSION:     '0.0.1',
-        COLLAPSE_MODINDEX: false,
+        COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
     <link rel="next" title="Topic Guides" href="../topic_guides/index.html" />
@@ -31,8 +34,8 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../modindex.html" title="Global Module Index"
-             accesskey="M">modules</a> |</li>
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li class="right" >
           <a href="../topic_guides/index.html" title="Topic Guides"
              accesskey="N">next</a> |</li>
@@ -44,62 +47,62 @@
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-            <h3><a href="../index.html">Table Of Contents</a></h3>
-            <ul>
-<li><a class="reference external" href="#">Tutorials</a><ul>
-<li><a class="reference external" href="#getting-started">Getting Started</a><ul>
-<li><a class="reference external" href="#module-kmos">Introduction</a><ul>
-<li><a class="reference external" href="#feature-overview">Feature overview</a></li>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Tutorials</a><ul>
+<li><a class="reference internal" href="#getting-started">Getting Started</a><ul>
+<li><a class="reference internal" href="#module-kmos">Introduction</a><ul>
+<li><a class="reference internal" href="#feature-overview">Feature overview</a></li>
 </ul>
 </li>
-<li><a class="reference external" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
 </ul>
 </li>
-<li><a class="reference external" href="#screenshots">Screenshots</a><ul>
-<li><a class="reference external" href="#the-editor">The  Editor</a></li>
-<li><a class="reference external" href="#the-runtime-view">The Runtime View</a></li>
+<li><a class="reference internal" href="#screenshots">Screenshots</a><ul>
+<li><a class="reference internal" href="#the-editor">The  Editor</a></li>
+<li><a class="reference internal" href="#the-runtime-view">The Runtime View</a></li>
 </ul>
 </li>
-<li><a class="reference external" href="#a-first-kmc-model-the-api-way">A first kMC Model&#8211;the API way</a><ul>
-<li><a class="reference external" href="#construct-the-model">Construct the model</a></li>
-<li><a class="reference external" href="#populate-process-list-and-parameter-list">Populate process list and parameter list</a></li>
-<li><a class="reference external" href="#export-save-compile">Export, save, compile</a></li>
-<li><a class="reference external" href="#taking-it-home">Taking it home</a></li>
+<li><a class="reference internal" href="#a-first-kmc-model-the-api-way">A first kMC Model&#8211;the API way</a><ul>
+<li><a class="reference internal" href="#construct-the-model">Construct the model</a></li>
+<li><a class="reference internal" href="#populate-process-list-and-parameter-list">Populate process list and parameter list</a></li>
+<li><a class="reference internal" href="#export-save-compile">Export, save, compile</a></li>
+<li><a class="reference internal" href="#taking-it-home">Taking it home</a></li>
 </ul>
 </li>
-<li><a class="reference external" href="#a-first-kmc-model-the-gui-way">A first kMC Model&#8211;the GUI way</a></li>
-<li><a class="reference external" href="#running-the-model-the-gui-way">Running the Model&#8211;the GUI way</a></li>
-<li><a class="reference external" href="#running-the-model-the-api-way">Running the Model&#8211;the API way</a></li>
-<li><a class="reference external" href="#running-models-in-parallel">Running models in parallel</a></li>
-<li><a class="reference external" href="#development">Development</a></li>
+<li><a class="reference internal" href="#a-first-kmc-model-the-gui-way">A first kMC Model&#8211;the GUI way</a></li>
+<li><a class="reference internal" href="#running-the-model-the-gui-way">Running the Model&#8211;the GUI way</a></li>
+<li><a class="reference internal" href="#running-the-model-the-api-way">Running the Model&#8211;the API way</a></li>
+<li><a class="reference internal" href="#running-models-in-parallel">Running models in parallel</a></li>
+<li><a class="reference internal" href="#development">Development</a></li>
 </ul>
 </li>
 </ul>
 
-            <h4>Previous topic</h4>
-            <p class="topless"><a href="../index.html"
-                                  title="previous chapter">Welcome to kmos&#8217;s documentation!</a></p>
-            <h4>Next topic</h4>
-            <p class="topless"><a href="../topic_guides/index.html"
-                                  title="next chapter">Topic Guides</a></p>
-            <h3>This Page</h3>
-            <ul class="this-page-menu">
-              <li><a href="../_sources/tutorials/index.txt"
-                     rel="nofollow">Show Source</a></li>
-            </ul>
-          <div id="searchbox" style="display: none">
-            <h3>Quick search</h3>
-              <form class="search" action="../search.html" method="get">
-                <input type="text" name="q" size="18" />
-                <input type="submit" value="Go" />
-                <input type="hidden" name="check_keywords" value="yes" />
-                <input type="hidden" name="area" value="default" />
-              </form>
-              <p class="searchtip" style="font-size: 90%">
-              Enter search terms or a module, class or function name.
-              </p>
-          </div>
-          <script type="text/javascript">$('#searchbox').show(0);</script>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../index.html"
+                        title="previous chapter">Welcome to kmos&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../topic_guides/index.html"
+                        title="next chapter">Topic Guides</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/tutorials/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
 
@@ -113,7 +116,7 @@
 <div class="section" id="getting-started">
 <h2>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="module-kmos">
-<h3>Introduction<a class="headerlink" href="#module-kmos" title="Permalink to this headline">¶</a></h3>
+<span id="introduction"></span><h3>Introduction<a class="headerlink" href="#module-kmos" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="feature-overview">
 <h4>Feature overview<a class="headerlink" href="#feature-overview" title="Permalink to this headline">¶</a></h4>
 <p>With kmos you can:</p>
@@ -181,12 +184,12 @@ no dependencies except for a Fortran compiler.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">kmos</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">dependencies</span><span class="o">-</span><span class="n">ubuntu</span>
 </pre></div>
 </div>
-<div class="admonition-todo admonition " id="todo-27">
+<div class="admonition-todo admonition " id="index-0">
 <p class="first admonition-title">Todo</p>
 <p class="last">add pip way or something alike to automatically
 install dependencies.</p>
 </div>
-<div class="admonition-todo admonition " id="todo-28">
+<div class="admonition-todo admonition " id="index-1">
 <p class="first admonition-title">Todo</p>
 <p class="last">test installation on other platforms</p>
 </div>
@@ -434,7 +437,7 @@ the workflow.</p>
 in terms of  <cite>conditions</cite> and
 <cite>actions</cite> and you find a more complete
 description can be found in the
-<a class="reference external" href="../topic_guides/proc_syntax.html#proc-mini-language"><em>topic guide</em></a>
+<a class="reference internal" href="../topic_guides/proc_syntax.html#proc-mini-language"><em>topic guide</em></a>
 to the process description syntax.</td></tr>
 </tbody>
 </table>
@@ -444,7 +447,7 @@ to the process description syntax.</td></tr>
 <tr><td class="label"><a class="fn-backref" href="#id2">[3]</a></td><td>The description of coordinates follows
 the simple syntax of the coordinate
 syntax and the
-<a class="reference external" href="../topic_guides/coord_syntax.html#coord-mini-language"><em>topic guide</em></a>
+<a class="reference internal" href="../topic_guides/coord_syntax.html#coord-mini-language"><em>topic guide</em></a>
 explains how that works.</td></tr>
 </tbody>
 </table>
@@ -456,7 +459,7 @@ explains how that works.</td></tr>
 simple adsorption/desorption model on a simple cubic surface.
 Despite its simplicity it touches all elements contained in
 the GUI and could be considered from first-principles.</p>
-<div class="admonition-todo admonition " id="todo-29">
+<div class="admonition-todo admonition " id="index-2">
 <p class="first admonition-title">Todo</p>
 <p class="last">describe modelling more complicated structures
 and e.g. boundary conditions</p>
@@ -481,7 +484,7 @@ be even more interactive you set a parameter to be adjustable.
 This can happen either in the generating XML file or directly
 in the kmc_settings.py. Also make sure to set sensible minimum
 and maximum values.</p>
-<div class="admonition-todo admonition " id="todo-30">
+<div class="admonition-todo admonition " id="index-3">
 <p class="first admonition-title">Todo</p>
 <p class="last">add recording function</p>
 </div>
@@ -665,7 +668,7 @@ from the top project directory</p>
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="../modindex.html" title="Global Module Index"
+          <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
           <a href="../topic_guides/index.html" title="Topic Guides"
@@ -677,8 +680,8 @@ from the top project directory</p>
       </ul>
     </div>
     <div class="footer">
-      &copy; Copyright 2009-2012, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+        &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
     </div>
   </body>
 </html>
