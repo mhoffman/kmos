@@ -299,7 +299,7 @@ class KMC_Model(multiprocessing.Process):
         if delta_t == 0. and atoms.kmc_time > 0:
             print(
                 "Warning: numerical precision too low, to resolve time-steps")
-            print('         Will reset kMC for next step')
+            print('         Will reset kMC time to 0s.')
             base.set_kmc_time(0.0)
             atoms.tof_data = np.zeros_like(self.tof_matrix[:, 0])
         else:
