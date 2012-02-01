@@ -1060,7 +1060,10 @@ class Species(FixedObject):
             if 'representation' in kwargs else ''
 
     def __repr__(self):
-        return '[SPECIES] Name: %s Color: %s\n' % (self.name, self.color)
+        if hasattr(self, 'color'):
+            return '[SPECIES] Name: %s Color: %s\n' % (self.name, self.color)
+        else:
+            return '[SPECIES] Name: %s Color: no color set.\n' % (self.name)
 
 
 class SpeciesList(FixedObject, list):
