@@ -94,6 +94,32 @@ necessary if you want to run more than one simulation
 in one script.
 
 
+Manipulating the Model at Runtime
+=================================
+
+It is quite easy to change not only model parameters but
+also the configuration at runtime. For instance if one
+would like to prepare a surface with a certain configuration
+or pattern.
+
+Given you instantiated a `model` instance a site can by calling ::
+
+  model.put(site=[x,y,z,n], model.proclist.<species>)
+
+However if changing many sites at once this is quite inefficient,
+since each put call, adjusts the book-keeping database for every
+change of the configuration. To circumvent this you can use
+the `_put` method, like so ::
+
+  model._put(...)
+  model._put(...)
+  ...
+  model._adjust_database()
+
+though at the end one must not forget to call `_adjust_database()`
+before executing any next step or the model instance will
+crash soon.
+
 Running models in parallel
 ==========================
 
