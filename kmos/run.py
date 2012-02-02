@@ -354,6 +354,14 @@ class KMC_Model(multiprocessing.Process):
     def switch_surface_processes_on(self):
         set_rate_constants(settings.parameters, self.print_rates)
 
+    def _put(self, site, new_species):
+        old_species = self.lattice.get_species(site)
+        self.lattice.replace_species(site, old_species, new_species)
+
+    def put(self, site, new_species):
+        self._put(site, new_species)
+        self._adjust_database()
+
     def halve(self):
         """
         Halve the size of the model and initialize each site in the new model
