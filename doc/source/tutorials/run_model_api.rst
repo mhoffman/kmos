@@ -111,7 +111,7 @@ kind of problem can be considered `embarrasingly parallel`
 since the require no communication between the runs.
 
 This is made very simple through the `multiprocessing`,
-which is in the Pythion standard library since version 2.6.
+which is in the Python standard library since version 2.6.
 For older versions this needs to be `downloaded <http://pypi.python.org/pypi/multiprocessing/>`
 and installed manually. The latter is very
 straightforward.
