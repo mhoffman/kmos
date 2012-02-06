@@ -13,9 +13,9 @@ rate_constants = {
 
 site_names = ['default_cus']
 representations = {
-    "CO":"",
-    "empty":"",
-    "oxygen":"",
+    "CO":"""""",
+    "empty":"""""",
+    "oxygen":"""""",
     }
 
 lattice_representation = """"""
