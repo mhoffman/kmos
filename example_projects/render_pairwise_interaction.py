@@ -14,10 +14,10 @@ layer = pt.add_layer(name='simplecubic_2d')
 layer.add_site(name='a')
 pt.add_species(name='empty', color='#ffffff')
 pt.add_species(name='CO', color='#000000', representation="Atoms('CO',[[0,0,0],[0,0,1.2]])")
-pt.add_parameter(name='E_CO', value=-1)
-pt.add_parameter(name='E_CO_nn', value=.2)
-pt.add_parameter(name='p_CO', value=.2)
-pt.add_parameter(name='T', value=600)
+pt.add_parameter(name='E_CO', value=-1, adjustable=True, min=-2, max=0)
+pt.add_parameter(name='E_CO_nn', value=.2, adjustable=True, min=-1, max=1)
+pt.add_parameter(name='p_COgas', value=.2, adjustable=True, scale='log', min=1e-13, max=1e3)
+pt.add_parameter(name='T', value=600, adjustable=True, min=300, max=1500)
 pt.add_parameter(name='A', value='(3*angstrom)**2')
 
 center = pt.lattice.generate_coord('a')
@@ -31,7 +31,7 @@ pt.lattice.cell = np.diag([A, A, 10])
 pt.add_process(name='CO_adsorption',
                conditions=[Condition(species='empty', coord=center)],
                actions=[Action(species='CO', coord=center)],
-               rate_constant='p_CO*A/sqrt(2*m_CO/beta)')
+               rate_constant='p_COgas*A*bar/sqrt(2*m_CO*umass/beta)')
 
 # fetch a lot of coordinates
 coords = pt.lattice.generate_coord_set(size=[2, 2, 2],
@@ -49,7 +49,7 @@ for i, nn_config in enumerate(product(['empty', 'CO'], repeat=len(nn_coords))):
     N_CO = nn_config.count('CO')
 
     # rate constant with pairwise interaction
-    rate_constant = 'p_CO*A/sqrt(2*m_CO/beta)*exp(beta*(E_CO+%s*E_CO_nn)*eV)' % N_CO
+    rate_constant = 'p_COgas*A*bar/sqrt(2*m_CO*umass/beta)*exp(beta*(E_CO+%s*E_CO_nn-mu_COgas)*eV)' % N_CO
 
     # turn neighborhood into conditions using zip
     conditions = [Condition(coord=coord, species=species)
