@@ -312,8 +312,8 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
 
         self.radius_scale = 20
         self.scale = 20
-        self.offset_x, self.offset_y = (150, 300)
-        self.offset = np.array([self.offset_x, self.offset_y, 0])
+        self.offset[0], self.offset[1] = (150, 300)
+        self.offset = np.array([self.offset[0], self.offset[1], 0])
         self.lattice_pad.add(self.canvas)
         self.previous_layer_name = self.layer_name.get_text()
         self.redraw()
@@ -341,12 +341,12 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         # draw atoms in background
         atoms = self._get_atoms()
 
-        self.lower_left = (self.offset_x,
-                           self.offset_y
+        self.lower_left = (self.offset[0],
+                           self.offset[1]
                            + self.scale * atoms.cell[1, 1])
-        self.upper_right = (self.offset_x
+        self.upper_right = (self.offset[0]
                            + self.scale * atoms.cell[0, 0],
-                           self.offset_y)
+                           self.offset[1])
         big_atoms = atoms * (3, 3, 1)
         for atom in sorted(big_atoms, key=lambda x: x.position[2]):
             i = atom.number
@@ -355,8 +355,8 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
             X = atom.position[0]
             Y = - atom.position[1]
             goocanvas.Ellipse(parent=self.root,
-                              center_x=(self.offset_x + self.scale * X),
-                              center_y=(self.offset_y + self.scale * Y),
+                              center_x=(self.offset[0] + self.scale * X),
+                              center_y=(self.offset[1] + self.scale * Y),
                               radius_x=radius,
                               radius_y=radius,
                               stroke_color='black',
@@ -365,16 +365,16 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
 
         # draw unit cell
         A = tuple(self.offset[:2])
-        B = (self.offset_x + self.scale * (atoms.cell[0, 0]),
-             self.offset_y + self.scale * (atoms.cell[0, 1]))
+        B = (self.offset[0] + self.scale * (atoms.cell[0, 0]),
+             self.offset[1] + self.scale * (atoms.cell[0, 1]))
 
-        C = (self.offset_x + self.scale * (atoms.cell[0, 0]
+        C = (self.offset[0] + self.scale * (atoms.cell[0, 0]
                                        + atoms.cell[1, 0]),
-             self.offset_y - self.scale * (atoms.cell[0, 1]
+             self.offset[1] - self.scale * (atoms.cell[0, 1]
                                        + atoms.cell[1, 1]))
 
-        D = (self.offset_x + self.scale * (atoms.cell[1, 0]),
-             self.offset_y - self.scale * (atoms.cell[1, 1]))
+        D = (self.offset[0] + self.scale * (atoms.cell[1, 0]),
+             self.offset[1] - self.scale * (atoms.cell[1, 1]))
         goocanvas.Polyline(parent=self.root,
                            close_path=True,
                            points=goocanvas.Points([A, B, C, D]),
@@ -579,6 +579,21 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         ProxySlaveDelegate.__init__(self, process)
         expression = self.generate_expression()
         self.chemical_expression.update(expression, )
+
+
+        if hasattr(self, 'canvas'):
+            self.process_pad.remove(self.canvas)
+        self.canvas = goocanvas.Canvas()
+        self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
+        #self.canvas.grab_focus()
+        self.canvas.show()
+        self.process_pad.add(self.canvas)
+
+
+        self.root = self.canvas.get_root_item()
+        self.radius_scale = 20
+        self.scale = 20
+        self.offset = np.array([150, 300, 0])
         self.draw_from_data()
 
         self.process_name.set_tooltip_text(
@@ -946,6 +961,95 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 o.set_radius(self.r_act)
                 o.type = 'action'
                 o.action = elem
+
+    def _get_atoms(self, layer_nr=0):
+        if self.project_tree.lattice.representation:
+            representations = eval(self.project_tree.lattice.representation)
+            if len(representations) > layer_nr:
+                atoms = representations[layer_nr]
+            else:
+                atoms = representations[0]
+        else:
+            atoms = Atoms()
+        return atoms
+
+    def _draw_from_data(self):
+        """Draw the current lattice with unit cell
+           and sites defined on it.
+
+           [Temporary function using goocanvas that
+           will replace the old function.]
+        """
+
+        # draw atoms in background
+        atoms = self._get_atoms()
+
+        self.lower_left = (self.offset[0],
+                           self.offset[1]
+                           + self.scale * atoms.cell[1, 1])
+        self.upper_right = (self.offset[0]
+                           + self.scale * atoms.cell[0, 0],
+                           self.offset[1])
+        big_atoms = atoms * (5, 5, 1)
+        for atom in sorted(big_atoms, key=lambda x: x.position[2]):
+            i = atom.number
+            radius = self.radius_scale * covalent_radii[i]
+            color = jmolcolor_in_hex(i)
+            X = atom.position[0]
+            Y = - atom.position[1]
+            goocanvas.Ellipse(parent=self.root,
+                              center_x=(self.offset[0] + self.scale * X),
+                              center_y=(self.offset[1] + self.scale * Y),
+                              radius_x=radius,
+                              radius_y=radius,
+                              stroke_color='black',
+                              fill_color_rgba=color,
+                              line_width=1.0)
+
+        # draw unit cell
+        A = tuple(self.offset[:2])
+        B = (self.offset[0] + self.scale * (atoms.cell[0, 0]),
+             self.offset[1] + self.scale * (atoms.cell[0, 1]))
+
+        C = (self.offset[0] + self.scale * (atoms.cell[0, 0]
+                                       + atoms.cell[1, 0]),
+             self.offset[1] - self.scale * (atoms.cell[0, 1]
+                                       + atoms.cell[1, 1]))
+
+        D = (self.offset[0] + self.scale * (atoms.cell[1, 0]),
+             self.offset[1] - self.scale * (atoms.cell[1, 1]))
+        goocanvas.Polyline(parent=self.root,
+                           close_path=True,
+                           points=goocanvas.Points([A, B, C, D]),
+                           stroke_color='black',)
+
+        # draw sites
+        for x in range(3):
+            for y in range(3):
+                break
+                for site in self.model.sites:
+
+                    # convert to screen coordinates
+                    pos = np.dot(site.pos + np.array([x, y, 0]), atoms.cell)
+                    pos *= np.array([1, -1, 1])
+                    pos *= self.scale
+                    pos += self.offset
+                    X = pos[0]
+                    Y = pos[1]
+
+                    o = goocanvas.Ellipse(parent=self.root,
+                                          center_x=X,
+                                          center_y=Y,
+                                          radius_x=.3 * self.radius_scale,
+                                          radius_y=.3 * self.radius_scale,
+                                          stroke_color='black',
+                                          fill_color='white',
+                                          line_width=1.0,)
+
+                    o.site = site
+                    o.connect('query-tooltip', self.query_tooltip)
+                self.canvas.hide()
+                self.canvas.show()
 
     def on_condition_action_clicked(self, _canvas, widget, event):
         if event.button == 2:
