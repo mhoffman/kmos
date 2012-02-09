@@ -965,9 +965,9 @@ class ProcListWriter():
         # Graphical Representations
         out.write('representations = {\n')
         for species in sorted(data.species_list, key=lambda x: x.name):
-            out.write('    "%s":"%s",\n'
+            out.write('    "%s":"""%s""",\n'
                 % (species.name,
-                species.representation))
+                species.representation.strip()))
         out.write('    }\n\n')
         out.write('lattice_representation = """%s"""\n\n' % data.layer_list.representation)
 

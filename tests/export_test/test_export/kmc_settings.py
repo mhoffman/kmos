@@ -58,9 +58,9 @@ rate_constants = {
 
 site_names = ['ruo2_bridge', 'ruo2_cus']
 representations = {
-    "co":"",
-    "empty":"",
-    "oxygen":"",
+    "co":"""""",
+    "empty":"""""",
+    "oxygen":"""""",
     }
 
 lattice_representation = """"""
