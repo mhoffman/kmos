@@ -989,21 +989,29 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.upper_right = (self.offset[0]
                            + self.scale * atoms.cell[0, 0],
                            self.offset[1])
-        big_atoms = atoms * (5, 5, 1)
-        for atom in sorted(big_atoms, key=lambda x: x.position[2]):
-            i = atom.number
-            radius = self.radius_scale * covalent_radii[i]
-            color = jmolcolor_in_hex(i)
-            X = atom.position[0]
-            Y = - atom.position[1]
-            goocanvas.Ellipse(parent=self.root,
-                              center_x=(self.offset[0] + self.scale * X),
-                              center_y=(self.offset[1] + self.scale * Y),
-                              radius_x=radius,
-                              radius_y=radius,
-                              stroke_color='black',
-                              fill_color_rgba=color,
-                              line_width=1.0)
+        big_atoms = atoms * (1, 1, 1)
+        for i in range(-1, 3):
+            for j in range(-1, 3):
+                for atom in sorted(atoms, key=lambda x: x.position[2]):
+                    pos = atom.position + np.dot(np.array([i, j, 0]), atoms.cell)
+                    pos *= np.array([1, -1, 1])
+                    pos *= self.scale
+                    pos += self.offset
+                    X = pos[0]
+                    Y = pos[1]
+                    n = atom.number
+                    radius = self.radius_scale * covalent_radii[n]
+                    color = jmolcolor_in_hex(n)
+                    #X = atom.position[0]
+                    #Y = - atom.position[1]
+                    goocanvas.Ellipse(parent=self.root,
+                                      center_x=(X),
+                                      center_y=(Y),
+                                      radius_x=radius,
+                                      radius_y=radius,
+                                      stroke_color='black',
+                                      fill_color_rgba=color,
+                                      line_width=1.0)
 
         # draw unit cell
         A = tuple(self.offset[:2])
