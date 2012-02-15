@@ -580,17 +580,6 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         expression = self.generate_expression()
         self.chemical_expression.update(expression, )
 
-
-        if hasattr(self, 'canvas'):
-            self.process_pad.remove(self.canvas)
-        self.canvas = goocanvas.Canvas()
-        self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
-        #self.canvas.grab_focus()
-        self.canvas.show()
-        self.process_pad.add(self.canvas)
-
-
-        self.root = self.canvas.get_root_item()
         self.radius_scale = 20
         self.scale = 20
         self.offset = np.array([150, 300, 0])
@@ -980,6 +969,15 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
            [Temporary function using goocanvas that
            will replace the old function.]
         """
+        # initialize canvas
+        if hasattr(self, 'canvas'):
+            self.process_pad.remove(self.canvas)
+        self.canvas = goocanvas.Canvas()
+        self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
+        #self.canvas.grab_focus()
+        self.canvas.show()
+        self.process_pad.add(self.canvas)
+        self.root = self.canvas.get_root_item()
 
         # draw atoms in background
         atoms = self._get_atoms()
@@ -990,11 +988,13 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.upper_right = (self.offset[0]
                            + self.scale * atoms.cell[0, 0],
                            self.offset[1])
-        big_atoms = atoms * (1, 1, 1)
-        for i in range(-1, 3):
-            for j in range(-1, 3):
+        x_range = (-1, 3)
+        y_range = (-1, 3)
+        for i in range(*x_range):
+            for j in range(*y_range):
                 for atom in sorted(atoms, key=lambda x: x.position[2]):
-                    pos = atom.position + np.dot(np.array([i, j, 0]), atoms.cell)
+                    pos = atom.position + np.dot(np.array([i, j, 0]),
+                                                 atoms.cell)
                     pos *= np.array([1, -1, 1])
                     pos *= self.scale
                     pos += self.offset
@@ -1003,8 +1003,6 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                     n = atom.number
                     radius = self.radius_scale * covalent_radii[n]
                     color = jmolcolor_in_hex(n)
-                    #X = atom.position[0]
-                    #Y = - atom.position[1]
                     goocanvas.Ellipse(parent=self.root,
                                       center_x=(X),
                                       center_y=(Y),
@@ -1032,11 +1030,10 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                            stroke_color='black',)
 
         # draw sites
-        for x in range(3):
-            for y in range(3):
-                break
-                for site in self.model.sites:
-
+        for x in range(*x_range):
+            for y in range(*y_range):
+                sites = self.project_tree.get_layers()[0].sites
+                for site in sites:
                     # convert to screen coordinates
                     pos = np.dot(site.pos + np.array([x, y, 0]), atoms.cell)
                     pos *= np.array([1, -1, 1])
@@ -1044,20 +1041,49 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                     pos += self.offset
                     X = pos[0]
                     Y = pos[1]
-
                     o = goocanvas.Ellipse(parent=self.root,
                                           center_x=X,
                                           center_y=Y,
-                                          radius_x=.3 * self.radius_scale,
-                                          radius_y=.3 * self.radius_scale,
-                                          stroke_color='black',
-                                          fill_color='white',
-                                          line_width=1.0,)
-
+                                          radius_x=.5 * self.radius_scale,
+                                          radius_y=.5 * self.radius_scale,
+                                          stroke_color='white',
+                                          line_width=2.0,)
                     o.site = site
                     o.connect('query-tooltip', self.query_tooltip)
                 self.canvas.hide()
                 self.canvas.show()
+
+        # draw conditions/actions
+        for i in range(*x_range):
+            for j in range(*y_range):
+                for condition in self.process.condition_list \
+                               + self.process.action_list:
+                    coord = condition.coord
+                    species = condition.species
+                    pos = [x for x in self.project_tree.get_layers()[0].sites
+                           if x.name == coord.name][0].pos
+                    pos += np.array([i, j, 0])
+                    pos = self.project_tree.lattice.cell * pos
+                    representation = [x for x in
+                                      self.project_tree.get_speciess()
+                                  if x.name == species][0].representation
+                    if representation:
+                        atoms = eval(representation)
+                    else:
+                        atoms = []
+                    for atom in atoms:
+                        n = atom.number
+                        color = jmolcolor_in_hex(n)
+                        radius = self.radius_scale * covalent_radii[n]
+                        apos = pos + atom.position
+                        goocanvas.Ellipse(parent=self.root,
+                                          center_x=(X),
+                                          center_y=(Y),
+                                          radius_x=radius,
+                                          radius_y=radius,
+                                          stroke_color='black',
+                                          fill_color_rgba=color,
+                                          line_width=1.0)
 
     def on_condition_action_clicked(self, _canvas, widget, event):
         if event.button == 2:
