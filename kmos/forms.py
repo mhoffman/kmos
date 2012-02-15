@@ -313,7 +313,6 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.radius_scale = 20
         self.scale = 20
         self.offset = np.array([150, 300, 0])
-        self.offset = np.array([self.offset[0], self.offset[1], 0])
         self.lattice_pad.add(self.canvas)
         self.previous_layer_name = self.layer_name.get_text()
         self.redraw()
