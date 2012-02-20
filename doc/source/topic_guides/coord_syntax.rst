@@ -14,7 +14,7 @@ To represent this in a computer program, we first need to
 make a small but crucial differentiation: namely the difference
 between the *sites* of a (surface) structure and the *coordinates*
 of a process. The difference is that a given structure contains
-each site defined exactly one, whereas a process may use the same
+each site defined exactly once, whereas a process may use the same
 site several times however in a different unit cell. So this
 differentation owes to the fact that we commonly simulate highly
 periodic structures.
@@ -113,6 +113,7 @@ Or of course you can use any combination of the above.
 Taking it home
 ^^^^^^^^^^^^^^
 
-- site belong to the structure while coordinates belong to the process
+- *sites* belong to a *structure* while *coordinates* belong to a *process*
 - coordinates are generated from sites
 - coordinate sets can be selected and chopped using list comprehensions
+  and tags
