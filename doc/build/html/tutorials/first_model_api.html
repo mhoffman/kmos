@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>A first kMC Model–the API way &mdash; kmos v0.0.1 documentation</title>
+    <title>A first kMC Model–the API way &mdash; kmos 0.0.1 documentation</title>
+    
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" /> 
+    <link rel="top" title="kmos 0.0.1 documentation" href="../index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -34,7 +37,7 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -58,7 +61,7 @@
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -243,7 +246,13 @@ well type</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">parse_and_add_process</span><span class="p">(</span><span class="s">&#39;CO_desorption; CO@hollow-&gt;; p_CO*bar*A/sqrt(2*pi*umss*m_CO/beta)*exp(-deltaG*eV)&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>And that is it!</p>
+<p>In order to add processes on more than one site possible spanning across unit
+cells, there is a shorthand as well. The full-fledged syntax for each
+coordinate is</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">name</span><span class="o">.</span><span class="n">offset</span><span class="o">.</span><span class="n">lattice</span>
+</pre></div>
+</div>
+<p>check <em class="xref std std-ref">manual_coord_generation</em> for details.</p>
 </div>
 <div class="section" id="export-save-compile">
 <h2>Export, save, compile<a class="headerlink" href="#export-save-compile" title="Permalink to this headline">¶</a></h2>
@@ -315,12 +324,12 @@ explains how that works.</td></tr>
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2009-2012, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
     </div>
   </body>
 </html>

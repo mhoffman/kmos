@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>The Concept of Kinetic Monte Carlo &mdash; kmos v0.0.1 documentation</title>
+    <title>The Concept of Kinetic Monte Carlo &mdash; kmos 0.0.1 documentation</title>
+    
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
+    <link rel="top" title="kmos 0.0.1 documentation" href="../index.html" />
     <link rel="up" title="Topic Guides" href="index.html" />
     <link rel="next" title="Modelling Workflows" href="workflows.html" />
     <link rel="prev" title="Topic Guides" href="index.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="index.html" title="Topic Guides"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li>
+        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Topic Guides</a> &raquo;</li> 
       </ul>
     </div>
@@ -73,7 +76,7 @@
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -106,7 +109,7 @@ over states, the probability distribution at one
 infinitesimal time <img class="math" src="../_images/math/a1ffc0a012620941fe660cedabff822ce7162eca.png" alt="\Delta t"/> later can be
 obtained from</p>
 <div class="math">
-<p><img src="../_images/math/f00bd792fb6d4b7712e25f6f6973ba58046b78a8.png" alt="\rho_{i}(t+\Delta t) = \rho_{i}(t) + \sum_{j} -k_{ji}\rho_{i}(t)\mathrm{d}t + k_{ij}\rho_j(t)\mathrm{d}t" /></p>
+<p><img src="../_images/math/f00bd792fb6d4b7712e25f6f6973ba58046b78a8.png" alt="\rho_{i}(t+\Delta t) = \rho_{i}(t) + \sum_{j} -k_{ji}\rho_{i}(t)\mathrm{d}t + k_{ij}\rho_j(t)\mathrm{d}t"/></p>
 </div><p>where the important bit is that each <img class="math" src="../_images/math/ced07561ffcf58a83865b55ac2aa49c3e29c0fbf.png" alt="\rho(t)"/>
 only depends on the state just before the current state.
 The matrix <img class="math" src="../_images/math/596289dc0590c497d056daa6e454a08b6336ab8d.png" alt="k_{ij}"/> consists of constant real entries,
@@ -145,7 +148,7 @@ be described as follows</p>
 <div class="section" id="basic-kinetic-carlo-algorithm">
 <h2>Basic Kinetic Carlo Algorithm<a class="headerlink" href="#basic-kinetic-carlo-algorithm" title="Permalink to this headline">¶</a></h2>
 <blockquote>
-<ul>
+<div><ul>
 <li><dl class="first docutils">
 <dt>Fix rate constants <img class="math" src="../_images/math/596289dc0590c497d056daa6e454a08b6336ab8d.png" alt="k_{ij}"/></dt>
 <dd><p class="first last">initial state <img class="math" src="../_images/math/837682bc6103a4c6740c8273434e1a2c771a2514.png" alt="x_{i}"/>, and
@@ -155,17 +158,17 @@ initial time <img class="math" src="../_images/math/e0d2bf360290fd61d1c1557e763f
 </li>
 <li><p class="first">while <img class="math" src="../_images/math/f02d72a8be145da5a0ee67e131b6f7c3a5167215.png" alt="t &lt; t_{\mathrm{max}}"/> do</p>
 <blockquote>
-<ol class="arabic simple">
+<div><ol class="arabic simple">
 <li>draw random numbers <img class="math" src="../_images/math/e09ea7a6eb86738fa7845008092520f8346eaa83.png" alt="R_{1}, R_{2} \in ]0,1]"/></li>
 <li>find <img class="math" src="../_images/math/9b25f8e64b484493fda944d25cad453423041fe6.png" alt="l"/> such that
 <img class="math" src="../_images/math/0a315a65bff0111468afdcfedafb9e41ff93a161.png" alt="\sum_{j=1}^{l}k_{i,\mathrm{tot}}R_{1}\le\sum_{j_1}^{l+1}k_{ij}"/></li>
 <li>increment time <img class="math" src="../_images/math/313d654f07358800126428252d82c39f68844d9f.png" alt="t\rightarrow t - \frac{\ln(R_{2})}{k_{i, \mathrm{tot}}}"/></li>
 </ol>
-</blockquote>
+</div></blockquote>
 <p>end</p>
 </li>
 </ul>
-</blockquote>
+</div></blockquote>
 </div>
 <div class="section" id="justification-of-the-algorithm">
 <h2>Justification of the Algorithm<a class="headerlink" href="#justification-of-the-algorithm" title="Permalink to this headline">¶</a></h2>
@@ -184,16 +187,16 @@ sometimes referred to as
 occur in a time interval <img class="math" src="../_images/math/e0d2bf360290fd61d1c1557e763f2622363b3d35.png" alt="t"/> is given by a Poisson distribution <a class="footnote-reference" href="#id5" id="id2">[2]</a></p>
 <div class="math">
 <p><img src="../_images/math/793dc8569836eacc56da96b38c4f4e4010f7f7b5.png" alt="P(n, t) = \frac{\mathrm{e}^{-k_{\mathrm{tot}}t}(k_{\mathrm{tot}} t)^{n}}
-               {n!} ." /></p>
+               {n!} ."/></p>
 </div><p>The waiting time or escape time <img class="math" src="../_images/math/dd6e9426d40362bb0c541b58d61ee4a4f722e721.png" alt="t_{w}"/> between two such processes
 is characterized by the probability that <em>zero</em> such processes have occured</p>
 <div class="math" id="equation-poisson_0">
-<p><span class="eqno">(1)</span><img src="../_images/math/444ab1479e4a062cafd21ab44f3b705caf65e21d.png" alt="P(0, t_{w}) = \mathrm{e}^{-k_{\mathrm{tot}} t_{w}}," /></p>
+<p><span class="eqno">(1)</span><img src="../_images/math/444ab1479e4a062cafd21ab44f3b705caf65e21d.png" alt="P(0, t_{w}) = \mathrm{e}^{-k_{\mathrm{tot}} t_{w}},"/></p>
 </div><p>which, as expected, leads to an average waiting time of</p>
 <div class="math">
 <p><img src="../_images/math/5ed62a04342ff5abbd1f829fe49cc849b29a0401.png" alt="\langle t_{w} \rangle = \frac{\int_{0}^{\infty}\mathrm{d}t_w\ t_w \mathrm{e}^{-k_{\mathrm{tot}} t_w}}
                              {\int_{0}^{\infty}\mathrm{d}t_w\ \mathrm{e}^{-k_{\mathrm{tot}} t_w}}
-                      = \frac{1}{k_{\mathrm{tot}}}." /></p>
+                      = \frac{1}{k_{\mathrm{tot}}}."/></p>
 </div><p>Therefore at  every step, we need to advance the time by a random number that
 is distributed according to <a href="#equation-poisson_0">(1)</a>. One can obtain such a random
 number from a uniformly distributed random number <img class="math" src="../_images/math/2b61dc75797e588cb22ee51d57a7cfbedbe325ca.png" alt="R_2\in ]0,1]"/>
@@ -253,13 +256,13 @@ Cambridge University Pres, 3rd edition, ISBN:0521768589.
         <li class="right" >
           <a href="index.html" title="Topic Guides"
              >previous</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li>
+        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li>
           <li><a href="index.html" >Topic Guides</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2009-2012, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
     </div>
   </body>
 </html>

@@ -1,0 +1,464 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Convert to id &mdash; kmos 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="kmos 0.0.1 documentation" href="../../../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Convert to id</a></li>
+<li><a class="reference internal" href="#jump-to-internal-target">Jump to internal target</a></li>
+<li><a class="reference internal" href="#completion-for-directive-options">Completion for directive options</a></li>
+<li><a class="reference internal" href="#completion-for-directives">Completion for directives</a></li>
+<li><a class="reference internal" href="#completion-for-user-defined-elements">Completion for user-defined elements</a></li>
+<li><a class="reference internal" href="#insertion-of-link-alias">Insertion of link alias</a></li>
+<li><a class="reference internal" href="#smart-use-of-iimage-mode">Smart use of <cite>iimage-mode</cite></a></li>
+<li><a class="reference internal" href="#toc-in-speedbar">TOC in speedbar</a></li>
+<li><a class="reference internal" href="#toc-mode-without-markup">toc-mode without markup</a></li>
+<li><a class="reference internal" href="#sophisticated-navigation-in-sections">Sophisticated navigation in sections</a></li>
+<li><a class="reference internal" href="#display-of-current-location">Display of current location</a></li>
+<li><a class="reference internal" href="#toc-mode-only-to-a-certain-level">toc-mode only to a certain level</a></li>
+<li><a class="reference internal" href="#imenu-support">Imenu support</a></li>
+<li><a class="reference internal" href="#outline-support">Outline support</a></li>
+<li><a class="reference internal" href="#sophisticated-filling">Sophisticated filling</a></li>
+<li><a class="reference internal" href="#sophisticated-indentation">Sophisticated indentation</a></li>
+<li><a class="reference internal" href="#list-to-sections">List to sections</a></li>
+<li><a class="reference internal" href="#change-section-level-by-more-than-one-step">Change section level by more than one step</a></li>
+<li><a class="reference internal" href="#compiling-for-syntax-check">Compiling for syntax check</a></li>
+<li><a class="reference internal" href="#renumber-an-exisiting-enumeration">Renumber an exisiting enumeration</a></li>
+<li><a class="reference internal" href="#command-to-move-across-blocks">Command to move across blocks</a></li>
+<li><a class="reference internal" href="#rst-toc-insert-features">rst-toc-insert features</a><ul>
+<li><a class="reference internal" href="#automatic-handling-of-txt-files">Automatic handling of <cite>.txt</cite> files</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../../../_sources/build/docutils/tools/editors/emacs/IDEAS.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <p>The following is a list of ideas of functionality which would be nice
+to have in <cite>rst.el</cite>. In the examples a <tt class="docutils literal"><span class="pre">&#64;</span></tt> stands for the cursor.</p>
+<div class="section" id="convert-to-id">
+<h1>Convert to id<a class="headerlink" href="#convert-to-id" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Convert the region to an HTML id<ul>
+<li>For instance &#8220;Eine ?berschrift&#8221; to &#8220;eine-berschrift&#8221;</li>
+<li>According the same rules as reST does this</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="jump-to-internal-target">
+<h1>Jump to internal target<a class="headerlink" href="#jump-to-internal-target" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>A command to jump to the internal target the point is on</li>
+<li>A target may be<ul>
+<li>A section title</li>
+<li>Footnotes / citations</li>
+<li>Inline internal targets</li>
+<li>Hyperlink target definition</li>
+<li>Substitution definition</li>
+</ul>
+</li>
+<li>See hunk #26 in <cite>rst_el-emacs_V23_1_patch1_1_2</cite> vs. <cite>emacs_V23_1</cite>
+for some ideas</li>
+</ul>
+</div>
+<div class="section" id="completion-for-directive-options">
+<h1>Completion for directive options<a class="headerlink" href="#completion-for-directive-options" title="Permalink to this headline">¶</a></h1>
+<ul>
+<li><p class="first">Imagine</p>
+<div class="highlight-python"><pre>.. list-table::
+   :@</pre>
+</div>
+<p>with the cursor at the asterisk</p>
+</li>
+<li><p class="first">There should be a command which offers all the possible options for
+this particular directive as completion</p>
+</li>
+<li><p class="first">May be <cite>skeleton.el</cite> can also be useful</p>
+</li>
+</ul>
+</div>
+<div class="section" id="completion-for-directives">
+<h1>Completion for directives<a class="headerlink" href="#completion-for-directives" title="Permalink to this headline">¶</a></h1>
+<ul>
+<li><p class="first">Imagine</p>
+<div class="highlight-python"><pre>.. @</pre>
+</div>
+</li>
+<li><p class="first">There should be a command which offers all directives as completion</p>
+</li>
+<li><p class="first">May be this should work for other keywords as well</p>
+</li>
+<li><p class="first">May be this could work even at the beginning of the line</p>
+</li>
+<li><p class="first">Completion must be bound to M-TAB</p>
+<ul class="simple">
+<li>Already existing binding must be chained</li>
+<li>May be <cite>expand.el</cite> can help (look in package finder)?</li>
+<li>May be <cite>hippie</cite> is good here</li>
+<li>Check <cite>(info)autotype</cite></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="completion-for-user-defined-elements">
+<h1>Completion for user-defined elements<a class="headerlink" href="#completion-for-user-defined-elements" title="Permalink to this headline">¶</a></h1>
+<ul>
+<li><p class="first">Imagine</p>
+<div class="highlight-python"><pre>|@</pre>
+</div>
+<p>or</p>
+<div class="highlight-python"><pre>[@</pre>
+</div>
+<p>or</p>
+<div class="highlight-python"><pre>_@</pre>
+</div>
+</li>
+<li><p class="first">There should be a command which offers all defined substitutions /
+footnotes / links as completion</p>
+</li>
+</ul>
+</div>
+<div class="section" id="insertion-of-link-alias">
+<h1>Insertion of link alias<a class="headerlink" href="#insertion-of-link-alias" title="Permalink to this headline">¶</a></h1>
+<ul>
+<li><p class="first">Imagine</p>
+<div class="highlight-python"><pre>Aspect of something
+===================
+
+This is about the `aspect of something`_@</pre>
+</div>
+</li>
+<li><p class="first">There should be a command which asks you for an alias for the link,
+add the alias and change the link</p>
+<div class="highlight-python"><pre>.. _aspects of something:
+
+Aspect of something
+===================
+
+This is about the `aspects of something`_@</pre>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="smart-use-of-iimage-mode">
+<h1>Smart use of <cite>iimage-mode</cite><a class="headerlink" href="#smart-use-of-iimage-mode" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>There is <cite>iimage-mode</cite> which shows <tt class="docutils literal"><span class="pre">..</span> <span class="pre">image::</span></tt>s in Emacs</li>
+<li>May be we can add a binding to toggle it</li>
+</ul>
+</div>
+<div class="section" id="toc-in-speedbar">
+<h1>TOC in speedbar<a class="headerlink" href="#toc-in-speedbar" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>If the TOC is displayed in the speedbar this could be used for
+permanent navigation</li>
+</ul>
+</div>
+<div class="section" id="toc-mode-without-markup">
+<h1>toc-mode without markup<a class="headerlink" href="#toc-mode-without-markup" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>The markup which may be contained in a section title is not useful
+in toc-mode and should be suppressed</li>
+</ul>
+</div>
+<div class="section" id="sophisticated-navigation-in-sections">
+<h1>Sophisticated navigation in sections<a class="headerlink" href="#sophisticated-navigation-in-sections" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Navigation in sections similar to navigation in other structured data<ul>
+<li>Like XML, Lisp</li>
+<li>C-M-u f?r Up</li>
+<li>C-M-d f?r Down</li>
+<li>C-M-f / C-M-b f?r Forward / Backward</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="display-of-current-location">
+<h1>Display of current location<a class="headerlink" href="#display-of-current-location" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Display the &#8220;section path&#8221; to the current point</li>
+<li>Like in XML: In which element is the point?</li>
+</ul>
+</div>
+<div class="section" id="toc-mode-only-to-a-certain-level">
+<h1>toc-mode only to a certain level<a class="headerlink" href="#toc-mode-only-to-a-certain-level" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>If a TOC buffer is created a prefix argument should limit the depth
+of the listing to the given level</li>
+</ul>
+</div>
+<div class="section" id="imenu-support">
+<h1>Imenu support<a class="headerlink" href="#imenu-support" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Imenu could be supported<ul>
+<li>See <cite>(elisp)Imenu</cite></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="outline-support">
+<h1>Outline support<a class="headerlink" href="#outline-support" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Support for <a href="#id1"><span class="problematic" id="id2">`</span></a>outline-mode&#8217; / <a href="#id3"><span class="problematic" id="id4">`</span></a>allout-mode&#8217; would be nice<ul>
+<li>Should consider section titles</li>
+</ul>
+</li>
+<li>May be folding is also possible<ul>
+<li>For item lists</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="sophisticated-filling">
+<h1>Sophisticated filling<a class="headerlink" href="#sophisticated-filling" title="Permalink to this headline">¶</a></h1>
+<ul>
+<li><p class="first">These things must be filled special:</p>
+<ul>
+<li><p class="first">Definitions</p>
+</li>
+<li><p class="first">Filling of</p>
+<div class="highlight-python"><pre>* VeryLongWordSuchAsAnURLVeryLongWordSuchAsAnURLVeryLongWordSuchAsAnURLVeryLongWordSuchAsAnURLVeryLongWordSuchAsAnURL</pre>
+</div>
+<p>should work as expected by <em>not</em> breaking the line</p>
+</li>
+</ul>
+</li>
+<li><p class="first">These things may not be filled at all</p>
+<ul class="simple">
+<li>Literal blocks</li>
+<li>Tables</li>
+<li>Section headers</li>
+<li>Link definitions</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="sophisticated-indentation">
+<h1>Sophisticated indentation<a class="headerlink" href="#sophisticated-indentation" title="Permalink to this headline">¶</a></h1>
+<ul>
+<li><p class="first">It should be generally possible to shift one more to the right</p>
+<ul class="simple">
+<li>This makes indentation for quotes possible</li>
+<li>But not for literal blocks</li>
+</ul>
+</li>
+<li><p class="first">For item lists the best tab should be on the same level as the last
+item:</p>
+<div class="highlight-python"><pre>* bla
+
+@</pre>
+</div>
+<ul>
+<li><p class="first">The second best tab should be where text starts:</p>
+<div class="highlight-python"><pre>* bla
+
+  @</pre>
+</div>
+</li>
+</ul>
+</li>
+<li><p class="first">&lt;backtab&gt; should be used to indent in the other direction</p>
+<ul class="simple">
+<li>Or may be C-u &lt;tab&gt; but this has a different meaning</li>
+</ul>
+</li>
+<li><p class="first">&lt;tab&gt; could obsolete C-c C-r &lt;tab&gt;</p>
+<ul>
+<li><p class="first">For this the indentation needs to be determined at the start
+instead of per line</p>
+<ul>
+<li><p class="first">&lt;tab&gt; over list works:</p>
+<div class="highlight-python"><pre>Text
+
+  * GGGGGG
+  * SSSSSSSSSSSSSSS
+  * TTTTTTTT
+  * ZZZZZZZZ</pre>
+</div>
+</li>
+<li><p class="first">&lt;tab&gt; over list doesn&#8217;t work:</p>
+<div class="highlight-python"><pre>Text
+
+* GGGGGG
+* SSSSSSSSSSSSSSS
+* TTTTTTTT
+* ZZZZZZZZ</pre>
+</div>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="list-to-sections">
+<h1>List to sections<a class="headerlink" href="#list-to-sections" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>A command would be nice which<ul>
+<li>transforms the first level of a nested list in a region into a
+header</li>
+<li>removes one level of indentation from the rest of the list</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="change-section-level-by-more-than-one-step">
+<h1>Change section level by more than one step<a class="headerlink" href="#change-section-level-by-more-than-one-step" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>It would be nice if &lt;C-h&gt; <cite>rst-adjust</cite> could rotate a section
+adornment more than one level</li>
+<li>A modification of the semantic of the prefix arguments could do this<ul>
+<li>Non-zero numeric prefix arg n rotates n step in the given direction</li>
+<li>Prefix arg 0 toggles overline / underline<ul>
+<li>This would be different from current setup</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="compiling-for-syntax-check">
+<h1>Compiling for syntax check<a class="headerlink" href="#compiling-for-syntax-check" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Compiling with results going to <cite>/dev/null</cite> would be useful<ul>
+<li>This would just do a syntax check with no files lying around</li>
+</ul>
+</li>
+<li>Toolset choice for &lt;C-c C-c C-c&gt; <cite>rst-compile</cite> must be by
+customizable if at all necessary<ul>
+<li>Customization group must be used</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="renumber-an-exisiting-enumeration">
+<h1>Renumber an exisiting enumeration<a class="headerlink" href="#renumber-an-exisiting-enumeration" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Renumbering an exisiting enumeration is not possible yet</li>
+</ul>
+</div>
+<div class="section" id="command-to-move-across-blocks">
+<h1>Command to move across blocks<a class="headerlink" href="#command-to-move-across-blocks" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>A command moving forward / backward across the content blocks of the
+current block would be nice<ul>
+<li>For instance: Move across all blocks contained in an item or field</li>
+<li>This would move to the start of the sibling of the current block</li>
+<li>Would allow to jump to the next item on the same level in a list</li>
+</ul>
+</li>
+<li>&lt;C-M-f&gt; <cite>forward-sexp</cite> could be a nice binding</li>
+</ul>
+</div>
+<div class="section" id="rst-toc-insert-features">
+<h1>rst-toc-insert features<a class="headerlink" href="#rst-toc-insert-features" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>The <cite>contents::</cite> options could be parsed to figure out how deep to
+render the inserted TOC</li>
+<li>On load, detect any existing TOCs and set the properties for links</li>
+<li>TOC insertion should have an option to add empty lines</li>
+<li>TOC insertion should deal with multiple lines</li>
+<li>Automatically detect if we have a <cite>section-numbering::</cite> in the
+corresponding section, to render the toc.</li>
+</ul>
+<div class="section" id="automatic-handling-of-txt-files">
+<h2>Automatic handling of <cite>.txt</cite> files<a class="headerlink" href="#automatic-handling-of-txt-files" title="Permalink to this headline">¶</a></h2>
+<p>It would be nice to differentiate between text files using
+reStructuredText and other general text files. If we had a function to
+automatically guess whether a <cite>.txt</cite> file is following the
+reStructuredText conventions, we could trigger <cite>rst-mode</cite> without
+having to hard-code this in every text file, nor forcing the user to
+add a local mode variable at the top of the file. We could perform
+this guessing by searching for a valid adornment at the top of the
+document or searching for reStructuredText directives further on.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

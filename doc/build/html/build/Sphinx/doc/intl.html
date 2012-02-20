@@ -1,0 +1,164 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Internationalization &mdash; kmos 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="kmos 0.0.1 documentation" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/build/Sphinx/doc/intl.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="internationalization">
+<span id="intl"></span><h1>Internationalization<a class="headerlink" href="#internationalization" title="Permalink to this headline">¶</a></h1>
+<p class="versionadded">
+<span class="versionmodified">New in version 1.1.</span></p>
+<p>Complementary to translations provided for Sphinx-generated messages such as
+navigation bars, Sphinx provides mechanisms facilitating <em>document</em> translations
+in itself.  See the <a class="reference internal" href="config.html#intl-options"><em>Options for internationalization</em></a> for details on configuration.</p>
+<div class="figure">
+<img alt="../../../_images/translation.png" src="../../../_images/translation.png" style="width: 100%;" />
+<p class="caption">Workflow visualization of translations in Sphinx.  (The stick-figure is taken
+from an <a class="reference external" href="http://xkcd.com/779/">XKCD comic</a>.)</p>
+</div>
+<p><strong>gettext</strong> <a class="footnote-reference" href="#id11" id="id1">[1]</a> is an established standard for internationalization and
+localization.  It naïvely maps messages in a program to a translated string.
+Sphinx uses these facilities to translate whole documents.</p>
+<p>Initially project maintainers have to collect all translatable strings (also
+referred to as <em>messages</em>) to make them known to translators.  Sphinx extracts
+these through invocation of <tt class="docutils literal"><span class="pre">sphinx-build</span> <span class="pre">-b</span> <span class="pre">gettext</span></tt>.</p>
+<p>Every single element in the doctree will end up in a single message which
+results in lists being equally split into different chunks while large
+paragraphs will remain as coarsely-grained as they were in the original
+document.  This grants seamless document updates while still providing a little
+bit of context for translators in free-text passages.  It is the maintainer&#8217;s
+task to split up paragraphs which are too large as there is no sane automated
+way to do that.</p>
+<p>After Sphinx successfully ran the
+<a class="reference internal" href="builders.html#sphinx.builders.gettext.MessageCatalogBuilder" title="sphinx.builders.gettext.MessageCatalogBuilder"><tt class="xref py py-class docutils literal"><span class="pre">MessageCatalogBuilder</span></tt></a> you will find a collection
+of <tt class="docutils literal"><span class="pre">.pot</span></tt> files in your output directory.  These are <strong>catalog templates</strong>
+and contain messages in your original language <em>only</em>.</p>
+<p>They can be delivered to translators which will transform them to <tt class="docutils literal"><span class="pre">.po</span></tt> files
+&#8212; so called <strong>message catalogs</strong> &#8212; containing a mapping from the original
+messages to foreign-language strings.</p>
+<p>Gettext compiles them into a binary format known as <strong>binary catalogs</strong> through
+<strong class="program">msgfmt</strong> for efficiency reasons.  If you make these files discoverable
+with <a href="#id2"><span class="problematic" id="id3">:confval:`locale_dirs`</span></a> for your <a href="#id4"><span class="problematic" id="id5">:confval:`language`</span></a>, Sphinx will pick them
+up automatically.</p>
+<p>An example: you have a document <tt class="docutils literal"><span class="pre">usage.rst</span></tt> in your Sphinx project.  The
+gettext builder will put its messages into <tt class="docutils literal"><span class="pre">usage.pot</span></tt>.  Imagine you have
+Spanish translations <a class="footnote-reference" href="#id12" id="id6">[2]</a> on your hands in <tt class="docutils literal"><span class="pre">usage.po</span></tt> &#8212; for your builds to
+be translated you need to follow these instructions:</p>
+<ul>
+<li><p class="first">Compile your message catalog to a locale directory, say <tt class="docutils literal"><span class="pre">translated</span></tt>, so it
+ends up in <tt class="docutils literal"><span class="pre">./translated/es/LC_MESSAGES/usage.mo</span></tt> in your source directory
+(where <tt class="docutils literal"><span class="pre">es</span></tt> is the language code for Spanish.)</p>
+<div class="highlight-python"><pre>msgfmt "usage.po" -o "translated/es/LC_MESSAGES/usage.mo"</pre>
+</div>
+</li>
+<li><p class="first">Set <a href="#id7"><span class="problematic" id="id8">:confval:`locale_dirs`</span></a> to <tt class="docutils literal"><span class="pre">[&quot;translated/&quot;]</span></tt>.</p>
+</li>
+<li><p class="first">Set <a href="#id9"><span class="problematic" id="id10">:confval:`language`</span></a> to <tt class="docutils literal"><span class="pre">es</span></tt> (also possible via <em class="xref std std-option">-D</em>).</p>
+</li>
+<li><p class="first">Run your desired build.</p>
+</li>
+</ul>
+<p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="id11" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>See the <a class="reference external" href="http://www.gnu.org/software/gettext/manual/gettext.html#Introduction">GNU gettext utilites</a>
+for details on that software suite.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id12" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id6">[2]</a></td><td>Because nobody expects the Spanish Inquisition!</td></tr>
+</tbody>
+</table>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

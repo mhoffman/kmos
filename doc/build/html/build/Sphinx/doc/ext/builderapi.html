@@ -1,0 +1,184 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Writing new builders &mdash; kmos 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="kmos 0.0.1 documentation" href="../../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../../_sources/build/Sphinx/doc/ext/builderapi.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="writing-new-builders">
+<span id="writing-builders"></span><h1>Writing new builders<a class="headerlink" href="#writing-new-builders" title="Permalink to this headline">¶</a></h1>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">Expand this.</p>
+</div>
+<dl class="class">
+<dt id="sphinx.builders.Builder">
+<em class="property">class </em><tt class="descclassname">sphinx.builders.</tt><tt class="descname">Builder</tt><a class="headerlink" href="#sphinx.builders.Builder" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the base class for all builders.</p>
+<p>These methods are predefined and will be called from the application:</p>
+<dl class="method">
+<dt id="sphinx.builders.Builder.get_relative_uri">
+<tt class="descname">get_relative_uri</tt><big>(</big><em>from_</em>, <em>to</em>, <em>typ=None</em><big>)</big><a class="headerlink" href="#sphinx.builders.Builder.get_relative_uri" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a relative URI between two source filenames.</p>
+<p>May raise environment.NoUri if there&#8217;s no way to return a sensible URI.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sphinx.builders.Builder.build_all">
+<tt class="descname">build_all</tt><big>(</big><big>)</big><a class="headerlink" href="#sphinx.builders.Builder.build_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build all source files.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sphinx.builders.Builder.build_specific">
+<tt class="descname">build_specific</tt><big>(</big><em>filenames</em><big>)</big><a class="headerlink" href="#sphinx.builders.Builder.build_specific" title="Permalink to this definition">¶</a></dt>
+<dd><p>Only rebuild as much as needed for changes in the <em>filenames</em>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sphinx.builders.Builder.build_update">
+<tt class="descname">build_update</tt><big>(</big><big>)</big><a class="headerlink" href="#sphinx.builders.Builder.build_update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Only rebuild what was changed or added since last build.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sphinx.builders.Builder.build">
+<tt class="descname">build</tt><big>(</big><em>docnames</em>, <em>summary=None</em>, <em>method='update'</em><big>)</big><a class="headerlink" href="#sphinx.builders.Builder.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main build method.</p>
+<p>First updates the environment, and then calls <tt class="xref py py-meth docutils literal"><span class="pre">write()</span></tt>.</p>
+</dd></dl>
+
+<p>These methods can be overridden in concrete builder classes:</p>
+<dl class="method">
+<dt id="sphinx.builders.Builder.init">
+<tt class="descname">init</tt><big>(</big><big>)</big><a class="headerlink" href="#sphinx.builders.Builder.init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load necessary templates and perform initialization.  The default
+implementation does nothing.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sphinx.builders.Builder.get_outdated_docs">
+<tt class="descname">get_outdated_docs</tt><big>(</big><big>)</big><a class="headerlink" href="#sphinx.builders.Builder.get_outdated_docs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an iterable of output files that are outdated, or a string
+describing what an update build will build.</p>
+<p>If the builder does not output individual files corresponding to
+source files, return a string here.  If it does, return an iterable
+of those files that need to be written.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sphinx.builders.Builder.get_target_uri">
+<tt class="descname">get_target_uri</tt><big>(</big><em>docname</em>, <em>typ=None</em><big>)</big><a class="headerlink" href="#sphinx.builders.Builder.get_target_uri" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the target URI for a document name.</p>
+<p><em>typ</em> can be used to qualify the link characteristic for individual
+builders.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sphinx.builders.Builder.prepare_writing">
+<tt class="descname">prepare_writing</tt><big>(</big><em>docnames</em><big>)</big><a class="headerlink" href="#sphinx.builders.Builder.prepare_writing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sphinx.builders.Builder.write_doc">
+<tt class="descname">write_doc</tt><big>(</big><em>docname</em>, <em>doctree</em><big>)</big><a class="headerlink" href="#sphinx.builders.Builder.write_doc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sphinx.builders.Builder.finish">
+<tt class="descname">finish</tt><big>(</big><big>)</big><a class="headerlink" href="#sphinx.builders.Builder.finish" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finish the building process.</p>
+<p>The default implementation does nothing.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

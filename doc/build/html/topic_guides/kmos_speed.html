@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>How the kmos kMC algorithm works &mdash; kmos v0.0.1 documentation</title>
+    <title>How the kmos kMC algorithm works &mdash; kmos 0.0.1 documentation</title>
+    
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
+    <link rel="top" title="kmos 0.0.1 documentation" href="../index.html" />
     <link rel="up" title="Topic Guides" href="index.html" />
     <link rel="next" title="The Process Syntax" href="proc_syntax.html" />
     <link rel="prev" title="The kmos data model" href="data_models.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="data_models.html" title="The kmos data model"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li>
+        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Topic Guides</a> &raquo;</li> 
       </ul>
     </div>
@@ -71,7 +74,7 @@
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -169,7 +172,7 @@ the available site for each process from the left.</p>
 <p>Totally independent of this we calculate the duration of the
 current step with another random number <img class="math" src="../_images/math/049680fc475590e3302c08973c2416e40d650d69.png" alt="R_3"/> using</p>
 <div class="math">
-<p><img src="../_images/math/011cb322159a14d0c323565fa64d08735459b541.png" alt="\Delta t = \frac{-\log(R_{3})}{k_{\mathrm{tot}}}" /></p>
+<p><img src="../_images/math/011cb322159a14d0c323565fa64d08735459b541.png" alt="\Delta t = \frac{-\log(R_{3})}{k_{\mathrm{tot}}}"/></p>
 </div><p>So, while the determination of process and site is
 extremely straightforward, the CPU intensive part
 just starts now. The <cite>proclist</cite> module is written
@@ -185,7 +188,7 @@ explained in greate detail in the next subsection.</p>
 know that for all database updates by the <cite>proclist</cite>
 module :</p>
 <blockquote>
-<ul class="simple">
+<div><ul class="simple">
 <li>the <cite>nr of sites</cite> array is updated as well.</li>
 <li>adding or deleting an available site only
 takes constant time, since the number of
@@ -196,11 +199,11 @@ When a site has to be deleted the last site
 in the array is moved to the memory slot
 available now.</li>
 </ul>
-</blockquote>
+</div></blockquote>
 <p>Thus once all local updates are finished the
 <cite>accum. rates</cite> array is simply updated once.
 And ready we are for the next kMC step.</p>
-<div class="admonition-todo admonition " id="index-0">
+<div class="admonition-todo admonition" id="index-0">
 <p class="first admonition-title">Todo</p>
 <p class="last">describe translation algorithm</p>
 </div>
@@ -228,13 +231,13 @@ And ready we are for the next kMC step.</p>
         <li class="right" >
           <a href="data_models.html" title="The kmos data model"
              >previous</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li>
+        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li>
           <li><a href="index.html" >Topic Guides</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2009-2012, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
     </div>
   </body>
 </html>

@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Running the Model–the API way &mdash; kmos v0.0.1 documentation</title>
+    <title>Running the Model–the API way &mdash; kmos 0.0.1 documentation</title>
+    
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" /> 
+    <link rel="top" title="kmos 0.0.1 documentation" href="../index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -34,7 +37,7 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -42,6 +45,7 @@
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Running the Model&#8211;the API way</a></li>
+<li><a class="reference internal" href="#manipulating-the-model-at-runtime">Manipulating the Model at Runtime</a></li>
 <li><a class="reference internal" href="#running-models-in-parallel">Running models in parallel</a></li>
 </ul>
 
@@ -53,7 +57,7 @@
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -162,6 +166,29 @@ allocated by the Fortan modules. This is particularly
 necessary if you want to run more than one simulation
 in one script.</p>
 </div>
+<div class="section" id="manipulating-the-model-at-runtime">
+<h1>Manipulating the Model at Runtime<a class="headerlink" href="#manipulating-the-model-at-runtime" title="Permalink to this headline">¶</a></h1>
+<p>It is quite easy to change not only model parameters but
+also the configuration at runtime. For instance if one
+would like to prepare a surface with a certain configuration
+or pattern.</p>
+<p>Given you instantiated a <cite>model</cite> instance a site can by calling</p>
+<div class="highlight-python"><pre>model.put(site=[x,y,z,n], model.proclist.&lt;species&gt;)</pre>
+</div>
+<p>However if changing many sites at once this is quite inefficient,
+since each put call, adjusts the book-keeping database for every
+change of the configuration. To circumvent this you can use
+the <cite>_put</cite> method, like so</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">_put</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">_put</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="o">...</span>
+<span class="n">model</span><span class="o">.</span><span class="n">_adjust_database</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>though at the end one must not forget to call <cite>_adjust_database()</cite>
+before executing any next step or the model instance will
+crash soon.</p>
+</div>
 <div class="section" id="running-models-in-parallel">
 <h1>Running models in parallel<a class="headerlink" href="#running-models-in-parallel" title="Permalink to this headline">¶</a></h1>
 <p>Due to the global clock in kMC there seems to be no
@@ -176,14 +203,15 @@ some set of parameters one a multicore computer. This
 kind of problem can be considered <cite>embarrasingly parallel</cite>
 since the require no communication between the runs.</p>
 <p>This is made very simple through the <cite>multiprocessing</cite>,
-which is in the Pythion standard library since version 2.6.
+which is in the Python standard library since version 2.6.
 For older versions this needs to be <cite>downloaded &lt;http://pypi.python.org/pypi/multiprocessing/&gt;</cite>
 and installed manually. The latter is very
 straightforward.</p>
 <p>Then besides <cite>kmos</cite> we need to import <cite>multiprocessing</cite></p>
-<div class="highlight-python"><pre>from multiprocessing import Process
-form numpy import linspace
-from kmos.run import KMC_Model</pre>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">linspace</span>
+<span class="kn">from</span> <span class="nn">kmos.run</span> <span class="kn">import</span> <span class="n">KMC_Model</span>
+</pre></div>
 </div>
 <p>and let&#8217;s say you wanted to scan a range of temperature,
 while keeping all other parameteres constant. You first
@@ -232,12 +260,12 @@ split the list and start subprocesses for each sublist</p>
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2009-2012, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
     </div>
   </body>
 </html>

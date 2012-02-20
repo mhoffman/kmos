@@ -94,6 +94,32 @@ necessary if you want to run more than one simulation
 in one script.
 
 
+Manipulating the Model at Runtime
+=================================
+
+It is quite easy to change not only model parameters but
+also the configuration at runtime. For instance if one
+would like to prepare a surface with a certain configuration
+or pattern.
+
+Given you instantiated a `model` instance a site can by calling ::
+
+  model.put(site=[x,y,z,n], model.proclist.<species>)
+
+However if changing many sites at once this is quite inefficient,
+since each put call, adjusts the book-keeping database for every
+change of the configuration. To circumvent this you can use
+the `_put` method, like so ::
+
+  model._put(...)
+  model._put(...)
+  ...
+  model._adjust_database()
+
+though at the end one must not forget to call `_adjust_database()`
+before executing any next step or the model instance will
+crash soon.
+
 Running models in parallel
 ==========================
 
@@ -111,7 +137,7 @@ kind of problem can be considered `embarrasingly parallel`
 since the require no communication between the runs.
 
 This is made very simple through the `multiprocessing`,
-which is in the Pythion standard library since version 2.6.
+which is in the Python standard library since version 2.6.
 For older versions this needs to be `downloaded <http://pypi.python.org/pypi/multiprocessing/>`
 and installed manually. The latter is very
 straightforward.
@@ -120,7 +146,7 @@ straightforward.
 Then besides `kmos` we need to import `multiprocessing` ::
 
   from multiprocessing import Process
-  form numpy import linspace
+  from numpy import linspace
   from kmos.run import KMC_Model
 
 and let's say you wanted to scan a range of temperature,

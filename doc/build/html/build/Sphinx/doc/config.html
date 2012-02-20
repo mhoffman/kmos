@@ -1,0 +1,197 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>The build configuration file &mdash; kmos 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="kmos 0.0.1 documentation" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">The build configuration file</a><ul>
+<li><a class="reference internal" href="#general-configuration">General configuration</a></li>
+<li><a class="reference internal" href="#project-information">Project information</a></li>
+<li><a class="reference internal" href="#options-for-internationalization">Options for internationalization</a></li>
+<li><a class="reference internal" href="#options-for-html-output">Options for HTML output</a></li>
+<li><a class="reference internal" href="#options-for-epub-output">Options for epub output</a></li>
+<li><a class="reference internal" href="#options-for-latex-output">Options for LaTeX output</a></li>
+<li><a class="reference internal" href="#options-for-text-output">Options for text output</a></li>
+<li><a class="reference internal" href="#options-for-manual-page-output">Options for manual page output</a></li>
+<li><a class="reference internal" href="#options-for-texinfo-output">Options for Texinfo output</a></li>
+<li><a class="reference internal" href="#options-for-the-linkcheck-builder">Options for the linkcheck builder</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/build/Sphinx/doc/config.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-conf">
+<span id="the-build-configuration-file"></span><span id="build-config"></span><h1>The build configuration file<a class="headerlink" href="#module-conf" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="glossary.html#term-configuration-directory"><em class="xref std std-term">configuration directory</em></a> must contain a file named <tt class="file docutils literal"><span class="pre">conf.py</span></tt>.
+This file (containing Python code) is called the &#8220;build configuration file&#8221; and
+contains all configuration needed to customize Sphinx input and output behavior.</p>
+<p>The configuration file is executed as Python code at build time (using
+<tt class="xref py py-func docutils literal"><span class="pre">execfile()</span></tt>, and with the current directory set to its containing
+directory), and therefore can execute arbitrarily complex code.  Sphinx then
+reads simple names from the file&#8217;s namespace as its configuration.</p>
+<p>Important points to note:</p>
+<ul class="simple">
+<li>If not otherwise documented, values must be strings, and their default is the
+empty string.</li>
+<li>The term &#8220;fully-qualified name&#8221; refers to a string that names an importable
+Python object inside a module; for example, the FQN
+<tt class="docutils literal"><span class="pre">&quot;sphinx.builders.Builder&quot;</span></tt> means the <tt class="docutils literal"><span class="pre">Builder</span></tt> class in the
+<tt class="docutils literal"><span class="pre">sphinx.builders</span></tt> module.</li>
+<li>Remember that document names use <tt class="docutils literal"><span class="pre">/</span></tt> as the path separator and don&#8217;t contain
+the file name extension.</li>
+<li>Since <tt class="file docutils literal"><span class="pre">conf.py</span></tt> is read as a Python file, the usual rules apply for
+encodings and Unicode support: declare the encoding using an encoding cookie
+(a comment like <tt class="docutils literal"><span class="pre">#</span> <span class="pre">-*-</span> <span class="pre">coding:</span> <span class="pre">utf-8</span> <span class="pre">-*-</span></tt>) and use Unicode string literals
+when you include non-ASCII characters in configuration values.</li>
+<li>The contents of the config namespace are pickled (so that Sphinx can find out
+when configuration changes), so it may not contain unpickleable values &#8211;
+delete them from the namespace with <tt class="docutils literal"><span class="pre">del</span></tt> if appropriate.  Modules are
+removed automatically, so you don&#8217;t need to <tt class="docutils literal"><span class="pre">del</span></tt> your imports after use.</li>
+<li>There is a special object named <tt class="docutils literal"><span class="pre">tags</span></tt> available in the config file.
+It can be used to query and change the tags (see <a class="reference internal" href="markup/misc.html#tags"><em>Including content based on tags</em></a>).  Use
+<tt class="docutils literal"><span class="pre">tags.has('tag')</span></tt> to query, <tt class="docutils literal"><span class="pre">tags.add('tag')</span></tt> and <tt class="docutils literal"><span class="pre">tags.remove('tag')</span></tt>
+to change.</li>
+</ul>
+<div class="section" id="general-configuration">
+<h2>General configuration<a class="headerlink" href="#general-configuration" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="project-information">
+<h2>Project information<a class="headerlink" href="#project-information" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="options-for-internationalization">
+<span id="intl-options"></span><h2>Options for internationalization<a class="headerlink" href="#options-for-internationalization" title="Permalink to this headline">¶</a></h2>
+<p>These options influence Sphinx&#8217; <em>Native Language Support</em>.  See the
+documentation on <a class="reference internal" href="intl.html#intl"><em>Internationalization</em></a> for details.</p>
+</div>
+<div class="section" id="options-for-html-output">
+<span id="html-options"></span><h2>Options for HTML output<a class="headerlink" href="#options-for-html-output" title="Permalink to this headline">¶</a></h2>
+<p>These options influence HTML as well as HTML Help output, and other builders
+that use Sphinx&#8217; HTMLWriter class.</p>
+</div>
+<div class="section" id="options-for-epub-output">
+<span id="epub-options"></span><h2>Options for epub output<a class="headerlink" href="#options-for-epub-output" title="Permalink to this headline">¶</a></h2>
+<p>These options influence the epub output.  As this builder derives from the HTML
+builder, the HTML options also apply where appropriate.  The actual values for
+some of the options is not really important, they just have to be entered into
+the <a class="reference external" href="http://dublincore.org/">Dublin Core metadata</a>.</p>
+</div>
+<div class="section" id="options-for-latex-output">
+<span id="latex-options"></span><h2>Options for LaTeX output<a class="headerlink" href="#options-for-latex-output" title="Permalink to this headline">¶</a></h2>
+<p>These options influence LaTeX output.</p>
+</div>
+<div class="section" id="options-for-text-output">
+<span id="text-options"></span><h2>Options for text output<a class="headerlink" href="#options-for-text-output" title="Permalink to this headline">¶</a></h2>
+<p>These options influence text output.</p>
+</div>
+<div class="section" id="options-for-manual-page-output">
+<span id="man-options"></span><h2>Options for manual page output<a class="headerlink" href="#options-for-manual-page-output" title="Permalink to this headline">¶</a></h2>
+<p>These options influence manual page output.</p>
+</div>
+<div class="section" id="options-for-texinfo-output">
+<span id="texinfo-options"></span><h2>Options for Texinfo output<a class="headerlink" href="#options-for-texinfo-output" title="Permalink to this headline">¶</a></h2>
+<p>These options influence Texinfo output.</p>
+</div>
+<div class="section" id="options-for-the-linkcheck-builder">
+<h2>Options for the linkcheck builder<a class="headerlink" href="#options-for-the-linkcheck-builder" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="id1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td>A note on available globbing syntax: you can use the standard shell
+constructs <tt class="docutils literal"><span class="pre">*</span></tt>, <tt class="docutils literal"><span class="pre">?</span></tt>, <tt class="docutils literal"><span class="pre">[...]</span></tt> and <tt class="docutils literal"><span class="pre">[!...]</span></tt> with the feature that
+these all don&#8217;t match slashes.  A double star <tt class="docutils literal"><span class="pre">**</span></tt> can be used to match
+any sequence of characters <em>including</em> slashes.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

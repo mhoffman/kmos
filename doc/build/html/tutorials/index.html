@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Tutorials &mdash; kmos v0.0.1 documentation</title>
+    <title>Tutorials &mdash; kmos 0.0.1 documentation</title>
+    
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
+    <link rel="top" title="kmos 0.0.1 documentation" href="../index.html" />
     <link rel="next" title="Topic Guides" href="../topic_guides/index.html" />
     <link rel="prev" title="Welcome to kmos’s documentation!" href="../index.html" /> 
   </head>
@@ -42,7 +45,7 @@
         <li class="right" >
           <a href="../index.html" title="Welcome to kmos’s documentation!"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -73,6 +76,7 @@
 <li><a class="reference internal" href="#a-first-kmc-model-the-gui-way">A first kMC Model&#8211;the GUI way</a></li>
 <li><a class="reference internal" href="#running-the-model-the-gui-way">Running the Model&#8211;the GUI way</a></li>
 <li><a class="reference internal" href="#running-the-model-the-api-way">Running the Model&#8211;the API way</a></li>
+<li><a class="reference internal" href="#manipulating-the-model-at-runtime">Manipulating the Model at Runtime</a></li>
 <li><a class="reference internal" href="#running-models-in-parallel">Running models in parallel</a></li>
 <li><a class="reference internal" href="#development">Development</a></li>
 </ul>
@@ -93,7 +97,7 @@
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -121,13 +125,13 @@
 <h4>Feature overview<a class="headerlink" href="#feature-overview" title="Permalink to this headline">¶</a></h4>
 <p>With kmos you can:</p>
 <blockquote>
-<ul class="simple">
+<div><ul class="simple">
 <li>easily create and modify kMC models through GUI</li>
 <li>store and exchange kMC models through XML</li>
 <li>generate fast, platform independent, self-contained code <a class="footnote-reference" href="#code" id="id1">[1]</a></li>
 <li>run kMC models through GUI or python bindings</li>
 </ul>
-</blockquote>
+</div></blockquote>
 <p>kmos has been developed in the context of first-principles based modelling
 of surface chemical reactions but might be of help for other types of
 kMC models as well.</p>
@@ -184,12 +188,12 @@ no dependencies except for a Fortran compiler.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">kmos</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">dependencies</span><span class="o">-</span><span class="n">ubuntu</span>
 </pre></div>
 </div>
-<div class="admonition-todo admonition " id="index-0">
+<div class="admonition-todo admonition" id="index-0">
 <p class="first admonition-title">Todo</p>
 <p class="last">add pip way or something alike to automatically
 install dependencies.</p>
 </div>
-<div class="admonition-todo admonition " id="index-1">
+<div class="admonition-todo admonition" id="index-1">
 <p class="first admonition-title">Todo</p>
 <p class="last">test installation on other platforms</p>
 </div>
@@ -397,7 +401,13 @@ well type</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">parse_and_add_process</span><span class="p">(</span><span class="s">&#39;CO_desorption; CO@hollow-&gt;; p_CO*bar*A/sqrt(2*pi*umss*m_CO/beta)*exp(-deltaG*eV)&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>And that is it!</p>
+<p>In order to add processes on more than one site possible spanning across unit
+cells, there is a shorthand as well. The full-fledged syntax for each
+coordinate is</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">name</span><span class="o">.</span><span class="n">offset</span><span class="o">.</span><span class="n">lattice</span>
+</pre></div>
+</div>
+<p>check <a class="reference internal" href="../topic_guides/coord_syntax.html#manual-coord-generation"><em>Manual generation</em></a> for details.</p>
 </div>
 <div class="section" id="export-save-compile">
 <h3>Export, save, compile<a class="headerlink" href="#export-save-compile" title="Permalink to this headline">¶</a></h3>
@@ -459,7 +469,7 @@ explains how that works.</td></tr>
 simple adsorption/desorption model on a simple cubic surface.
 Despite its simplicity it touches all elements contained in
 the GUI and could be considered from first-principles.</p>
-<div class="admonition-todo admonition " id="index-2">
+<div class="admonition-todo admonition" id="index-2">
 <p class="first admonition-title">Todo</p>
 <p class="last">describe modelling more complicated structures
 and e.g. boundary conditions</p>
@@ -484,7 +494,7 @@ be even more interactive you set a parameter to be adjustable.
 This can happen either in the generating XML file or directly
 in the kmc_settings.py. Also make sure to set sensible minimum
 and maximum values.</p>
-<div class="admonition-todo admonition " id="index-3">
+<div class="admonition-todo admonition" id="index-3">
 <p class="first admonition-title">Todo</p>
 <p class="last">add recording function</p>
 </div>
@@ -580,6 +590,29 @@ allocated by the Fortan modules. This is particularly
 necessary if you want to run more than one simulation
 in one script.</p>
 </div>
+<div class="section" id="manipulating-the-model-at-runtime">
+<h2>Manipulating the Model at Runtime<a class="headerlink" href="#manipulating-the-model-at-runtime" title="Permalink to this headline">¶</a></h2>
+<p>It is quite easy to change not only model parameters but
+also the configuration at runtime. For instance if one
+would like to prepare a surface with a certain configuration
+or pattern.</p>
+<p>Given you instantiated a <cite>model</cite> instance a site can by calling</p>
+<div class="highlight-python"><pre>model.put(site=[x,y,z,n], model.proclist.&lt;species&gt;)</pre>
+</div>
+<p>However if changing many sites at once this is quite inefficient,
+since each put call, adjusts the book-keeping database for every
+change of the configuration. To circumvent this you can use
+the <cite>_put</cite> method, like so</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">_put</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">_put</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="o">...</span>
+<span class="n">model</span><span class="o">.</span><span class="n">_adjust_database</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>though at the end one must not forget to call <cite>_adjust_database()</cite>
+before executing any next step or the model instance will
+crash soon.</p>
+</div>
 <div class="section" id="running-models-in-parallel">
 <h2>Running models in parallel<a class="headerlink" href="#running-models-in-parallel" title="Permalink to this headline">¶</a></h2>
 <p>Due to the global clock in kMC there seems to be no
@@ -594,14 +627,15 @@ some set of parameters one a multicore computer. This
 kind of problem can be considered <cite>embarrasingly parallel</cite>
 since the require no communication between the runs.</p>
 <p>This is made very simple through the <cite>multiprocessing</cite>,
-which is in the Pythion standard library since version 2.6.
+which is in the Python standard library since version 2.6.
 For older versions this needs to be <cite>downloaded &lt;http://pypi.python.org/pypi/multiprocessing/&gt;</cite>
 and installed manually. The latter is very
 straightforward.</p>
 <p>Then besides <cite>kmos</cite> we need to import <cite>multiprocessing</cite></p>
-<div class="highlight-python"><pre>from multiprocessing import Process
-form numpy import linspace
-from kmos.run import KMC_Model</pre>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">linspace</span>
+<span class="kn">from</span> <span class="nn">kmos.run</span> <span class="kn">import</span> <span class="n">KMC_Model</span>
+</pre></div>
 </div>
 <p>and let&#8217;s say you wanted to scan a range of temperature,
 while keeping all other parameteres constant. You first
@@ -676,12 +710,12 @@ from the top project directory</p>
         <li class="right" >
           <a href="../index.html" title="Welcome to kmos’s documentation!"
              >previous</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2009-2012, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
     </div>
   </body>
 </html>

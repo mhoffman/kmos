@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Trouble Shooting &mdash; kmos v0.0.1 documentation</title>
+    <title>Trouble Shooting &mdash; kmos 0.0.1 documentation</title>
+    
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
+    <link rel="top" title="kmos 0.0.1 documentation" href="../index.html" />
     <link rel="prev" title="Reference" href="../reference/index.html" /> 
   </head>
   <body>
@@ -38,7 +41,7 @@
         <li class="right" >
           <a href="../reference/index.html" title="Reference"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -54,7 +57,7 @@
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -77,13 +80,13 @@
 <p>When I run kmos the GUI way and close it, it seems to hang
 and I need to use the window manager to kill it.</p>
 <blockquote>
-This is a bug waiting to be fixed. To avoid it close
+<div>This is a bug waiting to be fixed. To avoid it close
 the window showing the atoms object by clicking on its
-close button or Alt-F4 or whichever shortcut your FM uses.</blockquote>
+close button or Alt-F4 or whichever shortcut your FM uses.</div></blockquote>
 <p>Running a model it sometimes prints
 <cite>Warning: numerical precision too low, to resolve time-steps</cite></p>
 <blockquote>
-<p>This means that the kMC step of the current process was so
+<div><p>This means that the kMC step of the current process was so
 small compared to the current kMC time that for the processor
 <img class="math" src="../_images/math/efdcb97849012e18f0417f151c96f3c850e769ce.png" alt="t + \Delta t = t"/>. This should under normal circumstances
 only occur if you changed external conditions during a kMC run.</p>
@@ -93,13 +96,13 @@ to wonder whether non-coarse graind kMC is actually the right
 approach for the system. On the hand because the selection of
 the next process will no longer be reliable and second because
 reasonable sampling of all involved process may no longer happen.</p>
-</blockquote>
+</div></blockquote>
 <dl class="docutils">
 <dt>When running a model without GUI evaluation steps seem very slow.</dt>
 <dd>If you have a <cite>kmos.run.KMC_Model</cite> instance and call <cite>model.get_atoms()</cite>
 the generation of the real-space geometry takes the longest time. If you
-only have to evaluate coverage or turn-over frequency you might you are
-better of using <cite>model.get_atoms(geometry=False)</cite>, which returns and
+only have to evaluate coverages or turn-over frequencies you are
+better off using <cite>model.get_atoms(geometry=False)</cite>, which returns an
 object with all numbers but without the actual geometry.</dd>
 <dt>What units is kmos using ?</dt>
 <dd>By default length are measured in angstrom, energies in eV, pressure
@@ -110,7 +113,7 @@ expressions though contain explicit conversion factors like <cite>bar</cite>,
 <p>More to follow. Please post issues
 <a class="reference external" href="https://github.com/mhoffman/kmos/issues">here</a>
 or via email mjhoffmann .at. gmail .dot. com</p>
-<div class="admonition-todo admonition " id="index-0">
+<div class="admonition-todo admonition" id="index-0">
 <p class="first admonition-title">Todo</p>
 <p class="last">Explain <cite>post-mortem</cite> procedure</p>
 </div>
@@ -134,12 +137,12 @@ or via email mjhoffmann .at. gmail .dot. com</p>
         <li class="right" >
           <a href="../reference/index.html" title="Reference"
              >previous</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2009-2012, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
     </div>
   </body>
 </html>
