@@ -188,8 +188,13 @@ and to make it even shorter you can parse and add the process on one line ::
   pt.parse_and_add_process('CO_desorption; CO@hollow->; p_CO*bar*A/sqrt(2*pi*umss*m_CO/beta)*exp(-deltaG*eV)')
 
 
+In order to add processes on more than one site possible spanning across unit
+cells, there is a shorthand as well. The full-fledged syntax for each
+coordinate is ::
+  
+  name.offset.lattice
 
-And that is it!
+check :ref:`manual_coord_generation` for details.
 
 Export, save, compile
 ^^^^^^^^^^^^^^^^^^^^^

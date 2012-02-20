@@ -50,6 +50,8 @@ is as follows ::
 The second part is to generate the coordinates that are
 used in the process description.
 
+.. _manual_coord_generation:
+
 Manual generation
 ^^^^^^^^^^^^^^^^^
 To quickly generate single coordinates you can generate it
@@ -62,9 +64,14 @@ Let's look at the generation string. The general syntax is ::
   site_name.offset.layer_name
 
 The ``site_name`` and the ``layer_name`` must have been defined before.
-The offset is a tuple of three integer numbers and specifies the relative
-unit cell of this coordinate. Of course this only becomes meaningful
+The offset is a tuple of three integer numbers `(0, 0, 1)` and specifies the
+relative unit cell of this coordinate. Of course this only becomes meaningful
 as soon as you use more than one coordinate in a process.
+
+Missing values will be filled in from the back using default values,
+such that ::
+  
+    site -> site.(0,0,0) -> site.(0,0,0).default_layer
 
 Advanced Coordinate Techniques
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

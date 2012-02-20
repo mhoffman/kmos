@@ -146,7 +146,7 @@ straightforward.
 Then besides `kmos` we need to import `multiprocessing` ::
 
   from multiprocessing import Process
-  form numpy import linspace
+  from numpy import linspace
   from kmos.run import KMC_Model
 
 and let's say you wanted to scan a range of temperature,
