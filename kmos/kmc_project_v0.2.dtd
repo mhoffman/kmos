@@ -20,6 +20,7 @@
     name CDATA #REQUIRED
     color CDATA #IMPLIED
     representation CDATA #IMPLIED
+    tags CDATA #IMPLIED
   >
   <!ELEMENT parameter_list (parameter)*>
   <!ELEMENT parameter EMPTY>

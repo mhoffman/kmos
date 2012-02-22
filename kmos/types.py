@@ -206,6 +206,7 @@ class Project(object):
                 species_elem.set('representation', species.representation)
             if hasattr(species, 'color'):
                 species_elem.set('color', species.color)
+            species_elem.set('tags', getattr(species, 'tags'))
         parameter_list = ET.SubElement(root, 'parameter_list')
         for parameter in self.get_parameters():
             parameter_elem = ET.SubElement(parameter_list, 'parameter')
@@ -453,9 +454,11 @@ class Project(object):
                             if 'color' in species.attrib else ''
                         representation = species.attrib['representation'] \
                             if 'representation' in species.attrib else ''
+                        tags = species.attrib.get('tags', '')
                         species_elem = Species(name=name,
                                                color=color,
-                                               representation=representation)
+                                               representation=representation,
+                                               tags=tags)
                         self.add_species(species_elem)
                 if child.tag == 'output_list':
                     for item in child:
@@ -1050,7 +1053,7 @@ class Species(FixedObject):
     Note: `empty` is treated just like a species.
 
     """
-    attributes = ['name', 'color', 'representation']
+    attributes = ['name', 'color', 'representation', 'tags']
 
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)
@@ -1058,6 +1061,7 @@ class Species(FixedObject):
             if 'name' in kwargs else ''
         self.representation = kwargs['representation'] \
             if 'representation' in kwargs else ''
+        self.tags = kwargs.get('tags', '')
 
     def __repr__(self):
         if hasattr(self, 'color'):
