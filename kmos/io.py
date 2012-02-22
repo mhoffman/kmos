@@ -967,12 +967,20 @@ class ProcListWriter():
         # rename to species
         # and include tags
         out.write('representations = {\n')
-        for species in sorted(data.species_list, key=lambda x: x.name):
+        for species in sorted(data.get_speciess(), key=lambda x: x.name):
             out.write('    "%s":"""%s""",\n'
                 % (species.name,
                 species.representation.strip()))
         out.write('    }\n\n')
         out.write('lattice_representation = """%s"""\n\n' % data.layer_list.representation)
+
+        # Species Tags
+        out.write('species_tags = {\n')
+        for species in sorted(data.get_speciess(), key=lambda x: x.name):
+            out.write('    "%s":"""%s""",\n'
+                % (species.name,
+                species.tags.strip()))
+        out.write('    }\n\n')
 
         # TOF counting
         out.write('tof_count = {\n')
