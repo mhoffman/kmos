@@ -254,6 +254,7 @@ class KMC_Model(multiprocessing.Process):
         information such as coverage and Turn-over-frequencies
         attached."""
 
+        # attach kmos_tags to adatoms
         if geometry:
             ase = import_ase()
             atoms = ase.atoms.Atoms()

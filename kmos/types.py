@@ -462,6 +462,10 @@ class Project(object):
                         output_elem = OutputItem(name=item.attrib['item'],
                                                  output=True)
                         self.add_output(output_elem)
+        elif self.version == (0, 3):
+            pass
+            # import new XML definition
+            # everything tagged and not Output
 
     def validate_model(self):
         """Run various consistency and completeness

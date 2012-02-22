@@ -963,6 +963,8 @@ class ProcListWriter():
         out.write('site_names = %s\n' % ['%s_%s' % (x[1], x[0]) for x in site_params])
 
         # Graphical Representations
+        # rename to species
+        # and include tags
         out.write('representations = {\n')
         for species in sorted(data.species_list, key=lambda x: x.name):
             out.write('    "%s":"""%s""",\n'
