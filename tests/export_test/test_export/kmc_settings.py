@@ -72,9 +72,9 @@ xml = """<?xml version="1.0" ?>
 <kmc version="(0, 2)">
     <meta author="Max J. Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="2" model_name="my_model"/>
     <species_list default_species="empty">
-        <species color="#000000" name="co" representation=""/>
-        <species color="#ffffff" name="empty" representation=""/>
-        <species color="#ff0000" name="oxygen" representation=""/>
+        <species color="#000000" name="co" representation="" tags=""/>
+        <species color="#ffffff" name="empty" representation="" tags=""/>
+        <species color="#ff0000" name="oxygen" representation="" tags=""/>
     </species_list>
     <parameter_list>
         <parameter adjustable="False" max="0.0" min="0.0" name="A" scale="linear" value="20.e-19"/>

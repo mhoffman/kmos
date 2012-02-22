@@ -2,9 +2,9 @@
 <kmc version="(0, 2)">
     <meta author="Max J. Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="2" model_name="Pdsqrt5"/>
     <species_list default_species="empty">
-        <species color="#000000" name="CO" representation="Atoms('CO', [[0,0,0],[0,0,1.2]])"/>
-        <species color="#ff0000" name="O" representation="Atoms('O')"/>
-        <species color="#ffffff" name="empty" representation=""/>
+        <species color="#000000" name="CO" representation="Atoms('CO', [[0,0,0],[0,0,1.2]])" tags=""/>
+        <species color="#ff0000" name="O" representation="Atoms('O')" tags=""/>
+        <species color="#ffffff" name="empty" representation="" tags=""/>
     </species_list>
     <parameter_list>
         <parameter adjustable="False" max="0.0" min="0.0" name="A" scale="linear" value="(3.94*angstrom)**2"/>
