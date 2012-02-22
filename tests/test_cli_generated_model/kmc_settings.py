@@ -20,6 +20,12 @@ representations = {
 
 lattice_representation = """"""
 
+species_tags = {
+    "CO":"""""",
+    "empty":"""""",
+    "oxygen":"""""",
+    }
+
 tof_count = {
     }
 
