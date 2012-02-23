@@ -13,7 +13,11 @@ pt.set_meta(author='Max J. Hoffmann',
 layer = pt.add_layer(name='simplecubic_2d')
 layer.add_site(name='a')
 pt.add_species(name='empty', color='#ffffff')
-pt.add_species(name='CO', color='#000000', representation="Atoms('CO',[[0,0,0],[0,0,1.2]])")
+pt.add_species(name='O', color='#000000',
+               representation="Atoms('O')",)
+pt.add_species(name='CO', color='#000000',
+               representation="Atoms('CO',[[0,0,0],[0,0,1.2]])",
+               tags='carbon')
 pt.add_parameter(name='E_CO', value=-1, adjustable=True, min=-2, max=0)
 pt.add_parameter(name='E_CO_nn', value=.2, adjustable=True, min=-1, max=1)
 pt.add_parameter(name='p_COgas', value=.2, adjustable=True, scale='log', min=1e-13, max=1e3)
@@ -32,6 +36,16 @@ pt.add_process(name='CO_adsorption',
                conditions=[Condition(species='empty', coord=center)],
                actions=[Action(species='CO', coord=center)],
                rate_constant='p_COgas*A*bar/sqrt(2*m_CO*umass/beta)')
+
+pt.add_process(name='O_adsorption',
+               conditions=[Condition(species='empty', coord=center)],
+               actions=[Action(species='O', coord=center)],
+               rate_constant='p_COgas*A*bar/sqrt(2*m_O*umass/beta)')
+
+pt.add_process(name='O_desorption',
+               conditions=[Condition(species='O', coord=center)],
+               actions=[Action(species='empty', coord=center)],
+               rate_constant='p_COgas*A*bar/sqrt(2*m_O*umass/beta)')
 
 # fetch a lot of coordinates
 coords = pt.lattice.generate_coord_set(size=[2, 2, 2],
