@@ -863,7 +863,7 @@ class Layer(FixedObject, CorrectlyNamed):
         self.name = kwargs.get('name', '')
         self.active = kwargs.get('active', True)
         self.color = kwargs.get('color', '#ffffff')
-        self.sites = kwargs('sites', [])
+        self.sites = kwargs.get('sites', [])
 
     def __repr__(self):
         return "[LAYER] %s\n[\n%s\n]" % (self.name, self.sites)
