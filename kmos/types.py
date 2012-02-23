@@ -673,8 +673,7 @@ class Meta(object):
 
     def __init__(self, *args, **kwargs):
         self.add(kwargs)
-        self.debug = kwargs['debug'] \
-                     if 'debug' in kwargs else 0
+        self.debug = kwargs.get('debug', 0)
 
     def add(self, attrib):
         for key in attrib:
@@ -712,18 +711,12 @@ class Parameter(FixedObject, CorrectlyNamed):
 
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)
-        self.name = kwargs['name'] \
-            if 'name' in kwargs else ''
-        self.adjustable = kwargs['adjustable'] \
-            if 'adjustable' in kwargs else False
-        self.value = kwargs['value'] \
-            if 'value' in kwargs else 0.
-        self.min = float(kwargs['min']) \
-            if 'min' in kwargs else 0.0
-        self.max = float(kwargs['max']) \
-            if 'max' in kwargs else 0.0
-        self.scale = str(kwargs['scale']) \
-            if 'scale' in kwargs else 'linear'
+        self.name = kwargs.get('name', '')
+        self.adjustable = kwargs.get('adjustable', False)
+        self.value = kwargs.get('value', 0.)
+        self.min = kwargs.get('min', 0.)
+        self.max = kwargs.get('max', 0.)
+        self.scale = kwargs.get('scale', 'linear')
 
     def __repr__(self):
         return '[PARAMETER] Name: %s Value: %s\n' % (self.name, self.value)
@@ -763,8 +756,7 @@ class LayerList(FixedObject, list):
                 raise UserWarning('%s not understood' % kwargs['cell'])
         else:
             self.cell = np.identity(3)
-        self.representation = kwargs['representation'] \
-            if 'representation' in kwargs else ''
+        self.representation = kwargs.get('representation', '')
 
     def set_representation(self, images):
         """FIXME: If there is more than one representation they should be
@@ -868,10 +860,10 @@ class Layer(FixedObject, CorrectlyNamed):
 
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)
-        self.name = kwargs['name'] if 'name' in kwargs else ''
-        self.active = kwargs['active'] if 'active' in kwargs else True
-        self.color = kwargs['color'] if 'color' in kwargs else '#ffffff'
-        self.sites = kwargs['sites'] if 'sites' in kwargs else []
+        self.name = kwargs.get('name', '')
+        self.active = kwargs.get('active', True)
+        self.color = kwargs.get('color', '#ffffff')
+        self.sites = kwargs('sites', [])
 
     def __repr__(self):
         return "[LAYER] %s\n[\n%s\n]" % (self.name, self.sites)
@@ -908,10 +900,9 @@ class Site(FixedObject):
 
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)
-        self.tags = kwargs['tags'] if  'tags' in kwargs else ''
-        self.name = kwargs['name'] if 'name' in kwargs else ''
-        self.default_species = kwargs['default_species'] \
-            if 'default_species' in kwargs else 'default_species'
+        self.tags = kwargs.get('tags', '')
+        self.name = kwargs.get('name', '')
+        self.default_species = kwargs.get('default_species', 'default_species')
         if 'pos' in kwargs:
             if type(kwargs['pos']) is str:
                 self.pos = np.array([float(i) for i in kwargs['pos'].split()])
@@ -941,7 +932,7 @@ class ProcessFormSite(Site):
 
     def __init__(self, **kwargs):
         Site.__init__(self, **kwargs)
-        self.layer = kwargs['layer'] if 'layer' in kwargs else ''
+        self.layer = kwargs.get('layer', '')
 
 
 class Coord(FixedObject):
@@ -953,18 +944,16 @@ class Coord(FixedObject):
 
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)
-        self.offset = kwargs['offset'] \
-            if 'offset' in kwargs else (0, 0, 0)
+        self.offset = kwargs.get('offset', (0, 0, 0))
         if len(self.offset) == 1:
             self.offset = (self.offset[0], 0, 0)
-        if len(self.offset) == 2:
+        elif len(self.offset) == 2:
             self.offset = (self.offset[0], self.offset[1], 0)
 
         self.pos = np.array([float(i) for i in kwargs['pos'].split()]) \
                    if 'pos' in kwargs else np.array([0., 0., 0.])
 
-        self.tags = kwargs['tags'] \
-                    if 'tags' in kwargs else ''
+        self.tags = kwargs.get('tags', '')
 
     def __repr__(self):
         return '[COORD] %s.%s.%s' % (self.name,
@@ -1061,10 +1050,8 @@ class Species(FixedObject):
 
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)
-        self.name = kwargs['name'] \
-            if 'name' in kwargs else ''
-        self.representation = kwargs['representation'] \
-            if 'representation' in kwargs else ''
+        self.name = kwargs.get('name', '')
+        self.representation = kwargs.get('representation', '')
         self.tags = kwargs.get('tags', '')
 
     def __repr__(self):
@@ -1109,17 +1096,12 @@ class Process(FixedObject):
 
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)
-        self.name = kwargs['name'] \
-            if 'name' in kwargs else ''
-        self.rate_constant = kwargs['rate_constant'] \
-            if 'rate_constant' in kwargs else '0.'
-        self.condition_list = kwargs['condition_list'] \
-            if 'condition_list' in kwargs else []
-        self.action_list = kwargs['action_list'] \
-         if 'action_list' in kwargs else []
-        self.tof_count = kwargs['tof_count'] \
-            if 'tof_count' in kwargs else None
-        self.enabled = kwargs['enabled'] if 'enabled' in kwargs else True
+        self.name = kwargs.get('name', '')
+        self.rate_constant = kwargs.get('rate_constant', '0.')
+        self.condition_list = kwargs.get('condition_list', [])
+        self.action_list = kwargs.get('action_list', [])
+        self.tof_count = kwargs.get('tof_count', None)
+        self.enabled = kwargs.get('enabled', True)
 
     def __repr__(self):
         return '[PROCESS] Name:%s Rate: %s\nConditions: %s\nActions: %s' \
