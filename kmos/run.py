@@ -125,6 +125,7 @@ class KMC_Model(multiprocessing.Process):
                     eval(settings.representations[species]))
             else:
                 self.species_representation.append(Atoms())
+        self.species_tags = settings.species_tags
 
         if len(settings.lattice_representation):
             if hasattr(settings, 'substrate_layer'):
@@ -254,8 +255,8 @@ class KMC_Model(multiprocessing.Process):
         information such as coverage and Turn-over-frequencies
         attached."""
 
-        # attach kmos_tags to adatoms
         if geometry:
+            kmos_tags = {}
             ase = import_ase()
             atoms = ase.atoms.Atoms()
             for i in xrange(lattice.system_size[0]):
@@ -264,23 +265,27 @@ class KMC_Model(multiprocessing.Process):
                         for n in xrange(1, 1 + lattice.spuck):
                             species = lattice.get_species([i, j, k, n])
                             if self.species_representation[species]:
-                                # create the atom
-                                atom = deepcopy(
+                                # create the ad_atoms
+                                ad_atoms = deepcopy(
                                     self.species_representation[species])
 
                                 # move to the correct location
-                                atom.translate(
+                                ad_atoms.translate(
                                     np.dot(
                                         np.array([i, j, k]) +
                                         lattice.site_positions[n - 1],
                                             lattice.unit_cell_size))
                                 # add to existing slab
-                                atoms += atom
+                                atoms += ad_atoms
+                                for atom in range(len(atoms)-len(ad_atoms), len(atoms)):
+                                    kmos_tags[atom] = self.species_tags.values()[species]
+
                         lattice_repr = deepcopy(self.lattice_representation)
                         lattice_repr.translate(np.dot(np.array([i, j, k]),
                                                       lattice.unit_cell_size))
                         atoms += lattice_repr
             atoms.set_cell(self.cell_size)
+            atoms.info['kmos_tags'] = kmos_tags
         else:
 
             class Expando():
