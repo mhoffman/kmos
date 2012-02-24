@@ -15,7 +15,7 @@
         <parameter adjustable="False" max="0.0" min="0.0" name="E_O_diff" scale="linear" value="0.5"/>
         <parameter adjustable="False" max="0.0" min="0.0" name="E_O_hollow" scale="linear" value="-1.28"/>
         <parameter adjustable="False" max="0.0" min="0.0" name="E_react" scale="linear" value="0.9"/>
-        <parameter adjustable="True" max="1500" min="300" name="T" scale="linear" value="600"/>
+        <parameter adjustable="True" max="1500.0" min="300.0" name="T" scale="linear" value="600"/>
         <parameter adjustable="True" max="100.0" min="1e-13" name="p_COgas" scale="log" value="1.0"/>
         <parameter adjustable="True" max="100.0" min="1e-13" name="p_O2gas" scale="log" value="1.0"/>
     </parameter_list>
