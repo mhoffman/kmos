@@ -94,6 +94,8 @@ necessary if you want to run more than one simulation
 in one script.
 
 
+.. _manipulate_model_runtime:
+
 Manipulating the Model at Runtime
 =================================
 
@@ -102,12 +104,13 @@ also the configuration at runtime. For instance if one
 would like to prepare a surface with a certain configuration
 or pattern.
 
-Given you instantiated a `model` instance a site can by calling ::
+Given you instantiated a `model` instance a site occupation
+can be changed by calling ::
 
   model.put(site=[x,y,z,n], model.proclist.<species>)
 
 However if changing many sites at once this is quite inefficient,
-since each put call, adjusts the book-keeping database for every
+since each `put` call, adjusts the book-keeping database for every
 change of the configuration. To circumvent this you can use
 the `_put` method, like so ::
 

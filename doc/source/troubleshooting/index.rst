@@ -6,7 +6,7 @@ When I run kmos the GUI way and close it, it seems to hang
 and I need to use the window manager to kill it.
   This is a bug waiting to be fixed. To avoid it close
   the window showing the atoms object by clicking on its 
-  close button or Alt-F4 or whichever shortcut your FM uses.
+  close button or Alt-F4 or whichever shortcut your WM uses.
 
 Running a model it sometimes prints 
 `Warning: numerical precision too low, to resolve time-steps`
@@ -36,9 +36,26 @@ What units is kmos using ?
   expressions though contain explicit conversion factors like `bar`,
   `eV` etc. If in doubt check the resulting rate constants by hand.
 
+When running the model I sometimes get mysterious `infty` or `nan` values!
+  This most likely can be traced back to fact that some variable ran outside
+  its range and is caused by the fact that the wrong `kind` values are chosen
+  (Fortran stuff). Kind values are currently all hard-code in the the `src`
+  directory at `/path-to-export/src/kind_values_f2py.f90` and set fort ifort.
+  While I am working to have this set dynamically at compile time, you have
+  to figure out the right `kind` value for your compiler for now.
+
+How can I change the occupation of a model at runtime?
+  This is explained in detail at :ref:`manipulate_model_runtime` though
+  the import bit is that you call ::
+
+    model._adjust_database()
+
+  after changing the occupation and before doing the next kMC step.
+
   
 More to follow. Please post issues 
 `here <https://github.com/mhoffman/kmos/issues>`_
 or via email mjhoffmann .at. gmail .dot. com
+or via twitter @maxjhoffmann
 
 .. TODO:: Explain `post-mortem` procedure
