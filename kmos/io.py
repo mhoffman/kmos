@@ -419,6 +419,9 @@ class ProcListWriter():
         representation_length = max([len(species.representation) for species in data.species_list])
 
         out.write('integer(kind=iint), parameter, public :: representation_length = %s\n' % representation_length)
+        out.write('integer(kind=iint), public :: seed_size = 8\n')
+        out.write('integer(kind=iint), public :: seed ! random seed\n')
+        out.write('integer(kind=iint), public, dimension(:), allocatable :: seed_arr ! random seed\n')
 
         out.write('\n\n! Process constants\n\n')
         for i, process in enumerate(self.data.process_list):
@@ -641,7 +644,13 @@ class ProcListWriter():
                   '!******\n'
                   '    integer(kind=iint), intent(in) :: layer\n\n'
                   '    integer(kind=iint) :: i, j, k, nr\n'
-
+                  ''
+                  '    ! initialize random number generator\n'
+                  '    allocate(seed_arr(seed_size))\n'
+                  '    seed_arr = seed\n'
+                  '    call random_seed(seed_size)\n'
+                  '    call random_seed(put=seed_arr)\n'
+                  ''
                   '    do k = 0, system_size(3)-1\n'
                   '        do j = 0, system_size(2)-1\n'
                   '            do i = 0, system_size(1)-1\n'
@@ -930,7 +939,7 @@ class ProcListWriter():
         out = open(os.path.join(self.dir, 'kmc_settings.py'), 'w')
         out.write('model_name = \'%s\'\n' % self.data.meta.model_name)
         out.write('simulation_size = 20\n')
-
+        out.write('random_seed = 1\n')
 
         # Parameters
         out.write('parameters = {\n')

@@ -96,6 +96,7 @@ class KMC_Model(multiprocessing.Process):
         self.system_name = system_name
         self.banner = banner
 
+        self.proclist.seed = np.array(getattr(self.settings, 'random_seed', 1))
         self.reset()
 
     def reset(self):
