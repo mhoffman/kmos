@@ -1,5 +1,6 @@
 model_name = 'test_cli_generated_model'
 simulation_size = 20
+random_seed = 1
 parameters = {
     "p_CO":{"value":"0.2", "adjustable":False, "min":"0.0", "max":"0.0","scale":"log"},
     "T":{"value":"500", "adjustable":True, "min":"0.0", "max":"0.0","scale":"linear"},

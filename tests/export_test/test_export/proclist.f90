@@ -66,6 +66,9 @@ integer(kind=iint), parameter, public :: empty = 1
 integer(kind=iint), parameter, public :: oxygen = 2
 integer(kind=iint), public :: default_species = empty
 integer(kind=iint), parameter, public :: representation_length = 0
+integer(kind=iint), public :: seed_size = 8
+integer(kind=iint), public :: seed ! random seed
+integer(kind=iint), public, dimension(:), allocatable :: seed_arr ! random seed
 
 
 ! Process constants
@@ -411,6 +414,11 @@ subroutine initialize_state(layer)
     integer(kind=iint), intent(in) :: layer
 
     integer(kind=iint) :: i, j, k, nr
+    ! initialize random number generator
+    allocate(seed_arr(seed_size))
+    seed_arr = seed
+    call random_seed(seed_size)
+    call random_seed(put=seed_arr)
     do k = 0, system_size(3)-1
         do j = 0, system_size(2)-1
             do i = 0, system_size(1)-1
