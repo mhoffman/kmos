@@ -250,7 +250,7 @@ subroutine initialize_state(layer)
     seed_arr = seed
     call random_seed(seed_size)
     call random_seed(put=seed_arr)
-    deallocate(seed_arr(seed_size))
+    deallocate(seed_arr)
     do k = 0, system_size(3)-1
         do j = 0, system_size(2)-1
             do i = 0, system_size(1)-1
