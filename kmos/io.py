@@ -650,6 +650,7 @@ class ProcListWriter():
                   '    seed_arr = seed\n'
                   '    call random_seed(seed_size)\n'
                   '    call random_seed(put=seed_arr)\n'
+                  '    deallocate(seed_arr(seed_size))\n'
                   ''
                   '    do k = 0, system_size(3)-1\n'
                   '        do j = 0, system_size(2)-1\n'
