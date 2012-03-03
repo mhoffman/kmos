@@ -47,7 +47,7 @@ def test_ml_export():
 
 
     import kmos.io
-    pt = kmos.io.import_xml('pdopd.xml')
+    pt = kmos.io.import_xml_file('pdopd.xml')
     kmos.io.export_source(pt)
     import shutil
     shutil.rmtree('sqrt5PdO')

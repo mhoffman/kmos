@@ -108,7 +108,7 @@ elif args[0] == 'import':
         import numpy as np
     except:
         pass
-    pt = kmos.io.import_xml(args[1])
+    pt = kmos.io.import_xml_file(args[1])
     import IPython
     if hasattr(IPython, 'release') and \
        map(int, IPython.release.version.split('.')) >= [0, 11]:

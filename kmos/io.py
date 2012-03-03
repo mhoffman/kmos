@@ -549,7 +549,7 @@ class ProcListWriter():
         for process in data.process_list:
             out.write('    case(%s)\n' % process.name)
             if data.meta.debug > 0:
-                out.write(('print *,"PROCLIST/RUN_PROC_NR/NAME","%s"\n' 
+                out.write(('print *,"PROCLIST/RUN_PROC_NR/NAME","%s"\n'
                            'print *,"PROCLIST/RUN_PROC_NR/LSITE","lsite"\n'
                            'print *,"PROCLIST/RUN_PROC_NR/SITE","site"\n') % process.name)
             for action in process.action_list:
@@ -1078,7 +1078,20 @@ def export_source(project_tree, export_dir=None):
     return True
 
 
-def import_xml(filename):
+def import_xml(xml):
+    from tempfile import mktemp
+    from os import remove
+
+    xml_filename = mktemp()
+    xml_file = file(xml_filename, 'w')
+    xml_file.write(xml)
+    xml_file.close()
+    project = import_xml_file(xml_filename)
+    remove(xml_filename)
+    return project
+
+
+def import_xml_file(filename):
     """Imports and returns project from an XML file."""
     import kmos.types
     project_tree = kmos.types.Project()
