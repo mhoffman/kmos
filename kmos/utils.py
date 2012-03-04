@@ -121,3 +121,51 @@ def split_sequence(seq, size):
         newseq.append(seq[int(round(i * splitsize)):
                       int(round((i + 1) * splitsize))])
     return newseq
+
+
+def download(project):
+    from django.http import HttpResponse
+    import zipfile
+    import tempfile
+    from os.path import join, basename
+    from glob import glob
+    from kmos.io import import_xml, export_source
+
+    # return HTTP download response (e.g. via django)
+    response = HttpResponse(mimetype='application/x-zip-compressed')
+    response['Content-Disposition'] = 'attachment; filename="kmos_export.zip"'
+
+    if isinstance(project, basestring):
+        project = import_xml(project)
+
+    try:
+        from cStringIO import StringIO
+    except:
+        from StringIO import StringIO
+    stringio  = StringIO()
+    zfile = zipfile.ZipFile(stringio, 'w')
+
+    # save XML
+    zfile.writestr('project.xml', str(project))
+
+    # generate source
+    tempdir = tempfile.mkdtemp()
+    srcdir = join(tempdir, 'src')
+
+
+    # add kMC project sources
+    export_source(project, srcdir)
+    for srcfile in glob(join(srcdir, '*')):
+        zfile.write(srcfile, join('src', basename(srcfile)))
+
+    # add standalone kmos program
+    # TODO
+
+
+
+    # write temporary file to response
+    zfile.close()
+    stringio.flush()
+    response.write(stringio.getvalue())
+    stringio.close()
+    return response
