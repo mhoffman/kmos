@@ -142,7 +142,7 @@ def download(project):
         from cStringIO import StringIO
     except:
         from StringIO import StringIO
-    stringio  = StringIO()
+    stringio = StringIO()
     zfile = zipfile.ZipFile(stringio, 'w')
 
     # save XML
@@ -152,7 +152,6 @@ def download(project):
     tempdir = tempfile.mkdtemp()
     srcdir = join(tempdir, 'src')
 
-
     # add kMC project sources
     export_source(project, srcdir)
     for srcfile in glob(join(srcdir, '*')):
@@ -160,8 +159,6 @@ def download(project):
 
     # add standalone kmos program
     # TODO
-
-
 
     # write temporary file to response
     zfile.close()
