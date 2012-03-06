@@ -49,10 +49,7 @@ package_data = {'kmos':['fortran_src/*f90',
                         'kmc_project_v0.2.dtd']}
 platforms = ['linux']
 scripts = [
-        'tools/kmos-editor',
-        'tools/kmos-export-program',
         'tools/kmos-build',
-        'tools/kmos-view',
         'tools/kmos-build-standalone',
         'tools/kmos',
         'tools/kmos-install-dependencies-ubuntu',
