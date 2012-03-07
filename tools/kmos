@@ -84,7 +84,7 @@ def build(options):
         if not isfile(src_file):
             raise IOError('File %s not found' % src_file)
 
-    call = ('{interpreter}{path_to_f2py}f2py '
+    call = ('{interpreter}{path_to_f2py}'
             ' --f90flags="{extra_flags}"'
             ' --fcompiler="{fcompiler}"'
             ' -c {src_files}'
@@ -96,7 +96,6 @@ def build(options):
                                        path_to_f2py=options.path_to_f2py,
                                        fcompiler=options.fcompiler)
     print(call)
-    #exit()
     system(call)
 
     print("""#  If you run into strange errors like'
@@ -116,11 +115,12 @@ def main():
 
     parser.add_option('-p', '--path-to-f2py',
                       dest='path_to_f2py',
-                      default='')
+                      default='f2py')
 
     parser.add_option('-f', '--fcompiler',
                      dest='fcompiler',
                      default='intel')
+
 
     options, args = parser.parse_args()
 
