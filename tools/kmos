@@ -60,19 +60,8 @@ usage['view'] = """kmos view
                  """
 
 def build(options):
-    import optparse
     from os.path import isfile
     from os import system, name
-
-    parser = optparse.OptionParser()
-    parser.add_option('-p', '--path-to-f2py',
-                      dest='path_to_f2py',
-                      default='')
-    parser.add_option('-f', '--fcompiler',
-                     dest='fcompiler',
-                     default='ifort')
-
-    options, args = parser.parse_args()
 
     src_files = 'kind_values_f2py.f90 base.f90 lattice.f90 proclist.f90'
 
@@ -107,7 +96,7 @@ def build(options):
                                        path_to_f2py=options.path_to_f2py,
                                        fcompiler=options.fcompiler)
     print(call)
-#exit()
+    #exit()
     system(call)
 
     print("""#  If you run into strange errors like'
@@ -131,7 +120,7 @@ def main():
 
     parser.add_option('-f', '--fcompiler',
                      dest='fcompiler',
-                     default='ifort')
+                     default='intel')
 
     options, args = parser.parse_args()
 
