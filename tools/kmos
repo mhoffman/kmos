@@ -59,138 +59,208 @@ usage['view'] = """kmos view
     model visually.
                  """
 
-parser = optparse.OptionParser(
-    'Usage: %prog [help] (' + '|'.join(usage.keys()) + ') [options]')
+def build(options):
+    import optparse
+    from os.path import isfile
+    from os import system, name
 
-parser.add_option('-s', '--source-only',
-                  dest='source_only',
-                  action='store_true',
-                  default=False)
+    parser = optparse.OptionParser()
+    parser.add_option('-p', '--path-to-f2py',
+                      dest='path_to_f2py',
+                      default='')
+    parser.add_option('-f', '--fcompiler',
+                     dest='fcompiler',
+                     default='ifort')
 
-options, args = parser.parse_args()
+    options, args = parser.parse_args()
 
+    src_files = 'kind_values_f2py.f90 base.f90 lattice.f90 proclist.f90'
 
-if len(args) < 1:
-    parser.error('Command expected')
-
-if args[0] == 'help':
-    if len(args) < 2:
-        parser.error('Which help do you  want?')
-    if args[1] == 'all':
-        for command in usage:
-            print(usage[command])
-    elif args[1] in usage:
-        print('Usage: %s\n' % usage[args[1]])
+    if name == 'nt':
+        interpreter = 'python '
+    elif name == 'posix':
+        interpreter = ''
     else:
-        print("Command not known or not documented.")
+        interpreter = ''
 
-elif args[0] == 'edit':
-    from kmos.gui import main
-    main()
-elif args[0] == 'export':
-    import kmos.types
-    import kmos.io
-    from glob import glob
-    import shutil
-    if len(args) < 2:
-        parser.error('XML file and export path expected.')
-    if len(args) < 3:
+    extra_flags = {}
+    extra_flags['gfortran'] = (' -ffree-line-length-none -ffree-form'
+                               ' -xf95-cpp-input -Wall -g')
+    extra_flags['intel'] = '-fast -fpp -Wall -I/opt/intel/fc/10.1.018/lib'
+    extra_flags['intelem'] = '-fast -fpp -Wall -g'
+
+    module_name = 'kmc_model'
+
+    for src_file in src_files.split():
+        if not isfile(src_file):
+            raise IOError('File %s not found' % src_file)
+
+    call = ('{interpreter}{path_to_f2py}f2py '
+            ' --f90flags="{extra_flags}"'
+            ' --fcompiler="{fcompiler}"'
+            ' -c {src_files}'
+            ' -m {module_name}').format(interpreter=interpreter,
+                                       src_files=src_files,
+                                       extra_flags=extra_flags.get(
+                                                   options.fcompiler, ''),
+                                       module_name=module_name,
+                                       path_to_f2py=options.path_to_f2py,
+                                       fcompiler=options.fcompiler)
+    print(call)
+#exit()
+    system(call)
+
+    print("""#  If you run into strange errors like'
+#                    '... returned NULL from py_object ...'
+# you probably have to kind_values_f2py.f90. Kind values are hardcoded here
+# because f2py cannot evaluate selected_real_kind or selected_integer_kind at
+# compile time.""")
+
+def main():
+    parser = optparse.OptionParser(
+        'Usage: %prog [help] (' + '|'.join(usage.keys()) + ') [options]')
+
+    parser.add_option('-s', '--source-only',
+                      dest='source_only',
+                      action='store_true',
+                      default=False)
+
+    parser.add_option('-p', '--path-to-f2py',
+                      dest='path_to_f2py',
+                      default='')
+
+    parser.add_option('-f', '--fcompiler',
+                     dest='fcompiler',
+                     default='ifort')
+
+    options, args = parser.parse_args()
+
+
+    if len(args) < 1:
+        parser.error('Command expected')
+
+
+    if args[0] == 'help':
+        if len(args) < 2:
+            parser.error('Which help do you  want?')
+        if args[1] == 'all':
+            for command in usage:
+                print(usage[command])
+        elif args[1] in usage:
+            print('Usage: %s\n' % usage[args[1]])
+        else:
+            print("Command not known or not documented.")
+
+    elif args[0] == 'edit':
+        from kmos.gui import main
+        main()
+    elif args[0] == 'export':
+        import kmos.types
+        import kmos.io
+        from glob import glob
+        import shutil
+        if len(args) < 2:
+            parser.error('XML file and export path expected.')
+        if len(args) < 3:
+            out_dir = os.path.splitext(args[1])[0]
+            print('No export path provided. Exporting to %s' % out_dir)
+            args.append(out_dir)
+
+        xml_file = args[1]
+        export_dir = os.path.join(args[2], 'src')
+
+        project = kmos.types.Project()
+        project.import_xml_file(xml_file)
+
+        kmos.io.export_source(project, export_dir)
+
+        cwd = os.path.abspath(os.curdir)
+        if os.name == 'posix' \
+           and os.uname()[0] == 'Linux'\
+           and not options.source_only:
+            os.chdir(export_dir)
+            build(options)
+            for out in glob('kmc_*'):
+                if os.path.exists('../%s' % out):
+                    overwrite = raw_input(('Should I overwrite existing %s ?'
+                                           '[y/N]  ') % out).lower()
+                    if overwrite.startswith('y'):
+                        os.remove('../%s' % out)
+                        shutil.move(out, '..')
+                else:
+                    shutil.move(out, '..')
+
+    elif args[0] == 'import':
+        import kmos.io
+        #try:
+            #from kmos.types import *
+        #except:
+            #pass
+        try:
+            import numpy as np
+        except:
+            pass
+        pt = kmos.io.import_xml_file(args[1])
+        import IPython
+        if hasattr(IPython, 'release') and \
+           map(int, IPython.release.version.split('.')) >= [0, 11]:
+            from IPython.frontend.terminal.embed import InteractiveShellEmbed
+            InteractiveShellEmbed(banner1='Note: pt = kmos.io.import_xml(\'%s\')'
+                                  % args[1])()
+        else:
+            from IPython.Shell import IPShellEmbed
+            IPShellEmbed(banner='Note: pt = kmos.io.import_xml(\'%s\')'
+                         % args[1])()
+    elif args[0] == 'build':
+        build(options)
+    elif args[0] == 'view':
+        from sys import path
+        path.append(os.path.abspath(os.curdir))
+        from kmos.view import main
+        main()
+    elif args[0] == 'benchmark':
+        from sys import path
+        path.append(os.path.abspath(os.curdir))
+        nsteps = 1000000
+        from time import time
+        from kmos.run import KMC_Model
+        model = KMC_Model(print_rates=False, banner=False)
+        time0 = time()
+        model.do_steps(nsteps)
+        print('%s steps took %.2f seconds' % (nsteps, time() - time0))
+    elif args[0] == 'export-view':
         out_dir = os.path.splitext(args[1])[0]
         print('No export path provided. Exporting to %s' % out_dir)
         args.append(out_dir)
+        os.system('kmos-export-program %s %s' % (args[1], args[2]))
+        os.chdir(out_dir)
+        os.system('kmos-view')
+    elif args[0] == 'rebuild':
+        from tempfile import mktemp
+        if not os.path.exists('kmc_model.so'):
+            print('No kmc_model.so found, exiting.')
+            exit()
 
-    xml_file = args[1]
-    export_dir = os.path.join(args[2], 'src')
+        if not os.path.exists('kmc_settings.py'):
+            print('No kmc_settings.py found, exiting.')
+            exit()
 
-    project = kmos.types.Project()
-    project.import_xml_file(xml_file)
+        from kmos.run import KMC_Model
 
-    kmos.io.export_source(project, export_dir)
+        model = KMC_Model(print_rates=False, banner=False)
 
-    cwd = os.path.abspath(os.curdir)
-    if os.name == 'posix' \
-       and os.uname()[0] == 'Linux'\
-       and not options.source_only:
-        os.chdir(export_dir)
-        os.system("kmos-build")
-        for out in glob('kmc_*'):
-            if os.path.exists('../%s' % out):
-                overwrite = raw_input(('Should I overwrite existing %s ?'
-                                       '[y/N]  ') % out).lower()
-                if overwrite.startswith('y'):
-                    os.remove('../%s' % out)
-                    shutil.move(out, '..')
-            else:
-                shutil.move(out, '..')
+        tempfile = mktemp()
+        f = file(tempfile, 'w')
+        f.write(model.xml())
+        f.close()
 
-elif args[0] == 'import':
-    import kmos.io
-    try:
-        from kmos.types import *
-    except:
-        pass
-    try:
-        import numpy as np
-    except:
-        pass
-    pt = kmos.io.import_xml_file(args[1])
-    import IPython
-    if hasattr(IPython, 'release') and \
-       map(int, IPython.release.version.split('.')) >= [0, 11]:
-        from IPython.frontend.terminal.embed import InteractiveShellEmbed
-        InteractiveShellEmbed(banner1='Note: pt = kmos.io.import_xml(\'%s\')'
-                              % args[1])()
+        os.system('rm kmc_*')
+        os.system('kmos export %s .' % tempfile)
+        os.remove(tempfile)
+
+
     else:
-        from IPython.Shell import IPShellEmbed
-        IPShellEmbed(banner='Note: pt = kmos.io.import_xml(\'%s\')'
-                     % args[1])()
-elif args[0] == 'build':
-    os.system('kmos-build')
-elif args[0] == 'view':
-    from sys import path
-    path.append(os.path.abspath(os.curdir))
-    from kmos.view import main
+        parser.error('Command not understood.')
+
+if __name__ == '__main__':
     main()
-elif args[0] == 'benchmark':
-    from sys import path
-    path.append(os.path.abspath(os.curdir))
-    nsteps = 1000000
-    from time import time
-    from kmos.run import KMC_Model
-    model = KMC_Model(print_rates=False, banner=False)
-    time0 = time()
-    model.do_steps(nsteps)
-    print('%s steps took %.2f seconds' % (nsteps, time() - time0))
-elif args[0] == 'export-view':
-    out_dir = os.path.splitext(args[1])[0]
-    print('No export path provided. Exporting to %s' % out_dir)
-    args.append(out_dir)
-    os.system('kmos-export-program %s %s' % (args[1], args[2]))
-    os.chdir(out_dir)
-    os.system('kmos-view')
-elif args[0] == 'rebuild':
-    from tempfile import mktemp
-    if not os.path.exists('kmc_model.so'):
-        print('No kmc_model.so found, exiting.')
-        exit()
-
-    if not os.path.exists('kmc_settings.py'):
-        print('No kmc_settings.py found, exiting.')
-        exit()
-
-    from kmos.run import KMC_Model
-
-    model = KMC_Model(print_rates=False, banner=False)
-
-    tempfile = mktemp()
-    f = file(tempfile, 'w')
-    f.write(model.xml())
-    f.close()
-
-    os.system('rm kmc_*')
-    os.system('kmos export %s .' % tempfile)
-    os.remove(tempfile)
-
-
-else:
-    parser.error('Command not understood.')
