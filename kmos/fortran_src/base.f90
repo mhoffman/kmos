@@ -64,6 +64,7 @@ public :: add_proc, &
     get_volume , &
     increment_procstat, &
     interval_search_real, &
+    is_allocated, &
     null_species, &
     reload_system, &
     reset_site, &
@@ -687,6 +688,12 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
 
 
 end subroutine allocate_system
+
+
+subroutine is_allocated(result)
+    logical, intent(out) :: result
+    result = allocated(avail_sites)
+end subroutine is_allocated
 
 
 subroutine deallocate_system()
