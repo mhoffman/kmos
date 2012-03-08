@@ -263,9 +263,10 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
 
         self.data_plot.canvas.draw_idle()
         manager = plt.get_current_fig_manager()
-        toolbar = manager.toolbar
-        if hasattr(toolbar, 'set_visible'):
-            toolbar.set_visible(False)
+        if hasattr(manager, 'toolbar')
+            toolbar = manager.toolbar
+            if hasattr(toolbar, 'set_visible'):
+                toolbar.set_visible(False)
 
         plt.show()
 
