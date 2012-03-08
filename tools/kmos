@@ -16,8 +16,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import optparse
+import os
+import sys
 
 usage = {}
 usage['all'] = """kmos help all
@@ -78,7 +79,18 @@ def build(options):
     extra_flags['intel'] = '-fast -fpp -Wall -I/opt/intel/fc/10.1.018/lib'
     extra_flags['intelem'] = '-fast -fpp -Wall -g'
 
+    # FIXME
+    extra_libs = ''
+    ccompiler = ''
+    if os.name == 'nt':
+        ccompiler = ' --compiler=mingw32 '
+        if sys.version_info() < (2, 7):
+            extra_libs = ' -lmsvcr71 '
+        else:
+            extra_libs = ' -lmsvcr90 '
+
     module_name = 'kmc_model'
+
 
     for src_file in src_files.split():
         if not isfile(src_file):
@@ -87,12 +99,16 @@ def build(options):
     call = ('{interpreter}{path_to_f2py}'
             ' --f90flags="{extra_flags}"'
             ' --fcompiler="{fcompiler}"'
+            ' {extra_libs} '
+            ' {ccompiler} '
             ' -c {src_files}'
             ' -m {module_name}').format(interpreter=interpreter,
                                        src_files=src_files,
                                        extra_flags=extra_flags.get(
-                                                   options.fcompiler, ''),
+                                        options.fcompiler, ''),
                                        module_name=module_name,
+                                       ccompiler=ccompiler,
+                                       extra_libs=extra_libs,
                                        path_to_f2py=options.path_to_f2py,
                                        fcompiler=options.fcompiler)
     print(call)
@@ -119,7 +135,7 @@ def main():
 
     parser.add_option('-f', '--fcompiler',
                      dest='fcompiler',
-                     default='intel')
+                     default=os.environ.get('F2PY_FCOMPILER', 'intel'))
 
 
     options, args = parser.parse_args()
@@ -164,8 +180,9 @@ def main():
         kmos.io.export_source(project, export_dir)
 
         cwd = os.path.abspath(os.curdir)
-        if os.name == 'posix' \
-           and os.uname()[0] == 'Linux'\
+        if ((os.name == 'posix'
+           and os.uname()[0] == 'Linux')
+           or os.name == 'nt' ) \
            and not options.source_only:
             os.chdir(export_dir)
             build(options)
