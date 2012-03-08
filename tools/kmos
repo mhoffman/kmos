@@ -84,7 +84,7 @@ def build(options):
     ccompiler = ''
     if os.name == 'nt':
         ccompiler = ' --compiler=mingw32 '
-        if sys.version_info() < (2, 7):
+        if sys.version_info < (2, 7):
             extra_libs = ' -lmsvcr71 '
         else:
             extra_libs = ' -lmsvcr90 '
