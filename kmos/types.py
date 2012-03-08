@@ -572,9 +572,10 @@ class Project(object):
         # check if all process names are valid
         for x in self.get_processes():
             if not variable_regex.match(x.name):
-                raise UserWarning('Model %s is not a valid variable name.\n'
-                                  'Only letters, numerals and "_" allowed.\n'
-                                  'First character has to be a letter.\n')
+                raise UserWarning(('Model %s is not a valid variable name.\n'
+                                   'Only letters, numerals and "_" allowed.\n'
+                                   'First character has to be a letter.\n')
+                                   % x.name)
 
         # check if all process names are unique
         for x in self.get_processes():
