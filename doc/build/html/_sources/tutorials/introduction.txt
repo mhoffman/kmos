@@ -9,8 +9,8 @@ Introduction
 
 
 
-Installation
-^^^^^^^^^^^^
+Installation on Linux
+^^^^^^^^^^^^^^^^^^^^^
 
 You can fetch the current version of kmos using *git* ::
 
@@ -51,7 +51,7 @@ no dependencies except for a Fortran compiler.
 
 To ease the installation further on Ubuntu one can simply run::
 
- kmos-install-dependencies-ubuntu 
+ kmos-install-dependencies-ubuntu
 
 
 .. todo ::
@@ -60,6 +60,73 @@ To ease the installation further on Ubuntu one can simply run::
     install dependencies.
 
 
-.. todo ::
 
-   test installation on other platforms
+Installation on windoze 7
+^^^^^^^^^^^^^^^^^^^^^^^^^
+In order for kmos to work in a recent windoze we need a
+number of programs.
+
+#. **Python**
+   If you have no python previously installed you might consider the
+   `Enthought Python Distribution`_ in its free version because it
+   already packages a number of useful libraries such a numpy, scipy,
+   ipython and matplotlib.
+
+   Otherwise you can simply download Python from `python.org`_ and
+   this installation has been successfully tested using python 2.7.
+
+
+#.  **MinGW**
+    provides free Fortran and C compilers and can be obtained from the
+    `sourceforge http://sourceforge.net/projects/mingw/`_ . Make
+    sure you make a tick for the Fortran and the C compiler.
+
+#. **GTK**
+   is needed for the GUI frontend so fetch the
+   `all-in-one http://www.gtk.org/download/`_ installer and
+   install most of it.
+
+#. **lxml**
+   is an awesome library to process xml files, which has unfortunately
+   not fully found its way into the standard library. As of this writing
+   the latest version with prebuilt binaries is `lxml 2.2.8`_ and installation
+   works without troubles.
+
+#. **ASE**
+   is needed for the representation of atoms in the frontend. So
+   download the latest from the
+   `DTU website <https://wiki.fysik.dtu.dk/ase/>`_
+   and install it. This has to be installed using e.g. the powershell.
+   So after unpacking it, fire up the powershell, cd to the directory
+   and run ::
+
+    python setup.py install
+
+   in there. Note that there is currently a slight glitch in the
+   `setup.py` script on windoze, so open `setup.py` in a text
+   editor and find the line saying ::
+
+     version = ...
+
+   comment out the lines above it and hard-code the current version
+   number.
+
+#. **kmos**
+   is finally what we are after, so download the latest version
+   from `github <http://mhoffman.github.com/kmos/>`_ and install
+   it in the same way as you installed **ASE**.
+
+
+There are probably a number of small changes you have to make
+which are not described in this document. Please post questions
+and comments in the
+`issues forum <https://github.com/mhoffman/kmos/issues>`_ .
+
+
+
+
+
+.. _Enthought Python Distribution: http://www.enthought.com/products/epd_free.php
+.. _python.org: http://www.python.org/download
+.. _lxml 2.2.8: http://pypi.python.org/pypi/lxml/2.2.8
+.. todo :: test installation on other platforms

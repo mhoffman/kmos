@@ -167,16 +167,17 @@ necessary if you want to run more than one simulation
 in one script.</p>
 </div>
 <div class="section" id="manipulating-the-model-at-runtime">
-<h1>Manipulating the Model at Runtime<a class="headerlink" href="#manipulating-the-model-at-runtime" title="Permalink to this headline">¶</a></h1>
+<span id="manipulate-model-runtime"></span><h1>Manipulating the Model at Runtime<a class="headerlink" href="#manipulating-the-model-at-runtime" title="Permalink to this headline">¶</a></h1>
 <p>It is quite easy to change not only model parameters but
 also the configuration at runtime. For instance if one
 would like to prepare a surface with a certain configuration
 or pattern.</p>
-<p>Given you instantiated a <cite>model</cite> instance a site can by calling</p>
+<p>Given you instantiated a <cite>model</cite> instance a site occupation
+can be changed by calling</p>
 <div class="highlight-python"><pre>model.put(site=[x,y,z,n], model.proclist.&lt;species&gt;)</pre>
 </div>
 <p>However if changing many sites at once this is quite inefficient,
-since each put call, adjusts the book-keeping database for every
+since each <cite>put</cite> call, adjusts the book-keeping database for every
 change of the configuration. To circumvent this you can use
 the <cite>_put</cite> method, like so</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">_put</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>

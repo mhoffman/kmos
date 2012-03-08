@@ -82,7 +82,7 @@ and I need to use the window manager to kill it.</p>
 <blockquote>
 <div>This is a bug waiting to be fixed. To avoid it close
 the window showing the atoms object by clicking on its
-close button or Alt-F4 or whichever shortcut your FM uses.</div></blockquote>
+close button or Alt-F4 or whichever shortcut your WM uses.</div></blockquote>
 <p>Running a model it sometimes prints
 <cite>Warning: numerical precision too low, to resolve time-steps</cite></p>
 <blockquote>
@@ -109,10 +109,26 @@ object with all numbers but without the actual geometry.</dd>
 in bar, constants are taken from CODATA 2010. Note that the rate
 expressions though contain explicit conversion factors like <cite>bar</cite>,
 <cite>eV</cite> etc. If in doubt check the resulting rate constants by hand.</dd>
+<dt>When running the model I sometimes get mysterious <cite>infty</cite> or <cite>nan</cite> values!</dt>
+<dd>This most likely can be traced back to fact that some variable ran outside
+its range and is caused by the fact that the wrong <cite>kind</cite> values are chosen
+(Fortran stuff). Kind values are currently all hard-code in the the <cite>src</cite>
+directory at <cite>/path-to-export/src/kind_values_f2py.f90</cite> and set fort ifort.
+While I am working to have this set dynamically at compile time, you have
+to figure out the right <cite>kind</cite> value for your compiler for now.</dd>
+<dt>How can I change the occupation of a model at runtime?</dt>
+<dd><p class="first">This is explained in detail at <a class="reference internal" href="../tutorials/run_model_api.html#manipulate-model-runtime"><em>Manipulating the Model at Runtime</em></a> though
+the import bit is that you call</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">_adjust_database</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="last">after changing the occupation and before doing the next kMC step.</p>
+</dd>
 </dl>
 <p>More to follow. Please post issues
 <a class="reference external" href="https://github.com/mhoffman/kmos/issues">here</a>
-or via email mjhoffmann .at. gmail .dot. com</p>
+or via email mjhoffmann .at. gmail .dot. com
+or via twitter &#64;maxjhoffmann</p>
 <div class="admonition-todo admonition" id="index-0">
 <p class="first admonition-title">Todo</p>
 <p class="last">Explain <cite>post-mortem</cite> procedure</p>

@@ -243,7 +243,7 @@ well type</p>
 </pre></div>
 </div>
 <p>and to make it even shorter you can parse and add the process on one line</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">parse_and_add_process</span><span class="p">(</span><span class="s">&#39;CO_desorption; CO@hollow-&gt;; p_CO*bar*A/sqrt(2*pi*umss*m_CO/beta)*exp(-deltaG*eV)&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">parse_and_add_process</span><span class="p">(</span><span class="s">&#39;CO_desorption; CO@hollow-&gt;; p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(-deltaG*eV)&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>In order to add processes on more than one site possible spanning across unit
@@ -252,7 +252,7 @@ coordinate is</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">name</span><span class="o">.</span><span class="n">offset</span><span class="o">.</span><span class="n">lattice</span>
 </pre></div>
 </div>
-<p>check <em class="xref std std-ref">manual_coord_generation</em> for details.</p>
+<p>check <a class="reference internal" href="../topic_guides/coord_syntax.html#manual-coord-generation"><em>Manual generation</em></a> for details.</p>
 </div>
 <div class="section" id="export-save-compile">
 <h2>Export, save, compile<a class="headerlink" href="#export-save-compile" title="Permalink to this headline">¶</a></h2>

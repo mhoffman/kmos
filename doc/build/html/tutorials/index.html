@@ -58,7 +58,8 @@
 <li><a class="reference internal" href="#feature-overview">Feature overview</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#installation-on-linux">Installation on Linux</a></li>
+<li><a class="reference internal" href="#installation-on-windoze-7">Installation on windoze 7</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#screenshots">Screenshots</a><ul>
@@ -154,8 +155,8 @@ fashion. Python bindings are generated using <a class="reference external" href=
 </table>
 </div>
 </div>
-<div class="section" id="installation">
-<h3>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="installation-on-linux">
+<h3>Installation on Linux<a class="headerlink" href="#installation-on-linux" title="Permalink to this headline">¶</a></h3>
 <p>You can fetch the current version of kmos using <em>git</em></p>
 <div class="highlight-python"><pre>git clone http://www.github.com/mhoffman/kmos</pre>
 </div>
@@ -193,6 +194,64 @@ no dependencies except for a Fortran compiler.</p>
 <p class="last">add pip way or something alike to automatically
 install dependencies.</p>
 </div>
+</div>
+<div class="section" id="installation-on-windoze-7">
+<h3>Installation on windoze 7<a class="headerlink" href="#installation-on-windoze-7" title="Permalink to this headline">¶</a></h3>
+<p>In order for kmos to work in a recent windoze we need a
+number of programs.</p>
+<ol class="arabic">
+<li><p class="first"><strong>Python</strong>
+If you have no python previously installed you might consider the
+<a class="reference external" href="http://www.enthought.com/products/epd_free.php">Enthought Python Distribution</a> in its free version because it
+already packages a number of useful libraries such a numpy, scipy,
+ipython and matplotlib.</p>
+<p>Otherwise you can simply download Python from <a class="reference external" href="http://www.python.org/download">python.org</a> and
+this installation has been successfully tested using python 2.7.</p>
+</li>
+<li><p class="first"><strong>MinGW</strong>
+provides free Fortran and C compilers and can be obtained from the
+<a href="#id4"><span class="problematic" id="id5">`sourceforge http://sourceforge.net/projects/mingw/`_</span></a> . Make
+sure you make a tick for the Fortran and the C compiler.</p>
+</li>
+<li><p class="first"><strong>GTK</strong>
+is needed for the GUI frontend so fetch the
+<a href="#id6"><span class="problematic" id="id7">`all-in-one http://www.gtk.org/download/`_</span></a> installer and
+install most of it.</p>
+</li>
+<li><p class="first"><strong>lxml</strong>
+is an awesome library to process xml files, which has unfortunately
+not fully found its way into the standard library. As of this writing
+the latest version with prebuilt binaries is <a class="reference external" href="http://pypi.python.org/pypi/lxml/2.2.8">lxml 2.2.8</a> and installation
+works without troubles.</p>
+</li>
+<li><p class="first"><strong>ASE</strong>
+is needed for the representation of atoms in the frontend. So
+download the latest from the
+<a class="reference external" href="https://wiki.fysik.dtu.dk/ase/">DTU website</a>
+and install it. This has to be installed using e.g. the powershell.
+So after unpacking it, fire up the powershell, cd to the directory
+and run</p>
+<div class="highlight-python"><pre>python setup.py install</pre>
+</div>
+<p>in there. Note that there is currently a slight glitch in the
+<cite>setup.py</cite> script on windoze, so open <cite>setup.py</cite> in a text
+editor and find the line saying</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">version</span> <span class="o">=</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>comment out the lines above it and hard-code the current version
+number.</p>
+</li>
+<li><p class="first"><strong>kmos</strong>
+is finally what we are after, so download the latest version
+from <a class="reference external" href="http://mhoffman.github.com/kmos/">github</a> and install
+it in the same way as you installed <strong>ASE</strong>.</p>
+</li>
+</ol>
+<p>There are probably a number of small changes you have to make
+which are not described in this document. Please post questions
+and comments in the
+<a class="reference external" href="https://github.com/mhoffman/kmos/issues">issues forum</a> .</p>
 <div class="admonition-todo admonition" id="index-1">
 <p class="first admonition-title">Todo</p>
 <p class="last">test installation on other platforms</p>
@@ -398,7 +457,7 @@ well type</p>
 </pre></div>
 </div>
 <p>and to make it even shorter you can parse and add the process on one line</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">parse_and_add_process</span><span class="p">(</span><span class="s">&#39;CO_desorption; CO@hollow-&gt;; p_CO*bar*A/sqrt(2*pi*umss*m_CO/beta)*exp(-deltaG*eV)&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">parse_and_add_process</span><span class="p">(</span><span class="s">&#39;CO_desorption; CO@hollow-&gt;; p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(-deltaG*eV)&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>In order to add processes on more than one site possible spanning across unit
@@ -591,16 +650,17 @@ necessary if you want to run more than one simulation
 in one script.</p>
 </div>
 <div class="section" id="manipulating-the-model-at-runtime">
-<h2>Manipulating the Model at Runtime<a class="headerlink" href="#manipulating-the-model-at-runtime" title="Permalink to this headline">¶</a></h2>
+<span id="manipulate-model-runtime"></span><h2>Manipulating the Model at Runtime<a class="headerlink" href="#manipulating-the-model-at-runtime" title="Permalink to this headline">¶</a></h2>
 <p>It is quite easy to change not only model parameters but
 also the configuration at runtime. For instance if one
 would like to prepare a surface with a certain configuration
 or pattern.</p>
-<p>Given you instantiated a <cite>model</cite> instance a site can by calling</p>
+<p>Given you instantiated a <cite>model</cite> instance a site occupation
+can be changed by calling</p>
 <div class="highlight-python"><pre>model.put(site=[x,y,z,n], model.proclist.&lt;species&gt;)</pre>
 </div>
 <p>However if changing many sites at once this is quite inefficient,
-since each put call, adjusts the book-keeping database for every
+since each <cite>put</cite> call, adjusts the book-keeping database for every
 change of the configuration. To circumvent this you can use
 the <cite>_put</cite> method, like so</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">_put</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
