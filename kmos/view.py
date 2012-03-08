@@ -338,7 +338,7 @@ class KMC_ModelProxy(multiprocessing.Process):
             self.model = KMC_Model(self.queue,
                                    self.parameter_queue,
                                    self.signal_queue)
-        self.model.start()
+        self.model.run()
 
     def join(self):
         self.signal_queue.put('JOIN')
