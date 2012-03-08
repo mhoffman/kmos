@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """Run and view a kMC model. For this to work one needs a
-kmc_model.so and a kmc_settings.py in the import path."""
+kmc_model.(so/pyd) and a kmc_settings.py in the import path."""
 #    Copyright 2009-2012 Max J. Hoffmann (mjhoffmann@gmail.com)
 #    This file is part of kmos.
 #
@@ -19,6 +19,7 @@ kmc_model.so and a kmc_settings.py in the import path."""
 
 import multiprocessing
 import threading
+import os
 
 import numpy as np
 import time
@@ -27,20 +28,29 @@ import time
 import ase.gui.ag
 from ase.gui.images import Images
 
-try:
-    import matplotlib
-    matplotlib.use('GTKAgg')
-    import matplotlib.pylab as plt
-except:
-    print('Could not import matplotlib frontend for real-time plotting')
+from kmos.run import KMC_Model
 
 try:
     import gtk
     import gobject
     from ase.gui.view import View
     from ase.gui.status import Status
-except:
+except Exception, e:
     print('Warning: GTK not available. Cannot run graphical front-end')
+    print(e)
+
+try:
+    import matplotlib
+    if os.name == 'posix':
+        matplotlib.use('GTKAgg')
+    elif os.name == 'nt':
+        matplotlib.use('wxagg')
+    else:
+        matplotlib.use('GTKAgg')
+    import matplotlib.pylab as plt
+except Exception, e:
+    print('Could not import matplotlib frontend for real-time plotting')
+    print(e)
 
 
 from kmos.run import KMC_Model, \
@@ -254,7 +264,8 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.data_plot.canvas.draw_idle()
         manager = plt.get_current_fig_manager()
         toolbar = manager.toolbar
-        toolbar.set_visible(False)
+        if hasattr(toolbar, 'set_visible'):
+            toolbar.set_visible(False)
 
         plt.show()
 
@@ -420,7 +431,7 @@ class KMC_Viewer():
 def main(model=None):
     """The entry point for the kmos viewer application. In order to
     run and view a model the corresponding kmc_settings.py and
-    kmc_model.so must be in the current import path, e.g. ::
+    kmc_model.(so/pyd) must be in the current import path, e.g. ::
 
         from sys import path
         path.append('/path/to/model')
