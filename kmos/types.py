@@ -529,7 +529,10 @@ class Project(object):
         for x in self.get_parameters():
             if len([y for y in self.get_parameters()
                     if x.name == y.name]) > 1:
-                raise UserWarning('Parameter name "%s" is not unique' %
+                raise UserWarning(('The parameter "%s" has been defined two'
+                                   'or more times. However  each parameter'
+                                   'can be defined only once  or the value'
+                                   'cannot be resolved at runtime') %
                                   x.name)
 
         #################
