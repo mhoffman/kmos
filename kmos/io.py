@@ -22,6 +22,7 @@ supported to Fortran 90 source code.
 import itertools
 import operator
 import shutil
+import os
 
 from kmos.types import ConditionAction
 from kmos.config import *
@@ -419,7 +420,13 @@ class ProcListWriter():
         representation_length = max([len(species.representation) for species in data.species_list])
 
         out.write('integer(kind=iint), parameter, public :: representation_length = %s\n' % representation_length)
-        out.write('integer(kind=iint), public :: seed_size = 8\n')
+        if os.name == 'posix':
+            out.write('integer(kind=iint), public :: seed_size = 8\n')
+        elif os.name == 'nt':
+            out.write('integer(kind=iint), public :: seed_size = 12\n')
+        else:
+            out.write('integer(kind=iint), public :: seed_size = 8\n')
+
         out.write('integer(kind=iint), public :: seed ! random seed\n')
         out.write('integer(kind=iint), public, dimension(:), allocatable :: seed_arr ! random seed\n')
 
