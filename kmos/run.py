@@ -207,6 +207,8 @@ class KMC_Model(multiprocessing.Process):
         """Runs the model indefinitely. To control the
         simulations, model must have been initialized
         with proper Queues."""
+        if not base.is_allocated():
+            self.reset()
         while True:
             for _ in xrange(50000):
                 proclist.do_kmc_step()
@@ -238,6 +240,11 @@ class KMC_Model(multiprocessing.Process):
                     self.switch_surface_processes_off()
                 elif signal.upper() == 'SWITCH_SURFACE_PROCESSES_ON':
                     self.switch_surface_processes_on()
+                elif signal.upper() == 'TERMINATE':
+                    self.deallocate()
+                    self.terminate()
+                elif signal.upper() == 'JOIN':
+                    self.join()
 
 
             if not self.parameter_queue.empty():

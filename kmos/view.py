@@ -315,6 +315,41 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         self.update_vbox(atoms)
 
 
+class KMC_ModelProxy(multiprocessing.Process):
+    """This is a proxy class handling the communication
+    with the Model process.
+
+    This proxy was necessary because Windows does not
+    support fork() and thus the model process cannot be split-off
+    directly. As a workaround multiprocessing tries to pickle the
+    memory of the current process, however it does not know how
+    to pickle the fortran objects.
+    """
+    def __init__(self, *args, **kwargs):
+        super(KMC_ModelProxy, self).__init__()
+        self.model = kwargs.get('model', None)
+        self.kwargs = kwargs
+        self.signal_queue = self.kwargs.get('signal_queue')
+        self.parameter_queue = self.kwargs.get('parameter_queue')
+        self.queue = self.kwargs.get('queue')
+
+    def run(self):
+        if self.model is None:
+            self.model = KMC_Model(self.queue,
+                                   self.parameter_queue,
+                                   self.signal_queue)
+        self.model.start()
+
+    def join(self):
+        self.signal_queue.put('JOIN')
+        super(KMC_ModelProxy, self).join()
+
+    def terminate(self):
+        self.signal_queue.put('STOP')
+        super(KMC_ModelProxy, self).terminate()
+
+
+
 class KMC_Viewer():
     """A graphical front-end to run, manipulate
     and view a kMC model.
@@ -331,9 +366,9 @@ class KMC_Viewer():
         self.parameter_queue = multiprocessing.Queue(maxsize=50)
         self.signal_queue = multiprocessing.Queue(maxsize=10)
         if model is None:
-            self.model = KMC_Model(queue,
-                                   self.parameter_queue,
-                                   self.signal_queue)
+            self.model = KMC_ModelProxy(queue=queue,
+                                   parameter_queue=self.parameter_queue,
+                                   signal_queue=self.signal_queue)
         else:
             self.model = model
             self.model.image_queue = queue
@@ -377,7 +412,7 @@ class KMC_Viewer():
         self.model.terminate()
         self.model.join()
         #print(' ... model thread joined')
-        base.deallocate_system()
+        #base.deallocate_system()
         gtk.main_quit()
         return True
 
