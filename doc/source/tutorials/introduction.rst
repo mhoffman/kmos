@@ -76,6 +76,11 @@ number of programs.
    this installation has been successfully tested using python 2.7.
 
 
+#. **numpy**
+   Fetch it for `your version` of python on
+   `sourceforge <http://sourceforge.net/project/numpy`_
+   and install it.
+
 #.  **MinGW**
     provides free Fortran and C compilers and can be obtained from the
     `sourceforge http://sourceforge.net/projects/mingw/`_ . Make
