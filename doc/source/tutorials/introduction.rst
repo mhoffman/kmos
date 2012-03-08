@@ -83,7 +83,7 @@ number of programs.
 
 #. **GTK**
    is needed for the GUI frontend so fetch the
-   `all-in-one http://www.gtk.org/download/`_ installer and
+   `all-in-one <http://www.gtk.org/download/>`_ installer and
    install most of it.
 
 #. **lxml**
