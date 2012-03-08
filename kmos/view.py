@@ -179,6 +179,11 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         Status.__init__(self, self.vbox)
         self.vbox.show()
 
+        if os.name == 'posix':
+            self.live_plot = True
+        else:
+            self.live_plot = False
+
         self.drawing_area.realize()
         self.scale = 10.0
         self.center = np.array([8, 8, 8])
@@ -286,7 +291,8 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
             if not self.image_queue.empty():
                 atoms = self.image_queue.get()
                 gobject.idle_add(self.update_vbox, atoms)
-                gobject.idle_add(self.update_plots, atoms)
+                if self.live_plot:
+                    gobject.idle_add(self.update_plots, atoms)
 
     def on_key_press(self, _widget, event):
         """Process key press event on view box."""
