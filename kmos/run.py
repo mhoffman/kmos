@@ -369,10 +369,43 @@ class KMC_Model(multiprocessing.Process):
         set_rate_constants(settings.parameters, self.print_rates)
 
     def _put(self, site, new_species):
+        """
+        Works exactly like put, but without updating the database of
+        available processes. This is faster for when one does a lot updates
+        at once, however one must call _adjust_database afterwards.
+
+        Examples ::
+
+            model._put([0,0,0,model.lattice.lattice_bridge], model.proclist.co ])
+            # puts a CO molecule at the `bridge` site of the lower left unit cell
+
+            model._put([1,0,0,model.lattice.lattice_bridge], model.proclist.co ])
+            # puts a CO molecule at the `bridge` site one to the right
+
+            # ... many more
+
+            model._adjust_database() # Important !
+
+        """
         old_species = self.lattice.get_species(site)
         self.lattice.replace_species(site, old_species, new_species)
 
     def put(self, site, new_species):
+        """
+        Puts new_species at site. The site is given by 4-entry sequence
+        like [x, y, z, n], where the first 3 entries define the unit cell
+        from 0 to the number of unit cells in the respective direction.
+        And `n` specifies the site within the unit cell.
+
+        The database of available processes will be updated automatically.
+
+        Examples ::
+
+            model.put([0,0,0,model.lattice.lattice_bridge], model.proclist.co ])
+            # puts a CO molecule at the `bridge` site of the lower left unit cell
+
+        """
+
         self._put(site, new_species)
         self._adjust_database()
 
@@ -380,7 +413,7 @@ class KMC_Model(multiprocessing.Process):
         """
         Halve the size of the model and initialize each site in the new model
         with a species randomly drawn from the sites that are reduced onto
-        one. It is necessary that the simulation size is even
+        one. It is necessary that the simulation size is even.
         """
         if self.settings.simulation_size % 2:
             print("Can only halve system with even size!")
