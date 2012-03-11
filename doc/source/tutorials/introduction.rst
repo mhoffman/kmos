@@ -78,12 +78,12 @@ number of programs.
 
 #. **numpy**
    Fetch it for `your version` of python on
-   `sourceforge <http://sourceforge.net/project/numpy`_
+   `sourceforge <http://sourceforge.net/project/numpy>`_
    and install it.
 
 #.  **MinGW**
     provides free Fortran and C compilers and can be obtained from the
-    `sourceforge http://sourceforge.net/projects/mingw/`_ . Make
+    `sourceforge <http://sourceforge.net/projects/mingw/>`_ . Make
     sure you make a tick for the Fortran and the C compiler.
 
 #. **GTK**

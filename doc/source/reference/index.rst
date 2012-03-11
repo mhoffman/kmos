@@ -10,9 +10,9 @@ kmos.types
 
 .. automodule:: kmos.types
 .. autoclass:: kmos.types.Project
-   :members: add_layer, add_parameter, add_process, add_species, \
-             get_layers, get_parameters, get_processes, get_speciess, \
-             imort_xml_file, lattice, parse_and_add_process, parse_process, \
+   :members: add_layer, add_parameter, add_process, add_species,
+             get_layers, get_parameters, get_processes, get_speciess,
+             import_xml_file, lattice, parse_and_add_process, parse_process,
              print_statistics, save, set_meta, validate_model
 .. autoclass:: kmos.types.Meta
 .. autoclass:: kmos.types.Parameter
