@@ -110,9 +110,8 @@ can be changed by calling ::
   model.put(site=[x,y,z,n], model.proclist.<species>)
 
 However if changing many sites at once this is quite inefficient,
-since each `put` call, adjusts the book-keeping database for every
-change of the configuration. To circumvent this you can use
-the `_put` method, like so ::
+since each `put` call, adjusts the book-keeping database. To circumvent
+this you can use the `_put` method, like so ::
 
   model._put(...)
   model._put(...)
@@ -120,8 +119,8 @@ the `_put` method, like so ::
   model._adjust_database()
 
 though at the end one must not forget to call `_adjust_database()`
-before executing any next step or the model instance will
-crash soon.
+before executing any next step or the database of available processes
+is inaccurate and the model instance will crash soon.
 
 Running models in parallel
 ==========================

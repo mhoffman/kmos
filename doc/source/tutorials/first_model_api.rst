@@ -225,7 +225,7 @@ containining and error.
            point. So on a typical installation the same
            line could look like ::
 
-           python C:\Python27\Scripts\kmos export myfirst_kmc.xml -p C:\Python27\Scripts\f2py.py -f gfortran
+             python C:\Python27\Scripts\kmos export myfirst_kmc.xml -p C:\Python27\Scripts\f2py.py -f gfortran
 
 If you now `cd` to that folder `myfirst_kmc` and run::
 
