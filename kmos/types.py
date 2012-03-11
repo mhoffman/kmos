@@ -1190,30 +1190,33 @@ def prettify_xml(elem):
 def parse_chemical_expression(eq, process, project_tree):
     """Evaluates a chemical expression 'eq' and adds
     conditions and actions accordingly. Rules are:
-        - each chemical expression has the form
-           conditions -> actions
-        - each condition or action term has the form (regex)
-          [$^]*SPECIES@SITE\.OFFSET\.LAYER
-        - each SPECIES must have been defined before. The special
-          species 'empty' exists by default
+        - each chemical expression has the form ::
+
+            conditions -> actions
+
+        - each condition or action term has the form (regex) ::
+
+            [$^]*SPECIES@SITE\.OFFSET\.LAYER
+
+        - each SPECIES must have been defined before.
         - each SITE must have been defined before via the
-          layer form
+          layer form.
         - an offset in units of units cell can be given as
-          tuple such as '(0,0)'
+          tuple such as `'(0, 0)'`
         - a condition or action term containing the default species,
           i.e. by default 'empty' may be omitted. However a term containing
           the omitted site and a species other then the default must exist
           on the opposite side of the expression
         - ^ and $ are special prefixes for the 'creation' and
-          'annihilation' of a site, respectively. In case of '$'
-           the species can be always omitted. In case of ^ the default
+          'annihilation' of a site, respectively. In case of `$`
+           the species can be always omitted. In case of `^` the default
            species may be omitted. Creation and annihilation is only
            needed for lattice reconstructions/multi-lattice models and
            they only stand on the right-hand (i.e. action) side of
            the expression
         - white spaces may be used for readability but have no effect
 
-    Examples::
+    Examples ::
         - oxygen@cus -> oxygen@bridge #diffusion
         - co@bridge -> co@cus.(-1,0) # diffusion
         - -> oxygen@cus + oxygen@bridge # adsorption
