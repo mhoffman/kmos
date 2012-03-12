@@ -166,3 +166,191 @@ def download(project):
     response.write(stringio.getvalue())
     stringio.close()
     return response
+
+
+def evaluate_kind_values(infile, outfile):
+    """Go through a given file and dynamically
+    replace all selected_int/real_kind calls
+    with the dynamically evaluated fortran code
+    using only code that the function itself
+    contains.
+
+    """
+    import re
+    import os
+    import imp
+    import sys
+    sys.path.append(os.path.abspath(os.curdir))
+    def import_selected_kind():
+        try:
+            import selected
+        except:
+            from numpy.f2py import compile
+            fcode = """module kind
+    implicit none
+    contains
+    subroutine real_kind(p, r, kind_value)
+      integer, intent(in), optional :: p, r
+      integer, intent(out) :: kind_value
+
+      if(present(p).and.present(r)) then
+        kind_value = selected_real_kind(p=p, r=r)
+      else
+        if (present(r)) then
+          kind_value = selected_real_kind(r=r)
+        else
+          if (present(p)) then
+            kind_value = selected_real_kind(p)
+          endif
+        endif
+      endif
+    end subroutine real_kind
+
+    subroutine int_kind(p, r, kind_value)
+      integer, intent(in), optional :: p, r
+      integer, intent(out) :: kind_value
+
+      if(present(p).and.present(r)) then
+        kind_value = selected_int_kind(p)
+      else
+        if (present(r)) then
+          kind_value = selected_int_kind(r=r)
+        else
+          if (present(p)) then
+            kind_value = selected_int_kind(p)
+          endif
+        endif
+      endif
+    end subroutine int_kind
+
+    end module kind
+            """
+            compile(fcode, source_fn='f2py_selected_kind.f90',
+                    modulename='selected')
+            try:
+                import selected
+            except:
+                print(os.path.abspath(os.curdir))
+                print(os.listdir('.'))
+                raise
+        return selected.kind
+
+
+    def parse_args(args):
+        in_args = [x.strip() for x in args.split(',')]
+        args = []
+        kwargs = {}
+
+        for arg in in_args:
+            if '=' in arg:
+                symbol, value = arg.split('=')
+                kwargs[symbol] = eval(value)
+            else:
+                args.append(eval(value))
+
+        return args, kwargs
+
+
+    def int_kind(args):
+        args, kwargs = parse_args(args)
+        return import_selected_kind().int_kind(*args, **kwargs)
+
+
+    def real_kind(args):
+        args, kwargs = parse_args(args)
+        return import_selected_kind().real_kind(*args, **kwargs)
+
+
+
+
+    infile = file(infile)
+    outfile = file(outfile, 'w')
+    int_pattern = re.compile((r'(?P<before>.*)selected_int_kind'
+                              '\((?P<args>.*)\)(?P<after>.*)'),
+                              flags=re.IGNORECASE)
+    real_pattern = re.compile((r'(?P<before>.*)selected_real_kind'
+                                '\((?P<args>.*)\)(?P<after>.*)'),
+                              flags=re.IGNORECASE)
+
+    for line in infile:
+        real_match = real_pattern.match(line)
+        int_match = int_pattern.match(line)
+        if int_match:
+            match = int_match.groupdict()
+            line = '{before}{kind}{after}\n'.format(
+                    before=match['before'],
+                    kind=int_kind(match['args']),
+                    after=match['after'],)
+        elif real_match:
+            match = real_match.groupdict()
+            line = '{before}{kind}{after}\n'.format(
+                    before=match['before'],
+                    kind=real_kind(match['args']),
+                    after=match['after'],)
+        outfile.write(line)
+    infile.close()
+    outfile.close()
+
+
+def build(options):
+    from os.path import isfile
+    from os import system, name
+
+    src_files = 'kind_values_f2py.f90 base.f90 lattice.f90 proclist.f90'
+
+    if name == 'nt':
+        interpreter = 'python '
+    elif name == 'posix':
+        interpreter = ''
+    else:
+        interpreter = ''
+
+    extra_flags = {}
+    extra_flags['gfortran'] = (' -ffree-line-length-none -ffree-form'
+                               ' -xf95-cpp-input -Wall -g')
+    extra_flags['intel'] = '-fast -fpp -Wall -I/opt/intel/fc/10.1.018/lib'
+    extra_flags['intelem'] = '-fast -fpp -Wall -g'
+
+    # FIXME
+    extra_libs = ''
+    ccompiler = ''
+    if name == 'nt':
+        ccompiler = ' --compiler=mingw32 '
+        if sys.version_info < (2, 7):
+            extra_libs = ' -lmsvcr71 '
+        else:
+            extra_libs = ' -lmsvcr90 '
+
+    module_name = 'kmc_model'
+
+
+    if not isfile('kind_values_f2py.py'):
+         evaluate_kind_values('kind_values.f90', 'kind_values_f2py.f90')
+
+    for src_file in src_files.split():
+        if not isfile(src_file):
+            raise IOError('File %s not found' % src_file)
+
+    call = ('{interpreter}{path_to_f2py}'
+            ' --f90flags="{extra_flags}"'
+            ' --fcompiler="{fcompiler}"'
+            ' {extra_libs} '
+            ' {ccompiler} '
+            ' -c {src_files}'
+            ' -m {module_name}').format(interpreter=interpreter,
+                                       src_files=src_files,
+                                       extra_flags=extra_flags.get(
+                                        options.fcompiler, ''),
+                                       module_name=module_name,
+                                       ccompiler=ccompiler,
+                                       extra_libs=extra_libs,
+                                       path_to_f2py=options.path_to_f2py,
+                                       fcompiler=options.fcompiler)
+    print(call)
+    system(call)
+
+    print("""#  If you run into strange errors like'
+#                    '... returned NULL from py_object ...'
+# you probably have to kind_values_f2py.f90. Kind values are hardcoded here
+# because f2py cannot evaluate selected_real_kind or selected_integer_kind at
+# compile time.""")

@@ -1068,7 +1068,7 @@ def export_source(project_tree, export_dir=None):
     # copy files
     cp_files = [os.path.join('fortran_src', 'assert.ppc'),
                 os.path.join('fortran_src', 'base.f90'),
-                os.path.join('fortran_src', 'kind_values_f2py.f90'),
+                os.path.join('fortran_src', 'kind_values.f90'),
                 ]
     exec_files = []
 

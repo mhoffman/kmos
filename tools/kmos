@@ -60,65 +60,6 @@ usage['view'] = """kmos view
     model visually.
                  """
 
-def build(options):
-    from os.path import isfile
-    from os import system, name
-
-    src_files = 'kind_values_f2py.f90 base.f90 lattice.f90 proclist.f90'
-
-    if name == 'nt':
-        interpreter = 'python '
-    elif name == 'posix':
-        interpreter = ''
-    else:
-        interpreter = ''
-
-    extra_flags = {}
-    extra_flags['gfortran'] = (' -ffree-line-length-none -ffree-form'
-                               ' -xf95-cpp-input -Wall -g')
-    extra_flags['intel'] = '-fast -fpp -Wall -I/opt/intel/fc/10.1.018/lib'
-    extra_flags['intelem'] = '-fast -fpp -Wall -g'
-
-    # FIXME
-    extra_libs = ''
-    ccompiler = ''
-    if os.name == 'nt':
-        ccompiler = ' --compiler=mingw32 '
-        if sys.version_info < (2, 7):
-            extra_libs = ' -lmsvcr71 '
-        else:
-            extra_libs = ' -lmsvcr90 '
-
-    module_name = 'kmc_model'
-
-
-    for src_file in src_files.split():
-        if not isfile(src_file):
-            raise IOError('File %s not found' % src_file)
-
-    call = ('{interpreter}{path_to_f2py}'
-            ' --f90flags="{extra_flags}"'
-            ' --fcompiler="{fcompiler}"'
-            ' {extra_libs} '
-            ' {ccompiler} '
-            ' -c {src_files}'
-            ' -m {module_name}').format(interpreter=interpreter,
-                                       src_files=src_files,
-                                       extra_flags=extra_flags.get(
-                                        options.fcompiler, ''),
-                                       module_name=module_name,
-                                       ccompiler=ccompiler,
-                                       extra_libs=extra_libs,
-                                       path_to_f2py=options.path_to_f2py,
-                                       fcompiler=options.fcompiler)
-    print(call)
-    system(call)
-
-    print("""#  If you run into strange errors like'
-#                    '... returned NULL from py_object ...'
-# you probably have to kind_values_f2py.f90. Kind values are hardcoded here
-# because f2py cannot evaluate selected_real_kind or selected_integer_kind at
-# compile time.""")
 
 def main():
     parser = optparse.OptionParser(
@@ -162,6 +103,7 @@ def main():
     elif args[0] == 'export':
         import kmos.types
         import kmos.io
+        from kmos.utils import build
         from glob import glob
         import shutil
         if len(args) < 2:
@@ -218,6 +160,7 @@ def main():
             IPShellEmbed(banner='Note: pt = kmos.io.import_xml(\'%s\')'
                          % args[1])()
     elif args[0] == 'build':
+        from kmos.utils import build
         build(options)
     elif args[0] == 'view':
         from sys import path
