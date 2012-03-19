@@ -242,7 +242,7 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         tof_data = atoms.tof_data
 
         # store locally
-        while len(self.times) > 30:
+        while len(self.times) > getattr(settings, 'hist_length', 30):
             self.tof_hist.pop(0)
             self.times.pop(0)
             self.occupation_hist.pop(0)
