@@ -140,11 +140,9 @@ Further Reading
 For a very practical introduction I recommend Arthur Voter's tutorial [4]_
 and Fichthorn [5]_ for a derivation, why :math:`\Delta t` is chosen they
 way it is. The example given there is also an excellent exercise for
-any beginning kMC modeler.
-
-For recent review on implementation techniques I recommend the review
-by Reese et al. [6]_ and for a review over status and outlook I recommend
-the one by Reuter [7]_ .
+any beginning kMC modeler.  For recent review on implementation techniques
+I recommend the review by Reese et al. [6]_ and for a review over status
+and outlook I recommend the one by Reuter [7]_ .
 
 
 .. [1] Wolfram Alpha's
