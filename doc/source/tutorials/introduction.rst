@@ -72,14 +72,35 @@ To ease the installation further on Ubuntu one can simply run::
     install dependencies.
 
 
-Installation in openSUSE 12.1 Linux
+Installation on openSUSE 12.1 Linux
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-On recent openSUSE some dependencies are distributed a little
+On a recent openSUSE some dependencies are distributed a little
 different but nevertheless doable. We start by install some
 package from the repositories ::
 
   sudo zypper install libgfortran46, python-lxml, python-matplotlib, \
+                      python-numpy, python-numpy-devel, python-goocanvas,
+                      python-imaging
+
+And two more packages SUSE packages have to be fetched from the
+openSUSE `build service <https://build.opensuse.org/>`_
+
+- `gazpacho <https://build.opensuse.org/package/files?package=gazpacho&project=home%3Ajoshkress>`_
+- `python-kiwi <https://build.opensuse.org/package/files?package=python-kiwi&project=home%3Ajoshkress>`_
+
+
+For each one just download the \*.tar.bz2 files. Unpack them and inside
+run ::
+
+  python setup.py install
+
+In the same vein you can install ASE. Download a recent version
+from the `DTU website <https://wiki.fysik.dtu.dk/ase/download.html>`_
+unzip it and install it with ::
+
+  python setup.py install
+
 
 
 Installation on windoze 7
@@ -147,8 +168,6 @@ There are probably a number of small changes you have to make
 which are not described in this document. Please post questions
 and comments in the
 `issues forum <https://github.com/mhoffman/kmos/issues>`_ .
-
-
 
 
 
