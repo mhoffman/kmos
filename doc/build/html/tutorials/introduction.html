@@ -43,7 +43,8 @@
 <li><a class="reference external" href="#feature-overview">Feature overview</a></li>
 </ul>
 </li>
-<li><a class="reference external" href="#installation-on-linux">Installation on Linux</a></li>
+<li><a class="reference external" href="#installation-on-ubuntu-linux">Installation on Ubuntu Linux</a></li>
+<li><a class="reference external" href="#installation-on-opensuse-12-1-linux">Installation on openSUSE 12.1 Linux</a></li>
 <li><a class="reference external" href="#installation-on-windoze-7">Installation on windoze 7</a></li>
 </ul>
 </li>
@@ -112,8 +113,8 @@ fashion. Python bindings are generated using <a class="reference external" href=
 </table>
 </div>
 </div>
-<div class="section" id="installation-on-linux">
-<h2>Installation on Linux<a class="headerlink" href="#installation-on-linux" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="installation-on-ubuntu-linux">
+<h2>Installation on Ubuntu Linux<a class="headerlink" href="#installation-on-ubuntu-linux" title="Permalink to this headline">¶</a></h2>
 <p>You can fetch the current version of kmos using <em>git</em></p>
 <div class="highlight-python"><pre>git clone http://www.github.com/mhoffman/kmos</pre>
 </div>
@@ -157,10 +158,35 @@ no dependencies except for a Fortran compiler.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">kmos</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">dependencies</span><span class="o">-</span><span class="n">ubuntu</span>
 </pre></div>
 </div>
-<div class="admonition-todo admonition " id="todo-37">
+<div class="admonition-todo admonition " id="todo-58">
 <p class="first admonition-title">Todo</p>
 <p class="last">add pip way or something alike to automatically
 install dependencies.</p>
+</div>
+</div>
+<div class="section" id="installation-on-opensuse-12-1-linux">
+<h2>Installation on openSUSE 12.1 Linux<a class="headerlink" href="#installation-on-opensuse-12-1-linux" title="Permalink to this headline">¶</a></h2>
+<p>On a recent openSUSE some dependencies are distributed a little
+different but nevertheless doable. We start by install some
+package from the repositories</p>
+<div class="highlight-python"><pre>sudo zypper install libgfortran46, python-lxml, python-matplotlib, \
+                    python-numpy, python-numpy-devel, python-goocanvas,
+                    python-imaging</pre>
+</div>
+<p>And two more packages SUSE packages have to be fetched from the
+openSUSE <a class="reference external" href="https://build.opensuse.org/">build service</a></p>
+<ul class="simple">
+<li><a class="reference external" href="https://build.opensuse.org/package/files?package=gazpacho&amp;project=home%3Ajoshkress">gazpacho</a></li>
+<li><a class="reference external" href="https://build.opensuse.org/package/files?package=python-kiwi&amp;project=home%3Ajoshkress">python-kiwi</a></li>
+</ul>
+<p>For each one just download the *.tar.bz2 files. Unpack them and inside
+run</p>
+<div class="highlight-python"><pre>python setup.py install</pre>
+</div>
+<p>In the same vein you can install ASE. Download a recent version
+from the <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/download.html">DTU website</a>
+unzip it and install it with</p>
+<div class="highlight-python"><pre>python setup.py install</pre>
 </div>
 </div>
 <div class="section" id="installation-on-windoze-7">
@@ -225,7 +251,7 @@ it in the same way as you installed <strong>ASE</strong>.</p>
 which are not described in this document. Please post questions
 and comments in the
 <a class="reference external" href="https://github.com/mhoffman/kmos/issues">issues forum</a> .</p>
-<div class="admonition-todo admonition " id="todo-38">
+<div class="admonition-todo admonition " id="todo-59">
 <p class="first admonition-title">Todo</p>
 <p class="last">test installation on other platforms</p>
 </div>
