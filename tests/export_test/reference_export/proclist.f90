@@ -66,7 +66,7 @@ integer(kind=iint), parameter, public :: empty = 1
 integer(kind=iint), parameter, public :: oxygen = 2
 integer(kind=iint), public :: default_species = empty
 integer(kind=iint), parameter, public :: representation_length = 0
-integer(kind=iint), public :: seed_size = 8
+integer(kind=iint), public :: seed_size = 12
 integer(kind=iint), public :: seed ! random seed
 integer(kind=iint), public, dimension(:), allocatable :: seed_arr ! random seed
 

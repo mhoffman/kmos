@@ -421,7 +421,7 @@ class ProcListWriter():
 
         out.write('integer(kind=iint), parameter, public :: representation_length = %s\n' % representation_length)
         if os.name == 'posix':
-            out.write('integer(kind=iint), public :: seed_size = 8\n')
+            out.write('integer(kind=iint), public :: seed_size = 12\n')
         elif os.name == 'nt':
             out.write('integer(kind=iint), public :: seed_size = 12\n')
         else:
