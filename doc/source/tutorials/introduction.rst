@@ -9,8 +9,8 @@ Introduction
 
 
 
-Installation on Linux
-^^^^^^^^^^^^^^^^^^^^^
+Installation on Ubuntu Linux
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You can fetch the current version of kmos using *git* ::
 
@@ -71,6 +71,15 @@ To ease the installation further on Ubuntu one can simply run::
     add pip way or something alike to automatically
     install dependencies.
 
+
+Installation in openSUSE 12.1 Linux
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+On recent openSUSE some dependencies are distributed a little
+different but nevertheless doable. We start by install some
+package from the repositories ::
+
+  sudo zypper install libgfortran46, python-lxml, python-matplotlib, \
 
 
 Installation on windoze 7
