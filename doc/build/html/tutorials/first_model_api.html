@@ -1,31 +1,25 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>A first kMC Model–the API way &mdash; kmos 0.0.1 documentation</title>
-    
+    <title>A first kMC Model–the API way &mdash; kmos v0.0.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
         VERSION:     '0.0.1',
-        COLLAPSE_INDEX: false,
+        COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos 0.0.1 documentation" href="../index.html" /> 
+    <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -35,42 +29,42 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+          <a href="../modindex.html" title="Global Module Index"
+             accesskey="M">modules</a> |</li>
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="../index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">A first kMC Model&#8211;the API way</a><ul>
-<li><a class="reference internal" href="#construct-the-model">Construct the model</a></li>
-<li><a class="reference internal" href="#populate-process-list-and-parameter-list">Populate process list and parameter list</a></li>
-<li><a class="reference internal" href="#export-save-compile">Export, save, compile</a></li>
-<li><a class="reference internal" href="#taking-it-home">Taking it home</a></li>
+            <h3><a href="../index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">A first kMC Model&#8211;the API way</a><ul>
+<li><a class="reference external" href="#construct-the-model">Construct the model</a></li>
+<li><a class="reference external" href="#populate-process-list-and-parameter-list">Populate process list and parameter list</a></li>
+<li><a class="reference external" href="#export-save-compile">Export, save, compile</a></li>
+<li><a class="reference external" href="#taking-it-home">Taking it home</a></li>
 </ul>
 </li>
 </ul>
 
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="../_sources/tutorials/first_model_api.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="../_sources/tutorials/first_model_api.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
 
@@ -252,26 +246,37 @@ coordinate is</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">name</span><span class="o">.</span><span class="n">offset</span><span class="o">.</span><span class="n">lattice</span>
 </pre></div>
 </div>
-<p>check <a class="reference internal" href="../topic_guides/coord_syntax.html#manual-coord-generation"><em>Manual generation</em></a> for details.</p>
+<p>check <a class="reference external" href="../topic_guides/coord_syntax.html#manual-coord-generation"><em>Manual generation</em></a> for details.</p>
 </div>
 <div class="section" id="export-save-compile">
 <h2>Export, save, compile<a class="headerlink" href="#export-save-compile" title="Permalink to this headline">¶</a></h2>
 <p>Next it is a good idea to save your work:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">export_xml_file</span><span class="p">(</span><span class="s">&#39;myfirst_kmc.xml&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>and next you can export the source code:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">kmos</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">export_source</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="s">&#39;myfirst_kmc.xml&#39;</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>Now is the time to leave the python shell. In the current
-directory you should see a MyFirstModel.xml and a folder
-named MyFirstModel. The latter contains all source code.</p>
-<p>If you now <cite>cd</cite> to that folder and run:</p>
-<div class="highlight-python"><pre>kmos build</pre>
+directory you should see a <cite>myfirst_kmc.xml</cite>.
+This XML file contains the full definition of your model
+and you can create the source code and binaries in just one line.
+So on the command line in the same directory as the XML file
+you run</p>
+<div class="highlight-python"><pre>kmos export myfirst_kmc.xml</pre>
 </div>
-<p>right there, you should get a binary named <cite>kmc_model.so</cite>.
-Now run:</p>
+<p>Make sure this finishes gracefully without any line
+containining and error.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>If you are using windoze, this line would not
+not look as slick, yet. We need to help the
+python interpreter to find the kmos file as
+well as help kmos to find the f2py entry
+point. So on a typical installation the same
+line could look like</p>
+<div class="last highlight-python"><pre>python C:\Python27\Scripts\kmos export myfirst_kmc.xml -p C:\Python27\Scripts\f2py.py -f gfortran</pre>
+</div>
+</div>
+<p>If you now <cite>cd</cite> to that folder <cite>myfirst_kmc</cite> and run:</p>
 <div class="highlight-python"><pre>kmos view</pre>
 </div>
 <p>... and dada! Your first running kMC model right there!</p>
@@ -292,7 +297,7 @@ the workflow.</p>
 in terms of  <cite>conditions</cite> and
 <cite>actions</cite> and you find a more complete
 description can be found in the
-<a class="reference internal" href="../topic_guides/proc_syntax.html#proc-mini-language"><em>topic guide</em></a>
+<a class="reference external" href="../topic_guides/proc_syntax.html#proc-mini-language"><em>topic guide</em></a>
 to the process description syntax.</td></tr>
 </tbody>
 </table>
@@ -302,7 +307,7 @@ to the process description syntax.</td></tr>
 <tr><td class="label"><a class="fn-backref" href="#id1">[2]</a></td><td>The description of coordinates follows
 the simple syntax of the coordinate
 syntax and the
-<a class="reference internal" href="../topic_guides/coord_syntax.html#coord-mini-language"><em>topic guide</em></a>
+<a class="reference external" href="../topic_guides/coord_syntax.html#coord-mini-language"><em>topic guide</em></a>
 explains how that works.</td></tr>
 </tbody>
 </table>
@@ -322,14 +327,14 @@ explains how that works.</td></tr>
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
+          <a href="../modindex.html" title="Global Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2009-2012, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+      &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
     </div>
   </body>
 </html>

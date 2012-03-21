@@ -1,31 +1,25 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Trouble Shooting &mdash; kmos 0.0.1 documentation</title>
-    
+    <title>Trouble Shooting &mdash; kmos v0.0.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
         VERSION:     '0.0.1',
-        COLLAPSE_INDEX: false,
+        COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos 0.0.1 documentation" href="../index.html" />
+    <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
     <link rel="prev" title="Reference" href="../reference/index.html" /> 
   </head>
   <body>
@@ -36,37 +30,37 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
+          <a href="../modindex.html" title="Global Module Index"
+             accesskey="M">modules</a> |</li>
         <li class="right" >
           <a href="../reference/index.html" title="Reference"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="../reference/index.html"
-                        title="previous chapter">Reference</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="../_sources/troubleshooting/index.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="../reference/index.html"
+                                  title="previous chapter">Reference</a></p>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="../_sources/troubleshooting/index.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
 
@@ -77,16 +71,16 @@
             
   <div class="section" id="trouble-shooting">
 <h1>Trouble Shooting<a class="headerlink" href="#trouble-shooting" title="Permalink to this headline">¶</a></h1>
-<p>When I run kmos the GUI way and close it, it seems to hang
-and I need to use the window manager to kill it.</p>
-<blockquote>
-<div>This is a bug waiting to be fixed. To avoid it close
+<dl class="docutils">
+<dt>When I run kmos the GUI way and close it, it seems to hang and I need to use the window manager to kill it.</dt>
+<dd>This is a bug waiting to be fixed. To avoid it close
 the window showing the atoms object by clicking on its
-close button or Alt-F4 or whichever shortcut your WM uses.</div></blockquote>
+close button or Alt-F4 or whichever shortcut your WM uses.</dd>
+</dl>
 <p>Running a model it sometimes prints
 <cite>Warning: numerical precision too low, to resolve time-steps</cite></p>
 <blockquote>
-<div><p>This means that the kMC step of the current process was so
+<p>This means that the kMC step of the current process was so
 small compared to the current kMC time that for the processor
 <img class="math" src="../_images/math/efdcb97849012e18f0417f151c96f3c850e769ce.png" alt="t + \Delta t = t"/>. This should under normal circumstances
 only occur if you changed external conditions during a kMC run.</p>
@@ -96,7 +90,7 @@ to wonder whether non-coarse graind kMC is actually the right
 approach for the system. On the hand because the selection of
 the next process will no longer be reliable and second because
 reasonable sampling of all involved process may no longer happen.</p>
-</div></blockquote>
+</blockquote>
 <dl class="docutils">
 <dt>When running a model without GUI evaluation steps seem very slow.</dt>
 <dd>If you have a <cite>kmos.run.KMC_Model</cite> instance and call <cite>model.get_atoms()</cite>
@@ -113,11 +107,11 @@ expressions though contain explicit conversion factors like <cite>bar</cite>,
 <dd>This most likely can be traced back to fact that some variable ran outside
 its range and is caused by the fact that the wrong <cite>kind</cite> values are chosen
 (Fortran stuff). Kind values are currently all hard-code in the the <cite>src</cite>
-directory at <cite>/path-to-export/src/kind_values_f2py.f90</cite> and set fort ifort.
+directory at <cite>/path-to-export/src/kind_values_f2py.f90</cite> and set for ifort.
 While I am working to have this set dynamically at compile time, you have
 to figure out the right <cite>kind</cite> value for your compiler for now.</dd>
 <dt>How can I change the occupation of a model at runtime?</dt>
-<dd><p class="first">This is explained in detail at <a class="reference internal" href="../tutorials/run_model_api.html#manipulate-model-runtime"><em>Manipulating the Model at Runtime</em></a> though
+<dd><p class="first">This is explained in detail at <a class="reference external" href="../tutorials/run_model_api.html#manipulate-model-runtime"><em>Manipulating the Model at Runtime</em></a> though
 the import bit is that you call</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">_adjust_database</span><span class="p">()</span>
 </pre></div>
@@ -125,11 +119,12 @@ the import bit is that you call</p>
 <p class="last">after changing the occupation and before doing the next kMC step.</p>
 </dd>
 </dl>
-<p>More to follow. Please post issues
+<p>More to follow.</p>
+<p>Please post issues
 <a class="reference external" href="https://github.com/mhoffman/kmos/issues">here</a>
 or via email mjhoffmann .at. gmail .dot. com
 or via twitter &#64;maxjhoffmann</p>
-<div class="admonition-todo admonition" id="index-0">
+<div class="admonition-todo admonition " id="todo-1">
 <p class="first admonition-title">Todo</p>
 <p class="last">Explain <cite>post-mortem</cite> procedure</p>
 </div>
@@ -148,17 +143,17 @@ or via twitter &#64;maxjhoffmann</p>
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
+          <a href="../modindex.html" title="Global Module Index"
              >modules</a> |</li>
         <li class="right" >
           <a href="../reference/index.html" title="Reference"
              >previous</a> |</li>
-        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2009-2012, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+      &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
     </div>
   </body>
 </html>

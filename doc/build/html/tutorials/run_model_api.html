@@ -1,31 +1,25 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Running the Model–the API way &mdash; kmos 0.0.1 documentation</title>
-    
+    <title>Running the Model–the API way &mdash; kmos v0.0.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
         VERSION:     '0.0.1',
-        COLLAPSE_INDEX: false,
+        COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos 0.0.1 documentation" href="../index.html" /> 
+    <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -35,38 +29,38 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+          <a href="../modindex.html" title="Global Module Index"
+             accesskey="M">modules</a> |</li>
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="../index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Running the Model&#8211;the API way</a></li>
-<li><a class="reference internal" href="#manipulating-the-model-at-runtime">Manipulating the Model at Runtime</a></li>
-<li><a class="reference internal" href="#running-models-in-parallel">Running models in parallel</a></li>
+            <h3><a href="../index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">Running the Model&#8211;the API way</a></li>
+<li><a class="reference external" href="#manipulating-the-model-at-runtime">Manipulating the Model at Runtime</a></li>
+<li><a class="reference external" href="#running-models-in-parallel">Running models in parallel</a></li>
 </ul>
 
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="../_sources/tutorials/run_model_api.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="../_sources/tutorials/run_model_api.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
 
@@ -177,9 +171,8 @@ can be changed by calling</p>
 <div class="highlight-python"><pre>model.put(site=[x,y,z,n], model.proclist.&lt;species&gt;)</pre>
 </div>
 <p>However if changing many sites at once this is quite inefficient,
-since each <cite>put</cite> call, adjusts the book-keeping database for every
-change of the configuration. To circumvent this you can use
-the <cite>_put</cite> method, like so</p>
+since each <cite>put</cite> call, adjusts the book-keeping database. To circumvent
+this you can use the <cite>_put</cite> method, like so</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">_put</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">_put</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
 <span class="o">...</span>
@@ -187,8 +180,8 @@ the <cite>_put</cite> method, like so</p>
 </pre></div>
 </div>
 <p>though at the end one must not forget to call <cite>_adjust_database()</cite>
-before executing any next step or the model instance will
-crash soon.</p>
+before executing any next step or the database of available processes
+is inaccurate and the model instance will crash soon.</p>
 </div>
 <div class="section" id="running-models-in-parallel">
 <h1>Running models in parallel<a class="headerlink" href="#running-models-in-parallel" title="Permalink to this headline">¶</a></h1>
@@ -259,14 +252,14 @@ split the list and start subprocesses for each sublist</p>
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
+          <a href="../modindex.html" title="Global Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2009-2012, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+      &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
     </div>
   </body>
 </html>

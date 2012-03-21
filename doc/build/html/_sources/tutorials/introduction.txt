@@ -22,7 +22,19 @@ and install it using *setuptools* ::
     ./setup.py install [--user]
 
 
-In order to use all features of kmos you have to install
+To use the core functionality
+(programmatic model setup, code generation, model execution)
+kmos has a fairly modest depedency foot-print. You will need ::
+
+  python-numpy, a Fortran compiler, python-lxml
+
+In order to watch the model run on screen you will additionally
+need ::
+
+  python-matplotlib, python-ase
+
+Finally in order to use all features, in particular the GUI
+model editor of kmos you have to install
 a number of dependencies. This should not be very difficult
 on a recent Linux distribution with package management. So
 on Ubuntu it suffices to call::
@@ -76,14 +88,19 @@ number of programs.
    this installation has been successfully tested using python 2.7.
 
 
+#. **numpy**
+   Fetch it for `your version` of python from
+   `sourceforge's Numpy site <http://sourceforge.net/project/numpy>`_
+   and install it.
+
 #.  **MinGW**
     provides free Fortran and C compilers and can be obtained from the
-    `sourceforge http://sourceforge.net/projects/mingw/`_ . Make
-    sure you make a tick for the Fortran and the C compiler.
+    `sourceforge's MinGW site <http://sourceforge.net/projects/mingw/>`_ .
+    Make sure you make a tick for the Fortran and the C compiler.
 
 #. **GTK**
    is needed for the GUI frontend so fetch the
-   `all-in-one http://www.gtk.org/download/`_ installer and
+   `all-in-one <http://www.gtk.org/download/>`_ installer and
    install most of it.
 
 #. **lxml**

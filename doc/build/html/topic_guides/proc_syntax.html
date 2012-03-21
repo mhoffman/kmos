@@ -1,31 +1,25 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>The Process Syntax &mdash; kmos 0.0.1 documentation</title>
-    
+    <title>The Process Syntax &mdash; kmos v0.0.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
         VERSION:     '0.0.1',
-        COLLAPSE_INDEX: false,
+        COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos 0.0.1 documentation" href="../index.html" />
+    <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
     <link rel="up" title="Topic Guides" href="index.html" />
     <link rel="next" title="The Site/Coordinate Syntax" href="coord_syntax.html" />
     <link rel="prev" title="How the kmos kMC algorithm works" href="kmos_speed.html" /> 
@@ -38,55 +32,55 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
+          <a href="../modindex.html" title="Global Module Index"
+             accesskey="M">modules</a> |</li>
         <li class="right" >
           <a href="coord_syntax.html" title="The Site/Coordinate Syntax"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="kmos_speed.html" title="How the kmos kMC algorithm works"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li>
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Topic Guides</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="../index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">The Process Syntax</a><ul>
-<li><a class="reference internal" href="#adsorption">Adsorption</a></li>
-<li><a class="reference internal" href="#diffusion">Diffusion</a></li>
-<li><a class="reference internal" href="#avoid-double-counting">Avoid Double Counting</a></li>
-<li><a class="reference internal" href="#taking-it-home">Taking It Home</a></li>
+            <h3><a href="../index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">The Process Syntax</a><ul>
+<li><a class="reference external" href="#adsorption">Adsorption</a></li>
+<li><a class="reference external" href="#diffusion">Diffusion</a></li>
+<li><a class="reference external" href="#avoid-double-counting">Avoid Double Counting</a></li>
+<li><a class="reference external" href="#taking-it-home">Taking It Home</a></li>
 </ul>
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="kmos_speed.html"
-                        title="previous chapter">How the kmos kMC algorithm works</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="coord_syntax.html"
-                        title="next chapter">The Site/Coordinate Syntax</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="../_sources/topic_guides/proc_syntax.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="kmos_speed.html"
+                                  title="previous chapter">How the kmos kMC algorithm works</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="coord_syntax.html"
+                                  title="next chapter">The Site/Coordinate Syntax</a></p>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="../_sources/topic_guides/proc_syntax.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
 
@@ -118,13 +112,13 @@ defined explicitly.  Typically one a single crystal
 surface one will have not one diffusion per species but
 as many as there are equivalent directions :</p>
 <blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li>species_diffusion_right</li>
 <li>species_diffusion_up</li>
 <li>species_diffusion_left</li>
 <li>species_diffusion_down</li>
 </ul>
-</div></blockquote>
+</blockquote>
 <p>while this seems like a lot of work to define that
 many processes, it allows for a very clean and simple
 definition of a process itself.  Later you can use
@@ -232,7 +226,7 @@ in the <cite>positive</cite> directions.</p>
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
+          <a href="../modindex.html" title="Global Module Index"
              >modules</a> |</li>
         <li class="right" >
           <a href="coord_syntax.html" title="The Site/Coordinate Syntax"
@@ -240,13 +234,13 @@ in the <cite>positive</cite> directions.</p>
         <li class="right" >
           <a href="kmos_speed.html" title="How the kmos kMC algorithm works"
              >previous</a> |</li>
-        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li>
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li>
           <li><a href="index.html" >Topic Guides</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2009-2012, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+      &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
     </div>
   </body>
 </html>

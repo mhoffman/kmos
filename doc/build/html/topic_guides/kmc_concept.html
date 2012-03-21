@@ -1,31 +1,25 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>The Concept of Kinetic Monte Carlo &mdash; kmos 0.0.1 documentation</title>
-    
+    <title>The Concept of Kinetic Monte Carlo &mdash; kmos v0.0.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
         VERSION:     '0.0.1',
-        COLLAPSE_INDEX: false,
+        COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos 0.0.1 documentation" href="../index.html" />
+    <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
     <link rel="up" title="Topic Guides" href="index.html" />
     <link rel="next" title="Modelling Workflows" href="workflows.html" />
     <link rel="prev" title="Topic Guides" href="index.html" /> 
@@ -38,54 +32,55 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
+          <a href="../modindex.html" title="Global Module Index"
+             accesskey="M">modules</a> |</li>
         <li class="right" >
           <a href="workflows.html" title="Modelling Workflows"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Topic Guides"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li>
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Topic Guides</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="../index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">The Concept of Kinetic Monte Carlo</a><ul>
-<li><a class="reference internal" href="#why-use-kinetic-monte-carlo">Why use Kinetic Monte Carlo?</a></li>
-<li><a class="reference internal" href="#basic-kinetic-carlo-algorithm">Basic Kinetic Carlo Algorithm</a></li>
-<li><a class="reference internal" href="#justification-of-the-algorithm">Justification of the Algorithm</a></li>
+            <h3><a href="../index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">The Concept of Kinetic Monte Carlo</a><ul>
+<li><a class="reference external" href="#why-use-kinetic-monte-carlo">Why use Kinetic Monte Carlo?</a></li>
+<li><a class="reference external" href="#basic-kinetic-carlo-algorithm">Basic Kinetic Carlo Algorithm</a></li>
+<li><a class="reference external" href="#justification-of-the-algorithm">Justification of the Algorithm</a></li>
+<li><a class="reference external" href="#further-reading">Further Reading</a></li>
 </ul>
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">Topic Guides</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="workflows.html"
-                        title="next chapter">Modelling Workflows</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="../_sources/topic_guides/kmc_concept.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="index.html"
+                                  title="previous chapter">Topic Guides</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="workflows.html"
+                                  title="next chapter">Modelling Workflows</a></p>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="../_sources/topic_guides/kmc_concept.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
 
@@ -109,7 +104,7 @@ over states, the probability distribution at one
 infinitesimal time <img class="math" src="../_images/math/a1ffc0a012620941fe660cedabff822ce7162eca.png" alt="\Delta t"/> later can be
 obtained from</p>
 <div class="math">
-<p><img src="../_images/math/f00bd792fb6d4b7712e25f6f6973ba58046b78a8.png" alt="\rho_{i}(t+\Delta t) = \rho_{i}(t) + \sum_{j} -k_{ji}\rho_{i}(t)\mathrm{d}t + k_{ij}\rho_j(t)\mathrm{d}t"/></p>
+<p><img src="../_images/math/f00bd792fb6d4b7712e25f6f6973ba58046b78a8.png" alt="\rho_{i}(t+\Delta t) = \rho_{i}(t) + \sum_{j} -k_{ji}\rho_{i}(t)\mathrm{d}t + k_{ij}\rho_j(t)\mathrm{d}t" /></p>
 </div><p>where the important bit is that each <img class="math" src="../_images/math/ced07561ffcf58a83865b55ac2aa49c3e29c0fbf.png" alt="\rho(t)"/>
 only depends on the state just before the current state.
 The matrix <img class="math" src="../_images/math/596289dc0590c497d056daa6e454a08b6336ab8d.png" alt="k_{ij}"/> consists of constant real entries,
@@ -133,7 +128,7 @@ sites and 3 possible states for each site, thus having
 to store all transition elements would have
 <img class="math" src="../_images/math/63b7edefb35c8c31035349bbe791d2f1f4f645eb.png" alt="(3^{100})^2 \approx 2.66\ 10^{95}"/> entries, which
 exceeds the number of atoms on our planet by roughly 45 orders of
-magnitude. <a class="footnote-reference" href="#id4" id="id1">[1]</a> And even though most of these elements
+magnitude. <a class="footnote-reference" href="#id8" id="id1">[1]</a> And even though most of these elements
 would be zero since the number of accessible states is
 usually a lot smaller, there seems to be no simple
 way to transform to and solve this irreducible matrix
@@ -148,7 +143,7 @@ be described as follows</p>
 <div class="section" id="basic-kinetic-carlo-algorithm">
 <h2>Basic Kinetic Carlo Algorithm<a class="headerlink" href="#basic-kinetic-carlo-algorithm" title="Permalink to this headline">¶</a></h2>
 <blockquote>
-<div><ul>
+<ul>
 <li><dl class="first docutils">
 <dt>Fix rate constants <img class="math" src="../_images/math/596289dc0590c497d056daa6e454a08b6336ab8d.png" alt="k_{ij}"/></dt>
 <dd><p class="first last">initial state <img class="math" src="../_images/math/837682bc6103a4c6740c8273434e1a2c771a2514.png" alt="x_{i}"/>, and
@@ -158,17 +153,17 @@ initial time <img class="math" src="../_images/math/e0d2bf360290fd61d1c1557e763f
 </li>
 <li><p class="first">while <img class="math" src="../_images/math/f02d72a8be145da5a0ee67e131b6f7c3a5167215.png" alt="t &lt; t_{\mathrm{max}}"/> do</p>
 <blockquote>
-<div><ol class="arabic simple">
+<ol class="arabic simple">
 <li>draw random numbers <img class="math" src="../_images/math/e09ea7a6eb86738fa7845008092520f8346eaa83.png" alt="R_{1}, R_{2} \in ]0,1]"/></li>
 <li>find <img class="math" src="../_images/math/9b25f8e64b484493fda944d25cad453423041fe6.png" alt="l"/> such that
 <img class="math" src="../_images/math/0a315a65bff0111468afdcfedafb9e41ff93a161.png" alt="\sum_{j=1}^{l}k_{i,\mathrm{tot}}R_{1}\le\sum_{j_1}^{l+1}k_{ij}"/></li>
 <li>increment time <img class="math" src="../_images/math/313d654f07358800126428252d82c39f68844d9f.png" alt="t\rightarrow t - \frac{\ln(R_{2})}{k_{i, \mathrm{tot}}}"/></li>
 </ol>
-</div></blockquote>
+</blockquote>
 <p>end</p>
 </li>
 </ul>
-</div></blockquote>
+</blockquote>
 </div>
 <div class="section" id="justification-of-the-algorithm">
 <h2>Justification of the Algorithm<a class="headerlink" href="#justification-of-the-algorithm" title="Permalink to this headline">¶</a></h2>
@@ -184,23 +179,23 @@ sometimes referred to as
 <em>viz</em> the rate with which <em>any</em> process occurs is simply
 <img class="math" src="../_images/math/bbc7521c700b7b182ebcba1cc8912265031b2ee7.png" alt="\sum_{i}k_{i}"/>.</p>
 <p>First, one can show that the probability that <img class="math" src="../_images/math/174fadd07fd54c9afe288e96558c92e0c1da733a.png" alt="n"/> such processes
-occur in a time interval <img class="math" src="../_images/math/e0d2bf360290fd61d1c1557e763f2622363b3d35.png" alt="t"/> is given by a Poisson distribution <a class="footnote-reference" href="#id5" id="id2">[2]</a></p>
+occur in a time interval <img class="math" src="../_images/math/e0d2bf360290fd61d1c1557e763f2622363b3d35.png" alt="t"/> is given by a Poisson distribution <a class="footnote-reference" href="#id9" id="id2">[2]</a></p>
 <div class="math">
 <p><img src="../_images/math/793dc8569836eacc56da96b38c4f4e4010f7f7b5.png" alt="P(n, t) = \frac{\mathrm{e}^{-k_{\mathrm{tot}}t}(k_{\mathrm{tot}} t)^{n}}
-               {n!} ."/></p>
+               {n!} ." /></p>
 </div><p>The waiting time or escape time <img class="math" src="../_images/math/dd6e9426d40362bb0c541b58d61ee4a4f722e721.png" alt="t_{w}"/> between two such processes
 is characterized by the probability that <em>zero</em> such processes have occured</p>
 <div class="math" id="equation-poisson_0">
-<p><span class="eqno">(1)</span><img src="../_images/math/444ab1479e4a062cafd21ab44f3b705caf65e21d.png" alt="P(0, t_{w}) = \mathrm{e}^{-k_{\mathrm{tot}} t_{w}},"/></p>
+<p><span class="eqno">(1)</span><img src="../_images/math/444ab1479e4a062cafd21ab44f3b705caf65e21d.png" alt="P(0, t_{w}) = \mathrm{e}^{-k_{\mathrm{tot}} t_{w}}," /></p>
 </div><p>which, as expected, leads to an average waiting time of</p>
 <div class="math">
 <p><img src="../_images/math/5ed62a04342ff5abbd1f829fe49cc849b29a0401.png" alt="\langle t_{w} \rangle = \frac{\int_{0}^{\infty}\mathrm{d}t_w\ t_w \mathrm{e}^{-k_{\mathrm{tot}} t_w}}
                              {\int_{0}^{\infty}\mathrm{d}t_w\ \mathrm{e}^{-k_{\mathrm{tot}} t_w}}
-                      = \frac{1}{k_{\mathrm{tot}}}."/></p>
+                      = \frac{1}{k_{\mathrm{tot}}}." /></p>
 </div><p>Therefore at  every step, we need to advance the time by a random number that
 is distributed according to <a href="#equation-poisson_0">(1)</a>. One can obtain such a random
 number from a uniformly distributed random number <img class="math" src="../_images/math/2b61dc75797e588cb22ee51d57a7cfbedbe325ca.png" alt="R_2\in ]0,1]"/>
-via <img class="math" src="../_images/math/19b0e8fc8da59339b73baac70ee12b304fb0a4c0.png" alt="-\ln(R_{2})/k_{\mathrm{tot}}"/>. <a class="footnote-reference" href="#id6" id="id3">[3]</a></p>
+via <img class="math" src="../_images/math/19b0e8fc8da59339b73baac70ee12b304fb0a4c0.png" alt="-\ln(R_{2})/k_{\mathrm{tot}}"/>. <a class="footnote-reference" href="#id10" id="id3">[3]</a></p>
 <p>Second, we need to select the next process. The next process occurs randomly
 but if we did this a very large number of times for the same initial state
 the number  of times each process is chosen should be proportional to its
@@ -209,13 +204,23 @@ sand over an arrangement of buckets, where the size of the bucket is
 proportional to the rate constant and count each hit by a grain of sand in a
 bucket as one executed process. Computationally the same is achieved by
 steps 2 and 3.</p>
-<table class="docutils footnote" frame="void" id="id4" rules="none">
+</div>
+<div class="section" id="further-reading">
+<h2>Further Reading<a class="headerlink" href="#further-reading" title="Permalink to this headline">¶</a></h2>
+<p>For a very practical introduction I recommend Arthur Voter&#8217;s tutorial <a class="footnote-reference" href="#id11" id="id4">[4]</a>
+and Fichthorn <a class="footnote-reference" href="#id13" id="id5">[5]</a> for a derivation, why <img class="math" src="../_images/math/a1ffc0a012620941fe660cedabff822ce7162eca.png" alt="\Delta t"/> is chosen they
+way it is. The example given there is also an excellent exercise for
+any beginning kMC modeler.  For recent review on implementation techniques
+I recommend the review by Reese et al. <a class="footnote-reference" href="#id15" id="id6">[6]</a> and for a review over status
+and outlook I recommend the one by Reuter <a class="footnote-reference" href="#id17" id="id7">[7]</a> .</p>
+<table class="docutils footnote" frame="void" id="id8" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td><a class="reference external" href="http://www.wolframalpha.com/input/?i=estimated+number+of+atoms+in+the+Earth">Wolfram Alpha&#8217;s</a> estimate for number of atoms on earth.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Wolfram Alpha&#8217;s
+<a class="reference external" href="http://www.wolframalpha.com/input/?i=estimated+number+of+atoms+in+the+Earth">estimate</a> for number of atoms on earth.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id5" rules="none">
+<table class="docutils footnote" frame="void" id="id9" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>C. Gardiner, 2004.
@@ -223,13 +228,41 @@ steps 2 and 3.</p>
 and the Natural Sciences</em>. Springer, 3rd edition, ISBN:3540208828.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id6" rules="none">
+<table class="docutils footnote" frame="void" id="id10" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>P. W. H, T. S. A, V. W. T, and F. B. P, 2007
 <em>Numerical Recipes 3rd Edition: The Art of Scientific Computing</em>.
-Cambridge University Pres, 3rd edition, ISBN:0521768589.
-*</td></tr>
+Cambridge University Pres, 3rd edition, ISBN:0521768589, p. 287.
+<a class="reference external" href="http://apps.nrbook.com/c/index.html">link</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id11" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[4]</a></td><td>Voter, Arthur F. “Introduction to the Kinetic Monte Carlo Method.” In Radiation Effects in Solids, 1–23, 2007. <a class="reference external" href="http://dx.doi.org/10.1007/978-1-4020-5295-8_1">http://dx.doi.org/10.1007/978-1-4020-5295-8_1</a>.
+<a class="reference external" href="http://www.ipam.ucla.edu/publications/matut/matut_5898_preprint.pdf">link</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id13" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[5]</a></td><td>Fichthorn, Kristen A., and W. H. Weinberg. “Theoretical Foundations of Dynamical Monte Carlo Simulations.” The Journal of Chemical Physics 95, no. 2 (July 15, 1991): 1090–1096.
+<a class="reference external" href="http://jcp.aip.org/resource/1/jcpsa6/v95/i2/p1090_s1">link</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id15" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id6">[6]</a></td><td>Reese, J. S., S. Raimondeau, and D. G. Vlachos. “Monte Carlo Algorithms for Complex Surface Reaction Mechanisms: Efficiency and Accuracy.” Journal of Computational Physics 173, no. 1 (October 10, 2001): 302–321.
+<a class="reference external" href="http://dx.doi.org/10.1006/jcph.2001.6877">link</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id17" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id7">[7]</a></td><td>Reuter, Karsten. “First-principles Kinetic Monte Carlo Simulations for Heterogeneous Catalysis: Concepts, Status and Frontiers”. Wiley-VCH, 2009.
+<a class="reference external" href="http://www.fhi-berlin.mpg.de/th/publications/wiley_reuter.pdf">link</a></td></tr>
 </tbody>
 </table>
 </div>
@@ -248,7 +281,7 @@ Cambridge University Pres, 3rd edition, ISBN:0521768589.
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
+          <a href="../modindex.html" title="Global Module Index"
              >modules</a> |</li>
         <li class="right" >
           <a href="workflows.html" title="Modelling Workflows"
@@ -256,13 +289,13 @@ Cambridge University Pres, 3rd edition, ISBN:0521768589.
         <li class="right" >
           <a href="index.html" title="Topic Guides"
              >previous</a> |</li>
-        <li><a href="../index.html">kmos 0.0.1 documentation</a> &raquo;</li>
+        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li>
           <li><a href="index.html" >Topic Guides</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2009-2012, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+      &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
     </div>
   </body>
 </html>

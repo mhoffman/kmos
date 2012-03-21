@@ -201,23 +201,33 @@ Export, save, compile
 
 Next it is a good idea to save your work::
 
-  pt.export_xml_file('myfirst_kmc.xml')
+  pt.filename = 'myfirst_kmc.xml'
+  pt.save()
 
-and next you can export the source code::
-
-  kmos.io.export_source(pt)
 
 Now is the time to leave the python shell. In the current
-directory you should see a MyFirstModel.xml and a folder
-named MyFirstModel. The latter contains all source code.
+directory you should see a `myfirst_kmc.xml`.
+This XML file contains the full definition of your model
+and you can create the source code and binaries in just one line.
+So on the command line in the same directory as the XML file
+you run ::
+
+  kmos export myfirst_kmc.xml
 
 
-If you now `cd` to that folder and run::
+Make sure this finishes gracefully without any line
+containining and error.
 
-  kmos build
+.. note::  If you are using windoze, this line would not
+           not look as slick, yet. We need to help the
+           python interpreter to find the kmos file as
+           well as help kmos to find the f2py entry
+           point. So on a typical installation the same
+           line could look like ::
 
-right there, you should get a binary named `kmc_model.so`.
-Now run::
+             python C:\Python27\Scripts\kmos export myfirst_kmc.xml -p C:\Python27\Scripts\f2py.py -f gfortran
+
+If you now `cd` to that folder `myfirst_kmc` and run::
 
   kmos view
 

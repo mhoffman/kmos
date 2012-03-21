@@ -133,8 +133,20 @@ bucket as one executed process. Computationally the same is achieved by
 steps 2 and 3.
 
 
-.. [1] `Wolfram Alpha's
-       <http://www.wolframalpha.com/input/?i=estimated+number+of+atoms+in+the+Earth>`_ estimate for number of atoms on earth.
+
+Further Reading
+---------------
+
+For a very practical introduction I recommend Arthur Voter's tutorial [4]_
+and Fichthorn [5]_ for a derivation, why :math:`\Delta t` is chosen they
+way it is. The example given there is also an excellent exercise for
+any beginning kMC modeler.  For recent review on implementation techniques
+I recommend the review by Reese et al. [6]_ and for a review over status
+and outlook I recommend the one by Reuter [7]_ .
+
+
+.. [1] Wolfram Alpha's
+       `estimate <http://www.wolframalpha.com/input/?i=estimated+number+of+atoms+in+the+Earth>`_ for number of atoms on earth.
 
 .. [2] C. Gardiner, 2004.
        *Handbook of Stochastic Methods: for Physics, Chemistry,
@@ -142,5 +154,17 @@ steps 2 and 3.
 
 .. [3] P. W. H, T. S. A, V. W. T, and F. B. P, 2007
        *Numerical Recipes 3rd Edition: The Art of Scientific Computing*.
-       Cambridge University Pres, 3rd edition, ISBN:0521768589.
-       *
+       Cambridge University Pres, 3rd edition, ISBN:0521768589, p. 287.
+       `link <http://apps.nrbook.com/c/index.html>`_
+
+.. [4] Voter, Arthur F. “Introduction to the Kinetic Monte Carlo Method.” In Radiation Effects in Solids, 1–23, 2007. http://dx.doi.org/10.1007/978-1-4020-5295-8_1.
+       `link <http://www.ipam.ucla.edu/publications/matut/matut_5898_preprint.pdf>`_
+
+.. [5] Fichthorn, Kristen A., and W. H. Weinberg. “Theoretical Foundations of Dynamical Monte Carlo Simulations.” The Journal of Chemical Physics 95, no. 2 (July 15, 1991): 1090–1096.
+       `link <http://jcp.aip.org/resource/1/jcpsa6/v95/i2/p1090_s1>`_
+
+.. [6] Reese, J. S., S. Raimondeau, and D. G. Vlachos. “Monte Carlo Algorithms for Complex Surface Reaction Mechanisms: Efficiency and Accuracy.” Journal of Computational Physics 173, no. 1 (October 10, 2001): 302–321.
+       `link <http://dx.doi.org/10.1006/jcph.2001.6877>`_
+
+.. [7] Reuter, Karsten. “First-principles Kinetic Monte Carlo Simulations for Heterogeneous Catalysis: Concepts, Status and Frontiers”. Wiley-VCH, 2009.
+       `link <http://www.fhi-berlin.mpg.de/th/publications/wiley_reuter.pdf>`_
