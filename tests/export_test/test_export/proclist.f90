@@ -198,6 +198,92 @@ subroutine get_occupation(occupation)
     occupation = occupation/real(system_size(1)*system_size(2)*system_size(3))
 end subroutine get_occupation
 
+subroutine init(input_system_size, system_name, layer, no_banner)
+
+!****f* proclist/init
+! FUNCTION
+!     Allocates the system and initializes all sites in the given
+!     layer.
+!
+! ARGUMENTS
+!
+!    * ``input_system_size`` number of unit cell per axis.
+!    * ``system_name`` identifier for reload file.
+!    * ``layer`` initial layer.
+!    * ``no_banner`` [optional] if True no copyright is issued.
+!******
+    integer(kind=iint), intent(in) :: layer
+    integer(kind=iint), dimension(2), intent(in) :: input_system_size
+
+    character(len=400), intent(in) :: system_name
+
+    logical, optional, intent(in) :: no_banner
+
+    if (.not. no_banner) then
+        print *, "This kMC Model 'my_model' was written by Max J. Hoffmann (mjhoffmann@gmail.com)"
+        print *, "and implemented with the help of kmos,"
+        print *, "which is distributed under"
+        print *, "GNU/GPL Version 3 (C) Max J. Hoffmann mjhoffmann@gmail.com"
+        print *, "kmos is in a very betaish stage and there is"
+        print *, "ABSOLUTELY NO WARRANTY for correctness."
+        print *, "Please check back with the author prior to using"
+        print *, "results in a publication or presentation."
+
+    endif
+    call allocate_system(nr_of_proc, input_system_size, system_name)
+    call initialize_state(layer)
+end subroutine init
+
+subroutine initialize_state(layer)
+
+!****f* proclist/initialize_state
+! FUNCTION
+!    Initialize all sites and book-keeping array
+!    for the given layer.
+!
+! ARGUMENTS
+!
+!    * ``layer`` integer representing layer
+!******
+    integer(kind=iint), intent(in) :: layer
+
+    integer(kind=iint) :: i, j, k, nr
+    ! initialize random number generator
+    allocate(seed_arr(seed_size))
+    seed_arr = seed
+    call random_seed(seed_size)
+    call random_seed(put=seed_arr)
+    deallocate(seed_arr)
+    do k = 0, system_size(3)-1
+        do j = 0, system_size(2)-1
+            do i = 0, system_size(1)-1
+                do nr = 1, spuck
+                    call reset_site((/i, j, k, nr/), null_species)
+                end do
+                select case(layer)
+                case (ruo2)
+                    call replace_species((/i, j, k, ruo2_bridge/), null_species, default_species)
+                    call replace_species((/i, j, k, ruo2_cus/), null_species, default_species)
+                end select
+            end do
+        end do
+    end do
+
+    do k = 0, system_size(3)-1
+        do j = 0, system_size(2)-1
+            do i = 0, system_size(1)-1
+                select case(layer)
+                case(ruo2)
+                    call touchup_ruo2_bridge((/i, j, k, ruo2_bridge/))
+                    call touchup_ruo2_cus((/i, j, k, ruo2_cus/))
+                end select
+            end do
+        end do
+    end do
+
+
+end subroutine initialize_state
+
 subroutine run_proc_nr(proc, nr_site)
 
 !****f* proclist/run_proc_nr
@@ -363,92 +449,6 @@ subroutine run_proc_nr(proc, nr_site)
     end select
 
 end subroutine run_proc_nr
-
-subroutine init(input_system_size, system_name, layer, no_banner)
-
-!****f* proclist/init
-! FUNCTION
-!     Allocates the system and initializes all sites in the given
-!     layer.
-!
-! ARGUMENTS
-!
-!    * ``input_system_size`` number of unit cell per axis.
-!    * ``system_name`` identifier for reload file.
-!    * ``layer`` initial layer.
-!    * ``no_banner`` [optional] if True no copyright is issued.
-!******
-    integer(kind=iint), intent(in) :: layer
-    integer(kind=iint), dimension(2), intent(in) :: input_system_size
-
-    character(len=400), intent(in) :: system_name
-
-    logical, optional, intent(in) :: no_banner
-
-    if (.not. no_banner) then
-        print *, "This kMC Model 'my_model' was written by Max J. Hoffmann (mjhoffmann@gmail.com)"
-        print *, "and implemented with the help of kmos,"
-        print *, "which is distributed under"
-        print *, "GNU/GPL Version 3 (C) Max J. Hoffmann mjhoffmann@gmail.com"
-        print *, "kmos is in a very betaish stage and there is"
-        print *, "ABSOLUTELY NO WARRANTY for correctness."
-        print *, "Please check back with the author prior to using"
-        print *, "results in a publication or presentation."
-
-    endif
-    call allocate_system(nr_of_proc, input_system_size, system_name)
-    call initialize_state(layer)
-end subroutine init
-
-subroutine initialize_state(layer)
-
-!****f* proclist/initialize_state
-! FUNCTION
-!    Initialize all sites and book-keeping array
-!    for the given layer.
-!
-! ARGUMENTS
-!
-!    * ``layer`` integer representing layer
-!******
-    integer(kind=iint), intent(in) :: layer
-
-    integer(kind=iint) :: i, j, k, nr
-    ! initialize random number generator
-    allocate(seed_arr(seed_size))
-    seed_arr = seed
-    call random_seed(seed_size)
-    call random_seed(put=seed_arr)
-    deallocate(seed_arr)
-    do k = 0, system_size(3)-1
-        do j = 0, system_size(2)-1
-            do i = 0, system_size(1)-1
-                do nr = 1, spuck
-                    call reset_site((/i, j, k, nr/), null_species)
-                end do
-                select case(layer)
-                case (ruo2)
-                    call replace_species((/i, j, k, ruo2_bridge/), null_species, default_species)
-                    call replace_species((/i, j, k, ruo2_cus/), null_species, default_species)
-                end select
-            end do
-        end do
-    end do
-
-    do k = 0, system_size(3)-1
-        do j = 0, system_size(2)-1
-            do i = 0, system_size(1)-1
-                select case(layer)
-                case(ruo2)
-                    call touchup_ruo2_bridge((/i, j, k, ruo2_bridge/))
-                    call touchup_ruo2_cus((/i, j, k, ruo2_cus/))
-                end select
-            end do
-        end do
-    end do
-
-
-end subroutine initialize_state
 
 subroutine put_co_ruo2_bridge(site)
 
