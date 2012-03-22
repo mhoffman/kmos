@@ -654,6 +654,17 @@ class Model_Rate_Constants(object):
         res += '# ------------------\n'
         return res
 
+    def inverse(self):
+        res = '# kMC rate constants (%i)\n' % len(settings.rate_constants)
+        res += '# ------------------\n'
+        for proc in sorted(settings.rate_constants):
+            rate_expr = settings.rate_constants[proc][0]
+            rate_const = evaluate_rate_expression(rate_expr,
+                                                  settings.parameters)
+            res += '# %s: %.2e s^{-1} = %s\n' % (proc, rate_const, rate_expr)
+        res += '# ------------------\n'
+        return res
+
 
 def set_rate_constants(parameters=None, print_rates=True):
     """Tries to evaluate the supplied expression for a rate constant
