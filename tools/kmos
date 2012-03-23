@@ -100,6 +100,31 @@ def main():
     elif args[0] == 'edit':
         from kmos.gui import main
         main()
+    elif args[0] == 'export-settings':
+        import kmos.types
+        import kmos.io
+        from kmos.utils import build
+        from glob import glob
+        import shutil
+        from kmos.io import ProcListWriter
+
+        if len(args) < 2:
+            parser.error('XML file and export path expected.')
+        if len(args) < 3:
+            out_dir = os.path.splitext(args[1])[0]
+            print('No export path provided. Exporting to %s' % out_dir)
+            args.append(out_dir)
+
+        xml_file = args[1]
+        export_dir = args[2]
+        project = kmos.types.Project()
+        project.import_xml_file(xml_file)
+
+        writer = ProcListWriter(project, export_dir)
+        writer.write_settings()
+
+
+
     elif args[0] == 'export':
         import kmos.types
         import kmos.io
