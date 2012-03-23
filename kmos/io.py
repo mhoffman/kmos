@@ -431,7 +431,7 @@ class ProcListWriter():
 
         out.write('integer(kind=iint), parameter, public :: representation_length = %s\n' % representation_length)
         if os.name == 'posix':
-            out.write('integer(kind=iint), public :: seed_size = 8\n')
+            out.write('integer(kind=iint), public :: seed_size = 12\n')
         elif os.name == 'nt':
             out.write('integer(kind=iint), public :: seed_size = 12\n')
         else:
@@ -538,6 +538,8 @@ class ProcListWriter():
         # Here we replicate the allocate_system call, initialize
         # all book-keeping databases
         # and calculate the rate constants for the first time
+        model_name_line = ('This kMC Model \'%s\' was written by' % data.meta.model_name).ljust(59)
+        author_name_line = ('%s (%s)' % (data.meta.author, data.meta.email)).center(60)
         out.write(('subroutine init(input_system_size, system_name, layer, no_banner)\n\n'
               '!****f* proclist/init\n'
               '! FUNCTION\n'
@@ -556,16 +558,35 @@ class ProcListWriter():
               '    character(len=400), intent(in) :: system_name\n\n'
               '    logical, optional, intent(in) :: no_banner\n\n'
               '    if (.not. no_banner) then\n'
-              '        print *, "This kMC Model \'%s\' was written by %s (%s)"\n'
-              '        print *, "and implemented with the help of kmos,"\n'
-              '        print *, "which is distributed under"\n'
-              '        print *, "GNU/GPL Version 3 (C) Max J. Hoffmann mjhoffmann@gmail.com"\n'
-              '        print *, "kmos is in a very betaish stage and there is"\n'
-              '        print *, "ABSOLUTELY NO WARRANTY for correctness."\n'
-              '        print *, "Please check back with the author prior to using"\n'
-              '        print *, "results in a publication or presentation."\n\n'\
+              '        print *, "+------------------------------------------------------------+"\n'
+              '        print *, "|                                                            |"\n'
+              '        print *, "| %s|"\n'
+              '        print *, "|                                                            |"\n'
+              '        print *, "|%s|"\n'
+              '        print *, "|                                                            |"\n'
+              '        print *, "| and implemented with the help of kmos,                     |"\n'
+              '        print *, "| which is distributed under GNU/GPL Version 3               |"\n'
+              '        print *, "| (C) Max J. Hoffmann mjhoffmann@gmail.com                   |"\n'
+              '        print *, "|                                                            |"\n'
+              '        print *, "| kmos is distributed in the hope that it will be useful     |"\n'
+              '        print *, "| but WIHTOUT ANY WARRANTY; without even the implied         |"\n'
+              '        print *, "| waranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR     |"\n'
+              '        print *, "| PURPOSE. See the GNU General Public License for more       |"\n'
+              '        print *, "| details.                                                   |"\n'
+              '        print *, "|                                                            |"\n'
+              '        print *, "| I appreciate, but do not require, attribution.             |"\n'
+              '        print *, "| An attribution usually includes the program name           |"\n'
+              '        print *, "| author, and URL. For example:                              |"\n'
+              '        print *, "| kmos by Max J. Hoffmann, (http://mhoffman.github.com/kmos) |"\n'
+              '        print *, "|                                                            |"\n'
+              '        print *, "+------------------------------------------------------------+"\n'
+              '        print *, ""\n'
+              '        print *, ""\n'
               '    endif\n')
-            % (data.meta.model_dimension, data.meta.model_name, data.meta.author, data.meta.email, ))
+            % (data.meta.model_dimension,
+               model_name_line,
+               author_name_line
+                ))
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/INIT/SYSTEM_SIZE",input_system_size\n')
         out.write('    call allocate_system(nr_of_proc, input_system_size, system_name)\n')

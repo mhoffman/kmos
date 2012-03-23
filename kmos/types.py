@@ -91,6 +91,12 @@ class Project(object):
                                            key=lambda x: x.name)
 
     def add_parameter(self, *parameters, **kwargs):
+        """Add a parameter to the project. A Parameter,
+        or keywords that are passed to the Parameter
+        constructor are accepted.
+
+        """
+
         for parameter in parameters:
             self.parameter_list.append(parameter)
 
@@ -100,6 +106,11 @@ class Project(object):
             return parameter
 
     def add_process(self, *processes, **kwargs):
+        """Add a process to the project. A Process,
+        or keywords that are passed to the Process
+        constructor are accepted.
+
+        """
         for process in processes:
             self.process_list.append(process)
         if kwargs:
@@ -122,6 +133,11 @@ class Project(object):
         self.process_list.append(process)
 
     def add_species(self, *speciess, **kwargs):
+        """Add a species to the project. A Species,
+        or keywords that are passed to the Species
+        constructor are accepted.
+
+        """
         for species in speciess:
             self.species_list.append(species)
         if kwargs:
@@ -138,6 +154,11 @@ class Project(object):
         return species
 
     def add_layer(self, *layers, **kwargs):
+        """Add a layer to the project. A Layer,
+        or keywords that are passed to the Layer
+        constructor are accepted.
+
+        """
         for layer in layers:
             self.layer_list.append(layer)
         if kwargs:
@@ -155,6 +176,17 @@ class Project(object):
         return layer
 
     def add_site(self, **kwargs):
+        """Add a site to the project. The
+        arguments are
+
+        add_site(layer_name, site)
+
+        where :
+            - layer_name : a string
+            - site : a Site instance
+
+        """
+
         try:
             layer_name = kwargs.pop('layer')
         except:
@@ -530,9 +562,9 @@ class Project(object):
             if len([y for y in self.get_parameters()
                     if x.name == y.name]) > 1:
                 raise UserWarning(('The parameter "%s" has been defined two'
-                                   'or more times. However  each parameter'
-                                   'can be defined only once  or the value'
-                                   'cannot be resolved at runtime') %
+                                   ' or more times. However each parameter'
+                                   ' can be defined only once or the value'
+                                   ' cannot be resolved at runtime.') %
                                   x.name)
 
         #################

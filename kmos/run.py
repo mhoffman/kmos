@@ -126,7 +126,10 @@ class KMC_Model(multiprocessing.Process):
                     eval(settings.representations[species]))
             else:
                 self.species_representation.append(Atoms())
-        self.species_tags = settings.species_tags
+        if hasattr(settings, 'species_tags'):
+            self.species_tags = settings.species_tags
+        else:
+            self.species_tags = None
 
         if len(settings.lattice_representation):
             if hasattr(settings, 'substrate_layer'):
@@ -285,8 +288,9 @@ class KMC_Model(multiprocessing.Process):
                                             lattice.unit_cell_size))
                                 # add to existing slab
                                 atoms += ad_atoms
-                                for atom in range(len(atoms)-len(ad_atoms), len(atoms)):
-                                    kmos_tags[atom] = self.species_tags.values()[species]
+                                if self.species_tags:
+                                    for atom in range(len(atoms)-len(ad_atoms), len(atoms)):
+                                        kmos_tags[atom] = self.species_tags.values()[species]
 
                         lattice_repr = deepcopy(self.lattice_representation)
                         lattice_repr.translate(np.dot(np.array([i, j, k]),
@@ -519,17 +523,17 @@ class KMC_Model(multiprocessing.Process):
             if old >= 0:
                 old = sorted(settings.representations.keys())[old]
             else:
-                old = 'NULL'
+                old = 'NULL (%s)' % old
 
             if new >= 0:
                 new = sorted(settings.representations.keys())[new]
             else:
-                new = 'NULL'
+                new = 'NULL (%s)' % new
 
             if found >= 0:
                 found = sorted(settings.representations.keys())[found]
             else:
-                found = 'NULL'
+                found = 'NULL (%s)' % found
 
             self.do_steps(steps)
             nprocess, nsite = proclist.get_kmc_step()
@@ -647,6 +651,17 @@ class Model_Rate_Constants(object):
             rate_const = evaluate_rate_expression(rate_expr,
                                                   settings.parameters)
             res += '# %s: %s = %.2e s^{-1}\n' % (proc, rate_expr, rate_const)
+        res += '# ------------------\n'
+        return res
+
+    def inverse(self):
+        res = '# kMC rate constants (%i)\n' % len(settings.rate_constants)
+        res += '# ------------------\n'
+        for proc in sorted(settings.rate_constants):
+            rate_expr = settings.rate_constants[proc][0]
+            rate_const = evaluate_rate_expression(rate_expr,
+                                                  settings.parameters)
+            res += '# %s: %.2e s^{-1} = %s\n' % (proc, rate_const, rate_expr)
         res += '# ------------------\n'
         return res
 

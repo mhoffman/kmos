@@ -933,20 +933,29 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 coords = matching_sites[0].get_coords()
                 if elem.species[0] == '^':
                     color = get_species_color(elem.species[1:])
+                    layer = self.action_layer
+                    radius = self.r_act
+                    line_width = 2.0
                 elif elem.species[0] == '$':
-                    # Don't draw the disappearing particle
-                    continue
+                    color = get_species_color(elem.species[1:])
+                    layer = self.condition_layer
+                    radius = self.r_cond
+                    line_width = 2.0
                 else:
                     color = get_species_color(elem.species)
+                    layer = self.action_layer
+                    radius = self.r_act
+                    line_width = 1.0
                 color = col_str2tuple(color)
-                o = CanvasOval(self.action_layer, bg=color,
-                                                  fg=black,
-                                                  filled=True,
-                                                  outline=True)
+                o = CanvasOval(layer, bg=color,
+                               fg=black,
+                               line_width=line_width,
+                               filled=True,
+                               outline=True)
                 o.coords = coords
                 o.connect('button-press-event',
                           self.on_condition_action_clicked)
-                o.set_radius(self.r_act)
+                o.set_radius(radius)
                 o.type = 'action'
                 o.action = elem
 

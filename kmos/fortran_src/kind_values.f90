@@ -7,7 +7,7 @@ module kind_values
 !******
 implicit none
 
-integer, parameter :: rsingle = SELECTED_REAL_KIND(p=6, r=37)
+integer, parameter :: rsingle = SELECTED_REAL_KIND(p=15, r=200)
 integer, parameter :: rdouble = SELECTED_REAL_KIND(p=15, r=200)
 integer, parameter :: ibyte = SELECTED_INT_KIND(p=2)
 integer, parameter :: ishort = SELECTED_INT_KIND(p=4)

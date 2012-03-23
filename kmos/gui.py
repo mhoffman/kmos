@@ -48,12 +48,10 @@ from kmos.forms import LayerEditor, \
 from kmos.config import GLADEFILE
 
 import kmos.io
-#sys.path.append(APP_ABS_PATH)
 import gobject
 import pygtk
 pygtk.require('2.0')
 import gtk
-import gtk.glade
 
 
 #Kiwi imports

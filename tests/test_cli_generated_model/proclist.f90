@@ -65,7 +65,7 @@ integer(kind=iint), parameter, public :: empty = 1
 integer(kind=iint), parameter, public :: oxygen = 2
 integer(kind=iint), public :: default_species = empty
 integer(kind=iint), parameter, public :: representation_length = 0
-integer(kind=iint), public :: seed_size = 8
+integer(kind=iint), public :: seed_size = 12
 integer(kind=iint), public :: seed ! random seed
 integer(kind=iint), public, dimension(:), allocatable :: seed_arr ! random seed
 
@@ -185,15 +185,30 @@ subroutine init(input_system_size, system_name, layer, no_banner)
     logical, optional, intent(in) :: no_banner
 
     if (.not. no_banner) then
-        print *, "This kMC Model 'test_cli_generated_model' was written by Max J. Hoffmann (mjhoffmann@gmail.com)"
-        print *, "and implemented with the help of kmos,"
-        print *, "which is distributed under"
-        print *, "GNU/GPL Version 3 (C) Max J. Hoffmann mjhoffmann@gmail.com"
-        print *, "kmos is in a very betaish stage and there is"
-        print *, "ABSOLUTELY NO WARRANTY for correctness."
-        print *, "Please check back with the author prior to using"
-        print *, "results in a publication or presentation."
-
+        print *, "+------------------------------------------------------------+"
+        print *, "|                                                            |"
+        print *, "| This kMC Model 'test_cli_generated_model' was written by   |"
+        print *, "|                                                            |"
+        print *, "|           Max J. Hoffmann (mjhoffmann@gmail.com)           |"
+        print *, "|                                                            |"
+        print *, "| and implemented with the help of kmos,                     |"
+        print *, "| which is distributed under GNU/GPL Version 3               |"
+        print *, "| (C) Max J. Hoffmann mjhoffmann@gmail.com                   |"
+        print *, "|                                                            |"
+        print *, "| kmos is distributed in the hope that it will be useful     |"
+        print *, "| but WIHTOUT ANY WARRANTY; without even the implied         |"
+        print *, "| waranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR     |"
+        print *, "| PURPOSE. See the GNU General Public License for more       |"
+        print *, "| details.                                                   |"
+        print *, "|                                                            |"
+        print *, "| I appreciate, but do not require, attribution.             |"
+        print *, "| An attribution usually includes the program name           |"
+        print *, "| author, and URL. For example:                              |"
+        print *, "| kmos by Max J. Hoffmann, (http://mhoffman.github.com/kmos) |"
+        print *, "|                                                            |"
+        print *, "+------------------------------------------------------------+"
+        print *, ""
+        print *, ""
     endif
     call allocate_system(nr_of_proc, input_system_size, system_name)
     call initialize_state(layer)

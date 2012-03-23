@@ -182,8 +182,17 @@ def evaluate_kind_values(infile, outfile):
     import sys
     sys.path.append(os.path.abspath(os.curdir))
     def import_selected_kind():
+        """Tries to import the module which provides
+        processor dependent kind values. If the module
+        is not available it is compiled from a here-document
+        and imported afterwards.
+
+        Warning: creates both the source file and the
+        compiled module in the current directory.
+
+        """
         try:
-            import selected
+            import f2py_selected_kind
         except:
             from numpy.f2py import compile
             fcode = """module kind
@@ -226,17 +235,22 @@ def evaluate_kind_values(infile, outfile):
     end module kind
             """
             compile(fcode, source_fn='f2py_selected_kind.f90',
-                    modulename='selected')
+                    modulename='f2py_selected_kind')
             try:
-                import selected
+                import f2py_selected_kind
             except:
                 print(os.path.abspath(os.curdir))
                 print(os.listdir('.'))
                 raise
-        return selected.kind
+        return f2py_selected_kind.kind
 
 
     def parse_args(args):
+        """
+            Parse the arguments for selected_(real/int)_kind
+            to pass them on to the Fortran module.
+
+        """
         in_args = [x.strip() for x in args.split(',')]
         args = []
         kwargs = {}
@@ -246,17 +260,23 @@ def evaluate_kind_values(infile, outfile):
                 symbol, value = arg.split('=')
                 kwargs[symbol] = eval(value)
             else:
-                args.append(eval(value))
+                args.append(eval(arg))
 
         return args, kwargs
 
 
     def int_kind(args):
+        """Python wrapper around Fortran selected_int_kind
+        function.
+        """
         args, kwargs = parse_args(args)
         return import_selected_kind().int_kind(*args, **kwargs)
 
 
     def real_kind(args):
+        """Python wrapper around Fortran selected_real_kind
+        function.
+        """
         args, kwargs = parse_args(args)
         return import_selected_kind().real_kind(*args, **kwargs)
 

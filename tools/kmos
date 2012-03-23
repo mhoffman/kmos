@@ -76,7 +76,7 @@ def main():
 
     parser.add_option('-f', '--fcompiler',
                      dest='fcompiler',
-                     default=os.environ.get('F2PY_FCOMPILER', 'intel'))
+                     default=os.environ.get('F2PY_FCOMPILER', 'gfortran'))
 
 
     options, args = parser.parse_args()
@@ -140,10 +140,6 @@ def main():
 
     elif args[0] == 'import':
         import kmos.io
-        #try:
-            #from kmos.types import *
-        #except:
-            #pass
         try:
             import numpy as np
         except:
