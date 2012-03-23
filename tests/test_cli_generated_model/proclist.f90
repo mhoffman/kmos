@@ -163,38 +163,6 @@ subroutine get_occupation(occupation)
     occupation = occupation/real(system_size(1)*system_size(2)*system_size(3))
 end subroutine get_occupation
 
-subroutine run_proc_nr(proc, nr_site)
-
-!****f* proclist/run_proc_nr
-! FUNCTION
-!    Runs process ``proc`` on site ``nr_site``.
-!
-! ARGUMENTS
-!
-!    * ``proc`` integer representing the process number
-!    * ``nr_site``  integer representing the site
-!******
-    integer(kind=iint), intent(in) :: proc
-    integer(kind=iint), intent(in) :: nr_site
-
-    integer(kind=iint), dimension(4) :: lsite
-
-    call increment_procstat(proc)
-
-    ! lsite = lattice_site, (vs. scalar site)
-    lsite = nr2lattice(nr_site, :)
-
-    select case(proc)
-    case(CO_adsorption)
-        call put_CO_default_cus(lsite)
-
-    case(CO_desorption)
-        call take_CO_default_cus(lsite)
-
-    end select
-
-end subroutine run_proc_nr
-
 subroutine init(input_system_size, system_name, layer, no_banner)
 
 !****f* proclist/init
@@ -293,6 +261,38 @@ subroutine initialize_state(layer)
 
 
 end subroutine initialize_state
+
+subroutine run_proc_nr(proc, nr_site)
+
+!****f* proclist/run_proc_nr
+! FUNCTION
+!    Runs process ``proc`` on site ``nr_site``.
+!
+! ARGUMENTS
+!
+!    * ``proc`` integer representing the process number
+!    * ``nr_site``  integer representing the site
+!******
+    integer(kind=iint), intent(in) :: proc
+    integer(kind=iint), intent(in) :: nr_site
+
+    integer(kind=iint), dimension(4) :: lsite
+
+    call increment_procstat(proc)
+
+    ! lsite = lattice_site, (vs. scalar site)
+    lsite = nr2lattice(nr_site, :)
+
+    select case(proc)
+    case(CO_adsorption)
+        call put_CO_default_cus(lsite)
+
+    case(CO_desorption)
+        call take_CO_default_cus(lsite)
+
+    end select
+
+end subroutine run_proc_nr
 
 subroutine put_oxygen_default_cus(site)
 

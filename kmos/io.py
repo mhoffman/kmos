@@ -70,42 +70,42 @@ class ProcListWriter():
         out.write(self._gpl_message())
         out.write('!****h* kmos/lattice\n')
         out.write('! FUNCTION\n'
-                  '!    Implements the mappings between the real space lattice\n'
-                  '!    and the 1-D lattice, which kmos/base operates on.\n'
-                  '!    Furthermore replicates all geometry specific functions of kmos/base\n'
-                  '!    in terms of lattice coordinates.\n'
-                  '!    Using this module each site can be addressed with 4-tuple\n'
-                  '!    ``(i, j, k, n)`` where ``i, j, k`` define the unit cell and\n'
-                  '!    ``n`` the site within the unit cell.\n'
-                  '!\n'
-                  '!******\n'
-                  '\n\nmodule lattice\n'
-                  'use kind_values\n'
-                  'use base, only: &\n'
-                  '    assertion_fail, &\n'
-                  '    base_deallocate_system => deallocate_system, &\n'
-                  '    get_kmc_step, &\n'
-                  '    get_kmc_time, &\n'
-                  '    get_kmc_time_step, &\n'
-                  '    get_rate, &\n'
-                  '    increment_procstat, &\n'
-                  '    base_add_proc => add_proc, &\n'
-                  '    base_reset_site => reset_site, &\n'
-                  '    base_allocate_system => allocate_system, &\n'
-                  '    base_can_do => can_do, &\n'
-                  '    base_del_proc => del_proc, &\n'
-                  '    determine_procsite, &\n'
-                  '    base_replace_species => replace_species, &\n'
-                  '    base_get_species => get_species, &\n'
-                  '    base_get_volume => get_volume, &\n'
-                  '    reload_system => reload_system, &\n'
-                  '    save_system, &\n'
-                  '    assertion_fail, &\n'
-                  '    null_species, &\n'
-                  '    set_rate_const, &\n'
-                  '    update_accum_rate, &\n'
-                  '    update_clocks\n\n'
-                  '\n\nimplicit none\n\n')
+          '!    Implements the mappings between the real space lattice\n'
+          '!    and the 1-D lattice, which kmos/base operates on.\n'
+          '!    Furthermore replicates all geometry specific functions of kmos/base\n'
+          '!    in terms of lattice coordinates.\n'
+          '!    Using this module each site can be addressed with 4-tuple\n'
+          '!    ``(i, j, k, n)`` where ``i, j, k`` define the unit cell and\n'
+          '!    ``n`` the site within the unit cell.\n'
+          '!\n'
+          '!******\n'
+          '\n\nmodule lattice\n'
+          'use kind_values\n'
+          'use base, only: &\n'
+          '    assertion_fail, &\n'
+          '    base_deallocate_system => deallocate_system, &\n'
+          '    get_kmc_step, &\n'
+          '    get_kmc_time, &\n'
+          '    get_kmc_time_step, &\n'
+          '    get_rate, &\n'
+          '    increment_procstat, &\n'
+          '    base_add_proc => add_proc, &\n'
+          '    base_reset_site => reset_site, &\n'
+          '    base_allocate_system => allocate_system, &\n'
+          '    base_can_do => can_do, &\n'
+          '    base_del_proc => del_proc, &\n'
+          '    determine_procsite, &\n'
+          '    base_replace_species => replace_species, &\n'
+          '    base_get_species => get_species, &\n'
+          '    base_get_volume => get_volume, &\n'
+          '    reload_system => reload_system, &\n'
+          '    save_system, &\n'
+          '    assertion_fail, &\n'
+          '    null_species, &\n'
+          '    set_rate_const, &\n'
+          '    update_accum_rate, &\n'
+          '    update_clocks\n\n'
+          '\n\nimplicit none\n\n')
 
         # define module wide variables
 
@@ -374,6 +374,16 @@ class ProcListWriter():
 
         # write header section and module imports
         out = open('%s/proclist.f90' % self.dir, 'w')
+
+        self.write_proclist_generic_part(data, out)
+        self.write_proclist_run_proc_nr_local(data, out)
+        self.write_proclist_put_take(data, out)
+        self.write_proclist_touchup(data, out)
+        self.write_proclist_multilattice(data, out)
+
+        out.close()
+
+    def write_proclist_generic_part(self, data, out):
         out.write(self._gpl_message())
         out.write('!****h* kmos/proclist\n'
                   '! FUNCTION\n'
@@ -524,80 +534,6 @@ class ProcListWriter():
                   '    end do\n\n'
                   '    occupation = occupation/real(system_size(1)*system_size(2)*system_size(3))\n'
                   'end subroutine get_occupation\n\n')
-        # run_proc_nr runs the process selected by determine_procsite
-        # for sake of simplicity each process is formulated in terms
-        # of take and put operations. This is due to the fact that
-        # in surface science type of models the default species,
-        # i.e. 'empty' has a special meaning. So instead of just
-        # 'setting' new species, which would be more general
-        # we say we 'take' and 'put' atoms. So a take is equivalent
-        # to a set_empty.
-        # While this looks more readable on paper, I am not sure
-        # if this make code maintainability a lot worse. So this
-        # should probably change.
-
-        out.write('subroutine run_proc_nr(proc, nr_site)\n\n'
-                  '!****f* proclist/run_proc_nr\n'
-                  '! FUNCTION\n'
-                  '!    Runs process ``proc`` on site ``nr_site``.\n'
-                  '!\n'
-                  '! ARGUMENTS\n'
-                  '!\n'
-                  '!    * ``proc`` integer representing the process number\n'
-                  '!    * ``nr_site``  integer representing the site\n'
-                  '!******\n'
-                  '    integer(kind=iint), intent(in) :: proc\n'
-                  '    integer(kind=iint), intent(in) :: nr_site\n\n'
-                  '    integer(kind=iint), dimension(4) :: lsite\n\n'
-                  '    call increment_procstat(proc)\n\n'
-                  '    ! lsite = lattice_site, (vs. scalar site)\n'
-                  '    lsite = nr2lattice(nr_site, :)\n\n'
-                  '    select case(proc)\n')
-        for process in data.process_list:
-            out.write('    case(%s)\n' % process.name)
-            if data.meta.debug > 0:
-                out.write(('print *,"PROCLIST/RUN_PROC_NR/NAME","%s"\n'
-                           'print *,"PROCLIST/RUN_PROC_NR/LSITE","lsite"\n'
-                           'print *,"PROCLIST/RUN_PROC_NR/SITE","site"\n') % process.name)
-            for action in process.action_list:
-                if action.coord == process.executing_coord():
-                    relative_coord = 'lsite'
-                else:
-                    relative_coord = 'lsite%s' % (action.coord - process.executing_coord()).radd_ff()
-
-                try:
-                    previous_species = filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list)[0].species
-                except:
-                    UserWarning("""Process %s seems to be ill-defined.
-                                   Every action needs a corresponding condition
-                                   for the same site.""" % process.name)
-
-                if action.species[0] == '^':
-                    if data.meta.debug > 0:
-                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","create %s_%s"\n' % (action.coord.layer, action.coord.name))
-                    out.write('        call create_%s_%s(%s, %s)\n' % (action.coord.layer, action.coord.name, relative_coord, action.species[1:]))
-                elif action.species[0] == '$':
-                    if data.meta.debug > 0:
-                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","annihilate %s_%s"\n' % (action.coord.layer, action.coord.name))
-                    out.write('        call annihilate_%s_%s(%s, %s)\n' % (action.coord.layer, action.coord.name, relative_coord, action.species[1:]))
-                elif action.species == data.species_list.default_species \
-                and not action.species == previous_species :
-                    if data.meta.debug > 0:
-                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","take %s_%s %s"\n' % (action.coord.layer, action.coord.name, previous_species))
-                    out.write('        call take_%s_%s_%s(%s)\n' % (previous_species, action.coord.layer, action.coord.name, relative_coord))
-                else:
-                    if not previous_species == action.species:
-                        if not previous_species == data.species_list.default_species:
-                            if data.meta.debug > 0:
-                                out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","take %s_%s %s"\n' % (action.coord.layer, action.coord.name, previous_species))
-                            out.write('        call take_%s_%s_%s(%s)\n' % (previous_species, action.coord.layer, action.coord.name, relative_coord))
-                        if data.meta.debug > 0:
-                            out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","put %s_%s %s"\n' % (action.coord.layer, action.coord.name, action.species))
-                        out.write('        call put_%s_%s_%s(%s)\n' % (action.species, action.coord.layer, action.coord.name, relative_coord))
-
-            out.write('\n')
-        out.write('    end select\n\n')
-        out.write('end subroutine run_proc_nr\n\n')
 
         # Here we replicate the allocate_system call, initialize
         # all book-keeping databases
@@ -711,6 +647,83 @@ class ProcListWriter():
 
         out.write('\nend subroutine initialize_state\n\n')
 
+    def write_proclist_run_proc_nr_local(self, data, out):
+        # run_proc_nr runs the process selected by determine_procsite
+        # for sake of simplicity each process is formulated in terms
+        # of take and put operations. This is due to the fact that
+        # in surface science type of models the default species,
+        # i.e. 'empty' has a special meaning. So instead of just
+        # 'setting' new species, which would be more general
+        # we say we 'take' and 'put' atoms. So a take is equivalent
+        # to a set_empty.
+        # While this looks more readable on paper, I am not sure
+        # if this make code maintainability a lot worse. So this
+        # should probably change.
+
+        out.write('subroutine run_proc_nr(proc, nr_site)\n\n'
+                  '!****f* proclist/run_proc_nr\n'
+                  '! FUNCTION\n'
+                  '!    Runs process ``proc`` on site ``nr_site``.\n'
+                  '!\n'
+                  '! ARGUMENTS\n'
+                  '!\n'
+                  '!    * ``proc`` integer representing the process number\n'
+                  '!    * ``nr_site``  integer representing the site\n'
+                  '!******\n'
+                  '    integer(kind=iint), intent(in) :: proc\n'
+                  '    integer(kind=iint), intent(in) :: nr_site\n\n'
+                  '    integer(kind=iint), dimension(4) :: lsite\n\n'
+                  '    call increment_procstat(proc)\n\n'
+                  '    ! lsite = lattice_site, (vs. scalar site)\n'
+                  '    lsite = nr2lattice(nr_site, :)\n\n'
+                  '    select case(proc)\n')
+        for process in data.process_list:
+            out.write('    case(%s)\n' % process.name)
+            if data.meta.debug > 0:
+                out.write(('print *,"PROCLIST/RUN_PROC_NR/NAME","%s"\n'
+                           'print *,"PROCLIST/RUN_PROC_NR/LSITE","lsite"\n'
+                           'print *,"PROCLIST/RUN_PROC_NR/SITE","site"\n') % process.name)
+            for action in process.action_list:
+                if action.coord == process.executing_coord():
+                    relative_coord = 'lsite'
+                else:
+                    relative_coord = 'lsite%s' % (action.coord - process.executing_coord()).radd_ff()
+
+                try:
+                    previous_species = filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list)[0].species
+                except:
+                    UserWarning("""Process %s seems to be ill-defined.
+                                   Every action needs a corresponding condition
+                                   for the same site.""" % process.name)
+
+                if action.species[0] == '^':
+                    if data.meta.debug > 0:
+                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","create %s_%s"\n' % (action.coord.layer, action.coord.name))
+                    out.write('        call create_%s_%s(%s, %s)\n' % (action.coord.layer, action.coord.name, relative_coord, action.species[1:]))
+                elif action.species[0] == '$':
+                    if data.meta.debug > 0:
+                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","annihilate %s_%s"\n' % (action.coord.layer, action.coord.name))
+                    out.write('        call annihilate_%s_%s(%s, %s)\n' % (action.coord.layer, action.coord.name, relative_coord, action.species[1:]))
+                elif action.species == data.species_list.default_species \
+                and not action.species == previous_species :
+                    if data.meta.debug > 0:
+                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","take %s_%s %s"\n' % (action.coord.layer, action.coord.name, previous_species))
+                    out.write('        call take_%s_%s_%s(%s)\n' % (previous_species, action.coord.layer, action.coord.name, relative_coord))
+                else:
+                    if not previous_species == action.species:
+                        if not previous_species == data.species_list.default_species:
+                            if data.meta.debug > 0:
+                                out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","take %s_%s %s"\n' % (action.coord.layer, action.coord.name, previous_species))
+                            out.write('        call take_%s_%s_%s(%s)\n' % (previous_species, action.coord.layer, action.coord.name, relative_coord))
+                        if data.meta.debug > 0:
+                            out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","put %s_%s %s"\n' % (action.coord.layer, action.coord.name, action.species))
+                        out.write('        call put_%s_%s_%s(%s)\n' % (action.species, action.coord.layer, action.coord.name, relative_coord))
+
+            out.write('\n')
+        out.write('    end select\n\n')
+        out.write('end subroutine run_proc_nr\n\n')
+
+    def write_proclist_put_take(self, data, out):
         # HERE comes the bulk part of this code generator:
         # the put/take/create/annihilation functions
         # encode what all the processes we defined mean in terms
@@ -812,6 +825,7 @@ class ProcListWriter():
                             self._write_optimal_iftree(items=enabled_procs, indent=4, out=out)
                         out.write('\nend subroutine %s\n\n' % routine_name)
 
+    def write_proclist_touchup(self, data, out):
         for layer in data.layer_list:
             for site in layer.sites:
                 routine_name = 'touchup_%s_%s' % (layer.name, site.name)
@@ -837,6 +851,7 @@ class ProcListWriter():
                 self._write_optimal_iftree(items=items, indent=4, out=out)
                 out.write('end subroutine %s\n\n' % routine_name)
 
+    def write_proclist_multilattice(self, data, out):
         if len(data.layer_list) > 1:
             # where are in multi-lattice mode
             for layer in data.layer_list:
@@ -894,7 +909,6 @@ class ProcListWriter():
                             self._write_optimal_iftree(items=enabled_procs, indent=4, out=out)
                         out.write('\nend subroutine %s\n\n' % routine_name)
         out.write('end module proclist\n')
-        out.close()
 
     def _write_optimal_iftree(self, items, indent, out):
         # this function is called recursively
