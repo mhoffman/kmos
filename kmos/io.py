@@ -365,47 +365,6 @@ class ProcListWriter():
                   'end module lattice\n')
         out.close()
 
-    def write_proclist_pseudolocal(self):
-        # make long lines a little shorter
-        data = self.data
-        # write header section and module imports
-        out = open('%s/proclist.f90' % self.dir, 'w')
-        out.write(self._gpl_message())
-        out.write('!****h* kmos/proclist\n'
-                  '! FUNCTION\n'
-                  '!    Implements the kMC process list.\n'
-                  '!\n'
-                  '!******\n'
-                  '\n\nmodule proclist\n'
-                  'use kind_values\n'
-                  'use base, only: &\n'
-                  '    update_accum_rate, &\n'
-                  '    determine_procsite, &\n'
-                  '    update_clocks, &\n'
-                  '    increment_procstat\n\n'
-                  'use lattice, only: &\n')
-        site_params = []
-        for layer in data.layer_list:
-            out.write('    %s, &\n' % layer.name)
-            for site in layer.sites:
-                site_params.append((site.name, layer.name))
-        for i, (site, layer) in enumerate(site_params):
-            out.write(('    %s_%s, &\n') % (layer, site))
-        out.write('    allocate_system, &\n'
-              '    nr2lattice, &\n'
-              '    lattice2nr, &\n'
-              '    add_proc, &\n'
-              '    can_do, &\n'
-              '    set_rate_const, &\n'
-              '    replace_species, &\n'
-              '    del_proc, &\n'
-              '    reset_site, &\n'
-              '    system_size, &\n'
-              '    spuck, &\n'
-              '    null_species, &\n'
-              '    get_species\n'
-              '\n\nimplicit none\n\n')
-
     def write_proclist(self):
         """Write the proclist.f90 module, i.e. the rules which make up
         the kMC process list.
