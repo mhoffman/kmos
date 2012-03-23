@@ -151,6 +151,10 @@ class KMC_Model(multiprocessing.Process):
         """
         return (repr(self.parameters) + repr(self.rate_constants))
 
+    def inverse(self):
+        return (repr(self.parameters) + self.rate_constants.inverse())
+
+
     def put(self, site, species):
         """Puts a certain species at a certain site.
         (Not implemented)
