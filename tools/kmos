@@ -62,6 +62,7 @@ usage['view'] = """kmos view
 
 
 def main():
+    import os
     parser = optparse.OptionParser(
         'Usage: %prog [help] (' + '|'.join(usage.keys()) + ') [options]')
 
@@ -137,6 +138,22 @@ def main():
                         shutil.move(out, '..')
                 else:
                     shutil.move(out, '..')
+
+    elif args[0] == 'export-settings':
+        import kmos.io
+        import os
+        pt = kmos.io.import_xml_file(args[1])
+        if len(args) < 3:
+            out_dir = os.path.splitext(args[1])[0]
+            print('No export path provided. Exporting kmc_settings.py to %s' % out_dir)
+            args.append(out_dir)
+
+        if not os.path.exists(args[2]):
+            os.mkdir(args[2])
+        elif not os.path.isdir(args[2]):
+            raise UserWarning("Cannot overwrite %s; Exiting;" % args[2])
+        writer = kmos.io.ProcListWriter(pt, args[2])
+        writer.write_settings()
 
     elif args[0] == 'import':
         import kmos.io
