@@ -33,10 +33,17 @@ usage['build'] = """kmos build
     Build kmc_model.so from *f90 files in the
     current directory.
                  """
+usage['help'] = """ kmos help <command>
+    Print usage information for the given command.
+                """
 usage['export'] = """kmos export <xml-file> [<export-path>]
     Take a kmos xml-file and export all generated
     source code to the export-path. There try to
     build the kmc_model.so.
+                    """
+usage['export-settings'] = """kmos export-settings <xml-file> [<export-path>]
+    Take a kmos xml-file and export kmc_settings.py
+    to the export-path.
                     """
 usage['export-view'] = """kmos export-view <xml-file>
     Export an XML file, compile and run the simulation.
@@ -64,7 +71,9 @@ usage['view'] = """kmos view
 def main():
     import os
     parser = optparse.OptionParser(
-        'Usage: %prog [help] (' + '|'.join(usage.keys()) + ') [options]')
+        'Usage: %prog [help] ('
+        + '|'.join(sorted(usage.keys()))
+        + ') [options]')
 
     parser.add_option('-s', '--source-only',
                       dest='source_only',
@@ -79,25 +88,24 @@ def main():
                      dest='fcompiler',
                      default=os.environ.get('F2PY_FCOMPILER', 'gfortran'))
 
-
     options, args = parser.parse_args()
-
 
     if len(args) < 1:
         parser.error('Command expected')
 
-
-    if args[0] == 'help':
-        if len(args) < 2:
-            parser.error('Which help do you  want?')
-        if args[1] == 'all':
-            for command in usage:
-                print(usage[command])
-        elif args[1] in usage:
-            print('Usage: %s\n' % usage[args[1]])
-        else:
-            print("Command not known or not documented.")
-
+    if args[0] == 'benchmark':
+        from sys import path
+        path.append(os.path.abspath(os.curdir))
+        nsteps = 1000000
+        from time import time
+        from kmos.run import KMC_Model
+        model = KMC_Model(print_rates=False, banner=False)
+        time0 = time()
+        model.do_steps(nsteps)
+        print('%s steps took %.2f seconds' % (nsteps, time() - time0))
+    elif args[0] == 'build':
+        from kmos.utils import build
+        build(options)
     elif args[0] == 'edit':
         from kmos.gui import main
         main()
@@ -125,7 +133,7 @@ def main():
         cwd = os.path.abspath(os.curdir)
         if ((os.name == 'posix'
            and os.uname()[0] == 'Linux')
-           or os.name == 'nt' ) \
+           or os.name == 'nt') \
            and not options.source_only:
             os.chdir(export_dir)
             build(options)
@@ -145,7 +153,8 @@ def main():
         pt = kmos.io.import_xml_file(args[1])
         if len(args) < 3:
             out_dir = os.path.splitext(args[1])[0]
-            print('No export path provided. Exporting kmc_settings.py to %s' % out_dir)
+            print('No export path provided. Exporting kmc_settings.py to %s'
+                   % out_dir)
             args.append(out_dir)
 
         if not os.path.exists(args[2]):
@@ -154,6 +163,25 @@ def main():
             raise UserWarning("Cannot overwrite %s; Exiting;" % args[2])
         writer = kmos.io.ProcListWriter(pt, args[2])
         writer.write_settings()
+
+    elif args[0] == 'export-view':
+        out_dir = os.path.splitext(args[1])[0]
+        print('No export path provided. Exporting to %s' % out_dir)
+        args.append(out_dir)
+        os.system('kmos-export-program %s %s' % (args[1], args[2]))
+        os.chdir(out_dir)
+        os.system('kmos-view')
+
+    elif args[0] == 'help':
+        if len(args) < 2:
+            parser.error('Which help do you  want?')
+        if args[1] == 'all':
+            for command in usage:
+                print(usage[command])
+        elif args[1] in usage:
+            print('Usage: %s\n' % usage[args[1]])
+        else:
+            print("Command not known or not documented.")
 
     elif args[0] == 'import':
         import kmos.io
@@ -166,37 +194,14 @@ def main():
         if hasattr(IPython, 'release') and \
            map(int, IPython.release.version.split('.')) >= [0, 11]:
             from IPython.frontend.terminal.embed import InteractiveShellEmbed
-            InteractiveShellEmbed(banner1='Note: pt = kmos.io.import_xml(\'%s\')'
-                                  % args[1])()
+            InteractiveShellEmbed(banner1=('Note: pt = '
+                                           'kmos.io.import_xml(\'%s\')')
+                                           % args[1])()
         else:
             from IPython.Shell import IPShellEmbed
             IPShellEmbed(banner='Note: pt = kmos.io.import_xml(\'%s\')'
                          % args[1])()
-    elif args[0] == 'build':
-        from kmos.utils import build
-        build(options)
-    elif args[0] == 'view':
-        from sys import path
-        path.append(os.path.abspath(os.curdir))
-        from kmos.view import main
-        main()
-    elif args[0] == 'benchmark':
-        from sys import path
-        path.append(os.path.abspath(os.curdir))
-        nsteps = 1000000
-        from time import time
-        from kmos.run import KMC_Model
-        model = KMC_Model(print_rates=False, banner=False)
-        time0 = time()
-        model.do_steps(nsteps)
-        print('%s steps took %.2f seconds' % (nsteps, time() - time0))
-    elif args[0] == 'export-view':
-        out_dir = os.path.splitext(args[1])[0]
-        print('No export path provided. Exporting to %s' % out_dir)
-        args.append(out_dir)
-        os.system('kmos-export-program %s %s' % (args[1], args[2]))
-        os.chdir(out_dir)
-        os.system('kmos-view')
+
     elif args[0] == 'rebuild':
         from tempfile import mktemp
         if not os.path.exists('kmc_model.so'):
@@ -220,6 +225,11 @@ def main():
         os.system('kmos export %s .' % tempfile)
         os.remove(tempfile)
 
+    elif args[0] == 'view':
+        from sys import path
+        path.append(os.path.abspath(os.curdir))
+        from kmos.view import main
+        main()
 
     else:
         parser.error('Command not understood.')
