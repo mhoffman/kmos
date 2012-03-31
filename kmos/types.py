@@ -131,6 +131,7 @@ class Project(object):
     def parse_and_add_process(self, string):
         process = parse_process(string, self)
         self.process_list.append(process)
+        return process
 
     def add_species(self, *speciess, **kwargs):
         """Add a species to the project. A Species,
