@@ -51,6 +51,8 @@ public :: add_proc, &
     del_proc, &
     determine_procsite, &
     replace_species, &
+    get_accum_rate, &
+    get_avail_site, &
     get_kmc_step, &
     get_kmc_time, &
     set_kmc_time, &
@@ -844,6 +846,26 @@ subroutine get_nrofsites(proc, return_nrofsites)
 end subroutine get_nrofsites
 
 
+subroutine get_avail_site(proc_nr, field, switch, return_avail_site)
+    !****f* base/get_rate
+    ! FUNCTION
+    !    Return field from the avail_sites database
+    !
+    ! ARGUMENTS
+    !
+    !    * ``proc_nr`` integer representing the requested process.
+    !    * ``field`` integer for the site at question
+    !    * ``switch`` 1 or 2 for site or storage location
+    !******
+    !---------------I/O variables---------------
+    integer(kind=iint), intent(in) :: proc_nr, field, switch
+    integer(kind=rdouble), intent(out) :: return_avail_site
+
+    return_avail_site = avail_sites(proc_nr, field, switch)
+
+end subroutine get_avail_site
+
+
 subroutine get_accum_rate(proc_nr, return_accum_rate)
     !****f* base/get_rate
     ! FUNCTION
@@ -856,7 +878,7 @@ subroutine get_accum_rate(proc_nr, return_accum_rate)
     !******
     !---------------I/O variables---------------
     integer(kind=iint), intent(in) :: proc_nr
-    real(kind=rdouble), intent(out) :: return_accum_rate
+    real(kind=iint), intent(out) :: return_accum_rate
 
     return_accum_rate=accum_rates(proc_nr)
 
