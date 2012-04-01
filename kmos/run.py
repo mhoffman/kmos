@@ -658,6 +658,10 @@ class Model_Rate_Constants(object):
         res += '# ------------------\n'
         return res
 
+    def by_name(self, proc):
+        rate_expr = settings.rate_constants[proc][0]
+        return evaluate_rate_expression(rate_expr, settings.parameters)
+
     def inverse(self):
         res = '# kMC rate constants (%i)\n' % len(settings.rate_constants)
         res += '# ------------------\n'
