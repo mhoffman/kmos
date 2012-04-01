@@ -99,6 +99,14 @@ class KMC_Model(multiprocessing.Process):
         self.proclist.seed = np.array(getattr(self.settings, 'random_seed', 1))
         self.reset()
 
+    def __enter__(self, *args, **kwargs):
+        """__enter/exit__ function for with-statement protocoll"""
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        """__enter/exit__ function for with-statement protocoll"""
+        self.deallocate()
+
     def reset(self):
         self.size = int(settings.simulation_size)
         proclist.init((self.size,) * int(lattice.model_dimension),
