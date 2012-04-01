@@ -844,6 +844,25 @@ subroutine get_nrofsites(proc, return_nrofsites)
 end subroutine get_nrofsites
 
 
+subroutine get_accum_rate(proc_nr, return_accum_rate)
+    !****f* base/get_rate
+    ! FUNCTION
+    !    Return accumulated rate at a given process.
+    !
+    ! ARGUMENTS
+    !
+    !    * ``proc_nr`` integer representing the requested process.
+    !    * ``return_accum_rate`` writeable real, where the requested accumulated rate will be stored.
+    !******
+    !---------------I/O variables---------------
+    integer(kind=iint), intent(in) :: proc_nr
+    real(kind=rdouble), intent(out) :: return_accum_rate
+
+    return_accum_rate=accum_rates(proc_nr)
+
+end subroutine get_accum_rate
+
+
 subroutine get_rate(proc_nr, return_rate)
     !****f* base/get_rate
     ! FUNCTION
