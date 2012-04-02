@@ -33,7 +33,7 @@ usage['build'] = """kmos build
     Build kmc_model.so from *f90 files in the
     current directory.
                  """
-usage['help'] = """ kmos help <command>
+usage['help'] = """kmos help <command>
     Print usage information for the given command.
                 """
 usage['export'] = """kmos export <xml-file> [<export-path>]
@@ -61,6 +61,11 @@ usage['rebuild'] = """kmos rebuild
     information included in kmc_settings.py in
     current directory.
                     """
+
+usage['run'] = """kmos run
+    Open an interactive shell and create a KMC_Model in it
+               """
+
 usage['view'] = """kmos view
     Take a kmc_model.so and kmc_settings.py in the
     same directory and start to simulate the
@@ -132,8 +137,6 @@ def main():
         writer = ProcListWriter(project, export_dir)
         writer.write_settings()
 
-
-
     elif args[0] == 'export':
         import kmos.types
         import kmos.io
@@ -201,7 +204,7 @@ def main():
         if len(args) < 2:
             parser.error('Which help do you  want?')
         if args[1] == 'all':
-            for command in usage:
+            for command in sorted(usage):
                 print(usage[command])
         elif args[1] in usage:
             print('Usage: %s\n' % usage[args[1]])
@@ -218,14 +221,11 @@ def main():
         import IPython
         if hasattr(IPython, 'release') and \
            map(int, IPython.release.version.split('.')) >= [0, 11]:
-            from IPython.frontend.terminal.embed import InteractiveShellEmbed
-            InteractiveShellEmbed(banner1=('Note: pt = '
-                                           'kmos.io.import_xml(\'%s\')')
-                                           % args[1])()
+            from IPython.frontend.terminal.embed \
+                import InteractiveShellEmbed as sh
         else:
-            from IPython.Shell import IPShellEmbed
-            IPShellEmbed(banner='Note: pt = kmos.io.import_xml(\'%s\')'
-                         % args[1])()
+            from IPython.Shell import IPShellEmbed as sh
+        sh(banner='Note: pt = kmos.io.import_xml(\'%s\')' % args[1])()
 
     elif args[0] == 'rebuild':
         from tempfile import mktemp
@@ -249,6 +249,18 @@ def main():
         os.system('rm kmc_*')
         os.system('kmos export %s .' % tempfile)
         os.remove(tempfile)
+
+    elif args[0] == 'run':
+        from kmos.run import KMC_Model
+        model = KMC_Model(print_rates=False)
+        import IPython
+        if hasattr(IPython, 'release') and \
+           map(int, IPython.release.version.split('.')) >= [0, 11]:
+            from IPython.frontend.terminal.embed \
+                import InteractiveShellEmbed as sh
+        else:
+            from IPython.Shell import IPShellEmbed as sh
+        sh(banner='Note: model = KMC_Model(print_rates=False)')()
 
     elif args[0] == 'view':
         from sys import path
