@@ -399,7 +399,7 @@ class KMC_Model(multiprocessing.Process):
                                                    prod, process_name))
 
         print('-------------------------')
-        print('total rate = %.8e s^-1' % accum_rate)
+        print('  = total rate = %.8e s^-1' % accum_rate)
 
     def _put(self, site, new_species):
         """
