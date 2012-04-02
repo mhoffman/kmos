@@ -848,7 +848,7 @@ end subroutine get_nrofsites
 
 
 subroutine get_avail_site(proc_nr, field, switch, return_avail_site)
-    !****f* base/get_rate
+    !****f* base/get_avail_site
     ! FUNCTION
     !    Return field from the avail_sites database
     !
@@ -868,7 +868,7 @@ end subroutine get_avail_site
 
 
 subroutine get_accum_rate(proc_nr, return_accum_rate)
-    !****f* base/get_rate
+    !****f* base/get_accum_rate
     ! FUNCTION
     !    Return accumulated rate at a given process.
     !
