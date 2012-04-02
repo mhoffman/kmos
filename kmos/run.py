@@ -384,6 +384,23 @@ class KMC_Model(multiprocessing.Process):
     def switch_surface_processes_on(self):
         set_rate_constants(settings.parameters, self.print_rates)
 
+    def show_accum_rate_summation(self):
+        accum_rate = 0.
+        for i, process_name in enumerate(
+                               sorted(
+                               self.settings.rate_constants)):
+            nrofsites = self.base.get_nrofsites(i+1)
+            if nrofsites:
+                rate = self.base.get_rate(i+1)
+                prod = nrofsites*rate
+                accum_rate += prod
+
+                print('% 5i*%8.4e s^-1 = %8.4e s^-1 [%s]' % (nrofsites, rate,
+                                                   prod, process_name))
+
+        print('-------------------------')
+        print('  = total rate = %.8e s^-1' % accum_rate)
+
     def _put(self, site, new_species):
         """
         Works exactly like put, but without updating the database of
