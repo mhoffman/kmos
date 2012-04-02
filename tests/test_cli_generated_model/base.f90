@@ -683,6 +683,7 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
         rates = 0
         allocate(accum_rates(nr_of_proc))
         accum_rates = 0
+        update_accum_rate()
         allocate(procstat(nr_of_proc))
         procstat = 0
 
