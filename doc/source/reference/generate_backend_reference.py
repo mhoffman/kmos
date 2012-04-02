@@ -89,3 +89,15 @@ for prefix in ['base', 'lattice', 'proclist']:
     #os.system('rst2html base.rst > base.html')
 
 shutil.rmtree(outdir)
+
+with file('cli.rst', 'w') as outfile:
+    from kmos.cli import usage
+    for i, doc in enumerate(usage.values()):
+        outfile.write('\n\n')
+        doc = doc.replace('*', '\*')
+        doc = doc.split('\n')
+        doc[0] = '``%s``' % doc[0]
+        for i, line in enumerate(doc):
+            doc[i] = line.rstrip()
+        doc = '\n'.join(doc)
+        outfile.write('%s' % doc)
