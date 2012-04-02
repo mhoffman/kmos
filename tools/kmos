@@ -17,5 +17,5 @@
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 
 if __name__ == '__main__':
-    from kmos.tool import main
+    from kmos.cli import main
     main()
