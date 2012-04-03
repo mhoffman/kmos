@@ -367,7 +367,7 @@ class KMC_Model(multiprocessing.Process):
                     for n in range(self.lattice.spuck):
                         self.lattice.replace_species(
                             [x, y, z, n + 1],
-                            self.base.get_species([xi, yi, zi, n]),
+                            self.base.get_species([x, y, z, n]),
                             config[xi, yi, zi, n],)
         self._adjust_database()
 
@@ -480,7 +480,7 @@ class KMC_Model(multiprocessing.Process):
                         # to randomly select one
                         self.lattice.replace_species(
                             [x, y, z, n + 1],
-                            self.base.get_species([xi, yi, zi, n]),
+                            self.base.get_species([x, y, z, n]),
                             random.choice(choices))
         self._adjust_database()
 
