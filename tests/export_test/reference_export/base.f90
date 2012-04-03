@@ -683,7 +683,6 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
         rates = 0
         allocate(accum_rates(nr_of_proc))
         accum_rates = 0
-        update_accum_rate()
         allocate(procstat(nr_of_proc))
         procstat = 0
 
@@ -878,10 +877,16 @@ subroutine get_accum_rate(proc_nr, return_accum_rate)
     !    * ``return_accum_rate`` writeable real, where the requested accumulated rate will be stored.
     !******
     !---------------I/O variables---------------
-    integer(kind=iint), intent(in) :: proc_nr
+  integer(kind=iint), intent(in), optional :: proc_nr
     real(kind=iint), intent(out) :: return_accum_rate
 
+  print *, proc_nr
+  if(.not. present(proc_nr) .or. proc_nr.eq.0) then
+    return_accum_rate=accum_rates(nr_of_proc)
+    print *, return_accum_rate
+  else
     return_accum_rate=accum_rates(proc_nr)
+  endif
 
 end subroutine get_accum_rate
 
