@@ -296,6 +296,8 @@ subroutine initialize_state(layer)
         end do
     end do
 
+    call update_accum_rate
+
 
 end subroutine initialize_state
 
