@@ -151,6 +151,7 @@ class KMC_Model(multiprocessing.Process):
         else:
             self.lattice_representation = Atoms()
         set_rate_constants(settings.parameters, self.print_rates)
+        self.base.update_accum_rate()
 
     def __repr__(self):
         """Print short summary of current parameters and rate
