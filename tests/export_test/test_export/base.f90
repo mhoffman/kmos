@@ -882,7 +882,6 @@ subroutine get_accum_rate(proc_nr, return_accum_rate)
 
     if(.not. present(proc_nr) .or. proc_nr.eq.0) then
       return_accum_rate=accum_rates(nr_of_proc)
-      print *, return_accum_rate
     else
       return_accum_rate=accum_rates(proc_nr)
     endif
