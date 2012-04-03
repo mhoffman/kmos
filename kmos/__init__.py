@@ -50,6 +50,8 @@ or it may be used as an API via the kmos module.
 #import kmos.types
 #import kmos.io
 
+__version__ = "0.1.1"
+
 
 def evaluate_rate_expression(rate_expr, parameters={}):
     """Evaluates an expression for a typical kMC rate constant.
