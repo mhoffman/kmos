@@ -353,13 +353,12 @@ class KMC_Model(multiprocessing.Process):
         for x in range(self.lattice.system_size[0]):
             for y in range(self.lattice.system_size[1]):
                 for z in range(self.lattice.system_size[2]):
-                    xi, yi, zi = np.array([x, y, z]) % \
-                                 old_system_size
+                    xi, yi, zi = np.array([x, y, z]) % old_system_size
                     for n in range(self.lattice.spuck):
                         self.lattice.replace_species(
                             [x, y, z, n + 1],
-                            self.base.get_species([x, y, z, n]),
-                            config[xi, yi, zi, n],)
+                            self.lattice.get_species([x, y, z, n + 1]),
+                            config[xi, yi, zi, n])
         self._adjust_database()
 
     def switch_surface_processes_off(self):
@@ -454,7 +453,7 @@ class KMC_Model(multiprocessing.Process):
                         # to randomly select one
                         self.lattice.replace_species(
                             [x, y, z, n + 1],
-                            self.base.get_species([x, y, z, n]),
+                            self.lattice.get_species([x, y, z, n + 1]),
                             random.choice(choices))
         self._adjust_database()
 
