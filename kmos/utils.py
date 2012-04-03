@@ -315,6 +315,7 @@ def evaluate_kind_values(infile, outfile):
 def build(options):
     from os.path import isfile
     from os import system, name
+    import sys
 
     src_files = 'kind_values_f2py.f90 base.f90 lattice.f90 proclist.f90'
 

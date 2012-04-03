@@ -2,6 +2,7 @@
 """kMC modeling on steroids"""
 
 from distutils.core import setup
+from kmos import __version__ as version
 
 maintainer = 'Max J. Hoffmann'
 maintainer_email = 'mjhoffmann@gmail.com'
@@ -54,7 +55,6 @@ scripts = [
         'tools/kmos-install-dependencies-ubuntu',
         ]
 url = 'https://github.com/mhoffman/kmos'
-version = '0.1'
 
 setup(
       author=author,
