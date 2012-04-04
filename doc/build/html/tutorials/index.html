@@ -5,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Tutorials &mdash; kmos v0.0.1 documentation</title>
+    <title>Tutorials &mdash; kmos v0.1.2 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.0.1',
+        VERSION:     '0.1.2',
         COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -19,7 +19,7 @@
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
+    <link rel="top" title="kmos v0.1.2 documentation" href="../index.html" />
     <link rel="next" title="Topic Guides" href="../topic_guides/index.html" />
     <link rel="prev" title="Welcome to kmos’s documentation!" href="../index.html" /> 
   </head>
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="../index.html" title="Welcome to kmos’s documentation!"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.1.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -195,7 +195,7 @@ no dependencies except for a Fortran compiler.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">kmos</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">dependencies</span><span class="o">-</span><span class="n">ubuntu</span>
 </pre></div>
 </div>
-<div class="admonition-todo admonition " id="todo-54">
+<div class="admonition-todo admonition " id="todo-62">
 <p class="first admonition-title">Todo</p>
 <p class="last">add pip way or something alike to automatically
 install dependencies.</p>
@@ -288,7 +288,7 @@ it in the same way as you installed <strong>ASE</strong>.</p>
 which are not described in this document. Please post questions
 and comments in the
 <a class="reference external" href="https://github.com/mhoffman/kmos/issues">issues forum</a> .</p>
-<div class="admonition-todo admonition " id="todo-55">
+<div class="admonition-todo admonition " id="todo-63">
 <p class="first admonition-title">Todo</p>
 <p class="last">test installation on other platforms</p>
 </div>
@@ -381,7 +381,7 @@ a CO molecule which can be evaluated in ASE namespace.</p>
 To keep it simple we will stick with a simple-cubic lattice in 2D which
 could for example represent the (100) surface of a fcc crystal with only
 one adsorption site per unit cell. You start by giving your layer a name</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">layer</span> <span class="o">=</span> <span class="n">Layer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;simple_cubic&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">layer</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;simple_cubic&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>and adding a site</p>
@@ -390,11 +390,7 @@ one adsorption site per unit cell. You start by giving your layer a name</p>
 </pre></div>
 </div>
 <p>Where <cite>pos</cite> is given in fractional coordinates, so this site
-will be in the center of the unit cell. Finally we have to
-add the newly created layer to our project</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
-</pre></div>
-</div>
+will be in the center of the unit cell.</p>
 <p>Simple, huh? Now you wonder where all the rest of the geometry went?
 For a simple reason: the geometric location of a site is
 meaningless from a kMC point of view. In order to solve the master
@@ -439,7 +435,7 @@ and the CO partial pressure:</p>
 set defines how the scrollbars a behave later in the runtime GUI.</p>
 <p>To describe the adsorption rate constant you will need the area
 of the unit cell:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;A&#39;</span><span class="p">,</span><span class="n">value</span><span class="o">=</span><span class="s">&#39;(3.5*angstrom)**2&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;A&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s">&#39;(3.5*angstrom)**2&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Last but not least you need a binding energy of the particle on
@@ -462,8 +458,8 @@ So for example an adsorption requires at least one site to be empty
 (condition). Then this site can be occupied by CO (action) with a
 rate constant. Written down in code this looks as follows</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_process</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;CO_adsorption&#39;</span><span class="p">,</span>
-               <span class="n">condition_list</span><span class="o">=</span><span class="p">[</span><span class="n">Condition</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)],</span>
-               <span class="n">action_list</span><span class="o">=</span><span class="p">[</span><span class="n">Action</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;CO&#39;</span><span class="p">)],</span>
+               <span class="n">conditions</span><span class="o">=</span><span class="p">[</span><span class="n">Condition</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)],</span>
+               <span class="n">actions</span><span class="o">=</span><span class="p">[</span><span class="n">Action</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;CO&#39;</span><span class="p">)],</span>
                <span class="n">rate_constant</span><span class="o">=</span><span class="s">&#39;p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -475,8 +471,8 @@ is true for m_CO, here the atomic masses are looked up and added. Note
 that we need conversion factors of bar and umass.</p>
 <p>Then the desorption process is almost the same, except the reverse:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_process</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;CO_desorption&#39;</span><span class="p">,</span>
-               <span class="n">condition_list</span><span class="o">=</span><span class="p">[</span><span class="n">Condition</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;CO&#39;</span><span class="p">)],</span>
-               <span class="n">action_list</span><span class="o">=</span><span class="p">[</span><span class="n">Action</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)],</span>
+               <span class="n">conditions</span><span class="o">=</span><span class="p">[</span><span class="n">Condition</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;CO&#39;</span><span class="p">)],</span>
+               <span class="n">actions</span><span class="o">=</span><span class="p">[</span><span class="n">Action</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)],</span>
                <span class="n">rate_constant</span><span class="o">=</span><span class="s">&#39;p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(-deltaG*eV)&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -506,7 +502,7 @@ coordinate is</p>
 </div>
 <div class="section" id="export-save-compile">
 <h3>Export, save, compile<a class="headerlink" href="#export-save-compile" title="Permalink to this headline">¶</a></h3>
-<p>Next it is a good idea to save your work:</p>
+<p>Next, it&#8217;s a good idea to save your work</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="s">&#39;myfirst_kmc.xml&#39;</span>
 <span class="n">pt</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 </pre></div>
@@ -575,7 +571,7 @@ explains how that works.</td></tr>
 simple adsorption/desorption model on a simple cubic surface.
 Despite its simplicity it touches all elements contained in
 the GUI and could be considered from first-principles.</p>
-<div class="admonition-todo admonition " id="todo-56">
+<div class="admonition-todo admonition " id="todo-64">
 <p class="first admonition-title">Todo</p>
 <p class="last">describe modelling more complicated structures
 and e.g. boundary conditions</p>
@@ -600,7 +596,7 @@ be even more interactive you set a parameter to be adjustable.
 This can happen either in the generating XML file or directly
 in the kmc_settings.py. Also make sure to set sensible minimum
 and maximum values.</p>
-<div class="admonition-todo admonition " id="todo-57">
+<div class="admonition-todo admonition " id="todo-65">
 <p class="first admonition-title">Todo</p>
 <p class="last">add recording function</p>
 </div>
@@ -626,16 +622,23 @@ by instantiating</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">model</span> <span class="o">=</span> <span class="n">KMC_Model</span><span class="p">(</span><span class="n">print_rates</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">banner</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>The most important method is of course how to run
+the model, which you can do by saying</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">do_steps</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>which would run the model by 100,000 kMC steps.</p>
 <p>Let&#8217;s say you want to change the temperature and a partial pressure of
 the model you could type</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="mi">550</span>
 <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">p_COgas</span> <span class="o">=</span> <span class="mf">0.5</span>
 </pre></div>
 </div>
-<p>and all rate constants will be instantly updated. In order get a quick
+<p>and all rate constants are instantly updated. In order get a quick
 overview of the current settings you can issue e.g.</p>
-<div class="highlight-python"><pre>print(model.parameters)
-print(model.rate_constants</pre>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">rate_constants</span><span class="p">)</span>
+</pre></div>
 </div>
 <p>or just</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
@@ -643,13 +646,18 @@ print(model.rate_constants</pre>
 </div>
 <p>Now an instantiated und configured model has mainly two functions: run
 kMC steps and report its current configuration.</p>
-<p>In order to propagate the model <cite>n</cite> steps you can say</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">do_steps</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<p>To analyze the current state you may use</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">atoms</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_atoms</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>and to analyze the current state you can use</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">get_atoms</span><span class="p">()</span>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>If you want to fetch data from the current state without
+actually visualizing the geometry can speed up the get_atoms()
+call using</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="n">atoms</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_atoms</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 </pre></div>
+</div>
 </div>
 <p>This will return an ASE atoms object of the current system, but
 it also contains some additional data piggy-backed such as</p>
@@ -666,7 +674,15 @@ it also contains some additional data piggy-backed such as</p>
 </div>
 <p>These quantities are often sufficient when running and simulating
 a catalyst surface, but of course the model could be expanded
-to more observables.</p>
+to more observables. The Fortran modules <cite>base</cite>, <cite>lattice</cite>,
+and <cite>proclist</cite> are atttributes of the model instance so,
+please feel free to explore the model instance e.g. using
+ipython and</p>
+<div class="highlight-python"><pre>model.base.&lt;TAB&gt;
+model.lattice.&lt;TAB&gt;
+model.proclist.&lt;TAB&gt;</pre>
+</div>
+<p>etc..</p>
 <p>The <cite>occupation</cite> is a 2-dimensional array which contains
 the <cite>occupation</cite> for each surface <cite>site</cite> divided by
 the number of unit cell. The first slot
@@ -816,7 +832,7 @@ from the top project directory</p>
         <li class="right" >
           <a href="../index.html" title="Welcome to kmos’s documentation!"
              >previous</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.1.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

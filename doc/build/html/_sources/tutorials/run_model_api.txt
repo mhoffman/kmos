@@ -20,17 +20,24 @@ by instantiating ::
 
   model = KMC_Model(print_rates=False, banner=False)
 
+The most important method is of course how to run
+the model, which you can do by saying ::
+
+  model.do_steps(100000)
+
+which would run the model by 100,000 kMC steps.
+
 Let's say you want to change the temperature and a partial pressure of
 the model you could type ::
 
   model.parameters.T = 550
   model.parameters.p_COgas = 0.5
 
-and all rate constants will be instantly updated. In order get a quick
+and all rate constants are instantly updated. In order get a quick
 overview of the current settings you can issue e.g. ::
 
   print(model.parameters)
-  print(model.rate_constants
+  print(model.rate_constants)
 
 or just ::
 
@@ -39,13 +46,17 @@ or just ::
 Now an instantiated und configured model has mainly two functions: run
 kMC steps and report its current configuration.
 
-In order to propagate the model `n` steps you can say ::
+To analyze the current state you may use ::
 
-  model.do_steps(n)
+  atoms = model.get_atoms()
 
-and to analyze the current state you can use ::
+.. note::
 
-  model.get_atoms()
+  If you want to fetch data from the current state without
+  actually visualizing the geometry can speed up the get_atoms()
+  call using ::
+
+    atoms = model.get_atoms(geometry=False)
 
 This will return an ASE atoms object of the current system, but
 it also contains some additional data piggy-backed such as ::
@@ -62,7 +73,16 @@ it also contains some additional data piggy-backed such as ::
 
 These quantities are often sufficient when running and simulating
 a catalyst surface, but of course the model could be expanded
-to more observables.
+to more observables. The Fortran modules `base`, `lattice`,
+and `proclist` are atttributes of the model instance so,
+please feel free to explore the model instance e.g. using
+ipython and ::
+
+  model.base.<TAB>
+  model.lattice.<TAB>
+  model.proclist.<TAB>
+
+etc..
 
 The `occupation` is a 2-dimensional array which contains
 the `occupation` for each surface `site` divided by

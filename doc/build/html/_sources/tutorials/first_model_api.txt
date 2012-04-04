@@ -60,7 +60,7 @@ To keep it simple we will stick with a simple-cubic lattice in 2D which
 could for example represent the (100) surface of a fcc crystal with only
 one adsorption site per unit cell. You start by giving your layer a name ::
 
-  layer = Layer(name='simple_cubic')
+  layer = pt.add_layer(name='simple_cubic')
 
 and adding a site ::
   
@@ -69,10 +69,7 @@ and adding a site ::
 
 
 Where `pos` is given in fractional coordinates, so this site
-will be in the center of the unit cell. Finally we have to
-add the newly created layer to our project ::
-
-  pt.add_layer(layer)
+will be in the center of the unit cell.
 
 Simple, huh? Now you wonder where all the rest of the geometry went?
 For a simple reason: the geometric location of a site is
@@ -120,14 +117,13 @@ and the CO partial pressure::
   pt.add_parameter(name='T', value=600., adjustable=True, min=400, max=800)
   pt.add_parameter(name='p_CO', value=1., adjustable=True, min=1e-10, max=1.e2)
 
-
 You can also set a default value and a minimum and maximum value
 set defines how the scrollbars a behave later in the runtime GUI.
 
 To describe the adsorption rate constant you will need the area
 of the unit cell::
 
-  pt.add_parameter(name='A',value='(3.5*angstrom)**2')
+  pt.add_parameter(name='A', value='(3.5*angstrom)**2')
 
 Last but not least you need a binding energy of the particle on
 the surface. Since without further ado we have no value for the
@@ -151,8 +147,8 @@ So for example an adsorption requires at least one site to be empty
 rate constant. Written down in code this looks as follows ::
 
   pt.add_process(name='CO_adsorption',
-                 condition_list=[Condition(coord=coord, species='empty')],
-                 action_list=[Action(coord=coord, species='CO')],
+                 conditions=[Condition(coord=coord, species='empty')],
+                 actions=[Action(coord=coord, species='CO')],
                  rate_constant='p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)')
 
 Now you might wonder, how come we can simply use m_CO and beta and such.
@@ -165,8 +161,8 @@ that we need conversion factors of bar and umass.
 Then the desorption process is almost the same, except the reverse::
 
   pt.add_process(name='CO_desorption',
-                 condition_list=[Condition(coord=coord, species='CO')],
-                 action_list=[Action(coord=coord, species='empty')],
+                 conditions=[Condition(coord=coord, species='CO')],
+                 actions=[Action(coord=coord, species='empty')],
                  rate_constant='p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(-deltaG*eV)')
 
 
@@ -199,11 +195,10 @@ check :ref:`manual_coord_generation` for details.
 Export, save, compile
 ^^^^^^^^^^^^^^^^^^^^^
 
-Next it is a good idea to save your work::
+Next, it's a good idea to save your work ::
 
   pt.filename = 'myfirst_kmc.xml'
   pt.save()
-
 
 Now is the time to leave the python shell. In the current
 directory you should see a `myfirst_kmc.xml`.

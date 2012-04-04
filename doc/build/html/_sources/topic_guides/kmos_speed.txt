@@ -45,8 +45,7 @@ spent per kMC step as nearly constant for up nearly 10^5 sites.
   :align: center
 
   Benchmark for a simple surface reaction model. All simulations have been
-  performed on a single CPU of Intel I7-2600K with 3.40 GHz clock speed
-  and 1333 MHz memory.
+  performed on a single CPU of Intel I7-2600K with 3.40 GHz clock speed.
 
 The kmos O(1) solver
 --------------------
@@ -61,7 +60,7 @@ The kmos O(1) solver
   it stores the location in memory, where the availability
   of the site is stored for direct access. The array of
   `rate constants` holds the numeric rate constant and only
-  changes, when one a physical parameter is changed. The
+  changes, when a physical parameter is changed. The
   `nr of sites` array holds the total number of sites for each
   process and needs to be updated whenever
   a process becomes available und unavailable. The `accum. rates`

@@ -1,6 +1,6 @@
 # Sphinx inventory version 1
 # Project: kmos
-# Version: 0.0.1
+# Version: 0.1.2
 kmos.gui mod reference/index.html
 kmos.view mod reference/index.html
 kmos.io mod reference/index.html
@@ -8,9 +8,10 @@ kmos.run mod reference/index.html
 kmos mod tutorials/introduction.html
 kmos.forms mod reference/index.html
 kmos.types mod reference/index.html
+kmos.types.Project.add_species method reference/index.html
 kmos.run.KMC_Model.double method reference/index.html
 kmos.forms.BatchProcessForm class reference/index.html
-kmos.gui.GTKProject class reference/index.html
+kmos.types.Project.add_parameter method reference/index.html
 kmos.forms.ProcessForm.on_lattice method reference/index.html
 kmos.forms.ProcessForm.draw_from_data method reference/index.html
 kmos.forms.parse_chemical_expression function reference/index.html
@@ -18,6 +19,7 @@ kmos.run.KMC_Model.get_occupation_header method reference/index.html
 kmos.types.Site class reference/index.html
 kmos.forms.SiteForm.on_site_name__validate method reference/index.html
 kmos.forms.SpeciesForm class reference/index.html
+kmos.types.Project.add_process method reference/index.html
 kmos.io.ProcListWriter.write_proclist method reference/index.html
 kmos.view.KMC_Viewer.parameter_callback method reference/index.html
 kmos.view.KMC_Viewer.exit method reference/index.html
@@ -31,6 +33,7 @@ kmos.run.KMC_Model.get_atoms method reference/index.html
 kmos.view.KMC_Viewer class reference/index.html
 kmos.forms.ParameterForm class reference/index.html
 kmos.forms.SiteForm.on_site_cancel__clicked method reference/index.html
+kmos.gui.GTKProject class reference/index.html
 kmos.forms.ProcessForm class reference/index.html
 kmos.types.Meta class reference/index.html
 kmos.forms.LayerEditor class reference/index.html
@@ -39,6 +42,7 @@ kmos.run.KMC_Model._get_configuration method reference/index.html
 kmos.run.KMC_Model._set_configuration method reference/index.html
 kmos.forms.MetaForm class reference/index.html
 kmos.forms.LatticeForm class reference/index.html
+kmos.types.Project.add_layer method reference/index.html
 kmos.run.KMC_Model class reference/index.html
 kmos.io.ProcListWriter class reference/index.html
 kmos.io.export_source function reference/index.html

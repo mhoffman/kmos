@@ -5,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>A first kMC Model–the API way &mdash; kmos v0.0.1 documentation</title>
+    <title>A first kMC Model–the API way &mdash; kmos v0.1.2 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.0.1',
+        VERSION:     '0.1.2',
         COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -19,7 +19,7 @@
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" /> 
+    <link rel="top" title="kmos v0.1.2 documentation" href="../index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -31,7 +31,7 @@
         <li class="right" >
           <a href="../modindex.html" title="Global Module Index"
              accesskey="M">modules</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.1.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -125,7 +125,7 @@ a CO molecule which can be evaluated in ASE namespace.</p>
 To keep it simple we will stick with a simple-cubic lattice in 2D which
 could for example represent the (100) surface of a fcc crystal with only
 one adsorption site per unit cell. You start by giving your layer a name</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">layer</span> <span class="o">=</span> <span class="n">Layer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;simple_cubic&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">layer</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;simple_cubic&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>and adding a site</p>
@@ -134,11 +134,7 @@ one adsorption site per unit cell. You start by giving your layer a name</p>
 </pre></div>
 </div>
 <p>Where <cite>pos</cite> is given in fractional coordinates, so this site
-will be in the center of the unit cell. Finally we have to
-add the newly created layer to our project</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
-</pre></div>
-</div>
+will be in the center of the unit cell.</p>
 <p>Simple, huh? Now you wonder where all the rest of the geometry went?
 For a simple reason: the geometric location of a site is
 meaningless from a kMC point of view. In order to solve the master
@@ -183,7 +179,7 @@ and the CO partial pressure:</p>
 set defines how the scrollbars a behave later in the runtime GUI.</p>
 <p>To describe the adsorption rate constant you will need the area
 of the unit cell:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;A&#39;</span><span class="p">,</span><span class="n">value</span><span class="o">=</span><span class="s">&#39;(3.5*angstrom)**2&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;A&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s">&#39;(3.5*angstrom)**2&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Last but not least you need a binding energy of the particle on
@@ -206,8 +202,8 @@ So for example an adsorption requires at least one site to be empty
 (condition). Then this site can be occupied by CO (action) with a
 rate constant. Written down in code this looks as follows</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_process</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;CO_adsorption&#39;</span><span class="p">,</span>
-               <span class="n">condition_list</span><span class="o">=</span><span class="p">[</span><span class="n">Condition</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)],</span>
-               <span class="n">action_list</span><span class="o">=</span><span class="p">[</span><span class="n">Action</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;CO&#39;</span><span class="p">)],</span>
+               <span class="n">conditions</span><span class="o">=</span><span class="p">[</span><span class="n">Condition</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)],</span>
+               <span class="n">actions</span><span class="o">=</span><span class="p">[</span><span class="n">Action</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;CO&#39;</span><span class="p">)],</span>
                <span class="n">rate_constant</span><span class="o">=</span><span class="s">&#39;p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -219,8 +215,8 @@ is true for m_CO, here the atomic masses are looked up and added. Note
 that we need conversion factors of bar and umass.</p>
 <p>Then the desorption process is almost the same, except the reverse:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_process</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;CO_desorption&#39;</span><span class="p">,</span>
-               <span class="n">condition_list</span><span class="o">=</span><span class="p">[</span><span class="n">Condition</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;CO&#39;</span><span class="p">)],</span>
-               <span class="n">action_list</span><span class="o">=</span><span class="p">[</span><span class="n">Action</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)],</span>
+               <span class="n">conditions</span><span class="o">=</span><span class="p">[</span><span class="n">Condition</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;CO&#39;</span><span class="p">)],</span>
+               <span class="n">actions</span><span class="o">=</span><span class="p">[</span><span class="n">Action</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)],</span>
                <span class="n">rate_constant</span><span class="o">=</span><span class="s">&#39;p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(-deltaG*eV)&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -250,7 +246,7 @@ coordinate is</p>
 </div>
 <div class="section" id="export-save-compile">
 <h2>Export, save, compile<a class="headerlink" href="#export-save-compile" title="Permalink to this headline">¶</a></h2>
-<p>Next it is a good idea to save your work:</p>
+<p>Next, it&#8217;s a good idea to save your work</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="s">&#39;myfirst_kmc.xml&#39;</span>
 <span class="n">pt</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 </pre></div>
@@ -329,7 +325,7 @@ explains how that works.</td></tr>
         <li class="right" >
           <a href="../modindex.html" title="Global Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.1.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

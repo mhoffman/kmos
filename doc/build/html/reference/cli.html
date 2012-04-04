@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Development &mdash; kmos v0.1.2 documentation</title>
+    <title><no title> &mdash; kmos v0.1.2 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -38,7 +38,7 @@
         <div class="sphinxsidebarwrapper">
             <h3>This Page</h3>
             <ul class="this-page-menu">
-              <li><a href="../_sources/tutorials/development.txt"
+              <li><a href="../_sources/reference/cli.txt"
                      rel="nofollow">Show Source</a></li>
             </ul>
           <div id="searchbox" style="display: none">
@@ -62,25 +62,43 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="development">
-<h1>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h1>
-<p>Contributions of any sort are of course quite welcome.
-Patches and comments are ideally sent in form of email,
-pull request, or github issues.</p>
-<p>To make synergizing a most pleasing experience I suggest you use
-git, nose, pep8, and pylint</p>
-<div class="highlight-python"><pre>sudo apt-get install git python-nose pep8 pylint</pre>
-</div>
-<p>When sending a patch please make sure the nose tests pass, i.e. run
-from the top project directory</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">nosetests</span>
-</pre></div>
-</div>
-<p>Furthermore run</p>
-<div class="highlight-python"><pre>pep8 &lt;filename&gt;</pre>
-</div>
-<p>Thank you.</p>
-</div>
+  <dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">help</span> <span class="pre">all</span></tt></dt>
+<dd>Display documentation for all commands.</dd>
+<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">run</span></tt></dt>
+<dd>Open an interactive shell and create a KMC_Model in it</dd>
+<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">help</span> <span class="pre">&lt;command&gt;</span></tt></dt>
+<dd>Print usage information for the given command.</dd>
+<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">edit</span> <span class="pre">&lt;xml-file&gt;</span></tt></dt>
+<dd>Open the kmos xml-file in a GUI to edit
+the model.</dd>
+<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">rebuild</span></tt></dt>
+<dd>Export code and rebuild binary module from XML
+information included in kmc_settings.py in
+current directory.</dd>
+<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">benchmark</span></tt></dt>
+<dd>Run 1 mio. kMC steps on model in current directory
+and report runtime.</dd>
+<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">export-view</span> <span class="pre">&lt;xml-file&gt;</span></tt></dt>
+<dd>Export an XML file, compile and run the simulation.</dd>
+<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">export</span> <span class="pre">&lt;xml-file&gt;</span> <span class="pre">[&lt;export-path&gt;]</span></tt></dt>
+<dd>Take a kmos xml-file and export all generated
+source code to the export-path. There try to
+build the kmc_model.so.</dd>
+<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">build</span></tt></dt>
+<dd>Build kmc_model.so from *f90 files in the
+current directory.</dd>
+<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">import</span> <span class="pre">&lt;xml-file&gt;</span></tt></dt>
+<dd>Take a kmos xml-file and open an ipython shell
+with the project_tree imported as pt.</dd>
+<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">export-settings</span> <span class="pre">&lt;xml-file&gt;</span> <span class="pre">[&lt;export-path&gt;]</span></tt></dt>
+<dd>Take a kmos xml-file and export kmc_settings.py
+to the export-path.</dd>
+<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">view</span></tt></dt>
+<dd>Take a kmc_model.so and kmc_settings.py in the
+same directory and start to simulate the
+model visually.</dd>
+</dl>
 
 
           </div>

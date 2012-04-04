@@ -109,6 +109,21 @@ base/determine_procsite
     * ``proc`` Return integer :math:`\in[1,\mathrm{nr\_of\_proc}`
     * ``site`` Return integer :math:`\in [1,\mathrm{volume}`
 
+base/get_accum_rate
+""""""""""""""""""""""""""""""""""""""""""""""""""
+    Return accumulated rate at a given process.
+
+    * ``proc_nr`` integer representing the requested process.
+    * ``return_accum_rate`` writeable real, where the requested accumulated rate will be stored.
+
+base/get_avail_site
+""""""""""""""""""""""""""""""""""""""""""""""""""
+    Return field from the avail_sites database
+
+    * ``proc_nr`` integer representing the requested process.
+    * ``field`` integer for the site at question
+    * ``switch`` 1 or 2 for site or storage location
+
 base/get_kmc_step
 """"""""""""""""""""""""""""""""""""""""""""""""""
     Return the current kmc_step

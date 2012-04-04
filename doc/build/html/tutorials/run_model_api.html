@@ -5,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Running the Model–the API way &mdash; kmos v0.0.1 documentation</title>
+    <title>Running the Model–the API way &mdash; kmos v0.1.2 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.0.1',
+        VERSION:     '0.1.2',
         COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -19,7 +19,7 @@
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" /> 
+    <link rel="top" title="kmos v0.1.2 documentation" href="../index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -31,7 +31,7 @@
         <li class="right" >
           <a href="../modindex.html" title="Global Module Index"
              accesskey="M">modules</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.1.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -90,16 +90,23 @@ by instantiating</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">model</span> <span class="o">=</span> <span class="n">KMC_Model</span><span class="p">(</span><span class="n">print_rates</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">banner</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>The most important method is of course how to run
+the model, which you can do by saying</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">do_steps</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>which would run the model by 100,000 kMC steps.</p>
 <p>Let&#8217;s say you want to change the temperature and a partial pressure of
 the model you could type</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="mi">550</span>
 <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">p_COgas</span> <span class="o">=</span> <span class="mf">0.5</span>
 </pre></div>
 </div>
-<p>and all rate constants will be instantly updated. In order get a quick
+<p>and all rate constants are instantly updated. In order get a quick
 overview of the current settings you can issue e.g.</p>
-<div class="highlight-python"><pre>print(model.parameters)
-print(model.rate_constants</pre>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">rate_constants</span><span class="p">)</span>
+</pre></div>
 </div>
 <p>or just</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
@@ -107,13 +114,18 @@ print(model.rate_constants</pre>
 </div>
 <p>Now an instantiated und configured model has mainly two functions: run
 kMC steps and report its current configuration.</p>
-<p>In order to propagate the model <cite>n</cite> steps you can say</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">do_steps</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<p>To analyze the current state you may use</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">atoms</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_atoms</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>and to analyze the current state you can use</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">get_atoms</span><span class="p">()</span>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>If you want to fetch data from the current state without
+actually visualizing the geometry can speed up the get_atoms()
+call using</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="n">atoms</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_atoms</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 </pre></div>
+</div>
 </div>
 <p>This will return an ASE atoms object of the current system, but
 it also contains some additional data piggy-backed such as</p>
@@ -130,7 +142,15 @@ it also contains some additional data piggy-backed such as</p>
 </div>
 <p>These quantities are often sufficient when running and simulating
 a catalyst surface, but of course the model could be expanded
-to more observables.</p>
+to more observables. The Fortran modules <cite>base</cite>, <cite>lattice</cite>,
+and <cite>proclist</cite> are atttributes of the model instance so,
+please feel free to explore the model instance e.g. using
+ipython and</p>
+<div class="highlight-python"><pre>model.base.&lt;TAB&gt;
+model.lattice.&lt;TAB&gt;
+model.proclist.&lt;TAB&gt;</pre>
+</div>
+<p>etc..</p>
 <p>The <cite>occupation</cite> is a 2-dimensional array which contains
 the <cite>occupation</cite> for each surface <cite>site</cite> divided by
 the number of unit cell. The first slot
@@ -254,7 +274,7 @@ split the list and start subprocesses for each sublist</p>
         <li class="right" >
           <a href="../modindex.html" title="Global Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.1.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

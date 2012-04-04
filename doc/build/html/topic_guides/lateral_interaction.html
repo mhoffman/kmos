@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>The kmos data model &mdash; kmos v0.1.2 documentation</title>
+    <title>Modeling lateral interaction &mdash; kmos v0.1.2 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -19,10 +19,7 @@
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos v0.1.2 documentation" href="../index.html" />
-    <link rel="up" title="Topic Guides" href="index.html" />
-    <link rel="next" title="How the kmos kMC algorithm works" href="kmos_speed.html" />
-    <link rel="prev" title="Modelling Workflows" href="workflows.html" /> 
+    <link rel="top" title="kmos v0.1.2 documentation" href="../index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -34,27 +31,24 @@
         <li class="right" >
           <a href="../modindex.html" title="Global Module Index"
              accesskey="M">modules</a> |</li>
-        <li class="right" >
-          <a href="kmos_speed.html" title="How the kmos kMC algorithm works"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="workflows.html" title="Modelling Workflows"
-             accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">kmos v0.1.2 documentation</a> &raquo;</li>
-          <li><a href="index.html" accesskey="U">Topic Guides</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.1.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-            <h4>Previous topic</h4>
-            <p class="topless"><a href="workflows.html"
-                                  title="previous chapter">Modelling Workflows</a></p>
-            <h4>Next topic</h4>
-            <p class="topless"><a href="kmos_speed.html"
-                                  title="next chapter">How the kmos kMC algorithm works</a></p>
+            <h3><a href="../index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">Modeling lateral interaction</a><ul>
+<li><a class="reference external" href="#introduction">Introduction</a></li>
+<li><a class="reference external" href="#lateral-interaction-models">Lateral Interaction Models</a></li>
+<li><a class="reference external" href="#conquering-combinatorics-with-itertools">Conquering combinatorics with itertools</a></li>
+</ul>
+</li>
+</ul>
+
             <h3>This Page</h3>
             <ul class="this-page-menu">
-              <li><a href="../_sources/topic_guides/data_models.txt"
+              <li><a href="../_sources/topic_guides/lateral_interaction.txt"
                      rel="nofollow">Show Source</a></li>
             </ul>
           <div id="searchbox" style="display: none">
@@ -78,40 +72,38 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="the-kmos-data-model">
-<h1>The kmos data model<a class="headerlink" href="#the-kmos-data-model" title="Permalink to this headline">¶</a></h1>
-<p>The guide explains how kmos handles represent
-a kmc model internally, which is important to know
-if one wants to write new functionality.</p>
-<p>The different functions and front-ends of
-kmos all interact in some way or another
-with instances of the Project class. A
-Project instance is a representation of
-a kmc model. If you fire up &#8216;kmos edit&#8217; with
-an xml file, kmos validates the XML file and
-stores the content in a Project instance.
-If you export source code, kmos runs over the
-Project and creates the necessary Fortran 90
-source code.</p>
-<p>So the following things are in a Project:</p>
+  <div class="section" id="modeling-lateral-interaction">
+<h1>Modeling lateral interaction<a class="headerlink" href="#modeling-lateral-interaction" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="lateral-interaction-models">
+<h2>Lateral Interaction Models<a class="headerlink" href="#lateral-interaction-models" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>meta</li>
-<li>lattice(layers)</li>
-<li>species</li>
-<li>parameters</li>
-<li>processes</li>
+<li>pairwise interaction</li>
+<li>bond-order potentials</li>
 </ul>
-<p>The language used here stems from modelling atomic
-movement on a fixed or evolving lattice like
-structure. In a more general
-context one may rephrase them as :</p>
-<ul class="simple">
-<li>meta -&gt; information about project</li>
-<li>lattice -&gt; geometry</li>
-<li>species -&gt; states</li>
-<li>parameters</li>
-<li>processes -&gt; transitions</li>
-</ul>
+</div>
+<div class="section" id="conquering-combinatorics-with-itertools">
+<h2>Conquering combinatorics with itertools<a class="headerlink" href="#conquering-combinatorics-with-itertools" title="Permalink to this headline">¶</a></h2>
+<p>Even restricting oneself to nearest neighbor
+lateral interaction to number of different
+configurations to be considered for lateral
+interactions can quickly reach a couple
+of tens or hundred. A phenomenon which is
+among practitioners humbly referred to as
+<em>combinatorial explosions</em>. Unfortunately
+manualy typing all these combinations if
+usually tiring and thus error prone.
+Fortunately the <cite>itertools</cite> module from the
+python standard library allows to very quickly
+generate all needed configurations. Before
+delving into the practical steps of this I
+would like to point out that lateral interaction
+typically slows down the simulation by about
+one order of magnitude, which is a purely
+empirical fact.</p>
+</div>
 </div>
 
 
@@ -129,14 +121,7 @@ context one may rephrase them as :</p>
         <li class="right" >
           <a href="../modindex.html" title="Global Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="kmos_speed.html" title="How the kmos kMC algorithm works"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="workflows.html" title="Modelling Workflows"
-             >previous</a> |</li>
-        <li><a href="../index.html">kmos v0.1.2 documentation</a> &raquo;</li>
-          <li><a href="index.html" >Topic Guides</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.1.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

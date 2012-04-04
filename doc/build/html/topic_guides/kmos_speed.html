@@ -5,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>How the kmos kMC algorithm works &mdash; kmos v0.0.1 documentation</title>
+    <title>How the kmos kMC algorithm works &mdash; kmos v0.1.2 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.0.1',
+        VERSION:     '0.1.2',
         COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -19,7 +19,7 @@
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos v0.0.1 documentation" href="../index.html" />
+    <link rel="top" title="kmos v0.1.2 documentation" href="../index.html" />
     <link rel="up" title="Topic Guides" href="index.html" />
     <link rel="next" title="The Process Syntax" href="proc_syntax.html" />
     <link rel="prev" title="The kmos data model" href="data_models.html" /> 
@@ -40,7 +40,7 @@
         <li class="right" >
           <a href="data_models.html" title="The kmos data model"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li>
+        <li><a href="../index.html">kmos v0.1.2 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Topic Guides</a> &raquo;</li> 
       </ul>
     </div>
@@ -124,8 +124,7 @@ spent per kMC step as nearly constant for up nearly 10^5 sites.</p>
 <div class="figure align-center">
 <img alt="../_images/benchmark.png" src="../_images/benchmark.png" />
 <p class="caption">Benchmark for a simple surface reaction model. All simulations have been
-performed on a single CPU of Intel I7-2600K with 3.40 GHz clock speed
-and 1333 MHz memory.</p>
+performed on a single CPU of Intel I7-2600K with 3.40 GHz clock speed.</p>
 </div>
 <div class="section" id="the-kmos-o-1-solver">
 <h2>The kmos O(1) solver<a class="headerlink" href="#the-kmos-o-1-solver" title="Permalink to this headline">¶</a></h2>
@@ -137,7 +136,7 @@ step the sites for which it is executable. Secondly
 it stores the location in memory, where the availability
 of the site is stored for direct access. The array of
 <cite>rate constants</cite> holds the numeric rate constant and only
-changes, when one a physical parameter is changed. The
+changes, when a physical parameter is changed. The
 <cite>nr of sites</cite> array holds the total number of sites for each
 process and needs to be updated whenever
 a process becomes available und unavailable. The <cite>accum. rates</cite>
@@ -197,7 +196,7 @@ available now.</li>
 <p>Thus once all local updates are finished the
 <cite>accum. rates</cite> array is simply updated once.
 And ready we are for the next kMC step.</p>
-<div class="admonition-todo admonition " id="todo-39">
+<div class="admonition-todo admonition " id="todo-60">
 <p class="first admonition-title">Todo</p>
 <p class="last">describe translation algorithm</p>
 </div>
@@ -225,7 +224,7 @@ And ready we are for the next kMC step.</p>
         <li class="right" >
           <a href="data_models.html" title="The kmos data model"
              >previous</a> |</li>
-        <li><a href="../index.html">kmos v0.0.1 documentation</a> &raquo;</li>
+        <li><a href="../index.html">kmos v0.1.2 documentation</a> &raquo;</li>
           <li><a href="index.html" >Topic Guides</a> &raquo;</li> 
       </ul>
     </div>
