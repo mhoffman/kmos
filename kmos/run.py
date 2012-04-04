@@ -187,6 +187,7 @@ class KMC_Model(multiprocessing.Process):
             for name in value:
                 if name not in tofs:
                     tofs.append(name)
+        tofs.sort()
         return ' '.join(tofs)
 
     def deallocate(self):
