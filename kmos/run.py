@@ -337,6 +337,8 @@ class KMC_Model(multiprocessing.Process):
             atoms.tof_data = np.dot(self.tof_matrix,
                             (atoms.procstat - self.procstat) / delta_t / size)
 
+        atoms.delta_t = delta_t
+
         # update trackers for next call
         self.procstat[:] = atoms.procstat
         self.time = atoms.kmc_time
@@ -597,11 +599,17 @@ class KMC_Model(multiprocessing.Process):
             if propagate:
                 proclist.run_proc_nr(nprocess, nsite)
 
-    def procstat_pprint(self):
+    def procstat_pprint(self, match=None):
         """Print an overview view process names along with
         the number of times it has been executed."""
+
+        from fnmatch import fnmatch
         for i, name in enumerate(sorted(self.settings.rate_constants.keys())):
-            print('%s : %.4e' % (name, self.base.get_procstat(i + 1)))
+            if match is None:
+                print('%s : %.4e' % (name, self.base.get_procstat(i + 1)))
+            else:
+                if fnmatch(name, match):
+                    print('%s : %.4e' % (name, self.base.get_procstat(i + 1)))
 
     def procstat_normalized(self):
         """Print an overview view process names along with
