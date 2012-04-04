@@ -110,7 +110,7 @@ class KMC_Model(multiprocessing.Process):
         # prepare structures for TOF evaluation
         self.tofs = tofs = get_tof_names()
         self.tof_matrix = np.zeros((len(tofs), proclist.nr_of_proc))
-        for process, tof_count in settings.tof_count.iteritems():
+        for process, tof_count in sorted(settings.tof_count.iteritems()):
             process_nr = eval('proclist.%s' % process.lower())
             for tof, tof_factor in tof_count.iteritems():
                 self.tof_matrix[tofs.index(tof), process_nr - 1] += tof_factor
