@@ -163,7 +163,6 @@ class KMC_Model(multiprocessing.Process):
     def inverse(self):
         return (repr(self.parameters) + self.rate_constants.inverse())
 
-
     def put(self, site, species):
         """Puts a certain species at a certain site.
         (Not implemented)
@@ -302,7 +301,7 @@ class KMC_Model(multiprocessing.Process):
                                 # add to existing slab
                                 atoms += ad_atoms
                                 if self.species_tags:
-                                    for atom in range(len(atoms)-len(ad_atoms), len(atoms)):
+                                    for atom in range(len(atoms) - len(ad_atoms), len(atoms)):
                                         kmos_tags[atom] = self.species_tags.values()[species]
 
                         lattice_repr = deepcopy(self.lattice_representation)
@@ -391,10 +390,10 @@ class KMC_Model(multiprocessing.Process):
         for i, process_name in enumerate(
                                sorted(
                                self.settings.rate_constants)):
-            nrofsites = self.base.get_nrofsites(i+1)
+            nrofsites = self.base.get_nrofsites(i + 1)
             if nrofsites:
-                rate = self.base.get_rate(i+1)
-                prod = nrofsites*rate
+                rate = self.base.get_rate(i + 1)
+                prod = nrofsites * rate
                 accum_rate += prod
 
                 print('% 5i*%8.4e s^-1 = %8.4e s^-1 [%s]' % (nrofsites, rate,
@@ -676,6 +675,13 @@ class Model_Parameters(object):
         res += '# --------------------\n'
         return res
 
+    def __call__(self, match=None):
+        from fnmatch import fnmatch
+        for attr in sorted(settings.parameters):
+            if match is None or fnmatch(attr, match):
+                print('# %s = %s'
+                      % (attr, settings.parameters[attr]['value']))
+
 
 class Model_Rate_Constants(object):
 
@@ -690,6 +696,15 @@ class Model_Rate_Constants(object):
             res += '# %s: %s = %.2e s^{-1}\n' % (proc, rate_expr, rate_const)
         res += '# ------------------\n'
         return res
+
+    def __call__(self, match=None):
+        from fnmatch import fnmatch
+        for i, proc in enumerate(sorted(settings.rate_constants.keys())):
+            if match is None or fnmatch(proc, match):
+                rate_expr = settings.rate_constants[proc][0]
+                rate_const = evaluate_rate_expression(rate_expr,
+                                                      settings.parameters)
+                print('# %s: %s = %.2e s^{-1}' % (proc, rate_expr, rate_const))
 
     def by_name(self, proc):
         rate_expr = settings.rate_constants[proc][0]
