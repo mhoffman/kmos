@@ -611,23 +611,25 @@ class KMC_Model(multiprocessing.Process):
                 if fnmatch(name, match):
                     print('%s : %.4e' % (name, self.base.get_procstat(i + 1)))
 
-    def procstat_normalized(self):
+    def procstat_normalized(self, match=None):
         """Print an overview view process names along with
         the number of times it has been executed divided by
         the current rate constant times the kmc time.
 
         Can help to find those processes which are kinetically
         hindered."""
+        from fnmatch import fnmatch
         kmc_time = self.base.get_kmc_time()
 
         for i, name in enumerate(sorted(self.settings.rate_constants.keys())):
-            if kmc_time:
-                print('%s : %.4e' % (name, self.base.get_procstat(i + 1) /
-                                           self.lattice.system_size.prod() /
-                                           self.base.get_kmc_time() /
-                                           self.base.get_rate(i + 1)))
-            else:
-                print('%s : %.4e' % (name, 0.))
+            if match is None or fnmatch(name, match):
+                if kmc_time:
+                    print('%s : %.4e' % (name, self.base.get_procstat(i + 1) /
+                                               self.lattice.system_size.prod() /
+                                               self.base.get_kmc_time() /
+                                               self.base.get_rate(i + 1)))
+                else:
+                    print('%s : %.4e' % (name, 0.))
 
     def rate_ratios(self):
         ratios = []
