@@ -9,8 +9,8 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="744.09448819"
-   height="1052.3622047"
+   width="98.157249"
+   height="31.093599"
    id="svg2"
    version="1.1"
    inkscape:version="0.48.2 r9819"
@@ -25,8 +25,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="8.8531413"
-     inkscape:cx="275.56859"
-     inkscape:cy="714.98039"
+     inkscape:cx="49.07863"
+     inkscape:cy="15.546797"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -34,7 +34,11 @@
      inkscape:window-height="573"
      inkscape:window-x="0"
      inkscape:window-y="1"
-     inkscape:window-maximized="1" />
+     inkscape:window-maximized="1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -43,14 +47,15 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1">
+     id="layer1"
+     transform="translate(-226.48996,-321.83499)">
     <path
        d="m 295.11914,333.00671 c -1.92709,2e-5 -3.45053,0.75523 -4.57031,2.26563 -1.1198,1.49741 -1.6797,3.5547 -1.67969,6.17187 -1e-5,2.6172 0.55338,4.681 1.66016,6.19141 1.11978,1.4974 2.64973,2.2461 4.58984,2.24609 1.91405,10e-6 3.43097,-0.7552 4.55078,-2.26562 1.11978,-1.51041 1.67967,-3.5677 1.67969,-6.17188 -2e-5,-2.59113 -0.55991,-4.64191 -1.67969,-6.15234 -1.11981,-1.52342 -2.63673,-2.28514 -4.55078,-2.28516 m 0,-3.04687 c 3.12499,2e-5 5.57941,1.01565 7.36328,3.04687 1.78383,2.03127 2.67576,4.84377 2.67578,8.4375 -2e-5,3.58074 -0.89195,6.39324 -2.67578,8.4375 -1.78387,2.03125 -4.23829,3.04688 -7.36328,3.04688 -3.13803,0 -5.59896,-1.01563 -7.38281,-3.04688 -1.77084,-2.04426 -2.65625,-4.85676 -2.65625,-8.4375 0,-3.59373 0.88541,-6.40623 2.65625,-8.4375 1.78385,-2.03122 4.24478,-3.04685 7.38281,-3.04687"
        style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Mallige;-inkscape-font-specification:Mallige"
@@ -73,8 +78,9 @@
        d="m 226.48996,321.97156 3.61328,0 0,17.94922 10.72266,-9.4336 4.58984,0 -11.60156,10.23438 12.08984,11.64062 -4.6875,0 -11.11328,-10.68359 0,10.68359 -3.61328,0 0,-30.39062" />
     <path
        style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Mallige;-inkscape-font-specification:Mallige"
-       d="M 293.96875 330 C 291.37109 330.22218 289.31087 331.22268 287.75 333 C 285.97916 335.03127 285.09375 337.84377 285.09375 341.4375 C 285.09375 345.01824 285.97916 347.83074 287.75 349.875 C 289.3289 351.67287 291.42273 352.66843 294.0625 352.875 L 294.0625 349.78125 C 292.6193 349.55003 291.43734 348.83665 290.53125 347.625 C 289.42447 346.11459 288.87499 344.0547 288.875 341.4375 C 288.87499 338.82033 289.4427 336.77866 290.5625 335.28125 C 291.46911 334.05839 292.6267 333.32656 294.0625 333.09375 L 294.0625 330 C 294.03229 330.00236 293.99882 329.99743 293.96875 330 z "
-       id="path3770" />
+       d="m 293.96875,330 c -2.59766,0.22218 -4.65788,1.22268 -6.21875,3 -1.77084,2.03127 -2.65625,4.84377 -2.65625,8.4375 0,3.58074 0.88541,6.39324 2.65625,8.4375 1.5789,1.79787 3.67273,2.79343 6.3125,3 l 0,-3.09375 c -1.4432,-0.23122 -2.62516,-0.9446 -3.53125,-2.15625 -1.10678,-1.51041 -1.65626,-3.5703 -1.65625,-6.1875 -10e-6,-2.61717 0.5677,-4.65884 1.6875,-6.15625 0.90661,-1.22286 2.0642,-1.95469 3.5,-2.1875 l 0,-3.09375 c -0.0302,0.002 -0.0637,-0.003 -0.0937,0 z"
+       id="path3770"
+       inkscape:connector-curvature="0" />
     <path
        inkscape:connector-curvature="0"
        id="path3768"
