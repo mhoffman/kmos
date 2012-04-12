@@ -260,7 +260,7 @@ def main():
                 import InteractiveShellEmbed as sh
         else:
             from IPython.Shell import IPShellEmbed as sh
-        sh(banner='Note: model = KMC_Model(print_rates=False)')()
+        sh(banner='Note: model = KMC_Model(print_rates=False, banner=True)')()
 
     elif args[0] == 'view':
         from sys import path
