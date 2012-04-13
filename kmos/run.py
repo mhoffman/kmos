@@ -40,6 +40,7 @@ the model happens through Queues.
 __all__ = ['base', 'lattice', 'proclist', 'KMC_Model']
 
 from copy import deepcopy
+from fnmatch import fnmatch
 import multiprocessing
 import random
 from math import log
@@ -145,9 +146,9 @@ class KMC_Model(multiprocessing.Process):
                     settings.lattice_representation)[
                         lattice.substrate_layer]
             else:
-                lattice_representation =  eval(
+                lattice_representation = eval(
                     settings.lattice_representation)
-                if len(lattice_representation) > 1 :
+                if len(lattice_representation) > 1:
                     self.lattice_representation = \
                          lattice_representation[self.lattice.default_layer]
                 else:
@@ -607,7 +608,6 @@ class KMC_Model(multiprocessing.Process):
         """Print an overview view process names along with
         the number of times it has been executed."""
 
-        from fnmatch import fnmatch
         for i, name in enumerate(sorted(self.settings.rate_constants.keys())):
             if match is None:
                 print('%s : %.4e' % (name, self.base.get_procstat(i + 1)))
@@ -622,7 +622,6 @@ class KMC_Model(multiprocessing.Process):
 
         Can help to find those processes which are kinetically
         hindered."""
-        from fnmatch import fnmatch
         kmc_time = self.base.get_kmc_time()
 
         for i, name in enumerate(sorted(self.settings.rate_constants.keys())):
@@ -683,7 +682,6 @@ class Model_Parameters(object):
         return res
 
     def __call__(self, match=None):
-        from fnmatch import fnmatch
         for attr in sorted(settings.parameters):
             if match is None or fnmatch(attr, match):
                 print('# %s = %s'
@@ -696,18 +694,18 @@ class Model_Rate_Constants(object):
         """Compact representation of all current rate_constants."""
         res = '# kMC rate constants (%i)\n' % len(settings.rate_constants)
         res += '# ------------------\n'
-        for proc in sorted(settings.rate_constants):
+        for i, proc in enumerate(sorted(settings.rate_constants)):
             rate_expr = settings.rate_constants[proc][0]
-            rate_const = evaluate_rate_expression(rate_expr,
-                                                  settings.parameters)
+            rate_const = base.get_rate(i + 1)
+            #rate_const = evaluate_rate_expression(rate_expr,
+                                                  #settings.parameters)
             res += '# %s: %s = %.2e s^{-1}\n' % (proc, rate_expr, rate_const)
         res += '# ------------------\n'
         return res
 
-    def __call__(self, match=None):
-        from fnmatch import fnmatch
+    def __call__(self, pattern=None):
         for i, proc in enumerate(sorted(settings.rate_constants.keys())):
-            if match is None or fnmatch(proc, match):
+            if pattern is None or fnmatch(proc, pattern):
                 rate_expr = settings.rate_constants[proc][0]
                 rate_const = evaluate_rate_expression(rate_expr,
                                                       settings.parameters)
@@ -727,6 +725,27 @@ class Model_Rate_Constants(object):
             res += '# %s: %.2e s^{-1} = %s\n' % (proc, rate_const, rate_expr)
         res += '# ------------------\n'
         return res
+
+    def set(self, pattern, rate_constant, parameters=None):
+        """Set rate constants. Pattern can be a glob pattern,
+        and the rate constant will be applied to all processes,
+        where the pattern matches. The rate constant can be either
+        a number or a rate expression.
+
+        """
+
+        if parameters is None:
+            parameters = settings.parameters
+        if type(rate_constant) is str:
+            rate_constant = evaluate_rate_expression(rate_constant,
+                                                     parameters)
+        try:
+            rate_constant = float(rate_constant)
+        except:
+            raise UserWarning("Could not convert rate constant to float")
+        for i, proc in enumerate(sorted(settings.rate_constants.keys())):
+            if pattern is None or fnmatch(proc, pattern):
+                base.set_rate_const(i + 1, rate_constant)
 
 
 def set_rate_constants(parameters=None, print_rates=True):
