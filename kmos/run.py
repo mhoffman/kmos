@@ -145,9 +145,13 @@ class KMC_Model(multiprocessing.Process):
                     settings.lattice_representation)[
                         lattice.substrate_layer]
             else:
-                self.lattice_representation = eval(
-                    settings.lattice_representation)[
-                        lattice.default_layer]
+                lattice_representation =  eval(
+                    settings.lattice_representation)
+                if len(lattice_representation) > 1 :
+                    self.lattice_representation = \
+                         lattice_representation[self.lattice.default_layer]
+                else:
+                    self.lattice_representation = lattice_representation[0]
         else:
             self.lattice_representation = Atoms()
         set_rate_constants(settings.parameters, self.print_rates)
