@@ -50,20 +50,25 @@ from kmos import evaluate_rate_expression
 try:
     from kmc_model import base, lattice, proclist
 except Exception, e:
-    print(e)
-    print('Could not find the kmc module. The kmc implements the actual')
-    print('kmc model. This can be created from a kmos xml file using')
-    print('kmos-export-program.')
     base = lattice = proclist = None
+    raise Exception("""Error: %s
+    Could not find the kmc module. The kmc implements the actual
+    kmc model. This can be created from a kmos xml file using
+    kmos export <xml-file>
+    Hint: are you in a directory containing a compiled kMC model?\n\n
+    """ % e )
 
 try:
     import kmc_settings as settings
 except Exception, e:
-    print(e)
-    print('Could import settings file')
-    print('The kmc_settings.py contains all changeable model parameters')
-    print('and descriptions for the representation on screen.')
     settings = None
+    raise Exception("""Error %s
+    Could import settings file
+    The kmc_settings.py contains all changeable model parameters
+    and descriptions for the representation on screen.
+    Hint: are you in a directory containing a compiled kMC model?
+    """ % e )
+
 
 
 class KMC_Model(multiprocessing.Process):
