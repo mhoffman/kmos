@@ -251,50 +251,54 @@ XML = """<?xml version="1.0" ?>
 </kmc>
 """
 
-def run(i=0):
+def run(i=0, edir=''):
+    from sys import path
+    path.append(edir)
     from kmos.run import KMC_Model
     model = KMC_Model(banner=False, print_rates=False)
     model.settings.random_seed = i
     assert not model.do_steps(1000)
     assert not model.deallocate()
 
-def run_in_serial():
+def run_in_serial(edir):
     for i in xrange(20):
-        run(i)
+        run(i, edir)
 
-def run_in_parallel():
+def run_in_parallel(edir):
     from multiprocessing import Process
     for i in xrange(8):
-        process = Process(target=run)
+        process = Process(target=run, args=(10, edir))
         process.start()
 
 def export_and_run_many_models():
     """Test if export of a model including initiating,
     running, and deallocating works many times in serial
     """
-    from os import system, chdir, remove
+    from os import chdir, remove
     from os.path import abspath
     from shutil import rmtree
     from sys import path
 
     import tempfile
+    from kmos.cli import main
 
     EXPORT_DIR = tempfile.mkdtemp()
     XML_FILENAME = '%s.xml' % tempfile.mktemp()
-    XML_FILE = file(XML_FILENAME, 'w')
-    XML_FILE.write(XML)
-    XML_FILE.close()
 
-    system('kmos export %s %s' % (XML_FILENAME, EXPORT_DIR))
+    with file(XML_FILENAME, 'w') as XML_FILE:
+        XML_FILE.write(XML)
 
-    path.append(abspath(EXPORT_DIR))
+    main('export %s %s' % (XML_FILENAME, EXPORT_DIR))
+
+
+    edir = abspath(EXPORT_DIR)
 
     try:
-        run_in_serial()
-        run_in_parallel()
+        run_in_serial(edir)
+        run_in_parallel(edir)
     finally:
         rmtree(abspath(EXPORT_DIR))
         remove(XML_FILENAME)
 
 if __name__ == '__main__':
-    test_export_and_run_many_models()
+    export_and_run_many_models()
