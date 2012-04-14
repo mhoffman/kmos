@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+"""Entry point module for the command-line
+   interface. The kmos executable should be
+   on the program path, import this modules
+   main function and run it.
+
+"""
+
 
 #    Copyright 2009-2012 Max J. Hoffmann (mjhoffmann@gmail.com)
 #    This file is part of kmos.
@@ -16,9 +23,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 
-import optparse
-import os
-import sys
 
 usage = {}
 usage['all'] = """kmos help all
@@ -73,8 +77,22 @@ usage['view'] = """kmos view
                  """
 
 
-def main():
+def main(args=None):
+    """The CLI main entry point function.
+
+    The optional arguemnts args, can be used to
+    directly supply command line argument like
+
+    $ kmos <args>
+
+    otherwise args will be taken from STDIN.
+
+    """
+
+    import optparse
     import os
+    from glob import glob
+
     parser = optparse.OptionParser(
         'Usage: %prog [help] ('
         + '|'.join(sorted(usage.keys()))
@@ -93,7 +111,10 @@ def main():
                      dest='fcompiler',
                      default=os.environ.get('F2PY_FCOMPILER', 'gfortran'))
 
-    options, args = parser.parse_args()
+    if args is not None:
+        options, args = parser.parse_args(args.split())
+    else:
+        options, args = parser.parse_args()
 
     if len(args) < 1:
         parser.error('Command expected')
@@ -104,21 +125,22 @@ def main():
         nsteps = 1000000
         from time import time
         from kmos.run import KMC_Model
-        model = KMC_Model(print_rates=False, banner=False)
-        time0 = time()
-        model.do_steps(nsteps)
-        print('%s steps took %.2f seconds' % (nsteps, time() - time0))
+        with KMC_Model(print_rates=False, banner=False) as model:
+            time0 = time()
+            model.do_steps(nsteps)
+            needed_time = time() - time0
+            print('%s steps took %.2f seconds' % (nsteps, needed_time))
+            print('Or %.2e steps/s' % (1e6 / needed_time))
     elif args[0] == 'build':
         from kmos.utils import build
         build(options)
     elif args[0] == 'edit':
-        from kmos.gui import main
-        main()
+        from kmos import gui
+        gui.main()
     elif args[0] == 'export-settings':
         import kmos.types
         import kmos.io
         from kmos.utils import build
-        from glob import glob
         import shutil
         from kmos.io import ProcListWriter
 
@@ -141,7 +163,6 @@ def main():
         import kmos.types
         import kmos.io
         from kmos.utils import build
-        from glob import glob
         import shutil
         if len(args) < 2:
             parser.error('XML file and export path expected.')
@@ -158,7 +179,6 @@ def main():
 
         kmos.io.export_source(project, export_dir)
 
-        cwd = os.path.abspath(os.curdir)
         if ((os.name == 'posix'
            and os.uname()[0] == 'Linux')
            or os.name == 'nt') \
@@ -177,7 +197,6 @@ def main():
 
     elif args[0] == 'export-settings':
         import kmos.io
-        import os
         pt = kmos.io.import_xml_file(args[1])
         if len(args) < 3:
             out_dir = os.path.splitext(args[1])[0]
@@ -198,7 +217,7 @@ def main():
         args.append(out_dir)
         os.system('kmos-export-program %s %s' % (args[1], args[2]))
         os.chdir(out_dir)
-        os.system('kmos-view')
+        main('view')
 
     elif args[0] == 'help':
         if len(args) < 2:
@@ -213,21 +232,15 @@ def main():
 
     elif args[0] == 'import':
         import kmos.io
-        try:
-            import numpy as np
-        except:
-            pass
+        if not len(args) >= 2:
+            raise UserWarning('XML file name expected.')
+        global pt
         pt = kmos.io.import_xml_file(args[1])
-        import IPython
-        if hasattr(IPython, 'release') and \
-           map(int, IPython.release.version.split('.')) >= [0, 11]:
-            from IPython.frontend.terminal.embed \
-                import InteractiveShellEmbed as sh
-        else:
-            from IPython.Shell import IPShellEmbed as sh
-        sh(banner='Note: pt = kmos.io.import_xml(\'%s\')' % args[1])()
+        sh(banner='Note: pt = kmos.io.import_xml(\'%s\')' % args[1])
 
     elif args[0] == 'rebuild':
+        from sys import path
+        path.append(os.path.abspath(os.curdir))
         from tempfile import mktemp
         if not os.path.exists('kmc_model.so'):
             print('No kmc_model.so found, exiting.')
@@ -239,34 +252,49 @@ def main():
 
         from kmos.run import KMC_Model
 
-        model = KMC_Model(print_rates=False, banner=False)
+        with KMC_Model(print_rates=False, banner=False) as model:
+            tempfile = mktemp()
+            f = file(tempfile, 'w')
+            f.write(model.xml())
+            f.close()
 
-        tempfile = mktemp()
-        f = file(tempfile, 'w')
-        f.write(model.xml())
-        f.close()
-
-        os.system('rm kmc_*')
-        os.system('kmos export %s .' % tempfile)
-        os.remove(tempfile)
+            for kmc_model in glob('kmc_model.*'):
+                os.remove(kmc_model)
+            os.remove('kmc_settings.py')
+            main('export %s .' % tempfile)
+            os.remove(tempfile)
 
     elif args[0] == 'run':
+        from sys import path
+        path.append(os.path.abspath(os.curdir))
         from kmos.run import KMC_Model
-        model = KMC_Model(print_rates=False)
-        import IPython
-        if hasattr(IPython, 'release') and \
-           map(int, IPython.release.version.split('.')) >= [0, 11]:
-            from IPython.frontend.terminal.embed \
-                import InteractiveShellEmbed as sh
-        else:
-            from IPython.Shell import IPShellEmbed as sh
-        sh(banner='Note: model = KMC_Model(print_rates=False, banner=True)')()
+
+        with KMC_Model(print_rates=False) as model:
+            global model
+            sh(banner='Note: model = KMC_Model(print_rates=False)')
 
     elif args[0] == 'view':
         from sys import path
         path.append(os.path.abspath(os.curdir))
-        from kmos.view import main
-        main()
+        from kmos import view
+        view.main()
 
     else:
         parser.error('Command not understood.')
+
+
+def sh(banner):
+    """Wrapper around interactive ipython shell
+    that factors out ipython version depencies.
+
+    """
+
+    import IPython
+    if hasattr(IPython, 'release') and \
+       map(int, IPython.release.version.split('.')) >= [0, 11]:
+        from IPython.frontend.terminal.embed \
+            import InteractiveShellEmbed
+        InteractiveShellEmbed(banner1=banner)()
+    else:
+        from IPython.Shell import IPShellEmbed
+        IPShellEmbed(banner=banner)
