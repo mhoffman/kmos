@@ -297,4 +297,4 @@ def sh(banner):
         InteractiveShellEmbed(banner1=banner)()
     else:
         from IPython.Shell import IPShellEmbed
-        IPShellEmbed(banner=banner)
+        IPShellEmbed(banner=banner)()
