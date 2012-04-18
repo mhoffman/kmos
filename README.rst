@@ -30,20 +30,30 @@ best under a similar setup. Other than standard libraries you need to fetch:
 
 USAGE
 #####
-Start the main program with:
-::
+
+Start the main program with ::
+
   kmos editor
-and create your model. To test, it you need to press 'Export source' choose a
-folder where the source code will be dumped. Use a terminal to go to that
-directory and run ./compile_for_f2py. If this finishes without complains
-you can try running::
+
+and create your model or create using IPython and the tutorials in
+the documentation. Both ways will give a XML file in the end that
+contains the entire definition of your kMC model. Run ::
+
+  kmos export <xml-file>
+
+and you will find a new folder under the same name with the compiled
+model and self-contained source code. Inside that directory run ::
+
   kmos view
+
+and readily watch your model and manipulate parameters at the same time.
 
 THANKS
 ######
+
 This project draws on several other great Python modules, which are in turn
 each free software and I would like to thank each of these projects for
-making their code avalaible freely, namely:
+making their code avalaible, namely:
 
 * `Python <http://www.python.org>`_
 * `ASE <https://wiki.fysik.dtu.dk/ase/>`_
@@ -52,4 +62,3 @@ making their code avalaible freely, namely:
 * `kiwi <http://www.async.com.br/projects/kiwi/>`_, gazpacho
 * lxml and in particular `ElementTree <http://www.effbot.org/>`_
 * `pygtkcanvas <http://code.google.com/p/pygtkcanvas/>`_
-
