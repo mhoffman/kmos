@@ -234,8 +234,14 @@ def evaluate_kind_values(infile, outfile):
 
     end module kind
             """
-            compile(fcode, source_fn='f2py_selected_kind.f90',
-                    modulename='f2py_selected_kind')
+            # quick'n'dirty workaround for windoze
+            if os.name == 'nt':
+                sys.argv = '-c --fcompiler=gnu95 --compiler=mingw32 -m f2py_selected_kind f2py_selected_kind.f90'.split()
+                from numpy import f2py as f2py2e
+                f2py2e.main()
+            else:
+                compile(fcode, source_fn='f2py_selected_kind.f90',
+                        modulename='f2py_selected_kind')
             try:
                 import f2py_selected_kind
             except:
