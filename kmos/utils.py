@@ -343,7 +343,7 @@ def build(options):
     extra_flags = {}
     extra_flags['gfortran'] = ('-ffree-line-length-none -ffree-form'
                                ' -xf95-cpp-input -Wall -g')
-    extra_flags['gnu95'] = '-xf95-cpp-input'
+    extra_flags['gnu95'] = extra_flags['gfortran']
     extra_flags['intel'] = '-fast -fpp -Wall -I/opt/intel/fc/10.1.018/lib'
     extra_flags['intelem'] = '-fast -fpp -Wall -g'
 
