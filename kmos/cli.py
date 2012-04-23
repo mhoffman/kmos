@@ -242,7 +242,8 @@ def main(args=None):
         from sys import path
         path.append(os.path.abspath(os.curdir))
         from tempfile import mktemp
-        if not os.path.exists('kmc_model.so'):
+        if not os.path.exists('kmc_model.so') \
+           and not os.path.exists('kmc_model.pyd'):
             print('No kmc_model.so found, exiting.')
             exit()
 
