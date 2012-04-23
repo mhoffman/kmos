@@ -236,10 +236,12 @@ def evaluate_kind_values(infile, outfile):
             """
             # quick'n'dirty workaround for windoze
             if os.name == 'nt':
+                with open('f2py_selected_kind.f90', 'w') as f:
+                    f.write(fcode)
                 from copy import deepcopy
                 # save for later
                 true_argv = deepcopy(sys.argv)
-                sys.argv = '-c --fcompiler=gnu95 --compiler=mingw32 -m f2py_selected_kind f2py_selected_kind.f90'.split()
+                sys.argv = ('%s -c --fcompiler=gnu95 --compiler=mingw32 -m f2py_selected_kind f2py_selected_kind.f90' % sys.executable).split()
                 from numpy import f2py as f2py2e
                 f2py2e.main()
 
@@ -332,14 +334,16 @@ def build(options):
 
     if name == 'nt':
         interpreter = 'python '
+        options.fcompiler = 'gnu95'
     elif name == 'posix':
         interpreter = ''
     else:
         interpreter = ''
 
     extra_flags = {}
-    extra_flags['gfortran'] = (' -ffree-line-length-none -ffree-form'
+    extra_flags['gfortran'] = ('-ffree-line-length-none -ffree-form'
                                ' -xf95-cpp-input -Wall -g')
+    extra_flags['gnu95'] = '-xf95-cpp-input'
     extra_flags['intel'] = '-fast -fpp -Wall -I/opt/intel/fc/10.1.018/lib'
     extra_flags['intelem'] = '-fast -fpp -Wall -g'
 
@@ -347,7 +351,7 @@ def build(options):
     extra_libs = ''
     ccompiler = ''
     if name == 'nt':
-        ccompiler = ' --compiler=mingw32 '
+        ccompiler = '--compiler=mingw32'
         if sys.version_info < (2, 7):
             extra_libs = ' -lmsvcr71 '
         else:
@@ -363,26 +367,24 @@ def build(options):
         if not isfile(src_file):
             raise IOError('File %s not found' % src_file)
 
-    call = ('{interpreter}{path_to_f2py}'
-            ' --f90flags="{extra_flags}"'
-            ' --fcompiler="{fcompiler}"'
-            ' {extra_libs} '
-            ' {ccompiler} '
-            ' -c {src_files}'
-            ' -m {module_name}').format(interpreter=interpreter,
-                                       src_files=src_files,
-                                       extra_flags=extra_flags.get(
-                                        options.fcompiler, ''),
-                                       module_name=module_name,
-                                       ccompiler=ccompiler,
-                                       extra_libs=extra_libs,
-                                       path_to_f2py=options.path_to_f2py,
-                                       fcompiler=options.fcompiler)
-    print(call)
-    system(call)
+    call = []
+    call.append('-c')
+    call.append('-c')
+    call.append('--fcompiler=%s' % options.fcompiler)
+    if name == 'nt':
+        call.append('%s' % ccompiler)
+    #call += extra_libs.split()
+    call.append('--f90flags="%s"' % extra_flags.get(
+                                        options.fcompiler, ''))
+    call.append('-m')
+    call.append(module_name)
+    call += src_files.split()
 
-    print("""#  If you run into strange errors like'
-#                    '... returned NULL from py_object ...'
-# you probably have to kind_values_f2py.f90. Kind values are hardcoded here
-# because f2py cannot evaluate selected_real_kind or selected_integer_kind at
-# compile time.""")
+    print(call)
+    #exit()
+    from copy import deepcopy
+    true_argv = deepcopy(sys.argv)  # save for later
+    from numpy import f2py
+    sys.argv = call
+    f2py.main()
+    sys.argv = true_argv
