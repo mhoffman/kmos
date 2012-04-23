@@ -236,9 +236,14 @@ def evaluate_kind_values(infile, outfile):
             """
             # quick'n'dirty workaround for windoze
             if os.name == 'nt':
+                from copy import deepcopy
+                # save for later
+                true_argv = deepcopy(sys.argv)
                 sys.argv = '-c --fcompiler=gnu95 --compiler=mingw32 -m f2py_selected_kind f2py_selected_kind.f90'.split()
                 from numpy import f2py as f2py2e
                 f2py2e.main()
+
+                sys.argv = true_argv
             else:
                 compile(fcode, source_fn='f2py_selected_kind.f90',
                         modulename='f2py_selected_kind')
