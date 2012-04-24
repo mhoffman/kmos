@@ -56,8 +56,8 @@ class Species:
                 val =  interp1d(T, self.T_grid, self.G_grid) + \
                        kboltzmann_in_eVK * T * log(p)
             except Exception, e:
-                print('Did you install JANAF tables?')
-                raise
+                raise Exception('Could not find JANAF tables for %s.'
+                                % self.name)
             else:
                 return val
 
