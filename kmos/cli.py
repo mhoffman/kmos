@@ -23,6 +23,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 
 usage = {}
 usage['all'] = """kmos help all
@@ -33,25 +34,36 @@ usage['benchmark'] = """kmos benchmark
     and report runtime.
                      """
 
-usage['build'] = """kmos build
-    Build kmc_model.so from *f90 files in the
-    current directory.
-                 """
+if os.name == 'nt':
+    usage['build'] = """kmos build
+        Build kmc_model.pyd from *f90 files in the
+        current directory.
+                     """
+else:
+    usage['build'] = """kmos build
+        Build kmc_model.so from *f90 files in the
+        current directory.
+                     """
+
 usage['help'] = """kmos help <command>
     Print usage information for the given command.
                 """
-usage['export'] = """kmos export <xml-file> [<export-path>]
-    Take a kmos xml-file and export all generated
-    source code to the export-path. There try to
-    build the kmc_model.so.
-                    """
+if os.name == 'nt':
+    usage['export'] = """kmos export <xml-file> [<export-path>]
+        Take a kmos xml-file and export all generated
+        source code to the export-path. There try to
+        build the kmc_model.pyd.
+                        """
+else:
+    usage['export'] = """kmos export <xml-file> [<export-path>]
+        Take a kmos xml-file and export all generated
+        source code to the export-path. There try to
+        build the kmc_model.so.
+                        """
 usage['export-settings'] = """kmos export-settings <xml-file> [<export-path>]
     Take a kmos xml-file and export kmc_settings.py
     to the export-path.
                     """
-usage['export-view'] = """kmos export-view <xml-file>
-    Export an XML file, compile and run the simulation.
-                        """
 usage['edit'] = """kmos edit <xml-file>
     Open the kmos xml-file in a GUI to edit
     the model.
@@ -70,29 +82,22 @@ usage['run'] = """kmos run
     Open an interactive shell and create a KMC_Model in it
                """
 
-usage['view'] = """kmos view
-    Take a kmc_model.so and kmc_settings.py in the
-    same directory and start to simulate the
-    model visually.
-                 """
+if os.name == 'nt':
+    usage['view'] = """kmos view
+        Take a kmc_model.pyd and kmc_settings.py in the
+        same directory and start to simulate the
+        model visually.
+                     """
+else:
+    usage['view'] = """kmos view
+        Take a kmc_model.so and kmc_settings.py in the
+        same directory and start to simulate the
+        model visually.
+                     """
 
 
-def main(args=None):
-    """The CLI main entry point function.
-
-    The optional arguemnts args, can be used to
-    directly supply command line argument like
-
-    $ kmos <args>
-
-    otherwise args will be taken from STDIN.
-
-    """
-
+def get_options(args=None, get_parser=False):
     import optparse
-    import os
-    from glob import glob
-
     parser = optparse.OptionParser(
         'Usage: %prog [help] ('
         + '|'.join(sorted(usage.keys()))
@@ -115,9 +120,30 @@ def main(args=None):
         options, args = parser.parse_args(args.split())
     else:
         options, args = parser.parse_args()
-
     if len(args) < 1:
         parser.error('Command expected')
+    if get_parser:
+        return options, args, parser
+    else:
+        return options, args
+
+
+def main(args=None):
+    """The CLI main entry point function.
+
+    The optional argument args, can be used to
+    directly supply command line argument like
+
+    $ kmos <args>
+
+    otherwise args will be taken from STDIN.
+
+    """
+
+    from glob import glob
+
+    options, args, parser = get_options(args, get_parser=True)
+
 
     if args[0] == 'benchmark':
         from sys import path
@@ -211,14 +237,6 @@ def main(args=None):
         writer = kmos.io.ProcListWriter(pt, args[2])
         writer.write_settings()
 
-    elif args[0] == 'export-view':
-        out_dir = os.path.splitext(args[1])[0]
-        print('No export path provided. Exporting to %s' % out_dir)
-        args.append(out_dir)
-        os.system('kmos-export-program %s %s' % (args[1], args[2]))
-        os.chdir(out_dir)
-        main('view')
-
     elif args[0] == 'help':
         if len(args) < 2:
             parser.error('Which help do you  want?')
@@ -228,7 +246,7 @@ def main(args=None):
         elif args[1] in usage:
             print('Usage: %s\n' % usage[args[1]])
         else:
-            print("Command not known or not documented.")
+            parser.error('Command "%s" not known or not documented.' % args[1])
 
     elif args[0] == 'import':
         import kmos.io
