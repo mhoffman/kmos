@@ -75,7 +75,6 @@ def evaluate_rate_expression(rate_expr, parameters={}):
             param_dict[parameter.name] = {'value': parameter.value}
         parameters = param_dict
 
-
     if not rate_expr:
         rate_const = 0.0
     else:

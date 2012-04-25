@@ -3,6 +3,7 @@
 """
 
 # stdlib imports
+import os
 import re
 
 # numpy
@@ -15,7 +16,7 @@ from xml.dom import minidom
 
 # kmos own modules
 from kmos.utils import CorrectlyNamed
-from kmos.config import *
+from kmos.config import APP_ABS_PATH
 
 kmcproject_v0_1_dtd = '/kmc_project_v0.1.dtd'
 kmcproject_v0_2_dtd = '/kmc_project_v0.2.dtd'
@@ -514,7 +515,6 @@ class Project(object):
         # variable names
         variable_regex = re.compile('^[a-zA-Z][a-zA-z0-9_]*$')
 
-
         #################
         # LATTICE
         #################
@@ -534,7 +534,6 @@ class Project(object):
                                        'is not unique.') % (x.name,
                                                             layer.name))
 
-
         for x in self.get_layers():
             # check if all lattice names are unique
             if len([y for y in self.get_layers() if x.name == y.name]) > 1:
@@ -553,7 +552,6 @@ class Project(object):
                                                  in self.get_layers()]:
             raise UserWarning('Default Layer "%s" is not defined.' %
                               self.layer_list.default_layer)
-
 
         #################
         # PARAMETERS
@@ -615,12 +613,10 @@ class Project(object):
             if len([y for y in self.get_processes() if x.name == y.name]) > 1:
                 raise UserWarning('Process name "%s" is not unique' % x.name)
 
-
         # check if all processes have at least one condition
         for x in self.get_processes():
             if not x.condition_list:
                 raise UserWarning('Process "%s" has no conditions!' % x.name)
-
 
         # check if all processes have at least one action
         for x in self.get_processes():
@@ -645,8 +641,6 @@ class Project(object):
                 raise UserWarning('Process %s has no rate constant defined')
 
         # check if all rate expressions are valid
-
-
         # check if all species used in condition_action are defined
         # after stripping ^ and $ operators
         species_names = [x.name for x in self.get_speciess()]
@@ -857,7 +851,6 @@ class LayerList(FixedObject, list):
         """Expecting something of the form site_name.offset.layer
         and return a Coord object"""
 
-
         term = terms.split('.')
         if len(term) == 3:
             coord = Coord(name=term[0],
@@ -919,7 +912,7 @@ class Layer(FixedObject, CorrectlyNamed):
         sites = filter(lambda site: site.name == site_name,
                        self.sites)
         if not sites:
-            raise Error('Site not found')
+            raise Exception('Site not found')
         return sites[0]
 
     def get_info(self):
@@ -1003,19 +996,6 @@ class Coord(FixedObject):
 
     def __hash__(self):
         return self.__repr__()
-
-    def __add__(a, b):
-        diff = [(x + y) for (x, y) in zip(a.offset, b.offset)]
-        if a.layer and b.layer:
-            name = "%s_%s + %s_%s" % (a.layer, a.name, b.layer, b.name)
-        elif a.layer:
-            name = '%s_%s + %s' % (a.layer, a.name, b.name)
-        elif b.layer:
-            name = "%s + %s_%s" % (a.name, b.layer, b.name)
-        else:
-            name = '%s + %s' % (a.name, b.name)
-        layer = ''
-        return Coord(name=name, layer=layer, offset=offset)
 
     def __sub__(a, b):
         """When subtracting two lattice coordinates from each other,
@@ -1406,7 +1386,7 @@ def parse_chemical_expression(eq, process, project_tree):
                         'for condition\n  and action.\n')
             else:
                 if corresponding_condition:
-                    action.species = '$%s' % corresponding_species[0].species
+                    action.species = '$%s' % corresponding_condition[0].species
                 else:
                     raise UserWarning(
                         'When omitting the species in the site '

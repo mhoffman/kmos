@@ -25,7 +25,7 @@ import shutil
 import os
 
 from kmos.types import ConditionAction
-from kmos.config import *
+from kmos.config import APP_ABS_PATH
 
 
 def _flatten(L):
@@ -705,7 +705,7 @@ class ProcListWriter():
                         out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","annihilate %s_%s"\n' % (action.coord.layer, action.coord.name))
                     out.write('        call annihilate_%s_%s(%s, %s)\n' % (action.coord.layer, action.coord.name, relative_coord, action.species[1:]))
                 elif action.species == data.species_list.default_species \
-                and not action.species == previous_species :
+                and not action.species == previous_species:
                     if data.meta.debug > 0:
                         out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","take %s_%s %s"\n' % (action.coord.layer, action.coord.name, previous_species))
                     out.write('        call take_%s_%s_%s(%s)\n' % (previous_species, action.coord.layer, action.coord.name, relative_coord))
@@ -930,7 +930,6 @@ class ProcListWriter():
         items = filter(lambda x: x[0], items)
         if not items:
             return
-
 
         # now the GENERAL CASE
         # first find site, that is most sought after

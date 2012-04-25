@@ -20,10 +20,11 @@
 
 from StringIO import StringIO
 
+ValidationError = UserWarning
 try:
     from kiwi.datatypes import ValidationError
 except:
-    ValidationError = UserWarning
+    print('kiwi Validation not working.')
 
 
 class CorrectlyNamed:
@@ -179,9 +180,9 @@ def evaluate_kind_values(infile, outfile):
     """
     import re
     import os
-    import imp
     import sys
     sys.path.append(os.path.abspath(os.curdir))
+
     def import_selected_kind():
         """Tries to import the module which provides
         processor dependent kind values. If the module
@@ -242,7 +243,10 @@ def evaluate_kind_values(infile, outfile):
                 from copy import deepcopy
                 # save for later
                 true_argv = deepcopy(sys.argv)
-                sys.argv = ('%s -c --fcompiler=gnu95 --compiler=mingw32 -m f2py_selected_kind f2py_selected_kind.f90' % sys.executable).split()
+                sys.argv = (('%s -c --fcompiler=gnu95 --compiler=mingw32'
+                             ' -m f2py_selected_kind'
+                             ' f2py_selected_kind.f90')
+                             % sys.executable).split()
                 from numpy import f2py as f2py2e
                 f2py2e.main()
 
@@ -257,7 +261,6 @@ def evaluate_kind_values(infile, outfile):
                 print(os.listdir('.'))
                 raise
         return f2py_selected_kind.kind
-
 
     def parse_args(args):
         """
@@ -278,7 +281,6 @@ def evaluate_kind_values(infile, outfile):
 
         return args, kwargs
 
-
     def int_kind(args):
         """Python wrapper around Fortran selected_int_kind
         function.
@@ -286,16 +288,12 @@ def evaluate_kind_values(infile, outfile):
         args, kwargs = parse_args(args)
         return import_selected_kind().int_kind(*args, **kwargs)
 
-
     def real_kind(args):
         """Python wrapper around Fortran selected_real_kind
         function.
         """
         args, kwargs = parse_args(args)
         return import_selected_kind().real_kind(*args, **kwargs)
-
-
-
 
     infile = file(infile)
     outfile = file(outfile, 'w')
@@ -332,18 +330,10 @@ def build(options):
 
     """
     from os.path import isfile
-    from os import system, name
+    import os
     import sys
 
     src_files = 'kind_values_f2py.f90 base.f90 lattice.f90 proclist.f90'
-
-    if name == 'nt':
-        interpreter = 'python '
-        options.fcompiler = 'gnu95'
-    elif name == 'posix':
-        interpreter = ''
-    else:
-        interpreter = ''
 
     extra_flags = {}
     extra_flags['gfortran'] = ('-ffree-line-length-none -ffree-form'
@@ -355,7 +345,7 @@ def build(options):
     # FIXME
     extra_libs = ''
     ccompiler = ''
-    if name == 'nt':
+    if os.name == 'nt':
         ccompiler = '--compiler=mingw32'
         if sys.version_info < (2, 7):
             extra_libs = ' -lmsvcr71 '
@@ -364,9 +354,8 @@ def build(options):
 
     module_name = 'kmc_model'
 
-
     if not isfile('kind_values_f2py.py'):
-         evaluate_kind_values('kind_values.f90', 'kind_values_f2py.f90')
+        evaluate_kind_values('kind_values.f90', 'kind_values_f2py.f90')
 
     for src_file in src_files.split():
         if not isfile(src_file):
@@ -376,9 +365,8 @@ def build(options):
     call.append('-c')
     call.append('-c')
     call.append('--fcompiler=%s' % options.fcompiler)
-    if name == 'nt':
+    if os.name == 'nt':
         call.append('%s' % ccompiler)
-    #call += extra_libs.split()
     call.append('--f90flags="%s"' % extra_flags.get(
                                         options.fcompiler, ''))
     call.append('-m')

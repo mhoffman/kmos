@@ -22,12 +22,13 @@ import ase
 import numpy as np
 from numpy import interp as interp1d
 from math import log
-import re
 import os
+
+janaf_data = None
 try:
     import janaf_data
 except:
-    janaf_data = None
+    print('Could not import JANAF data')
 
 
 class Species:
@@ -53,9 +54,9 @@ class Species:
             kboltzmann_in_eVK = 8.6173324e-5
             # interpolate given grid
             try:
-                val =  interp1d(T, self.T_grid, self.G_grid) + \
+                val = interp1d(T, self.T_grid, self.G_grid) + \
                        kboltzmann_in_eVK * T * log(p)
-            except Exception, e:
+            except Exception:
                 raise Exception('Could not find JANAF tables for %s.'
                                 % self.name)
             else:

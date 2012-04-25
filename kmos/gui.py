@@ -22,43 +22,24 @@ import optparse
 import StringIO
 import sys
 import os
-from kmos.types import Project, \
-                       Layer, \
-                       LayerList, \
-                       Meta, \
-                       OutputList, \
-                       Parameter, \
-                       Process, \
-                       ProcessList, \
-                       SpeciesList, \
-                       OutputItem, \
-                       Species
 
-from kmos.forms import LayerEditor, \
-                       MetaForm, \
-                       InlineMessage, \
-                       OutputForm, \
-                       ParameterForm, \
-                       ProcessForm, \
-                       BatchProcessForm, \
-                       SpeciesForm, \
-                       SpeciesListForm, \
-                       LatticeForm
-
+from kmos.types import Project, Layer, LayerList, Meta, OutputList, \
+                       Parameter, Process, ProcessList, SpeciesList, \
+                       OutputItem, Species
+from kmos.forms import LayerEditor, MetaForm, InlineMessage, OutputForm, \
+                       ParameterForm, ProcessForm, BatchProcessForm, \
+                       SpeciesForm, SpeciesListForm, LatticeForm
 from kmos.config import GLADEFILE
-
 import kmos.io
+
 import gobject
 import pygtk
 pygtk.require('2.0')
 import gtk
 
-
 #Kiwi imports
 import kiwi.ui
-from kiwi.ui.delegates import SlaveDelegate, \
-                              GladeDelegate
-
+from kiwi.ui.delegates import SlaveDelegate, GladeDelegate
 from kiwi.ui.objectlist import ObjectTree, Column
 import kiwi.ui.dialogs
 
@@ -183,7 +164,6 @@ class GTKProject(SlaveDelegate):
             sorted(self.project_data.get_descendants(self.species_list),
                    key=lambda x: x.name)
         self.model_tree.get_speciess = self.get_speciess
-
 
         # Process List
         self.process_list = self.project_data.append(None,
