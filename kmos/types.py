@@ -333,9 +333,8 @@ class Project(object):
         try:
             root = ET.parse(filename, parser=xmlparser).getroot()
         except:
-            print('\nCould not parse file. Are you sure this')
-            print('a kmos project file?\n')
-            raise
+            raise Exception('\nCould not parse file. Are you sure this'
+                  ' is a kmos project file?\n')
 
         if 'version' in root.attrib:
             self.version = eval(root.attrib['version'])

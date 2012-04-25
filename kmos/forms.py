@@ -1155,10 +1155,9 @@ class BatchProcessForm(SlaveDelegate):
                                           project_tree=self.project_tree)
                 self.draw_from_data()
             except:
-                print(
+                raise Exception(
                     ("Found an error in your chemical expression(line %s):\n"\
                     "%s") % (i + 1, line[1]))
-                raise
             else:
                 # replace any existing process with identical names
                 for dublette_proc in [x for x in
