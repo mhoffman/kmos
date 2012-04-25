@@ -605,7 +605,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         else:
             try:
                 self.rate_constant.set_tooltip_text(
-                    'Current value: %.2e s^{-1}' %
+                    'Current value: %.5e s^{-1}' %
                     evaluate_rate_expression(expr,
                         self.project_tree.get_parameters()))
             except Exception, e:

@@ -122,7 +122,7 @@ class Project(object):
                 kwargs.pop('actions')
             process = Process(**kwargs)
             self.process_list.append(process)
-            return process
+        return process
 
     def parse_process(self, string):
         process = parse_process(string, self)

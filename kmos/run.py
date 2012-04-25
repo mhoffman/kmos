@@ -40,6 +40,7 @@ the model happens through Queues.
 __all__ = ['base', 'lattice', 'proclist', 'KMC_Model']
 
 from copy import deepcopy
+from fnmatch import fnmatch
 import multiprocessing
 import random
 from math import log
@@ -49,20 +50,25 @@ from kmos import evaluate_rate_expression
 try:
     from kmc_model import base, lattice, proclist
 except Exception, e:
-    print(e)
-    print('Could not find the kmc module. The kmc implements the actual')
-    print('kmc model. This can be created from a kmos xml file using')
-    print('kmos-export-program.')
     base = lattice = proclist = None
+    raise Exception("""Error: %s
+    Could not find the kmc module. The kmc implements the actual
+    kmc model. This can be created from a kmos xml file using
+    kmos export <xml-file>
+    Hint: are you in a directory containing a compiled kMC model?\n\n
+    """ % e )
 
 try:
     import kmc_settings as settings
 except Exception, e:
-    print(e)
-    print('Could import settings file')
-    print('The kmc_settings.py contains all changeable model parameters')
-    print('and descriptions for the representation on screen.')
     settings = None
+    raise Exception("""Error %s
+    Could import settings file
+    The kmc_settings.py contains all changeable model parameters
+    and descriptions for the representation on screen.
+    Hint: are you in a directory containing a compiled kMC model?
+    """ % e )
+
 
 
 class KMC_Model(multiprocessing.Process):
@@ -98,6 +104,14 @@ class KMC_Model(multiprocessing.Process):
 
         self.proclist.seed = np.array(getattr(self.settings, 'random_seed', 1))
         self.reset()
+
+    def __enter__(self, *args, **kwargs):
+        """__enter/exit__ function for with-statement protocoll"""
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        """__enter/exit__ function for with-statement protocoll"""
+        self.deallocate()
 
     def reset(self):
         self.size = int(settings.simulation_size)
@@ -137,12 +151,17 @@ class KMC_Model(multiprocessing.Process):
                     settings.lattice_representation)[
                         lattice.substrate_layer]
             else:
-                self.lattice_representation = eval(
-                    settings.lattice_representation)[
-                        lattice.default_layer]
+                lattice_representation = eval(
+                    settings.lattice_representation)
+                if len(lattice_representation) > 1:
+                    self.lattice_representation = \
+                         lattice_representation[self.lattice.default_layer]
+                else:
+                    self.lattice_representation = lattice_representation[0]
         else:
             self.lattice_representation = Atoms()
         set_rate_constants(settings.parameters, self.print_rates)
+        self.base.update_accum_rate()
 
     def __repr__(self):
         """Print short summary of current parameters and rate
@@ -153,7 +172,6 @@ class KMC_Model(multiprocessing.Process):
 
     def inverse(self):
         return (repr(self.parameters) + self.rate_constants.inverse())
-
 
     def put(self, site, species):
         """Puts a certain species at a certain site.
@@ -294,7 +312,7 @@ class KMC_Model(multiprocessing.Process):
                                 # add to existing slab
                                 atoms += ad_atoms
                                 if self.species_tags:
-                                    for atom in range(len(atoms)-len(ad_atoms), len(atoms)):
+                                    for atom in range(len(atoms) - len(ad_atoms), len(atoms)):
                                         kmos_tags[atom] = self.species_tags.values()[species]
 
                         lattice_repr = deepcopy(self.lattice_representation)
@@ -333,6 +351,8 @@ class KMC_Model(multiprocessing.Process):
         else:
             atoms.tof_data = np.dot(self.tof_matrix,
                             (atoms.procstat - self.procstat) / delta_t / size)
+
+        atoms.delta_t = delta_t
 
         # update trackers for next call
         self.procstat[:] = atoms.procstat
@@ -380,6 +400,23 @@ class KMC_Model(multiprocessing.Process):
 
     def switch_surface_processes_on(self):
         set_rate_constants(settings.parameters, self.print_rates)
+
+    def show_accum_rate_summation(self):
+        accum_rate = 0.
+        for i, process_name in enumerate(
+                               sorted(
+                               self.settings.rate_constants)):
+            nrofsites = self.base.get_nrofsites(i + 1)
+            if nrofsites:
+                rate = self.base.get_rate(i + 1)
+                prod = nrofsites * rate
+                accum_rate += prod
+
+                print('% 5i*%8.4e s^-1 = %8.4e s^-1 [%s]' % (nrofsites, rate,
+                                                   prod, process_name))
+
+        print('-------------------------')
+        print('  = total rate = %.8e s^-1' % accum_rate)
 
     def _put(self, site, new_species):
         """
@@ -577,13 +614,18 @@ class KMC_Model(multiprocessing.Process):
             if propagate:
                 proclist.run_proc_nr(nprocess, nsite)
 
-    def procstat_pprint(self):
+    def procstat_pprint(self, match=None):
         """Print an overview view process names along with
         the number of times it has been executed."""
-        for i, name in enumerate(sorted(self.settings.rate_constants.keys())):
-            print('%s : %.4e' % (name, self.base.get_procstat(i + 1)))
 
-    def procstat_normalized(self):
+        for i, name in enumerate(sorted(self.settings.rate_constants.keys())):
+            if match is None:
+                print('%s : %.4e' % (name, self.base.get_procstat(i + 1)))
+            else:
+                if fnmatch(name, match):
+                    print('%s : %.4e' % (name, self.base.get_procstat(i + 1)))
+
+    def procstat_normalized(self, match=None):
         """Print an overview view process names along with
         the number of times it has been executed divided by
         the current rate constant times the kmc time.
@@ -593,13 +635,14 @@ class KMC_Model(multiprocessing.Process):
         kmc_time = self.base.get_kmc_time()
 
         for i, name in enumerate(sorted(self.settings.rate_constants.keys())):
-            if kmc_time:
-                print('%s : %.4e' % (name, self.base.get_procstat(i + 1) /
-                                           self.lattice.system_size.prod() /
-                                           self.base.get_kmc_time() /
-                                           self.base.get_rate(i + 1)))
-            else:
-                print('%s : %.4e' % (name, 0.))
+            if match is None or fnmatch(name, match):
+                if kmc_time:
+                    print('%s : %.4e' % (name, self.base.get_procstat(i + 1) /
+                                               self.lattice.system_size.prod() /
+                                               self.base.get_kmc_time() /
+                                               self.base.get_rate(i + 1)))
+                else:
+                    print('%s : %.4e' % (name, 0.))
 
     def rate_ratios(self):
         ratios = []
@@ -648,6 +691,12 @@ class Model_Parameters(object):
         res += '# --------------------\n'
         return res
 
+    def __call__(self, match=None):
+        for attr in sorted(settings.parameters):
+            if match is None or fnmatch(attr, match):
+                print('# %s = %s'
+                      % (attr, settings.parameters[attr]['value']))
+
 
 class Model_Rate_Constants(object):
 
@@ -655,13 +704,22 @@ class Model_Rate_Constants(object):
         """Compact representation of all current rate_constants."""
         res = '# kMC rate constants (%i)\n' % len(settings.rate_constants)
         res += '# ------------------\n'
-        for proc in sorted(settings.rate_constants):
+        for i, proc in enumerate(sorted(settings.rate_constants)):
             rate_expr = settings.rate_constants[proc][0]
-            rate_const = evaluate_rate_expression(rate_expr,
-                                                  settings.parameters)
+            rate_const = base.get_rate(i + 1)
+            #rate_const = evaluate_rate_expression(rate_expr,
+                                                  #settings.parameters)
             res += '# %s: %s = %.2e s^{-1}\n' % (proc, rate_expr, rate_const)
         res += '# ------------------\n'
         return res
+
+    def __call__(self, pattern=None):
+        for i, proc in enumerate(sorted(settings.rate_constants.keys())):
+            if pattern is None or fnmatch(proc, pattern):
+                rate_expr = settings.rate_constants[proc][0]
+                rate_const = evaluate_rate_expression(rate_expr,
+                                                      settings.parameters)
+                print('# %s: %s = %.2e s^{-1}' % (proc, rate_expr, rate_const))
 
     def by_name(self, proc):
         rate_expr = settings.rate_constants[proc][0]
@@ -677,6 +735,27 @@ class Model_Rate_Constants(object):
             res += '# %s: %.2e s^{-1} = %s\n' % (proc, rate_const, rate_expr)
         res += '# ------------------\n'
         return res
+
+    def set(self, pattern, rate_constant, parameters=None):
+        """Set rate constants. Pattern can be a glob pattern,
+        and the rate constant will be applied to all processes,
+        where the pattern matches. The rate constant can be either
+        a number or a rate expression.
+
+        """
+
+        if parameters is None:
+            parameters = settings.parameters
+        if type(rate_constant) is str:
+            rate_constant = evaluate_rate_expression(rate_constant,
+                                                     parameters)
+        try:
+            rate_constant = float(rate_constant)
+        except:
+            raise UserWarning("Could not convert rate constant to float")
+        for i, proc in enumerate(sorted(settings.rate_constants.keys())):
+            if pattern is None or fnmatch(proc, pattern):
+                base.set_rate_const(i + 1, rate_constant)
 
 
 def set_rate_constants(parameters=None, print_rates=True):
