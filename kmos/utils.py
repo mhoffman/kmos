@@ -327,6 +327,10 @@ def evaluate_kind_values(infile, outfile):
 
 
 def build(options):
+    """Build binary with f2py binding from complete
+    set of source file in the current directory.
+
+    """
     from os.path import isfile
     from os import system, name
     import sys

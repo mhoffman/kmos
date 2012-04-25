@@ -24,6 +24,7 @@
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import shutil
 
 usage = {}
 usage['all'] = """kmos help all
@@ -144,7 +145,6 @@ def main(args=None):
 
     options, args, parser = get_options(args, get_parser=True)
 
-
     if args[0] == 'benchmark':
         from sys import path
         path.append(os.path.abspath(os.curdir))
@@ -166,8 +166,6 @@ def main(args=None):
     elif args[0] == 'export-settings':
         import kmos.types
         import kmos.io
-        from kmos.utils import build
-        import shutil
         from kmos.io import ProcListWriter
 
         if len(args) < 2:
@@ -189,7 +187,6 @@ def main(args=None):
         import kmos.types
         import kmos.io
         from kmos.utils import build
-        import shutil
         if len(args) < 2:
             parser.error('XML file and export path expected.')
         if len(args) < 3:
