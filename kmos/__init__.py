@@ -50,7 +50,7 @@ or it may be used as an API via the kmos module.
 #import kmos.types
 #import kmos.io
 
-__version__ = "0.1.8"
+__version__ = "0.2.0"
 
 
 def evaluate_rate_expression(rate_expr, parameters={}):
