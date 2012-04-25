@@ -70,10 +70,11 @@ def write_py(fileobj, images, **kwargs):
 
         if not scaled_positions:
             fileobj.write("          positions=np.array(\n      %s),\n"
-                % repr(image.positions)[6:])
+                % repr(list(image.positions)))
         else:
             fileobj.write("          scaled_positions=np.array(\n      %s),\n"
-                % repr(image.get_scaled_positions())[6:])
+                % repr(list(image.get_scaled_positions().tolist())))
+        fileobj.write('),\n')
 
     fileobj.write(']')
 
@@ -93,7 +94,7 @@ def get_ase_constructor(atoms):
     for i, line in enumerate(lines):
         if i >= 5 and i < len(lines) - 1:
             astr += line
-    astr = astr[:-2]
+    #astr = astr[:-2]
     return astr.strip()
 
 
