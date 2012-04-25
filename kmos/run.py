@@ -320,6 +320,11 @@ class KMC_Model(multiprocessing.Process):
                                                       lattice.unit_cell_size))
                         atoms += lattice_repr
             atoms.set_cell(self.cell_size)
+
+            # workaround for older ASE < 3.6
+            if not hasattr(atoms, 'info'):
+                atoms.info = {}
+
             atoms.info['kmos_tags'] = kmos_tags
         else:
 
