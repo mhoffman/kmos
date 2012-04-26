@@ -83,10 +83,10 @@ def evaluate_rate_expression(rate_expr, parameters={}):
         # replace some aliases
         rate_expr = rate_expr.replace('beta', '(1./(kboltzmann*T))')
         try:
-            tokens = list(tokenize.generate_tokens(
-                            StringIO.StringIO(rate_expr).readline))
+            input = StringIO.StringIO(rate_expr).readline
+            tokens = list(tokenize.generate_tokens(input))
         except:
-            raise
+            raise Exception('Could not tokenize expression: %s' % input)
         for i, token, _, _, _ in tokens:
             if token in ['sqrt', 'exp', 'sin', 'cos', 'pi', 'pow', 'log']:
                 replaced_tokens.append((i, 'math.' + token))
