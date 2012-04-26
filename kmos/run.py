@@ -264,10 +264,15 @@ class KMC_Model(multiprocessing.Process):
                     settings.parameters.update(parameters)
                 set_rate_constants(parameters, self.print_rates)
 
-    def view(self):
+    def show(self):
         """Visualize the current configuration of the model using ASE ag."""
         ase = import_ase()
         ase.visualize.view(self.get_atoms())
+
+    def view(self):
+        """Start current model in live view mode."""
+        from kmos import view
+        view.main(self)
 
     def get_atoms(self, geometry=True):
         """Return an ASE Atoms object with additional
