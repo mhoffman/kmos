@@ -1,4 +1,6 @@
 Functionality
+  * standardize definition of those parameters that are logged
+    in the output file (header/data)
   * Explicitly allow for non-orthogonal unit cells in
     GUI process editor
   * make sure one can (re)start and stop viewer from ipython ('kmos run')
