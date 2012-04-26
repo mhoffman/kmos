@@ -107,9 +107,17 @@ def main(args=None):
                       dest='path_to_f2py',
                       default='f2py')
 
+    try:
+        from numpy.distutils.fcompiler import get_default_fcompiler
+        from numpy.distutils import log
+        log.set_verbosity(-1, True)
+        fcompiler = get_default_fcompiler()
+    except:
+        fcompiler = 'gfortran'
+
     parser.add_option('-f', '--fcompiler',
                      dest='fcompiler',
-                     default=os.environ.get('F2PY_FCOMPILER', 'gfortran'))
+                     default=os.environ.get('F2PY_FCOMPILER', fcompiler ))
 
     if args is not None:
         options, args = parser.parse_args(args.split())
