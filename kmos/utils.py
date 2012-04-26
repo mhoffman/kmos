@@ -257,10 +257,10 @@ def evaluate_kind_values(infile, outfile):
             try:
                 import f2py_selected_kind
             except:
-                raise Exception(('Could create selected_kind module'
-                os.path.abspath(os.curdir)
-                os.listdir('.')
-                ))
+                raise Exception('Could create selected_kind module\n'
+                + '%s\n' % os.path.abspath(os.curdir)
+                + '%s\n' % os.listdir('.')
+                )
         return f2py_selected_kind.kind
 
     def parse_args(args):
