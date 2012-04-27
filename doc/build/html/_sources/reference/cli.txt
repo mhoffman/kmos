@@ -1,35 +1,18 @@
 
 
-``kmos help all``
-    Display documentation for all commands.
-
-
-``kmos run``
-    Open an interactive shell and create a KMC_Model in it
-
-
-``kmos help <command>``
-    Print usage information for the given command.
-
-
-``kmos edit <xml-file>``
-    Open the kmos xml-file in a GUI to edit
-    the model.
-
-
-``kmos rebuild``
-    Export code and rebuild binary module from XML
-    information included in kmc_settings.py in
-    current directory.
-
-
 ``kmos benchmark``
     Run 1 mio. kMC steps on model in current directory
     and report runtime.
 
 
-``kmos export-view <xml-file>``
-    Export an XML file, compile and run the simulation.
+``kmos build``
+    Build kmc_model.so from \*f90 files in the
+    current directory.
+
+
+``kmos edit <xml-file>``
+    Open the kmos xml-file in a GUI to edit
+    the model.
 
 
 ``kmos export <xml-file> [<export-path>]``
@@ -38,9 +21,21 @@
     build the kmc_model.so.
 
 
-``kmos build``
-    Build kmc_model.so from \*f90 files in the
-    current directory.
+``kmos export-settings <xml-file> [<export-path>]``
+    Take a kmos xml-file and export kmc_settings.py
+    to the export-path.
+
+
+``kmos export-view <xml-file>``
+    Export an XML file, compile and run the simulation.
+
+
+``kmos help <command>``
+    Print usage information for the given command.
+
+
+``kmos help all``
+    Display documentation for all commands.
 
 
 ``kmos import <xml-file>``
@@ -48,9 +43,14 @@
     with the project_tree imported as pt.
 
 
-``kmos export-settings <xml-file> [<export-path>]``
-    Take a kmos xml-file and export kmc_settings.py
-    to the export-path.
+``kmos rebuild``
+    Export code and rebuild binary module from XML
+    information included in kmc_settings.py in
+    current directory.
+
+
+``kmos run``
+    Open an interactive shell and create a KMC_Model in it
 
 
 ``kmos view``

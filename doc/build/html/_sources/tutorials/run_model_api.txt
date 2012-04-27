@@ -142,6 +142,14 @@ though at the end one must not forget to call `_adjust_database()`
 before executing any next step or the database of available processes
 is inaccurate and the model instance will crash soon.
 
+You can also get or set the whole configuration of the lattice
+at once using ::
+
+  config = model._get_configuration()
+  # possible change config
+  model._set_configuration(config)
+
+
 Running models in parallel
 ==========================
 

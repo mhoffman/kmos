@@ -5,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Tutorials &mdash; kmos v0.1.2 documentation</title>
+    <title>Tutorials &mdash; kmos v0.2.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.1.2',
+        VERSION:     '0.2.1',
         COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -19,7 +19,7 @@
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos v0.1.2 documentation" href="../index.html" />
+    <link rel="top" title="kmos v0.2.1 documentation" href="../index.html" />
     <link rel="next" title="Topic Guides" href="../topic_guides/index.html" />
     <link rel="prev" title="Welcome to kmos’s documentation!" href="../index.html" /> 
   </head>
@@ -39,11 +39,14 @@
         <li class="right" >
           <a href="../index.html" title="Welcome to kmos’s documentation!"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">kmos v0.1.2 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.2.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/kmos_logo.png" alt="Logo"/>
+            </a></p>
             <h3><a href="../index.html">Table Of Contents</a></h3>
             <ul>
 <li><a class="reference external" href="#">Tutorials</a><ul>
@@ -71,6 +74,7 @@
 </li>
 <li><a class="reference external" href="#a-first-kmc-model-the-gui-way">A first kMC Model&#8211;the GUI way</a></li>
 <li><a class="reference external" href="#running-the-model-the-gui-way">Running the Model&#8211;the GUI way</a></li>
+<li><a class="reference external" href="#how-to-prepare-a-model-and-run-it-interactively">How To Prepare a Model and Run It Interactively</a></li>
 <li><a class="reference external" href="#running-the-model-the-api-way">Running the Model&#8211;the API way</a></li>
 <li><a class="reference external" href="#manipulating-the-model-at-runtime">Manipulating the Model at Runtime</a></li>
 <li><a class="reference external" href="#running-models-in-parallel">Running models in parallel</a></li>
@@ -195,7 +199,7 @@ no dependencies except for a Fortran compiler.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">kmos</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">dependencies</span><span class="o">-</span><span class="n">ubuntu</span>
 </pre></div>
 </div>
-<div class="admonition-todo admonition " id="todo-62">
+<div class="admonition-todo admonition " id="todo-73">
 <p class="first admonition-title">Todo</p>
 <p class="last">add pip way or something alike to automatically
 install dependencies.</p>
@@ -232,9 +236,9 @@ unzip it and install it with</p>
 number of programs.</p>
 <ol class="arabic">
 <li><p class="first"><strong>Python</strong>
-If you have no python previously installed you might consider the
-<a class="reference external" href="http://www.enthought.com/products/epd_free.php">Enthought Python Distribution</a> in its free version because it
-already packages a number of useful libraries such a numpy, scipy,
+If you have no python previously installed you should try
+<a class="reference external" href="http://www.enthought.com/products/epd_free.php">Enthought Python Distribution</a> (EPD) in its free version since it
+already comes with a number of useful libraries such a numpy, scipy,
 ipython and matplotlib.</p>
 <p>Otherwise you can simply download Python from <a class="reference external" href="http://www.python.org/download">python.org</a> and
 this installation has been successfully tested using python 2.7.</p>
@@ -242,16 +246,16 @@ this installation has been successfully tested using python 2.7.</p>
 <li><p class="first"><strong>numpy</strong>
 Fetch it for <cite>your version</cite> of python from
 <a class="reference external" href="http://sourceforge.net/project/numpy">sourceforge&#8217;s Numpy site</a>
-and install it.</p>
+and install it. [Not needed with EPD ]</p>
 </li>
 <li><p class="first"><strong>MinGW</strong>
 provides free Fortran and C compilers and can be obtained from the
 <a class="reference external" href="http://sourceforge.net/projects/mingw/">sourceforge&#8217;s MinGW site</a> .
 Make sure you make a tick for the Fortran and the C compiler.</p>
 </li>
-<li><p class="first"><strong>GTK</strong>
+<li><p class="first"><strong>pyGTK</strong>
 is needed for the GUI frontend so fetch the
-<a class="reference external" href="http://www.gtk.org/download/">all-in-one</a> installer and
+<a href="#id5"><span class="problematic" id="id6">`all-in-one &lt;&gt;`_</span></a> bundle installer and
 install most of it.</p>
 </li>
 <li><p class="first"><strong>lxml</strong>
@@ -288,7 +292,7 @@ it in the same way as you installed <strong>ASE</strong>.</p>
 which are not described in this document. Please post questions
 and comments in the
 <a class="reference external" href="https://github.com/mhoffman/kmos/issues">issues forum</a> .</p>
-<div class="admonition-todo admonition " id="todo-63">
+<div class="admonition-todo admonition " id="todo-74">
 <p class="first admonition-title">Todo</p>
 <p class="last">test installation on other platforms</p>
 </div>
@@ -571,7 +575,7 @@ explains how that works.</td></tr>
 simple adsorption/desorption model on a simple cubic surface.
 Despite its simplicity it touches all elements contained in
 the GUI and could be considered from first-principles.</p>
-<div class="admonition-todo admonition " id="todo-64">
+<div class="admonition-todo admonition " id="todo-75">
 <p class="first admonition-title">Todo</p>
 <p class="last">describe modelling more complicated structures
 and e.g. boundary conditions</p>
@@ -581,24 +585,48 @@ and e.g. boundary conditions</p>
 <h2>Running the Model&#8211;the GUI way<a class="headerlink" href="#running-the-model-the-gui-way" title="Permalink to this headline">¶</a></h2>
 <p>After successfully exporting and compiling a model you get
 two files: kmc_model.so and kmc_settings.py. These two files
-are technically all you need for simulations. So a simple
+are really all you need for simulations. So a simple
 way to view the model is the</p>
 <div class="highlight-python"><pre>kmos view</pre>
 </div>
 <p>command from the command line. For this two work you need to
 be in the same directory as these two file (more precisely
 these two files need to be in the python import path) and
-you should see an instance of your model running. This feature
-can be quite useful to quickly obtain an intuitive understanding
-of the model at hand. A lot of settings can be changed through
-the kmc_settings.py such as rate constant or parameters. To
-be even more interactive you set a parameter to be adjustable.
-This can happen either in the generating XML file or directly
-in the kmc_settings.py. Also make sure to set sensible minimum
-and maximum values.</p>
-<div class="admonition-todo admonition " id="todo-65">
-<p class="first admonition-title">Todo</p>
-<p class="last">add recording function</p>
+you should see an instance of your model running.
+This feature can be quite useful to quickly obtain an
+intuitive understanding of the model at hand. A lot of settings
+can be changed through the kmc_settings.py such as rate constant
+or parameters.
+To be even more interactive you can set a parameter
+to be adjustable.  This can happen either in the generating XML
+file or directly in the kmc_settings.py. Also make sure to set
+sensible minimum and maximum values.</p>
+</div>
+<div class="section" id="how-to-prepare-a-model-and-run-it-interactively">
+<h2>How To Prepare a Model and Run It Interactively<a class="headerlink" href="#how-to-prepare-a-model-and-run-it-interactively" title="Permalink to this headline">¶</a></h2>
+<p>If you want to prepare a model in a certain
+way (parameters, size, configuration) and
+then run it interactively from there, there
+is in easy way, too.  Just write a little python
+script. The with-statement is nice because it takes
+care of the correct allocation and deallocation</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#!/usr/bin/env python</span>
+
+<span class="kn">from</span> <span class="nn">kmos.run</span> <span class="kn">import</span> <span class="n">KMC_Model</span>
+<span class="kn">from</span> <span class="nn">kmos.view</span> <span class="kn">import</span> <span class="n">main</span>
+
+
+<span class="k">with</span> <span class="n">KMC_Model</span><span class="p">(</span><span class="n">print_rates</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">banner</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">simulation_size</span> <span class="o">=</span> <span class="mi">5</span>
+
+<span class="k">with</span> <span class="n">KMC_Model</span><span class="p">(</span><span class="n">print_rates</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">banner</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">do_steps</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e7</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">double</span><span class="p">()</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">double</span><span class="p">()</span>
+    <span class="c"># one or more changes to the model</span>
+    <span class="c"># ...</span>
+    <span class="n">main</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="running-the-model-the-api-way">
@@ -734,6 +762,13 @@ this you can use the <cite>_put</cite> method, like so</p>
 <p>though at the end one must not forget to call <cite>_adjust_database()</cite>
 before executing any next step or the database of available processes
 is inaccurate and the model instance will crash soon.</p>
+<p>You can also get or set the whole configuration of the lattice
+at once using</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">config</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_get_configuration</span><span class="p">()</span>
+<span class="c"># possible change config</span>
+<span class="n">model</span><span class="o">.</span><span class="n">_set_configuration</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="running-models-in-parallel">
 <h2>Running models in parallel<a class="headerlink" href="#running-models-in-parallel" title="Permalink to this headline">¶</a></h2>
@@ -832,7 +867,7 @@ from the top project directory</p>
         <li class="right" >
           <a href="../index.html" title="Welcome to kmos’s documentation!"
              >previous</a> |</li>
-        <li><a href="../index.html">kmos v0.1.2 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.2.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

@@ -5,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title><no title> &mdash; kmos v0.1.2 documentation</title>
+    <title><no title> &mdash; kmos v0.2.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.1.2',
+        VERSION:     '0.2.1',
         COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -19,7 +19,7 @@
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos v0.1.2 documentation" href="../index.html" /> 
+    <link rel="top" title="kmos v0.2.1 documentation" href="../index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -31,11 +31,14 @@
         <li class="right" >
           <a href="../modindex.html" title="Global Module Index"
              accesskey="M">modules</a> |</li>
-        <li><a href="../index.html">kmos v0.1.2 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.2.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/kmos_logo.png" alt="Logo"/>
+            </a></p>
             <h3>This Page</h3>
             <ul class="this-page-menu">
               <li><a href="../_sources/reference/cli.txt"
@@ -63,37 +66,37 @@
           <div class="body">
             
   <dl class="docutils">
-<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">help</span> <span class="pre">all</span></tt></dt>
-<dd>Display documentation for all commands.</dd>
-<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">run</span></tt></dt>
-<dd>Open an interactive shell and create a KMC_Model in it</dd>
-<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">help</span> <span class="pre">&lt;command&gt;</span></tt></dt>
-<dd>Print usage information for the given command.</dd>
-<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">edit</span> <span class="pre">&lt;xml-file&gt;</span></tt></dt>
-<dd>Open the kmos xml-file in a GUI to edit
-the model.</dd>
-<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">rebuild</span></tt></dt>
-<dd>Export code and rebuild binary module from XML
-information included in kmc_settings.py in
-current directory.</dd>
 <dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">benchmark</span></tt></dt>
 <dd>Run 1 mio. kMC steps on model in current directory
 and report runtime.</dd>
-<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">export-view</span> <span class="pre">&lt;xml-file&gt;</span></tt></dt>
-<dd>Export an XML file, compile and run the simulation.</dd>
+<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">build</span></tt></dt>
+<dd>Build kmc_model.so from *f90 files in the
+current directory.</dd>
+<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">edit</span> <span class="pre">&lt;xml-file&gt;</span></tt></dt>
+<dd>Open the kmos xml-file in a GUI to edit
+the model.</dd>
 <dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">export</span> <span class="pre">&lt;xml-file&gt;</span> <span class="pre">[&lt;export-path&gt;]</span></tt></dt>
 <dd>Take a kmos xml-file and export all generated
 source code to the export-path. There try to
 build the kmc_model.so.</dd>
-<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">build</span></tt></dt>
-<dd>Build kmc_model.so from *f90 files in the
-current directory.</dd>
-<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">import</span> <span class="pre">&lt;xml-file&gt;</span></tt></dt>
-<dd>Take a kmos xml-file and open an ipython shell
-with the project_tree imported as pt.</dd>
 <dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">export-settings</span> <span class="pre">&lt;xml-file&gt;</span> <span class="pre">[&lt;export-path&gt;]</span></tt></dt>
 <dd>Take a kmos xml-file and export kmc_settings.py
 to the export-path.</dd>
+<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">export-view</span> <span class="pre">&lt;xml-file&gt;</span></tt></dt>
+<dd>Export an XML file, compile and run the simulation.</dd>
+<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">help</span> <span class="pre">&lt;command&gt;</span></tt></dt>
+<dd>Print usage information for the given command.</dd>
+<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">help</span> <span class="pre">all</span></tt></dt>
+<dd>Display documentation for all commands.</dd>
+<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">import</span> <span class="pre">&lt;xml-file&gt;</span></tt></dt>
+<dd>Take a kmos xml-file and open an ipython shell
+with the project_tree imported as pt.</dd>
+<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">rebuild</span></tt></dt>
+<dd>Export code and rebuild binary module from XML
+information included in kmc_settings.py in
+current directory.</dd>
+<dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">run</span></tt></dt>
+<dd>Open an interactive shell and create a KMC_Model in it</dd>
 <dt><tt class="docutils literal"><span class="pre">kmos</span> <span class="pre">view</span></tt></dt>
 <dd>Take a kmc_model.so and kmc_settings.py in the
 same directory and start to simulate the
@@ -115,7 +118,7 @@ model visually.</dd>
         <li class="right" >
           <a href="../modindex.html" title="Global Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">kmos v0.1.2 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.2.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

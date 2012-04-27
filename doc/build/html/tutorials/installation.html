@@ -1,0 +1,242 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation on Ubuntu Linux &mdash; kmos v0.2.1 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.2.1',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="kmos v0.2.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../modindex.html" title="Global Module Index"
+             accesskey="M">modules</a> |</li>
+        <li><a href="../index.html">kmos v0.2.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/kmos_logo.png" alt="Logo"/>
+            </a></p>
+            <h3><a href="../index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">Installation on Ubuntu Linux</a></li>
+<li><a class="reference external" href="#installation-on-opensuse-12-1-linux">Installation on openSUSE 12.1 Linux</a></li>
+<li><a class="reference external" href="#installation-on-windoze-7">Installation on windoze 7</a></li>
+</ul>
+
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="../_sources/tutorials/installation.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="installation-on-ubuntu-linux">
+<h1>Installation on Ubuntu Linux<a class="headerlink" href="#installation-on-ubuntu-linux" title="Permalink to this headline">¶</a></h1>
+<p>You can fetch the current version of kmos using <em>git</em></p>
+<div class="highlight-python"><pre>git clone http://www.github.com/mhoffman/kmos</pre>
+</div>
+<p>and install it using <em>setuptools</em></p>
+<div class="highlight-python"><pre>./setup.py install [--user]</pre>
+</div>
+<p>To use the core functionality
+(programmatic model setup, code generation, model execution)
+kmos has a fairly modest depedency foot-print. You will need</p>
+<div class="highlight-python"><pre>python-numpy, a Fortran compiler, python-lxml</pre>
+</div>
+<p>In order to watch the model run on screen you will additionally
+need</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">python</span><span class="o">-</span><span class="n">matplotlib</span><span class="p">,</span> <span class="n">python</span><span class="o">-</span><span class="n">ase</span>
+</pre></div>
+</div>
+<p>Finally in order to use all features, in particular the GUI
+model editor of kmos you have to install
+a number of dependencies. This should not be very difficult
+on a recent Linux distribution with package management. So
+on Ubuntu it suffices to call:</p>
+<div class="highlight-python"><pre>sudo apt-get install gazpacho gfortran python-dev \
+                     python-glade2 python-kiwi python-lxml \
+                     python-matplotlib python-numpy \
+                     python-pygoocanvas</pre>
+</div>
+<p>and if you haven&#8217;t already installed it, one way to fetch the
+atomic simulation environment (ASE) is currently to</p>
+<div class="highlight-python"><pre>sudo add-apt-repository ppa:campos-dev/campos
+sudo apt-get update
+sudo apt-get install python-ase</pre>
+</div>
+<p>Or go to their <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/download.html">website</a>
+to fetch the latest version.</p>
+<p>If you think this dependency list hurts. Yes, it does!
+And I am happy about any suggestions how to
+minimize it. However one should note these dependencies are only
+required for the model development. Running a model has virtually
+no dependencies except for a Fortran compiler.</p>
+<p>To ease the installation further on Ubuntu one can simply run:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">kmos</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">dependencies</span><span class="o">-</span><span class="n">ubuntu</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition " id="todo-76">
+<p class="first admonition-title">Todo</p>
+<p class="last">add pip way or something alike to automatically
+install dependencies.</p>
+</div>
+</div>
+<div class="section" id="installation-on-opensuse-12-1-linux">
+<h1>Installation on openSUSE 12.1 Linux<a class="headerlink" href="#installation-on-opensuse-12-1-linux" title="Permalink to this headline">¶</a></h1>
+<p>On a recent openSUSE some dependencies are distributed a little
+different but nevertheless doable. We start by install some
+package from the repositories</p>
+<div class="highlight-python"><pre>sudo zypper install libgfortran46, python-lxml, python-matplotlib, \
+                    python-numpy, python-numpy-devel, python-goocanvas,
+                    python-imaging</pre>
+</div>
+<p>And two more packages SUSE packages have to be fetched from the
+openSUSE <a class="reference external" href="https://build.opensuse.org/">build service</a></p>
+<ul class="simple">
+<li><a class="reference external" href="https://build.opensuse.org/package/files?package=gazpacho&amp;project=home%3Ajoshkress">gazpacho</a></li>
+<li><a class="reference external" href="https://build.opensuse.org/package/files?package=python-kiwi&amp;project=home%3Ajoshkress">python-kiwi</a></li>
+</ul>
+<p>For each one just download the *.tar.bz2 files. Unpack them and inside
+run</p>
+<div class="highlight-python"><pre>python setup.py install</pre>
+</div>
+<p>In the same vein you can install ASE. Download a recent version
+from the <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/download.html">DTU website</a>
+unzip it and install it with</p>
+<div class="highlight-python"><pre>python setup.py install</pre>
+</div>
+</div>
+<div class="section" id="installation-on-windoze-7">
+<h1>Installation on windoze 7<a class="headerlink" href="#installation-on-windoze-7" title="Permalink to this headline">¶</a></h1>
+<p>In order for kmos to work in a recent windoze we need a
+number of programs.</p>
+<ol class="arabic">
+<li><p class="first"><strong>Python</strong>
+If you have no python previously installed you should try
+<a class="reference external" href="http://www.enthought.com/products/epd_free.php">Enthought Python Distribution</a> (EPD) in its free version since it
+already comes with a number of useful libraries such a numpy, scipy,
+ipython and matplotlib.</p>
+<p>Otherwise you can simply download Python from <a class="reference external" href="http://www.python.org/download">python.org</a> and
+this installation has been successfully tested using python 2.7.</p>
+</li>
+<li><p class="first"><strong>numpy</strong>
+Fetch it for <cite>your version</cite> of python from
+<a class="reference external" href="http://sourceforge.net/project/numpy">sourceforge&#8217;s Numpy site</a>
+and install it. [Not needed with EPD ]</p>
+</li>
+<li><p class="first"><strong>MinGW</strong>
+provides free Fortran and C compilers and can be obtained from the
+<a class="reference external" href="http://sourceforge.net/projects/mingw/">sourceforge&#8217;s MinGW site</a> .
+Make sure you make a tick for the Fortran and the C compiler.</p>
+</li>
+<li><p class="first"><strong>pyGTK</strong>
+is needed for the GUI frontend so fetch the
+<a href="#id2"><span class="problematic" id="id3">`all-in-one &lt;&gt;`_</span></a> bundle installer and
+install most of it.</p>
+</li>
+<li><p class="first"><strong>lxml</strong>
+is an awesome library to process xml files, which has unfortunately
+not fully found its way into the standard library. As of this writing
+the latest version with prebuilt binaries is <a class="reference external" href="http://pypi.python.org/pypi/lxml/2.2.8">lxml 2.2.8</a> and installation
+works without troubles.</p>
+</li>
+<li><p class="first"><strong>ASE</strong>
+is needed for the representation of atoms in the frontend. So
+download the latest from the
+<a class="reference external" href="https://wiki.fysik.dtu.dk/ase/">DTU website</a>
+and install it. This has to be installed using e.g. the powershell.
+So after unpacking it, fire up the powershell, cd to the directory
+and run</p>
+<div class="highlight-python"><pre>python setup.py install</pre>
+</div>
+<p>in there. Note that there is currently a slight glitch in the
+<cite>setup.py</cite> script on windoze, so open <cite>setup.py</cite> in a text
+editor and find the line saying</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">version</span> <span class="o">=</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>comment out the lines above it and hard-code the current version
+number.</p>
+</li>
+<li><p class="first"><strong>kmos</strong>
+is finally what we are after, so download the latest version
+from <a class="reference external" href="http://mhoffman.github.com/kmos/">github</a> and install
+it in the same way as you installed <strong>ASE</strong>.</p>
+</li>
+</ol>
+<p>There are probably a number of small changes you have to make
+which are not described in this document. Please post questions
+and comments in the
+<a class="reference external" href="https://github.com/mhoffman/kmos/issues">issues forum</a> .</p>
+<div class="admonition-todo admonition " id="todo-77">
+<p class="first admonition-title">Todo</p>
+<p class="last">test installation on other platforms</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../modindex.html" title="Global Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">kmos v0.2.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+    </div>
+  </body>
+</html>

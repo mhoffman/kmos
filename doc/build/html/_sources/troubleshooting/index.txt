@@ -20,7 +20,6 @@ What other kMC codes are there?
   inaccurate.
 
 
-  
 When I run kmos the GUI way and close it, it seems to hang and I need to use the window manager to kill it.
   This is a bug waiting to be fixed. To avoid it close
   the window showing the atoms object by clicking on its

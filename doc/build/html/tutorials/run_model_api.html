@@ -5,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Running the Model–the API way &mdash; kmos v0.1.2 documentation</title>
+    <title>Running the Model–the API way &mdash; kmos v0.2.1 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.1.2',
+        VERSION:     '0.2.1',
         COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -19,7 +19,7 @@
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos v0.1.2 documentation" href="../index.html" /> 
+    <link rel="top" title="kmos v0.2.1 documentation" href="../index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -31,11 +31,14 @@
         <li class="right" >
           <a href="../modindex.html" title="Global Module Index"
              accesskey="M">modules</a> |</li>
-        <li><a href="../index.html">kmos v0.1.2 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.2.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/kmos_logo.png" alt="Logo"/>
+            </a></p>
             <h3><a href="../index.html">Table Of Contents</a></h3>
             <ul>
 <li><a class="reference external" href="#">Running the Model&#8211;the API way</a></li>
@@ -202,6 +205,13 @@ this you can use the <cite>_put</cite> method, like so</p>
 <p>though at the end one must not forget to call <cite>_adjust_database()</cite>
 before executing any next step or the database of available processes
 is inaccurate and the model instance will crash soon.</p>
+<p>You can also get or set the whole configuration of the lattice
+at once using</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">config</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_get_configuration</span><span class="p">()</span>
+<span class="c"># possible change config</span>
+<span class="n">model</span><span class="o">.</span><span class="n">_set_configuration</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="running-models-in-parallel">
 <h1>Running models in parallel<a class="headerlink" href="#running-models-in-parallel" title="Permalink to this headline">¶</a></h1>
@@ -274,7 +284,7 @@ split the list and start subprocesses for each sublist</p>
         <li class="right" >
           <a href="../modindex.html" title="Global Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">kmos v0.1.2 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.2.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
