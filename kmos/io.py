@@ -365,7 +365,7 @@ class ProcListWriter():
                   'end module lattice\n')
         out.close()
 
-    def write_proclist(self):
+    def write_proclist(self, smart=True, code_generator='local_smart'):
         """Write the proclist.f90 module, i.e. the rules which make up
         the kMC process list.
         """
@@ -375,11 +375,20 @@ class ProcListWriter():
         # write header section and module imports
         out = open('%s/proclist.f90' % self.dir, 'w')
 
-        self.write_proclist_generic_part(data, out)
-        self.write_proclist_run_proc_nr_local(data, out)
-        self.write_proclist_put_take(data, out)
-        self.write_proclist_touchup(data, out)
-        self.write_proclist_multilattice(data, out)
+        if code_generator == 'local_smart':
+            self.write_proclist_generic_part(data, out)
+            self.write_proclist_run_proc_nr_smart(data, out)
+            self.write_proclist_put_take(data, out)
+            self.write_proclist_touchup(data, out)
+            self.write_proclist_multilattice(data, out)
+
+        elif code_generator == 'local_dumb':
+            self.write_proclist_generic_part(data, out)
+            self.write_proclist_run_proc_nr_dumb(data, out)
+            self.write_proclist_touchup(data, out)
+            self.write_proclist_multilattice(data, out)
+        else:
+            raise Exception("Don't know this code generator %s" % code_generator)
 
         out.close()
 
@@ -647,7 +656,7 @@ class ProcListWriter():
 
         out.write('\nend subroutine initialize_state\n\n')
 
-    def write_proclist_run_proc_nr_local(self, data, out):
+    def write_proclist_run_proc_nr_smart(self, data, out):
         # run_proc_nr runs the process selected by determine_procsite
         # for sake of simplicity each process is formulated in terms
         # of take and put operations. This is due to the fact that
@@ -723,23 +732,65 @@ class ProcListWriter():
         out.write('    end select\n\n')
         out.write('end subroutine run_proc_nr\n\n')
 
+    def write_proclist_run_proc_nr_dumb(self, data, out):
+        """
+        This a dumber version of the run_proc_nr routine. Though
+        the source code it generates might be quite a bit smaller.
+        On the downside, it might be a little less optimized though
+        it is local in a very strict sense. [EXPERIMENTAL/UNFINISHED!!!]
+        """
+        out.write('subroutine run_proc_nr(proc, nr_site)\n\n'
+                  '!****f* proclist/run_proc_nr\n'
+                  '! FUNCTION\n'
+                  '!    Runs process ``proc`` on site ``nr_site``.\n'
+                  '!\n'
+                  '! ARGUMENTS\n'
+                  '!\n'
+                  '!    * ``proc`` integer representing the process number\n'
+                  '!    * ``nr_site``  integer representing the site\n'
+                  '!******\n'
+                  '    integer(kind=iint), intent(in) :: proc\n'
+                  '    integer(kind=iint), intent(in) :: nr_site\n\n'
+                  '    integer(kind=iint), dimension(4) :: lsite\n\n'
+                  '    call increment_procstat(proc)\n\n'
+                  '    ! lsite = lattice_site, (vs. scalar site)\n'
+                  '    lsite = nr2lattice(nr_site, :)\n\n'
+                  '    select case(proc)\n')
+        # iterate over all process
+        for process in data.process_list:
+        # make direct atomic changes
+        # determine possibly affected sites
+        # call the touchup function for each of them
+        # TODO
+
+
+
+
+            out.write('    case(%s)\n' % process.name)
+            out.write('\n')
+        out.write('    end select\n\n')
+        out.write('end subroutine run_proc_nr\n\n')
+
+
     def write_proclist_put_take(self, data, out):
-        # HERE comes the bulk part of this code generator:
-        # the put/take/create/annihilation functions
-        # encode what all the processes we defined mean in terms
-        # updates for the geometry and the list of available processes
-        #
-        # The updates that disable available process are pretty easy
-        # and flat so they cannot be optimized much.
-        # The updates enabling processes are more sophisticasted: most
-        # processes have more than one condition. So enabling one condition
-        # of a processes is not enough. We need to check if all the other
-        # conditions are met after this update as well. All these checks
-        # typically involve many repetitive questions, i.e. we will
-        # inquire the lattice many times about the same site.
-        # To mend this we first collect all processes that could be enabled
-        # and then use a heuristic algorithm (any theoretical computer scientist
-        # knows how to improve on this?) to construct an improved if-tree
+        """
+        HERE comes the bulk part of this code generator:
+        the put/take/create/annihilation functions
+        encode what all the processes we defined mean in terms
+        updates for the geometry and the list of available processes
+
+        The updates that disable available process are pretty easy
+        and flat so they cannot be optimized much.
+        The updates enabling processes are more sophisticasted: most
+        processes have more than one condition. So enabling one condition
+        of a processes is not enough. We need to check if all the other
+        conditions are met after this update as well. All these checks
+        typically involve many repetitive questions, i.e. we will
+        inquire the lattice many times about the same site.
+        To mend this we first collect all processes that could be enabled
+        and then use a heuristic algorithm (any theoretical computer scientist
+        knows how to improve on this?) to construct an improved if-tree
+        """
         for species in data.species_list:
             if species.name == data.species_list.default_species:
                 continue  # don't put/take 'empty'
@@ -1082,7 +1133,7 @@ class ProcListWriter():
         return out
 
 
-def export_source(project_tree, export_dir=None):
+def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     """Export a kmos project into Fortran 90 code that can be readily
     compiled using f2py.  The model contained in project_tree
     will be stored under the directory export_dir. export_dir will
@@ -1113,7 +1164,7 @@ def export_source(project_tree, export_dir=None):
 
     writer = ProcListWriter(project_tree, export_dir)
     writer.write_lattice()
-    writer.write_proclist()
+    writer.write_proclist(code_generator=code_generator)
     writer.write_settings()
     project_tree.validate_model()
     return True

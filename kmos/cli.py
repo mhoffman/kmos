@@ -117,6 +117,10 @@ def get_options(args=None, get_parser=False):
                       dest='path_to_f2py',
                       default='f2py')
 
+    parser.add_option('-c','--code-generator',
+                     dest='code_generator',
+                     default='local_smart')
+
     try:
         from numpy.distutils.fcompiler import get_default_fcompiler
         from numpy.distutils import log
@@ -212,7 +216,9 @@ def main(args=None):
         project = kmos.types.Project()
         project.import_xml_file(xml_file)
 
-        kmos.io.export_source(project, export_dir)
+        kmos.io.export_source(project,
+                              export_dir,
+                              code_generator=options.code_generator)
 
         if ((os.name == 'posix'
            and os.uname()[0] == 'Linux')
