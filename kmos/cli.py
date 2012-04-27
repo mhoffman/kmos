@@ -6,7 +6,6 @@
 
 """
 
-
 #    Copyright 2009-2012 Max J. Hoffmann (mjhoffmann@gmail.com)
 #    This file is part of kmos.
 #
@@ -22,7 +21,6 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
-
 
 usage = {}
 usage['all'] = """kmos help all
@@ -92,11 +90,13 @@ def main(args=None):
     import optparse
     import os
     from glob import glob
+    import kmos
 
     parser = optparse.OptionParser(
         'Usage: %prog [help] ('
         + '|'.join(sorted(usage.keys()))
-        + ') [options]')
+        + ') [options]',
+        version=kmos.__version__)
 
     parser.add_option('-s', '--source-only',
                       dest='source_only',
@@ -227,6 +227,9 @@ def main(args=None):
         os.chdir(out_dir)
         main('view')
 
+    elif args[0] == 'all':
+        print('Interpreting: all -> help all\n\n')
+        main('help all')
     elif args[0] == 'help':
         if len(args) < 2:
             parser.error('Which help do you  want?')
@@ -236,7 +239,8 @@ def main(args=None):
         elif args[1] in usage:
             print('Usage: %s\n' % usage[args[1]])
         else:
-            print("Command not known or not documented.")
+            raise Exception('Command "%s" not known or not documented.'
+                            % args[1])
 
     elif args[0] == 'import':
         import kmos.io
@@ -252,12 +256,9 @@ def main(args=None):
         from tempfile import mktemp
         if not os.path.exists('kmc_model.so') \
            and not os.path.exists('kmc_model.pyd'):
-            print('No kmc_model.so found, exiting.')
-            exit()
-
+            raise Exception('No kmc_model.so found.')
         if not os.path.exists('kmc_settings.py'):
-            print('No kmc_settings.py found, exiting.')
-            exit()
+            raise Exception('No kmc_settings.py found.')
 
         from kmos.run import KMC_Model
 
@@ -289,7 +290,7 @@ def main(args=None):
         view.main()
 
     else:
-        parser.error('Command not understood.')
+        parser.error('Command "%s" not understood.' % args[0])
 
 
 def sh(banner):
