@@ -259,8 +259,7 @@ def evaluate_kind_values(infile, outfile):
             except:
                 raise Exception('Could create selected_kind module\n'
                 + '%s\n' % os.path.abspath(os.curdir)
-                + '%s\n' % os.listdir('.')
-                )
+                + '%s\n' % os.listdir('.'))
         return f2py_selected_kind.kind
 
     def parse_args(args):
@@ -382,3 +381,34 @@ def build(options):
     sys.argv = call
     f2py.main()
     sys.argv = true_argv
+
+
+def T_grid(T_min, T_max, n):
+    from numpy import linspace
+    """Return a list of n temperatures between
+       T_min and T_max such that the grid of T^(-1)
+       is evenly spaced.
+    """
+
+    T_min1 = T_min ** (-1.)
+    T_max1 = T_max ** (-1.)
+
+    grid = list(linspace(T_max1, T_min1, n))
+    grid.reverse()
+    grid = [x ** (-1.) for x in grid]
+
+    return grid
+
+
+def p_grid(p_min, p_max, n):
+    from numpy import logspace, log10
+    """Return a list of n pressures between
+       p_min and p_max such that the grid of log(p)
+       is evenly spaced.
+    """
+    p_minlog = log10(p_min)
+    p_maxlog = log10(p_max)
+
+    grid = logspace(p_minlog, p_maxlog, n)
+
+    return grid
