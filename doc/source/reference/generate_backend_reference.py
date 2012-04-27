@@ -92,7 +92,7 @@ shutil.rmtree(outdir)
 
 with file('cli.rst', 'w') as outfile:
     from kmos.cli import usage
-    for i, doc in enumerate(usage.values()):
+    for i, doc in enumerate(sorted(usage.values())):
         outfile.write('\n\n')
         doc = doc.replace('*', '\*')
         doc = doc.split('\n')

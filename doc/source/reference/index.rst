@@ -86,6 +86,8 @@ kmos.run
             _get_configuration,
             _set_configuration,
 
+.. autoclass:: kmos.run.Model_Rate_Constants
+.. autoclass:: kmos.run.Model_Parameters
 
 kmos.view
 ^^^^^^^^^
