@@ -238,8 +238,9 @@ def evaluate_kind_values(infile, outfile):
             """
             # quick'n'dirty workaround for windoze
             if os.name == 'nt':
-                with open('f2py_selected_kind.f90', 'w') as f:
-                    f.write(fcode)
+                f = open('f2py_selected_kind.f90', 'w')
+                f.write(fcode)
+                f.close()
                 from copy import deepcopy
                 # save for later
                 true_argv = deepcopy(sys.argv)
