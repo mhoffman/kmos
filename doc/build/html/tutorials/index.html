@@ -5,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Tutorials &mdash; kmos v0.2.1 documentation</title>
+    <title>Tutorials &mdash; kmos v0.2.0 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.2.1',
+        VERSION:     '0.2.0',
         COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -19,7 +19,7 @@
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos v0.2.1 documentation" href="../index.html" />
+    <link rel="top" title="kmos v0.2.0 documentation" href="../index.html" />
     <link rel="next" title="Topic Guides" href="../topic_guides/index.html" />
     <link rel="prev" title="Welcome to kmos’s documentation!" href="../index.html" /> 
   </head>
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="../index.html" title="Welcome to kmos’s documentation!"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">kmos v0.2.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -58,6 +58,7 @@
 <li><a class="reference external" href="#installation-on-ubuntu-linux">Installation on Ubuntu Linux</a></li>
 <li><a class="reference external" href="#installation-on-opensuse-12-1-linux">Installation on openSUSE 12.1 Linux</a></li>
 <li><a class="reference external" href="#installation-on-windoze-7">Installation on windoze 7</a></li>
+<li><a class="reference external" href="#installing-janaf-thermochemical-tables">Installing JANAF Thermochemical Tables</a></li>
 </ul>
 </li>
 <li><a class="reference external" href="#screenshots">Screenshots</a><ul>
@@ -199,7 +200,7 @@ no dependencies except for a Fortran compiler.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">kmos</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">dependencies</span><span class="o">-</span><span class="n">ubuntu</span>
 </pre></div>
 </div>
-<div class="admonition-todo admonition " id="todo-73">
+<div class="admonition-todo admonition " id="todo-90">
 <p class="first admonition-title">Todo</p>
 <p class="last">add pip way or something alike to automatically
 install dependencies.</p>
@@ -292,7 +293,31 @@ it in the same way as you installed <strong>ASE</strong>.</p>
 which are not described in this document. Please post questions
 and comments in the
 <a class="reference external" href="https://github.com/mhoffman/kmos/issues">issues forum</a> .</p>
-<div class="admonition-todo admonition " id="todo-74">
+</div>
+<div class="section" id="installing-janaf-thermochemical-tables">
+<h3>Installing JANAF Thermochemical Tables<a class="headerlink" href="#installing-janaf-thermochemical-tables" title="Permalink to this headline">¶</a></h3>
+<p>You can conveniently use gas phase chemical potentials
+inserted in rate constant expressions using
+JANAF Thermochemical Tables. A couple of molecules
+are automatically supported. If you need support
+for more gas-phase species, drop me a line.</p>
+<p>The tabulated value are not distributed since
+the terms of distribution do not permit this.
+Fortunately manual installation is easy.
+Just create a directory called <cite>janaf_data</cite>
+anywhere on your python path. To see the directories on your python
+path run</p>
+<div class="highlight-python"><pre>python -c"import sys; print(sys.path)"</pre>
+</div>
+<p>Inside the <cite>janaf_data</cite> directory has to be a file
+named <cite>__init__.py</cite>, so that python recognizes it as a module</p>
+<div class="highlight-python"><pre>touch __init__.py</pre>
+</div>
+<p>Then copy all needed data files from the
+<a class="reference external" href="http://kinetics.nist.gov/janaf/Search">NIST website</a>
+in the tab-delimited text format
+to the <cite>janaf_data</cite> directory.</p>
+<div class="admonition-todo admonition " id="todo-91">
 <p class="first admonition-title">Todo</p>
 <p class="last">test installation on other platforms</p>
 </div>
@@ -575,7 +600,7 @@ explains how that works.</td></tr>
 simple adsorption/desorption model on a simple cubic surface.
 Despite its simplicity it touches all elements contained in
 the GUI and could be considered from first-principles.</p>
-<div class="admonition-todo admonition " id="todo-75">
+<div class="admonition-todo admonition " id="todo-92">
 <p class="first admonition-title">Todo</p>
 <p class="last">describe modelling more complicated structures
 and e.g. boundary conditions</p>
@@ -867,7 +892,7 @@ from the top project directory</p>
         <li class="right" >
           <a href="../index.html" title="Welcome to kmos’s documentation!"
              >previous</a> |</li>
-        <li><a href="../index.html">kmos v0.2.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

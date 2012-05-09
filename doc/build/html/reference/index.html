@@ -5,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Reference &mdash; kmos v0.2.1 documentation</title>
+    <title>Reference &mdash; kmos v0.2.0 documentation</title>
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.2.1',
+        VERSION:     '0.2.0',
         COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -19,7 +19,7 @@
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos v0.2.1 documentation" href="../index.html" />
+    <link rel="top" title="kmos v0.2.0 documentation" href="../index.html" />
     <link rel="next" title="Trouble Shooting" href="../troubleshooting/index.html" />
     <link rel="prev" title="The Site/Coordinate Syntax" href="../topic_guides/coord_syntax.html" /> 
   </head>
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="../topic_guides/coord_syntax.html" title="The Site/Coordinate Syntax"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">kmos v0.2.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -62,8 +62,8 @@
 </ul>
 </li>
 <li><a class="reference external" href="#runtime-frontend">Runtime frontend</a><ul>
-<li><a class="reference external" href="#module-kmos.run">kmos.run</a></li>
-<li><a class="reference external" href="#module-kmos.view">kmos.view</a></li>
+<li><a class="reference external" href="#kmos-run">kmos.run</a></li>
+<li><a class="reference external" href="#kmos-view">kmos.view</a></li>
 </ul>
 </li>
 <li><a class="reference external" href="#kmos-kmc-project-dtd">kmos kMC project DTD</a></li>
@@ -328,7 +328,7 @@ Currently import and export is supported to XML and export is
 supported to Fortran 90 source code.</p>
 <dl class="function">
 <dt id="kmos.io.export_source">
-<tt class="descclassname">kmos.io.</tt><tt class="descname">export_source</tt><big>(</big><em>project_tree</em>, <em>export_dir=None</em><big>)</big><a class="headerlink" href="#kmos.io.export_source" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">kmos.io.</tt><tt class="descname">export_source</tt><big>(</big><em>project_tree</em>, <em>export_dir=None</em>, <em>code_generator='local_smart'</em><big>)</big><a class="headerlink" href="#kmos.io.export_source" title="Permalink to this definition">¶</a></dt>
 <dd><p>Export a kmos project into Fortran 90 code that can be readily
 compiled using f2py.  The model contained in project_tree
 will be stored under the directory export_dir. export_dir will
@@ -357,7 +357,7 @@ information that belongs to a kMC model.</dd></dl>
 
 <dl class="method">
 <dt id="kmos.io.ProcListWriter.write_proclist">
-<tt class="descname">write_proclist</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.io.ProcListWriter.write_proclist" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">write_proclist</tt><big>(</big><em>smart=True</em>, <em>code_generator='local_smart'</em><big>)</big><a class="headerlink" href="#kmos.io.ProcListWriter.write_proclist" title="Permalink to this definition">¶</a></dt>
 <dd>Write the proclist.f90 module, i.e. the rules which make up
 the kMC process list.</dd></dl>
 
@@ -558,183 +558,11 @@ process per line in the form:</p>
 </div>
 <div class="section" id="runtime-frontend">
 <h2>Runtime frontend<a class="headerlink" href="#runtime-frontend" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="module-kmos.run">
-<h3>kmos.run<a class="headerlink" href="#module-kmos.run" title="Permalink to this headline">¶</a></h3>
-<p>A front-end module to run a compiled kMC model. The actual model is
-imported in kmc_model.so and all parameters are stored in kmc_settings.py.</p>
-<p>The model can be used directly like so:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">kmos.model</span> <span class="kn">import</span> <span class="n">KMC_Model</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">KMC_Model</span><span class="p">()</span>
-
-<span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="mi">500</span>
-<span class="n">model</span><span class="o">.</span><span class="n">do_steps</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">view</span><span class="p">()</span>
-</pre></div>
+<div class="section" id="kmos-run">
+<h3>kmos.run<a class="headerlink" href="#kmos-run" title="Permalink to this headline">¶</a></h3>
 </div>
-<p>which, of course can also be part of a python script.</p>
-<p>The model can also be run in a different process using the
-multiprocessing module. This mode is designed for use with
-a GUI so that the CPU intensive kMC integration can run at
-full throttle without impeding the front-end. Interaction with
-the model happens through Queues.</p>
-<dl class="class">
-<dt id="kmos.run.KMC_Model">
-<em class="property">class </em><tt class="descclassname">kmos.run.</tt><tt class="descname">KMC_Model</tt><big>(</big><em>image_queue=None</em>, <em>parameter_queue=None</em>, <em>signal_queue=None</em>, <em>size=None</em>, <em>system_name='kmc_model'</em>, <em>banner=True</em>, <em>print_rates=True</em>, <em>autosend=True</em><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model" title="Permalink to this definition">¶</a></dt>
-<dd><p>API Front-end to initialize and run a kMC model using python bindings.
-Depending on the constructor cal the model can be run either via directory
-calls or in a separate processes access via multiprocessing.Queues.
-Only one model instance can exist simultaneously per process.</p>
-<dl class="method">
-<dt id="kmos.run.KMC_Model.deallocate">
-<tt class="descname">deallocate</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.deallocate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deallocate all arrays that are allocated
-by the Fortran module. This needs to be called
-whenever more than one simulation is started
-from one process.</p>
-<p>Note that the currenty state and history of
-the system is lost after calling this method.</p>
-<p>Note: explicit invocation was chosen over the
-__del__ method because there seems to easy
-portable way to control garbage collection.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="kmos.run.KMC_Model.do_steps">
-<tt class="descname">do_steps</tt><big>(</big><em>n=10000</em><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.do_steps" title="Permalink to this definition">¶</a></dt>
-<dd>Propagate the model <cite>n</cite> steps.</dd></dl>
-
-<dl class="method">
-<dt id="kmos.run.KMC_Model.double">
-<tt class="descname">double</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.double" title="Permalink to this definition">¶</a></dt>
-<dd>Double the size of the model in each direction and initialize
-larger model with current configuration in each copy.</dd></dl>
-
-<dl class="method">
-<dt id="kmos.run.KMC_Model.get_atoms">
-<tt class="descname">get_atoms</tt><big>(</big><em>geometry=True</em><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.get_atoms" title="Permalink to this definition">¶</a></dt>
-<dd>Return an ASE Atoms object with additional
-information such as coverage and Turn-over-frequencies
-attached.</dd></dl>
-
-<dl class="method">
-<dt id="kmos.run.KMC_Model.get_occupation_header">
-<tt class="descname">get_occupation_header</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.get_occupation_header" title="Permalink to this definition">¶</a></dt>
-<dd>Returns the names of the fields returned by
-self.get_atoms().occupation.
-Useful for the header line of an ASCII output.</dd></dl>
-
-<dl class="method">
-<dt id="kmos.run.KMC_Model.get_tof_header">
-<tt class="descname">get_tof_header</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.get_tof_header" title="Permalink to this definition">¶</a></dt>
-<dd>Returns the names of the fields returned by
-self.get_atoms().tof_data.
-Useful for the header line of an ASCII output.</dd></dl>
-
-<dl class="method">
-<dt id="kmos.run.KMC_Model.halve">
-<tt class="descname">halve</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.halve" title="Permalink to this definition">¶</a></dt>
-<dd>Halve the size of the model and initialize each site in the new model
-with a species randomly drawn from the sites that are reduced onto
-one. It is necessary that the simulation size is even.</dd></dl>
-
-<dl class="method">
-<dt id="kmos.run.KMC_Model.post_mortem">
-<tt class="descname">post_mortem</tt><big>(</big><em>steps=None</em>, <em>propagate=False</em>, <em>err_code=None</em><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.post_mortem" title="Permalink to this definition">¶</a></dt>
-<dd>Accepts an integer and generates a post-mortem report
-by running that many steps and returning which process
-would be executed next without executing it.</dd></dl>
-
-<dl class="method">
-<dt id="kmos.run.KMC_Model.put">
-<tt class="descname">put</tt><big>(</big><em>site</em>, <em>new_species</em><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.put" title="Permalink to this definition">¶</a></dt>
-<dd><p>Puts new_species at site. The site is given by 4-entry sequence
-like [x, y, z, n], where the first 3 entries define the unit cell
-from 0 to the number of unit cells in the respective direction.
-And <cite>n</cite> specifies the site within the unit cell.</p>
-<p>The database of available processes will be updated automatically.</p>
-<p>Examples</p>
-<div class="highlight-python"><pre>model.put([0,0,0,model.lattice.lattice_bridge], model.proclist.co ])
-# puts a CO molecule at the `bridge` site of the lower left unit cell</pre>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="kmos.run.KMC_Model.run">
-<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.run" title="Permalink to this definition">¶</a></dt>
-<dd>Runs the model indefinitely. To control the
-simulations, model must have been initialized
-with proper Queues.</dd></dl>
-
-<dl class="method">
-<dt id="kmos.run.KMC_Model.start">
-<tt class="descname">start</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.start" title="Permalink to this definition">¶</a></dt>
-<dd>Start child process</dd></dl>
-
-<dl class="method">
-<dt id="kmos.run.KMC_Model.view">
-<tt class="descname">view</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.view" title="Permalink to this definition">¶</a></dt>
-<dd>Visualize the current configuration of the model using ASE ag.</dd></dl>
-
-<dl class="method">
-<dt id="kmos.run.KMC_Model.xml">
-<tt class="descname">xml</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model.xml" title="Permalink to this definition">¶</a></dt>
-<dd>Returns the XML representation that this model was created from.</dd></dl>
-
-<dl class="method">
-<dt id="kmos.run.KMC_Model._get_configuration">
-<tt class="descname">_get_configuration</tt><big>(</big><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model._get_configuration" title="Permalink to this definition">¶</a></dt>
-<dd>Return current configuration of model.</dd></dl>
-
-<dl class="method">
-<dt id="kmos.run.KMC_Model._set_configuration">
-<tt class="descname">_set_configuration</tt><big>(</big><em>config</em><big>)</big><a class="headerlink" href="#kmos.run.KMC_Model._set_configuration" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the current lattice configuration.</p>
-<p>Expects a 4-dimensional array, with dimensions [X, Y, Z, N]
-where X, Y, Z are the lattice size and N the number of
-sites in each unit cell.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="kmos.run.Model_Rate_Constants">
-<em class="property">class </em><tt class="descclassname">kmos.run.</tt><tt class="descname">Model_Rate_Constants</tt><a class="headerlink" href="#kmos.run.Model_Rate_Constants" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="class">
-<dt id="kmos.run.Model_Parameters">
-<em class="property">class </em><tt class="descclassname">kmos.run.</tt><tt class="descname">Model_Parameters</tt><big>(</big><em>print_rates=True</em><big>)</big><a class="headerlink" href="#kmos.run.Model_Parameters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Holds all user defined parameters of a model in
-concise form. All user defined parameters can be
-accessed and set as attributes, like so</p>
-<div class="highlight-python"><pre>model.parameters.&lt;parameter&gt; = X.Y</pre>
-</div>
-</dd></dl>
-
-</div>
-<div class="section" id="module-kmos.view">
-<h3>kmos.view<a class="headerlink" href="#module-kmos.view" title="Permalink to this headline">¶</a></h3>
-<p>Run and view a kMC model. For this to work one needs a
-kmc_model.(so/pyd) and a kmc_settings.py in the import path.</p>
-<dl class="class">
-<dt id="kmos.view.KMC_Viewer">
-<em class="property">class </em><tt class="descclassname">kmos.view.</tt><tt class="descname">KMC_Viewer</tt><big>(</big><em>model=None</em><big>)</big><a class="headerlink" href="#kmos.view.KMC_Viewer" title="Permalink to this definition">¶</a></dt>
-<dd><p>A graphical front-end to run, manipulate
-and view a kMC model.</p>
-<dl class="method">
-<dt id="kmos.view.KMC_Viewer.exit">
-<tt class="descname">exit</tt><big>(</big><em>_widget</em>, <em>_event</em><big>)</big><a class="headerlink" href="#kmos.view.KMC_Viewer.exit" title="Permalink to this definition">¶</a></dt>
-<dd>Exit the viewer application cleanly
-killing all subprocesses before the main
-process.</dd></dl>
-
-<dl class="method">
-<dt id="kmos.view.KMC_Viewer.parameter_callback">
-<tt class="descname">parameter_callback</tt><big>(</big><em>name</em>, <em>value</em><big>)</big><a class="headerlink" href="#kmos.view.KMC_Viewer.parameter_callback" title="Permalink to this definition">¶</a></dt>
-<dd>Sent (updated) parameters to the model process.</dd></dl>
-
-</dd></dl>
-
+<div class="section" id="kmos-view">
+<h3>kmos.view<a class="headerlink" href="#kmos-view" title="Permalink to this headline">¶</a></h3>
 </div>
 </div>
 <div class="section" id="kmos-kmc-project-dtd">
@@ -1440,7 +1268,7 @@ for the given layer.</p>
         <li class="right" >
           <a href="../topic_guides/coord_syntax.html" title="The Site/Coordinate Syntax"
              >previous</a> |</li>
-        <li><a href="../index.html">kmos v0.2.1 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos v0.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

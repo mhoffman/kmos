@@ -159,6 +159,35 @@ and comments in the
 `issues forum <https://github.com/mhoffman/kmos/issues>`_ .
 
 
+Installing JANAF Thermochemical Tables
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You can conveniently use gas phase chemical potentials
+inserted in rate constant expressions using
+JANAF Thermochemical Tables. A couple of molecules
+are automatically supported. If you need support
+for more gas-phase species, drop me a line.
+
+The tabulated value are not distributed since
+the terms of distribution do not permit this.
+Fortunately manual installation is easy.
+Just create a directory called `janaf_data`
+anywhere on your python path. To see the directories on your python
+path run ::
+
+    python -c"import sys; print(sys.path)"
+
+Inside the `janaf_data` directory has to be a file
+named `__init__.py`, so that python recognizes it as a module ::
+
+    touch __init__.py
+
+Then copy all needed data files from the
+`NIST website <http://kinetics.nist.gov/janaf/Search>`_
+in the tab-delimited text format
+to the `janaf_data` directory.
+
+
 
 .. _Enthought Python Distribution: http://www.enthought.com/products/epd_free.php
 .. _python.org: http://www.python.org/download
