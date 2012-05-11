@@ -35,7 +35,13 @@ class Species:
     def __init__(self, atoms, gas=False, janaf_file='', name=''):
         self.atoms = atoms
         self.gas = gas
-        self.name = name if name else self.atoms.get_name()
+        if name:
+            self.name = name
+        else:
+            if hasattr(self.atoms, 'get_chemical_formula'):
+                self.name = self.atoms.get_chemical_formula(mode='hill')
+            else:
+                self.atoms.get_name()
         self.janaf_file = janaf_file
 
         # prepare chemical potential
