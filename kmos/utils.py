@@ -310,16 +310,16 @@ def evaluate_kind_values(infile, outfile):
         int_match = int_pattern.match(line)
         if int_match:
             match = int_match.groupdict()
-            line = '{before}{kind}{after}\n'.format(
-                    before=match['before'],
-                    kind=int_kind(match['args']),
-                    after=match['after'],)
+            line = '%s%s%s\n' % (
+                    match['before'],
+                    int_kind(match['args']),
+                    match['after'],)
         elif real_match:
             match = real_match.groupdict()
-            line = '{before}{kind}{after}\n'.format(
-                    before=match['before'],
-                    kind=real_kind(match['args']),
-                    after=match['after'],)
+            line = '%s%s%s\n' % (
+                    match['before'],
+                    real_kind(match['args']),
+                    match['after'],)
         outfile.write(line)
     infile.close()
     outfile.close()

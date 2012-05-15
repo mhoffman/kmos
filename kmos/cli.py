@@ -167,12 +167,13 @@ def main(args=None):
         nsteps = 1000000
         from time import time
         from kmos.run import KMC_Model
-        with KMC_Model(print_rates=False, banner=False) as model:
-            time0 = time()
-            model.do_steps(nsteps)
-            needed_time = time() - time0
-            print('%s steps took %.2f seconds' % (nsteps, needed_time))
-            print('Or %.2e steps/s' % (1e6 / needed_time))
+        model = KMC_Model(print_rates=False, banner=False)
+        time0 = time()
+        model.do_steps(nsteps)
+        needed_time = time() - time0
+        print('%s steps took %.2f seconds' % (nsteps, needed_time))
+        print('Or %.2e steps/s' % (1e6 / needed_time))
+        model.deallocate()
     elif args[0] == 'build':
         from kmos.utils import build
         build(options)
@@ -283,26 +284,28 @@ def main(args=None):
 
         from kmos.run import KMC_Model
 
-        with KMC_Model(print_rates=False, banner=False) as model:
-            tempfile = mktemp()
-            f = file(tempfile, 'w')
-            f.write(model.xml())
-            f.close()
+        model = KMC_Model(print_rates=False, banner=False)
+        tempfile = mktemp()
+        f = file(tempfile, 'w')
+        f.write(model.xml())
+        f.close()
 
-            for kmc_model in glob('kmc_model.*'):
-                os.remove(kmc_model)
-            os.remove('kmc_settings.py')
-            main('export %s .' % tempfile)
-            os.remove(tempfile)
+        for kmc_model in glob('kmc_model.*'):
+            os.remove(kmc_model)
+        os.remove('kmc_settings.py')
+        main('export %s .' % tempfile)
+        os.remove(tempfile)
+        model.deallocate()
 
     elif args[0] == 'run':
         from sys import path
         path.append(os.path.abspath(os.curdir))
         from kmos.run import KMC_Model
 
-        with KMC_Model(print_rates=False) as model:
-            global model
-            sh(banner='Note: model = KMC_Model(print_rates=False)')
+        model = KMC_Model(print_rates=False)
+        global model
+        sh(banner='Note: model = KMC_Model(print_rates=False)')
+        model.deallocate()
 
     elif args[0] == 'view':
         from sys import path
