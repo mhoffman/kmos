@@ -405,6 +405,7 @@ class ProcListWriter():
                   '    update_accum_rate, &\n'
                   '    determine_procsite, &\n'
                   '    update_clocks, &\n'
+                  '    avail_sites, &\n'
                   '    increment_procstat\n\n'
                   'use lattice, only: &\n')
         site_params = []
@@ -862,9 +863,12 @@ class ProcListWriter():
                                     out.write('print *,"    LATTICE/CAN_DO/PROC",%s\n' % process.name)
                                     out.write('print *,"    LATTICE/CAN_DO/VSITE","site%s"\n' % (coord).radd_ff())
                                     out.write('print *,"    LATTICE/CAN_DO/SITE",site%s\n' % (coord).radd_ff())
-                                out.write(('    if(can_do(%(proc)s, site%(coord)s))then\n'
+                                #out.write(('    if(can_do(%(proc)s, site%(coord)s))then\n'
+                                out.write(('    if(avail_sites(%(proc)s, lattice2nr(%(unpacked)s), 2).ne.0)then\n'
                                 + '        call del_proc(%(proc)s, site%(coord)s)\n'
-                                + '    endif\n\n') % {'coord': (coord).radd_ff(), 'proc': process.name})
+                                + '    endif\n\n') % {'coord': (coord).radd_ff(),
+                                                      'proc': process.name,
+                                                      'unpacked': coord.site_offset_unpacked()})
 
                         # updating enabled procs is not so simply, because meeting one condition
                         # is not enough. We need to know if all other conditions are met as well

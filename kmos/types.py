@@ -1030,6 +1030,14 @@ class Coord(FixedObject):
         else:
             return ' - %s' % ff
 
+    def site_offset_unpacked(self):
+        ff = self.ff()
+        if ff == '(/0, 0, 0, 0/)':
+            return 'site(1), site(2), site(3), site(4)'
+        else:
+            return 'site(1) + %s, site(2) + %s, site(3) + %s, site(4) + %s' % \
+                    (self.offset[0], self.offset[1], self.offset[2], self.name)
+
     def radd_ff(self):
         """Build term as if adding on the right, omit '+' if 0 anyway
         (in Fortran Form :-)
