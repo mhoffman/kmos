@@ -1158,6 +1158,7 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     cp_files = [os.path.join('fortran_src', 'assert.ppc'),
                 os.path.join('fortran_src', 'base.f90'),
                 os.path.join('fortran_src', 'kind_values.f90'),
+                os.path.join('fortran_src', 'main.f90'),
                 ]
     exec_files = []
 
