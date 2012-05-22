@@ -80,7 +80,7 @@ public :: add_proc, &
 integer(kind=iint), parameter :: null_species = -1
 
 !---- Allocatable, module wide, variables
-integer(kind=iint), dimension(:,:,:), allocatable :: avail_sites
+integer(kind=iint), dimension(:,:,:), allocatable, public :: avail_sites
 !****v* base/avail_sites
 ! FUNCTION
 !   Main book-keeping array that stores for each process the sites
