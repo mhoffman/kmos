@@ -482,7 +482,7 @@ subroutine put_co_ruo2_bridge(site)
         call del_proc(co_diffusion_bridge_bridge_down, site)
     endif
 
-    if(avail_sites(co_diffusion_bridge_bridge_up, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(co_diffusion_bridge_bridge_up, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(co_diffusion_bridge_bridge_up, site + (/0, -1, 0, 0/))
     endif
 
@@ -498,7 +498,7 @@ subroutine put_co_ruo2_bridge(site)
         call del_proc(oxygen_adsorption_bridge_bridge, site)
     endif
 
-    if(avail_sites(oxygen_adsorption_bridge_bridge, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(oxygen_adsorption_bridge_bridge, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(oxygen_adsorption_bridge_bridge, site + (/0, -1, 0, 0/))
     endif
 
@@ -514,7 +514,7 @@ subroutine put_co_ruo2_bridge(site)
         call del_proc(oxygen_diffusion_bridge_bridge_down, site)
     endif
 
-    if(avail_sites(oxygen_diffusion_bridge_bridge_up, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(oxygen_diffusion_bridge_bridge_up, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(oxygen_diffusion_bridge_bridge_up, site + (/0, -1, 0, 0/))
     endif
 
@@ -571,7 +571,7 @@ subroutine take_co_ruo2_bridge(site)
         call del_proc(co_desorption_bridge, site)
     endif
 
-    if(avail_sites(co_diffusion_bridge_bridge_down, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(co_diffusion_bridge_bridge_down, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(co_diffusion_bridge_bridge_down, site + (/0, -1, 0, 0/))
     endif
 
@@ -591,7 +591,7 @@ subroutine take_co_ruo2_bridge(site)
         call del_proc(reaction_oxygen_bridge_co_bridge_down, site)
     endif
 
-    if(avail_sites(reaction_oxygen_bridge_co_bridge_up, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(reaction_oxygen_bridge_co_bridge_up, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(reaction_oxygen_bridge_co_bridge_up, site + (/0, -1, 0, 0/))
     endif
 
@@ -656,11 +656,11 @@ subroutine put_co_ruo2_cus(site)
         call del_proc(co_adsorption_cus, site)
     endif
 
-    if(avail_sites(co_diffusion_bridge_cus_left, lattice2nr(site(1) + 1, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(co_diffusion_bridge_cus_left, lattice2nr(site(1) + (1), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(co_diffusion_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(avail_sites(co_diffusion_bridge_cus_right, lattice2nr(site(1) + 0, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(co_diffusion_bridge_cus_right, lattice2nr(site(1) + (0), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(co_diffusion_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
@@ -668,15 +668,15 @@ subroutine put_co_ruo2_cus(site)
         call del_proc(co_diffusion_cus_cus_down, site)
     endif
 
-    if(avail_sites(co_diffusion_cus_cus_up, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(co_diffusion_cus_cus_up, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(co_diffusion_cus_cus_up, site + (/0, -1, 0, 0/))
     endif
 
-    if(avail_sites(oxygen_adsorption_bridge_cus_left, lattice2nr(site(1) + 1, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(oxygen_adsorption_bridge_cus_left, lattice2nr(site(1) + (1), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(oxygen_adsorption_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(avail_sites(oxygen_adsorption_bridge_cus_right, lattice2nr(site(1) + 0, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(oxygen_adsorption_bridge_cus_right, lattice2nr(site(1) + (0), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(oxygen_adsorption_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
@@ -684,15 +684,15 @@ subroutine put_co_ruo2_cus(site)
         call del_proc(oxygen_adsorption_cus_cus, site)
     endif
 
-    if(avail_sites(oxygen_adsorption_cus_cus, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(oxygen_adsorption_cus_cus, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(oxygen_adsorption_cus_cus, site + (/0, -1, 0, 0/))
     endif
 
-    if(avail_sites(oxygen_diffusion_bridge_cus_left, lattice2nr(site(1) + 1, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(oxygen_diffusion_bridge_cus_left, lattice2nr(site(1) + (1), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(oxygen_diffusion_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(avail_sites(oxygen_diffusion_bridge_cus_right, lattice2nr(site(1) + 0, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(oxygen_diffusion_bridge_cus_right, lattice2nr(site(1) + (0), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(oxygen_diffusion_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
@@ -700,7 +700,7 @@ subroutine put_co_ruo2_cus(site)
         call del_proc(oxygen_diffusion_cus_cus_down, site)
     endif
 
-    if(avail_sites(oxygen_diffusion_cus_cus_up, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(oxygen_diffusion_cus_cus_up, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(oxygen_diffusion_cus_cus_up, site + (/0, -1, 0, 0/))
     endif
 
@@ -749,15 +749,15 @@ subroutine take_co_ruo2_cus(site)
         call del_proc(co_desorption_cus, site)
     endif
 
-    if(avail_sites(co_diffusion_cus_bridge_left, lattice2nr(site(1) + 0, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(co_diffusion_cus_bridge_left, lattice2nr(site(1) + (0), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(co_diffusion_cus_bridge_left, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(avail_sites(co_diffusion_cus_bridge_right, lattice2nr(site(1) + 1, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(co_diffusion_cus_bridge_right, lattice2nr(site(1) + (1), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(co_diffusion_cus_bridge_right, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(avail_sites(co_diffusion_cus_cus_down, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(co_diffusion_cus_cus_down, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(co_diffusion_cus_cus_down, site + (/0, -1, 0, 0/))
     endif
 
@@ -765,11 +765,11 @@ subroutine take_co_ruo2_cus(site)
         call del_proc(co_diffusion_cus_cus_up, site)
     endif
 
-    if(avail_sites(reaction_oxygen_bridge_co_cus_left, lattice2nr(site(1) + 1, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(reaction_oxygen_bridge_co_cus_left, lattice2nr(site(1) + (1), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(reaction_oxygen_bridge_co_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(avail_sites(reaction_oxygen_bridge_co_cus_right, lattice2nr(site(1) + 0, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(reaction_oxygen_bridge_co_cus_right, lattice2nr(site(1) + (0), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(reaction_oxygen_bridge_co_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
@@ -777,7 +777,7 @@ subroutine take_co_ruo2_cus(site)
         call del_proc(reaction_oxygen_cus_co_cus_down, site)
     endif
 
-    if(avail_sites(reaction_oxygen_cus_co_cus_up, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(reaction_oxygen_cus_co_cus_up, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(reaction_oxygen_cus_co_cus_up, site + (/0, -1, 0, 0/))
     endif
 
@@ -838,7 +838,7 @@ subroutine put_oxygen_ruo2_bridge(site)
         call del_proc(co_diffusion_bridge_bridge_down, site)
     endif
 
-    if(avail_sites(co_diffusion_bridge_bridge_up, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(co_diffusion_bridge_bridge_up, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(co_diffusion_bridge_bridge_up, site + (/0, -1, 0, 0/))
     endif
 
@@ -854,7 +854,7 @@ subroutine put_oxygen_ruo2_bridge(site)
         call del_proc(oxygen_adsorption_bridge_bridge, site)
     endif
 
-    if(avail_sites(oxygen_adsorption_bridge_bridge, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(oxygen_adsorption_bridge_bridge, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(oxygen_adsorption_bridge_bridge, site + (/0, -1, 0, 0/))
     endif
 
@@ -870,7 +870,7 @@ subroutine put_oxygen_ruo2_bridge(site)
         call del_proc(oxygen_diffusion_bridge_bridge_down, site)
     endif
 
-    if(avail_sites(oxygen_diffusion_bridge_bridge_up, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(oxygen_diffusion_bridge_bridge_up, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(oxygen_diffusion_bridge_bridge_up, site + (/0, -1, 0, 0/))
     endif
 
@@ -934,7 +934,7 @@ subroutine take_oxygen_ruo2_bridge(site)
         call del_proc(oxygen_desorption_bridge_bridge, site)
     endif
 
-    if(avail_sites(oxygen_desorption_bridge_bridge, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(oxygen_desorption_bridge_bridge, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(oxygen_desorption_bridge_bridge, site + (/0, -1, 0, 0/))
     endif
 
@@ -946,7 +946,7 @@ subroutine take_oxygen_ruo2_bridge(site)
         call del_proc(oxygen_desorption_bridge_cus_right, site)
     endif
 
-    if(avail_sites(oxygen_diffusion_bridge_bridge_down, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(oxygen_diffusion_bridge_bridge_down, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(oxygen_diffusion_bridge_bridge_down, site + (/0, -1, 0, 0/))
     endif
 
@@ -962,7 +962,7 @@ subroutine take_oxygen_ruo2_bridge(site)
         call del_proc(oxygen_diffusion_bridge_cus_right, site)
     endif
 
-    if(avail_sites(reaction_oxygen_bridge_co_bridge_down, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(reaction_oxygen_bridge_co_bridge_down, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(reaction_oxygen_bridge_co_bridge_down, site + (/0, -1, 0, 0/))
     endif
 
@@ -1031,11 +1031,11 @@ subroutine put_oxygen_ruo2_cus(site)
         call del_proc(co_adsorption_cus, site)
     endif
 
-    if(avail_sites(co_diffusion_bridge_cus_left, lattice2nr(site(1) + 1, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(co_diffusion_bridge_cus_left, lattice2nr(site(1) + (1), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(co_diffusion_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(avail_sites(co_diffusion_bridge_cus_right, lattice2nr(site(1) + 0, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(co_diffusion_bridge_cus_right, lattice2nr(site(1) + (0), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(co_diffusion_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
@@ -1043,15 +1043,15 @@ subroutine put_oxygen_ruo2_cus(site)
         call del_proc(co_diffusion_cus_cus_down, site)
     endif
 
-    if(avail_sites(co_diffusion_cus_cus_up, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(co_diffusion_cus_cus_up, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(co_diffusion_cus_cus_up, site + (/0, -1, 0, 0/))
     endif
 
-    if(avail_sites(oxygen_adsorption_bridge_cus_left, lattice2nr(site(1) + 1, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(oxygen_adsorption_bridge_cus_left, lattice2nr(site(1) + (1), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(oxygen_adsorption_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(avail_sites(oxygen_adsorption_bridge_cus_right, lattice2nr(site(1) + 0, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(oxygen_adsorption_bridge_cus_right, lattice2nr(site(1) + (0), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(oxygen_adsorption_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
@@ -1059,15 +1059,15 @@ subroutine put_oxygen_ruo2_cus(site)
         call del_proc(oxygen_adsorption_cus_cus, site)
     endif
 
-    if(avail_sites(oxygen_adsorption_cus_cus, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(oxygen_adsorption_cus_cus, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(oxygen_adsorption_cus_cus, site + (/0, -1, 0, 0/))
     endif
 
-    if(avail_sites(oxygen_diffusion_bridge_cus_left, lattice2nr(site(1) + 1, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(oxygen_diffusion_bridge_cus_left, lattice2nr(site(1) + (1), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(oxygen_diffusion_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(avail_sites(oxygen_diffusion_bridge_cus_right, lattice2nr(site(1) + 0, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(oxygen_diffusion_bridge_cus_right, lattice2nr(site(1) + (0), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(oxygen_diffusion_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
@@ -1075,7 +1075,7 @@ subroutine put_oxygen_ruo2_cus(site)
         call del_proc(oxygen_diffusion_cus_cus_down, site)
     endif
 
-    if(avail_sites(oxygen_diffusion_cus_cus_up, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(oxygen_diffusion_cus_cus_up, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(oxygen_diffusion_cus_cus_up, site + (/0, -1, 0, 0/))
     endif
 
@@ -1127,11 +1127,11 @@ subroutine take_oxygen_ruo2_cus(site)
     call replace_species(site, oxygen, empty)
 
     ! disable affected processes
-    if(avail_sites(oxygen_desorption_bridge_cus_left, lattice2nr(site(1) + 1, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(oxygen_desorption_bridge_cus_left, lattice2nr(site(1) + (1), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(oxygen_desorption_bridge_cus_left, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(avail_sites(oxygen_desorption_bridge_cus_right, lattice2nr(site(1) + 0, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(oxygen_desorption_bridge_cus_right, lattice2nr(site(1) + (0), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(oxygen_desorption_bridge_cus_right, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
@@ -1139,19 +1139,19 @@ subroutine take_oxygen_ruo2_cus(site)
         call del_proc(oxygen_desorption_cus_cus, site)
     endif
 
-    if(avail_sites(oxygen_desorption_cus_cus, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(oxygen_desorption_cus_cus, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(oxygen_desorption_cus_cus, site + (/0, -1, 0, 0/))
     endif
 
-    if(avail_sites(oxygen_diffusion_cus_bridge_left, lattice2nr(site(1) + 0, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(oxygen_diffusion_cus_bridge_left, lattice2nr(site(1) + (0), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(oxygen_diffusion_cus_bridge_left, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(avail_sites(oxygen_diffusion_cus_bridge_right, lattice2nr(site(1) + 1, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(oxygen_diffusion_cus_bridge_right, lattice2nr(site(1) + (1), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(oxygen_diffusion_cus_bridge_right, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(avail_sites(oxygen_diffusion_cus_cus_down, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(oxygen_diffusion_cus_cus_down, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(oxygen_diffusion_cus_cus_down, site + (/0, -1, 0, 0/))
     endif
 
@@ -1159,15 +1159,15 @@ subroutine take_oxygen_ruo2_cus(site)
         call del_proc(oxygen_diffusion_cus_cus_up, site)
     endif
 
-    if(avail_sites(reaction_oxygen_cus_co_bridge_left, lattice2nr(site(1) + 0, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(reaction_oxygen_cus_co_bridge_left, lattice2nr(site(1) + (0), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(reaction_oxygen_cus_co_bridge_left, site + (/0, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(avail_sites(reaction_oxygen_cus_co_bridge_right, lattice2nr(site(1) + 1, site(2) + 0, site(3) + 0, site(4) + ruo2_bridge - ruo2_cus), 2).ne.0)then
+    if(avail_sites(reaction_oxygen_cus_co_bridge_right, lattice2nr(site(1) + (1), site(2) + (0), site(3) + (0), site(4) + (ruo2_bridge - ruo2_cus)), 2).ne.0)then
         call del_proc(reaction_oxygen_cus_co_bridge_right, site + (/1, 0, 0, ruo2_bridge - ruo2_cus/))
     endif
 
-    if(avail_sites(reaction_oxygen_cus_co_cus_down, lattice2nr(site(1) + 0, site(2) + -1, site(3) + 0, site(4) + 0), 2).ne.0)then
+    if(avail_sites(reaction_oxygen_cus_co_cus_down, lattice2nr(site(1) + (0), site(2) + (-1), site(3) + (0), site(4) + (0)), 2).ne.0)then
         call del_proc(reaction_oxygen_cus_co_cus_down, site + (/0, -1, 0, 0/))
     endif
 
