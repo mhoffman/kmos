@@ -10,13 +10,15 @@ Functionality
     [should be transparent to the user]
   * add a tags field to all entities: parameters, process, species, layer
   * build standard class for model builder
-  * put XML/DTD handling into stdlib only tools
   * change book-keeping/memory management from
     process based to site based
     (better storage for amorphous geometries)
   * add/fix undo function to process editor
   * improve layer editor: make handling better (removing/cancelling sites)
     and make better guess for z-position of site
+  * improve speed by inlining function call in generated code
+    [keep it optional in case inlining increases code base too much]
+  * put XML/DTD handling into stdlib only tools (validation currenty not supported)
 
 
 Project related
