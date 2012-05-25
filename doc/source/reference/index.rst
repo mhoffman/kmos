@@ -78,8 +78,10 @@ kmos.run
             print_rates,
             post_mortem,
             put,
+            _put,
             rate_constants,
             run,
+            show_accum_rate_summation,
             start,
             view,
             xml,
@@ -87,7 +89,12 @@ kmos.run
             _set_configuration,
 
 .. autoclass:: kmos.run.Model_Rate_Constants
+   :members: __call__,
+             by_name,
+             inverse
+
 .. autoclass:: kmos.run.Model_Parameters
+   :members: __call__
 
 kmos.view
 ^^^^^^^^^
