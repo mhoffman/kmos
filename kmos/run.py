@@ -395,6 +395,14 @@ class KMC_Model(multiprocessing.Process):
         set_rate_constants(settings.parameters, self.print_rates)
 
     def show_accum_rate_summation(self, order='-rate'):
+        """Shows rate individual processes contribute to the total rate
+
+        The optional argument order can be one of: name, rate, rate_constant,
+        nrofsites. You precede each keyword with a '-', to show in decreasing
+        order.
+        Default: '-rate'.
+
+        """
         accum_rate = 0.
         entries = []
         # collect
@@ -428,13 +436,15 @@ class KMC_Model(multiprocessing.Process):
 
         # print
         total_contribution = 0
+        print('(cumulative)    nrofsites * rate_constant    = rate            [name]')
+        print('-------------------------------------------------------------------------------')
         for entry in entries:
             total_contribution  += float(entry[2])
             percent = '(%8.4f %%)' % (total_contribution*100/accum_rate)
-            entry = '% 5i*%8.4e s^-1 = %8.4e s^-1 [%s]' % entry
+            entry = '% 12i * % 8.4e s^-1 = %8.4e s^-1 [%s]' % entry
             print('%s %s' % (percent, entry))
 
-        print('-------------------------')
+        print('-------------------------------------------------------------------------------')
         print('  = total rate = %.8e s^-1' % accum_rate)
 
     def _put(self, site, new_species):
