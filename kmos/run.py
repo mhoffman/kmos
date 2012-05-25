@@ -394,8 +394,10 @@ class KMC_Model(multiprocessing.Process):
     def switch_surface_processes_on(self):
         set_rate_constants(settings.parameters, self.print_rates)
 
-    def show_accum_rate_summation(self):
+    def show_accum_rate_summation(self, order='-rate'):
         accum_rate = 0.
+        entries = []
+        # collect
         for i, process_name in enumerate(
                                sorted(
                                self.settings.rate_constants)):
@@ -404,9 +406,33 @@ class KMC_Model(multiprocessing.Process):
                 rate = self.base.get_rate(i + 1)
                 prod = nrofsites * rate
                 accum_rate += prod
+                entries.append((nrofsites, rate, prod, process_name))
 
-                print('% 5i*%8.4e s^-1 = %8.4e s^-1 [%s]' % (nrofsites, rate,
-                                                   prod, process_name))
+        # reorder
+        if order == 'name':
+            entries = sorted(entries, key=lambda x: x[3])
+        elif order == 'rate':
+            entries = sorted(entries, key=lambda x: x[2])
+        elif order == 'rate_constant':
+            entries = sorted(entries, key=lambda x: x[1])
+        elif order == 'nrofsites':
+            entries = sorted(entries, key=lambda x: x[0])
+        elif order == '-name':
+            entries = sorted(entries, key=lambda x: -x[3])
+        elif order == '-rate':
+            entries = sorted(entries, key=lambda x: -x[2])
+        elif order == '-rate_constant':
+            entries = sorted(entries, key=lambda x: -x[1])
+        elif order == '-nrofsites':
+            entries = sorted(entries, key=lambda x: -x[0])
+
+        # print
+        total_contribution = 0
+        for entry in entries:
+            total_contribution  += float(entry[2])
+            percent = '(%8.4f %%)' % (total_contribution*100/accum_rate)
+            entry = '% 5i*%8.4e s^-1 = %8.4e s^-1 [%s]' % entry
+            print('%s %s' % (percent, entry))
 
         print('-------------------------')
         print('  = total rate = %.8e s^-1' % accum_rate)
