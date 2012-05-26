@@ -56,7 +56,7 @@ except Exception, e:
     kmc model. This can be created from a kmos xml file using
     kmos export <xml-file>
     Hint: are you in a directory containing a compiled kMC model?\n\n
-    """ % e )
+    """ % e)
 
 try:
     import kmc_settings as settings
@@ -67,8 +67,7 @@ except Exception, e:
     The kmc_settings.py contains all changeable model parameters
     and descriptions for the representation on screen.
     Hint: are you in a directory containing a compiled kMC model?
-    """ % e )
-
+    """ % e)
 
 
 class KMC_Model(multiprocessing.Process):
@@ -173,19 +172,6 @@ class KMC_Model(multiprocessing.Process):
     def inverse(self):
         return (repr(self.parameters) + self.rate_constants.inverse())
 
-    def put(self, site, species):
-        """Puts a certain species at a certain site.
-        (Not implemented)
-        """
-        species = species.lower()
-
-        cell, name = np.array(site[:3]), site[3].lower()
-        site_nr = eval('lattice.%s' % name)
-        site = np.array(list(cell) + [site_nr])
-        species = lattice.get_species(site)
-        if species:
-            pass
-
     def get_occupation_header(self):
         """Returns the names of the fields returned by
         self.get_atoms().occupation.
@@ -272,17 +258,21 @@ class KMC_Model(multiprocessing.Process):
                 elif signal.upper() == 'JOIN':
                     self.join()
 
-
             if not self.parameter_queue.empty():
                 while not self.parameter_queue.empty():
                     parameters = self.parameter_queue.get()
                     settings.parameters.update(parameters)
                 set_rate_constants(parameters, self.print_rates)
 
-    def view(self):
+    def show(self):
         """Visualize the current configuration of the model using ASE ag."""
         ase = import_ase()
         ase.visualize.view(self.get_atoms())
+
+    def view(self):
+        """Start current model in live view mode."""
+        from kmos import view
+        view.main(self)
 
     def get_atoms(self, geometry=True):
         """Return an ASE Atoms object with additional
@@ -312,14 +302,22 @@ class KMC_Model(multiprocessing.Process):
                                 # add to existing slab
                                 atoms += ad_atoms
                                 if self.species_tags:
-                                    for atom in range(len(atoms) - len(ad_atoms), len(atoms)):
-                                        kmos_tags[atom] = self.species_tags.values()[species]
+                                    for atom in range(len(atoms)
+                                                      - len(ad_atoms),
+                                                      len(atoms)):
+                                        kmos_tags[atom] = \
+                                        self.species_tags.values()[species]
 
                         lattice_repr = deepcopy(self.lattice_representation)
                         lattice_repr.translate(np.dot(np.array([i, j, k]),
                                                       lattice.unit_cell_size))
                         atoms += lattice_repr
             atoms.set_cell(self.cell_size)
+
+            # workaround for older ASE < 3.6
+            if not hasattr(atoms, 'info'):
+                atoms.info = {}
+
             atoms.info['kmos_tags'] = kmos_tags
         else:
 
@@ -396,8 +394,18 @@ class KMC_Model(multiprocessing.Process):
     def switch_surface_processes_on(self):
         set_rate_constants(settings.parameters, self.print_rates)
 
-    def show_accum_rate_summation(self):
+    def show_accum_rate_summation(self, order='-rate'):
+        """Shows rate individual processes contribute to the total rate
+
+        The optional argument order can be one of: name, rate, rate_constant,
+        nrofsites. You precede each keyword with a '-', to show in decreasing
+        order.
+        Default: '-rate'.
+
+        """
         accum_rate = 0.
+        entries = []
+        # collect
         for i, process_name in enumerate(
                                sorted(
                                self.settings.rate_constants)):
@@ -406,11 +414,37 @@ class KMC_Model(multiprocessing.Process):
                 rate = self.base.get_rate(i + 1)
                 prod = nrofsites * rate
                 accum_rate += prod
+                entries.append((nrofsites, rate, prod, process_name))
 
-                print('% 5i*%8.4e s^-1 = %8.4e s^-1 [%s]' % (nrofsites, rate,
-                                                   prod, process_name))
+        # reorder
+        if order == 'name':
+            entries = sorted(entries, key=lambda x: x[3])
+        elif order == 'rate':
+            entries = sorted(entries, key=lambda x: x[2])
+        elif order == 'rate_constant':
+            entries = sorted(entries, key=lambda x: x[1])
+        elif order == 'nrofsites':
+            entries = sorted(entries, key=lambda x: x[0])
+        elif order == '-name':
+            entries = sorted(entries, key=lambda x: -x[3])
+        elif order == '-rate':
+            entries = sorted(entries, key=lambda x: -x[2])
+        elif order == '-rate_constant':
+            entries = sorted(entries, key=lambda x: -x[1])
+        elif order == '-nrofsites':
+            entries = sorted(entries, key=lambda x: -x[0])
 
-        print('-------------------------')
+        # print
+        total_contribution = 0
+        print('(cumulative)    nrofsites * rate_constant    = rate            [name]')
+        print('-------------------------------------------------------------------------------')
+        for entry in entries:
+            total_contribution  += float(entry[2])
+            percent = '(%8.4f %%)' % (total_contribution*100/accum_rate)
+            entry = '% 12i * % 8.4e s^-1 = %8.4e s^-1 [%s]' % entry
+            print('%s %s' % (percent, entry))
+
+        print('-------------------------------------------------------------------------------')
         print('  = total rate = %.8e s^-1' % accum_rate)
 
     def _put(self, site, new_species):
@@ -633,9 +667,9 @@ class KMC_Model(multiprocessing.Process):
             if match is None or fnmatch(name, match):
                 if kmc_time:
                     print('%s : %.4e' % (name, self.base.get_procstat(i + 1) /
-                                               self.lattice.system_size.prod() /
-                                               self.base.get_kmc_time() /
-                                               self.base.get_rate(i + 1)))
+                                             self.lattice.system_size.prod() /
+                                             self.base.get_kmc_time() /
+                                             self.base.get_rate(i + 1)))
                 else:
                     print('%s : %.4e' % (name, 0.))
 

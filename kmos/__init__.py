@@ -50,7 +50,7 @@ or it may be used as an API via the kmos module.
 #import kmos.types
 #import kmos.io
 
-__version__ = "0.1.4"
+__version__ = "0.2.0"
 
 
 def evaluate_rate_expression(rate_expr, parameters={}):
@@ -75,7 +75,6 @@ def evaluate_rate_expression(rate_expr, parameters={}):
             param_dict[parameter.name] = {'value': parameter.value}
         parameters = param_dict
 
-
     if not rate_expr:
         rate_const = 0.0
     else:
@@ -84,10 +83,10 @@ def evaluate_rate_expression(rate_expr, parameters={}):
         # replace some aliases
         rate_expr = rate_expr.replace('beta', '(1./(kboltzmann*T))')
         try:
-            tokens = list(tokenize.generate_tokens(
-                            StringIO.StringIO(rate_expr).readline))
+            input = StringIO.StringIO(rate_expr).readline
+            tokens = list(tokenize.generate_tokens(input))
         except:
-            raise
+            raise Exception('Could not tokenize expression: %s' % input)
         for i, token, _, _, _ in tokens:
             if token in ['sqrt', 'exp', 'sin', 'cos', 'pi', 'pow', 'log']:
                 replaced_tokens.append((i, 'math.' + token))

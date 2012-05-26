@@ -28,8 +28,6 @@ import time
 import ase.gui.ag
 from ase.gui.images import Images
 
-from kmos.run import KMC_Model
-
 try:
     import gtk
     import gobject
@@ -53,11 +51,7 @@ except Exception, e:
     print(e)
 
 
-from kmos.run import KMC_Model, \
-                       base, \
-                       get_tof_names, \
-                       lattice, \
-                       settings
+from kmos.run import KMC_Model, base, get_tof_names, lattice, settings
 
 
 class ParamSlider(gtk.HScale):
@@ -312,7 +306,6 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         elif event.string == 'S':
             self.signal_queue.put('SWITCH_SURFACE_PROCESSES_ON')
 
-
     def scroll_event(self, _window, event):
         """Zoom in/out when using mouse wheel"""
         x = 1.0
@@ -365,7 +358,6 @@ class KMC_ModelProxy(multiprocessing.Process):
     def terminate(self):
         self.signal_queue.put('STOP')
         super(KMC_ModelProxy, self).terminate()
-
 
 
 class KMC_Viewer():

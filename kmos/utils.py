@@ -20,10 +20,11 @@
 
 from StringIO import StringIO
 
+ValidationError = UserWarning
 try:
     from kiwi.datatypes import ValidationError
 except:
-    ValidationError = UserWarning
+    print('kiwi Validation not working.')
 
 
 class CorrectlyNamed:
@@ -70,10 +71,11 @@ def write_py(fileobj, images, **kwargs):
 
         if not scaled_positions:
             fileobj.write("          positions=np.array(\n      %s),\n"
-                % repr(image.positions)[6:])
+                % repr(list(image.positions)))
         else:
             fileobj.write("          scaled_positions=np.array(\n      %s),\n"
-                % repr(image.get_scaled_positions())[6:])
+                % repr(list(image.get_scaled_positions().tolist())))
+        fileobj.write('),\n')
 
     fileobj.write(']')
 
@@ -93,7 +95,7 @@ def get_ase_constructor(atoms):
     for i, line in enumerate(lines):
         if i >= 5 and i < len(lines) - 1:
             astr += line
-    astr = astr[:-2]
+    #astr = astr[:-2]
     return astr.strip()
 
 
@@ -178,9 +180,9 @@ def evaluate_kind_values(infile, outfile):
     """
     import re
     import os
-    import imp
     import sys
     sys.path.append(os.path.abspath(os.curdir))
+
     def import_selected_kind():
         """Tries to import the module which provides
         processor dependent kind values. If the module
@@ -234,16 +236,32 @@ def evaluate_kind_values(infile, outfile):
 
     end module kind
             """
-            compile(fcode, source_fn='f2py_selected_kind.f90',
-                    modulename='f2py_selected_kind')
+            # quick'n'dirty workaround for windoze
+            if os.name == 'nt':
+                f = open('f2py_selected_kind.f90', 'w')
+                f.write(fcode)
+                f.close()
+                from copy import deepcopy
+                # save for later
+                true_argv = deepcopy(sys.argv)
+                sys.argv = (('%s -c --fcompiler=gnu95 --compiler=mingw32'
+                             ' -m f2py_selected_kind'
+                             ' f2py_selected_kind.f90')
+                             % sys.executable).split()
+                from numpy import f2py as f2py2e
+                f2py2e.main()
+
+                sys.argv = true_argv
+            else:
+                compile(fcode, source_fn='f2py_selected_kind.f90',
+                        modulename='f2py_selected_kind')
             try:
                 import f2py_selected_kind
             except:
-                print(os.path.abspath(os.curdir))
-                print(os.listdir('.'))
-                raise
+                raise Exception('Could create selected_kind module\n'
+                + '%s\n' % os.path.abspath(os.curdir)
+                + '%s\n' % os.listdir('.'))
         return f2py_selected_kind.kind
-
 
     def parse_args(args):
         """
@@ -264,7 +282,6 @@ def evaluate_kind_values(infile, outfile):
 
         return args, kwargs
 
-
     def int_kind(args):
         """Python wrapper around Fortran selected_int_kind
         function.
@@ -272,16 +289,12 @@ def evaluate_kind_values(infile, outfile):
         args, kwargs = parse_args(args)
         return import_selected_kind().int_kind(*args, **kwargs)
 
-
     def real_kind(args):
         """Python wrapper around Fortran selected_real_kind
         function.
         """
         args, kwargs = parse_args(args)
         return import_selected_kind().real_kind(*args, **kwargs)
-
-
-
 
     infile = file(infile)
     outfile = file(outfile, 'w')
@@ -297,46 +310,44 @@ def evaluate_kind_values(infile, outfile):
         int_match = int_pattern.match(line)
         if int_match:
             match = int_match.groupdict()
-            line = '{before}{kind}{after}\n'.format(
-                    before=match['before'],
-                    kind=int_kind(match['args']),
-                    after=match['after'],)
+            line = '%s%s%s\n' % (
+                    match['before'],
+                    int_kind(match['args']),
+                    match['after'],)
         elif real_match:
             match = real_match.groupdict()
-            line = '{before}{kind}{after}\n'.format(
-                    before=match['before'],
-                    kind=real_kind(match['args']),
-                    after=match['after'],)
+            line = '%s%s%s\n' % (
+                    match['before'],
+                    real_kind(match['args']),
+                    match['after'],)
         outfile.write(line)
     infile.close()
     outfile.close()
 
 
 def build(options):
+    """Build binary with f2py binding from complete
+    set of source file in the current directory.
+
+    """
     from os.path import isfile
-    from os import system, name
+    import os
     import sys
 
     src_files = 'kind_values_f2py.f90 base.f90 lattice.f90 proclist.f90'
 
-    if name == 'nt':
-        interpreter = 'python '
-    elif name == 'posix':
-        interpreter = ''
-    else:
-        interpreter = ''
-
     extra_flags = {}
-    extra_flags['gfortran'] = (' -ffree-line-length-none -ffree-form'
+    extra_flags['gfortran'] = ('-ffree-line-length-none -ffree-form'
                                ' -xf95-cpp-input -Wall -g')
+    extra_flags['gnu95'] = extra_flags['gfortran']
     extra_flags['intel'] = '-fast -fpp -Wall -I/opt/intel/fc/10.1.018/lib'
     extra_flags['intelem'] = '-fast -fpp -Wall -g'
 
     # FIXME
     extra_libs = ''
     ccompiler = ''
-    if name == 'nt':
-        ccompiler = ' --compiler=mingw32 '
+    if os.name == 'nt':
+        ccompiler = '--compiler=mingw32'
         if sys.version_info < (2, 7):
             extra_libs = ' -lmsvcr71 '
         else:
@@ -344,34 +355,61 @@ def build(options):
 
     module_name = 'kmc_model'
 
-
     if not isfile('kind_values_f2py.py'):
-         evaluate_kind_values('kind_values.f90', 'kind_values_f2py.f90')
+        evaluate_kind_values('kind_values.f90', 'kind_values_f2py.f90')
 
     for src_file in src_files.split():
         if not isfile(src_file):
             raise IOError('File %s not found' % src_file)
 
-    call = ('{interpreter}{path_to_f2py}'
-            ' --f90flags="{extra_flags}"'
-            ' --fcompiler="{fcompiler}"'
-            ' {extra_libs} '
-            ' {ccompiler} '
-            ' -c {src_files}'
-            ' -m {module_name}').format(interpreter=interpreter,
-                                       src_files=src_files,
-                                       extra_flags=extra_flags.get(
-                                        options.fcompiler, ''),
-                                       module_name=module_name,
-                                       ccompiler=ccompiler,
-                                       extra_libs=extra_libs,
-                                       path_to_f2py=options.path_to_f2py,
-                                       fcompiler=options.fcompiler)
-    print(call)
-    system(call)
+    call = []
+    call.append('-c')
+    call.append('-c')
+    call.append('--fcompiler=%s' % options.fcompiler)
+    if os.name == 'nt':
+        call.append('%s' % ccompiler)
+    call.append('--f90flags="%s"' % extra_flags.get(
+                                        options.fcompiler, ''))
+    call.append('-m')
+    call.append(module_name)
+    call += src_files.split()
 
-    print("""#  If you run into strange errors like'
-#                    '... returned NULL from py_object ...'
-# you probably have to kind_values_f2py.f90. Kind values are hardcoded here
-# because f2py cannot evaluate selected_real_kind or selected_integer_kind at
-# compile time.""")
+    print(call)
+    #exit()
+    from copy import deepcopy
+    true_argv = deepcopy(sys.argv)  # save for later
+    from numpy import f2py
+    sys.argv = call
+    f2py.main()
+    sys.argv = true_argv
+
+
+def T_grid(T_min, T_max, n):
+    from numpy import linspace
+    """Return a list of n temperatures between
+       T_min and T_max such that the grid of T^(-1)
+       is evenly spaced.
+    """
+
+    T_min1 = T_min ** (-1.)
+    T_max1 = T_max ** (-1.)
+
+    grid = list(linspace(T_max1, T_min1, n))
+    grid.reverse()
+    grid = [x ** (-1.) for x in grid]
+
+    return grid
+
+
+def p_grid(p_min, p_max, n):
+    from numpy import logspace, log10
+    """Return a list of n pressures between
+       p_min and p_max such that the grid of log(p)
+       is evenly spaced.
+    """
+    p_minlog = log10(p_min)
+    p_maxlog = log10(p_max)
+
+    grid = logspace(p_minlog, p_maxlog, n)
+
+    return grid

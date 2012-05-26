@@ -2,57 +2,34 @@
 <kmc version="(0, 2)">
     <meta author="Max J. Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="2" model_name="dummy"/>
     <species_list default_species="empty">
-        <species color="#ff0000" name="CO" representation="Atoms(symbols='CO',
-          pbc=np.array([False, False, False], dtype=bool),
-          cell=np.array(
-      [[ 10.,   0.,   0.],
-       [  0.,  10.,   0.],
-       [  0.,   0.,  10.]]),
-          positions=np.array(
-      [[  2.46567854e-20,  -4.00120225e-19,   7.19809738e-02],
-       [ -3.19940484e-18,  -7.20175257e-18,   1.12801903e+00]]))"/>
-        <species color="#ff0000" name="O" representation="Atoms(symbols='O',
-          pbc=np.array([False, False, False], dtype=bool),
-          cell=np.array(
-      [[ 10.,   0.,   0.],
-       [  0.,  10.,   0.],
-       [  0.,   0.,  10.]]),
-          positions=np.array(
-      [[ 0.,  0.,  0.]]))"/>
-        <species color="#ff0000" name="ON" representation="Atoms(symbols='NO',
-          pbc=np.array([False, False, False], dtype=bool),
-          cell=np.array(
-      [[ 10.,   0.,   0.],
-       [  0.,  10.,   0.],
-       [  0.,   0.,  10.]]),
-          positions=np.array(
-      [[ 0.        ,  0.        ,  0.07023786],
-       [ 0.        ,  0.        ,  1.12976214]]))"/>
-        <species color="#ffffff" name="empty" representation=""/>
+        <species color="#ff0000" name="CO" representation="Atoms(symbols='CO',           pbc=np.array([False, False, False], dtype=bool),           cell=np.array(       [[ 10.,   0.,   0.],        [  0.,  10.,   0.],        [  0.,   0.,  10.]]),           positions=np.array(       [[  2.46567854e-20,  -4.00120225e-19,   7.19809738e-02],        [ -3.19940484e-18,  -7.20175257e-18,   1.12801903e+00]]))" tags=""/>
+        <species color="#ff0000" name="O" representation="Atoms(symbols='O',           pbc=np.array([False, False, False], dtype=bool),           cell=np.array(       [[ 10.,   0.,   0.],        [  0.,  10.,   0.],        [  0.,   0.,  10.]]),           positions=np.array(       [[ 0.,  0.,  0.]]))" tags=""/>
+        <species color="#ff0000" name="ON" representation="Atoms(symbols='NO',           pbc=np.array([False, False, False], dtype=bool),           cell=np.array(       [[ 10.,   0.,   0.],        [  0.,  10.,   0.],        [  0.,   0.,  10.]]),           positions=np.array(       [[ 0.        ,  0.        ,  0.07023786],        [ 0.        ,  0.        ,  1.12976214]]))" tags=""/>
+        <species color="#ffffff" name="empty" representation="" tags=""/>
     </species_list>
     <parameter_list>
-        <parameter adjustable="True" max="800.0" min="300.0" name="T" value="600"/>
-        <parameter adjustable="False" max="0.0" min="0.0" name="m_CO" value="28.0104"/>
-        <parameter adjustable="False" max="0.0" min="0.0" name="m_CO2" value="44.0098"/>
-        <parameter adjustable="False" max="0.0" min="0.0" name="m_ON" value="30.0061"/>
-        <parameter adjustable="True" max="10.0" min="0.01" name="p_CO" value="1.0"/>
-        <parameter adjustable="True" max="10.0" min="0.01" name="p_CO2" value="1.0"/>
-        <parameter adjustable="True" max="10.0" min="0.01" name="p_ON" value="1.0"/>
+        <parameter adjustable="True" max="800.0" min="300.0" name="T" scale="linear" value="600"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="m_CO" scale="linear" value="28.0104"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="m_CO2" scale="linear" value="44.0098"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="m_ON" scale="linear" value="30.0061"/>
+        <parameter adjustable="True" max="10.0" min="0.01" name="p_CO" scale="linear" value="1.0"/>
+        <parameter adjustable="True" max="10.0" min="0.01" name="p_CO2" scale="linear" value="1.0"/>
+        <parameter adjustable="True" max="10.0" min="0.01" name="p_ON" scale="linear" value="1.0"/>
     </parameter_list>
-    <lattice cell_size="2.75064537882 2.75064537882 11.945" default_layer="default" representation="[Atoms(symbols='Pd2',
+    <lattice cell_size="2.75064538 0.0 0.0 0.0 2.75064538 0.0 0.0 0.0 11.945" default_layer="default" representation="[Atoms(symbols='Pd2',
           pbc=np.array([ True,  True, False], dtype=bool),
           cell=np.array(
       [[  2.75064538,   0.        ,   0.        ],
        [  0.        ,   2.75064538,   0.        ],
        [  0.        ,   0.        ,  11.945     ]]),
-          positions=np.array(
-      [[ 1.37532269,  1.37532269,  5.05755467],
-       [ 0.        ,  0.        ,  6.88744533]]))]">
-        <layer color="#ffffff" grid="1 1 1" grid_offset="0.0 0.0 0.0" name="default">
-            <site default_species="empty" type="top_0" pos="0.0 0.0 0.706990372541"/>
-            <site default_species="empty" type="bridge_1" pos="0.0 0.5 0.706990372541"/>
-            <site default_species="empty" type="bridge_2" pos="0.5 0.0 0.706990372541"/>
-            <site default_species="empty" type="hollow4_13" pos="0.5 0.5 0.706990372541"/>
+          scaled_positions=np.array(
+      [[0.5, 0.5, 0.42340348848890746], [0.0, 0.0, 0.57659651151109248]]),
+),]" substrate_layer="default">
+        <layer color="#ffffff" name="default">
+            <site default_species="empty" pos="0.0 0.0 0.706990372541" tags="" type="top_0"/>
+            <site default_species="empty" pos="0.0 0.5 0.706990372541" tags="" type="bridge_1"/>
+            <site default_species="empty" pos="0.5 0.0 0.706990372541" tags="" type="bridge_2"/>
+            <site default_species="empty" pos="0.5 0.5 0.706990372541" tags="" type="hollow4_13"/>
         </layer>
     </lattice>
     <process_list>

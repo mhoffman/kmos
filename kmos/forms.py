@@ -31,10 +31,8 @@ import gtk
 import goocanvas
 
 #kiwi imports
-from kiwi.ui.delegates import ProxySlaveDelegate, \
-                              GladeDelegate, \
-                              SlaveDelegate, \
-                              ProxyDelegate
+from kiwi.ui.delegates import ProxySlaveDelegate, GladeDelegate, \
+                              SlaveDelegate, ProxyDelegate
 
 from kiwi.ui.views import SlaveView
 from kiwi.datatypes import ValidationError
@@ -43,12 +41,8 @@ from kiwi.ui.objectlist import Column
 # own modules
 from kmos.config import GLADEFILE
 from kmos.utils import CorrectlyNamed, get_ase_constructor
-from kmos.types import ProcessFormSite, \
-                       Process, \
-                       OutputItem, \
-                       Coord, \
-                       ConditionAction, \
-                       Site
+from kmos.types import ProcessFormSite, Process, OutputItem, Coord, \
+                       ConditionAction, Site
 
 from kmos import evaluate_rate_expression
 from kmos.types import parse_chemical_expression
@@ -1083,7 +1077,6 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                         n = atom.number
                         color = jmolcolor_in_hex(n)
                         radius = self.radius_scale * covalent_radii[n]
-                        apos = pos + atom.position
                         goocanvas.Ellipse(parent=self.root,
                                           center_x=(X),
                                           center_y=(Y),
@@ -1155,10 +1148,9 @@ class BatchProcessForm(SlaveDelegate):
                                           project_tree=self.project_tree)
                 self.draw_from_data()
             except:
-                print(
+                raise Exception(
                     ("Found an error in your chemical expression(line %s):\n"\
                     "%s") % (i + 1, line[1]))
-                raise
             else:
                 # replace any existing process with identical names
                 for dublette_proc in [x for x in

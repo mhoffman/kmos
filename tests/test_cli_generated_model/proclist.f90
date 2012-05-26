@@ -31,6 +31,7 @@ use base, only: &
     update_accum_rate, &
     determine_procsite, &
     update_clocks, &
+    avail_sites, &
     increment_procstat
 
 use lattice, only: &
@@ -302,7 +303,7 @@ subroutine put_oxygen_default_cus(site)
     call replace_species(site, empty, oxygen)
 
     ! disable affected processes
-    if(can_do(CO_adsorption, site))then
+    if(avail_sites(CO_adsorption, lattice2nr(site(1), site(2), site(3), site(4)), 2).ne.0)then
         call del_proc(CO_adsorption, site)
     endif
 
@@ -329,7 +330,7 @@ subroutine put_CO_default_cus(site)
     call replace_species(site, empty, CO)
 
     ! disable affected processes
-    if(can_do(CO_adsorption, site))then
+    if(avail_sites(CO_adsorption, lattice2nr(site(1), site(2), site(3), site(4)), 2).ne.0)then
         call del_proc(CO_adsorption, site)
     endif
 
@@ -346,7 +347,7 @@ subroutine take_CO_default_cus(site)
     call replace_species(site, CO, empty)
 
     ! disable affected processes
-    if(can_do(CO_desorption, site))then
+    if(avail_sites(CO_desorption, lattice2nr(site(1), site(2), site(3), site(4)), 2).ne.0)then
         call del_proc(CO_desorption, site)
     endif
 

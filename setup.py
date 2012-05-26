@@ -1,6 +1,7 @@
 #!/usr/bin/python
 """kMC modeling on steroids"""
 
+import os
 from distutils.core import setup
 from kmos import __version__ as version
 
@@ -18,6 +19,7 @@ classifiers = [
         'OSI Approved :: GNU General Public License (GPL)',
         'Natural Language :: English',
         'Operating System :: POSIX :: Linux',
+        'Operating System :: POSIX :: Windows',
         'Programming Language :: Fortran',
         'Programming Language :: Python',
         'Topic :: Education',
@@ -47,13 +49,19 @@ package_dir = {'kmos':'kmos'}
 package_data = {'kmos':['fortran_src/*f90',
                         'kmc_editor.glade',
                         'fortran_src/assert.ppc',
+                        'kmc_project_v0.1.dtd',
                         'kmc_project_v0.2.dtd']}
-platforms = ['linux']
-scripts = [
-        'tools/kmos-build-standalone',
-        'tools/kmos',
-        'tools/kmos-install-dependencies-ubuntu',
-        ]
+platforms = ['linux', 'windows']
+if os.name == 'nt':
+    scripts = [
+            'tools/kmos.bat'
+            ]
+else:
+    scripts = [
+            'tools/kmos-build-standalone',
+            'tools/kmos',
+            'tools/kmos-install-dependencies-ubuntu',
+            ]
 url = 'https://github.com/mhoffman/kmos'
 
 setup(

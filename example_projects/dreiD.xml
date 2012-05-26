@@ -2,59 +2,59 @@
 <kmc version="(0, 2)">
     <meta author="Onkel 3d" debug="0" email="dreiD@gmail.com" model_dimension="3" model_name="dreiD_attempt"/>
     <species_list default_species="empty">
-        <species color="#000000" name="C" representation="Atoms('O',[[0.,0.,0.]])"/>
-        <species color="#fff" name="empty" representation=""/>
+        <species color="#000000" name="C" representation="Atoms('O',[[0.,0.,0.]])" tags=""/>
+        <species color="#fff" name="empty" representation="" tags=""/>
     </species_list>
     <parameter_list>
-        <parameter name="lattice_size" value="10 10 10"/>
-        <parameter name="print_every" value="1.e5"/>
-        <parameter name="total_steps" value="1.e7"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="lattice_size" scale="linear" value="10 10 10"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="print_every" scale="linear" value="1.e5"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="total_steps" scale="linear" value="1.e7"/>
     </parameter_list>
-    <lattice cell_size="1.0 1.0 1.0" default_layer="default">
-        <layer grid="1 1 1" grid_offset="0.0 0.0 0.0" name="default">
-            <site class="" type="a" vector="0.0 0.0 0.0"/>
+    <lattice cell_size="1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0" default_layer="default" representation="" substrate_layer="default">
+        <layer color="#ffffff" name="default">
+            <site default_species="default_species" pos="0.0 0.0 0.0" tags="" type="a"/>
         </layer>
     </lattice>
     <process_list>
-        <process name="annihilation" rate_constant="10**6">
+        <process enabled="True" name="annihilation" rate_constant="10**6">
             <condition coord_layer="default" coord_name="a" coord_offset="0 0 0" species="C"/>
             <action coord_layer="default" coord_name="a" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process name="back" rate_constant="10**4">
+        <process enabled="True" name="back" rate_constant="10**4">
             <condition coord_layer="default" coord_name="a" coord_offset="0 0 0" species="C"/>
             <condition coord_layer="default" coord_name="a" coord_offset="0 0 1" species="empty"/>
             <action coord_layer="default" coord_name="a" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="default" coord_name="a" coord_offset="0 0 1" species="C"/>
         </process>
-        <process name="creation" rate_constant="10**3">
+        <process enabled="True" name="creation" rate_constant="10**3">
             <condition coord_layer="default" coord_name="a" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="default" coord_name="a" coord_offset="0 0 0" species="C"/>
         </process>
-        <process name="down" rate_constant="10**6">
+        <process enabled="True" name="down" rate_constant="10**6">
             <condition coord_layer="default" coord_name="a" coord_offset="0 0 0" species="C"/>
             <condition coord_layer="default" coord_name="a" coord_offset="0 -1 0" species="empty"/>
             <action coord_layer="default" coord_name="a" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="default" coord_name="a" coord_offset="0 -1 0" species="C"/>
         </process>
-        <process name="front" rate_constant="10**6">
+        <process enabled="True" name="front" rate_constant="10**6">
             <condition coord_layer="default" coord_name="a" coord_offset="0 0 0" species="C"/>
             <condition coord_layer="default" coord_name="a" coord_offset="0 0 1" species="empty"/>
             <action coord_layer="default" coord_name="a" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="default" coord_name="a" coord_offset="0 0 1" species="C"/>
         </process>
-        <process name="left" rate_constant="10**6">
+        <process enabled="True" name="left" rate_constant="10**6">
             <condition coord_layer="default" coord_name="a" coord_offset="0 0 0" species="C"/>
             <condition coord_layer="default" coord_name="a" coord_offset="1 0 0" species="empty"/>
             <action coord_layer="default" coord_name="a" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="default" coord_name="a" coord_offset="1 0 0" species="C"/>
         </process>
-        <process name="right" rate_constant="10**6">
+        <process enabled="True" name="right" rate_constant="10**6">
             <condition coord_layer="default" coord_name="a" coord_offset="0 0 0" species="C"/>
             <condition coord_layer="default" coord_name="a" coord_offset="1 0 0" species="empty"/>
             <action coord_layer="default" coord_name="a" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="default" coord_name="a" coord_offset="1 0 0" species="C"/>
         </process>
-        <process name="up" rate_constant="10**6">
+        <process enabled="True" name="up" rate_constant="10**6">
             <condition coord_layer="default" coord_name="a" coord_offset="0 0 0" species="C"/>
             <condition coord_layer="default" coord_name="a" coord_offset="0 1 0" species="empty"/>
             <action coord_layer="default" coord_name="a" coord_offset="0 0 0" species="empty"/>
@@ -63,4 +63,3 @@
     </process_list>
     <output_list/>
 </kmc>
-<!-- This is an automatically generated XML file, representing a kMC model please do not change this unless you know what you are doing -->

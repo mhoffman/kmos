@@ -1,26 +1,24 @@
 Functionality
-  * generate backend reference automatically from minimal
-    generated project
-  * make sure one can (re)start and stop viewer from ipython
+  * standardize definition of those parameters that are logged
+    in the output file (header/data)
+  * Explicitly allow for non-orthogonal unit cells in
+    GUI process editor
+  * make sure one can (re)start and stop viewer from ipython ('kmos run')
   * kmos.gui.Editor should be able to process
-    project_tree passed in automatically 
+    project_tree passed in automatically
     (and save changes directly to it)
     [should be transparent to the user]
-  * integrate most of kmos-tool into cli submodule
-  * offer i/o functionality which returns compiled and
-    initialized model
   * add a tags field to all entities: parameters, process, species, layer
   * build standard class for model builder
-  * put test hook into netbook repository
-  * put XML/DTD handling into stdlib only tools
   * change book-keeping/memory management from
-    process based to site based 
+    process based to site based
     (better storage for amorphous geometries)
-  * write autocompletion for output fields
   * add/fix undo function to process editor
   * improve layer editor: make handling better (removing/cancelling sites)
     and make better guess for z-position of site
-  * reimplement 'print output' function using old_src
+  * improve speed by inlining function call in generated code
+    [keep it optional in case inlining increases code base too much]
+  * put XML/DTD handling into stdlib only tools (validation currenty not supported)
 
 
 Project related
@@ -28,11 +26,9 @@ Project related
   * build virtualenv test environment(s): 2.4-3.0
   * build deb package
 
-
 Future/optional projects:
-  * Explicitly allow for non-orthogonal unit cells
   * do 2D version of process editor using ASE
-    facilities first: basically rid gtkcanvas 
+    facilities first: basically rid gtkcanvas
     in favor or pygoocanvas and include atoms
     in background
   * check-out blender and maybe additional 3D programs
@@ -45,5 +41,5 @@ Defered:
     simply chosen from (making new lattice is very easy
     and fast)
 
-BUGS:
-  * fix output of observables
+Refactorization
+  * remove output functionality

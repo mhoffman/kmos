@@ -2,8 +2,8 @@
 <kmc version="(0, 2)">
     <meta author="Max J. Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="2" model_name="pt111"/>
     <species_list default_species="empty">
-        <species color="#ffff00" name="H" representation="Atoms('H')"/>
-        <species color="#ffffff" name="empty" representation=""/>
+        <species color="#ffff00" name="H" representation="Atoms('H')" tags=""/>
+        <species color="#ffffff" name="empty" representation="" tags=""/>
     </species_list>
     <parameter_list/>
     <lattice cell_size="2.77185858 0.0 0.0 1.38592929 2.40049995 0.0 0.0 0.0 26.78963917" default_layer="pt111" representation="[Atoms(symbols='Pt4',
@@ -13,45 +13,37 @@
        [  1.38592929,   2.40049995,   0.        ],
        [  0.        ,   0.        ,  26.78963917]]),
           scaled_positions=np.array(
-      [[ 0.        ,  0.        ,  0.37327864],
-       [ 0.33333333,  0.33333333,  0.45775955],
-       [ 0.66666667,  0.66666667,  0.54224045],
-       [ 0.        ,  0.        ,  0.62672136]]))]" substrate_layer="pt111">
+      [[0.0, 0.0, 0.37327863724326149], [0.33333333333333331, 0.33333333333333337, 0.45775954574775385], [0.66666666666666663, 0.66666666666666674, 0.54224045425224621], [0.0, 0.0, 0.62672136275673862]]),
+),]" substrate_layer="pt111">
         <layer color="#ffffff" name="pt111">
-            <site default_species="empty" pos="0.312781938115 0.312434915902 0.675247582834" tags="" type="hollow1"/>
-            <site default_species="empty" pos="0.61235882295 0.687356814983 0.675247582834" tags="" type="hollow2"/>
+            <site default_species="default_species" pos="0.333333333333 0.333333333333 0.672" tags="" type="hollow1"/>
+            <site default_species="default_species" pos="0.666666666667 0.666666666667 0.672" tags="" type="hollow2"/>
         </layer>
     </lattice>
     <process_list>
-        <process enabled="True" name="H_adsorption_hollow1" rate_constant=" 100000">
+        <process enabled="True" name="H_adsorption_hollow1" rate_constant="100000">
             <condition coord_layer="pt111" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="pt111" coord_name="hollow1" coord_offset="0 0 0" species="H"/>
         </process>
-        <process enabled="True" name="H_adsorption_hollow2" rate_constant=" 100000">
+        <process enabled="True" name="H_adsorption_hollow2" rate_constant="100000">
             <condition coord_layer="pt111" coord_name="hollow2" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="pt111" coord_name="hollow2" coord_offset="0 0 0" species="H"/>
         </process>
-        <process enabled="True" name="H_desorption_hollow1" rate_constant=" 100000">
+        <process enabled="True" name="H_desorption_hollow1" rate_constant="100000">
             <condition coord_layer="pt111" coord_name="hollow1" coord_offset="0 0 0" species="H"/>
             <action coord_layer="pt111" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process enabled="True" name="H_desorption_hollow2" rate_constant=" 100000">
+        <process enabled="True" name="H_desorption_hollow2" rate_constant="100000">
             <condition coord_layer="pt111" coord_name="hollow2" coord_offset="0 0 0" species="H"/>
             <action coord_layer="pt111" coord_name="hollow2" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process enabled="True" name="H_diffusion_h1_right" rate_constant=" 1000">
-            <condition coord_layer="pt111" coord_name="hollow1" coord_offset="0 0 0" species="H"/>
-            <condition coord_layer="pt111" coord_name="hollow2" coord_offset="1 0 0" species="empty"/>
-            <action coord_layer="pt111" coord_name="hollow2" coord_offset="1 0 0" species="H"/>
-            <action coord_layer="pt111" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
-        </process>
-        <process enabled="True" name="H_diffusion_h1h2" rate_constant=" 1000">
+        <process enabled="True" name="H_diff_h1h2" rate_constant="1000000000">
             <condition coord_layer="pt111" coord_name="hollow1" coord_offset="0 0 0" species="H"/>
             <condition coord_layer="pt111" coord_name="hollow2" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="pt111" coord_name="hollow2" coord_offset="0 0 0" species="H"/>
             <action coord_layer="pt111" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
         </process>
-        <process enabled="True" name="H_diffusion_h2h1" rate_constant=" 1000">
+        <process enabled="True" name="H_diff_h2h1" rate_constant="1000000000">
             <condition coord_layer="pt111" coord_name="hollow2" coord_offset="0 0 0" species="H"/>
             <condition coord_layer="pt111" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="pt111" coord_name="hollow1" coord_offset="0 0 0" species="H"/>
