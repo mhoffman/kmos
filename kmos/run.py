@@ -728,6 +728,24 @@ class Model_Parameters(object):
 
 
 class Model_Rate_Constants(object):
+    """Holds all rate constants currently associated with the model.
+    To inspect the expression and current settings of it you can just
+    call it as a function with a (glob) pattern that matches
+    the desired processes, e.g. ::
+
+      model.rate_constant('*ads*')
+
+    could print all rate constants for adsorption. Given of course that
+    'ads' is part of the process name. The just get the rate constant
+    for one specific process you can use ::
+
+      model.rate_constant.by_name("<process name>")
+
+    To set rate constants manually use ::
+
+      model.rate_constants.set("<pattern>", <rate-constant (expr.)>)
+
+    """
 
     def __repr__(self):
         """Compact representation of all current rate_constants."""
