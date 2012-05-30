@@ -262,7 +262,8 @@ def main(args=None):
         elif args[1] in usage:
             print('Usage: %s\n' % usage[args[1]])
         else:
-            parser.error('Command "%s" not known or not documented.' % args[1])
+            raise Exception('Command "%s" not known or not documented.'
+                            % args[1])
 
     elif args[0] == 'import':
         import kmos.io
