@@ -677,6 +677,9 @@ class Model_Parameters(object):
         self.print_rates = print_rates
 
     def __setattr__(self, attr, value):
+        if not attr in settings.parameters \
+           and not attr in ['print_rates']:
+            print("Warning: don't know parameter '%s'." % attr)
         if attr in settings.parameters:
             settings.parameters[attr]['value'] = value
             set_rate_constants(print_rates=self.print_rates)
