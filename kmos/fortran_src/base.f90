@@ -758,6 +758,7 @@ pure function get_system_name()
     get_system_name = system_name
 end function get_system_name
 
+
 subroutine set_system_name(input_system_name)
     !****f* base/get_system_name
     ! FUNCTION
