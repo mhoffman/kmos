@@ -168,7 +168,7 @@ JANAF Thermochemical Tables. A couple of molecules
 are automatically supported. If you need support
 for more gas-phase species, drop me a line.
 
-The tabulated value are not distributed since
+The tabulated values are not distributed since
 the terms of distribution do not permit this.
 Fortunately manual installation is easy.
 Just create a directory called `janaf_data`

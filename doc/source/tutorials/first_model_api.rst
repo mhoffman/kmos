@@ -1,13 +1,17 @@
 A first kMC Model--the API way
 ==============================
-Since the GUI used in the next subsection is nothing
-but a frontend to the various datatypes, you can just as
-well write models by instantiating and adding different
-parts of the model directly in python. This way might look
-rather arcane for simple models in the beginning, however
-it starts to really pay off as soon as you want to 
-make a version of a model which is almost identical with the
-only difference that ...
+
+In general there are two interfaces to *defining* a new
+model: A GUI and an API. While the GUI can be quite
+nice especially for beginners, it turns out that the
+API is better maintained simply because ... well, maintaing
+a GUI is a lot more work.
+
+So we will start by learning how to setup the model using the
+API which will turn out not to be hard at all. It is knowing howto
+do this will also pay-off especially if you starting tinkering
+with your existing models and make little changes here and there.
+
 
 
 Construct the model
@@ -37,7 +41,7 @@ First you should instantiate a new project and fill in meta information ::
               model_dimension = 2,)
 
 
-Next you could add some species or states. Note that whichever
+Next you add some species or states. Note that whichever
 species you add first is the default species with which all sites in the
 system will be initialized. Of course this can be changed later
 
@@ -75,7 +79,7 @@ Simple, huh? Now you wonder where all the rest of the geometry went?
 For a simple reason: the geometric location of a site is
 meaningless from a kMC point of view. In order to solve the master
 equation none of the numerical coordinates
-of any lattice, site matters since the master equation is only
+of any lattice sites matter since the master equation is only
 defined in terms of states and transition between these. However
 to allow a graphical representation of the simulation one can add geometry
 as you have already done for the site. You set the size of the unit cell
@@ -87,7 +91,7 @@ which are prototypical dimensions for a single-crystal surface in
 Angstrom.
 
 Ok, let us see what we managed so far: you have a *lattice* with a
-*site* that can be either *empty* for occupied with *CO*.
+*site* that can be either *empty* or occupied with *CO*.
 
 
 Populate process list and parameter list
@@ -96,7 +100,7 @@ Populate process list and parameter list
 The remaining work is to populate the `process list` and the
 `parameter list`. The parameter list defines the parameters
 that can be used in the expressions of the rate constants.
-In principle one could to without the parameter
+In principle one could do without the parameter
 list and simply hard code all parameters in the process list,
 however one looses some nifty functionality like easily
 changing parameters on-the-fly or even interactively.
@@ -138,7 +142,7 @@ To define processes we first need a coordinate [#coord_minilanguage]_  ::
   coord = pt.lattice.generate_coord('hollow.(0,0,0).simple_cubic')
 
 
-Then you need to have at least two processes. A process in kMC
+Then you need to have at least two processes. A process or elementary step in kMC
 means that a certain local configuration must be given so that something
 can happen at a certain rate constant. In the framework here this is
 phrased in terms of 'conditions' and 'actions'. [#proc_minilanguage]_ 
@@ -152,7 +156,7 @@ rate constant. Written down in code this looks as follows ::
                  rate_constant='p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)')
 
 Now you might wonder, how come we can simply use m_CO and beta and such.
-Well, that is because we evaluator will to some trickery to resolve such
+Well, that is because the evaluator will to some trickery to resolve such
 terms. So beta will be first be translated into 1/(kboltzmann*T) and as
 long as you have set a parameter `T` before, this will go through. Same
 is true for m_CO, here the atomic masses are looked up and added. Note
@@ -211,16 +215,7 @@ you run ::
 
 
 Make sure this finishes gracefully without any line
-containining and error.
-
-.. note::  If you are using windoze, this line would not
-           not look as slick, yet. We need to help the
-           python interpreter to find the kmos file as
-           well as help kmos to find the f2py entry
-           point. So on a typical installation the same
-           line could look like ::
-
-             python C:\Python27\Scripts\kmos export myfirst_kmc.xml -p C:\Python27\Scripts\f2py.py -f gfortran
+containining an error.
 
 If you now `cd` to that folder `myfirst_kmc` and run::
 
@@ -243,10 +238,10 @@ the workflow.
 
 
 
-.. [#proc_minilanguage]  You will have describe all processes
+.. [#proc_minilanguage]  You will have to describe all processes
                          in terms of  `conditions` and
                          `actions` and you find a more complete
-                         description can be found in the
+                         description in the
                          :ref:`topic guide <proc_mini_language>`
                          to the process description syntax.
 
