@@ -6,8 +6,8 @@
 
 
 ``kmos build``
-    Build kmc_model.so from \*f90 files in the
-    current directory.
+        Build kmc_model.so from \*f90 files in the
+        current directory.
 
 
 ``kmos edit <xml-file>``
@@ -16,18 +16,14 @@
 
 
 ``kmos export <xml-file> [<export-path>]``
-    Take a kmos xml-file and export all generated
-    source code to the export-path. There try to
-    build the kmc_model.so.
+        Take a kmos xml-file and export all generated
+        source code to the export-path. There try to
+        build the kmc_model.so.
 
 
 ``kmos export-settings <xml-file> [<export-path>]``
     Take a kmos xml-file and export kmc_settings.py
     to the export-path.
-
-
-``kmos export-view <xml-file>``
-    Export an XML file, compile and run the simulation.
 
 
 ``kmos help <command>``
@@ -54,6 +50,6 @@
 
 
 ``kmos view``
-    Take a kmc_model.so and kmc_settings.py in the
-    same directory and start to simulate the
-    model visually.
+        Take a kmc_model.so and kmc_settings.py in the
+        same directory and start to simulate the
+        model visually.
