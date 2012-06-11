@@ -277,7 +277,23 @@ class KMC_Model(multiprocessing.Process):
     def get_atoms(self, geometry=True):
         """Return an ASE Atoms object with additional
         information such as coverage and Turn-over-frequencies
-        attached."""
+        attached.
+
+        The additional attributes are:
+          - `info` (extra tags assigned to species)
+          - `kmc_step`
+          - `kmc_time`
+          - `occupation`
+          - `procstat`
+          - `tof_data`
+
+        `tof_data` contains previously defined TOFs in reaction per seconds per cell
+                   sampled since the last call to `get_atoms()`
+        `info` can be used to better visualize similar looking molecule during post-processing
+        `procstat` holds the number of times each process was executed since last `get_atoms()`
+                   call.
+
+        """
 
         if geometry:
             kmos_tags = {}
