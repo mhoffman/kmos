@@ -1,7 +1,7 @@
 Running the Model--the API way
 ==============================
 
-In order to analyze a model in a more quantitative way it is
+In order to analyze a model in quantitatively it is
 more practical to write small client scripts that directly
 talk to the runtime API. As time passes and more of these
 scripts are written over and over some standard functionality
@@ -164,13 +164,12 @@ However in many applications it is still useful to
 run several models seperately at once, for example to scan
 some set of parameters one a multicore computer. This
 kind of problem can be considered `embarrasingly parallel`
-since the require no communication between the runs.
+since it requires no communication between the runs.
 
-This is made very simple through the `multiprocessing`,
+This is made very simple through the `multiprocessing` module,
 which is in the Python standard library since version 2.6.
 For older versions this needs to be `downloaded <http://pypi.python.org/pypi/multiprocessing/>`
-and installed manually. The latter is very
-straightforward.
+and installed manually. The latter is pretty straightforward.
 
 
 Then besides `kmos` we need to import `multiprocessing` ::

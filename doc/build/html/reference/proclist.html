@@ -1,25 +1,31 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>kmos/proclist &mdash; kmos v0.2.0 documentation</title>
+    <title>kmos/proclist &mdash; kmos 0.2.1 documentation</title>
+    
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.2.0',
-        COLLAPSE_MODINDEX: false,
+        VERSION:     '0.2.1',
+        COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos v0.2.0 documentation" href="../index.html" /> 
+    <link rel="top" title="kmos 0.2.1 documentation" href="../index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -29,9 +35,9 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../modindex.html" title="Global Module Index"
-             accesskey="M">modules</a> |</li>
-        <li><a href="../index.html">kmos v0.2.0 documentation</a> &raquo;</li> 
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">kmos 0.2.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -39,37 +45,37 @@
             <p class="logo"><a href="../index.html">
               <img class="logo" src="../_static/kmos_logo.png" alt="Logo"/>
             </a></p>
-            <h3><a href="../index.html">Table Of Contents</a></h3>
-            <ul>
-<li><a class="reference external" href="#">kmos/proclist</a><ul>
-<li><a class="reference external" href="#proclist-do-kmc-step">proclist/do_kmc_step</a></li>
-<li><a class="reference external" href="#proclist-get-kmc-step">proclist/get_kmc_step</a></li>
-<li><a class="reference external" href="#proclist-get-occupation">proclist/get_occupation</a></li>
-<li><a class="reference external" href="#proclist-init">proclist/init</a></li>
-<li><a class="reference external" href="#proclist-initialize-state">proclist/initialize_state</a></li>
-<li><a class="reference external" href="#proclist-run-proc-nr">proclist/run_proc_nr</a></li>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">kmos/proclist</a><ul>
+<li><a class="reference internal" href="#proclist-do-kmc-step">proclist/do_kmc_step</a></li>
+<li><a class="reference internal" href="#proclist-get-kmc-step">proclist/get_kmc_step</a></li>
+<li><a class="reference internal" href="#proclist-get-occupation">proclist/get_occupation</a></li>
+<li><a class="reference internal" href="#proclist-init">proclist/init</a></li>
+<li><a class="reference internal" href="#proclist-initialize-state">proclist/initialize_state</a></li>
+<li><a class="reference internal" href="#proclist-run-proc-nr">proclist/run_proc_nr</a></li>
 </ul>
 </li>
 </ul>
 
-            <h3>This Page</h3>
-            <ul class="this-page-menu">
-              <li><a href="../_sources/reference/proclist.txt"
-                     rel="nofollow">Show Source</a></li>
-            </ul>
-          <div id="searchbox" style="display: none">
-            <h3>Quick search</h3>
-              <form class="search" action="../search.html" method="get">
-                <input type="text" name="q" size="18" />
-                <input type="submit" value="Go" />
-                <input type="hidden" name="check_keywords" value="yes" />
-                <input type="hidden" name="area" value="default" />
-              </form>
-              <p class="searchtip" style="font-size: 90%">
-              Enter search terms or a module, class or function name.
-              </p>
-          </div>
-          <script type="text/javascript">$('#searchbox').show(0);</script>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/reference/proclist.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
 
@@ -81,64 +87,64 @@
   <div class="section" id="kmos-proclist">
 <h1>kmos/proclist<a class="headerlink" href="#kmos-proclist" title="Permalink to this headline">¶</a></h1>
 <blockquote>
-Implements the kMC process list.</blockquote>
+<div>Implements the kMC process list.</div></blockquote>
 <div class="section" id="proclist-do-kmc-step">
 <h2>proclist/do_kmc_step<a class="headerlink" href="#proclist-do-kmc-step" title="Permalink to this headline">¶</a></h2>
 <blockquote>
-<p>Performs exactly one kMC step.</p>
+<div><p>Performs exactly one kMC step.</p>
 <p><tt class="docutils literal"><span class="pre">none</span></tt></p>
-</blockquote>
+</div></blockquote>
 </div>
 <div class="section" id="proclist-get-kmc-step">
 <h2>proclist/get_kmc_step<a class="headerlink" href="#proclist-get-kmc-step" title="Permalink to this headline">¶</a></h2>
 <blockquote>
-<p>Determines next step without executing it.</p>
+<div><p>Determines next step without executing it.</p>
 <p><tt class="docutils literal"><span class="pre">none</span></tt></p>
-</blockquote>
+</div></blockquote>
 </div>
 <div class="section" id="proclist-get-occupation">
 <h2>proclist/get_occupation<a class="headerlink" href="#proclist-get-occupation" title="Permalink to this headline">¶</a></h2>
 <blockquote>
-<p>Evaluate current lattice configuration and returns
+<div><p>Evaluate current lattice configuration and returns
 the normalized occupation as matrix. Different species
 run along the first axis and different sites run
 along the second.</p>
 <p><tt class="docutils literal"><span class="pre">none</span></tt></p>
-</blockquote>
+</div></blockquote>
 </div>
 <div class="section" id="proclist-init">
 <h2>proclist/init<a class="headerlink" href="#proclist-init" title="Permalink to this headline">¶</a></h2>
 <blockquote>
-<blockquote>
-Allocates the system and initializes all sites in the given
-layer.</blockquote>
+<div><blockquote>
+<div>Allocates the system and initializes all sites in the given
+layer.</div></blockquote>
 <ul class="simple">
 <li><tt class="docutils literal"><span class="pre">input_system_size</span></tt> number of unit cell per axis.</li>
 <li><tt class="docutils literal"><span class="pre">system_name</span></tt> identifier for reload file.</li>
 <li><tt class="docutils literal"><span class="pre">layer</span></tt> initial layer.</li>
 <li><tt class="docutils literal"><span class="pre">no_banner</span></tt> [optional] if True no copyright is issued.</li>
 </ul>
-</blockquote>
+</div></blockquote>
 </div>
 <div class="section" id="proclist-initialize-state">
 <h2>proclist/initialize_state<a class="headerlink" href="#proclist-initialize-state" title="Permalink to this headline">¶</a></h2>
 <blockquote>
-<p>Initialize all sites and book-keeping array
+<div><p>Initialize all sites and book-keeping array
 for the given layer.</p>
 <ul class="simple">
 <li><tt class="docutils literal"><span class="pre">layer</span></tt> integer representing layer</li>
 </ul>
-</blockquote>
+</div></blockquote>
 </div>
 <div class="section" id="proclist-run-proc-nr">
 <h2>proclist/run_proc_nr<a class="headerlink" href="#proclist-run-proc-nr" title="Permalink to this headline">¶</a></h2>
 <blockquote>
-<p>Runs process <tt class="docutils literal"><span class="pre">proc</span></tt> on site <tt class="docutils literal"><span class="pre">nr_site</span></tt>.</p>
+<div><p>Runs process <tt class="docutils literal"><span class="pre">proc</span></tt> on site <tt class="docutils literal"><span class="pre">nr_site</span></tt>.</p>
 <ul class="simple">
 <li><tt class="docutils literal"><span class="pre">proc</span></tt> integer representing the process number</li>
 <li><tt class="docutils literal"><span class="pre">nr_site</span></tt>  integer representing the site</li>
 </ul>
-</blockquote>
+</div></blockquote>
 </div>
 </div>
 
@@ -155,14 +161,14 @@ for the given layer.</p>
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="../modindex.html" title="Global Module Index"
+          <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">kmos v0.2.0 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos 0.2.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-      &copy; Copyright 2009-2012, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+        &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
     </div>
   </body>
 </html>

@@ -102,6 +102,12 @@ kmos.view
 .. automodule:: kmos.view
    :members: KMC_Viewer
 
+kmos.utils
+^^^^^^^^^
+
+.. automodule:: kmos.utils
+   :members: T_grid, build, evaluate_kind_values, get_ase_constructor, p_grid \
+             product, split_sequence, write_py
 
 kmos kMC project DTD
 ====================

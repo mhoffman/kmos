@@ -178,7 +178,7 @@ base/get_species
 
 base/get_system_name
 """"""""""""""""""""""""""""""""""""""""""""""""""
-    Returns the systems name, that was specified with base/allocate_system
+    Return the systems name, that was specified with base/allocate_system
 
     * ``system_name`` Writeable string of type character(len=200).
 
@@ -314,6 +314,13 @@ base/set_rate_const
 
   * ``proc_n`` The process number as defined in the corresponding proclist\_ module.
   * ``rate`` the rate in :math:`s^{-1}`
+
+base/set_system_name
+""""""""""""""""""""""""""""""""""""""""""""""""""
+    Set the systems name. Useful in conjunction with base.save_system
+    to save *.reload files under a different name than the default one.
+
+    * ``system_name`` Readable string of type character(len=200).
 
 base/start_time
 """"""""""""""""""""""""""""""""""""""""""""""""""

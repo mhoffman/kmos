@@ -1,25 +1,31 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Tutorials &mdash; kmos v0.2.0 documentation</title>
+    <title>Tutorials &mdash; kmos 0.2.1 documentation</title>
+    
     <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.2.0',
-        COLLAPSE_MODINDEX: false,
+        VERSION:     '0.2.1',
+        COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="kmos v0.2.0 documentation" href="../index.html" />
+    <link rel="top" title="kmos 0.2.1 documentation" href="../index.html" />
     <link rel="next" title="Topic Guides" href="../topic_guides/index.html" />
     <link rel="prev" title="Welcome to kmos’s documentation!" href="../index.html" /> 
   </head>
@@ -31,15 +37,15 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../modindex.html" title="Global Module Index"
-             accesskey="M">modules</a> |</li>
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li class="right" >
           <a href="../topic_guides/index.html" title="Topic Guides"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../index.html" title="Welcome to kmos’s documentation!"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">kmos v0.2.0 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos 0.2.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -47,67 +53,67 @@
             <p class="logo"><a href="../index.html">
               <img class="logo" src="../_static/kmos_logo.png" alt="Logo"/>
             </a></p>
-            <h3><a href="../index.html">Table Of Contents</a></h3>
-            <ul>
-<li><a class="reference external" href="#">Tutorials</a><ul>
-<li><a class="reference external" href="#getting-started">Getting Started</a><ul>
-<li><a class="reference external" href="#module-kmos">Introduction</a><ul>
-<li><a class="reference external" href="#feature-overview">Feature overview</a></li>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Tutorials</a><ul>
+<li><a class="reference internal" href="#getting-started">Getting Started</a><ul>
+<li><a class="reference internal" href="#module-kmos">Introduction</a><ul>
+<li><a class="reference internal" href="#feature-overview">Feature overview</a></li>
 </ul>
 </li>
-<li><a class="reference external" href="#installation-on-ubuntu-linux">Installation on Ubuntu Linux</a></li>
-<li><a class="reference external" href="#installation-on-opensuse-12-1-linux">Installation on openSUSE 12.1 Linux</a></li>
-<li><a class="reference external" href="#installation-on-windoze-7">Installation on windoze 7</a></li>
-<li><a class="reference external" href="#installing-janaf-thermochemical-tables">Installing JANAF Thermochemical Tables</a></li>
+<li><a class="reference internal" href="#installation-on-ubuntu-linux">Installation on Ubuntu Linux</a></li>
+<li><a class="reference internal" href="#installation-on-opensuse-12-1-linux">Installation on openSUSE 12.1 Linux</a></li>
+<li><a class="reference internal" href="#installation-on-windoze-7">Installation on windoze 7</a></li>
+<li><a class="reference internal" href="#installing-janaf-thermochemical-tables">Installing JANAF Thermochemical Tables</a></li>
 </ul>
 </li>
-<li><a class="reference external" href="#screenshots">Screenshots</a><ul>
-<li><a class="reference external" href="#the-editor">The  Editor</a></li>
-<li><a class="reference external" href="#the-runtime-view">The Runtime View</a></li>
+<li><a class="reference internal" href="#screenshots">Screenshots</a><ul>
+<li><a class="reference internal" href="#the-editor">The  Editor</a></li>
+<li><a class="reference internal" href="#the-runtime-view">The Runtime View</a></li>
 </ul>
 </li>
-<li><a class="reference external" href="#a-first-kmc-model-the-api-way">A first kMC Model&#8211;the API way</a><ul>
-<li><a class="reference external" href="#construct-the-model">Construct the model</a></li>
-<li><a class="reference external" href="#populate-process-list-and-parameter-list">Populate process list and parameter list</a></li>
-<li><a class="reference external" href="#export-save-compile">Export, save, compile</a></li>
-<li><a class="reference external" href="#taking-it-home">Taking it home</a></li>
+<li><a class="reference internal" href="#a-first-kmc-model-the-api-way">A first kMC Model&#8211;the API way</a><ul>
+<li><a class="reference internal" href="#construct-the-model">Construct the model</a></li>
+<li><a class="reference internal" href="#populate-process-list-and-parameter-list">Populate process list and parameter list</a></li>
+<li><a class="reference internal" href="#export-save-compile">Export, save, compile</a></li>
+<li><a class="reference internal" href="#taking-it-home">Taking it home</a></li>
 </ul>
 </li>
-<li><a class="reference external" href="#a-first-kmc-model-the-gui-way">A first kMC Model&#8211;the GUI way</a></li>
-<li><a class="reference external" href="#running-the-model-the-gui-way">Running the Model&#8211;the GUI way</a></li>
-<li><a class="reference external" href="#how-to-prepare-a-model-and-run-it-interactively">How To Prepare a Model and Run It Interactively</a></li>
-<li><a class="reference external" href="#running-the-model-the-api-way">Running the Model&#8211;the API way</a></li>
-<li><a class="reference external" href="#manipulating-the-model-at-runtime">Manipulating the Model at Runtime</a></li>
-<li><a class="reference external" href="#running-models-in-parallel">Running models in parallel</a></li>
-<li><a class="reference external" href="#development">Development</a></li>
+<li><a class="reference internal" href="#a-first-kmc-model-the-gui-way">A first kMC Model&#8211;the GUI way</a></li>
+<li><a class="reference internal" href="#running-the-model-the-gui-way">Running the Model&#8211;the GUI way</a></li>
+<li><a class="reference internal" href="#how-to-prepare-a-model-and-run-it-interactively">How To Prepare a Model and Run It Interactively</a></li>
+<li><a class="reference internal" href="#running-the-model-the-api-way">Running the Model&#8211;the API way</a></li>
+<li><a class="reference internal" href="#manipulating-the-model-at-runtime">Manipulating the Model at Runtime</a></li>
+<li><a class="reference internal" href="#running-models-in-parallel">Running models in parallel</a></li>
+<li><a class="reference internal" href="#development">Development</a></li>
 </ul>
 </li>
 </ul>
 
-            <h4>Previous topic</h4>
-            <p class="topless"><a href="../index.html"
-                                  title="previous chapter">Welcome to kmos&#8217;s documentation!</a></p>
-            <h4>Next topic</h4>
-            <p class="topless"><a href="../topic_guides/index.html"
-                                  title="next chapter">Topic Guides</a></p>
-            <h3>This Page</h3>
-            <ul class="this-page-menu">
-              <li><a href="../_sources/tutorials/index.txt"
-                     rel="nofollow">Show Source</a></li>
-            </ul>
-          <div id="searchbox" style="display: none">
-            <h3>Quick search</h3>
-              <form class="search" action="../search.html" method="get">
-                <input type="text" name="q" size="18" />
-                <input type="submit" value="Go" />
-                <input type="hidden" name="check_keywords" value="yes" />
-                <input type="hidden" name="area" value="default" />
-              </form>
-              <p class="searchtip" style="font-size: 90%">
-              Enter search terms or a module, class or function name.
-              </p>
-          </div>
-          <script type="text/javascript">$('#searchbox').show(0);</script>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../index.html"
+                        title="previous chapter">Welcome to kmos&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../topic_guides/index.html"
+                        title="next chapter">Topic Guides</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/tutorials/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
 
@@ -121,18 +127,18 @@
 <div class="section" id="getting-started">
 <h2>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="module-kmos">
-<h3>Introduction<a class="headerlink" href="#module-kmos" title="Permalink to this headline">¶</a></h3>
+<span id="introduction"></span><h3>Introduction<a class="headerlink" href="#module-kmos" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="feature-overview">
 <h4>Feature overview<a class="headerlink" href="#feature-overview" title="Permalink to this headline">¶</a></h4>
 <p>With kmos you can:</p>
 <blockquote>
-<ul class="simple">
+<div><ul class="simple">
 <li>easily create and modify kMC models through GUI</li>
 <li>store and exchange kMC models through XML</li>
 <li>generate fast, platform independent, self-contained code <a class="footnote-reference" href="#code" id="id1">[1]</a></li>
 <li>run kMC models through GUI or python bindings</li>
 </ul>
-</blockquote>
+</div></blockquote>
 <p>kmos has been developed in the context of first-principles based modelling
 of surface chemical reactions but might be of help for other types of
 kMC models as well.</p>
@@ -200,7 +206,7 @@ no dependencies except for a Fortran compiler.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">kmos</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">dependencies</span><span class="o">-</span><span class="n">ubuntu</span>
 </pre></div>
 </div>
-<div class="admonition-todo admonition " id="todo-97">
+<div class="admonition-todo admonition" id="index-0">
 <p class="first admonition-title">Todo</p>
 <p class="last">add pip way or something alike to automatically
 install dependencies.</p>
@@ -301,7 +307,7 @@ inserted in rate constant expressions using
 JANAF Thermochemical Tables. A couple of molecules
 are automatically supported. If you need support
 for more gas-phase species, drop me a line.</p>
-<p>The tabulated value are not distributed since
+<p>The tabulated values are not distributed since
 the terms of distribution do not permit this.
 Fortunately manual installation is easy.
 Just create a directory called <cite>janaf_data</cite>
@@ -317,7 +323,7 @@ named <cite>__init__.py</cite>, so that python recognizes it as a module</p>
 <a class="reference external" href="http://kinetics.nist.gov/janaf/Search">NIST website</a>
 in the tab-delimited text format
 to the <cite>janaf_data</cite> directory.</p>
-<div class="admonition-todo admonition " id="todo-98">
+<div class="admonition-todo admonition" id="index-1">
 <p class="first admonition-title">Todo</p>
 <p class="last">test installation on other platforms</p>
 </div>
@@ -360,14 +366,15 @@ in the rate constants.</p>
 </div>
 <div class="section" id="a-first-kmc-model-the-api-way">
 <h2>A first kMC Model&#8211;the API way<a class="headerlink" href="#a-first-kmc-model-the-api-way" title="Permalink to this headline">¶</a></h2>
-<p>Since the GUI used in the next subsection is nothing
-but a frontend to the various datatypes, you can just as
-well write models by instantiating and adding different
-parts of the model directly in python. This way might look
-rather arcane for simple models in the beginning, however
-it starts to really pay off as soon as you want to
-make a version of a model which is almost identical with the
-only difference that ...</p>
+<p>In general there are two interfaces to <em>defining</em> a new
+model: A GUI and an API. While the GUI can be quite
+nice especially for beginners, it turns out that the
+API is better maintained simply because ... well, maintaing
+a GUI is a lot more work.</p>
+<p>So we will start by learning how to setup the model using the
+API which will turn out not to be hard at all. It is knowing howto
+do this will also pay-off especially if you starting tinkering
+with your existing models and make little changes here and there.</p>
 <div class="section" id="construct-the-model">
 <h3>Construct the model<a class="headerlink" href="#construct-the-model" title="Permalink to this headline">¶</a></h3>
 <p>We start by making the necessary import statements (in <em>python</em> or better <em>ipython</em>):</p>
@@ -390,7 +397,7 @@ this hardly excites surface scientists but we need to start somewhere, right?</p
             <span class="n">model_dimension</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,)</span>
 </pre></div>
 </div>
-<p>Next you could add some species or states. Note that whichever
+<p>Next you add some species or states. Note that whichever
 species you add first is the default species with which all sites in the
 system will be initialized. Of course this can be changed later</p>
 <p>For surface science simulations it is useful to define an
@@ -424,7 +431,7 @@ will be in the center of the unit cell.</p>
 For a simple reason: the geometric location of a site is
 meaningless from a kMC point of view. In order to solve the master
 equation none of the numerical coordinates
-of any lattice, site matters since the master equation is only
+of any lattice sites matter since the master equation is only
 defined in terms of states and transition between these. However
 to allow a graphical representation of the simulation one can add geometry
 as you have already done for the site. You set the size of the unit cell
@@ -435,14 +442,14 @@ via</p>
 <p>which are prototypical dimensions for a single-crystal surface in
 Angstrom.</p>
 <p>Ok, let us see what we managed so far: you have a <em>lattice</em> with a
-<em>site</em> that can be either <em>empty</em> for occupied with <em>CO</em>.</p>
+<em>site</em> that can be either <em>empty</em> or occupied with <em>CO</em>.</p>
 </div>
 <div class="section" id="populate-process-list-and-parameter-list">
 <h3>Populate process list and parameter list<a class="headerlink" href="#populate-process-list-and-parameter-list" title="Permalink to this headline">¶</a></h3>
 <p>The remaining work is to populate the <cite>process list</cite> and the
 <cite>parameter list</cite>. The parameter list defines the parameters
 that can be used in the expressions of the rate constants.
-In principle one could to without the parameter
+In principle one could do without the parameter
 list and simply hard code all parameters in the process list,
 however one looses some nifty functionality like easily
 changing parameters on-the-fly or even interactively.</p>
@@ -479,7 +486,7 @@ it adjustable</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">coord</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">generate_coord</span><span class="p">(</span><span class="s">&#39;hollow.(0,0,0).simple_cubic&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Then you need to have at least two processes. A process in kMC
+<p>Then you need to have at least two processes. A process or elementary step in kMC
 means that a certain local configuration must be given so that something
 can happen at a certain rate constant. In the framework here this is
 phrased in terms of &#8216;conditions&#8217; and &#8216;actions&#8217;. <a class="footnote-reference" href="#proc-minilanguage" id="id4">[2]</a>
@@ -493,7 +500,7 @@ rate constant. Written down in code this looks as follows</p>
 </pre></div>
 </div>
 <p>Now you might wonder, how come we can simply use m_CO and beta and such.
-Well, that is because we evaluator will to some trickery to resolve such
+Well, that is because the evaluator will to some trickery to resolve such
 terms. So beta will be first be translated into 1/(kboltzmann*T) and as
 long as you have set a parameter <cite>T</cite> before, this will go through. Same
 is true for m_CO, here the atomic masses are looked up and added. Note
@@ -527,7 +534,7 @@ coordinate is</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">name</span><span class="o">.</span><span class="n">offset</span><span class="o">.</span><span class="n">lattice</span>
 </pre></div>
 </div>
-<p>check <a class="reference external" href="../topic_guides/coord_syntax.html#manual-coord-generation"><em>Manual generation</em></a> for details.</p>
+<p>check <a class="reference internal" href="../topic_guides/coord_syntax.html#manual-coord-generation"><em>Manual generation</em></a> for details.</p>
 </div>
 <div class="section" id="export-save-compile">
 <h3>Export, save, compile<a class="headerlink" href="#export-save-compile" title="Permalink to this headline">¶</a></h3>
@@ -545,18 +552,7 @@ you run</p>
 <div class="highlight-python"><pre>kmos export myfirst_kmc.xml</pre>
 </div>
 <p>Make sure this finishes gracefully without any line
-containining and error.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p>If you are using windoze, this line would not
-not look as slick, yet. We need to help the
-python interpreter to find the kmos file as
-well as help kmos to find the f2py entry
-point. So on a typical installation the same
-line could look like</p>
-<div class="last highlight-python"><pre>python C:\Python27\Scripts\kmos export myfirst_kmc.xml -p C:\Python27\Scripts\f2py.py -f gfortran</pre>
-</div>
-</div>
+containining an error.</p>
 <p>If you now <cite>cd</cite> to that folder <cite>myfirst_kmc</cite> and run:</p>
 <div class="highlight-python"><pre>kmos view</pre>
 </div>
@@ -574,11 +570,11 @@ the workflow.</p>
 <table class="docutils footnote" frame="void" id="proc-minilanguage" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id4">[2]</a></td><td>You will have describe all processes
+<tr><td class="label"><a class="fn-backref" href="#id4">[2]</a></td><td>You will have to describe all processes
 in terms of  <cite>conditions</cite> and
 <cite>actions</cite> and you find a more complete
-description can be found in the
-<a class="reference external" href="../topic_guides/proc_syntax.html#proc-mini-language"><em>topic guide</em></a>
+description in the
+<a class="reference internal" href="../topic_guides/proc_syntax.html#proc-mini-language"><em>topic guide</em></a>
 to the process description syntax.</td></tr>
 </tbody>
 </table>
@@ -588,7 +584,7 @@ to the process description syntax.</td></tr>
 <tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>The description of coordinates follows
 the simple syntax of the coordinate
 syntax and the
-<a class="reference external" href="../topic_guides/coord_syntax.html#coord-mini-language"><em>topic guide</em></a>
+<a class="reference internal" href="../topic_guides/coord_syntax.html#coord-mini-language"><em>topic guide</em></a>
 explains how that works.</td></tr>
 </tbody>
 </table>
@@ -600,7 +596,7 @@ explains how that works.</td></tr>
 simple adsorption/desorption model on a simple cubic surface.
 Despite its simplicity it touches all elements contained in
 the GUI and could be considered from first-principles.</p>
-<div class="admonition-todo admonition " id="todo-99">
+<div class="admonition-todo admonition" id="index-2">
 <p class="first admonition-title">Todo</p>
 <p class="last">describe modelling more complicated structures
 and e.g. boundary conditions</p>
@@ -656,7 +652,7 @@ care of the correct allocation and deallocation</p>
 </div>
 <div class="section" id="running-the-model-the-api-way">
 <h2>Running the Model&#8211;the API way<a class="headerlink" href="#running-the-model-the-api-way" title="Permalink to this headline">¶</a></h2>
-<p>In order to analyze a model in a more quantitative way it is
+<p>In order to analyze a model in quantitatively it is
 more practical to write small client scripts that directly
 talk to the runtime API. As time passes and more of these
 scripts are written over and over some standard functionality
@@ -807,12 +803,11 @@ check for steady state conditions.</p>
 run several models seperately at once, for example to scan
 some set of parameters one a multicore computer. This
 kind of problem can be considered <cite>embarrasingly parallel</cite>
-since the require no communication between the runs.</p>
-<p>This is made very simple through the <cite>multiprocessing</cite>,
+since it requires no communication between the runs.</p>
+<p>This is made very simple through the <cite>multiprocessing</cite> module,
 which is in the Python standard library since version 2.6.
 For older versions this needs to be <cite>downloaded &lt;http://pypi.python.org/pypi/multiprocessing/&gt;</cite>
-and installed manually. The latter is very
-straightforward.</p>
+and installed manually. The latter is pretty straightforward.</p>
 <p>Then besides <cite>kmos</cite> we need to import <cite>multiprocessing</cite></p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">linspace</span>
@@ -884,7 +879,7 @@ from the top project directory</p>
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="../modindex.html" title="Global Module Index"
+          <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
           <a href="../topic_guides/index.html" title="Topic Guides"
@@ -892,12 +887,12 @@ from the top project directory</p>
         <li class="right" >
           <a href="../index.html" title="Welcome to kmos’s documentation!"
              >previous</a> |</li>
-        <li><a href="../index.html">kmos v0.2.0 documentation</a> &raquo;</li> 
+        <li><a href="../index.html">kmos 0.2.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-      &copy; Copyright 2009-2012, Max J. Hoffmann.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+        &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
     </div>
   </body>
 </html>
