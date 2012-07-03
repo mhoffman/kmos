@@ -418,7 +418,8 @@ class Project(object):
                 elif child.tag == 'parameter_list':
                     for parameter in child:
                         name = parameter.attrib['name']
-                        value = float(parameter.attrib['value'])
+                        value = parameter.attrib['value']
+
                         if 'adjustable' in parameter.attrib:
                             adjustable = bool(eval(
                                             parameter.attrib['adjustable']))
