@@ -15,6 +15,8 @@ is no standardized way to develop kMC models, thus there is no standardized
 way to use kmos. kmos can be an Editor, an API, a viewer. However all in all
 kmos wants to save time filled with repetitive labor and enlarge your stride.
 
+This documentation as one `PDF. <www.fhi-berlin.mpg.de/~hoffmannm/member/kmos.pdf>`_
+
 .. toctree::
    :maxdepth: 0
 
