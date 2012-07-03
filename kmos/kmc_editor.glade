@@ -815,12 +815,13 @@
                                         </child>
                                         <child>
                                             <widget class="ProxyEntry" id="value">
-                                                <property name="data_type">str</property>
+                                                <property name="data_type">float</property>
                                                 <property name="invisible_char">*</property>
                                                 <property name="invisible_char_set">True</property>
                                                 <property name="is_focus">True</property>
                                                 <property name="model_attribute">value</property>
                                                 <property name="visible">True</property>
+                                                <property name="xalign">1.0</property>
                                             </widget>
                                             <packing>
                                                 <property name="padding">5</property>
@@ -1176,6 +1177,7 @@
                                     <widget class="ProxyEntry" id="site_tags">
                                         <property name="data_type">str</property>
                                         <property name="invisible_char">*</property>
+                                        <property name="invisible_char_set">True</property>
                                         <property name="is_focus">True</property>
                                         <property name="model_attribute">tags</property>
                                         <property name="visible">True</property>
