@@ -56,6 +56,7 @@ public :: add_proc, &
     get_kmc_step, &
     get_kmc_time, &
     set_kmc_time, &
+    set_system_name, &
     get_kmc_time_step, &
     get_nrofsites, &
     get_procstat, &
@@ -745,7 +746,7 @@ end subroutine deallocate_system
 pure function get_system_name()
     !****f* base/get_system_name
     ! FUNCTION
-    !    Returns the systems name, that was specified with base/allocate_system
+    !    Return the systems name, that was specified with base/allocate_system
     !
     ! ARGUMENTS
     !
@@ -756,6 +757,23 @@ pure function get_system_name()
 
     get_system_name = system_name
 end function get_system_name
+
+
+subroutine set_system_name(input_system_name)
+    !****f* base/set_system_name
+    ! FUNCTION
+    !    Set the systems name. Useful in conjunction with base.save_system
+    !    to save *.reload files under a different name than the default one.
+    !
+    ! ARGUMENTS
+    !
+    !    * ``system_name`` Readable string of type character(len=200).
+    !******
+    character(len=200), intent(in) :: input_system_name
+
+    system_name = input_system_name
+
+end subroutine set_system_name
 
 
 subroutine set_kmc_time(new_kmc_time)
