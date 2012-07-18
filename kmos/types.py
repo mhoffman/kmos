@@ -419,15 +419,16 @@ class Project(object):
                     for parameter in child:
                         name = parameter.attrib['name']
                         value = parameter.attrib['value']
+
                         if 'adjustable' in parameter.attrib:
                             adjustable = bool(eval(
                                             parameter.attrib['adjustable']))
                         else:
                             adjustable = False
 
-                        min = parameter.attrib['min'] \
+                        min = float(parameter.attrib['min']) \
                             if 'min' in parameter.attrib else 0.0
-                        max = parameter.attrib['max'] \
+                        max = float(parameter.attrib['max']) \
                             if 'max' in parameter.attrib else 0.0
                         scale = parameter.attrib['scale'] \
                             if 'scale' in parameter.attrib else 'linear'
