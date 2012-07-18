@@ -172,8 +172,18 @@ class KMC_Model(multiprocessing.Process):
     def inverse(self):
         return (repr(self.parameters) + self.rate_constants.inverse())
 
+    def get_param_header(self):
+        """Return the names of field return by
+        self.get_atoms().params.
+        Useful for the header line of an ASCII output.
+        """
+        return ' '.join(param_name
+                       for param_name in sorted(self.settings.parameters)
+            if self.settings.parameters[param_name].get('adjustable', False))
+
+
     def get_occupation_header(self):
-        """Returns the names of the fields returned by
+        """Return the names of the fields returned by
         self.get_atoms().occupation.
         Useful for the header line of an ASCII output.
         """
@@ -182,7 +192,7 @@ class KMC_Model(multiprocessing.Process):
                            for site in settings.site_names])
 
     def get_tof_header(self):
-        """Returns the names of the fields returned by
+        """Return the names of the fields returned by
         self.get_atoms().tof_data.
         Useful for the header line of an ASCII output.
         """
@@ -343,6 +353,10 @@ class KMC_Model(multiprocessing.Process):
         atoms.calc = None
         atoms.kmc_time = base.get_kmc_time()
         atoms.kmc_step = base.get_kmc_step()
+        atoms.params = [float(self.settings.parameters.get(param_name)['value'])
+                   for param_name in sorted(self.settings.parameters)
+        if self.settings.parameters[param_name].get('adjustable', False)
+                       ]
 
         # calculate TOF since last call
         atoms.procstat = np.zeros((proclist.nr_of_proc,))
@@ -855,6 +869,7 @@ def set_rate_constants(parameters=None, print_rates=True):
 def import_ase():
     try:
         import ase
+        import ase.visualize
     except:
         print('Please download the ASE from')
         print('https://wiki.fysik.dtu.dk/ase/')

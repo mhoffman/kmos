@@ -95,6 +95,9 @@ else:
         model visually.
                      """
 
+usage['xml'] = """kmos xml
+    Print xml representation of model to stdout
+               """
 
 def get_options(args=None, get_parser=False):
     import optparse
@@ -313,6 +316,13 @@ def main(args=None):
         path.append(os.path.abspath(os.curdir))
         from kmos import view
         view.main()
+
+    elif args[0] == 'xml':
+        from sys import path
+        path.append(os.path.abspath(os.curdir))
+        from kmos.run import KMC_Model
+        model = KMC_Model(banner=False, print_rates=False)
+        print(model.xml())
 
     else:
         parser.error('Command "%s" not understood.' % args[0])
