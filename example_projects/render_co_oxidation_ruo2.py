@@ -357,3 +357,4 @@ pt.add_process(name='React_bridge_left',
 
 
 pt.export_xml_file('CO_oxidation_Ruo2.xml')
+pt.print_statistics()
