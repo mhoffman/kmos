@@ -107,11 +107,11 @@ class KMC_Model(multiprocessing.Process):
         self.reset()
 
     def __enter__(self, *args, **kwargs):
-        """__enter/exit__ function for with-statement protocoll"""
+        """__enter/exit__ function for with-statement protocol."""
         return self
 
     def __exit__(self, *args, **kwargs):
-        """__enter/exit__ function for with-statement protocoll"""
+        """__enter/exit__ function for with-statement protocol."""
         self.deallocate()
 
     def reset(self):
@@ -141,7 +141,8 @@ class KMC_Model(multiprocessing.Process):
                     self.species_representation.append(
                         eval(settings.representations[species]))
                 except Exception as e:
-                    print('Trouble with representation %s' % settings.representations[species])
+                    print('Trouble with representation %s'
+                           % settings.representations[species])
                     print(e)
                     raise
             else:
@@ -187,7 +188,6 @@ class KMC_Model(multiprocessing.Process):
         return ' '.join(param_name
                        for param_name in sorted(self.settings.parameters)
             if self.settings.parameters[param_name].get('adjustable', False))
-
 
     def get_occupation_header(self):
         """Return the names of the fields returned by
@@ -304,11 +304,12 @@ class KMC_Model(multiprocessing.Process):
           - `procstat`
           - `tof_data`
 
-        `tof_data` contains previously defined TOFs in reaction per seconds per cell
-                   sampled since the last call to `get_atoms()`
-        `info` can be used to better visualize similar looking molecule during post-processing
-        `procstat` holds the number of times each process was executed since last `get_atoms()`
-                   call.
+        `tof_data` contains previously defined TOFs in reaction per seconds per
+                   cell sampled since the last call to `get_atoms()`
+        `info` can be used to better visualize similar looking molecule during
+               post-processing
+        `procstat` holds the number of times each process was executed since
+                   last `get_atoms()` call.
 
         """
 
@@ -362,8 +363,7 @@ class KMC_Model(multiprocessing.Process):
         atoms.kmc_step = base.get_kmc_step()
         atoms.params = [float(self.settings.parameters.get(param_name)['value'])
                    for param_name in sorted(self.settings.parameters)
-        if self.settings.parameters[param_name].get('adjustable', False)
-                       ]
+        if self.settings.parameters[param_name].get('adjustable', False)]
 
         # calculate TOF since last call
         atoms.procstat = np.zeros((proclist.nr_of_proc,))
@@ -463,21 +463,21 @@ class KMC_Model(multiprocessing.Process):
         elif order == 'nrofsites':
             entries = sorted(entries, key=lambda x: x[0])
         elif order == '-name':
-            entries = sorted(entries, key=lambda x: -x[3])
+            entries = sorted(entries, key=lambda x: - x[3])
         elif order == '-rate':
-            entries = sorted(entries, key=lambda x: -x[2])
+            entries = sorted(entries, key=lambda x: - x[2])
         elif order == '-rate_constant':
-            entries = sorted(entries, key=lambda x: -x[1])
+            entries = sorted(entries, key=lambda x: - x[1])
         elif order == '-nrofsites':
-            entries = sorted(entries, key=lambda x: -x[0])
+            entries = sorted(entries, key=lambda x: - x[0])
 
         # print
         total_contribution = 0
         print('(cumulative)    nrofsites * rate_constant    = rate            [name]')
         print('-------------------------------------------------------------------------------')
         for entry in entries:
-            total_contribution  += float(entry[2])
-            percent = '(%8.4f %%)' % (total_contribution*100/accum_rate)
+            total_contribution += float(entry[2])
+            percent = '(%8.4f %%)' % (total_contribution * 100 / accum_rate)
             entry = '% 12i * % 8.4e s^-1 = %8.4e s^-1 [%s]' % entry
             print('%s %s' % (percent, entry))
 
@@ -760,6 +760,14 @@ class Model_Parameters(object):
         res += '# --------------------\n'
         return res
 
+    def names(self, pattern=None):
+        """Return names of paramters that match `pattern'"""
+        names = []
+        for attr in sorted(settings.parameters):
+            if pattern is None or fnmatch(attr, pattern):
+                names.append(attr)
+        return names
+
     def __call__(self, match=None):
         for attr in sorted(settings.parameters):
             if match is None or fnmatch(attr, match):
@@ -808,7 +816,16 @@ class Model_Rate_Constants(object):
                                                       settings.parameters)
                 print('# %s: %s = %.2e s^{-1}' % (proc, rate_expr, rate_const))
 
+    def names(self, pattern=None):
+        """Return names of processes that match `pattern`."""
+        names = []
+        for i, proc in enumerate(sorted(settings.rate_constants.keys())):
+            if pattern is None or fnmatch(proc, pattern):
+                names.append(proc)
+        return names
+
     def by_name(self, proc):
+        """Return rate constant currently set for `proc`"""
         rate_expr = settings.rate_constants[proc][0]
         return evaluate_rate_expression(rate_expr, settings.parameters)
 
@@ -874,6 +891,7 @@ def set_rate_constants(parameters=None, print_rates=True):
 
 
 def import_ase():
+    """Wrapper for import ASE."""
     try:
         import ase
         import ase.visualize
@@ -884,6 +902,7 @@ def import_ase():
 
 
 def get_tof_names():
+    """Return names turn-over-frequencies (TOF) previously defined in model."""
     tofs = []
     for process, tof_count in settings.tof_count.iteritems():
         for tof in tof_count:
