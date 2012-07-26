@@ -82,7 +82,8 @@ class KMC_Model(multiprocessing.Process):
                        size=None, system_name='kmc_model',
                        banner=True,
                        print_rates=True,
-                       autosend=True):
+                       autosend=True,
+                       steps_per_frame=50000):
         super(KMC_Model, self).__init__()
         self.image_queue = image_queue
         self.parameter_queue = parameter_queue
@@ -93,6 +94,7 @@ class KMC_Model(multiprocessing.Process):
         self.rate_constants = Model_Rate_Constants()
         self.size = int(settings.simulation_size) \
                         if size is None else int(size)
+        self.steps_per_frame = steps_per_frame
 
         self.base = base
         self.lattice = lattice
@@ -135,8 +137,13 @@ class KMC_Model(multiprocessing.Process):
         self.species_representation = []
         for species in sorted(settings.representations):
             if settings.representations[species].strip():
-                self.species_representation.append(
-                    eval(settings.representations[species]))
+                try:
+                    self.species_representation.append(
+                        eval(settings.representations[species]))
+                except Exception as e:
+                    print('Trouble with representation %s' % settings.representations[species])
+                    print(e)
+                    raise
             else:
                 self.species_representation.append(Atoms())
         if hasattr(settings, 'species_tags'):
@@ -232,7 +239,7 @@ class KMC_Model(multiprocessing.Process):
         if not base.is_allocated():
             self.reset()
         while True:
-            for _ in xrange(50000):
+            for _ in xrange(self.steps_per_frame):
                 proclist.do_kmc_step()
             if self.autosend and not self.image_queue.full():
                 atoms = self.get_atoms()

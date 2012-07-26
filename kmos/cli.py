@@ -124,6 +124,10 @@ def get_options(args=None, get_parser=False):
                      dest='code_generator',
                      default='local_smart')
 
+    parser.add_option('-v','--steps-per-frame',
+                     dest='steps_per_frame',
+                     type='int',
+                     default='50000')
     try:
         from numpy.distutils.fcompiler import get_default_fcompiler
         from numpy.distutils import log
@@ -315,7 +319,7 @@ def main(args=None):
         from sys import path
         path.append(os.path.abspath(os.curdir))
         from kmos import view
-        view.main()
+        view.main(steps_per_frame=options.steps_per_frame)
 
     elif args[0] == 'xml':
         from sys import path

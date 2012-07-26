@@ -338,7 +338,8 @@ class KMC_ModelProxy(multiprocessing.Process):
     """
     def __init__(self, *args, **kwargs):
         super(KMC_ModelProxy, self).__init__()
-        self.model = kwargs.get('model', None)
+        self.steps_per_frame = kwargs.get('steps_per_frame', 50000)
+        self.model = kwargs.get('model', None, )
         self.kwargs = kwargs
         self.signal_queue = self.kwargs.get('signal_queue')
         self.parameter_queue = self.kwargs.get('parameter_queue')
@@ -348,7 +349,8 @@ class KMC_ModelProxy(multiprocessing.Process):
         if self.model is None:
             self.model = KMC_Model(self.queue,
                                    self.parameter_queue,
-                                   self.signal_queue)
+                                   self.signal_queue,
+                                   steps_per_frame=self.steps_per_frame)
         self.model.run()
 
     def join(self):
@@ -365,7 +367,7 @@ class KMC_Viewer():
     and view a kMC model.
     """
 
-    def __init__(self, model=None):
+    def __init__(self, model=None, steps_per_frame=50000):
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_position(gtk.WIN_POS_CENTER)
         self.window.connect('delete-event', self.exit)
@@ -378,7 +380,8 @@ class KMC_Viewer():
         if model is None:
             self.model = KMC_ModelProxy(queue=queue,
                                    parameter_queue=self.parameter_queue,
-                                   signal_queue=self.signal_queue)
+                                   signal_queue=self.signal_queue,
+                                   steps_per_frame=steps_per_frame)
         else:
             self.model = model
             self.model.image_queue = queue
@@ -427,7 +430,7 @@ class KMC_Viewer():
         return True
 
 
-def main(model=None):
+def main(model=None, steps_per_frame=50000):
     """The entry point for the kmos viewer application. In order to
     run and view a model the corresponding kmc_settings.py and
     kmc_model.(so/pyd) must be in the current import path, e.g. ::
@@ -439,7 +442,7 @@ def main(model=None):
     """
 
     gobject.threads_init()
-    viewer = KMC_Viewer(model)
+    viewer = KMC_Viewer(model, steps_per_frame=steps_per_frame)
     viewer.model.start()
     viewer.viewbox.start()
     gtk.main()
