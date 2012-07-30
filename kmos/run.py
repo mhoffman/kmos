@@ -728,6 +728,23 @@ class KMC_Model(multiprocessing.Process):
             res += ('%s: %s\n' % (label, ratio))
         return res
 
+    def dump_config(self, filename):
+        """Use numpy mechanism to store current configuration in a file.
+        """
+        self._get_configuration().tofile(filename)
+
+    def load_config(self, filename):
+        """Use numpy mechanism to load configuration from a file. User
+        must ensure that size of stored configuration is correct.
+        """
+        x, y, z = self.lattice.system_size
+        spuck = self.lattice.spuck
+        config = np.fromfile(filename)
+        config.shape = (x, y, z, spuck)
+
+        self._set_configuration(config)
+        self._adjust_database()
+
 
 class Model_Parameters(object):
     """Holds all user defined parameters of a model in
