@@ -70,6 +70,7 @@ kmos.run
   :members: deallocate,
             do_steps,
             double,
+            export_movie,
             get_atoms,
             get_occupation_header,
             get_tof_header,
