@@ -281,6 +281,44 @@ class KMC_Model(multiprocessing.Process):
                     settings.parameters.update(parameters)
                 set_rate_constants(parameters, self.print_rates)
 
+    def export_movie(self,
+                    frames=30,
+                    skip=1,
+                    prefix='movie',
+                    rotation='15x,-70x',
+                    suffix='png',
+                    **kwargs):
+        """Export series of snapshots of model instance to an image
+        file in the current directory which allows for easy post-processing
+        of images, e.g. using `ffmpeg` ::
+
+            ffmpeg -i movie_%06d.png -f image2 -r 24 movie.avi
+
+        Allows suffixes are png, pov, and eps. Additional keyword arguments (kwargs)
+        are passed directly the ase.io.write of the ASE library.
+
+        When exporting to *.pov, one has to manually povray each *.pov file in the
+        directory which is as simple as typing ::
+
+            for pov_file in *.pov
+            do
+               povray ${pov_file}
+            done
+
+        using bash.
+
+        """
+
+        from ase.io import write
+        for i in xrange(frames):
+            atoms = self.get_atoms()
+            write('%s_%06i.%s' % (prefix, i, suffix),
+                  atoms,
+                  show_unit_cell=True,
+                  rotation=rotation,
+                  **kwargs)
+            self.do_steps(skip)
+
     def show(self):
         """Visualize the current configuration of the model using ASE ag."""
         ase = import_ase()
