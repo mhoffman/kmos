@@ -140,7 +140,7 @@ class KMC_Model(multiprocessing.Process):
                 try:
                     self.species_representation.append(
                         eval(settings.representations[species]))
-                except Exception as e:
+                except Exception, e:
                     print('Trouble with representation %s'
                            % settings.representations[species])
                     print(e)
