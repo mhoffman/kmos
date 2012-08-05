@@ -377,8 +377,8 @@ class KMC_Viewer():
         self.signal_queue = multiprocessing.Queue(maxsize=10)
         if model is None:
             self.model = KMC_ModelProxy(queue=queue,
-                                   parameter_queue=self.parameter_queue,
-                                   signal_queue=self.signal_queue)
+                                        parameter_queue=self.parameter_queue,
+                                        signal_queue=self.signal_queue)
         else:
             self.model = model
             self.model.image_queue = queue

@@ -1036,7 +1036,15 @@ class ProcListWriter():
         out = open(os.path.join(self.dir, 'kmc_settings.py'), 'w')
         out.write('model_name = \'%s\'\n' % self.data.meta.model_name)
         out.write('simulation_size = 20\n')
-        out.write('random_seed = 1\n')
+        out.write('random_seed = 1\n\n')
+
+        # stub for setup function
+        out.write('def setup_model(model):\n')
+        out.write('    """Write initialization steps here.\n')
+        out.write('       e.g. ::\n')
+        out.write('    model.put([0,0,0,model.lattice.default_a], model.proclist.species_a)\n')
+        out.write('    """\n')
+        out.write('    pass\n\n')
 
         # Parameters
         out.write('parameters = {\n')

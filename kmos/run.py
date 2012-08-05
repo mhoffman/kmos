@@ -83,27 +83,39 @@ class KMC_Model(multiprocessing.Process):
                        banner=True,
                        print_rates=True,
                        autosend=True):
+        # initialize multiprocessing.Process hooks
         super(KMC_Model, self).__init__()
+
+        # setup queues for viewer
         self.image_queue = image_queue
         self.parameter_queue = parameter_queue
         self.signal_queue = signal_queue
         self.autosend = autosend
+
+        # initalize instance settings
+        self.system_name = system_name
+        self.banner = banner
         self.print_rates = print_rates
         self.parameters = Model_Parameters(self.print_rates)
         self.rate_constants = Model_Rate_Constants()
         self.size = int(settings.simulation_size) \
                         if size is None else int(size)
 
+        # bind Fortran submodules
         self.base = base
         self.lattice = lattice
         self.proclist = proclist
         self.settings = settings
-        self.system_name = system_name
-        self.banner = banner
 
         self.proclist.seed = np.array(getattr(self.settings, 'random_seed', 1))
         self.reset()
 
+        if hasattr(settings, 'setup_model'):
+            import new
+            self.setup_model = new.instancemethod(settings.setup_model,
+                                                  self,
+                                                  KMC_Model)
+            self.setup_model()
 
     def __enter__(self, *args, **kwargs):
         """__enter/exit__ function for with-statement protocol"""
