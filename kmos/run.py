@@ -72,7 +72,7 @@ except Exception, e:
 
 class KMC_Model(multiprocessing.Process):
     """API Front-end to initialize and run a kMC model using python bindings.
-    Depending on the constructor cal the model can be run either via directory
+    Depending on the constructor call the model can be run either via directory
     calls or in a separate processes access via multiprocessing.Queues.
     Only one model instance can exist simultaneously per process."""
 
@@ -104,12 +104,13 @@ class KMC_Model(multiprocessing.Process):
         self.proclist.seed = np.array(getattr(self.settings, 'random_seed', 1))
         self.reset()
 
+
     def __enter__(self, *args, **kwargs):
-        """__enter/exit__ function for with-statement protocoll"""
+        """__enter/exit__ function for with-statement protocol"""
         return self
 
     def __exit__(self, *args, **kwargs):
-        """__enter/exit__ function for with-statement protocoll"""
+        """__enter/exit__ function for with-statement protocol"""
         self.deallocate()
 
     def reset(self):
