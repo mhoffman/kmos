@@ -1,6 +1,14 @@
 model_name = 'my_model'
 simulation_size = 20
 random_seed = 1
+
+def setup_model(model):
+    """Write initialization steps here.
+       e.g. ::
+    model.put([0,0,0,model.lattice.default_a], model.proclist.species_a)
+    """
+    pass
+
 parameters = {
     "A":{"value":"20.e-19", "adjustable":False, "min":"0.0", "max":"0.0","scale":"linear"},
     "E_co_bridge":{"value":".1", "adjustable":False, "min":"0.0", "max":"0.0","scale":"linear"},

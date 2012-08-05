@@ -382,10 +382,9 @@ class ProcListWriter():
             self.write_proclist_touchup(data, out)
             self.write_proclist_multilattice(data, out)
 
-        elif code_generator == 'local_dumb':
+        elif code_generator == 'lat_int':
             self.write_proclist_generic_part(data, out)
-            self.write_proclist_run_proc_nr_dumb(data, out)
-            self.write_proclist_touchup(data, out)
+            self.write_proclist_lat_int(data, out)
             self.write_proclist_multilattice(data, out)
         else:
             raise Exception("Don't know this code generator %s" % code_generator)
@@ -733,7 +732,7 @@ class ProcListWriter():
         out.write('    end select\n\n')
         out.write('end subroutine run_proc_nr\n\n')
 
-    def write_proclist_run_proc_nr_dumb(self, data, out):
+    def write_proclist_lat_int(self, data, out):
         """
         This a dumber version of the run_proc_nr routine. Though
         the source code it generates might be quite a bit smaller.
@@ -757,19 +756,29 @@ class ProcListWriter():
                   '    ! lsite = lattice_site, (vs. scalar site)\n'
                   '    lsite = nr2lattice(nr_site, :)\n\n'
                   '    select case(proc)\n')
+
+        # group processes by lateral interaction groups
+        lat_int_groups = {}
+        for process in data.process_list:
+            actions = process.action_list
+            # fetch those conditions that are
+            # matched by an option
+            conditions = [condition for condition  in process.condition_list
+                          if condition.coord in [action.coord for action in actions]]
+
+
+
         # iterate over all process
         for process in data.process_list:
         # make direct atomic changes
         # determine possibly affected sites
         # call the touchup function for each of them
         # TODO
-
-
-
-
             out.write('    case(%s)\n' % process.name)
             out.write('\n')
+            print(process.name)
         out.write('    end select\n\n')
+
         out.write('end subroutine run_proc_nr\n\n')
 
 
