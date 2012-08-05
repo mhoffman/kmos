@@ -103,6 +103,12 @@ kmos.view
 .. automodule:: kmos.view
    :members: KMC_Viewer
 
+kmos.cli
+^^^^^^^^
+
+.. automodule:: kmos.cli
+   :members: main
+
 kmos.utils
 ^^^^^^^^^
 
