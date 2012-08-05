@@ -4,6 +4,12 @@
    on the program path, import this modules
    main function and run it.
 
+   To call kmos command as you would from the shell,
+   use ::
+
+       kmos.cli.main('...')
+
+
 """
 
 #    Copyright 2009-2012 Max J. Hoffmann (mjhoffmann@gmail.com)
