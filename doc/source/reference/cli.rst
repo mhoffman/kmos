@@ -53,3 +53,7 @@
         Take a kmc_model.so and kmc_settings.py in the
         same directory and start to simulate the
         model visually.
+
+
+``kmos xml``
+    Print xml representation of model to stdout
