@@ -213,6 +213,13 @@ you run ::
 
   kmos export myfirst_kmc.xml
 
+or alternatively if you are still on the ipython shell
+and don't like to quit it you can use the API hook
+of the command line interface like ::
+
+  import kmos.cli
+  kmos.cli.main('export myfirst_kmc.xml')
+
 
 Make sure this finishes gracefully without any line
 containining an error.

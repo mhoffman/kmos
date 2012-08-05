@@ -48,3 +48,17 @@ care of the correct allocation and deallocation ::
       # one or more changes to the model
       # ...
       main(model)
+
+Or you can use the hook in the `kmc_settings.py` called `setup_model`.
+This function will be invoked at startup every time you call ::
+
+  kmos view, run, or benchmark
+
+Though it can easily get overwritten, when exporting or rebuilding.
+To minimize this risk, you e.g. place the `setup_model` function
+in a separate file called `setup_model.py` and insert into kmc_settings.py ::
+
+  from setup_model import setup_model
+
+Next time you overwrite `kmc_settings.py` you just need to add this line
+again.
