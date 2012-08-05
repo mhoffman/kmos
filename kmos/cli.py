@@ -59,6 +59,9 @@ if os.name == 'nt':
         Take a kmos xml-file and export all generated
         source code to the export-path. There try to
         build the kmc_model.pyd.
+
+        Additional Parameters ::
+            -s : export source only and don't build binary
                         """
 else:
     usage['export'] = """kmos export <xml-file> [<export-path>]
@@ -93,6 +96,10 @@ if os.name == 'nt':
         Take a kmc_model.pyd and kmc_settings.py in the
         same directory and start to simulate the
         model visually.
+
+        Additional Parameters ::
+            -v <number> : Number of steps per frame
+
                      """
 else:
     usage['view'] = """kmos view
