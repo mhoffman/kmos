@@ -1,6 +1,14 @@
 model_name = 'test_cli_generated_model'
 simulation_size = 20
 random_seed = 1
+
+def setup_model(model):
+    """Write initialization steps here.
+       e.g. ::
+    model.put([0,0,0,model.lattice.default_a], model.proclist.species_a)
+    """
+    pass
+
 parameters = {
     "p_CO":{"value":"0.2", "adjustable":False, "min":"0.0", "max":"0.0","scale":"log"},
     "T":{"value":"500", "adjustable":True, "min":"0.0", "max":"0.0","scale":"linear"},

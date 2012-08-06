@@ -72,7 +72,7 @@ except Exception, e:
 
 class KMC_Model(multiprocessing.Process):
     """API Front-end to initialize and run a kMC model using python bindings.
-    Depending on the constructor cal the model can be run either via directory
+    Depending on the constructor call the model can be run either via directory
     calls or in a separate processes access via multiprocessing.Queues.
     Only one model instance can exist simultaneously per process."""
 
@@ -84,11 +84,19 @@ class KMC_Model(multiprocessing.Process):
                        print_rates=True,
                        autosend=True,
                        steps_per_frame=50000):
+
+        # initialize multiprocessing.Process hooks
         super(KMC_Model, self).__init__()
+
+        # setup queues for viewer
         self.image_queue = image_queue
         self.parameter_queue = parameter_queue
         self.signal_queue = signal_queue
         self.autosend = autosend
+
+        # initalize instance settings
+        self.system_name = system_name
+        self.banner = banner
         self.print_rates = print_rates
         self.parameters = Model_Parameters(self.print_rates)
         self.rate_constants = Model_Rate_Constants()
@@ -96,15 +104,21 @@ class KMC_Model(multiprocessing.Process):
                         if size is None else int(size)
         self.steps_per_frame = steps_per_frame
 
+        # bind Fortran submodules
         self.base = base
         self.lattice = lattice
         self.proclist = proclist
         self.settings = settings
-        self.system_name = system_name
-        self.banner = banner
 
         self.proclist.seed = np.array(getattr(self.settings, 'random_seed', 1))
         self.reset()
+
+        if hasattr(settings, 'setup_model'):
+            import new
+            self.setup_model = new.instancemethod(settings.setup_model,
+                                                  self,
+                                                  KMC_Model)
+            self.setup_model()
 
     def __enter__(self, *args, **kwargs):
         """__enter/exit__ function for with-statement protocol."""
@@ -112,7 +126,7 @@ class KMC_Model(multiprocessing.Process):
 
     def __exit__(self, *args, **kwargs):
         """__enter/exit__ function for with-statement protocol."""
-        self.deallocate()
+        return self
 
     def reset(self):
         self.size = int(settings.simulation_size)

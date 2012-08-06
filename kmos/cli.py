@@ -4,6 +4,12 @@
    on the program path, import this modules
    main function and run it.
 
+   To call kmos command as you would from the shell,
+   use ::
+
+       kmos.cli.main('...')
+
+
 """
 
 #    Copyright 2009-2012 Max J. Hoffmann (mjhoffmann@gmail.com)
@@ -53,6 +59,9 @@ if os.name == 'nt':
         Take a kmos xml-file and export all generated
         source code to the export-path. There try to
         build the kmc_model.pyd.
+
+        Additional Parameters ::
+            -s : export source only and don't build binary
                         """
 else:
     usage['export'] = """kmos export <xml-file> [<export-path>]
@@ -87,6 +96,10 @@ if os.name == 'nt':
         Take a kmc_model.pyd and kmc_settings.py in the
         same directory and start to simulate the
         model visually.
+
+        Additional Parameters ::
+            -v <number> : Number of steps per frame
+
                      """
 else:
     usage['view'] = """kmos view
