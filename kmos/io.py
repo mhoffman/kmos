@@ -387,7 +387,7 @@ class ProcListWriter():
             self.write_proclist_lat_int(data, out)
             self.write_proclist_multilattice(data, out)
         else:
-            raise Exception("Don't know this code generator %s" % code_generator)
+            raise Exception("Don't know this code generator '%s'" % code_generator)
 
         out.close()
 
