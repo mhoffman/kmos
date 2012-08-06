@@ -13,7 +13,7 @@ pt.set_meta(author='Max J. Hoffmann',
 layer = pt.add_layer(name='simplecubic_2d')
 layer.add_site(name='a')
 pt.add_species(name='empty', color='#ffffff')
-pt.add_species(name='O', color='#000000',
+pt.add_species(name='O', color='#ff0000',
                representation="Atoms('O')",)
 pt.add_species(name='CO', color='#000000',
                representation="Atoms('CO',[[0,0,0],[0,0,1.2]])",

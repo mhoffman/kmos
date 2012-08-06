@@ -24,7 +24,7 @@ import operator
 import shutil
 import os
 
-from kmos.types import ConditionAction
+from kmos.types import ConditionAction, LatIntProcess
 from kmos.config import APP_ABS_PATH
 
 
@@ -732,55 +732,110 @@ class ProcListWriter():
         out.write('    end select\n\n')
         out.write('end subroutine run_proc_nr\n\n')
 
-    def write_proclist_lat_int(self, data, out):
+    def write_proclist_lat_int(self, data, out, debug=True):
         """
         This a dumber version of the run_proc_nr routine. Though
         the source code it generates might be quite a bit smaller.
         On the downside, it might be a little less optimized though
         it is local in a very strict sense. [EXPERIMENTAL/UNFINISHED!!!]
         """
-        out.write('subroutine run_proc_nr(proc, nr_site)\n\n'
-                  '!****f* proclist/run_proc_nr\n'
-                  '! FUNCTION\n'
-                  '!    Runs process ``proc`` on site ``nr_site``.\n'
-                  '!\n'
-                  '! ARGUMENTS\n'
-                  '!\n'
-                  '!    * ``proc`` integer representing the process number\n'
-                  '!    * ``nr_site``  integer representing the site\n'
-                  '!******\n'
-                  '    integer(kind=iint), intent(in) :: proc\n'
-                  '    integer(kind=iint), intent(in) :: nr_site\n\n'
-                  '    integer(kind=iint), dimension(4) :: lsite\n\n'
-                  '    call increment_procstat(proc)\n\n'
-                  '    ! lsite = lattice_site, (vs. scalar site)\n'
-                  '    lsite = nr2lattice(nr_site, :)\n\n'
-                  '    select case(proc)\n')
 
+        process_list = []
         # group processes by lateral interaction groups
-        lat_int_groups = {}
         for process in data.process_list:
             actions = process.action_list
-            # fetch those conditions that are
-            # matched by an option
-            conditions = [condition for condition  in process.condition_list
-                          if condition.coord in [action.coord for action in actions]]
+
+            # identify, which conditions
+            # are truly changing and which are just bystanders
+            true_conditions = []
+            true_actions = []
+            bystanders = []
+            for condition in process.condition_list:
+                corresponding_actions = [action for action in actions if condition.coord == action.coord]
 
 
+                if debug:
+                    print('%s: %s <-> %s' % (process.name, condition, corresponding_actions))
 
-        # iterate over all process
-        for process in data.process_list:
-        # make direct atomic changes
-        # determine possibly affected sites
-        # call the touchup function for each of them
-        # TODO
-            out.write('    case(%s)\n' % process.name)
-            out.write('\n')
-            print(process.name)
-        out.write('    end select\n\n')
+                if corresponding_actions:
+                    action = corresponding_actions[0]
+                    if condition.species != action.species :
+                        true_conditions.append(condition)
+                        true_actions.append(action)
+                    else:
+                        bystanders.append(condition)
+                else:
+                    bystanders.append(condition)
+            if hasattr(process, 'bystanders'):
+                bystanders.extend(process.bystanders)
 
-        out.write('end subroutine run_proc_nr\n\n')
+            if debug:
+                print('\n\nPROCESSNAME  %s' % (process.name))
+                print('    TRUE CONDITIONS %s' % (true_conditions))
+                print('    TRUE ACTIONS %s' % (true_actions))
+                print('    BYSTANDERS %s' % (bystanders))
+            process_list.append(LatIntProcess(
+                                name=process.name,
+                                rate_constant=process.rate_constant,
+                                condition_list=true_conditions,
+                                action_list=true_actions,
+                                bystanders=bystanders,
+                                enabled=process.enabled,
+                                tof_count=process.tof_count,))
 
+        lat_int_groups = {}
+        with open('debug_process_grouping.txt', 'w') as dbg_file:
+            for process in process_list :
+                for lat_int_group, processes in lat_int_groups.iteritems():
+                    p0 = processes[0]
+                    same = True
+                    if sorted(p0.condition_list) != sorted(process.condition_list) :
+                        same = False
+
+                    if sorted(p0.action_list) != sorted(process.action_list) :
+                        same = False
+
+                    if same:
+                        if debug:
+                            dbg_file.write('    %s <- %s\n' % (lat_int_group, process.name))
+                        processes.append(process)
+                        break
+                else:
+                    lat_int_groups[process.name] = [process]
+                    if debug:
+                        dbg_file.write('* %s\n' % (process.name))
+
+        # correctly determined lat. int. groups, yay.
+
+        #TODO: check if lat_int group is correct
+        # i.e. each bystander list is unique
+        # let's assume it for now
+
+        for lat_int_group, processes in lat_int_groups.iteritems():
+            process = processes[0]
+            # create mapping to map the sparse
+            # representation for lateral interaction
+            # into a contiguous one
+            densify = {}
+            for i, process in enumerate(processes):
+                # calculate lat. int. nr
+                lat_int_nr = 0
+                nr_of_species = len(data.species_list())
+                for j, bystander in enumerate(proces.bystanders):
+                    pass
+                    # CONTINUE HERE
+
+            out.write('subroutine get_lat_int_%s(cell, lat_int_proc)\n'
+                      % (lat_int_group))
+            out.write('    integer(kind=iint), dimension(4), intent(in) :: cell\n')
+            out.write('    integer, intent(out) :: lat_int_proc\n\n')
+            out.write('    integer :: n\n\n')
+            out.write('    n = 0\n\n')
+            for i, bystander in enumerate(process.bystanders):
+                out.write('    n = n + get_species(lattice2nr(cell%s))*nr_of_species**%s\n'
+                % (bystander.coord.radd_ff(), i))
+
+            out.write('\nend subroutine get_lat_int_%s\n\n' % (lat_int_group))
 
     def write_proclist_put_take(self, data, out):
         """

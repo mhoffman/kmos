@@ -30,7 +30,7 @@ class FixedObject(object):
     attributes = []
 
     def __init__(self, **kwargs):
-        self.__doc__ += '\nAllowed keywords: %s' % self.attributes
+        self.__doc__ = ('\nAllowed keywords: %s' % self.attributes)
         for attribute in self.attributes:
             if attribute in kwargs:
                 self.__dict__[attribute] = kwargs[attribute]
@@ -1153,6 +1153,16 @@ class Process(FixedObject):
         import kmos.evaluate_rate_expression
         return kmos.evaluate_rate_expression(self.rate_constant, parameters)
 
+class LatIntProcess(Process):
+    attributes = ['name',
+                  'rate_constant',
+                  'condition_list',
+                  'action_list',
+                  'bystanders',
+                  'enabled',
+                  'chemical_expression',
+                  'tof_count']
+
 
 class ConditionAction(FixedObject):
     """Represents either a condition or an action. Since both
@@ -1164,12 +1174,12 @@ class ConditionAction(FixedObject):
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)
 
+    def __eq__(self, other):
+        return self.__repr__() == other.__repr__()
+
     def __repr__(self):
         return ("[COND_ACT] Species: %s Coord:%s\n" %
                (self.species, self.coord))
-
-    def __eq__(self, other):
-        return self.__repr__() == other.__repr__()
 
     def __hash__(self):
         return self.__repr__()

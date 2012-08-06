@@ -40,43 +40,37 @@ usage['benchmark'] = """kmos benchmark
     and report runtime.
                      """
 
-if os.name == 'nt':
-    usage['build'] = """kmos build
-        Build kmc_model.pyd from *f90 files in the
-        current directory.
-                     """
-else:
-    usage['build'] = """kmos build
-        Build kmc_model.so from *f90 files in the
-        current directory.
-                     """
+usage['build'] = """kmos build
+    Build kmc_model.%s from *f90 files in the
+    current directory.
+                 """ % ('pyd' if os.name == 'nt' else 'so')
 
 usage['help'] = """kmos help <command>
     Print usage information for the given command.
                 """
-if os.name == 'nt':
-    usage['export'] = """kmos export <xml-file> [<export-path>]
-        Take a kmos xml-file and export all generated
-        source code to the export-path. There try to
-        build the kmc_model.pyd.
 
-        Additional Parameters ::
-            -s : export source only and don't build binary
-                        """
-else:
-    usage['export'] = """kmos export <xml-file> [<export-path>]
-        Take a kmos xml-file and export all generated
-        source code to the export-path. There try to
-        build the kmc_model.so.
-                        """
+usage['export'] = """kmos export <xml-file> [<export-path>]
+    Take a kmos xml-file and export all generated
+    source code to the export-path. There try to
+    build the kmc_model.%s.
+
+    Additional Parameters ::
+        -s : export source only and don't build binary
+                    """ % ('pyd' if os.name == 'nt' else 'so')
+
 usage['export-settings'] = """kmos export-settings <xml-file> [<export-path>]
     Take a kmos xml-file and export kmc_settings.py
     to the export-path.
                     """
+
 usage['edit'] = """kmos edit <xml-file>
     Open the kmos xml-file in a GUI to edit
     the model.
+
+    Additional Parameters ::
+        -c <code_generator> : Name for code generator [EXPERIMENTAL]
                 """
+
 usage['import'] = """kmos import <xml-file>
     Take a kmos xml-file and open an ipython shell
     with the project_tree imported as pt.
@@ -91,22 +85,15 @@ usage['run'] = """kmos run
     Open an interactive shell and create a KMC_Model in it
                """
 
-if os.name == 'nt':
-    usage['view'] = """kmos view
-        Take a kmc_model.pyd and kmc_settings.py in the
-        same directory and start to simulate the
-        model visually.
+usage['view'] = """kmos view
+    Take a kmc_model.%s and kmc_settings.py in the
+    same directory and start to simulate the
+    model visually.
 
-        Additional Parameters ::
-            -v <number> : Number of steps per frame
+    Additional Parameters ::
+        -v <number> : Number of steps per frame
 
-                     """
-else:
-    usage['view'] = """kmos view
-        Take a kmc_model.so and kmc_settings.py in the
-        same directory and start to simulate the
-        model visually.
-                     """
+                 """ % ('pyd' if os.name == 'nt' else 'so')
 
 usage['xml'] = """kmos xml
     Print xml representation of model to stdout
@@ -157,7 +144,7 @@ def get_options(args=None, get_parser=False):
         options, args = parser.parse_args(args.split())
     else:
         options, args = parser.parse_args()
-    if len(args) < 1:
+    if len(args) < 1 :
         parser.error('Command expected')
     if get_parser:
         return options, args, parser
