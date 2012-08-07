@@ -732,7 +732,7 @@ class ProcListWriter():
         out.write('    end select\n\n')
         out.write('end subroutine run_proc_nr\n\n')
 
-    def write_proclist_lat_int(self, data, out, debug=True):
+    def write_proclist_lat_int(self, data, out, debug=False):
         """
         This a dumber version of the run_proc_nr routine. Though
         the source code it generates might be quite a bit smaller.
@@ -813,22 +813,37 @@ class ProcListWriter():
 
         for lat_int_group, processes in lat_int_groups.iteritems():
             process = processes[0]
-            # create mapping to map the sparse
-            # representation for lateral interaction
-            # into a contiguous one
-            densify = {}
-            for i, process in enumerate(processes):
-                # calculate lat. int. nr
-                lat_int_nr = 0
-                nr_of_species = len(data.species_list())
-                for j, bystander in enumerate(proces.bystanders):
-                    pass
-                    # CONTINUE HERE
-
             out.write('subroutine get_lat_int_%s(cell, lat_int_proc)\n'
                       % (lat_int_group))
             out.write('    integer(kind=iint), dimension(4), intent(in) :: cell\n')
             out.write('    integer, intent(out) :: lat_int_proc\n\n')
+            # create mapping to map the sparse
+            # representation for lateral interaction
+            # into a contiguous one
+            compression_map = {}
+            for i, process in enumerate(processes):
+                # calculate lat. int. nr
+                lat_int_nr = 0
+                nr_of_species = len(data.species_list)
+                for j, bystander in enumerate(process.bystanders):
+                    # CONTINUE HERE
+                    species_nr = [x for (x, species) in
+                                  enumerate(data.species_list)
+                                  if species.name == bystander.species][0]
+                    lat_int_nr += species_nr*(nr_of_species**j)
+                compression_map[lat_int_nr] = process.name
+            compression_index = [compression_map.get(i, 0) for
+                                 i in xrange(nr_of_species**len(process.bystanders))]
+            #print(process.name)
+            #print(compression_map)
+            #print(compression_index)
+
+            out.write('    integer, dimension(%s) :: lat_int_index_%s = %s\n'
+                      % (len(compression_index),
+                        process.name, compression_index))
+
+
+
             out.write('    integer :: n\n\n')
             out.write('    n = 0\n\n')
             for i, bystander in enumerate(process.bystanders):
@@ -836,6 +851,17 @@ class ProcListWriter():
                 % (bystander.coord.radd_ff(), i))
 
             out.write('\nend subroutine get_lat_int_%s\n\n' % (lat_int_group))
+
+        for lat_int_group, processes in lat_int_groups.iteritems():
+            out.write('subroutine run_proc_%s(cell)\n\n' % lat_int_group)
+            out.write('\n! disable processes that have to be disabled\n')
+
+            out.write('\n! update lattice\n')
+
+
+            out.write('\n! enable processes that have to be enabled\n')
+
+            out.write('\nend subroutine run_proc_%s\n\n' % lat_int_group)
 
     def write_proclist_put_take(self, data, out):
         """
