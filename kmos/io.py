@@ -23,8 +23,9 @@ import itertools
 import operator
 import shutil
 import os
+from pprint import PrettyPrinter, pformat
 
-from kmos.types import ConditionAction, LatIntProcess
+from kmos.types import ConditionAction, LatIntProcess, SingleLatIntProcess
 from kmos.config import APP_ABS_PATH
 
 
@@ -740,6 +741,9 @@ class ProcListWriter():
         it is local in a very strict sense. [EXPERIMENTAL/UNFINISHED!!!]
         """
 
+        #TODO: now only for old style definition of processes (w/o bystanders)
+        #FUTURE: insert switch and support new style definition of processes
+
         process_list = []
         # group processes by lateral interaction groups
         for process in data.process_list:
@@ -774,7 +778,7 @@ class ProcListWriter():
                 print('    TRUE CONDITIONS %s' % (true_conditions))
                 print('    TRUE ACTIONS %s' % (true_actions))
                 print('    BYSTANDERS %s' % (bystanders))
-            process_list.append(LatIntProcess(
+            process_list.append(SingleLatIntProcess(
                                 name=process.name,
                                 rate_constant=process.rate_constant,
                                 condition_list=true_conditions,
@@ -791,10 +795,8 @@ class ProcListWriter():
                     same = True
                     if sorted(p0.condition_list) != sorted(process.condition_list) :
                         same = False
-
                     if sorted(p0.action_list) != sorted(process.action_list) :
                         same = False
-
                     if same:
                         if debug:
                             dbg_file.write('    %s <- %s\n' % (lat_int_group, process.name))
@@ -808,15 +810,18 @@ class ProcListWriter():
         # correctly determined lat. int. groups, yay.
 
         #TODO: check if lat_int group is correct
-        # i.e. each bystander list is unique
+        # i.e.
+        # - each bystander list is unique
+        # - all bystanders cover the same set of sites
         # let's assume it for now
 
         for lat_int_group, processes in lat_int_groups.iteritems():
             process = processes[0]
-            out.write('subroutine get_lat_int_%s(cell, lat_int_proc)\n'
+            out.write('function get_lat_int_%s(cell, lat_int_proc)\n'
                       % (lat_int_group))
             out.write('    integer(kind=iint), dimension(4), intent(in) :: cell\n')
             out.write('    integer, intent(out) :: lat_int_proc\n\n')
+            out.write('    integer(kind=iint) :: get_lat_int_%s\n\n' % lat_int_group)
             # create mapping to map the sparse
             # representation for lateral interaction
             # into a contiguous one
@@ -850,16 +855,53 @@ class ProcListWriter():
                 out.write('    n = n + get_species(lattice2nr(cell%s))*nr_of_species**%s\n'
                 % (bystander.coord.radd_ff(), i))
 
-            out.write('\nend subroutine get_lat_int_%s\n\n' % (lat_int_group))
+            out.write('\nend function get_lat_int_%s\n\n' % (lat_int_group))
 
         for lat_int_group, processes in lat_int_groups.iteritems():
+            print('PROCESS: %s' % lat_int_group)
+            process = processes[0]
+            modified_procs = set()
             out.write('subroutine run_proc_%s(cell)\n\n' % lat_int_group)
-            out.write('\n! disable processes that have to be disabled\n')
+            out.write('    integer(kind=iint), dimension(4), intent(in) :: cell\n')
+            out.write('\n    ! disable processes that have to be disabled\n')
+            for action in process.action_list:
+                print('    ACTION: %s' % action)
+                for _, other_processes in lat_int_groups.iteritems():
+                    other_process = other_processes[0]
+                    print('      OTHER PROCESS %s' % (pformat(other_process, indent=12)))
+                    other_conditions = other_process.condition_list + other_process.bystanders
+                    print('            OTHER CONDITIONS\n%s' % pformat(other_conditions, indent=12))
 
-            out.write('\n! update lattice\n')
+                    for condition in other_conditions :
+                        if action.coord.eq_mod_offset(condition.coord):
+                            modified_procs.add((other_process, tuple(action.coord.offset-condition.coord.offset)))
+
+            modified_procs = sorted(modified_procs)
+            for i, (process, offset) in enumerate(modified_procs):
+                out.write('    call del_proc(get_lat_int_%s(cell + %s), cell + %s)\n'
+                    % (process.name, offset, offset))
 
 
-            out.write('\n! enable processes that have to be enabled\n')
+            out.write('\n    ! update lattice\n')
+            for condition in process.condition_list:
+                try:
+                    action = [action for action in process.action_list
+                                            if condition.coord == action.coord][0]
+                except Exception as e:
+                    print(e)
+                    print('Trouble with process %s' % process.name)
+                    print('And condition %s' % condition)
+                    raise
+
+                out.write('    update: %s -> %s @ %s\n' % (condition.species,
+                                                           action.species,
+                                                           condition.coord))
+
+
+            out.write('\n    ! enable processes that have to be enabled\n')
+            for i, (process, offset) in enumerate(modified_procs):
+                out.write('    call del_proc(get_lat_int_%s(cell + %s), cell + %s)\n'
+                    % (process.name, offset, offset))
 
             out.write('\nend subroutine run_proc_%s\n\n' % lat_int_group)
 

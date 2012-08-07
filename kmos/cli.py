@@ -120,8 +120,8 @@ def get_options(args=None, get_parser=False):
                       dest='path_to_f2py',
                       default='f2py')
 
-    parser.add_option('-c','--code-generator',
-                     dest='code_generator',
+    parser.add_option('-b','--backend',
+                     dest='backend',
                      default='local_smart')
 
     parser.add_option('-v','--steps-per-frame',
@@ -226,7 +226,7 @@ def main(args=None):
 
         kmos.io.export_source(project,
                               export_dir,
-                              code_generator=options.code_generator)
+                              code_generator=options.backend)
 
         if ((os.name == 'posix'
            and os.uname()[0] == 'Linux')

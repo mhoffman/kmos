@@ -975,11 +975,15 @@ class Coord(FixedObject):
 
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)
-        self.offset = kwargs.get('offset', (0, 0, 0))
+        self.offset = kwargs.get('offset', np.array([0, 0, 0]))
         if len(self.offset) == 1:
-            self.offset = (self.offset[0], 0, 0)
+            self.offset = np.array([self.offset[0], 0, 0])
         elif len(self.offset) == 2:
-            self.offset = (self.offset[0], self.offset[1], 0)
+            self.offset = np.array([self.offset[0], self.offset[1], 0])
+        elif len(self.offset) == 3:
+            self.offset = np.array([self.offset[0],
+                                    self.offset[1],
+                                    self.offset[2]])
 
         self.pos = np.array([float(i) for i in kwargs['pos'].split()]) \
                    if 'pos' in kwargs else np.array([0., 0., 0.])
@@ -991,9 +995,15 @@ class Coord(FixedObject):
                                      tuple(self.offset),
                                      self.layer)
 
+    def eq_mod_offset(self, other):
+        """Compares wether to coordinates are the same up to (modulo)
+        a cell offset.
+        """
+        return (self.layer, self.name) == (other.layer, other.name)
+
     def __eq__(self, other):
-        return (self.layer, self.name, self.offset) == \
-               (other.layer, other.name, other.offset)
+        return ((self.layer, self.name) == \
+               (other.layer, other.name)) and (self.offset == other.offset).all()
 
     def __hash__(self):
         return self.__repr__()
@@ -1153,7 +1163,12 @@ class Process(FixedObject):
         import kmos.evaluate_rate_expression
         return kmos.evaluate_rate_expression(self.rate_constant, parameters)
 
-class LatIntProcess(Process):
+
+class SingleLatIntProcess(Process):
+    """A process that corresponds to a single lateral interaction
+    configuration. This is conceptually the same as the old
+    condition/action model, just some conditions are now called
+    bystanders."""
     attributes = ['name',
                   'rate_constant',
                   'condition_list',
@@ -1163,6 +1178,30 @@ class LatIntProcess(Process):
                   'chemical_expression',
                   'tof_count']
 
+
+class LatIntProcess(Process):
+    """A process which directly includes lateral interactions.
+    In this model a bystander just defines a set of allowed
+    species so, it allows for additional degrees of freedom
+    here. Different lateral model can be accounted for through
+    counters and placeholder in rate expression.
+
+    """
+    attributes = ['name',
+                  'rate_constant',
+                  'condition_list',
+                  'action_list',
+                  'bystanders',
+                  'enabled',
+                  'chemical_expression',
+                  'tof_count']
+
+
+class Bystander(FixedObject):
+    attributes = ['coord', 'allowed_species', 'counter']
+    def __repr__(self):
+        return ("[BYSTANDER] Coord:%s Allowed species: %s, Counter: %s\n" %
+               (self.coord, self.allowed_species, self.counter))
 
 class ConditionAction(FixedObject):
     """Represents either a condition or an action. Since both
