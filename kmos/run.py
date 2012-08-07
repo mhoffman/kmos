@@ -308,11 +308,11 @@ class KMC_Model(multiprocessing.Process):
 
             ffmpeg -i movie_%06d.png -f image2 -r 24 movie.avi
 
-        Allows suffixes are png, pov, and eps. Additional keyword arguments (kwargs)
-        are passed directly the ase.io.write of the ASE library.
+        Allows suffixes are png, pov, and eps. Additional keyword arguments
+        (kwargs) are passed directly the ase.io.write of the ASE library.
 
-        When exporting to *.pov, one has to manually povray each *.pov file in the
-        directory which is as simple as typing ::
+        When exporting to *.pov, one has to manually povray each *.pov file in
+        the directory which is as simple as typing ::
 
             for pov_file in *.pov
             do
@@ -555,6 +555,21 @@ class KMC_Model(multiprocessing.Process):
             model._adjust_database() # Important !
 
         """
+        # Error checking
+        x, y, z, n = site
+        if not x in range(self.lattice.system_size[0]):
+            raise UserWarning('x-coordinate %s seems to fall outside lattice'
+                              % x)
+        if not y in range(self.lattice.system_size[1]):
+            raise UserWarning('y-coordinate %s seems to fall outside lattice'
+                              % y)
+        if not z in range(self.lattice.system_size[2]):
+            raise UserWarning('z-coordinate %s seems to fall outside lattice'
+                              % z)
+        if not n in range(1, self.lattice.spuck + 1):
+            raise UserWarning('n-coordinate %s seems to fall outside lattice'
+                              % n)
+
         old_species = self.lattice.get_species(site)
         self.lattice.replace_species(site, old_species, new_species)
 
@@ -569,8 +584,9 @@ class KMC_Model(multiprocessing.Process):
 
         Examples ::
 
-            model.put([0,0,0,model.lattice.lattice_bridge], model.proclist.co ])
-            # puts a CO molecule at the `bridge` site of the lower left unit cell
+            model.put([0,0,0,model.lattice.site], model.proclist.co ])
+            # puts a CO molecule at the `bridge` site
+            # of the lower left unit cell
 
         """
 
