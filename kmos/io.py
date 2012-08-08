@@ -740,6 +740,10 @@ class ProcListWriter():
         On the downside, it might be a little less optimized though
         it is local in a very strict sense. [EXPERIMENTAL/UNFINISHED!!!]
         """
+        def db_print(line, debug=debug):
+            if debug:
+                with open('dbg_file.txt', 'a') as dbg_file:
+                    dbg_file.write(line)
 
         #TODO: now only for old style definition of processes (w/o bystanders)
         #FUTURE: insert switch and support new style definition of processes
@@ -758,8 +762,7 @@ class ProcListWriter():
                 corresponding_actions = [action for action in actions if condition.coord == action.coord]
 
 
-                if debug:
-                    print('%s: %s <-> %s' % (process.name, condition, corresponding_actions))
+                db_print('%s: %s <-> %s' % (process.name, condition, corresponding_actions))
 
                 if corresponding_actions:
                     action = corresponding_actions[0]
@@ -773,11 +776,10 @@ class ProcListWriter():
             if hasattr(process, 'bystanders'):
                 bystanders.extend(process.bystanders)
 
-            if debug:
-                print('\n\nPROCESSNAME  %s' % (process.name))
-                print('    TRUE CONDITIONS %s' % (true_conditions))
-                print('    TRUE ACTIONS %s' % (true_actions))
-                print('    BYSTANDERS %s' % (bystanders))
+            db_print('\n\nPROCESSNAME  %s' % (process.name))
+            db_print('    TRUE CONDITIONS %s' % (true_conditions))
+            db_print('    TRUE ACTIONS %s' % (true_actions))
+            db_print('    BYSTANDERS %s' % (bystanders))
             process_list.append(SingleLatIntProcess(
                                 name=process.name,
                                 rate_constant=process.rate_constant,
@@ -788,24 +790,21 @@ class ProcListWriter():
                                 tof_count=process.tof_count,))
 
         lat_int_groups = {}
-        with open('debug_process_grouping.txt', 'w') as dbg_file:
-            for process in process_list :
-                for lat_int_group, processes in lat_int_groups.iteritems():
-                    p0 = processes[0]
-                    same = True
-                    if sorted(p0.condition_list) != sorted(process.condition_list) :
-                        same = False
-                    if sorted(p0.action_list) != sorted(process.action_list) :
-                        same = False
-                    if same:
-                        if debug:
-                            dbg_file.write('    %s <- %s\n' % (lat_int_group, process.name))
-                        processes.append(process)
-                        break
-                else:
-                    lat_int_groups[process.name] = [process]
-                    if debug:
-                        dbg_file.write('* %s\n' % (process.name))
+        for process in process_list :
+            for lat_int_group, processes in lat_int_groups.iteritems():
+                p0 = processes[0]
+                same = True
+                if sorted(p0.condition_list) != sorted(process.condition_list) :
+                    same = False
+                if sorted(p0.action_list) != sorted(process.action_list) :
+                    same = False
+                if same:
+                    db_print('    %s <- %s\n' % (lat_int_group, process.name))
+                    processes.append(process)
+                    break
+            else:
+                lat_int_groups[process.name] = [process]
+                db_print('* %s\n' % (process.name))
 
         # correctly determined lat. int. groups, yay.
 
@@ -814,6 +813,78 @@ class ProcListWriter():
         # - each bystander list is unique
         # - all bystanders cover the same set of sites
         # let's assume it for now
+
+        out.write('subroutine run_proc_nr(proc, nr_cell)\n')
+        out.write('    integer(kind=iint), intent(in) :: nr_cell\n')
+        out.write('    integer(kind=iint), intent(in) :: proc\n\n')
+        out.write('    integer(kind=iint), dimension(4) :: cell\n\n')
+        out.write('    cell = nr2lattice(nr_cell, :)\n')
+        out.write('    call increment_procstat(proc)\n\n')
+        out.write('    select case(proc)\n')
+        for lat_int_group, processes in lat_int_groups.iteritems():
+            out.write('    case(%s)\n' % (lat_int_group))
+            out.write('        call run_proc_%s(cell)\n' % lat_int_group)
+        out.write('    case default\n')
+        out.write('        print *, "Whoops, should not get here!"\n')
+        out.write('        print *, "PROC_NR", proc\n')
+        out.write('        stop\n')
+        out.write('    end select\n\n')
+
+        out.write('end subroutine run_proc_nr\n\n')
+
+        for lat_int_group, processes in lat_int_groups.iteritems():
+            db_print('PROCESS: %s' % lat_int_group)
+            process = processes[0]
+            modified_procs = set()
+            out.write('subroutine run_proc_%s(cell)\n\n' % lat_int_group)
+            out.write('    integer(kind=iint), dimension(4), intent(in) :: cell\n')
+            out.write('\n    ! disable processes that have to be disabled\n')
+            for action in process.action_list:
+                db_print('    ACTION: %s' % action)
+                for _, other_processes in lat_int_groups.iteritems():
+                    other_process = other_processes[0]
+                    db_print('      OTHER PROCESS %s' % (pformat(other_process, indent=12)))
+                    other_conditions = other_process.condition_list + other_process.bystanders
+                    db_print('            OTHER CONDITIONS\n%s' % pformat(other_conditions, indent=12))
+
+                    for condition in other_conditions :
+                        if action.coord.eq_mod_offset(condition.coord):
+                            modified_procs.add((other_process, tuple(action.coord.offset-condition.coord.offset)))
+
+            modified_procs = sorted(modified_procs)
+            for i, (process, offset) in enumerate(modified_procs):
+                offset = '(/%s, %s, %s, 0/)' % tuple(offset)
+                out.write('    call del_proc(get_lat_int_%s(cell + %s), cell + %s)\n'
+                    % (process.name, offset, offset))
+
+
+            out.write('\n    ! update lattice\n')
+            for condition in process.condition_list:
+                try:
+                    action = [action for action in process.action_list
+                                            if condition.coord == action.coord][0]
+                except Exception as e:
+                    print(e)
+                    print('Trouble with process %s' % process.name)
+                    print('And condition %s' % condition)
+                    raise
+
+                out.write('    call replace_species(cell%s, %s, %s)\n'
+                          % (condition.coord.radd_ff(),
+                             condition.species,
+                             action.species))
+                #out.write('    update: %s -> %s @ %s\n' % (condition.species,
+                                                           #action.species,
+                                                           #condition.coord))
+
+
+            out.write('\n    ! enable processes that have to be enabled\n')
+            for i, (process, offset) in enumerate(modified_procs):
+                offset = '(/%s, %s, %s, 0/)' % tuple(offset)
+                out.write('    call add_proc(get_lat_int_%s(cell + %s), cell + %s)\n'
+                    % (process.name, offset, offset))
+
+            out.write('\nend subroutine run_proc_%s\n\n' % lat_int_group)
 
         for lat_int_group, processes in lat_int_groups.iteritems():
             process = processes[0]
@@ -855,8 +926,6 @@ class ProcListWriter():
                 out.write(line)
             out.write('/)\n')
 
-
-
             out.write('    integer :: n\n\n')
             out.write('    n = 0\n\n')
             for i, bystander in enumerate(process.bystanders):
@@ -866,60 +935,6 @@ class ProcListWriter():
             out.write('\n    get_lat_int_%s = lat_int_index_%s(n + 1)'
                       % (lat_int_group, lat_int_group))
             out.write('\nend function get_lat_int_%s\n\n' % (lat_int_group))
-
-        for lat_int_group, processes in lat_int_groups.iteritems():
-            print('PROCESS: %s' % lat_int_group)
-            process = processes[0]
-            modified_procs = set()
-            out.write('subroutine run_proc_%s(cell)\n\n' % lat_int_group)
-            out.write('    integer(kind=iint), dimension(4), intent(in) :: cell\n')
-            out.write('\n    ! disable processes that have to be disabled\n')
-            for action in process.action_list:
-                print('    ACTION: %s' % action)
-                for _, other_processes in lat_int_groups.iteritems():
-                    other_process = other_processes[0]
-                    print('      OTHER PROCESS %s' % (pformat(other_process, indent=12)))
-                    other_conditions = other_process.condition_list + other_process.bystanders
-                    print('            OTHER CONDITIONS\n%s' % pformat(other_conditions, indent=12))
-
-                    for condition in other_conditions :
-                        if action.coord.eq_mod_offset(condition.coord):
-                            modified_procs.add((other_process, tuple(action.coord.offset-condition.coord.offset)))
-
-            modified_procs = sorted(modified_procs)
-            for i, (process, offset) in enumerate(modified_procs):
-                offset = '(/%s, %s, %s, 0/)' % tuple(offset)
-                out.write('    call del_proc(get_lat_int_%s(cell + %s), cell + %s)\n'
-                    % (process.name, offset, offset))
-
-
-            out.write('\n    ! update lattice\n')
-            for condition in process.condition_list:
-                try:
-                    action = [action for action in process.action_list
-                                            if condition.coord == action.coord][0]
-                except Exception as e:
-                    print(e)
-                    print('Trouble with process %s' % process.name)
-                    print('And condition %s' % condition)
-                    raise
-
-                out.write('    call replace_species(%s, %s, %s)\n'
-                          % (condition.coord.ff(),
-                             condition.species,
-                             action.species))
-                #out.write('    update: %s -> %s @ %s\n' % (condition.species,
-                                                           #action.species,
-                                                           #condition.coord))
-
-
-            out.write('\n    ! enable processes that have to be enabled\n')
-            for i, (process, offset) in enumerate(modified_procs):
-                offset = '(/%s, %s, %s, 0/)' % tuple(offset)
-                out.write('    call add_proc(get_lat_int_%s(cell + %s), cell + %s)\n'
-                    % (process.name, offset, offset))
-
-            out.write('\nend subroutine run_proc_%s\n\n' % lat_int_group)
 
     def write_proclist_put_take(self, data, out):
         """
