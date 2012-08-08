@@ -368,8 +368,10 @@ def build(options):
     call.append('--fcompiler=%s' % options.fcompiler)
     if os.name == 'nt':
         call.append('%s' % ccompiler)
-    call.append('--f90flags="%s"' % extra_flags.get(
-                                        options.fcompiler, ''))
+    extra_flags = extra_flags.get(options.fcompiler, '')
+    if options.debug :
+        extra_flags += ' -DDEBUG'
+    call.append('--f90flags="%s"' % extra_flags )
     call.append('-m')
     call.append(module_name)
     call += src_files.split()

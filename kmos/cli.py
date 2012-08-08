@@ -43,6 +43,9 @@ usage['benchmark'] = """kmos benchmark
 usage['build'] = """kmos build
     Build kmc_model.%s from *f90 files in the
     current directory.
+
+    Additional Parameters ::
+        -d : Turn on assertion statements in F90 code
                  """ % ('pyd' if os.name == 'nt' else 'so')
 
 usage['help'] = """kmos help <command>
@@ -56,6 +59,7 @@ usage['export'] = """kmos export <xml-file> [<export-path>]
 
     Additional Parameters ::
         -s : export source only and don't build binary
+        -d : Turn on assertion statements in F90 code
                     """ % ('pyd' if os.name == 'nt' else 'so')
 
 usage['export-settings'] = """kmos export-settings <xml-file> [<export-path>]
@@ -79,6 +83,9 @@ usage['rebuild'] = """kmos rebuild
     Export code and rebuild binary module from XML
     information included in kmc_settings.py in
     current directory.
+
+    Additional Parameters ::
+        -d : Turn on assertion statements in F90 code
                     """
 
 usage['run'] = """kmos run
@@ -128,6 +135,11 @@ def get_options(args=None, get_parser=False):
                      dest='steps_per_frame',
                      type='int',
                      default='50000')
+
+    parser.add_option('-d', '--debug',
+                      default=False,
+                      dest='debug',
+                      action='store_true')
     try:
         from numpy.distutils.fcompiler import get_default_fcompiler
         from numpy.distutils import log
