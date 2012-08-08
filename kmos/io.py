@@ -916,7 +916,7 @@ class ProcListWriter():
             out.write('\n    ! enable processes that have to be enabled\n')
             for i, (process, offset) in enumerate(modified_procs):
                 offset = '(/%s, %s, %s, 0/)' % tuple(offset)
-                out.write('    call del_proc(get_lat_int_%s(cell + %s), cell + %s)\n'
+                out.write('    call add_proc(get_lat_int_%s(cell + %s), cell + %s)\n'
                     % (process.name, offset, offset))
 
             out.write('\nend subroutine run_proc_%s\n\n' % lat_int_group)
