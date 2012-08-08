@@ -831,7 +831,6 @@ class ProcListWriter():
                 lat_int_nr = 0
                 nr_of_species = len(data.species_list)
                 for j, bystander in enumerate(process.bystanders):
-                    # CONTINUE HERE
                     species_nr = [x for (x, species) in
                                   enumerate(data.species_list)
                                   if species.name == bystander.species][0]
@@ -839,13 +838,14 @@ class ProcListWriter():
                 compression_map[lat_int_nr] = process.name
             compression_index = [compression_map.get(i, 0) for
                                  i in xrange(nr_of_species**len(process.bystanders))]
-            #print(process.name)
-            #print(compression_map)
-            #print(compression_index)
 
-            out.write('    integer, dimension(%s) :: lat_int_index_%s = %s\n'
-                      % (len(compression_index),
-                        process.name, compression_index))
+            out.write('    integer, dimension(%s) :: lat_int_index_%s = (/ &\n'
+                      % (len(compression_index), process.name))
+            outstr = ', '.join(map(str, compression_index))
+            outstr = pformat(outstr, indent=12, width=70).split('\n')
+            outstr = '&\n'.join(outstr)
+            out.write(outstr)
+            out.write(' '*12 + '/)\n')
 
 
 
@@ -878,6 +878,7 @@ class ProcListWriter():
 
             modified_procs = sorted(modified_procs)
             for i, (process, offset) in enumerate(modified_procs):
+                offset = '(/%s, %s, %s, 0/)' % tuple(offset)
                 out.write('    call del_proc(get_lat_int_%s(cell + %s), cell + %s)\n'
                     % (process.name, offset, offset))
 
@@ -893,13 +894,18 @@ class ProcListWriter():
                     print('And condition %s' % condition)
                     raise
 
-                out.write('    update: %s -> %s @ %s\n' % (condition.species,
-                                                           action.species,
-                                                           condition.coord))
+                out.write('    call replace_species(%s, %s, %s)\n'
+                          % (condition.coord.ff(),
+                             condition.species,
+                             action.species))
+                #out.write('    update: %s -> %s @ %s\n' % (condition.species,
+                                                           #action.species,
+                                                           #condition.coord))
 
 
             out.write('\n    ! enable processes that have to be enabled\n')
             for i, (process, offset) in enumerate(modified_procs):
+                offset = '(/%s, %s, %s, 0/)' % tuple(offset)
                 out.write('    call del_proc(get_lat_int_%s(cell + %s), cell + %s)\n'
                     % (process.name, offset, offset))
 
