@@ -817,10 +817,9 @@ class ProcListWriter():
 
         for lat_int_group, processes in lat_int_groups.iteritems():
             process = processes[0]
-            out.write('function get_lat_int_%s(cell, lat_int_proc)\n'
+            out.write('function get_lat_int_%s(cell)\n'
                       % (lat_int_group))
             out.write('    integer(kind=iint), dimension(4), intent(in) :: cell\n')
-            out.write('    integer, intent(out) :: lat_int_proc\n\n')
             out.write('    integer(kind=iint) :: get_lat_int_%s\n\n' % lat_int_group)
             # create mapping to map the sparse
             # representation for lateral interaction
@@ -840,21 +839,32 @@ class ProcListWriter():
                                  i in xrange(nr_of_species**len(process.bystanders))]
 
             out.write('    integer, dimension(%s) :: lat_int_index_%s = (/ &\n'
-                      % (len(compression_index), process.name))
+                      % (len(compression_index), lat_int_group))
             outstr = ', '.join(map(str, compression_index))
-            outstr = pformat(outstr, indent=12, width=70).split('\n')
-            outstr = '&\n'.join(outstr)
-            out.write(outstr)
-            out.write(' '*12 + '/)\n')
+
+            outstr_list = []
+            LINE_LEN = 100
+            while outstr:
+                try:
+                    NEXT_BREAK = outstr.index(',', LINE_LEN) + 1
+                except ValueError:
+                    NEXT_BREAK = len(outstr)
+                outstr_list.append(outstr[:NEXT_BREAK] + '&\n' )
+                outstr = outstr[NEXT_BREAK:]
+            for line in outstr_list:
+                out.write(line)
+            out.write('/)\n')
 
 
 
             out.write('    integer :: n\n\n')
             out.write('    n = 0\n\n')
             for i, bystander in enumerate(process.bystanders):
-                out.write('    n = n + get_species(lattice2nr(cell%s))*nr_of_species**%s\n'
+                out.write('    n = n + get_species(cell%s)*nr_of_species**%s\n'
                 % (bystander.coord.radd_ff(), i))
 
+            out.write('\n    get_lat_int_%s = lat_int_index_%s(n + 1)'
+                      % (lat_int_group, lat_int_group))
             out.write('\nend function get_lat_int_%s\n\n' % (lat_int_group))
 
         for lat_int_group, processes in lat_int_groups.iteritems():
