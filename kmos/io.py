@@ -376,8 +376,8 @@ class ProcListWriter():
                   '    get_species = base_get_species(nr)\n\n')
 
         if data.meta.debug > 3 :
-            out.write('print *, "LATTICE/GET_SPECIES/SITE", site\n')
-            out.write('print *, "LATTICE/GET_SPECIES/SPECIES", get_species\n')
+            out.write('print *, "    LATTICE/GET_SPECIES/SITE", site\n')
+            out.write('print *, "    LATTICE/GET_SPECIES/SPECIES", get_species\n')
         out.write('end function get_species\n\n'
 
                   'subroutine reset_site(site, old_species)\n\n'
@@ -788,18 +788,13 @@ class ProcListWriter():
         out.write('    end select\n\n')
         out.write('end subroutine run_proc_nr\n\n')
 
-    def write_proclist_lat_int(self, data, out, debug=False):
-        """
-        This a dumber version of the run_proc_nr routine. Though
-        the source code it generates might be quite a bit smaller.
-        On the downside, it might be a little less optimized though
-        it is local in a very strict sense. [EXPERIMENTAL/UNFINISHED!!!]
-        """
-        def db_print(line, debug=debug):
-            if debug:
-                with open('dbg_file.txt', 'a') as dbg_file:
-                    dbg_file.write(line)
+    def _db_print(self, line, debug=False):
+        if debug:
+            with open('dbg_file.txt', 'a') as dbg_file:
+                dbg_file.write(line)
 
+    def _get_lat_int_groups(self):
+        data = self.data
         #TODO: now only for old style definition of processes (w/o bystanders)
         #FUTURE: insert switch and support new style definition of processes
 
@@ -817,7 +812,7 @@ class ProcListWriter():
                 corresponding_actions = [action for action in actions if condition.coord == action.coord]
 
 
-                db_print('%s: %s <-> %s' % (process.name, condition, corresponding_actions))
+                self._db_print('%s: %s <-> %s' % (process.name, condition, corresponding_actions))
 
                 if corresponding_actions:
                     action = corresponding_actions[0]
@@ -831,10 +826,10 @@ class ProcListWriter():
             if hasattr(process, 'bystanders'):
                 bystanders.extend(process.bystanders)
 
-            db_print('\n\nPROCESSNAME  %s' % (process.name))
-            db_print('    TRUE CONDITIONS %s' % (true_conditions))
-            db_print('    TRUE ACTIONS %s' % (true_actions))
-            db_print('    BYSTANDERS %s' % (bystanders))
+            self._db_print('\n\nPROCESSNAME  %s' % (process.name))
+            self._db_print('    TRUE CONDITIONS %s' % (true_conditions))
+            self._db_print('    TRUE ACTIONS %s' % (true_actions))
+            self._db_print('    BYSTANDERS %s' % (bystanders))
             process_list.append(SingleLatIntProcess(
                                 name=process.name,
                                 rate_constant=process.rate_constant,
@@ -843,7 +838,6 @@ class ProcListWriter():
                                 bystanders=bystanders,
                                 enabled=process.enabled,
                                 tof_count=process.tof_count,))
-
         lat_int_groups = {}
         for process in process_list :
             for lat_int_group, processes in lat_int_groups.iteritems():
@@ -854,12 +848,12 @@ class ProcListWriter():
                 if sorted(p0.action_list) != sorted(process.action_list) :
                     same = False
                 if same:
-                    db_print('    %s <- %s\n' % (lat_int_group, process.name))
+                    self._db_print('    %s <- %s\n' % (lat_int_group, process.name))
                     processes.append(process)
                     break
             else:
                 lat_int_groups[process.name] = [process]
-                db_print('* %s\n' % (process.name))
+                self._db_print('* %s\n' % (process.name))
 
         # correctly determined lat. int. groups, yay.
 
@@ -869,20 +863,40 @@ class ProcListWriter():
         # - all bystanders cover the same set of sites
         # let's assume it for now
 
+        return lat_int_groups
+
+    def write_proclist_lat_int(self, data, out, debug=False):
+        """
+        This a dumber version of the run_proc_nr routine. Though
+        the source code it generates might be quite a bit smaller.
+        On the downside, it might be a little less optimized though
+        it is local in a very strict sense. [EXPERIMENTAL/UNFINISHED!!!]
+        """
+
+
+
+        lat_int_groups = self._get_lat_int_groups()
+
         out.write('subroutine touchup_cell(cell)\n')
         out.write('    integer(kind=iint), intent(in), dimension(4) :: cell\n\n')
         for lat_int_group, process in lat_int_groups.iteritems():
             if data.meta.debug > 1 :
                 out.write('print *,"PROCLIST/TOUCHUP_CELL/%s"\n' % lat_int_group.upper())
-            out.write('    call add_proc(nli_%s(cell), cell)\n' % (lat_int_group))
+            out.write('    call add_proc(nli_%s(cell), cell + (/0, 0, 0, 1/))\n' % (lat_int_group))
 
         out.write('end subroutine touchup_cell\n\n')
         out.write('subroutine run_proc_nr(proc, nr_cell)\n')
         out.write('    integer(kind=iint), intent(in) :: nr_cell\n')
         out.write('    integer(kind=iint), intent(in) :: proc\n\n')
         out.write('    integer(kind=iint), dimension(4) :: cell\n\n')
-        out.write('    cell = nr2lattice(nr_cell, :)\n')
+        out.write('    cell = nr2lattice(nr_cell, :) + (/0, 0, 0, -1/)\n')
         out.write('    call increment_procstat(proc)\n\n')
+        if data.meta.debug > 1 :
+            out.write('    print *, "PROCLIST/RUN_PROC_NR"\n')
+            out.write('    print *, "  PROCLIST/RUN_PROC_NR/PROC", proc\n')
+            out.write('    print *, "  PROCLIST/RUN_PROC_NR/NR_CELL", nr_cell\n')
+            out.write('    print *, "  PROCLIST/RUN_PROC_NR/CELL", cell\n')
+
         out.write('    select case(proc)\n')
 
         for lat_int_group, processes in lat_int_groups.iteritems():
@@ -906,19 +920,19 @@ class ProcListWriter():
         out.write('end subroutine run_proc_nr\n\n')
 
         for lat_int_group, processes in lat_int_groups.iteritems():
-            db_print('PROCESS: %s' % lat_int_group)
+            self._db_print('PROCESS: %s' % lat_int_group)
             process0 = processes[0]
             modified_procs = set()
             out.write('subroutine run_proc_%s(cell)\n\n' % lat_int_group)
             out.write('    integer(kind=iint), dimension(4), intent(in) :: cell\n')
             out.write('\n    ! disable processes that have to be disabled\n')
             for action in process0.action_list:
-                db_print('    ACTION: %s' % action)
+                self._db_print('    ACTION: %s' % action)
                 for _, other_processes in lat_int_groups.iteritems():
                     other_process = other_processes[0]
-                    db_print('      OTHER PROCESS %s' % (pformat(other_process, indent=12)))
+                    self._db_print('      OTHER PROCESS %s' % (pformat(other_process, indent=12)))
                     other_conditions = other_process.condition_list + other_process.bystanders
-                    db_print('            OTHER CONDITIONS\n%s' % pformat(other_conditions, indent=12))
+                    self._db_print('            OTHER CONDITIONS\n%s' % pformat(other_conditions, indent=12))
 
                     for condition in other_conditions :
                         if action.coord.eq_mod_offset(condition.coord):
@@ -926,9 +940,10 @@ class ProcListWriter():
 
             modified_procs = sorted(modified_procs)
             for i, (process, offset) in enumerate(modified_procs):
-                offset = '(/%s, %s, %s, 0/)' % tuple(offset)
+                offset_cell = '(/%s, %s, %s, 0/)' % tuple(offset)
+                offset_site = '(/%s, %s, %s, 1/)' % tuple(offset)
                 out.write('    call del_proc(nli_%s(cell + %s), cell + %s)\n'
-                    % (process.name, offset, offset))
+                    % (process.name, offset_cell, offset_site))
 
 
             out.write('\n    ! update lattice\n')
@@ -949,9 +964,10 @@ class ProcListWriter():
 
             out.write('\n    ! enable processes that have to be enabled\n')
             for i, (process, offset) in enumerate(modified_procs):
-                offset = '(/%s, %s, %s, 0/)' % tuple(offset)
+                offset_cell = '(/%s, %s, %s, 0/)' % tuple(offset)
+                offset_site = '(/%s, %s, %s, 1/)' % tuple(offset)
                 out.write('    call add_proc(nli_%s(cell + %s), cell + %s)\n'
-                    % (process.name, offset, offset))
+                    % (process.name, offset_cell, offset_site))
 
             out.write('\nend subroutine run_proc_%s\n\n' % lat_int_group)
 
@@ -966,6 +982,9 @@ class ProcListWriter():
                           % (lat_int_group))
             out.write('    integer(kind=iint), dimension(4), intent(in) :: cell\n')
             out.write('    integer(kind=iint) :: nli_%s\n\n' % lat_int_group)
+
+
+
             # create mapping to map the sparse
             # representation for lateral interaction
             # into a contiguous one
@@ -984,7 +1003,7 @@ class ProcListWriter():
             compression_index = [compression_map.get(i, 0) for
                                  i in xrange(nr_of_species**len(conditions0))]
 
-            out.write('    integer, dimension(%s) :: lat_int_index_%s = (/ &\n'
+            out.write('    integer, dimension(%s), parameter :: lat_int_index_%s = (/ &\n'
                       % (len(compression_index), lat_int_group))
             outstr = ', '.join(map(str, compression_index))
 
@@ -1006,6 +1025,7 @@ class ProcListWriter():
 
             if data.meta.debug > 2 :
                 out.write('print *,"PROCLIST/NLI_%s"\n' % lat_int_group.upper())
+                out.write('print *,"    PROCLIST/NLI_%s/CELL", cell\n' % lat_int_group.upper())
 
             conditions0 = process0.condition_list + process0.bystanders
             for i, bystander in enumerate(conditions0):
@@ -1316,9 +1336,15 @@ class ProcListWriter():
                 parameters = {}
                 for param in data.parameter_list:
                     parameters[param.name] = {'value': param.value}
+            except Exception, e:
+                raise UserWarning('Parameter ill-defined(%s)\n%s\nProcess: %s'
+                                  % (param, e, process.name))
+
+            try:
                 evaluate_rate_expression(process.rate_constant, parameters)
             except Exception, e:
-                raise UserWarning('%s\nProcess: %s' % (e, process.name))
+                raise UserWarning('Could not evaluate (%s)\n%s\nProcess: %s'
+                                  % (process.rate_constant, e, process.name))
         out.write('    }\n\n')
 
         # Site Names
@@ -1414,7 +1440,7 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     # each file is tuple (source, target)
     if code_generator == 'local_smart':
         cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
-                    (os.path.join('fortran_src', 'base.f90'), 'assert.ppc'),
+                    (os.path.join('fortran_src', 'base.f90'), 'base.f90'),
                     (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
                     (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
                     ]

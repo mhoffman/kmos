@@ -675,10 +675,14 @@ class KMC_Model(multiprocessing.Process):
         for x in range(self.lattice.system_size[0]):
             for y in range(self.lattice.system_size[1]):
                 for z in range(self.lattice.system_size[2]):
-                    for n in range(self.lattice.spuck):
-                        site_name = self.settings.site_names[n].lower()
-                        eval('self.proclist.touchup_%s([%i, %i, %i, %i])'
-                            % (site_name, x, y, z, n + 1))
+                    if self.get_backend() == 'lat_int':
+                        eval('self.proclist.touchup_cell([%i, %i, %i, 0])'
+                            % (x, y, z))
+                    else:
+                        for n in range(self.lattice.spuck):
+                            site_name = self.settings.site_names[n].lower()
+                            eval('self.proclist.touchup_%s([%i, %i, %i, %i])'
+                                % (site_name, x, y, z, n + 1))
 
     def get_backend(self):
         if hasattr(self.proclist, 'backend'):
