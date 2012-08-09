@@ -43,7 +43,7 @@ def _chop_line(outstr):
             NEXT_BREAK = len(outstr)
         outstr_list.append(outstr[:NEXT_BREAK] + '&\n' )
         outstr = outstr[NEXT_BREAK:]
-     return ''.join(outstr_list)
+    return ''.join(outstr_list)
 
 
 def _most_common(L):
