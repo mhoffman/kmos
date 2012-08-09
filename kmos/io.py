@@ -913,17 +913,8 @@ class ProcListWriter():
         out.write('    select case(proc)\n')
 
         for lat_int_group, processes in lat_int_groups.iteritems():
-            proc_names = [proc.name for proc in processes]
-            proc_numbers = [(proc.name, i+1)
-                            for (i, proc) in enumerate(data.process_list)
-                            if proc.name in proc_names]
-            proc_min = min(proc_numbers, key=lambda x: x[1])[0]
-            proc_max = max(proc_numbers, key=lambda x: x[1])[0]
-            if proc_min == proc_max :
-                out.write('    case(%s)\n' % proc_min)
-            else:
-                out.write('    case(%s:%s)\n' % (proc_min, proc_max))
-            out.write('        call run_proc_%s(cell)\n' % lat_int_group)
+            proc_names = ', '.join([proc.name for proc in processes])
+            out.write('    case(%s)\n' % _chop_line(proc_names))
         out.write('    case default\n')
         out.write('        print *, "Whoops, should not get here!"\n')
         out.write('        print *, "PROC_NR", proc\n')
