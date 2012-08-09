@@ -33,6 +33,19 @@ def _flatten(L):
     return [item for sublist in L for item in sublist]
 
 
+def _chop_line(outstr):
+    outstr_list = []
+    LINE_LEN = 100
+    while outstr:
+        try:
+            NEXT_BREAK = outstr.index(',', LINE_LEN) + 1
+        except ValueError:
+            NEXT_BREAK = len(outstr)
+        outstr_list.append(outstr[:NEXT_BREAK] + '&\n' )
+        outstr = outstr[NEXT_BREAK:]
+     return ''.join(outstr_list)
+
+
 def _most_common(L):
     # thanks go to Alex Martelli for this function
     # get an iterable of (item, iterable) pairs
@@ -1007,17 +1020,10 @@ class ProcListWriter():
                       % (len(compression_index), lat_int_group))
             outstr = ', '.join(map(str, compression_index))
 
-            outstr_list = []
-            LINE_LEN = 100
-            while outstr:
-                try:
-                    NEXT_BREAK = outstr.index(',', LINE_LEN) + 1
-                except ValueError:
-                    NEXT_BREAK = len(outstr)
-                outstr_list.append(outstr[:NEXT_BREAK] + '&\n' )
-                outstr = outstr[NEXT_BREAK:]
-            for line in outstr_list:
-                out.write(line)
+            outstr = _chop_line(outstr)
+
+            out.write(outstr)
+
             out.write('/)\n')
 
             out.write('    integer :: n\n\n')
