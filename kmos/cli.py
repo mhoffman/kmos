@@ -45,7 +45,8 @@ usage['build'] = """kmos build
     current directory.
 
     Additional Parameters ::
-        -d : Turn on assertion statements in F90 code
+        -d/--debug
+            Turn on assertion statements in F90 code
                  """ % ('pyd' if os.name == 'nt' else 'so')
 
 usage['help'] = """kmos help <command>
@@ -58,8 +59,17 @@ usage['export'] = """kmos export <xml-file> [<export-path>]
     build the kmc_model.%s.
 
     Additional Parameters ::
-        -s : export source only and don't build binary
-        -d : Turn on assertion statements in F90 code
+        -s/--source-only
+            Export source only and don't build binary
+
+        -b/--backend (local_smart|lat_int)
+            Choose backend. Default is "local_smart".
+            lat_int is EXPERIMENTAL and not made
+            for production, yet.
+
+        -d/--debug
+            Turn on assertion statements in F90 code.
+            (Only active in compile step)
                     """ % ('pyd' if os.name == 'nt' else 'so')
 
 usage['export-settings'] = """kmos export-settings <xml-file> [<export-path>]
@@ -70,9 +80,6 @@ usage['export-settings'] = """kmos export-settings <xml-file> [<export-path>]
 usage['edit'] = """kmos edit <xml-file>
     Open the kmos xml-file in a GUI to edit
     the model.
-
-    Additional Parameters ::
-        -c <code_generator> : Name for code generator [EXPERIMENTAL]
                 """
 
 usage['import'] = """kmos import <xml-file>
@@ -85,7 +92,8 @@ usage['rebuild'] = """kmos rebuild
     current directory.
 
     Additional Parameters ::
-        -d : Turn on assertion statements in F90 code
+        -d/--debug
+            Turn on assertion statements in F90 code
                     """
 
 usage['run'] = """kmos run
@@ -98,7 +106,8 @@ usage['view'] = """kmos view
     model visually.
 
     Additional Parameters ::
-        -v <number> : Number of steps per frame
+        -v/--steps-per-frame <number>
+            Number of steps per frame
 
                  """ % ('pyd' if os.name == 'nt' else 'so')
 
