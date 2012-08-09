@@ -484,11 +484,13 @@ class ProcListWriter():
             % (len(data.process_list)))
         out.write('character(len=2000), dimension(%s) :: processes, rates'
                   % (len(data.process_list)))
+
         if code_generator == 'lat_int':
             out.write('\ncharacter(len=%s), parameter, public :: backend = "%s"\n'
                       % (len(code_generator), code_generator))
         elif code_generator == 'local_smart':
             pass # change nothing here, to not alter old code
+
         out.write('\n\ncontains\n\n')
 
         # do exactly one kmc step
