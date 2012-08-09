@@ -680,6 +680,12 @@ class KMC_Model(multiprocessing.Process):
                         eval('self.proclist.touchup_%s([%i, %i, %i, %i])'
                             % (site_name, x, y, z, n + 1))
 
+    def get_backend(self):
+        if hasattr(self.proclist, 'backend'):
+            return ''.join(self.proclist.backend)
+        else:
+            return 'local_smart'
+
     def xml(self):
         """Returns the XML representation that this model was created from.
         """

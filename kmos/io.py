@@ -365,13 +365,20 @@ class ProcListWriter():
                   '    call base_replace_species(nr, old_species, new_species)\n\n'
                   'end subroutine replace_species\n\n')
 
-        out.write('pure function get_species(site)\n\n'
-                  '    integer(kind=iint) :: get_species\n'
+        if data.meta.debug > 0 :
+            out.write('function get_species(site)\n\n')
+        else:
+            out.write('pure function get_species(site)\n\n')
+        out.write('    integer(kind=iint) :: get_species\n'
                   '    integer(kind=iint), dimension(4), intent(in) :: site\n'
                   '    integer(kind=iint) :: nr\n\n'
                   '    nr = lattice2nr(site(1), site(2), site(3), site(4))\n'
-                  '    get_species = base_get_species(nr)\n\n'
-                  'end function get_species\n\n'
+                  '    get_species = base_get_species(nr)\n\n')
+
+        if data.meta.debug > 3 :
+            out.write('print *, "LATTICE/GET_SPECIES/SITE", site\n')
+            out.write('print *, "LATTICE/GET_SPECIES/SPECIES", get_species\n')
+        out.write('end function get_species\n\n'
 
                   'subroutine reset_site(site, old_species)\n\n'
                   '    integer(kind=iint), dimension(4), intent(in) :: site\n'
@@ -475,7 +482,13 @@ class ProcListWriter():
 
         out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_proc = %s\n'\
             % (len(data.process_list)))
-        out.write('character(len=2000), dimension(%s) :: processes, rates' % (len(data.process_list)))
+        out.write('character(len=2000), dimension(%s) :: processes, rates\n'
+                  % (len(data.process_list)))
+        if code_generator == 'lat_int':
+            out.write('character(len=%s), parameter, public :: backend = "%s"\n'
+                      % (len(code_generator), code_generator))
+        elif code_generator == 'local_smart':
+            pass # change nothing here, to not alter old code
         out.write('\n\ncontains\n\n')
 
         # do exactly one kmc step
@@ -502,6 +515,7 @@ class ProcListWriter():
                   '    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr\n')
+            out.write('print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site\n')
         out.write('    call run_proc_nr(proc_nr, nr_site)\n'
                   '    call update_clocks(ran_time)\n\n'
                   'end subroutine do_kmc_step\n\n')
@@ -685,7 +699,7 @@ class ProcListWriter():
                     out.write('                    call touchup_%s_%s((/i, j, k, %s_%s/))\n' % (2 * (layer.name, site.name)))
             out.write('                end select\n')
         elif code_generator == 'lat_int':
-            out.write('                call touchup_cell((/i, j, k, 1/))\n')
+            out.write('                call touchup_cell((/i, j, k, 0/))\n')
         else:
             raise UserWarning("Don't know this code generator")
         out.write('            end do\n')
@@ -856,6 +870,8 @@ class ProcListWriter():
         out.write('subroutine touchup_cell(cell)\n')
         out.write('    integer(kind=iint), intent(in), dimension(4) :: cell\n\n')
         for lat_int_group, process in lat_int_groups.iteritems():
+            if data.meta.debug > 1 :
+                out.write('print *,"PROCLIST/TOUCHUP_CELL/%s"\n' % lat_int_group.upper())
             out.write('    call add_proc(nli_%s(cell), cell)\n' % (lat_int_group))
 
         out.write('end subroutine touchup_cell\n\n')
@@ -866,8 +882,18 @@ class ProcListWriter():
         out.write('    cell = nr2lattice(nr_cell, :)\n')
         out.write('    call increment_procstat(proc)\n\n')
         out.write('    select case(proc)\n')
+
         for lat_int_group, processes in lat_int_groups.iteritems():
-            out.write('    case(%s)\n' % (lat_int_group))
+            proc_names = [proc.name for proc in processes]
+            proc_numbers = [(proc.name, i+1)
+                            for (i, proc) in enumerate(data.process_list)
+                            if proc.name in proc_names]
+            proc_min = min(proc_numbers, key=lambda x: x[1])[0]
+            proc_max = max(proc_numbers, key=lambda x: x[1])[0]
+            if proc_min == proc_max :
+                out.write('    case(%s)\n' % proc_min)
+            else:
+                out.write('    case(%s:%s)\n' % (proc_min, proc_max))
             out.write('        call run_proc_%s(cell)\n' % lat_int_group)
         out.write('    case default\n')
         out.write('        print *, "Whoops, should not get here!"\n')
@@ -930,8 +956,12 @@ class ProcListWriter():
         for lat_int_group, processes in lat_int_groups.iteritems():
             process0 = processes[0]
             conditions0 = process0.condition_list + process0.bystanders
-            out.write('function nli_%s(cell)\n'
-                      % (lat_int_group))
+            if data.meta.debug > 0 :
+                out.write('function nli_%s(cell)\n'
+                          % (lat_int_group))
+            else:
+                out.write('pure function nli_%s(cell)\n'
+                          % (lat_int_group))
             out.write('    integer(kind=iint), dimension(4), intent(in) :: cell\n')
             out.write('    integer(kind=iint) :: nli_%s\n\n' % lat_int_group)
             # create mapping to map the sparse
@@ -971,13 +1001,22 @@ class ProcListWriter():
 
             out.write('    integer :: n\n\n')
             out.write('    n = 1\n\n')
+
+            if data.meta.debug > 2 :
+                out.write('print *,"PROCLIST/NLI_%s"\n' % lat_int_group.upper())
+
             conditions0 = process0.condition_list + process0.bystanders
             for i, bystander in enumerate(conditions0):
                 out.write('    n = n + get_species(cell%s)*nr_of_species**%s\n'
                 % (bystander.coord.radd_ff(), i))
 
-            out.write('\n    nli_%s = lat_int_index_%s(n)'
+            out.write('\n    nli_%s = lat_int_index_%s(n)\n'
                       % (lat_int_group, lat_int_group))
+            if data.meta.debug > 2 :
+                out.write('print *,"    PROCLIST/NLI_%s/N", n\n'
+                          % lat_int_group.upper())
+                out.write('print *,"    PROCLIST/NLI_%s/PROC_NR", nli_%s\n'
+                          % (lat_int_group.upper(), lat_int_group))
             out.write('\nend function nli_%s\n\n' % (lat_int_group))
 
     def write_proclist_put_take(self, data, out):
