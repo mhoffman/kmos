@@ -482,10 +482,10 @@ class ProcListWriter():
 
         out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_proc = %s\n'\
             % (len(data.process_list)))
-        out.write('character(len=2000), dimension(%s) :: processes, rates\n'
+        out.write('character(len=2000), dimension(%s) :: processes, rates'
                   % (len(data.process_list)))
         if code_generator == 'lat_int':
-            out.write('character(len=%s), parameter, public :: backend = "%s"\n'
+            out.write('\ncharacter(len=%s), parameter, public :: backend = "%s"\n'
                       % (len(code_generator), code_generator))
         elif code_generator == 'local_smart':
             pass # change nothing here, to not alter old code
