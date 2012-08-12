@@ -987,8 +987,6 @@ class ProcListWriter():
             out.write('    integer(kind=iint), dimension(4), intent(in) :: cell\n')
             out.write('    integer(kind=iint) :: nli_%s\n\n' % lat_int_group)
 
-
-
             # create mapping to map the sparse
             # representation for lateral interaction
             # into a contiguous one
