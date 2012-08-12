@@ -1076,6 +1076,16 @@ class Coord(FixedObject):
             return "(/%s, %s, %s, %s/)" % (self.offset[0], self.offset[1],
                                            self.offset[2], self.name, )
 
+def cmp_coords(self, other):
+    if self.layer != other.layer:
+        return cmp(self.layer, other.layer)
+    elif (self.offset != other.offset).any():
+        for i in range(3):
+            if self.offset[i] != other.offset[i]:
+                return cmp(self.offset[i], other.offset[i])
+    else:
+        return 0
+
 
 class Species(FixedObject):
     """Class that represent a species such as oxygen, empty, ... .
@@ -1177,6 +1187,14 @@ class SingleLatIntProcess(Process):
                   'enabled',
                   'chemical_expression',
                   'tof_count']
+
+    def __repr__(self):
+        return '[PROCESS] Name:%s Rate: %s\nConditions: %s\nActions: %s\nBystanders: %s' \
+            % (self.name,
+               self.rate_constant,
+               self.condition_list,
+               self.action_list,
+               self.bystanders)
 
 
 class LatIntProcess(Process):
