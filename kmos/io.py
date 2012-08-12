@@ -28,6 +28,7 @@ import pdb
 
 from kmos.types import ConditionAction, LatIntProcess, SingleLatIntProcess
 from kmos.config import APP_ABS_PATH
+from kmos.types import cmp_coords
 
 
 def _flatten(L):
@@ -896,11 +897,11 @@ class ProcListWriter():
             for lat_int_group, processes in lat_int_groups.iteritems():
                 p0 = processes[0]
                 same = True
-                if sorted(p0.condition_list, key=lambda x: x.coord) \
-                   != sorted(process.condition_list, key=lambda x: x.coord):
+                if sorted(p0.condition_list, key=lambda x: x.coord, cmp=cmp_coords) \
+                   != sorted(process.condition_list, key=lambda x: x.coord, cmp=cmp_coords):
                     same = False
-                if sorted(p0.action_list, key=lambda x: x.coord) \
-                   != sorted(process.action_list, key=lambda x: x.coord):
+                if sorted(p0.action_list, key=lambda x: x.coord, cmp=cmp_coords) \
+                   != sorted(process.action_list, key=lambda x: x.coord, cmp=cmp_coords):
                     same = False
                 if same:
                     self._db_print('    %s <- %s\n' % (lat_int_group, process.name))

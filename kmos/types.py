@@ -1005,16 +1005,6 @@ class Coord(FixedObject):
         return ((self.layer, self.name) == \
                (other.layer, other.name)) and (self.offset == other.offset).all()
 
-    def __cmp__(self, other):
-        if self.layer != other.layer:
-            return cmp(self.layer, other.layer)
-        elif (self.offset != other.offset).any():
-            for i in range(3):
-                if self.offset[i] != other.offset[i]:
-                    return cmp(self.offset[i], other.offset[i])
-        else:
-            return 0
-
     def __hash__(self):
         return self.__repr__()
 
@@ -1085,6 +1075,16 @@ class Coord(FixedObject):
         else:
             return "(/%s, %s, %s, %s/)" % (self.offset[0], self.offset[1],
                                            self.offset[2], self.name, )
+
+def cmp_coords(self, other):
+    if self.layer != other.layer:
+        return cmp(self.layer, other.layer)
+    elif (self.offset != other.offset).any():
+        for i in range(3):
+            if self.offset[i] != other.offset[i]:
+                return cmp(self.offset[i], other.offset[i])
+    else:
+        return 0
 
 
 class Species(FixedObject):
