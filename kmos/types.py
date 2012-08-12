@@ -1005,6 +1005,16 @@ class Coord(FixedObject):
         return ((self.layer, self.name) == \
                (other.layer, other.name)) and (self.offset == other.offset).all()
 
+    def __cmp__(self, other):
+        if self.layer != other.layer:
+            return cmp(self.layer, other.layer)
+        elif (self.offset != other.offset).any():
+            for i in range(3):
+                if self.offset[i] != other.offset[i]:
+                    return cmp(self.offset[i], other.offset[i])
+        else:
+            return 0
+
     def __hash__(self):
         return self.__repr__()
 
@@ -1177,6 +1187,14 @@ class SingleLatIntProcess(Process):
                   'enabled',
                   'chemical_expression',
                   'tof_count']
+
+    def __repr__(self):
+        return '[PROCESS] Name:%s Rate: %s\nConditions: %s\nActions: %s\nBystanders: %s' \
+            % (self.name,
+               self.rate_constant,
+               self.condition_list,
+               self.action_list,
+               self.bystanders)
 
 
 class LatIntProcess(Process):

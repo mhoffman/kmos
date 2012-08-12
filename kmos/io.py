@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """
 Features front-end import/export functions for kMC Projects.
-Currently import and export is supported to XML and export is
-supported to Fortran 90 source code.
+Currently import and export is supported to XML
+and export is supported to Fortran 90 source code.
 """
 #    Copyright 2009-2012 Max J. Hoffmann (mjhoffmann@gmail.com)
 #    This file is part of kmos.
@@ -24,6 +24,7 @@ import operator
 import shutil
 import os
 from pprint import PrettyPrinter, pformat
+import pdb
 
 from kmos.types import ConditionAction, LatIntProcess, SingleLatIntProcess
 from kmos.config import APP_ABS_PATH
@@ -234,7 +235,7 @@ class ProcListWriter():
                   '    integer(kind=iint) :: check_nr\n'
                   '    integer(kind=iint) :: volume\n\n'
                   '    ! Copy to module wide variable\n')
-        if data.meta.debug > 1 :
+        if data.meta.debug > 1:
             out.write('print *,"LATTICE/ALLOCATE_SYSTEM"\n')
         if data.meta.model_dimension == 3:
             out.write('    system_size = input_system_size\n')
@@ -244,7 +245,7 @@ class ProcListWriter():
             out.write('    system_size = (/input_system_size(1), 1, 1/)\n')
 
         out.write('    volume = system_size(1)*system_size(2)*system_size(3)*spuck\n')
-        if data.meta.debug > 1 :
+        if data.meta.debug > 1:
             out.write('    print *, "    LATTICE/ALLOCATE_SYSTEM/SPUCK", spuck\n')
             out.write('    print *, "    LATTICE/ALLOCATE_SYSTEM/VOLUME", volume\n')
 
@@ -273,14 +274,14 @@ class ProcListWriter():
           '            stop\n'
           '        endif\n'
           '    end do\n\n')
-        if data.meta.debug > 1 :
+        if data.meta.debug > 1:
             out.write('    print *, "    LATTICE/ALLOCATE_SYSTEM/MAPPING_OK"\n')
         out.write('    allocate(nr2lattice(1:product(system_size)*spuck,4))\n'
           '    allocate(lattice2nr(-system_size(1):2*system_size(1)-1, &\n'
           '        -system_size(2):2*system_size(2)-1, &\n'
           '        -system_size(3):2*system_size(3)-1, &\n'
           '         1:spuck))\n')
-        if data.meta.debug > 1 :
+        if data.meta.debug > 1:
             out.write('    print *, "    LATTICE/ALLOCATE_SYSTEM/ALLOCATED_LOOKUP"\n')
         out.write('    do check_nr=1, product(system_size)*spuck\n'
           '        nr2lattice(check_nr, :) = calculate_nr2lattice(check_nr)\n'
@@ -294,7 +295,7 @@ class ProcListWriter():
           '            end do\n'
           '        end do\n'
           '    end do\n\n')
-        if data.meta.debug > 1 :
+        if data.meta.debug > 1:
             out.write('    print *, "    LATTICE/ALLOCATE_SYSTEM/FILLED_LOOKUP"\n')
         out.write('    call base_allocate_system(nr_of_proc, volume, system_name)\n\n')
         out.write('    unit_cell_size(1, 1) = %s\n' % data.layer_list.cell[0, 0])
@@ -328,7 +329,7 @@ class ProcListWriter():
                   '!\n'
                   '!    ``none``\n'
                   '!******\n')
-        if data.meta.debug > 1 :
+        if data.meta.debug > 1:
             out.write('print *,"    LATTICE/DEALLOCATE_SYSTEM"\n')
         out.write('    deallocate(lattice2nr)\n'
                   '    deallocate(nr2lattice)\n'
@@ -378,7 +379,7 @@ class ProcListWriter():
                   '    call base_replace_species(nr, old_species, new_species)\n\n'
                   'end subroutine replace_species\n\n')
 
-        if data.meta.debug > 0 :
+        if data.meta.debug > 0:
             out.write('function get_species(site)\n\n')
         else:
             out.write('pure function get_species(site)\n\n')
@@ -388,7 +389,7 @@ class ProcListWriter():
                   '    nr = lattice2nr(site(1), site(2), site(3), site(4))\n'
                   '    get_species = base_get_species(nr)\n\n')
 
-        if data.meta.debug > 3 :
+        if data.meta.debug > 3:
             out.write('print *, "    LATTICE/GET_SPECIES/SITE", site\n')
             out.write('print *, "    LATTICE/GET_SPECIES/SPECIES", get_species\n')
         out.write('end function get_species\n\n'
@@ -673,7 +674,7 @@ class ProcListWriter():
                   '    integer(kind=iint), intent(in) :: layer\n\n'
                   '    integer(kind=iint) :: i, j, k, nr\n'
                   '')
-        if data.meta.debug > 0 :
+        if data.meta.debug > 0:
             out.write('print *,"PROCLIST/INITIALIZE_STATE"\n')
         out.write('    ! initialize random number generator\n'
                   '    allocate(seed_arr(seed_size))\n'
@@ -682,7 +683,7 @@ class ProcListWriter():
                   '    call random_seed(put=seed_arr)\n'
                   '    deallocate(seed_arr)\n'
                   '')
-        if data.meta.debug > 0 :
+        if data.meta.debug > 0:
             out.write('print *, "    PROCLIST/INITALIZE_STATE/INITIALIZED_RNG"\n')
         out.write('    do k = 0, system_size(3)-1\n'
                   '        do j = 0, system_size(2)-1\n'
@@ -699,12 +700,12 @@ class ProcListWriter():
         out.write('            end do\n')
         out.write('        end do\n')
         out.write('    end do\n\n')
-        if data.meta.debug > 0 :
+        if data.meta.debug > 0:
             out.write('print *, "    PROCLIST/INITALIZE_STATE/INITIALIZED_DEFAULT_SPECIES"\n')
         out.write('    do k = 0, system_size(3)-1\n')
         out.write('        do j = 0, system_size(2)-1\n')
         out.write('            do i = 0, system_size(1)-1\n')
-        if data.meta.debug > 0 :
+        if data.meta.debug > 0:
             out.write('print *, "    PROCLIST/INITIALIZE_STATE/TOUCHUP_CELL", i, j, k\n')
         if code_generator == 'local_smart':
             out.write('                select case(layer)\n')
@@ -720,7 +721,7 @@ class ProcListWriter():
         out.write('            end do\n')
         out.write('        end do\n')
         out.write('    end do\n\n')
-        if data.meta.debug > 0 :
+        if data.meta.debug > 0:
             out.write('print *, "    PROCLIST/INITALIZE_STATE/INITIALIZED_AVAIL_SITES"\n')
 
         out.write('\nend subroutine initialize_state\n\n')
@@ -760,7 +761,8 @@ class ProcListWriter():
             if data.meta.debug > 0:
                 out.write(('print *,"PROCLIST/RUN_PROC_NR/NAME","%s"\n'
                            'print *,"PROCLIST/RUN_PROC_NR/LSITE","lsite"\n'
-                           'print *,"PROCLIST/RUN_PROC_NR/SITE","site"\n') % process.name)
+                           'print *,"PROCLIST/RUN_PROC_NR/SITE","site"\n')
+                           % process.name)
             for action in process.action_list:
                 if action.coord == process.executing_coord():
                     relative_coord = 'lsite'
@@ -776,26 +778,59 @@ class ProcListWriter():
 
                 if action.species[0] == '^':
                     if data.meta.debug > 0:
-                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","create %s_%s"\n' % (action.coord.layer, action.coord.name))
-                    out.write('        call create_%s_%s(%s, %s)\n' % (action.coord.layer, action.coord.name, relative_coord, action.species[1:]))
+                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","create %s_%s"\n'
+                                   % (action.coord.layer,
+                                      action.coord.name))
+                    out.write('        call create_%s_%s(%s, %s)\n'
+                               % (action.coord.layer,
+                                  action.coord.name,
+                                  relative_coord,
+                                  action.species[1:]))
                 elif action.species[0] == '$':
                     if data.meta.debug > 0:
-                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","annihilate %s_%s"\n' % (action.coord.layer, action.coord.name))
-                    out.write('        call annihilate_%s_%s(%s, %s)\n' % (action.coord.layer, action.coord.name, relative_coord, action.species[1:]))
+                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","annihilate %s_%s"\n'
+                                   % (action.coord.layer,
+                                      action.coord.name))
+                    out.write('        call annihilate_%s_%s(%s, %s)\n'
+                               % (action.coord.layer,
+                                  action.coord.name,
+                                  relative_coord,
+                                  action.species[1:]))
                 elif action.species == data.species_list.default_species \
                 and not action.species == previous_species:
                     if data.meta.debug > 0:
-                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","take %s_%s %s"\n' % (action.coord.layer, action.coord.name, previous_species))
-                    out.write('        call take_%s_%s_%s(%s)\n' % (previous_species, action.coord.layer, action.coord.name, relative_coord))
+                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","take %s_%s %s"\n'
+                                   % (action.coord.layer,
+                                      action.coord.name,
+                                      previous_species))
+                    out.write('        call take_%s_%s_%s(%s)\n'
+                               % (previous_species,
+                                  action.coord.layer,
+                                  action.coord.name,
+                                  relative_coord))
                 else:
                     if not previous_species == action.species:
                         if not previous_species == data.species_list.default_species:
                             if data.meta.debug > 0:
-                                out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","take %s_%s %s"\n' % (action.coord.layer, action.coord.name, previous_species))
-                            out.write('        call take_%s_%s_%s(%s)\n' % (previous_species, action.coord.layer, action.coord.name, relative_coord))
+                                out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","take %s_%s %s"\n'
+                                           % (action.coord.layer,
+                                              action.coord.name,
+                                              previous_species))
+                            out.write('        call take_%s_%s_%s(%s)\n'
+                                       % (previous_species,
+                                          action.coord.layer,
+                                          action.coord.name,
+                                          relative_coord))
                         if data.meta.debug > 0:
-                            out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","put %s_%s %s"\n' % (action.coord.layer, action.coord.name, action.species))
-                        out.write('        call put_%s_%s_%s(%s)\n' % (action.species, action.coord.layer, action.coord.name, relative_coord))
+                            out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","put %s_%s %s"\n'
+                                      % (action.coord.layer,
+                                         action.coord.name,
+                                         action.species))
+                        out.write('        call put_%s_%s_%s(%s)\n'
+                                   % (action.species,
+                                      action.coord.layer,
+                                      action.coord.name,
+                                      relative_coord))
 
             out.write('\n')
         out.write('    end select\n\n')
@@ -811,8 +846,9 @@ class ProcListWriter():
         #TODO: now only for old style definition of processes (w/o bystanders)
         #FUTURE: insert switch and support new style definition of processes
 
+        # FIRST: group processes by lateral interaction groups
+        ################################################################
         process_list = []
-        # group processes by lateral interaction groups
         for process in data.process_list:
             actions = process.action_list
 
@@ -825,11 +861,11 @@ class ProcListWriter():
                 corresponding_actions = [action for action in actions if condition.coord == action.coord]
 
 
-                self._db_print('%s: %s <-> %s' % (process.name, condition, corresponding_actions))
+                #self._db_print('%s: %s <-> %s' % (process.name, condition, corresponding_actions))
 
                 if corresponding_actions:
                     action = corresponding_actions[0]
-                    if condition.species != action.species :
+                    if condition.species != action.species:
                         true_conditions.append(condition)
                         true_actions.append(action)
                     else:
@@ -839,10 +875,10 @@ class ProcListWriter():
             if hasattr(process, 'bystanders'):
                 bystanders.extend(process.bystanders)
 
-            self._db_print('\n\nPROCESSNAME  %s' % (process.name))
-            self._db_print('    TRUE CONDITIONS %s' % (true_conditions))
-            self._db_print('    TRUE ACTIONS %s' % (true_actions))
-            self._db_print('    BYSTANDERS %s' % (bystanders))
+            #self._db_print('\n\nPROCESSNAME  %s' % (process.name))
+            #self._db_print('    TRUE CONDITIONS %s' % (true_conditions))
+            #self._db_print('    TRUE ACTIONS %s' % (true_actions))
+            #self._db_print('    BYSTANDERS %s' % (bystanders))
             process_list.append(SingleLatIntProcess(
                                 name=process.name,
                                 rate_constant=process.rate_constant,
@@ -851,14 +887,20 @@ class ProcListWriter():
                                 bystanders=bystanders,
                                 enabled=process.enabled,
                                 tof_count=process.tof_count,))
+        # SECOND: Group lateral interaction groups into dictionary
+        ################################################################
         lat_int_groups = {}
-        for process in process_list :
+        for process in process_list:
+            #if process.name == 'Li_diffusion_a0_a0_0300':
+                #pdb.set_trace()
             for lat_int_group, processes in lat_int_groups.iteritems():
                 p0 = processes[0]
                 same = True
-                if sorted(p0.condition_list) != sorted(process.condition_list) :
+                if sorted(p0.condition_list, key=lambda x: x.coord) \
+                   != sorted(process.condition_list, key=lambda x: x.coord):
                     same = False
-                if sorted(p0.action_list) != sorted(process.action_list) :
+                if sorted(p0.action_list, key=lambda x: x.coord) \
+                   != sorted(process.action_list, key=lambda x: x.coord):
                     same = False
                 if same:
                     self._db_print('    %s <- %s\n' % (lat_int_group, process.name))
@@ -886,32 +928,22 @@ class ProcListWriter():
         it is local in a very strict sense. [EXPERIMENTAL/UNFINISHED!!!]
         """
 
-
-
         lat_int_groups = self._get_lat_int_groups()
-
-        out.write('subroutine touchup_cell(cell)\n')
-        out.write('    integer(kind=iint), intent(in), dimension(4) :: cell\n\n')
-        for lat_int_group, process in lat_int_groups.iteritems():
-            if data.meta.debug > 1 :
-                out.write('print *,"PROCLIST/TOUCHUP_CELL/%s"\n' % lat_int_group.upper())
-            out.write('    call add_proc(nli_%s(cell), cell + (/0, 0, 0, 1/))\n' % (lat_int_group))
-
-        out.write('end subroutine touchup_cell\n\n')
+        #####################################################
+        # def run_proc_nr
+        #####################################################
         out.write('subroutine run_proc_nr(proc, nr_cell)\n')
         out.write('    integer(kind=iint), intent(in) :: nr_cell\n')
         out.write('    integer(kind=iint), intent(in) :: proc\n\n')
         out.write('    integer(kind=iint), dimension(4) :: cell\n\n')
         out.write('    cell = nr2lattice(nr_cell, :) + (/0, 0, 0, -1/)\n')
         out.write('    call increment_procstat(proc)\n\n')
-        if data.meta.debug > 1 :
+        if data.meta.debug > 1:
             out.write('    print *, "PROCLIST/RUN_PROC_NR"\n')
             out.write('    print *, "  PROCLIST/RUN_PROC_NR/PROC", proc\n')
             out.write('    print *, "  PROCLIST/RUN_PROC_NR/NR_CELL", nr_cell\n')
             out.write('    print *, "  PROCLIST/RUN_PROC_NR/CELL", cell\n')
-
         out.write('    select case(proc)\n')
-
         for lat_int_group, processes in lat_int_groups.iteritems():
             proc_names = ', '.join([proc.name for proc in processes])
             out.write('    case(%s)\n' % _chop_line(proc_names))
@@ -920,9 +952,11 @@ class ProcListWriter():
         out.write('        print *, "PROC_NR", proc\n')
         out.write('        stop\n')
         out.write('    end select\n\n')
-
         out.write('end subroutine run_proc_nr\n\n')
 
+        #####################################################
+        # def run_proc_<processname>
+        #####################################################
         for lat_int_group, processes in lat_int_groups.iteritems():
             self._db_print('PROCESS: %s' % lat_int_group)
             process0 = processes[0]
@@ -938,7 +972,7 @@ class ProcListWriter():
                     other_conditions = other_process.condition_list + other_process.bystanders
                     self._db_print('            OTHER CONDITIONS\n%s' % pformat(other_conditions, indent=12))
 
-                    for condition in other_conditions :
+                    for condition in other_conditions:
                         if action.coord.eq_mod_offset(condition.coord):
                             modified_procs.add((other_process, tuple(action.coord.offset-condition.coord.offset)))
 
@@ -972,13 +1006,16 @@ class ProcListWriter():
                 offset_site = '(/%s, %s, %s, 1/)' % tuple(offset)
                 out.write('    call add_proc(nli_%s(cell + %s), cell + %s)\n'
                     % (process.name, offset_cell, offset_site))
-
             out.write('\nend subroutine run_proc_%s\n\n' % lat_int_group)
 
+        #########################################
+        # def nli_<processname>
+        # nli = number of lateral interaction
+        #########################################
         for lat_int_group, processes in lat_int_groups.iteritems():
             process0 = processes[0]
             conditions0 = process0.condition_list + process0.bystanders
-            if data.meta.debug > 0 :
+            if data.meta.debug > 0:
                 out.write('function nli_%s(cell)\n'
                           % (lat_int_group))
             else:
@@ -991,6 +1028,7 @@ class ProcListWriter():
             # representation for lateral interaction
             # into a contiguous one
             compression_map = {}
+            #print("# proc %s" % len(processes))
             for i, process in enumerate(processes):
                 # calculate lat. int. nr
                 lat_int_nr = 0
@@ -998,9 +1036,10 @@ class ProcListWriter():
                 conditions = process.condition_list + process.bystanders
                 for j, bystander in enumerate(conditions):
                     species_nr = [x for (x, species) in
-                                  enumerate(data.species_list)
+                                  enumerate(sorted(data.species_list))
                                   if species.name == bystander.species][0]
                     lat_int_nr += species_nr*(nr_of_species**j)
+                    #print(lat_int_nr, species.name, nr_of_species, j)
                 compression_map[lat_int_nr] = process.name
             compression_index = [compression_map.get(i, 0) for
                                  i in xrange(nr_of_species**len(conditions0))]
@@ -1010,15 +1049,12 @@ class ProcListWriter():
             outstr = ', '.join(map(str, compression_index))
 
             outstr = _chop_line(outstr)
-
             out.write(outstr)
-
             out.write('/)\n')
-
             out.write('    integer :: n\n\n')
             out.write('    n = 1\n\n')
 
-            if data.meta.debug > 2 :
+            if data.meta.debug > 2:
                 out.write('print *,"PROCLIST/NLI_%s"\n' % lat_int_group.upper())
                 out.write('print *,"    PROCLIST/NLI_%s/CELL", cell\n' % lat_int_group.upper())
 
@@ -1029,12 +1065,23 @@ class ProcListWriter():
 
             out.write('\n    nli_%s = lat_int_index_%s(n)\n'
                       % (lat_int_group, lat_int_group))
-            if data.meta.debug > 2 :
+            if data.meta.debug > 2:
                 out.write('print *,"    PROCLIST/NLI_%s/N", n\n'
                           % lat_int_group.upper())
                 out.write('print *,"    PROCLIST/NLI_%s/PROC_NR", nli_%s\n'
                           % (lat_int_group.upper(), lat_int_group))
             out.write('\nend function nli_%s\n\n' % (lat_int_group))
+
+        #########################################
+        # The touchup function
+        #########################################
+        out.write('subroutine touchup_cell(cell)\n')
+        out.write('    integer(kind=iint), intent(in), dimension(4) :: cell\n\n')
+        for lat_int_group, process in lat_int_groups.iteritems():
+            if data.meta.debug > 1:
+                out.write('print *,"PROCLIST/TOUCHUP_CELL/%s"\n' % lat_int_group.upper())
+            out.write('    call add_proc(nli_%s(cell), cell + (/0, 0, 0, 1/))\n' % (lat_int_group))
+        out.write('end subroutine touchup_cell\n\n')
 
     def write_proclist_put_take(self, data, out):
         """
@@ -1074,14 +1121,19 @@ class ProcListWriter():
                         if op == 'put':
                             if data.meta.debug > 0:
                                 out.write('print *,"    LATTICE/REPLACE_SPECIES/SITE",site\n')
-                                out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES","%s"\n' % data.species_list.default_species)
-                                out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES","%s"\n' % species.name)
-                            out.write('    call replace_species(site, %s, %s)\n\n' % (data.species_list.default_species, species.name))
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES","%s"\n'
+                                          % data.species_list.default_species)
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES","%s"\n'
+                                          % species.name)
+                            out.write('    call replace_species(site, %s, %s)\n\n'
+                                       % (data.species_list.default_species, species.name))
                         elif op == 'take':
                             if data.meta.debug > 0:
                                 out.write('print *,"    LATTICE/REPLACE_SPECIES/SITE",site\n')
-                                out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES","%s"\n' % species.name)
-                                out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES","%s"\n' % data.species_list.default_species)
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES","%s"\n'
+                                          % species.name)
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES","%s"\n'
+                                          % data.species_list.default_species)
                             out.write('    call replace_species(site, %s, %s)\n\n' %
                                       (species.name, data.species_list.default_species))
                         for process in data.process_list:
@@ -1446,7 +1498,7 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
                     (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
                     (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
                     ]
-    else :
+    else:
         raise UserWarning("Don't know this backend")
 
     exec_files = []
