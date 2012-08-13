@@ -947,12 +947,34 @@ class ProcListWriter():
         for lat_int_group, processes in lat_int_groups.iteritems():
             proc_names = ', '.join([proc.name for proc in processes])
             out.write('    case(%s)\n' % _chop_line(proc_names, line_length=60))
+            out.write('        call run_proc_%s(cell)\n' % lat_int_group)
         out.write('    case default\n')
         out.write('        print *, "Whoops, should not get here!"\n')
         out.write('        print *, "PROC_NR", proc\n')
         out.write('        stop\n')
         out.write('    end select\n\n')
         out.write('end subroutine run_proc_nr\n\n')
+
+        #########################################
+        # The touchup function
+        #########################################
+        out.write('subroutine touchup_cell(cell)\n')
+        out.write('    integer(kind=iint), intent(in), dimension(4) :: cell\n\n')
+        out.write('    integer(kind=iint), dimension(4) :: site\n\n')
+        out.write('    site = cell + (/0, 0, 0, 1/)\n')
+        for lat_int_group, process in lat_int_groups.iteritems():
+            if data.meta.debug > 1:
+                out.write('print *,"PROCLIST/TOUCHUP_CELL/DEL/%s"\n' % lat_int_group.upper())
+            out.write('    if(avail_sites(nli_%s(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then\n'
+                      % lat_int_group)
+            out.write('        call del_proc(nli_%s(cell), site)\n' % (lat_int_group))
+            out.write('    endif\n')
+
+        for lat_int_group, process in lat_int_groups.iteritems():
+            if data.meta.debug > 1:
+                out.write('print *,"PROCLIST/TOUCHUP_CELL/ADD/%s"\n' % lat_int_group.upper())
+            out.write('    call add_proc(nli_%s(cell), site)\n' % (lat_int_group))
+        out.write('end subroutine touchup_cell\n\n')
 
         #####################################################
         # def run_proc_<processname>
@@ -978,8 +1000,8 @@ class ProcListWriter():
 
             modified_procs = sorted(modified_procs)
             for i, (process, offset) in enumerate(modified_procs):
-                offset_cell = '(/%s, %s, %s, 0/)' % tuple(offset)
-                offset_site = '(/%s, %s, %s, 1/)' % tuple(offset)
+                offset_cell = '(/%+i, %+i, %+i, 0/)' % tuple(offset)
+                offset_site = '(/%+i, %+i, %+i, 1/)' % tuple(offset)
                 out.write('    call del_proc(nli_%s(cell + %s), cell + %s)\n'
                     % (process.name, offset_cell, offset_site))
 
@@ -1002,8 +1024,8 @@ class ProcListWriter():
 
             out.write('\n    ! enable processes that have to be enabled\n')
             for i, (process, offset) in enumerate(modified_procs):
-                offset_cell = '(/%s, %s, %s, 0/)' % tuple(offset)
-                offset_site = '(/%s, %s, %s, 1/)' % tuple(offset)
+                offset_cell = '(/%+i, %+i, %+i, 0/)' % tuple(offset)
+                offset_site = '(/%+i, %+i, %+i, 1/)' % tuple(offset)
                 out.write('    call add_proc(nli_%s(cell + %s), cell + %s)\n'
                     % (process.name, offset_cell, offset_site))
             out.write('\nend subroutine run_proc_%s\n\n' % lat_int_group)
@@ -1046,7 +1068,7 @@ class ProcListWriter():
             #compression_index = [compression_map.get(i, 0) for
                                  #i in xrange(nr_of_species**len(conditions0))]
             # DEBUGGING
-            compression_index = [compression_map.get(i, -i) for
+            compression_index = [compression_map.get(i, 0) for
                                  i in xrange(nr_of_species**len(conditions0))]
 
             out.write('    integer, dimension(%s), parameter :: lat_int_index_%s = (/ &\n'
@@ -1077,27 +1099,6 @@ class ProcListWriter():
                 out.write('print *,"    PROCLIST/NLI_%s/PROC_NR", nli_%s\n'
                           % (lat_int_group.upper(), lat_int_group))
             out.write('\nend function nli_%s\n\n' % (lat_int_group))
-
-        #########################################
-        # The touchup function
-        #########################################
-        out.write('subroutine touchup_cell(cell)\n')
-        out.write('    integer(kind=iint), intent(in), dimension(4) :: cell\n\n')
-        out.write('    integer(kind=iint), dimension(4) :: site\n\n')
-        out.write('    site = cell + (/0, 0, 0, 1/)\n')
-        for lat_int_group, process in lat_int_groups.iteritems():
-            if data.meta.debug > 1:
-                out.write('print *,"PROCLIST/TOUCHUP_CELL/DEL/%s"\n' % lat_int_group.upper())
-            out.write('    if(avail_sites(nli_%s(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then\n'
-                      % lat_int_group)
-            out.write('        call del_proc(nli_%s(cell), site)\n' % (lat_int_group))
-            out.write('    endif\n')
-
-        for lat_int_group, process in lat_int_groups.iteritems():
-            if data.meta.debug > 1:
-                out.write('print *,"PROCLIST/TOUCHUP_CELL/ADD/%s"\n' % lat_int_group.upper())
-            out.write('    call add_proc(nli_%s(cell), site)\n' % (lat_int_group))
-        out.write('end subroutine touchup_cell\n\n')
 
     def write_proclist_put_take(self, data, out):
         """
