@@ -1088,10 +1088,10 @@ class ProcListWriter():
         for lat_int_group, process in lat_int_groups.iteritems():
             if data.meta.debug > 1:
                 out.write('print *,"PROCLIST/TOUCHUP_CELL/DEL/%s"\n' % lat_int_group.upper())
-            #out.write('    if(avail_sites(nli_%s(cell), site, 2).ne.0)then\n'
-                      #% lat_int_group)
-            #out.write('        call del_proc(nli_%s(cell), site)\n' % (lat_int_group))
-            #out.write('    endif\n')
+            out.write('    if(avail_sites(nli_%s(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then\n'
+                      % lat_int_group)
+            out.write('        call del_proc(nli_%s(cell), site)\n' % (lat_int_group))
+            out.write('    endif\n')
 
         for lat_int_group, process in lat_int_groups.iteritems():
             if data.meta.debug > 1:
