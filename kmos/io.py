@@ -35,12 +35,11 @@ def _flatten(L):
     return [item for sublist in L for item in sublist]
 
 
-def _chop_line(outstr):
+def _chop_line(outstr, line_length=100):
     outstr_list = []
-    LINE_LEN = 100
     while outstr:
         try:
-            NEXT_BREAK = outstr.index(',', LINE_LEN) + 1
+            NEXT_BREAK = outstr.index(',', line_length) + 1
         except ValueError:
             NEXT_BREAK = len(outstr)
         outstr_list.append(outstr[:NEXT_BREAK] + '&\n' )
@@ -947,7 +946,7 @@ class ProcListWriter():
         out.write('    select case(proc)\n')
         for lat_int_group, processes in lat_int_groups.iteritems():
             proc_names = ', '.join([proc.name for proc in processes])
-            out.write('    case(%s)\n' % _chop_line(proc_names))
+            out.write('    case(%s)\n' % _chop_line(proc_names, line_length=60))
         out.write('    case default\n')
         out.write('        print *, "Whoops, should not get here!"\n')
         out.write('        print *, "PROC_NR", proc\n')
@@ -1042,7 +1041,10 @@ class ProcListWriter():
                     lat_int_nr += species_nr*(nr_of_species**j)
                     #print(lat_int_nr, species.name, nr_of_species, j)
                 compression_map[lat_int_nr] = process.name
-            compression_index = [compression_map.get(i, 0) for
+            #compression_index = [compression_map.get(i, 0) for
+                                 #i in xrange(nr_of_species**len(conditions0))]
+            # DEBUGGING
+            compression_index = [compression_map.get(i, -i) for
                                  i in xrange(nr_of_species**len(conditions0))]
 
             out.write('    integer, dimension(%s), parameter :: lat_int_index_%s = (/ &\n'
@@ -1078,10 +1080,20 @@ class ProcListWriter():
         #########################################
         out.write('subroutine touchup_cell(cell)\n')
         out.write('    integer(kind=iint), intent(in), dimension(4) :: cell\n\n')
+        out.write('    integer(kind=iint), dimension(4) :: site\n\n')
+        out.write('    site = cell + (/0, 0, 0, 1/)\n')
         for lat_int_group, process in lat_int_groups.iteritems():
             if data.meta.debug > 1:
-                out.write('print *,"PROCLIST/TOUCHUP_CELL/%s"\n' % lat_int_group.upper())
-            out.write('    call add_proc(nli_%s(cell), cell + (/0, 0, 0, 1/))\n' % (lat_int_group))
+                out.write('print *,"PROCLIST/TOUCHUP_CELL/DEL/%s"\n' % lat_int_group.upper())
+            #out.write('    if(avail_sites(nli_%s(cell), site, 2).ne.0)then\n'
+                      #% lat_int_group)
+            #out.write('        call del_proc(nli_%s(cell), site)\n' % (lat_int_group))
+            #out.write('    endif\n')
+
+        for lat_int_group, process in lat_int_groups.iteritems():
+            if data.meta.debug > 1:
+                out.write('print *,"PROCLIST/TOUCHUP_CELL/ADD/%s"\n' % lat_int_group.upper())
+            out.write('    call add_proc(nli_%s(cell), site)\n' % (lat_int_group))
         out.write('end subroutine touchup_cell\n\n')
 
     def write_proclist_put_take(self, data, out):
