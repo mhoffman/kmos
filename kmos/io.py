@@ -836,7 +836,7 @@ class ProcListWriter():
         out.write('    end select\n\n')
         out.write('end subroutine run_proc_nr\n\n')
 
-    def _db_print(self, line, debug=False):
+    def _db_print(self, line, debug=True):
         if debug:
             with open('dbg_file.txt', 'a') as dbg_file:
                 dbg_file.write(line)
@@ -1034,7 +1034,9 @@ class ProcListWriter():
                 lat_int_nr = 0
                 nr_of_species = len(data.species_list)
                 conditions = process.condition_list + process.bystanders
-                for j, bystander in enumerate(conditions):
+                for j, bystander in enumerate(sorted(conditions,
+                                     key=lambda x: x.coord,
+                                     cmp=cmp_coords)):
                     species_nr = [x for (x, species) in
                                   enumerate(sorted(data.species_list))
                                   if species.name == bystander.species][0]
@@ -1061,7 +1063,8 @@ class ProcListWriter():
                 out.write('print *,"PROCLIST/NLI_%s"\n' % lat_int_group.upper())
                 out.write('print *,"    PROCLIST/NLI_%s/CELL", cell\n' % lat_int_group.upper())
 
-            conditions0 = process0.condition_list + process0.bystanders
+            conditions0 = sorted(process0.condition_list + process0.bystanders,
+                                 key=lambda x: x.coord, cmp=cmp_coord)
             for i, bystander in enumerate(conditions0):
                 out.write('    n = n + get_species(cell%s)*nr_of_species**%s\n'
                 % (bystander.coord.radd_ff(), i))
