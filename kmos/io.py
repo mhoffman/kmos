@@ -1062,7 +1062,7 @@ class ProcListWriter():
                 out.write('print *,"    PROCLIST/NLI_%s/CELL", cell\n' % lat_int_group.upper())
 
             conditions0 = sorted(process0.condition_list + process0.bystanders,
-                                 key=lambda x: x.coord, cmp=cmp_coord)
+                                 key=lambda x: x.coord, cmp=cmp_coords)
             for i, bystander in enumerate(conditions0):
                 out.write('    n = n + get_species(cell%s)*nr_of_species**%s\n'
                 % (bystander.coord.radd_ff(), i))
