@@ -182,7 +182,8 @@ class KMC_Model(multiprocessing.Process):
         else:
             self.lattice_representation = Atoms()
         set_rate_constants(settings.parameters, self.print_rates)
-        self.base.update_accum_rate()
+        # DEBUGGING, do we need this?
+        #self.base.update_accum_rate()
 
     def __repr__(self):
         """Print short summary of current parameters and rate
@@ -683,6 +684,7 @@ class KMC_Model(multiprocessing.Process):
                             site_name = self.settings.site_names[n].lower()
                             eval('self.proclist.touchup_%s([%i, %i, %i, %i])'
                                 % (site_name, x, y, z, n + 1))
+        self.base.update_accum_rate()
 
     def get_backend(self):
         if hasattr(self.proclist, 'backend'):
