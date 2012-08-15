@@ -197,7 +197,11 @@ def main(args=None):
         from kmos.run import KMC_Model
         model = KMC_Model(print_rates=False, banner=False)
         time0 = time()
-        model.do_steps(nsteps)
+        try:
+            model.proclist.do_kmc_steps(nsteps)
+        except: # kmos < 0.3 had no model.proclist.do_kmc_steps
+            model.do_steps(nsteps)
+
         needed_time = time() - time0
         print('%s steps took %.2f seconds' % (nsteps, needed_time))
         print('Or %.2e steps/s' % (1e6 / needed_time))
