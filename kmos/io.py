@@ -507,6 +507,40 @@ class ProcListWriter():
 
         out.write('\n\ncontains\n\n')
 
+        # do n kmc steps
+        out.write('subroutine do_kmc_steps(n)\n\n'
+                  '!****f* proclist/do_kmc_steps\n'
+                  '! FUNCTION\n'
+                  '!    Performs ``n`` kMC step.\n'
+                  '!    If one has to run many steps without evaluation\n'
+                  '!    do_kmc_steps might perform a little better.\n'
+                  '!\n'
+                  '! ARGUMENTS\n'
+                  '!\n'
+                  '!    ``n`` : Number of steps to run\n'
+                  '!******\n'
+                  '    integer(kind=iint), intent(in) :: n\n\n'
+                  '    real(kind=rsingle) :: ran_proc, ran_time, ran_site\n'
+                  '    integer(kind=iint) :: nr_site, proc_nr, i\n\n'
+                  '    do i = 1, n\n'
+                  '    call random_number(ran_time)\n'
+                  '    call random_number(ran_proc)\n'
+                  '    call random_number(ran_site)\n')
+        if data.meta.debug > 0:
+            out.write('print *, "PROCLIST/DO_KMC_STEP"\n'
+                      'print *,"    PROCLIST/DO_KMC_STEP/RAN_TIME",ran_time\n'
+                      'print *,"    PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc\n'
+                      'print *,"    PROCLIST/DO_KMC_STEP/RAN_site",ran_site\n')
+        out.write('    call update_accum_rate\n'
+                  '    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
+        if data.meta.debug > 0:
+            out.write('print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr\n')
+            out.write('print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site\n')
+        out.write('    call run_proc_nr(proc_nr, nr_site)\n'
+                  '    call update_clocks(ran_time)\n\n'
+                  '    enddo\n\n'
+                  'end subroutine do_kmc_steps\n\n')
+
         # do exactly one kmc step
         out.write('subroutine do_kmc_step()\n\n'
                   '!****f* proclist/do_kmc_step\n'
