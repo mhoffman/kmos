@@ -65,9 +65,27 @@ How can I change the occupation of a model at runtime?
   This is explained in detail at :ref:`manipulate_model_runtime` though
   the import bit is that you call ::
 
-    model._adjust_database()
+     model._adjust_database()
 
   after changing the occupation and before doing the next kMC step.
+
+
+How can I quickly obtain k_tot ?
+    That is ::
+        model.base.get_accum_rate(model.proclist.nr_of_proc)
+
+How can I check the system size ?
+    You can check ::
+        model.lattice.system_size
+    to get the number of unit cell in the x, y, and z direction.
+    The number of sites per unit cell is stored in ::
+        model.lattice.spuck
+    a.k.a Sites Per Unit Cell Konstant :-).
+    Or you check ::
+        model.base.get_volume()
+    to get the total number of sites, i.e. ::
+        model.base.get_volume() == model.lattice.system_size.prod()*model.lattice.spuck
+        => True
 
 
 More to follow.
