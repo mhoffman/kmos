@@ -36,6 +36,8 @@ def _flatten(L):
 
 
 def _chop_line(outstr, line_length=100):
+    if len(outstr) < line_length :
+        return outstr
     outstr_list = []
     while outstr:
         try:
@@ -1104,14 +1106,20 @@ class ProcListWriter():
             # DEBUGGING
             compression_index = [compression_map.get(i, 0) for
                                  i in xrange(nr_of_species**len(conditions0))]
+            # use a threshold of 1./3 for very sparse maps
+            if float(compression_index.count(0))/len(compression_index) < 1./3 :
+                USE_ARRAY = True
+            else:
+                USE_ARRAY = False
 
-            out.write('    integer, dimension(%s), parameter :: lat_int_index_%s = (/ &\n'
-                      % (len(compression_index), lat_int_group))
-            outstr = ', '.join(map(str, compression_index))
+            if USE_ARRAY :
+                out.write('    integer, dimension(%s), parameter :: lat_int_index_%s = (/ &\n'
+                          % (len(compression_index), lat_int_group))
+                outstr = ', '.join(map(str, compression_index))
 
-            outstr = _chop_line(outstr)
-            out.write(outstr)
-            out.write('/)\n')
+                outstr = _chop_line(outstr)
+                out.write(outstr)
+                out.write('/)\n')
             out.write('    integer :: n\n\n')
             out.write('    n = 1\n\n')
 
@@ -1125,8 +1133,19 @@ class ProcListWriter():
                 out.write('    n = n + get_species(cell%s)*nr_of_species**%s\n'
                 % (bystander.coord.radd_ff(), i))
 
-            out.write('\n    nli_%s = lat_int_index_%s(n)\n'
-                      % (lat_int_group, lat_int_group))
+            if USE_ARRAY :
+                out.write('\n    nli_%s = lat_int_index_%s(n)\n'
+                          % (lat_int_group, lat_int_group))
+            else:
+                out.write('\n    select case(n)\n')
+                for i, proc_name in enumerate(compression_index, start=1):
+                    if proc_name:
+                        out.write('    case(%s)\n' % i)
+                        out.write('        nli_%s = %s\n' %
+                                   (lat_int_group, proc_name))
+                out.write('    case default\n')
+                out.write('        nli_%s = 0\n' % lat_int_group)
+                out.write('    end select\n\n')
             if data.meta.debug > 2:
                 out.write('print *,"    PROCLIST/NLI_%s/N", n\n'
                           % lat_int_group.upper())
