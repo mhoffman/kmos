@@ -873,6 +873,7 @@ class ProcListWriter():
         out.write('end subroutine run_proc_nr\n\n')
 
     def _db_print(self, line, debug=True):
+        """Write out debugging statement if requested."""
         if debug:
             with open('dbg_file.txt', 'a') as dbg_file:
                 dbg_file.write(line)
@@ -1017,11 +1018,18 @@ class ProcListWriter():
         #####################################################
         for lat_int_group, processes in lat_int_groups.iteritems():
             self._db_print('PROCESS: %s' % lat_int_group)
+            # initialize needed data structure
             process0 = processes[0]
             modified_procs = set()
+
+            # write F90 subroutine definition
             out.write('subroutine run_proc_%s(cell)\n\n' % lat_int_group)
             out.write('    integer(kind=iint), dimension(4), intent(in) :: cell\n')
             out.write('\n    ! disable processes that have to be disabled\n')
+
+            # collect processes that could be modified by current process:
+            # if current process modifies a site, that "another process" depends on,
+            # add "another process" to the processes to be modified/updated.
             for action in process0.action_list:
                 self._db_print('    ACTION: %s' % action)
                 for _, other_processes in lat_int_groups.iteritems():
@@ -1034,7 +1042,10 @@ class ProcListWriter():
                         if action.coord.eq_mod_offset(condition.coord):
                             modified_procs.add((other_process, tuple(action.coord.offset-condition.coord.offset)))
 
+            # sort to one well-defined orded
             modified_procs = sorted(modified_procs)
+
+            # write out necessary DELETION statements
             for i, (process, offset) in enumerate(modified_procs):
                 offset_cell = '(/%+i, %+i, %+i, 0/)' % tuple(offset)
                 offset_site = '(/%+i, %+i, %+i, 1/)' % tuple(offset)
@@ -1042,6 +1053,7 @@ class ProcListWriter():
                     % (process.name, offset_cell, offset_site))
 
 
+            # write out necessary LATTICE UPDATES
             out.write('\n    ! update lattice\n')
             for condition in process0.condition_list:
                 try:
@@ -1058,6 +1070,7 @@ class ProcListWriter():
                              condition.species,
                              action.species))
 
+            # write out necessary ADDITION statements
             out.write('\n    ! enable processes that have to be enabled\n')
             for i, (process, offset) in enumerate(modified_procs):
                 offset_cell = '(/%+i, %+i, %+i, 0/)' % tuple(offset)
@@ -1069,6 +1082,12 @@ class ProcListWriter():
         #########################################
         # def nli_<processname>
         # nli = number of lateral interaction
+        # inspect a local enviroment for a set
+        # of processes that only differ by lateral
+        # interaction and return the process number
+        # corrresponding to the present configuration.
+        # If no process is applicable an integer "0"
+        # is returned.
         #########################################
         for lat_int_group, processes in lat_int_groups.iteritems():
             process0 = processes[0]
@@ -1552,7 +1571,8 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     if not os.path.exists(export_dir):
         os.makedirs(export_dir)
 
-    # copy files
+    # FIRST
+    # copy static files
     # each file is tuple (source, target)
     if code_generator == 'local_smart':
         cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
@@ -1580,6 +1600,8 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
         shutil.copy(os.path.join(APP_ABS_PATH, filename), export_dir)
         os.chmod(os.path.join(export_dir, filename), 0755)
 
+    # SECOND
+    # produce those source files that are written on the fly
     writer = ProcListWriter(project_tree, export_dir)
     writer.write_lattice()
     writer.write_proclist(code_generator=code_generator)
