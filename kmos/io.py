@@ -1103,14 +1103,15 @@ class ProcListWriter():
                 compression_map[lat_int_nr] = process.name
 
             # use a threshold of 1./3 for very sparse maps
-            if float(len(compression_map))/(nr_of_species**len(conditions)) < 1./3 :
+            if float(len(compression_map))/(nr_of_species**len(conditions)) > 1./3 :
                 USE_ARRAY = True
             else:
                 USE_ARRAY = False
+            #print(lat_int_group, float(len(compression_map)), (nr_of_species**len(conditions)), USE_ARRAY)
 
-            if USE_ARRAY :
-                compression_index = [compression_map.get(i, 0) for
-                                     i in xrange(nr_of_species**len(conditions0))]
+            compression_index = [compression_map.get(i, 0) for
+                                 i in xrange(nr_of_species**len(conditions0))]
+            if USE_ARRAY:
                 out.write('    integer, dimension(%s), parameter :: lat_int_index_%s = (/ &\n'
                           % (len(compression_index), lat_int_group))
                 outstr = ', '.join(map(str, compression_index))
