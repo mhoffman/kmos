@@ -1043,7 +1043,9 @@ class ProcListWriter():
                             modified_procs.add((other_process, tuple(action.coord.offset-condition.coord.offset)))
 
             # sort to one well-defined orded
-            modified_procs = sorted(modified_procs)
+            modified_procs = sorted(modified_procs,
+                                    key=lambda x: '%s %s' % (x[0].name, str(x[1]))
+                                    )
 
             # write out necessary DELETION statements
             for i, (process, offset) in enumerate(modified_procs):
