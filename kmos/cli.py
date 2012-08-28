@@ -183,7 +183,7 @@ def get_options(args=None, get_parser=False):
     else:
         return options, args
 
-def match_keys(arg, usage, parse):
+def match_keys(arg, usage, parser):
     """Try to match part of a command against
        the set of commands from usage. Throws
        an error if not successful.
