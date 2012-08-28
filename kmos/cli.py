@@ -172,6 +172,19 @@ def get_options(args=None, get_parser=False):
     else:
         return options, args
 
+def match_keys(arg, usage, parse):
+    """Try to match part of a command against
+       the set of commands from usage. Throws
+       an error if not successful.
+
+    """
+    possible_args = [key for key in usage if key.startswith(arg)]
+    if len(possible_args) == 0 :
+        parser.error('Command "%s" not understood.' % arg)
+    elif len(possible_args) > 1 :
+        parser.error('Command "%s" ambiguous.' % arg)
+    else:
+        return possible_args[0]
 
 def main(args=None):
     """The CLI main entry point function.
@@ -190,13 +203,7 @@ def main(args=None):
     options, args, parser = get_options(args, get_parser=True)
 
     if not args[0] in usage.keys():
-        possible_args = [key for key in usage if key.startswith(args[0])]
-        if len(possible_args) == 0 :
-            parser.error('Command "%s" not understood.' % args[0])
-        elif len(possible_args) > 1 :
-            parser.error('Command "%s" ambiguous.' % args[0])
-        else:
-            args[0] = possible_args[0]
+        args[0] = match_keys(args[0], usage, parser)
 
     if args[0] == 'benchmark':
         from sys import path
@@ -303,8 +310,8 @@ def main(args=None):
         elif args[1] in usage:
             print('Usage: %s\n' % usage[args[1]])
         else:
-            raise Exception('Command "%s" not known or not documented.'
-                            % args[1])
+            arg = match_keys(args[1], usage, parser)
+            print('Usage: %s\n' % usage[arg])
 
     elif args[0] == 'import':
         import kmos.io
