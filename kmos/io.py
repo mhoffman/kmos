@@ -872,7 +872,7 @@ class ProcListWriter():
         out.write('    end select\n\n')
         out.write('end subroutine run_proc_nr\n\n')
 
-    def _db_print(self, line, debug=True):
+    def _db_print(self, line, debug=False):
         """Write out debugging statement if requested."""
         if debug:
             with open('dbg_file.txt', 'a') as dbg_file:
@@ -998,14 +998,15 @@ class ProcListWriter():
         out.write('subroutine touchup_cell(cell)\n')
         out.write('    integer(kind=iint), intent(in), dimension(4) :: cell\n\n')
         out.write('    integer(kind=iint), dimension(4) :: site\n\n')
+        out.write('    integer(kind=iint) :: proc_nr\n\n')
         out.write('    site = cell + (/0, 0, 0, 1/)\n')
-        for lat_int_group, process in lat_int_groups.iteritems():
-            if data.meta.debug > 1:
-                out.write('print *,"PROCLIST/TOUCHUP_CELL/DEL/%s"\n' % lat_int_group.upper())
-            out.write('    if(avail_sites(nli_%s(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then\n'
-                      % lat_int_group)
-            out.write('        call del_proc(nli_%s(cell), site)\n' % (lat_int_group))
-            out.write('    endif\n')
+        out.write('do proc_nr = 1, nr_of_proc\n')
+        if data.meta.debug > 1:
+            out.write('print *,"PROCLIST/TOUCHUP_CELL/DEL/%s"\n' % lat_int_group.upper())
+        out.write('    if(avail_sites(proc_nr, lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then\n')
+        out.write('        call del_proc(proc_nr, site)\n')
+        out.write('    endif\n')
+        out.write('end do\n\n')
 
         for lat_int_group, process in lat_int_groups.iteritems():
             if data.meta.debug > 1:
