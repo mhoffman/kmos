@@ -193,7 +193,8 @@ def match_keys(arg, usage, parser):
     if len(possible_args) == 0 :
         parser.error('Command "%s" not understood.' % arg)
     elif len(possible_args) > 1 :
-        parser.error('Command "%s" ambiguous.' % arg)
+        parser.error(('Command "%s" ambiguous.\n'
+                      'Could be one of %s\n\n') % (arg, possible_args))
     else:
         return possible_args[0]
 
