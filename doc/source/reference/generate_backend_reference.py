@@ -92,6 +92,9 @@ shutil.rmtree(outdir)
 
 with file('cli.rst', 'w') as outfile:
     from kmos.cli import usage
+    from kmos import cli
+    outfile.write(cli.__doc__)
+    outfile.write('List of commands\n^^^^^^^^^^^^^^^^\n\n')
     for i, doc in enumerate(sorted(usage.values())):
         outfile.write('\n\n')
         doc = doc.replace('*', '\*')

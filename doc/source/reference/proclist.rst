@@ -9,6 +9,14 @@ proclist/do_kmc_step
 
     ``none``
 
+proclist/do_kmc_steps
+""""""""""""""""""""""""""""""""""""""""""""""""""
+    Performs ``n`` kMC step.
+    If one has to run many steps without evaluation
+    do_kmc_steps might perform a little better.
+
+    ``n`` : Number of steps to run
+
 proclist/get_kmc_step
 """"""""""""""""""""""""""""""""""""""""""""""""""
     Determines next step without executing it.
