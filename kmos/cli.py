@@ -9,6 +9,17 @@
 
        kmos.cli.main('...')
 
+   Every command can be shortened as long as it is non-ambiguous, e.g. ::
+
+
+    kmos ex <xml-file>
+
+   instead of ::
+
+    kmos export <xml-file>
+
+
+   etc.
 
 """
 
