@@ -72,7 +72,7 @@ usage['export'] = """kmos export <xml-file> [<export-path>]
             (Only active in compile step)
                     """ % ('pyd' if os.name == 'nt' else 'so')
 
-usage['export-settings'] = """kmos export-settings <xml-file> [<export-path>]
+usage['settings-export'] = """kmos settings-export <xml-file> [<export-path>]
     Take a kmos xml-file and export kmc_settings.py
     to the export-path.
                     """
@@ -189,6 +189,15 @@ def main(args=None):
 
     options, args, parser = get_options(args, get_parser=True)
 
+    if not args[0] in usage.keys():
+        possible_args = [key for key in usage if key.startswith(args[0])]
+        if len(possible_args) == 0 :
+            parser.error('Command "%s" not understood.' % args[0])
+        elif len(possible_args) > 1 :
+            parser.error('Command "%s" ambiguous.' % args[0])
+        else:
+            args[0] = possible_args[0]
+
     if args[0] == 'benchmark':
         from sys import path
         path.append(os.path.abspath(os.curdir))
@@ -212,7 +221,7 @@ def main(args=None):
     elif args[0] == 'edit':
         from kmos import gui
         gui.main()
-    elif args[0] == 'export-settings':
+    elif args[0] == 'settings-export':
         import kmos.types
         import kmos.io
         from kmos.io import ProcListWriter
@@ -269,7 +278,7 @@ def main(args=None):
                 else:
                     shutil.move(out, '..')
 
-    elif args[0] == 'export-settings':
+    elif args[0] == 'settings-export':
         import kmos.io
         pt = kmos.io.import_xml_file(args[1])
         if len(args) < 3:
