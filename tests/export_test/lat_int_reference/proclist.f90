@@ -423,115 +423,15 @@ subroutine touchup_cell(cell)
 
     integer(kind=iint), dimension(4) :: site
 
+    integer(kind=iint) :: proc_nr
+
     site = cell + (/0, 0, 0, 1/)
-    if(avail_sites(nli_oxygen_diffusion_bridge_bridge_down(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_oxygen_diffusion_bridge_bridge_down(cell), site)
+do proc_nr = 1, nr_of_proc
+    if(avail_sites(proc_nr, lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
+        call del_proc(proc_nr, site)
     endif
-    if(avail_sites(nli_oxygen_diffusion_cus_bridge_right(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_oxygen_diffusion_cus_bridge_right(cell), site)
-    endif
-    if(avail_sites(nli_co_diffusion_bridge_cus_left(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_co_diffusion_bridge_cus_left(cell), site)
-    endif
-    if(avail_sites(nli_co_diffusion_cus_cus_up(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_co_diffusion_cus_cus_up(cell), site)
-    endif
-    if(avail_sites(nli_co_diffusion_bridge_bridge_down(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_co_diffusion_bridge_bridge_down(cell), site)
-    endif
-    if(avail_sites(nli_reaction_oxygen_bridge_co_cus_left(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_reaction_oxygen_bridge_co_cus_left(cell), site)
-    endif
-    if(avail_sites(nli_co_desorption_cus(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_co_desorption_cus(cell), site)
-    endif
-    if(avail_sites(nli_reaction_oxygen_bridge_co_bridge_up(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_reaction_oxygen_bridge_co_bridge_up(cell), site)
-    endif
-    if(avail_sites(nli_oxygen_desorption_bridge_bridge(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_oxygen_desorption_bridge_bridge(cell), site)
-    endif
-    if(avail_sites(nli_oxygen_adsorption_bridge_bridge(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_oxygen_adsorption_bridge_bridge(cell), site)
-    endif
-    if(avail_sites(nli_co_diffusion_bridge_cus_right(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_co_diffusion_bridge_cus_right(cell), site)
-    endif
-    if(avail_sites(nli_oxygen_adsorption_cus_cus(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_oxygen_adsorption_cus_cus(cell), site)
-    endif
-    if(avail_sites(nli_co_diffusion_cus_bridge_left(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_co_diffusion_cus_bridge_left(cell), site)
-    endif
-    if(avail_sites(nli_oxygen_desorption_bridge_cus_left(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_oxygen_desorption_bridge_cus_left(cell), site)
-    endif
-    if(avail_sites(nli_co_diffusion_cus_cus_down(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_co_diffusion_cus_cus_down(cell), site)
-    endif
-    if(avail_sites(nli_reaction_oxygen_cus_co_bridge_right(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_reaction_oxygen_cus_co_bridge_right(cell), site)
-    endif
-    if(avail_sites(nli_co_diffusion_bridge_bridge_up(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_co_diffusion_bridge_bridge_up(cell), site)
-    endif
-    if(avail_sites(nli_reaction_oxygen_cus_co_cus_up(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_reaction_oxygen_cus_co_cus_up(cell), site)
-    endif
-    if(avail_sites(nli_reaction_oxygen_cus_co_cus_down(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_reaction_oxygen_cus_co_cus_down(cell), site)
-    endif
-    if(avail_sites(nli_oxygen_diffusion_bridge_cus_right(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_oxygen_diffusion_bridge_cus_right(cell), site)
-    endif
-    if(avail_sites(nli_oxygen_diffusion_cus_bridge_left(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_oxygen_diffusion_cus_bridge_left(cell), site)
-    endif
-    if(avail_sites(nli_oxygen_diffusion_cus_cus_up(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_oxygen_diffusion_cus_cus_up(cell), site)
-    endif
-    if(avail_sites(nli_reaction_oxygen_bridge_co_cus_right(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_reaction_oxygen_bridge_co_cus_right(cell), site)
-    endif
-    if(avail_sites(nli_co_diffusion_cus_bridge_right(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_co_diffusion_cus_bridge_right(cell), site)
-    endif
-    if(avail_sites(nli_oxygen_adsorption_bridge_cus_right(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_oxygen_adsorption_bridge_cus_right(cell), site)
-    endif
-    if(avail_sites(nli_oxygen_diffusion_bridge_bridge_up(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_oxygen_diffusion_bridge_bridge_up(cell), site)
-    endif
-    if(avail_sites(nli_oxygen_diffusion_bridge_cus_left(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_oxygen_diffusion_bridge_cus_left(cell), site)
-    endif
-    if(avail_sites(nli_oxygen_diffusion_cus_cus_down(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_oxygen_diffusion_cus_cus_down(cell), site)
-    endif
-    if(avail_sites(nli_reaction_oxygen_cus_co_bridge_left(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_reaction_oxygen_cus_co_bridge_left(cell), site)
-    endif
-    if(avail_sites(nli_reaction_oxygen_bridge_co_bridge_down(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_reaction_oxygen_bridge_co_bridge_down(cell), site)
-    endif
-    if(avail_sites(nli_oxygen_adsorption_bridge_cus_left(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_oxygen_adsorption_bridge_cus_left(cell), site)
-    endif
-    if(avail_sites(nli_oxygen_desorption_cus_cus(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_oxygen_desorption_cus_cus(cell), site)
-    endif
-    if(avail_sites(nli_co_desorption_bridge(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_co_desorption_bridge(cell), site)
-    endif
-    if(avail_sites(nli_oxygen_desorption_bridge_cus_right(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_oxygen_desorption_bridge_cus_right(cell), site)
-    endif
-    if(avail_sites(nli_co_adsorption_bridge(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_co_adsorption_bridge(cell), site)
-    endif
-    if(avail_sites(nli_co_adsorption_cus(cell), lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then
-        call del_proc(nli_co_adsorption_cus(cell), site)
-    endif
+end do
+
     call add_proc(nli_oxygen_diffusion_bridge_bridge_down(cell), site)
     call add_proc(nli_oxygen_diffusion_cus_bridge_right(cell), site)
     call add_proc(nli_co_diffusion_bridge_cus_left(cell), site)
