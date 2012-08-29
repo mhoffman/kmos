@@ -231,6 +231,7 @@ def main(args=None):
             model.do_steps(nsteps)
 
         needed_time = time() - time0
+        print('Using the [%s] backend.' % model.get_backend())
         print('%s steps took %.2f seconds' % (nsteps, needed_time))
         print('Or %.2e steps/s' % (1e6 / needed_time))
         model.deallocate()
