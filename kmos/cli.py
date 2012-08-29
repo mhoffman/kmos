@@ -335,6 +335,11 @@ def main(args=None):
         sh(banner='Note: pt = kmos.io.import_xml(\'%s\')' % args[1])
 
     elif args[0] == 'rebuild':
+        from time import sleep
+        print('Will rebuild model from kmc_settings.py in current directory')
+        print('Please do not interrupt, build process, as you will most likely')
+        print('loose the current model files.')
+        sleep(2.)
         from sys import path
         path.append(os.path.abspath(os.curdir))
         from tempfile import mktemp
