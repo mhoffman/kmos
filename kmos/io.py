@@ -967,6 +967,10 @@ class ProcListWriter():
         On the downside, it might be a little less optimized though
         it is local in a very strict sense. [EXPERIMENTAL/UNFINISHED!!!]
         """
+        if os.name == 'posix':
+            from kmos.utils.progressbar import ProgressBar
+            progress_bar = ProgressBar('blue', width=80)
+            progress_bar.render(10, 'generic part')
 
         lat_int_groups = self._get_lat_int_groups()
         #####################################################
@@ -1020,7 +1024,7 @@ class ProcListWriter():
         #####################################################
         # def run_proc_<processname>
         #####################################################
-        for lat_int_group, processes in lat_int_groups.iteritems():
+        for lat_int_loop, (lat_int_group, processes) in enumerate(lat_int_groups.iteritems()):
             self._db_print('PROCESS: %s' % lat_int_group)
             # initialize needed data structure
             process0 = processes[0]
@@ -1096,6 +1100,10 @@ class ProcListWriter():
                     % (process.name, offset_cell, offset_site))
             out.write('\nend subroutine run_proc_%s\n\n' % lat_int_group)
 
+            if os.name == 'posix':
+                progress_bar.render(int(10+40*float(lat_int_loop)/len(lat_int_groups)),
+                                    'run_proc_%s' % lat_int_group)
+
         #########################################
         # def nli_<processname>
         # nli = number of lateral interaction
@@ -1106,7 +1114,7 @@ class ProcListWriter():
         # If no process is applicable an integer "0"
         # is returned.
         #########################################
-        for lat_int_group, processes in lat_int_groups.iteritems():
+        for lat_int_loop, (lat_int_group, processes) in enumerate(lat_int_groups.iteritems()):
             process0 = processes[0]
             conditions0 = process0.condition_list + process0.bystanders
             if data.meta.debug > 0:
@@ -1192,6 +1200,11 @@ class ProcListWriter():
                 out.write('print *,"    PROCLIST/NLI_%s/PROC_NR", nli_%s\n'
                           % (lat_int_group.upper(), lat_int_group))
             out.write('\nend function nli_%s\n\n' % (lat_int_group))
+            if os.name == 'posix':
+                progress_bar.render(int(50+50*float(lat_int_loop)/len(lat_int_groups)),
+                                    'nli_%s' % lat_int_group)
+        if os.name == 'posix':
+            progress_bar.render(100, 'finished proclist.f90')
 
     def write_proclist_put_take(self, data, out):
         """

@@ -44,6 +44,7 @@ name='python-kmos'
 packages = [
            'kmos',
            'kmos.pygtkcanvas',
+           'kmos.utils',
            ]
 package_dir = {'kmos':'kmos'}
 package_data = {'kmos':['fortran_src/*f90',
