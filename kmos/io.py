@@ -23,6 +23,7 @@ import itertools
 import operator
 import shutil
 import os
+import sys
 from pprint import PrettyPrinter, pformat
 import pdb
 
@@ -423,11 +424,13 @@ class ProcListWriter():
             self.write_proclist_put_take(data, out)
             self.write_proclist_touchup(data, out)
             self.write_proclist_multilattice(data, out)
+            self.write_proclist_end(out)
 
         elif code_generator == 'lat_int':
             self.write_proclist_generic_part(data, out, code_generator=code_generator)
             self.write_proclist_lat_int(data, out)
-            self.write_proclist_multilattice(data, out)
+            #self.write_proclist_multilattice(data, out)
+            self.write_proclist_end(out)
 
         else:
             raise Exception("Don't know this code generator '%s'" % code_generator)
@@ -1068,10 +1071,21 @@ class ProcListWriter():
                     print('And condition %s' % condition)
                     raise
 
+                # catch "multi-lattice" species
+                if action.species.startswith('$'):
+                    condition_species = condition.species
+                    action_species = 'null_species'
+                elif action.species.startswith('^') :
+                    condition_species = 'null_species'
+                    action_species = action.species
+                else:
+                    condition_species = condition.species
+                    action_species = action.species
+
                 out.write('    call replace_species(cell%s, %s, %s)\n'
                           % (condition.coord.radd_ff(),
-                             condition.species,
-                             action.species))
+                             condition_species,
+                             action_species))
 
             # write out necessary ADDITION statements
             out.write('\n    ! enable processes that have to be enabled\n')
@@ -1123,6 +1137,11 @@ class ProcListWriter():
                     lat_int_nr += species_nr*(nr_of_species**j)
                     #print(lat_int_nr, species.name, nr_of_species, j)
                 compression_map[lat_int_nr] = process.name
+                if lat_int_nr > sys.maxint :
+                    print(("Warning: Lateral interaction index is too large to compile."
+                          "          Try to reduce the number of conditions for process %s"
+                          "          or the total number of species.") % process)
+
 
             # use a threshold of 1./3 for very sparse maps
             if float(len(compression_map))/(nr_of_species**len(conditions)) > 1./3 :
@@ -1369,6 +1388,8 @@ class ProcListWriter():
                             out.write('    ! enable affected processes\n')
                             self._write_optimal_iftree(items=enabled_procs, indent=4, out=out)
                         out.write('\nend subroutine %s\n\n' % routine_name)
+
+    def write_proclist_end(self, out):
         out.write('end module proclist\n')
 
     def _write_optimal_iftree(self, items, indent, out):
