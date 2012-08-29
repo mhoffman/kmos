@@ -6,6 +6,12 @@
 
 
 model=${1}
+if [[ "${model}" == *xml* ]]
+then
+    echo "Run benchmark just on prefix (without XML)"
+    exit
+
+fi
 BENCHMARK_FILE="$(readlink -f benchmark_${model}.txt)"
 for compiler in intelem gfortran
 do
@@ -16,8 +22,8 @@ do
         echo -e "BENCHMARK ${model} ${backend} ${compiler}" >> ${BENCHMARK_FILE}
         echo "    COMPILE TIME" >> ${BENCHMARK_FILE}
         /usr/bin/time -o ${BENCHMARK_FILE} -a kmos export -b ${backend} ${model}.xml
-        cp kmc_settings.py ${model}
-        cp setup_model.py ${model}
+        #cp kmc_settings.py ${model}
+        #cp setup_model.py ${model}
         cd ${model}
         echo "    RUN TIME" >> ${BENCHMARK_FILE}
         for i in $(seq 3)
