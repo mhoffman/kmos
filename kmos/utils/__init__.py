@@ -65,7 +65,7 @@ def write_py(fileobj, images, **kwargs):
         fileobj.write("    Atoms(symbols='%s',\n"
                       "          pbc=np.%s,\n"
                       "          cell=np.array(\n      %s,\n" % (
-            image.get_chemical_symbols(reduce=True),
+            image.get_chemical_formula(mode='reduce'),
             repr(image.pbc),
             repr(image.cell)[6:]))
 
