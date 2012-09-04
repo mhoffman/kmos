@@ -484,6 +484,39 @@ class KMC_Model(multiprocessing.Process):
     def switch_surface_processes_on(self):
         set_rate_constants(settings.parameters, self.print_rates)
 
+    def show_coverages(self):
+        """Show coverages (per unit cell) for each species
+        and site type for current configurations.
+
+        """
+
+        # get atoms
+        atoms = self.get_atoms(geometry=False)
+
+        # get occupation
+        occupation = atoms.occupation
+
+        # get species names
+        species_names = sorted(self.settings.representations.keys())
+
+        # get site_names
+        site_names = sorted(self.settings.site_names)
+
+        header_line = ('|' +
+                      ('%18s|' % 'site \ species') +
+                      '|'.join([ ('%11s' % sn) for sn in species_names ] + ['']))
+        print(len(header_line)*'-')
+        print(header_line)
+        print(len(header_line)*'-')
+        for i in range(self.lattice.spuck):
+            site_name = self.settings.site_names[i];
+            print('|'
+                 + '%18s|' % (site_name, )
+                 + '|'.join([('{0:^11.5f}'.format(x) if x else 11*' ') for x in list(occupation[:,i])]
+                 + ['']))
+        print(len(header_line)*'-')
+        print('Units: "molecules (or atoms) per unit cell"')
+
     def show_accum_rate_summation(self, order='-rate'):
         """Shows rate individual processes contribute to the total rate
 

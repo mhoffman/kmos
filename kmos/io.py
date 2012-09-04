@@ -914,11 +914,15 @@ class ProcListWriter():
                     bystanders.append(condition)
             if hasattr(process, 'bystanders'):
                 bystanders.extend(process.bystanders)
+            # extra block for multi-lattice actions
+            for action in actions:
+                if action not in true_actions:
+                    if not(action.species.startswith('^')
+                           or action.species.startswith('$')):
+                        raise UserWarning('Found unmatched action that is not a multi-lattice action: %s' % action)
+                    else:
+                        true_actions.append(action)
 
-            #self._db_print('\n\nPROCESSNAME  %s' % (process.name))
-            #self._db_print('    TRUE CONDITIONS %s' % (true_conditions))
-            #self._db_print('    TRUE ACTIONS %s' % (true_actions))
-            #self._db_print('    BYSTANDERS %s' % (bystanders))
             process_list.append(SingleLatIntProcess(
                                 name=process.name,
                                 rate_constant=process.rate_constant,
@@ -931,8 +935,6 @@ class ProcListWriter():
         ################################################################
         lat_int_groups = {}
         for process in process_list:
-            #if process.name == 'Li_diffusion_a0_a0_0300':
-                #pdb.set_trace()
             for lat_int_group, processes in lat_int_groups.iteritems():
                 p0 = processes[0]
                 same = True
@@ -1065,6 +1067,7 @@ class ProcListWriter():
 
             # write out necessary LATTICE UPDATES
             out.write('\n    ! update lattice\n')
+            matched_actions = []
             for condition in process0.condition_list:
                 try:
                     action = [action for action in process0.action_list
@@ -1074,6 +1077,7 @@ class ProcListWriter():
                     print('Trouble with process %s' % process.name)
                     print('And condition %s' % condition)
                     raise
+                matched_actions.append(action)
 
                 # catch "multi-lattice" species
                 if action.species.startswith('$'):
@@ -1090,6 +1094,25 @@ class ProcListWriter():
                           % (condition.coord.radd_ff(),
                              condition_species,
                              action_species))
+            # extra part for multi-lattice action
+            # without explicit condition
+            for action in process0.action_list:
+                if action not in matched_actions:
+                    #print(process0.name, action, not action in matched_actions)
+                    # catch "multi-lattice" species
+                    if action.species.startswith('$'):
+                        condition_species = action.species[1:]
+                        action_species = 'null_species'
+                    elif action.species.startswith('^') :
+                        condition_species = 'null_species'
+                        action_species = action.species[1:]
+                    else:
+                        raise UserWarning('Unmatched action that is not a multi-lattice action: %s' % (action))
+                    out.write('    call replace_species(cell%s, %s, %s)\n'
+                              % (action.coord.radd_ff(),
+                                 condition_species,
+                                 action_species))
+
 
             # write out necessary ADDITION statements
             out.write('\n    ! enable processes that have to be enabled\n')
