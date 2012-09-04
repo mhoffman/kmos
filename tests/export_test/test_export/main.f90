@@ -1,13 +1,5 @@
 program main
 
-! Just a small stub program to illustrate what a pure F90 client could look like
-! in case Python or f2py is not available.
-!
-! Though for practical purposes using
-! the f2py generated Python bindings
-! is strongly recommended for all to
-! run, inspect, and evaluate the kMC model.
-
 use kind_values, only: rdouble
 use base, only: set_rate_const
 use proclist, only : do_kmc_step, init, nr_of_proc
@@ -28,10 +20,10 @@ enddo
 
 ! run some steps
 do i = 1, 1000000
-  call do_kmc_step
+  call do_kmc_step()
 enddo
 
 ! deallocate
-call deallocate_system
+call deallocate_system()
 
 end program main
