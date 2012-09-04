@@ -511,7 +511,7 @@ class KMC_Model(multiprocessing.Process):
         for i in range(self.lattice.spuck):
             site_name = self.settings.site_names[i];
             print('|'
-                 + '%18s|' % (site_name, )
+                 + '{0:<18s}|'.format(site_name)
                  + '|'.join([('{0:^11.5f}'.format(x) if x else 11*' ') for x in list(occupation[:,i])]
                  + ['']))
         print(len(header_line)*'-')
