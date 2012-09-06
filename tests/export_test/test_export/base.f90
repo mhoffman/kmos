@@ -72,13 +72,14 @@ public :: add_proc, &
     reload_system, &
     reset_site, &
     save_system, &
+    set_null_species, &
     set_rate_const, &
     update_accum_rate, &
     update_clocks
 
 
 ! Public constants
-integer(kind=iint), parameter :: null_species = -1
+integer(kind=iint) :: null_species = -1
 
 !---- Allocatable, module wide, variables
 integer(kind=iint), dimension(:,:,:), allocatable, public :: avail_sites
@@ -1131,7 +1132,15 @@ subroutine replace_species(site, old_species, new_species)
         print '(a)', "model = KMC_Model(banner=False, print_rates=False)"
         print '(a,i2,a,i2,a,i2,a,i10,a,i10,a)', &
         "model.post_mortem(err_code=(",old_species,", ",new_species, ", ",  lattice(site), ", ", site, ", ", kmc_step, "))"
-        print '(a)', "model.view()"
+        print '(a)', "model.show()"
+        print '(a)', "--"
+        print '(a)', "or in a command line"
+        print '(a)', "--"
+        print '(a)', "kmos run"
+        print '(a,i2,a,i2,a,i2,a,i10,a,i10,a)', &
+        "model.post_mortem(err_code=(",old_species,", ",new_species, ", ",  lattice(site), ", ", site, ", ", kmc_step, "))"
+        print '(a)', "model.show()"
+
 
         stop
     endif
@@ -1269,5 +1278,12 @@ subroutine assertion_fail(a, r)
     stop
 
 end subroutine assertion_fail
+
+subroutine set_null_species(input_null_species)
+    integer(kind=iint), intent(in) :: input_null_species
+
+    null_species = input_null_species
+
+end subroutine set_null_species
 
 end module base
