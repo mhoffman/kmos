@@ -375,6 +375,8 @@ class KMC_Model(multiprocessing.Process):
                     for k in xrange(lattice.system_size[2]):
                         for n in xrange(1, 1 + lattice.spuck):
                             species = lattice.get_species([i, j, k, n])
+                            if species == proclist.null_species:
+                                continue
                             if self.species_representation[species]:
                                 # create the ad_atoms
                                 ad_atoms = deepcopy(
