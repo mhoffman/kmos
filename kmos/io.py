@@ -449,9 +449,12 @@ class ProcListWriter():
                   '    update_accum_rate, &\n'
                   '    determine_procsite, &\n'
                   '    update_clocks, &\n'
-                  '    avail_sites, &\n'
-                  '    set_null_species, &\n'
-                  '    increment_procstat\n\n'
+                  '    avail_sites, &\n')
+        if len(data.layer_list) == 1 : # multi-lattice mode
+            out.write('    null_species, &\n')
+        else:
+            out.write('    set_null_species, &\n')
+        out.write('    increment_procstat\n\n'
                   'use lattice, only: &\n')
         site_params = []
         for layer in data.layer_list:
@@ -469,8 +472,8 @@ class ProcListWriter():
               '    replace_species, &\n'
               '    del_proc, &\n'
               '    reset_site, &\n'
-              '    system_size, &\n'
-              '    spuck, &\n')
+              '    system_size, &\n')
+        out.write('    spuck, &\n')
         out.write('    get_species\n'
               '\n\nimplicit none\n\n')
 

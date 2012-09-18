@@ -32,7 +32,7 @@ use base, only: &
     determine_procsite, &
     update_clocks, &
     avail_sites, &
-    set_null_species, &
+    null_species, &
     increment_procstat
 
 use lattice, only: &

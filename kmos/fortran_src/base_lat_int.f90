@@ -74,6 +74,7 @@ public :: add_proc, &
   save_system, &
   set_rate_const, &
   set_null_species, &
+  get_null_species, &
   update_accum_rate, &
   update_clocks
 
@@ -1281,5 +1282,12 @@ subroutine set_null_species(input_null_species)
     null_species = input_null_species
 
 end subroutine set_null_species
+
+subroutine get_null_species(output_null_species)
+    integer(kind=iint), intent(out) :: output_null_species
+
+    output_null_species = null_species
+
+end subroutine get_null_species
 
 end module base
