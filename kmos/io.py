@@ -545,14 +545,14 @@ class ProcListWriter():
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_TIME",ran_time\n'
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc\n'
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_site",ran_site\n')
-        out.write('    call update_accum_rate\n'
-                  '    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
+        out.write('    call update_accum_rate\n')
+        out.write('    call update_clocks(ran_time)\n\n')
+        out.write('    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr\n')
             out.write('print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site\n')
-        out.write('    call run_proc_nr(proc_nr, nr_site)\n'
-                  '    call update_clocks(ran_time)\n\n'
-                  '    enddo\n\n'
+        out.write('    call run_proc_nr(proc_nr, nr_site)\n')
+        out.write('    enddo\n\n'
                   'end subroutine do_kmc_steps\n\n')
 
         # do exactly one kmc step
@@ -575,14 +575,14 @@ class ProcListWriter():
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_TIME",ran_time\n'
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc\n'
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_site",ran_site\n')
-        out.write('    call update_accum_rate\n'
-                  '    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
+        out.write('    call update_accum_rate\n')
+        out.write('    call update_clocks(ran_time)\n\n')
+        out.write('    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr\n')
             out.write('print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site\n')
-        out.write('    call run_proc_nr(proc_nr, nr_site)\n'
-                  '    call update_clocks(ran_time)\n\n'
-                  'end subroutine do_kmc_step\n\n')
+        out.write('    call run_proc_nr(proc_nr, nr_site)\n')
+        out.write('end subroutine do_kmc_step\n\n')
 
         # useful for debugging
         out.write('subroutine get_kmc_step(proc_nr, nr_site)\n\n'
@@ -604,7 +604,7 @@ class ProcListWriter():
                       'print *,"PROCLIST/GET_KMC_STEP/RAN_PROC",ran_proc\n'
                       'print *,"PROCLIST/GET_KMC_STEP/RAN_site",ran_site\n')
         out.write('    call update_accum_rate\n')
-        out.write('    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
+        out.write('    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n\n')
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/GET_KMC_STEP/PROC_NR", proc_nr\n')
         out.write('end subroutine get_kmc_step\n\n')
