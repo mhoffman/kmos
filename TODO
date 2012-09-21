@@ -1,6 +1,6 @@
 Functionality
   * Write regression test for lat_int backend
-  * Write regression teset for lat_int and multi-lattice
+  * Write regression test for lat_int and multi-lattice and all other combinations
   * make and base.save_system(<seed_name>)
     TODO: make sure .reloading is more sugar-coated,
     e.g. check for correct size of file and document
