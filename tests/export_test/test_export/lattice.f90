@@ -53,7 +53,6 @@ use base, only: &
     reload_system => reload_system, &
     save_system, &
     assertion_fail, &
-    null_species, &
     set_rate_const, &
     update_accum_rate, &
     update_clocks

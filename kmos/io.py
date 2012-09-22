@@ -119,7 +119,6 @@ class ProcListWriter():
           '    reload_system => reload_system, &\n'
           '    save_system, &\n'
           '    assertion_fail, &\n'
-          '    null_species, &\n'
           '    set_rate_const, &\n'
           '    update_accum_rate, &\n'
           '    update_clocks\n\n'
@@ -450,8 +449,12 @@ class ProcListWriter():
                   '    update_accum_rate, &\n'
                   '    determine_procsite, &\n'
                   '    update_clocks, &\n'
-                  '    avail_sites, &\n'
-                  '    increment_procstat\n\n'
+                  '    avail_sites, &\n')
+        if len(data.layer_list) == 1 : # multi-lattice mode
+            out.write('    null_species, &\n')
+        else:
+            out.write('    set_null_species, &\n')
+        out.write('    increment_procstat\n\n'
                   'use lattice, only: &\n')
         site_params = []
         for layer in data.layer_list:
@@ -469,18 +472,24 @@ class ProcListWriter():
               '    replace_species, &\n'
               '    del_proc, &\n'
               '    reset_site, &\n'
-              '    system_size, &\n'
-              '    spuck, &\n'
-              '    null_species, &\n'
-              '    get_species\n'
+              '    system_size, &\n')
+        out.write('    spuck, &\n')
+        out.write('    get_species\n'
               '\n\nimplicit none\n\n')
 
         # initialize various parameter kind of data
         out.write('\n\n ! Species constants\n\n')
-        out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_species = %s\n'\
-            % (len(data.species_list)))
+        if len(data.layer_list) > 1 : # multi-lattice mode
+            out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_species = %s\n'\
+                % (len(data.species_list)+1))
+        else:
+            out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_species = %s\n'\
+                % (len(data.species_list)))
         for i, species in enumerate(sorted(data.species_list, key=lambda x: x.name)):
             out.write('integer(kind=iint), parameter, public :: %s = %s\n' % (species.name, i))
+        if len(data.layer_list) > 1 : # multi-lattice mode
+            out.write('integer(kind=iint), parameter, public :: null_species = %s\n\n'\
+                % (len(data.species_list)))
         out.write('integer(kind=iint), public :: default_species = %s\n' % (data.species_list.default_species))
         representation_length = max([len(species.representation) for species in data.species_list])
 
@@ -536,14 +545,14 @@ class ProcListWriter():
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_TIME",ran_time\n'
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc\n'
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_site",ran_site\n')
-        out.write('    call update_accum_rate\n'
-                  '    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
+        out.write('    call update_accum_rate\n')
+        out.write('    call update_clocks(ran_time)\n\n')
+        out.write('    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr\n')
             out.write('print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site\n')
-        out.write('    call run_proc_nr(proc_nr, nr_site)\n'
-                  '    call update_clocks(ran_time)\n\n'
-                  '    enddo\n\n'
+        out.write('    call run_proc_nr(proc_nr, nr_site)\n')
+        out.write('    enddo\n\n'
                   'end subroutine do_kmc_steps\n\n')
 
         # do exactly one kmc step
@@ -566,14 +575,14 @@ class ProcListWriter():
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_TIME",ran_time\n'
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc\n'
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_site",ran_site\n')
-        out.write('    call update_accum_rate\n'
-                  '    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
+        out.write('    call update_accum_rate\n')
+        out.write('    call update_clocks(ran_time)\n\n')
+        out.write('    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr\n')
             out.write('print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site\n')
-        out.write('    call run_proc_nr(proc_nr, nr_site)\n'
-                  '    call update_clocks(ran_time)\n\n'
-                  'end subroutine do_kmc_step\n\n')
+        out.write('    call run_proc_nr(proc_nr, nr_site)\n')
+        out.write('end subroutine do_kmc_step\n\n')
 
         # useful for debugging
         out.write('subroutine get_kmc_step(proc_nr, nr_site)\n\n'
@@ -595,7 +604,7 @@ class ProcListWriter():
                       'print *,"PROCLIST/GET_KMC_STEP/RAN_PROC",ran_proc\n'
                       'print *,"PROCLIST/GET_KMC_STEP/RAN_site",ran_site\n')
         out.write('    call update_accum_rate\n')
-        out.write('    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
+        out.write('    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n\n')
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/GET_KMC_STEP/PROC_NR", proc_nr\n')
         out.write('end subroutine get_kmc_step\n\n')
@@ -612,7 +621,11 @@ class ProcListWriter():
                   '!\n'
                   '!    ``none``\n'
                   '!******\n')
-        out.write('    ! nr_of_species = %s, spuck = %s\n' % (len(data.species_list), len(site_params)))
+        if len(data.layer_list) > 1 :  # multi-lattice mode
+            out.write('    ! nr_of_species = %s, spuck = %s\n' % (len(data.species_list) + 1,
+                                                                  len(site_params)))
+        else:
+            out.write('    ! nr_of_species = %s, spuck = %s\n' % (len(data.species_list), len(site_params)))
         out.write('    real(kind=rdouble), dimension(0:%s, 1:%s), intent(out) :: occupation\n\n' % (len(data.species_list) - 1, len(site_params)))
         out.write('    integer(kind=iint) :: i, j, k, nr, species\n\n'
                   '    occupation = 0\n\n'
@@ -623,7 +636,7 @@ class ProcListWriter():
                   '                    ! shift position by 1, so it can be accessed\n'
                   '                    ! more straightforwardly from f2py interface\n'
                   '                    species = get_species((/i,j,k,nr/))\n'
-                  '                    if(species.gt.null_species) then\n'
+                  '                    if(species.ne.null_species) then\n'
                   '                    occupation(species, nr) = &\n'
                   '                        occupation(species, nr) + 1\n'
                   '                    endif\n'
@@ -689,6 +702,8 @@ class ProcListWriter():
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/INIT"\n'
                       'print *,"    PROCLIST/INIT/SYSTEM_SIZE",input_system_size\n')
+        if len(data.layer_list) > 1 :
+            out.write('    call set_null_species(null_species)\n')
         out.write('    call allocate_system(nr_of_proc, input_system_size, system_name)\n')
         if data.meta.debug > 0:
             out.write('print *,"    PROCLIST/INIT/ALLOCATED_LATTICE"\n')
@@ -1009,13 +1024,13 @@ class ProcListWriter():
         out.write('    integer(kind=iint), dimension(4) :: site\n\n')
         out.write('    integer(kind=iint) :: proc_nr\n\n')
         out.write('    site = cell + (/0, 0, 0, 1/)\n')
-        out.write('do proc_nr = 1, nr_of_proc\n')
+        out.write('    do proc_nr = 1, nr_of_proc\n')
         if data.meta.debug > 1:
             out.write('print *,"PROCLIST/TOUCHUP_CELL/DEL/%s"\n' % lat_int_group.upper())
-        out.write('    if(avail_sites(proc_nr, lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then\n')
-        out.write('        call del_proc(proc_nr, site)\n')
-        out.write('    endif\n')
-        out.write('end do\n\n')
+        out.write('        if(avail_sites(proc_nr, lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then\n')
+        out.write('            call del_proc(proc_nr, site)\n')
+        out.write('        endif\n')
+        out.write('    end do\n\n')
 
         for lat_int_group, process in lat_int_groups.iteritems():
             if data.meta.debug > 1:
@@ -1157,7 +1172,10 @@ class ProcListWriter():
             for i, process in enumerate(processes):
                 # calculate lat. int. nr
                 lat_int_nr = 0
-                nr_of_species = len(data.species_list)
+                if len(data.layer_list) > 1:
+                    nr_of_species = len(data.species_list) + 1
+                else:
+                    nr_of_species = len(data.species_list)
                 conditions = process.condition_list + process.bystanders
                 for j, bystander in enumerate(sorted(conditions,
                                      key=lambda x: x.coord,
@@ -1181,9 +1199,10 @@ class ProcListWriter():
                 USE_ARRAY = False
             #print(lat_int_group, float(len(compression_map)), (nr_of_species**len(conditions)), USE_ARRAY)
 
-            compression_index = [compression_map.get(i, 0) for
-                                 i in xrange(nr_of_species**len(conditions0))]
+            # use generator object to save memory
             if USE_ARRAY:
+                compression_index = (compression_map.get(i, 0) for
+                                     i in xrange(nr_of_species**len(conditions0)))
                 out.write('    integer, dimension(%s), parameter :: lat_int_index_%s = (/ &\n'
                           % (len(compression_index), lat_int_group))
                 outstr = ', '.join(map(str, compression_index))
@@ -1191,8 +1210,8 @@ class ProcListWriter():
                 outstr = _chop_line(outstr)
                 out.write(outstr)
                 out.write('/)\n')
-            out.write('    integer :: n\n\n')
-            out.write('    n = 1\n\n')
+            out.write('    integer(kind=ilong) :: n\n\n')
+            out.write('    n = 0\n\n')
 
             if data.meta.debug > 2:
                 out.write('print *,"PROCLIST/NLI_%s"\n' % lat_int_group.upper())
@@ -1209,7 +1228,7 @@ class ProcListWriter():
                           % (lat_int_group, lat_int_group))
             else:
                 out.write('\n    select case(n)\n')
-                for i, proc_name in enumerate(compression_index, start=1):
+                for i, proc_name in compression_map.iteritems():
                     if proc_name:
                         out.write('    case(%s)\n' % i)
                         out.write('        nli_%s = %s\n' %
@@ -1651,6 +1670,7 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
         raise UserWarning("Don't know this backend")
 
     exec_files = []
+    print(APP_ABS_PATH)
 
     for filename, target in cp_files:
         shutil.copy(os.path.join(APP_ABS_PATH, filename),

@@ -110,6 +110,14 @@ class KMC_Model(multiprocessing.Process):
         self.proclist = proclist
         self.settings = settings
 
+        if hasattr(self.base, 'null_species'):
+            self.null_species = self.base.null_species
+        elif hasattr(self.base, 'get_null_species'):
+            self.null_species = self.base.get_null_species()
+        else:
+            self.null_species = -1
+
+
         self.proclist.seed = np.array(getattr(self.settings, 'random_seed', 1))
         self.reset()
 
@@ -375,6 +383,8 @@ class KMC_Model(multiprocessing.Process):
                     for k in xrange(lattice.system_size[2]):
                         for n in xrange(1, 1 + lattice.spuck):
                             species = lattice.get_species([i, j, k, n])
+                            if species == self.null_species:
+                                continue
                             if self.species_representation[species]:
                                 # create the ad_atoms
                                 ad_atoms = deepcopy(

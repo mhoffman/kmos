@@ -32,6 +32,7 @@ use base, only: &
     determine_procsite, &
     update_clocks, &
     avail_sites, &
+    null_species, &
     increment_procstat
 
 use lattice, only: &
@@ -49,7 +50,6 @@ use lattice, only: &
     reset_site, &
     system_size, &
     spuck, &
-    null_species, &
     get_species
 
 
@@ -217,7 +217,7 @@ subroutine get_occupation(occupation)
                     ! shift position by 1, so it can be accessed
                     ! more straightforwardly from f2py interface
                     species = get_species((/i,j,k,nr/))
-                    if(species.gt.null_species) then
+                    if(species.ne.null_species) then
                     occupation(species, nr) = &
                         occupation(species, nr) + 1
                     endif

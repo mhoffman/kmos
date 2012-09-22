@@ -30,6 +30,7 @@ Project related
   * configure pip mechanism
   * build virtualenv test environment(s): 2.4-3.0
   * build deb package
+  * write overview/about page
 
 Future/optional projects:
   * do 2D version of process editor using ASE

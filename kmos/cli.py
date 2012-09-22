@@ -360,7 +360,7 @@ def main(args=None):
         for kmc_model in glob('kmc_model.*'):
             os.remove(kmc_model)
         os.remove('kmc_settings.py')
-        main('export %s .' % tempfile)
+        main('export %s -b %s .' % (tempfile, options.backend))
         os.remove(tempfile)
         model.deallocate()
 

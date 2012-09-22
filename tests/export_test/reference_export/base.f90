@@ -1131,7 +1131,15 @@ subroutine replace_species(site, old_species, new_species)
         print '(a)', "model = KMC_Model(banner=False, print_rates=False)"
         print '(a,i2,a,i2,a,i2,a,i10,a,i10,a)', &
         "model.post_mortem(err_code=(",old_species,", ",new_species, ", ",  lattice(site), ", ", site, ", ", kmc_step, "))"
-        print '(a)', "model.view()"
+        print '(a)', "model.show()"
+        print '(a)', "--"
+        print '(a)', "or in a command line"
+        print '(a)', "--"
+        print '(a)', "kmos run"
+        print '(a,i2,a,i2,a,i2,a,i10,a,i10,a)', &
+        "model.post_mortem(err_code=(",old_species,", ",new_species, ", ",  lattice(site), ", ", site, ", ", kmc_step, "))"
+        print '(a)', "model.show()"
+
 
         stop
     endif
