@@ -82,7 +82,7 @@ def write_py(fileobj, images, **kwargs):
 
 def get_ase_constructor(atoms):
     """Return the ASE constructor string for `atoms`."""
-    if type(atoms) is type(str):
+    if isinstance(atoms, basestring):
         atoms = eval(atoms)
     if type(atoms) is list:
         atoms = atoms[0]
