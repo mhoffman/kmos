@@ -453,6 +453,54 @@ class KMC_Model(multiprocessing.Process):
 
         return atoms
 
+    def get_std_header(self):
+        """Return commented line of field names corresponding to
+        values returned in get_std_outdata
+
+        """
+
+        std_header = ('#%s %s %s kmc_steps kmc_time\n'
+                  % (self.get_param_header(),
+                     self.get_tof_header(),
+                     self.get_occupation_header()))
+        return std_header
+
+    def get_std_outdata(self, samples, sample_size, tof_method='procrates'):
+        """Sample an average model and return TOFs and coverages
+        in a standardized format :
+
+        [parameters] [TOFs] [occupations] kmc_time kmc_step
+
+        """
+
+        # initialize lists for averages
+        occs = []
+        tofs = []
+        delta_ts = []
+
+        # sample over trajectory
+        for sample in xrange(samples):
+            self.do_steps(sample_size)
+            atoms = self.get_atoms(geometry=False)
+            occs.append(list(atoms.occupation.flatten()))
+            if tof_method == 'procrates':
+                tofs.append(atoms.tof_data.flatten())
+            else:
+                raise NotImplementedError('Working on it ..')
+
+            delta_ts.append(atoms.delta_t)
+        # calculate time averages
+        occs_mean = np.average(occs, axis=0, weights=delta_ts)
+        tof_mean = np.average(tofs, axis=0, weights=delta_ts)
+
+        # write out averages
+        outdata = tuple(atoms.params
+                        + list(occs_mean.flatten())
+                        + list(tof_mean.flatten())
+                        + [self.base.get_kmc_time(),
+                           self.base.get_kmc_step()])
+        return ((' '.join(['%.5e'] * len(outdata)) + '\n') % outdata)
+
     def double(self):
         """
         Double the size of the model in each direction and initialize
