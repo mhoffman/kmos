@@ -73,12 +73,14 @@ public :: add_proc, &
     reset_site, &
     save_system, &
     set_rate_const, &
+    set_null_species, &
+    get_null_species, &
     update_accum_rate, &
     update_clocks
 
 
 ! Public constants
-integer(kind=iint), parameter :: null_species = -1
+integer(kind=iint) :: null_species = -1
 
 !---- Allocatable, module wide, variables
 integer(kind=iint), dimension(:,:,:), allocatable, public :: avail_sites
@@ -1277,5 +1279,20 @@ subroutine assertion_fail(a, r)
     stop
 
 end subroutine assertion_fail
+
+subroutine set_null_species(input_null_species)
+    integer(kind=iint), intent(in) :: input_null_species
+
+    null_species = input_null_species
+
+end subroutine set_null_species
+
+subroutine get_null_species(output_null_species)
+    integer(kind=iint), intent(out) :: output_null_species
+
+    output_null_species = null_species
+
+end subroutine get_null_species
+
 
 end module base

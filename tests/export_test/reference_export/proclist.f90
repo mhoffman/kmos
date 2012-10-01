@@ -32,7 +32,7 @@ use base, only: &
     determine_procsite, &
     update_clocks, &
     avail_sites, &
-    set_null_species, &
+    null_species, &
     increment_procstat
 
 use lattice, only: &
@@ -139,10 +139,10 @@ subroutine do_kmc_steps(n)
     call random_number(ran_proc)
     call random_number(ran_site)
     call update_accum_rate
-    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)
-    call run_proc_nr(proc_nr, nr_site)
     call update_clocks(ran_time)
 
+    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)
+    call run_proc_nr(proc_nr, nr_site)
     enddo
 
 end subroutine do_kmc_steps
@@ -164,10 +164,10 @@ subroutine do_kmc_step()
     call random_number(ran_proc)
     call random_number(ran_site)
     call update_accum_rate
-    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)
-    call run_proc_nr(proc_nr, nr_site)
     call update_clocks(ran_time)
 
+    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)
+    call run_proc_nr(proc_nr, nr_site)
 end subroutine do_kmc_step
 
 subroutine get_kmc_step(proc_nr, nr_site)
@@ -188,6 +188,7 @@ subroutine get_kmc_step(proc_nr, nr_site)
     call random_number(ran_site)
     call update_accum_rate
     call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)
+
 end subroutine get_kmc_step
 
 subroutine get_occupation(occupation)
