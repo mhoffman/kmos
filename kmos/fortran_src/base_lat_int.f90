@@ -1,6 +1,6 @@
 !/* ROBODOC this makes robodoc to document this file */
 #include "assert.ppc"
-! Copyright (C)  2009-2012 Max J. Hoffmann
+! Copyright (C) 2009-2012 Max J. Hoffmann
 !
 ! This file is part of kmos.
 !
@@ -52,6 +52,7 @@ public :: add_proc, &
   determine_procsite, &
   replace_species, &
   get_accum_rate, &
+  get_integ_rate, &
   get_avail_site, &
   get_kmc_step, &
   get_kmc_time, &
@@ -76,6 +77,7 @@ public :: add_proc, &
   set_null_species, &
   get_null_species, &
   update_accum_rate, &
+  update_integ_rate, &
   update_clocks
 
 
@@ -123,6 +125,21 @@ real(kind=rdouble), dimension(:), allocatable :: accum_rates
 !   is calculated according to :math:`a_{i}=\sum_{j=1}^{i} c_{j} n_{j}`.
 !
 !******
+!------ S. Matera 09/18/2012------
+real(kind=rdouble), dimension(:), allocatable :: integ_rates
+!****v* base/integ_rates
+! FUNCTION
+!   Stores the time-integrated rates (non-normalized to surface area)
+!   Used to determine reaction rates, i.e. average number of reactions 
+!   per unit surface and time.
+!   Let :math:`\mathbf{a}` the integrated rates, :math:`\mathbf{c}` be the 
+!   rate constants, :math:`\mathbf{n}_i` the number of available sites 
+!   during kMC-time interval i,  :math: `\{\Delta t_i\}` the corresponding
+!   timesteps then :math:`a_{i}(t)` at the time :math: `t=\sum_{i=1}\Delta t_i`
+!   is calculated according to :math:`a_{i}(t)=\sum_{i=1}} c_{i} n_{i}\Delta t_i`.
+!
+!******
+!------ S. Matera 09/18/2012------
 integer(kind=iint), dimension(:), allocatable :: nr_of_sites
 !****v* base/nr_of_sites
 ! FUNCTION
@@ -609,6 +626,29 @@ subroutine update_accum_rate()
 
 end subroutine update_accum_rate
 
+!------ S. Matera 09/18/2012------
+subroutine update_integ_rate()
+    !****f* base/update_integ_rate
+    ! FUNCTION
+    !    Updates the vector of integ_rates.
+    !
+    ! ARGUMENTS
+    !
+    !    ``none``
+    !******
+
+    integer(kind=iint) :: i
+
+    
+    do i = 1, nr_of_proc
+        integ_rates(i)=integ_rates(i)+nr_of_sites(i)*rates(i)*kmc_time_step
+    enddo
+
+!!$    ASSERT(accum_rates(nr_of_proc).gt.0.,"base/update_accum_rate found &
+!!$        accum_rates(nr_of_proc)=0, so no process is available at all")
+
+end subroutine update_integ_rate
+!------ S. Matera 09/18/2012------
 
 subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
   !****f* base/allocate_system
@@ -662,6 +702,12 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
     print *,"kmos/base/allocate_system: Tried to allocate accum_rates twice, please deallocate first"
     system_allocated = .true.
   endif
+!------ S. Matera 09/18/2012------
+    if(allocated(integ_rates))then
+        print *,"kmos/base/allocate_system: Tried to allocate integ_rates twice, please deallocate first"
+        system_allocated = .true.
+    endif
+!------ S. Matera 09/18/2012------
   if(allocated(procstat))then
     print *,"kmos/base/allocate_system: Tried to allocate procstat twice, please deallocate first"
     system_allocated = .true.
@@ -690,6 +736,10 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
     rates = 0
     allocate(accum_rates(nr_of_proc))
     accum_rates = 0
+!------ S. Matera 09/18/2012------
+        allocate(integ_rates(nr_of_proc))
+        integ_rates = 0
+!------ S. Matera 09/18/2012------
     allocate(procstat(nr_of_proc))
     procstat = 0
 
@@ -740,6 +790,13 @@ subroutine deallocate_system()
   else
     print *,"Warning: rates was not allocated, tried to deallocate."
   endif
+!------ S. Matera 09/18/2012------
+    if(allocated(integ_rates))then
+        deallocate(integ_rates)
+    else
+        print *,"Warning: integ_rates was not allocated, tried to deallocate."
+    endif
+!------ S. Matera 09/18/2012------
   if(allocated(procstat))then
     deallocate(procstat)
   else
@@ -912,6 +969,29 @@ subroutine get_accum_rate(proc_nr, return_accum_rate)
 
 end subroutine get_accum_rate
 
+!------ S. Matera 09/18/2012------
+subroutine get_integ_rate(proc_nr, return_integ_rate)
+    !****f* base/get_integ_rate
+    ! FUNCTION
+    !    Return integrated rate at a given process.
+    !
+    ! ARGUMENTS
+    !
+    !    * ``proc_nr`` integer representing the requested process.
+    !    * ``return_integ_rate`` writeable real, where the requested integrated rate will be stored.
+    !******
+    !---------------I/O variables---------------
+    integer(kind=iint), intent(in), optional :: proc_nr
+    real(kind=iint), intent(out) :: return_integ_rate
+
+    if(.not. present(proc_nr) .or. proc_nr.eq.0) then
+      return_integ_rate=integ_rates(nr_of_proc)
+    else
+      return_integ_rate=integ_rates(proc_nr)
+    endif
+
+end subroutine get_integ_rate
+!------ S. Matera 09/18/2012------
 
 subroutine get_rate(proc_nr, return_rate)
   !****f* base/get_rate
@@ -1079,6 +1159,10 @@ subroutine update_clocks(ran_time)
   ! when the simulation was reloaded, so walltime represents the total
   ! walltime across reloads.
   walltime = start_time + runtime
+  !------ S. Matera 09/18/2012------
+  !-- 'call update_integ_rate()' directly in do_kmc_step(s)
+  ! call update_integ_rate()
+  !------ S. Matera 09/18/2012------
 
 
 end subroutine update_clocks

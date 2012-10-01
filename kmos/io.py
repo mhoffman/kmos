@@ -121,6 +121,7 @@ class ProcListWriter():
           '    assertion_fail, &\n'
           '    set_rate_const, &\n'
           '    update_accum_rate, &\n'
+          '    update_integ_rate, &\n'
           '    update_clocks\n\n'
           '\n\nimplicit none\n\n')
 
@@ -447,6 +448,7 @@ class ProcListWriter():
                   'use kind_values\n'
                   'use base, only: &\n'
                   '    update_accum_rate, &\n'
+                  '    update_integ_rate, &\n'
                   '    determine_procsite, &\n'
                   '    update_clocks, &\n'
                   '    avail_sites, &\n')
@@ -522,6 +524,10 @@ class ProcListWriter():
         out.write('\n\ncontains\n\n')
 
         # do n kmc steps
+        # order changed by S. matera 09/28/2012: 
+        # first update clock
+        #   then configuration sampling step
+        # last execute process
         out.write('subroutine do_kmc_steps(n)\n\n'
                   '!****f* proclist/do_kmc_steps\n'
                   '! FUNCTION\n'
@@ -546,16 +552,22 @@ class ProcListWriter():
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc\n'
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_site",ran_site\n')
         out.write('    call update_accum_rate\n'
+                  '    call update_clocks(ran_time)\n\n'
+                  '    call update_integ_rate\n'
                   '    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr\n')
             out.write('print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site\n')
         out.write('    call run_proc_nr(proc_nr, nr_site)\n'
-                  '    call update_clocks(ran_time)\n\n'
                   '    enddo\n\n'
                   'end subroutine do_kmc_steps\n\n')
 
         # do exactly one kmc step
+        # order changed by S. matera 09/28/2012: 
+        # first update clock
+        #   then configuration sampling step
+        # last execute process
+ 
         out.write('subroutine do_kmc_step()\n\n'
                   '!****f* proclist/do_kmc_step\n'
                   '! FUNCTION\n'
@@ -576,12 +588,13 @@ class ProcListWriter():
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc\n'
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_site",ran_site\n')
         out.write('    call update_accum_rate\n'
+                  '    call update_clocks(ran_time)\n\n'
+                  '    call update_integ_rate\n'
                   '    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr\n')
             out.write('print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site\n')
         out.write('    call run_proc_nr(proc_nr, nr_site)\n'
-                  '    call update_clocks(ran_time)\n\n'
                   'end subroutine do_kmc_step\n\n')
 
         # useful for debugging
@@ -779,6 +792,26 @@ class ProcListWriter():
             out.write('print *, "    PROCLIST/INITALIZE_STATE/INITIALIZED_AVAIL_SITES"\n')
 
         out.write('\nend subroutine initialize_state\n\n')
+
+##################################################################
+#By S.Matera 09/18/2012
+#    def write_proclist_integrate_TOF(self, data, out):
+#        # calculates the total rates (not normalized to surface area) for predefined TOFs
+#        # in one time step. Used for sampling the TOFs by time integration instead
+#        # of the common counting. 
+#        list_proc = [(i+1, proc.name, proc.tof_count ) for i, proc in enumerate(sorted(pt.get_processes(), key=lambda x: x.name)) if proc.tof_count]
+#        tof_count_names = []
+#        for item in list_proc:
+#            tof_count_names.extend(eval(item[2]).keys())
+#        
+#        tof_names=list(set(tof_count_names))
+#        j=0
+#        for item in tof_names:
+#            tof_list[j]=[(i+1, proc.name, proc.tof_count ) for i, proc in enumerate(sorted(pt.get_processes(), key=lambda x: x.name)) if name in proc.tof_count ]
+#            
+#      !!! not necessary anymore !!!
+#
+##################################################################
 
     def write_proclist_run_proc_nr_smart(self, data, out):
         # run_proc_nr runs the process selected by determine_procsite

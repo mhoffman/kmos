@@ -155,6 +155,8 @@ class KMC_Model(multiprocessing.Process):
 
         # prepare procstat
         self.procstat = np.zeros((proclist.nr_of_proc,))
+         # prepare integ_rates (S.Matera 09/25/2012)
+        self.integ_rates = np.zeros((proclist.nr_of_proc,))
         self.time = 0.
 
         self.species_representation = []
@@ -192,6 +194,8 @@ class KMC_Model(multiprocessing.Process):
             self.lattice_representation = Atoms()
         set_rate_constants(settings.parameters, self.print_rates)
         self.base.update_accum_rate()
+        # S. matera 09/25/2012
+        self.base.update_integ_rate()
 
     def __repr__(self):
         """Print short summary of current parameters and rate
@@ -363,6 +367,7 @@ class KMC_Model(multiprocessing.Process):
           - `kmc_time`
           - `occupation`
           - `procstat`
+          - `integ_rates`
           - `tof_data`
 
         `tof_data` contains previously defined TOFs in reaction per seconds per
@@ -433,6 +438,11 @@ class KMC_Model(multiprocessing.Process):
         atoms.occupation = proclist.get_occupation()
         for i in range(proclist.nr_of_proc):
             atoms.procstat[i] = base.get_procstat(i + 1)
+        # S. Matera 09/25/2012
+        atoms.integ_rates = np.zeros((proclist.nr_of_proc,))
+        for i in range(proclist.nr_of_proc):
+                atoms.integ_rates[i]=base.get_integ_rate(i+1)
+        # S. Matera 09/25/2012
         delta_t = (atoms.kmc_time - self.time)
         size = self.size ** lattice.model_dimension
         if delta_t == 0. and atoms.kmc_time > 0:
@@ -441,14 +451,23 @@ class KMC_Model(multiprocessing.Process):
             print('         Will reset kMC time to 0s.')
             base.set_kmc_time(0.0)
             atoms.tof_data = np.zeros_like(self.tof_matrix[:, 0])
+            atoms.tof_integ = np.zeros_like(self.tof_matrix[:, 0])
+
         else:
             atoms.tof_data = np.dot(self.tof_matrix,
                             (atoms.procstat - self.procstat) / delta_t / size)
+            # S. Matera 09/25/2012
+            atoms.tof_integ = np.dot(self.tof_matrix,
+                            (atoms.integ_rates - self.integ_rates ) / delta_t / size)
+            # S. Matera 09/25/2012
 
         atoms.delta_t = delta_t
 
         # update trackers for next call
         self.procstat[:] = atoms.procstat
+        # S. Matera 09/25/2012
+        self.integ_rates[:]=atoms.integ_rates
+        # S. Matera 09/25/2012
         self.time = atoms.kmc_time
 
         return atoms
