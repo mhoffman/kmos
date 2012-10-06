@@ -3578,7 +3578,7 @@ pure function nli_o_O2des_h2h1(cell)
     n = n + get_species(cell + (/0, 1, 0, PdO_hollow1/))*nr_of_species**1
 
     select case(n)
-    case(6)
+    case(18)
         nli_o_O2des_h2h1 = o_O2des_h2h1
     case default
         nli_o_O2des_h2h1 = 0
@@ -3639,7 +3639,7 @@ pure function nli_o_O2des_h1h2(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_hollow2/))*nr_of_species**1
 
     select case(n)
-    case(6)
+    case(18)
         nli_o_O2des_h1h2 = o_O2des_h1h2
     case default
         nli_o_O2des_h1h2 = 0
@@ -3709,7 +3709,7 @@ pure function nli_oxidize1(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b9/))*nr_of_species**4
 
     select case(n)
-    case(1537)
+    case(1587)
         nli_oxidize1 = oxidize1
     case default
         nli_oxidize1 = 0
