@@ -5095,7 +5095,7 @@ pure function nli_oxygen_diffusion_bridge_bridge_down(cell)
     n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
 
     select case(n)
-    case(1)
+    case(7)
         nli_oxygen_diffusion_bridge_bridge_down = oxygen_diffusion_bridge_bridge_down
     case default
         nli_oxygen_diffusion_bridge_bridge_down = 0
@@ -5116,7 +5116,7 @@ pure function nli_oxygen_diffusion_cus_bridge_right(cell)
     n = n + get_species(cell + (/1, 0, 0, ruo2_bridge/))*nr_of_species**1
 
     select case(n)
-    case(3)
+    case(5)
         nli_oxygen_diffusion_cus_bridge_right = oxygen_diffusion_cus_bridge_right
     case default
         nli_oxygen_diffusion_cus_bridge_right = 0
@@ -5137,7 +5137,7 @@ pure function nli_co_diffusion_bridge_cus_left(cell)
     n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
 
     select case(n)
-    case(7)
+    case(1)
         nli_co_diffusion_bridge_cus_left = co_diffusion_bridge_cus_left
     case default
         nli_co_diffusion_bridge_cus_left = 0
@@ -5158,7 +5158,7 @@ pure function nli_co_diffusion_cus_cus_up(cell)
     n = n + get_species(cell + (/0, 1, 0, ruo2_cus/))*nr_of_species**1
 
     select case(n)
-    case(5)
+    case(3)
         nli_co_diffusion_cus_cus_up = co_diffusion_cus_cus_up
     case default
         nli_co_diffusion_cus_cus_up = 0
@@ -5179,7 +5179,7 @@ pure function nli_co_diffusion_bridge_bridge_down(cell)
     n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
 
     select case(n)
-    case(7)
+    case(1)
         nli_co_diffusion_bridge_bridge_down = co_diffusion_bridge_bridge_down
     case default
         nli_co_diffusion_bridge_bridge_down = 0
@@ -5200,7 +5200,7 @@ pure function nli_reaction_oxygen_bridge_co_cus_left(cell)
     n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
 
     select case(n)
-    case(2)
+    case(6)
         nli_reaction_oxygen_bridge_co_cus_left = reaction_oxygen_bridge_co_cus_left
     case default
         nli_reaction_oxygen_bridge_co_cus_left = 0
@@ -5220,7 +5220,7 @@ pure function nli_co_desorption_cus(cell)
     n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**0
 
     select case(n)
-    case(2)
+    case(0)
         nli_co_desorption_cus = co_desorption_cus
     case default
         nli_co_desorption_cus = 0
@@ -5241,7 +5241,7 @@ pure function nli_reaction_oxygen_bridge_co_bridge_up(cell)
     n = n + get_species(cell + (/0, 1, 0, ruo2_bridge/))*nr_of_species**1
 
     select case(n)
-    case(6)
+    case(2)
         nli_reaction_oxygen_bridge_co_bridge_up = reaction_oxygen_bridge_co_bridge_up
     case default
         nli_reaction_oxygen_bridge_co_bridge_up = 0
@@ -5262,7 +5262,7 @@ pure function nli_oxygen_desorption_bridge_bridge(cell)
     n = n + get_species(cell + (/0, 1, 0, ruo2_bridge/))*nr_of_species**1
 
     select case(n)
-    case(0)
+    case(8)
         nli_oxygen_desorption_bridge_bridge = oxygen_desorption_bridge_bridge
     case default
         nli_oxygen_desorption_bridge_bridge = 0
@@ -5304,7 +5304,7 @@ pure function nli_co_diffusion_bridge_cus_right(cell)
     n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**1
 
     select case(n)
-    case(5)
+    case(3)
         nli_co_diffusion_bridge_cus_right = co_diffusion_bridge_cus_right
     case default
         nli_co_diffusion_bridge_cus_right = 0
@@ -5346,7 +5346,7 @@ pure function nli_co_diffusion_cus_bridge_left(cell)
     n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
 
     select case(n)
-    case(5)
+    case(3)
         nli_co_diffusion_cus_bridge_left = co_diffusion_cus_bridge_left
     case default
         nli_co_diffusion_cus_bridge_left = 0
@@ -5367,7 +5367,7 @@ pure function nli_oxygen_desorption_bridge_cus_left(cell)
     n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
 
     select case(n)
-    case(0)
+    case(8)
         nli_oxygen_desorption_bridge_cus_left = oxygen_desorption_bridge_cus_left
     case default
         nli_oxygen_desorption_bridge_cus_left = 0
@@ -5388,7 +5388,7 @@ pure function nli_co_diffusion_cus_cus_down(cell)
     n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**1
 
     select case(n)
-    case(7)
+    case(1)
         nli_co_diffusion_cus_cus_down = co_diffusion_cus_cus_down
     case default
         nli_co_diffusion_cus_cus_down = 0
@@ -5409,7 +5409,7 @@ pure function nli_reaction_oxygen_cus_co_bridge_right(cell)
     n = n + get_species(cell + (/1, 0, 0, ruo2_bridge/))*nr_of_species**1
 
     select case(n)
-    case(6)
+    case(2)
         nli_reaction_oxygen_cus_co_bridge_right = reaction_oxygen_cus_co_bridge_right
     case default
         nli_reaction_oxygen_cus_co_bridge_right = 0
@@ -5430,7 +5430,7 @@ pure function nli_co_diffusion_bridge_bridge_up(cell)
     n = n + get_species(cell + (/0, 1, 0, ruo2_bridge/))*nr_of_species**1
 
     select case(n)
-    case(5)
+    case(3)
         nli_co_diffusion_bridge_bridge_up = co_diffusion_bridge_bridge_up
     case default
         nli_co_diffusion_bridge_bridge_up = 0
@@ -5451,7 +5451,7 @@ pure function nli_reaction_oxygen_cus_co_cus_up(cell)
     n = n + get_species(cell + (/0, 1, 0, ruo2_cus/))*nr_of_species**1
 
     select case(n)
-    case(6)
+    case(2)
         nli_reaction_oxygen_cus_co_cus_up = reaction_oxygen_cus_co_cus_up
     case default
         nli_reaction_oxygen_cus_co_cus_up = 0
@@ -5472,7 +5472,7 @@ pure function nli_reaction_oxygen_cus_co_cus_down(cell)
     n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**1
 
     select case(n)
-    case(2)
+    case(6)
         nli_reaction_oxygen_cus_co_cus_down = reaction_oxygen_cus_co_cus_down
     case default
         nli_reaction_oxygen_cus_co_cus_down = 0
@@ -5493,7 +5493,7 @@ pure function nli_oxygen_diffusion_bridge_cus_right(cell)
     n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**1
 
     select case(n)
-    case(3)
+    case(5)
         nli_oxygen_diffusion_bridge_cus_right = oxygen_diffusion_bridge_cus_right
     case default
         nli_oxygen_diffusion_bridge_cus_right = 0
@@ -5514,7 +5514,7 @@ pure function nli_oxygen_diffusion_cus_bridge_left(cell)
     n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
 
     select case(n)
-    case(3)
+    case(5)
         nli_oxygen_diffusion_cus_bridge_left = oxygen_diffusion_cus_bridge_left
     case default
         nli_oxygen_diffusion_cus_bridge_left = 0
@@ -5535,7 +5535,7 @@ pure function nli_oxygen_diffusion_cus_cus_up(cell)
     n = n + get_species(cell + (/0, 1, 0, ruo2_cus/))*nr_of_species**1
 
     select case(n)
-    case(3)
+    case(5)
         nli_oxygen_diffusion_cus_cus_up = oxygen_diffusion_cus_cus_up
     case default
         nli_oxygen_diffusion_cus_cus_up = 0
@@ -5556,7 +5556,7 @@ pure function nli_reaction_oxygen_bridge_co_cus_right(cell)
     n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**1
 
     select case(n)
-    case(6)
+    case(2)
         nli_reaction_oxygen_bridge_co_cus_right = reaction_oxygen_bridge_co_cus_right
     case default
         nli_reaction_oxygen_bridge_co_cus_right = 0
@@ -5577,7 +5577,7 @@ pure function nli_co_diffusion_cus_bridge_right(cell)
     n = n + get_species(cell + (/1, 0, 0, ruo2_bridge/))*nr_of_species**1
 
     select case(n)
-    case(5)
+    case(3)
         nli_co_diffusion_cus_bridge_right = co_diffusion_cus_bridge_right
     case default
         nli_co_diffusion_cus_bridge_right = 0
@@ -5619,7 +5619,7 @@ pure function nli_oxygen_diffusion_bridge_bridge_up(cell)
     n = n + get_species(cell + (/0, 1, 0, ruo2_bridge/))*nr_of_species**1
 
     select case(n)
-    case(3)
+    case(5)
         nli_oxygen_diffusion_bridge_bridge_up = oxygen_diffusion_bridge_bridge_up
     case default
         nli_oxygen_diffusion_bridge_bridge_up = 0
@@ -5640,7 +5640,7 @@ pure function nli_oxygen_diffusion_bridge_cus_left(cell)
     n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
 
     select case(n)
-    case(1)
+    case(7)
         nli_oxygen_diffusion_bridge_cus_left = oxygen_diffusion_bridge_cus_left
     case default
         nli_oxygen_diffusion_bridge_cus_left = 0
@@ -5661,7 +5661,7 @@ pure function nli_oxygen_diffusion_cus_cus_down(cell)
     n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**1
 
     select case(n)
-    case(1)
+    case(7)
         nli_oxygen_diffusion_cus_cus_down = oxygen_diffusion_cus_cus_down
     case default
         nli_oxygen_diffusion_cus_cus_down = 0
@@ -5682,7 +5682,7 @@ pure function nli_reaction_oxygen_cus_co_bridge_left(cell)
     n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
 
     select case(n)
-    case(6)
+    case(2)
         nli_reaction_oxygen_cus_co_bridge_left = reaction_oxygen_cus_co_bridge_left
     case default
         nli_reaction_oxygen_cus_co_bridge_left = 0
@@ -5703,7 +5703,7 @@ pure function nli_reaction_oxygen_bridge_co_bridge_down(cell)
     n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
 
     select case(n)
-    case(2)
+    case(6)
         nli_reaction_oxygen_bridge_co_bridge_down = reaction_oxygen_bridge_co_bridge_down
     case default
         nli_reaction_oxygen_bridge_co_bridge_down = 0
@@ -5745,7 +5745,7 @@ pure function nli_oxygen_desorption_cus_cus(cell)
     n = n + get_species(cell + (/0, 1, 0, ruo2_cus/))*nr_of_species**1
 
     select case(n)
-    case(0)
+    case(8)
         nli_oxygen_desorption_cus_cus = oxygen_desorption_cus_cus
     case default
         nli_oxygen_desorption_cus_cus = 0
@@ -5765,7 +5765,7 @@ pure function nli_co_desorption_bridge(cell)
     n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**0
 
     select case(n)
-    case(2)
+    case(0)
         nli_co_desorption_bridge = co_desorption_bridge
     case default
         nli_co_desorption_bridge = 0
@@ -5786,7 +5786,7 @@ pure function nli_oxygen_desorption_bridge_cus_right(cell)
     n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**1
 
     select case(n)
-    case(0)
+    case(8)
         nli_oxygen_desorption_bridge_cus_right = oxygen_desorption_bridge_cus_right
     case default
         nli_oxygen_desorption_bridge_cus_right = 0
