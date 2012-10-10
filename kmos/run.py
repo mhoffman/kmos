@@ -465,7 +465,7 @@ class KMC_Model(multiprocessing.Process):
                      self.get_occupation_header()))
         return std_header
 
-    def get_std_outdata(self, samples, sample_size, tof_method='procrates'):
+    def get_std_sampled_data(self, samples, sample_size, tof_method='procrates'):
         """Sample an average model and return TOFs and coverages
         in a standardized format :
 
