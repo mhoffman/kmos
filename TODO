@@ -24,6 +24,8 @@ Functionality
   * improve speed by inlining function call in generated code
     [keep it optional in case inlining increases code base too much]
   * put XML/DTD handling into stdlib only tools (validation currenty not supported)
+  * add convenient 'cachefile' mechanism into model constructor/destructor
+  * add convenience function to write time series
 
 
 Project related
