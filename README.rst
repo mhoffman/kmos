@@ -1,5 +1,6 @@
-kmos: kMC modelling on steroids - a vigorous attempt to make lattice kinetic
-Monte Carlo modelling more accessible.
+kmos: kMC modelling on steroids
+=====================================
+*a vigorous attempt to make lattice kinetic Monte Carlo modelling more accessible.*
 
 Copyright (C) 2009-12 Max J. Hoffmann <mjhoffmann@gmail.com>
 
@@ -30,7 +31,6 @@ best under a similar setup. Other than standard libraries you need to fetch:
 
 USAGE
 #####
-somehow
 
 Start the main program with ::
 
