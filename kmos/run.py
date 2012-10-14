@@ -40,6 +40,7 @@ the model happens through Queues.
 __all__ = ['base', 'lattice', 'proclist', 'KMC_Model']
 
 from copy import deepcopy
+import os
 from fnmatch import fnmatch
 import multiprocessing
 import random
@@ -83,7 +84,8 @@ class KMC_Model(multiprocessing.Process):
                        banner=True,
                        print_rates=True,
                        autosend=True,
-                       steps_per_frame=50000):
+                       steps_per_frame=50000,
+                       config_cache_file=None):
 
         # initialize multiprocessing.Process hooks
         super(KMC_Model, self).__init__()
@@ -103,6 +105,7 @@ class KMC_Model(multiprocessing.Process):
         self.size = int(settings.simulation_size) \
                         if size is None else int(size)
         self.steps_per_frame = steps_per_frame
+        self.config_cache_file = config_cache_file
 
         # bind Fortran submodules
         self.base = base
@@ -130,10 +133,15 @@ class KMC_Model(multiprocessing.Process):
 
     def __enter__(self, *args, **kwargs):
         """__enter/exit__ function for with-statement protocol."""
+        if self.config_cache_file is not None:
+            if os.path.exists(self.config_cache_file):
+                self.load_config(self.config_cache_file)
         return self
 
     def __exit__(self, *args, **kwargs):
         """__enter/exit__ function for with-statement protocol."""
+        if self.config_cache_file is not None:
+            self.dump_config(self.config_cache_file)
         self.deallocate()
         return self
 
