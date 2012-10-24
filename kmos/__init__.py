@@ -20,7 +20,7 @@ you plan the model.
 kmos can be invoked directly from the command line in one of the following
 ways::
 
-    kmos [help] (edit|export|view) [options]
+    kmos [help] (all|benchmark|build|edit|export|export-settings|help|import|rebuild|run|view) [options]
 
 or it may be used as an API via the kmos module.
 
@@ -76,7 +76,6 @@ def evaluate_rate_expression(rate_expr, parameters={}):
             param_dict[parameter.name] = {'value': parameter.value}
         parameters = param_dict
 
-
     if not rate_expr:
         rate_const = 0.0
     else:
@@ -85,10 +84,10 @@ def evaluate_rate_expression(rate_expr, parameters={}):
         # replace some aliases
         rate_expr = rate_expr.replace('beta', '(1./(kboltzmann*T))')
         try:
-            tokens = list(tokenize.generate_tokens(
-                            StringIO.StringIO(rate_expr).readline))
+            input = StringIO.StringIO(rate_expr).readline
+            tokens = list(tokenize.generate_tokens(input))
         except:
-            raise
+            raise Exception('Could not tokenize expression: %s' % input)
         for i, token, _, _, _ in tokens:
             if token in ['sqrt', 'exp', 'sin', 'cos', 'pi', 'pow', 'log']:
                 replaced_tokens.append((i, 'math.' + token))

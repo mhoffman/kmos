@@ -3,6 +3,7 @@
 """
 
 # stdlib imports
+import os
 import re
 
 # numpy
@@ -15,7 +16,7 @@ from xml.dom import minidom
 
 # kmos own modules
 from kmos.utils import CorrectlyNamed
-from kmos.config import *
+from kmos.config import APP_ABS_PATH
 
 kmcproject_v0_1_dtd = '/kmc_project_v0.1.dtd'
 kmcproject_v0_2_dtd = '/kmc_project_v0.2.dtd'
@@ -29,7 +30,7 @@ class FixedObject(object):
     attributes = []
 
     def __init__(self, **kwargs):
-        self.__doc__ += '\nAllowed keywords: %s' % self.attributes
+        self.__doc__ = ('\nAllowed keywords: %s' % self.attributes)
         for attribute in self.attributes:
             if attribute in kwargs:
                 self.__dict__[attribute] = kwargs[attribute]
@@ -418,15 +419,16 @@ class Project(object):
                     for parameter in child:
                         name = parameter.attrib['name']
                         value = parameter.attrib['value']
+
                         if 'adjustable' in parameter.attrib:
                             adjustable = bool(eval(
                                             parameter.attrib['adjustable']))
                         else:
                             adjustable = False
 
-                        min = parameter.attrib['min'] \
+                        min = float(parameter.attrib['min']) \
                             if 'min' in parameter.attrib else 0.0
-                        max = parameter.attrib['max'] \
+                        max = float(parameter.attrib['max']) \
                             if 'max' in parameter.attrib else 0.0
                         scale = parameter.attrib['scale'] \
                             if 'scale' in parameter.attrib else 'linear'
@@ -514,7 +516,6 @@ class Project(object):
         # variable names
         variable_regex = re.compile('^[a-zA-Z][a-zA-z0-9_]*$')
 
-
         #################
         # LATTICE
         #################
@@ -534,7 +535,6 @@ class Project(object):
                                        'is not unique.') % (x.name,
                                                             layer.name))
 
-
         for x in self.get_layers():
             # check if all lattice names are unique
             if len([y for y in self.get_layers() if x.name == y.name]) > 1:
@@ -553,7 +553,6 @@ class Project(object):
                                                  in self.get_layers()]:
             raise UserWarning('Default Layer "%s" is not defined.' %
                               self.layer_list.default_layer)
-
 
         #################
         # PARAMETERS
@@ -615,12 +614,10 @@ class Project(object):
             if len([y for y in self.get_processes() if x.name == y.name]) > 1:
                 raise UserWarning('Process name "%s" is not unique' % x.name)
 
-
         # check if all processes have at least one condition
         for x in self.get_processes():
             if not x.condition_list:
                 raise UserWarning('Process "%s" has no conditions!' % x.name)
-
 
         # check if all processes have at least one action
         for x in self.get_processes():
@@ -645,8 +642,6 @@ class Project(object):
                 raise UserWarning('Process %s has no rate constant defined')
 
         # check if all rate expressions are valid
-
-
         # check if all species used in condition_action are defined
         # after stripping ^ and $ operators
         species_names = [x.name for x in self.get_speciess()]
@@ -857,7 +852,6 @@ class LayerList(FixedObject, list):
         """Expecting something of the form site_name.offset.layer
         and return a Coord object"""
 
-
         term = terms.split('.')
         if len(term) == 3:
             coord = Coord(name=term[0],
@@ -919,7 +913,7 @@ class Layer(FixedObject, CorrectlyNamed):
         sites = filter(lambda site: site.name == site_name,
                        self.sites)
         if not sites:
-            raise Error('Site not found')
+            raise Exception('Site not found')
         return sites[0]
 
     def get_info(self):
@@ -981,11 +975,15 @@ class Coord(FixedObject):
 
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)
-        self.offset = kwargs.get('offset', (0, 0, 0))
+        self.offset = kwargs.get('offset', np.array([0, 0, 0]))
         if len(self.offset) == 1:
-            self.offset = (self.offset[0], 0, 0)
+            self.offset = np.array([self.offset[0], 0, 0])
         elif len(self.offset) == 2:
-            self.offset = (self.offset[0], self.offset[1], 0)
+            self.offset = np.array([self.offset[0], self.offset[1], 0])
+        elif len(self.offset) == 3:
+            self.offset = np.array([self.offset[0],
+                                    self.offset[1],
+                                    self.offset[2]])
 
         self.pos = np.array([float(i) for i in kwargs['pos'].split()]) \
                    if 'pos' in kwargs else np.array([0., 0., 0.])
@@ -997,25 +995,18 @@ class Coord(FixedObject):
                                      tuple(self.offset),
                                      self.layer)
 
+    def eq_mod_offset(self, other):
+        """Compares wether to coordinates are the same up to (modulo)
+        a cell offset.
+        """
+        return (self.layer, self.name) == (other.layer, other.name)
+
     def __eq__(self, other):
-        return (self.layer, self.name, self.offset) == \
-               (other.layer, other.name, other.offset)
+        return ((self.layer, self.name) == \
+               (other.layer, other.name)) and (self.offset == other.offset).all()
 
     def __hash__(self):
         return self.__repr__()
-
-    def __add__(a, b):
-        diff = [(x + y) for (x, y) in zip(a.offset, b.offset)]
-        if a.layer and b.layer:
-            name = "%s_%s + %s_%s" % (a.layer, a.name, b.layer, b.name)
-        elif a.layer:
-            name = '%s_%s + %s' % (a.layer, a.name, b.name)
-        elif b.layer:
-            name = "%s + %s_%s" % (a.name, b.layer, b.name)
-        else:
-            name = '%s + %s' % (a.name, b.name)
-        layer = ''
-        return Coord(name=name, layer=layer, offset=offset)
 
     def __sub__(a, b):
         """When subtracting two lattice coordinates from each other,
@@ -1050,6 +1041,14 @@ class Coord(FixedObject):
         else:
             return ' - %s' % ff
 
+    def site_offset_unpacked(self):
+        ff = self.ff()
+        if ff == '(/0, 0, 0, 0/)':
+            return 'site(1), site(2), site(3), site(4)'
+        else:
+            return 'site(1) + (%s), site(2) + (%s), site(3) + (%s), site(4) + (%s)' % \
+                    (self.offset[0], self.offset[1], self.offset[2], self.name)
+
     def radd_ff(self):
         """Build term as if adding on the right, omit '+' if 0 anyway
         (in Fortran Form :-)
@@ -1076,6 +1075,16 @@ class Coord(FixedObject):
         else:
             return "(/%s, %s, %s, %s/)" % (self.offset[0], self.offset[1],
                                            self.offset[2], self.name, )
+
+def cmp_coords(self, other):
+    if self.layer != other.layer:
+        return cmp(self.layer, other.layer)
+    elif (self.offset != other.offset).any():
+        for i in range(3):
+            if self.offset[i] != other.offset[i]:
+                return cmp(self.offset[i], other.offset[i])
+    else:
+        return 0
 
 
 class Species(FixedObject):
@@ -1165,6 +1174,53 @@ class Process(FixedObject):
         return kmos.evaluate_rate_expression(self.rate_constant, parameters)
 
 
+class SingleLatIntProcess(Process):
+    """A process that corresponds to a single lateral interaction
+    configuration. This is conceptually the same as the old
+    condition/action model, just some conditions are now called
+    bystanders."""
+    attributes = ['name',
+                  'rate_constant',
+                  'condition_list',
+                  'action_list',
+                  'bystanders',
+                  'enabled',
+                  'chemical_expression',
+                  'tof_count']
+
+    def __repr__(self):
+        return '[PROCESS] Name:%s Rate: %s\nConditions: %s\nActions: %s\nBystanders: %s' \
+            % (self.name,
+               self.rate_constant,
+               self.condition_list,
+               self.action_list,
+               self.bystanders)
+
+
+class LatIntProcess(Process):
+    """A process which directly includes lateral interactions.
+    In this model a bystander just defines a set of allowed
+    species so, it allows for additional degrees of freedom
+    here. Different lateral model can be accounted for through
+    counters and placeholder in rate expression.
+
+    """
+    attributes = ['name',
+                  'rate_constant',
+                  'condition_list',
+                  'action_list',
+                  'bystanders',
+                  'enabled',
+                  'chemical_expression',
+                  'tof_count']
+
+
+class Bystander(FixedObject):
+    attributes = ['coord', 'allowed_species', 'counter']
+    def __repr__(self):
+        return ("[BYSTANDER] Coord:%s Allowed species: %s, Counter: %s\n" %
+               (self.coord, self.allowed_species, self.counter))
+
 class ConditionAction(FixedObject):
     """Represents either a condition or an action. Since both
     have the same attributes we use the same class here, and just
@@ -1175,12 +1231,12 @@ class ConditionAction(FixedObject):
     def __init__(self, **kwargs):
         FixedObject.__init__(self, **kwargs)
 
+    def __eq__(self, other):
+        return self.__repr__() == other.__repr__()
+
     def __repr__(self):
         return ("[COND_ACT] Species: %s Coord:%s\n" %
                (self.species, self.coord))
-
-    def __eq__(self, other):
-        return self.__repr__() == other.__repr__()
 
     def __hash__(self):
         return self.__repr__()
@@ -1406,7 +1462,7 @@ def parse_chemical_expression(eq, process, project_tree):
                         'for condition\n  and action.\n')
             else:
                 if corresponding_condition:
-                    action.species = '$%s' % corresponding_species[0].species
+                    action.species = '$%s' % corresponding_condition[0].species
                 else:
                     raise UserWarning(
                         'When omitting the species in the site '

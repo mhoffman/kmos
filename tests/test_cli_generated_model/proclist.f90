@@ -31,6 +31,8 @@ use base, only: &
     update_accum_rate, &
     determine_procsite, &
     update_clocks, &
+    avail_sites, &
+    null_species, &
     increment_procstat
 
 use lattice, only: &
@@ -47,7 +49,6 @@ use lattice, only: &
     reset_site, &
     system_size, &
     spuck, &
-    null_species, &
     get_species
 
 
@@ -81,6 +82,36 @@ character(len=2000), dimension(2) :: processes, rates
 
 contains
 
+subroutine do_kmc_steps(n)
+
+!****f* proclist/do_kmc_steps
+! FUNCTION
+!    Performs ``n`` kMC step.
+!    If one has to run many steps without evaluation
+!    do_kmc_steps might perform a little better.
+!
+! ARGUMENTS
+!
+!    ``n`` : Number of steps to run
+!******
+    integer(kind=iint), intent(in) :: n
+
+    real(kind=rsingle) :: ran_proc, ran_time, ran_site
+    integer(kind=iint) :: nr_site, proc_nr, i
+
+    do i = 1, n
+    call random_number(ran_time)
+    call random_number(ran_proc)
+    call random_number(ran_site)
+    call update_accum_rate
+    call update_clocks(ran_time)
+
+    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)
+    call run_proc_nr(proc_nr, nr_site)
+    enddo
+
+end subroutine do_kmc_steps
+
 subroutine do_kmc_step()
 
 !****f* proclist/do_kmc_step
@@ -98,10 +129,10 @@ subroutine do_kmc_step()
     call random_number(ran_proc)
     call random_number(ran_site)
     call update_accum_rate
-    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)
-    call run_proc_nr(proc_nr, nr_site)
     call update_clocks(ran_time)
 
+    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)
+    call run_proc_nr(proc_nr, nr_site)
 end subroutine do_kmc_step
 
 subroutine get_kmc_step(proc_nr, nr_site)
@@ -122,6 +153,7 @@ subroutine get_kmc_step(proc_nr, nr_site)
     call random_number(ran_site)
     call update_accum_rate
     call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)
+
 end subroutine get_kmc_step
 
 subroutine get_occupation(occupation)
@@ -151,7 +183,7 @@ subroutine get_occupation(occupation)
                     ! shift position by 1, so it can be accessed
                     ! more straightforwardly from f2py interface
                     species = get_species((/i,j,k,nr/))
-                    if(species.gt.null_species) then
+                    if(species.ne.null_species) then
                     occupation(species, nr) = &
                         occupation(species, nr) + 1
                     endif
@@ -302,7 +334,7 @@ subroutine put_oxygen_default_cus(site)
     call replace_species(site, empty, oxygen)
 
     ! disable affected processes
-    if(can_do(CO_adsorption, site))then
+    if(avail_sites(CO_adsorption, lattice2nr(site(1), site(2), site(3), site(4)), 2).ne.0)then
         call del_proc(CO_adsorption, site)
     endif
 
@@ -329,7 +361,7 @@ subroutine put_CO_default_cus(site)
     call replace_species(site, empty, CO)
 
     ! disable affected processes
-    if(can_do(CO_adsorption, site))then
+    if(avail_sites(CO_adsorption, lattice2nr(site(1), site(2), site(3), site(4)), 2).ne.0)then
         call del_proc(CO_adsorption, site)
     endif
 
@@ -346,7 +378,7 @@ subroutine take_CO_default_cus(site)
     call replace_species(site, CO, empty)
 
     ! disable affected processes
-    if(can_do(CO_desorption, site))then
+    if(avail_sites(CO_desorption, lattice2nr(site(1), site(2), site(3), site(4)), 2).ne.0)then
         call del_proc(CO_desorption, site)
     endif
 

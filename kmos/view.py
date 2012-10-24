@@ -28,8 +28,6 @@ import time
 import ase.gui.ag
 from ase.gui.images import Images
 
-from kmos.run import KMC_Model
-
 try:
     import gtk
     import gobject
@@ -53,11 +51,7 @@ except Exception, e:
     print(e)
 
 
-from kmos.run import KMC_Model, \
-                       base, \
-                       get_tof_names, \
-                       lattice, \
-                       settings
+from kmos.run import KMC_Model, base, get_tof_names, lattice, settings
 
 
 class ParamSlider(gtk.HScale):
@@ -312,7 +306,6 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
         elif event.string == 'S':
             self.signal_queue.put('SWITCH_SURFACE_PROCESSES_ON')
 
-
     def scroll_event(self, _window, event):
         """Zoom in/out when using mouse wheel"""
         x = 1.0
@@ -345,7 +338,8 @@ class KMC_ModelProxy(multiprocessing.Process):
     """
     def __init__(self, *args, **kwargs):
         super(KMC_ModelProxy, self).__init__()
-        self.model = kwargs.get('model', None)
+        self.steps_per_frame = kwargs.get('steps_per_frame', 50000)
+        self.model = kwargs.get('model', None, )
         self.kwargs = kwargs
         self.signal_queue = self.kwargs.get('signal_queue')
         self.parameter_queue = self.kwargs.get('parameter_queue')
@@ -355,7 +349,8 @@ class KMC_ModelProxy(multiprocessing.Process):
         if self.model is None:
             self.model = KMC_Model(self.queue,
                                    self.parameter_queue,
-                                   self.signal_queue)
+                                   self.signal_queue,
+                                   steps_per_frame=self.steps_per_frame)
         self.model.run()
 
     def join(self):
@@ -367,13 +362,12 @@ class KMC_ModelProxy(multiprocessing.Process):
         super(KMC_ModelProxy, self).terminate()
 
 
-
 class KMC_Viewer():
     """A graphical front-end to run, manipulate
     and view a kMC model.
     """
 
-    def __init__(self, model=None):
+    def __init__(self, model=None, steps_per_frame=50000):
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_position(gtk.WIN_POS_CENTER)
         self.window.connect('delete-event', self.exit)
@@ -385,8 +379,9 @@ class KMC_Viewer():
         self.signal_queue = multiprocessing.Queue(maxsize=10)
         if model is None:
             self.model = KMC_ModelProxy(queue=queue,
-                                   parameter_queue=self.parameter_queue,
-                                   signal_queue=self.signal_queue)
+                                        parameter_queue=self.parameter_queue,
+                                        signal_queue=self.signal_queue,
+                                        steps_per_frame=steps_per_frame)
         else:
             self.model = model
             self.model.image_queue = queue
@@ -435,7 +430,7 @@ class KMC_Viewer():
         return True
 
 
-def main(model=None):
+def main(model=None, steps_per_frame=50000):
     """The entry point for the kmos viewer application. In order to
     run and view a model the corresponding kmc_settings.py and
     kmc_model.(so/pyd) must be in the current import path, e.g. ::
@@ -447,7 +442,7 @@ def main(model=None):
     """
 
     gobject.threads_init()
-    viewer = KMC_Viewer(model)
+    viewer = KMC_Viewer(model, steps_per_frame=steps_per_frame)
     viewer.model.start()
     viewer.viewbox.start()
     gtk.main()

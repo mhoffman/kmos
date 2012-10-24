@@ -40,6 +40,7 @@ the model happens through Queues.
 __all__ = ['base', 'lattice', 'proclist', 'KMC_Model']
 
 from copy import deepcopy
+import os
 from fnmatch import fnmatch
 import multiprocessing
 import random
@@ -56,7 +57,7 @@ except Exception, e:
     kmc model. This can be created from a kmos xml file using
     kmos export <xml-file>
     Hint: are you in a directory containing a compiled kMC model?\n\n
-    """ % e )
+    """ % e)
 
 try:
     import kmc_settings as settings
@@ -67,13 +68,12 @@ except Exception, e:
     The kmc_settings.py contains all changeable model parameters
     and descriptions for the representation on screen.
     Hint: are you in a directory containing a compiled kMC model?
-    """ % e )
-
+    """ % e)
 
 
 class KMC_Model(multiprocessing.Process):
     """API Front-end to initialize and run a kMC model using python bindings.
-    Depending on the constructor cal the model can be run either via directory
+    Depending on the constructor call the model can be run either via directory
     calls or in a separate processes access via multiprocessing.Queues.
     Only one model instance can exist simultaneously per process."""
 
@@ -83,35 +83,67 @@ class KMC_Model(multiprocessing.Process):
                        size=None, system_name='kmc_model',
                        banner=True,
                        print_rates=True,
-                       autosend=True):
+                       autosend=True,
+                       steps_per_frame=50000,
+                       config_cache_file=None):
+
+        # initialize multiprocessing.Process hooks
         super(KMC_Model, self).__init__()
+
+        # setup queues for viewer
         self.image_queue = image_queue
         self.parameter_queue = parameter_queue
         self.signal_queue = signal_queue
         self.autosend = autosend
+
+        # initalize instance settings
+        self.system_name = system_name
+        self.banner = banner
         self.print_rates = print_rates
         self.parameters = Model_Parameters(self.print_rates)
         self.rate_constants = Model_Rate_Constants()
         self.size = int(settings.simulation_size) \
                         if size is None else int(size)
+        self.steps_per_frame = steps_per_frame
+        self.config_cache_file = config_cache_file
 
+        # bind Fortran submodules
         self.base = base
         self.lattice = lattice
         self.proclist = proclist
         self.settings = settings
-        self.system_name = system_name
-        self.banner = banner
+
+        if hasattr(self.base, 'null_species'):
+            self.null_species = self.base.null_species
+        elif hasattr(self.base, 'get_null_species'):
+            self.null_species = self.base.get_null_species()
+        else:
+            self.null_species = -1
+
 
         self.proclist.seed = np.array(getattr(self.settings, 'random_seed', 1))
         self.reset()
 
+        if hasattr(settings, 'setup_model'):
+            import new
+            self.setup_model = new.instancemethod(settings.setup_model,
+                                                  self,
+                                                  KMC_Model)
+            self.setup_model()
+
     def __enter__(self, *args, **kwargs):
-        """__enter/exit__ function for with-statement protocoll"""
+        """__enter/exit__ function for with-statement protocol."""
+        if self.config_cache_file is not None:
+            if os.path.exists(self.config_cache_file):
+                self.load_config(self.config_cache_file)
         return self
 
     def __exit__(self, *args, **kwargs):
-        """__enter/exit__ function for with-statement protocoll"""
+        """__enter/exit__ function for with-statement protocol."""
+        if self.config_cache_file is not None:
+            self.dump_config(self.config_cache_file)
         self.deallocate()
+        return self
 
     def reset(self):
         self.size = int(settings.simulation_size)
@@ -136,8 +168,14 @@ class KMC_Model(multiprocessing.Process):
         self.species_representation = []
         for species in sorted(settings.representations):
             if settings.representations[species].strip():
-                self.species_representation.append(
-                    eval(settings.representations[species]))
+                try:
+                    self.species_representation.append(
+                        eval(settings.representations[species]))
+                except Exception, e:
+                    print('Trouble with representation %s'
+                           % settings.representations[species])
+                    print(e)
+                    raise
             else:
                 self.species_representation.append(Atoms())
         if hasattr(settings, 'species_tags'):
@@ -173,21 +211,17 @@ class KMC_Model(multiprocessing.Process):
     def inverse(self):
         return (repr(self.parameters) + self.rate_constants.inverse())
 
-    def put(self, site, species):
-        """Puts a certain species at a certain site.
-        (Not implemented)
+    def get_param_header(self):
+        """Return the names of field return by
+        self.get_atoms().params.
+        Useful for the header line of an ASCII output.
         """
-        species = species.lower()
-
-        cell, name = np.array(site[:3]), site[3].lower()
-        site_nr = eval('lattice.%s' % name)
-        site = np.array(list(cell) + [site_nr])
-        species = lattice.get_species(site)
-        if species:
-            pass
+        return ' '.join(param_name
+                       for param_name in sorted(self.settings.parameters)
+            if self.settings.parameters[param_name].get('adjustable', False))
 
     def get_occupation_header(self):
-        """Returns the names of the fields returned by
+        """Return the names of the fields returned by
         self.get_atoms().occupation.
         Useful for the header line of an ASCII output.
         """
@@ -196,7 +230,7 @@ class KMC_Model(multiprocessing.Process):
                            for site in settings.site_names])
 
     def get_tof_header(self):
-        """Returns the names of the fields returned by
+        """Return the names of the fields returned by
         self.get_atoms().tof_data.
         Useful for the header line of an ASCII output.
         """
@@ -236,7 +270,7 @@ class KMC_Model(multiprocessing.Process):
         if not base.is_allocated():
             self.reset()
         while True:
-            for _ in xrange(50000):
+            for _ in xrange(self.steps_per_frame):
                 proclist.do_kmc_step()
             if self.autosend and not self.image_queue.full():
                 atoms = self.get_atoms()
@@ -272,22 +306,81 @@ class KMC_Model(multiprocessing.Process):
                 elif signal.upper() == 'JOIN':
                     self.join()
 
-
             if not self.parameter_queue.empty():
                 while not self.parameter_queue.empty():
                     parameters = self.parameter_queue.get()
                     settings.parameters.update(parameters)
                 set_rate_constants(parameters, self.print_rates)
 
-    def view(self):
+    def export_movie(self,
+                    frames=30,
+                    skip=1,
+                    prefix='movie',
+                    rotation='15x,-70x',
+                    suffix='png',
+                    **kwargs):
+        """Export series of snapshots of model instance to an image
+        file in the current directory which allows for easy post-processing
+        of images, e.g. using `ffmpeg` ::
+
+            ffmpeg -i movie_%06d.png -f image2 -r 24 movie.avi
+
+        Allows suffixes are png, pov, and eps. Additional keyword arguments
+        (kwargs) are passed directly the ase.io.write of the ASE library.
+
+        When exporting to *.pov, one has to manually povray each *.pov file in
+        the directory which is as simple as typing ::
+
+            for pov_file in *.pov
+            do
+               povray ${pov_file}
+            done
+
+        using bash.
+
+        """
+
+        from ase.io import write
+        for i in xrange(frames):
+            atoms = self.get_atoms()
+            write('%s_%06i.%s' % (prefix, i, suffix),
+                  atoms,
+                  show_unit_cell=True,
+                  rotation=rotation,
+                  **kwargs)
+            self.do_steps(skip)
+
+    def show(self):
         """Visualize the current configuration of the model using ASE ag."""
         ase = import_ase()
         ase.visualize.view(self.get_atoms())
 
+    def view(self):
+        """Start current model in live view mode."""
+        from kmos import view
+        view.main(self)
+
     def get_atoms(self, geometry=True):
         """Return an ASE Atoms object with additional
         information such as coverage and Turn-over-frequencies
-        attached."""
+        attached.
+
+        The additional attributes are:
+          - `info` (extra tags assigned to species)
+          - `kmc_step`
+          - `kmc_time`
+          - `occupation`
+          - `procstat`
+          - `tof_data`
+
+        `tof_data` contains previously defined TOFs in reaction per seconds per
+                   cell sampled since the last call to `get_atoms()`
+        `info` can be used to better visualize similar looking molecule during
+               post-processing
+        `procstat` holds the number of times each process was executed since
+                   last `get_atoms()` call.
+
+        """
 
         if geometry:
             kmos_tags = {}
@@ -298,6 +391,8 @@ class KMC_Model(multiprocessing.Process):
                     for k in xrange(lattice.system_size[2]):
                         for n in xrange(1, 1 + lattice.spuck):
                             species = lattice.get_species([i, j, k, n])
+                            if species == self.null_species:
+                                continue
                             if self.species_representation[species]:
                                 # create the ad_atoms
                                 ad_atoms = deepcopy(
@@ -312,8 +407,11 @@ class KMC_Model(multiprocessing.Process):
                                 # add to existing slab
                                 atoms += ad_atoms
                                 if self.species_tags:
-                                    for atom in range(len(atoms) - len(ad_atoms), len(atoms)):
-                                        kmos_tags[atom] = self.species_tags.values()[species]
+                                    for atom in range(len(atoms)
+                                                      - len(ad_atoms),
+                                                      len(atoms)):
+                                        kmos_tags[atom] = \
+                                        self.species_tags.values()[species]
 
                         lattice_repr = deepcopy(self.lattice_representation)
                         lattice_repr.translate(np.dot(np.array([i, j, k]),
@@ -334,6 +432,9 @@ class KMC_Model(multiprocessing.Process):
         atoms.calc = None
         atoms.kmc_time = base.get_kmc_time()
         atoms.kmc_step = base.get_kmc_step()
+        atoms.params = [float(self.settings.parameters.get(param_name)['value'])
+                   for param_name in sorted(self.settings.parameters)
+        if self.settings.parameters[param_name].get('adjustable', False)]
 
         # calculate TOF since last call
         atoms.procstat = np.zeros((proclist.nr_of_proc,))
@@ -359,6 +460,54 @@ class KMC_Model(multiprocessing.Process):
         self.time = atoms.kmc_time
 
         return atoms
+
+    def get_std_header(self):
+        """Return commented line of field names corresponding to
+        values returned in get_std_outdata
+
+        """
+
+        std_header = ('#%s %s %s kmc_steps kmc_time\n'
+                  % (self.get_param_header(),
+                     self.get_tof_header(),
+                     self.get_occupation_header()))
+        return std_header
+
+    def get_std_sampled_data(self, samples, sample_size, tof_method='procrates'):
+        """Sample an average model and return TOFs and coverages
+        in a standardized format :
+
+        [parameters] [TOFs] [occupations] kmc_time kmc_step
+
+        """
+
+        # initialize lists for averages
+        occs = []
+        tofs = []
+        delta_ts = []
+
+        # sample over trajectory
+        for sample in xrange(samples):
+            self.do_steps(sample_size)
+            atoms = self.get_atoms(geometry=False)
+            occs.append(list(atoms.occupation.flatten()))
+            if tof_method == 'procrates':
+                tofs.append(atoms.tof_data.flatten())
+            else:
+                raise NotImplementedError('Working on it ..')
+
+            delta_ts.append(atoms.delta_t)
+        # calculate time averages
+        occs_mean = np.average(occs, axis=0, weights=delta_ts)
+        tof_mean = np.average(tofs, axis=0, weights=delta_ts)
+
+        # write out averages
+        outdata = tuple(atoms.params
+                        + list(occs_mean.flatten())
+                        + list(tof_mean.flatten())
+                        + [self.base.get_kmc_time(),
+                           self.base.get_kmc_step()])
+        return ((' '.join(['%.5e'] * len(outdata)) + '\n') % outdata)
 
     def double(self):
         """
@@ -401,8 +550,51 @@ class KMC_Model(multiprocessing.Process):
     def switch_surface_processes_on(self):
         set_rate_constants(settings.parameters, self.print_rates)
 
-    def show_accum_rate_summation(self):
+    def show_coverages(self):
+        """Show coverages (per unit cell) for each species
+        and site type for current configurations.
+
+        """
+
+        # get atoms
+        atoms = self.get_atoms(geometry=False)
+
+        # get occupation
+        occupation = atoms.occupation
+
+        # get species names
+        species_names = sorted(self.settings.representations.keys())
+
+        # get site_names
+        site_names = sorted(self.settings.site_names)
+
+        header_line = ('|' +
+                      ('%18s|' % 'site \ species') +
+                      '|'.join([ ('%11s' % sn) for sn in species_names ] + ['']))
+        print(len(header_line)*'-')
+        print(header_line)
+        print(len(header_line)*'-')
+        for i in range(self.lattice.spuck):
+            site_name = self.settings.site_names[i];
+            print('|'
+                 + '{0:<18s}|'.format(site_name)
+                 + '|'.join([('{0:^11.5f}'.format(x) if x else 11*' ') for x in list(occupation[:,i])]
+                 + ['']))
+        print(len(header_line)*'-')
+        print('Units: "molecules (or atoms) per unit cell"')
+
+    def show_accum_rate_summation(self, order='-rate'):
+        """Shows rate individual processes contribute to the total rate
+
+        The optional argument order can be one of: name, rate, rate_constant,
+        nrofsites. You precede each keyword with a '-', to show in decreasing
+        order.
+        Default: '-rate'.
+
+        """
         accum_rate = 0.
+        entries = []
+        # collect
         for i, process_name in enumerate(
                                sorted(
                                self.settings.rate_constants)):
@@ -411,11 +603,37 @@ class KMC_Model(multiprocessing.Process):
                 rate = self.base.get_rate(i + 1)
                 prod = nrofsites * rate
                 accum_rate += prod
+                entries.append((nrofsites, rate, prod, process_name))
 
-                print('% 5i*%8.4e s^-1 = %8.4e s^-1 [%s]' % (nrofsites, rate,
-                                                   prod, process_name))
+        # reorder
+        if order == 'name':
+            entries = sorted(entries, key=lambda x: x[3])
+        elif order == 'rate':
+            entries = sorted(entries, key=lambda x: x[2])
+        elif order == 'rate_constant':
+            entries = sorted(entries, key=lambda x: x[1])
+        elif order == 'nrofsites':
+            entries = sorted(entries, key=lambda x: x[0])
+        elif order == '-name':
+            entries = sorted(entries, key=lambda x: - x[3])
+        elif order == '-rate':
+            entries = sorted(entries, key=lambda x: - x[2])
+        elif order == '-rate_constant':
+            entries = sorted(entries, key=lambda x: - x[1])
+        elif order == '-nrofsites':
+            entries = sorted(entries, key=lambda x: - x[0])
 
-        print('-------------------------')
+        # print
+        total_contribution = 0
+        print('(cumulative)    nrofsites * rate_constant    = rate            [name]')
+        print('-------------------------------------------------------------------------------')
+        for entry in entries:
+            total_contribution += float(entry[2])
+            percent = '(%8.4f %%)' % (total_contribution * 100 / accum_rate)
+            entry = '% 12i * % 8.4e s^-1 = %8.4e s^-1 [%s]' % entry
+            print('%s %s' % (percent, entry))
+
+        print('-------------------------------------------------------------------------------')
         print('  = total rate = %.8e s^-1' % accum_rate)
 
     def _put(self, site, new_species):
@@ -437,6 +655,21 @@ class KMC_Model(multiprocessing.Process):
             model._adjust_database() # Important !
 
         """
+        # Error checking
+        x, y, z, n = site
+        if not x in range(self.lattice.system_size[0]):
+            raise UserWarning('x-coordinate %s seems to fall outside lattice'
+                              % x)
+        if not y in range(self.lattice.system_size[1]):
+            raise UserWarning('y-coordinate %s seems to fall outside lattice'
+                              % y)
+        if not z in range(self.lattice.system_size[2]):
+            raise UserWarning('z-coordinate %s seems to fall outside lattice'
+                              % z)
+        if not n in range(1, self.lattice.spuck + 1):
+            raise UserWarning('n-coordinate %s seems to fall outside lattice'
+                              % n)
+
         old_species = self.lattice.get_species(site)
         self.lattice.replace_species(site, old_species, new_species)
 
@@ -451,8 +684,9 @@ class KMC_Model(multiprocessing.Process):
 
         Examples ::
 
-            model.put([0,0,0,model.lattice.lattice_bridge], model.proclist.co ])
-            # puts a CO molecule at the `bridge` site of the lower left unit cell
+            model.put([0,0,0,model.lattice.site], model.proclist.co ])
+            # puts a CO molecule at the `bridge` site
+            # of the lower left unit cell
 
         """
 
@@ -541,10 +775,22 @@ class KMC_Model(multiprocessing.Process):
         for x in range(self.lattice.system_size[0]):
             for y in range(self.lattice.system_size[1]):
                 for z in range(self.lattice.system_size[2]):
-                    for n in range(self.lattice.spuck):
-                        site_name = self.settings.site_names[n].lower()
-                        eval('self.proclist.touchup_%s([%i, %i, %i, %i])'
-                            % (site_name, x, y, z, n + 1))
+                    if self.get_backend() == 'lat_int':
+                        eval('self.proclist.touchup_cell([%i, %i, %i, 0])'
+                            % (x, y, z))
+                    else:
+                        for n in range(self.lattice.spuck):
+                            site_name = self.settings.site_names[n].lower()
+                            eval('self.proclist.touchup_%s([%i, %i, %i, %i])'
+                                % (site_name, x, y, z, n + 1))
+        # DEBUGGING, adjust database
+        self.base.update_accum_rate()
+
+    def get_backend(self):
+        if hasattr(self.proclist, 'backend'):
+            return ''.join(self.proclist.backend)
+        else:
+            return 'local_smart'
 
     def xml(self):
         """Returns the XML representation that this model was created from.
@@ -638,9 +884,9 @@ class KMC_Model(multiprocessing.Process):
             if match is None or fnmatch(name, match):
                 if kmc_time:
                     print('%s : %.4e' % (name, self.base.get_procstat(i + 1) /
-                                               self.lattice.system_size.prod() /
-                                               self.base.get_kmc_time() /
-                                               self.base.get_rate(i + 1)))
+                                             self.lattice.system_size.prod() /
+                                             self.base.get_kmc_time() /
+                                             self.base.get_rate(i + 1)))
                 else:
                     print('%s : %.4e' % (name, 0.))
 
@@ -661,6 +907,23 @@ class KMC_Model(multiprocessing.Process):
         for label, ratio in ratios:
             res += ('%s: %s\n' % (label, ratio))
         return res
+
+    def dump_config(self, filename):
+        """Use numpy mechanism to store current configuration in a file.
+        """
+        self._get_configuration().tofile(filename)
+
+    def load_config(self, filename):
+        """Use numpy mechanism to load configuration from a file. User
+        must ensure that size of stored configuration is correct.
+        """
+        x, y, z = self.lattice.system_size
+        spuck = self.lattice.spuck
+        config = np.fromfile(filename)
+        config.shape = (x, y, z, spuck)
+
+        self._set_configuration(config)
+        self._adjust_database()
 
 
 class Model_Parameters(object):
@@ -694,6 +957,14 @@ class Model_Parameters(object):
         res += '# --------------------\n'
         return res
 
+    def names(self, pattern=None):
+        """Return names of paramters that match `pattern'"""
+        names = []
+        for attr in sorted(settings.parameters):
+            if pattern is None or fnmatch(attr, pattern):
+                names.append(attr)
+        return names
+
     def __call__(self, match=None):
         for attr in sorted(settings.parameters):
             if match is None or fnmatch(attr, match):
@@ -702,6 +973,24 @@ class Model_Parameters(object):
 
 
 class Model_Rate_Constants(object):
+    """Holds all rate constants currently associated with the model.
+    To inspect the expression and current settings of it you can just
+    call it as a function with a (glob) pattern that matches
+    the desired processes, e.g. ::
+
+      model.rate_constant('*ads*')
+
+    could print all rate constants for adsorption. Given of course that
+    'ads' is part of the process name. The just get the rate constant
+    for one specific process you can use ::
+
+      model.rate_constant.by_name("<process name>")
+
+    To set rate constants manually use ::
+
+      model.rate_constants.set("<pattern>", <rate-constant (expr.)>)
+
+    """
 
     def __repr__(self):
         """Compact representation of all current rate_constants."""
@@ -724,7 +1013,16 @@ class Model_Rate_Constants(object):
                                                       settings.parameters)
                 print('# %s: %s = %.2e s^{-1}' % (proc, rate_expr, rate_const))
 
+    def names(self, pattern=None):
+        """Return names of processes that match `pattern`."""
+        names = []
+        for i, proc in enumerate(sorted(settings.rate_constants.keys())):
+            if pattern is None or fnmatch(proc, pattern):
+                names.append(proc)
+        return names
+
     def by_name(self, proc):
+        """Return rate constant currently set for `proc`"""
         rate_expr = settings.rate_constants[proc][0]
         return evaluate_rate_expression(rate_expr, settings.parameters)
 
@@ -790,8 +1088,10 @@ def set_rate_constants(parameters=None, print_rates=True):
 
 
 def import_ase():
+    """Wrapper for import ASE."""
     try:
         import ase
+        import ase.visualize
     except:
         print('Please download the ASE from')
         print('https://wiki.fysik.dtu.dk/ase/')
@@ -799,6 +1099,7 @@ def import_ase():
 
 
 def get_tof_names():
+    """Return names turn-over-frequencies (TOF) previously defined in model."""
     tofs = []
     for process, tof_count in settings.tof_count.iteritems():
         for tof in tof_count:

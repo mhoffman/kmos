@@ -56,6 +56,7 @@ public :: add_proc, &
     get_kmc_step, &
     get_kmc_time, &
     set_kmc_time, &
+    set_system_name, &
     get_kmc_time_step, &
     get_nrofsites, &
     get_procstat, &
@@ -72,15 +73,17 @@ public :: add_proc, &
     reset_site, &
     save_system, &
     set_rate_const, &
+    set_null_species, &
+    get_null_species, &
     update_accum_rate, &
     update_clocks
 
 
 ! Public constants
-integer(kind=iint), parameter :: null_species = -1
+integer(kind=iint) :: null_species = -1
 
 !---- Allocatable, module wide, variables
-integer(kind=iint), dimension(:,:,:), allocatable :: avail_sites
+integer(kind=iint), dimension(:,:,:), allocatable, public :: avail_sites
 !****v* base/avail_sites
 ! FUNCTION
 !   Main book-keeping array that stores for each process the sites
@@ -745,7 +748,7 @@ end subroutine deallocate_system
 pure function get_system_name()
     !****f* base/get_system_name
     ! FUNCTION
-    !    Returns the systems name, that was specified with base/allocate_system
+    !    Return the systems name, that was specified with base/allocate_system
     !
     ! ARGUMENTS
     !
@@ -756,6 +759,23 @@ pure function get_system_name()
 
     get_system_name = system_name
 end function get_system_name
+
+
+subroutine set_system_name(input_system_name)
+    !****f* base/set_system_name
+    ! FUNCTION
+    !    Set the systems name. Useful in conjunction with base.save_system
+    !    to save *.reload files under a different name than the default one.
+    !
+    ! ARGUMENTS
+    !
+    !    * ``system_name`` Readable string of type character(len=200).
+    !******
+    character(len=200), intent(in) :: input_system_name
+
+    system_name = input_system_name
+
+end subroutine set_system_name
 
 
 subroutine set_kmc_time(new_kmc_time)
@@ -1113,7 +1133,15 @@ subroutine replace_species(site, old_species, new_species)
         print '(a)', "model = KMC_Model(banner=False, print_rates=False)"
         print '(a,i2,a,i2,a,i2,a,i10,a,i10,a)', &
         "model.post_mortem(err_code=(",old_species,", ",new_species, ", ",  lattice(site), ", ", site, ", ", kmc_step, "))"
-        print '(a)', "model.view()"
+        print '(a)', "model.show()"
+        print '(a)', "--"
+        print '(a)', "or in a command line"
+        print '(a)', "--"
+        print '(a)', "kmos run"
+        print '(a,i2,a,i2,a,i2,a,i10,a,i10,a)', &
+        "model.post_mortem(err_code=(",old_species,", ",new_species, ", ",  lattice(site), ", ", site, ", ", kmc_step, "))"
+        print '(a)', "model.show()"
+
 
         stop
     endif
@@ -1251,5 +1279,20 @@ subroutine assertion_fail(a, r)
     stop
 
 end subroutine assertion_fail
+
+subroutine set_null_species(input_null_species)
+    integer(kind=iint), intent(in) :: input_null_species
+
+    null_species = input_null_species
+
+end subroutine set_null_species
+
+subroutine get_null_species(output_null_species)
+    integer(kind=iint), intent(out) :: output_null_species
+
+    output_null_species = null_species
+
+end subroutine get_null_species
+
 
 end module base
