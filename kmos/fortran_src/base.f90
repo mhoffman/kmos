@@ -130,10 +130,10 @@ real(kind=rdouble), dimension(:), allocatable :: integ_rates
 !****v* base/integ_rates
 ! FUNCTION
 !   Stores the time-integrated rates (non-normalized to surface area)
-!   Used to determine reaction rates, i.e. average number of reactions 
+!   Used to determine reaction rates, i.e. average number of reactions
 !   per unit surface and time.
-!   Let :math:`\mathbf{a}` the integrated rates, :math:`\mathbf{c}` be the 
-!   rate constants, :math:`\mathbf{n}_i` the number of available sites 
+!   Let :math:`\mathbf{a}` the integrated rates, :math:`\mathbf{c}` be the
+!   rate constants, :math:`\mathbf{n}_i` the number of available sites
 !   during kMC-time interval i,  :math: `\{\Delta t_i\}` the corresponding
 !   timesteps then :math:`a_{i}(t)` at the time :math: `t=\sum_{i=1}\Delta t_i`
 !   is calculated according to :math:`a_{i}(t)=\sum_{i=1}} c_{i} n_{i}\Delta t_i`.
@@ -635,7 +635,7 @@ subroutine update_integ_rate()
 
     integer(kind=iint) :: i
 
-    
+
     do i = 1, nr_of_proc
         integ_rates(i)=integ_rates(i)+nr_of_sites(i)*rates(i)*kmc_time_step
     enddo
