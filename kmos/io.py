@@ -523,17 +523,15 @@ class ProcListWriter():
 
         out.write('\n\ncontains\n\n')
 
-        # do n kmc steps
-        # order changed by S. matera 09/28/2012: 
-        # first update clock
-        #   then configuration sampling step
-        # last execute process
         out.write('subroutine do_kmc_steps(n)\n\n'
                   '!****f* proclist/do_kmc_steps\n'
                   '! FUNCTION\n'
                   '!    Performs ``n`` kMC step.\n'
                   '!    If one has to run many steps without evaluation\n'
                   '!    do_kmc_steps might perform a little better.\n'
+                  '!      first update clock\n'
+                  '!      then configuration sampling step\n'
+                  '!      last execute process\n'
                   '!\n'
                   '! ARGUMENTS\n'
                   '!\n'
@@ -562,16 +560,13 @@ class ProcListWriter():
                   '    enddo\n\n'
                   'end subroutine do_kmc_steps\n\n')
 
-        # do exactly one kmc step
-        # order changed by S. matera 09/28/2012: 
-        # first update clock
-        #   then configuration sampling step
-        # last execute process
- 
         out.write('subroutine do_kmc_step()\n\n'
                   '!****f* proclist/do_kmc_step\n'
                   '! FUNCTION\n'
                   '!    Performs exactly one kMC step.\n'
+                  '!      first update clock\n'
+                  '!      then configuration sampling step\n'
+                  '!      last execute process\n'
                   '!\n'
                   '! ARGUMENTS\n'
                   '!\n'
@@ -798,17 +793,17 @@ class ProcListWriter():
 #    def write_proclist_integrate_TOF(self, data, out):
 #        # calculates the total rates (not normalized to surface area) for predefined TOFs
 #        # in one time step. Used for sampling the TOFs by time integration instead
-#        # of the common counting. 
+#        # of the common counting.
 #        list_proc = [(i+1, proc.name, proc.tof_count ) for i, proc in enumerate(sorted(pt.get_processes(), key=lambda x: x.name)) if proc.tof_count]
 #        tof_count_names = []
 #        for item in list_proc:
 #            tof_count_names.extend(eval(item[2]).keys())
-#        
+#
 #        tof_names=list(set(tof_count_names))
 #        j=0
 #        for item in tof_names:
 #            tof_list[j]=[(i+1, proc.name, proc.tof_count ) for i, proc in enumerate(sorted(pt.get_processes(), key=lambda x: x.name)) if name in proc.tof_count ]
-#            
+#
 #      !!! not necessary anymore !!!
 #
 ##################################################################
