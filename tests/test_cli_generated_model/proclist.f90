@@ -29,6 +29,7 @@ module proclist
 use kind_values
 use base, only: &
     update_accum_rate, &
+    update_integ_rate, &
     determine_procsite, &
     update_clocks, &
     avail_sites, &
@@ -89,6 +90,9 @@ subroutine do_kmc_steps(n)
 !    Performs ``n`` kMC step.
 !    If one has to run many steps without evaluation
 !    do_kmc_steps might perform a little better.
+!      first update clock
+!      then configuration sampling step
+!      last execute process
 !
 ! ARGUMENTS
 !
@@ -106,6 +110,7 @@ subroutine do_kmc_steps(n)
     call update_accum_rate
     call update_clocks(ran_time)
 
+    call update_integ_rate
     call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)
     call run_proc_nr(proc_nr, nr_site)
     enddo
@@ -117,6 +122,9 @@ subroutine do_kmc_step()
 !****f* proclist/do_kmc_step
 ! FUNCTION
 !    Performs exactly one kMC step.
+!      first update clock
+!      then configuration sampling step
+!      last execute process
 !
 ! ARGUMENTS
 !
@@ -131,6 +139,7 @@ subroutine do_kmc_step()
     call update_accum_rate
     call update_clocks(ran_time)
 
+    call update_integ_rate
     call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)
     call run_proc_nr(proc_nr, nr_site)
 end subroutine do_kmc_step
