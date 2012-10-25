@@ -195,7 +195,8 @@ class KMC_Model(multiprocessing.Process):
         set_rate_constants(settings.parameters, self.print_rates)
         self.base.update_accum_rate()
         # S. matera 09/25/2012
-        self.base.update_integ_rate()
+        if hasattr(self.base, 'update_integ_rate'):
+            self.base.update_integ_rate()
 
     def __repr__(self):
         """Print short summary of current parameters and rate
@@ -439,9 +440,10 @@ class KMC_Model(multiprocessing.Process):
         for i in range(proclist.nr_of_proc):
             atoms.procstat[i] = base.get_procstat(i + 1)
         # S. Matera 09/25/2012
-        atoms.integ_rates = np.zeros((proclist.nr_of_proc,))
-        for i in range(proclist.nr_of_proc):
-                atoms.integ_rates[i]=base.get_integ_rate(i+1)
+        if hasattr(self.base, 'get_integ_rate'):
+            atoms.integ_rates = np.zeros((proclist.nr_of_proc,))
+            for i in range(proclist.nr_of_proc):
+                    atoms.integ_rates[i]=base.get_integ_rate(i+1)
         # S. Matera 09/25/2012
         delta_t = (atoms.kmc_time - self.time)
         size = self.size ** lattice.model_dimension
@@ -457,8 +459,9 @@ class KMC_Model(multiprocessing.Process):
             atoms.tof_data = np.dot(self.tof_matrix,
                             (atoms.procstat - self.procstat) / delta_t / size)
             # S. Matera 09/25/2012
-            atoms.tof_integ = np.dot(self.tof_matrix,
-                            (atoms.integ_rates - self.integ_rates ) / delta_t / size)
+            if hasattr(self.base, 'get_integ_rate'):
+                atoms.tof_integ = np.dot(self.tof_matrix,
+                                (atoms.integ_rates - self.integ_rates ) / delta_t / size)
             # S. Matera 09/25/2012
 
         atoms.delta_t = delta_t
@@ -466,7 +469,8 @@ class KMC_Model(multiprocessing.Process):
         # update trackers for next call
         self.procstat[:] = atoms.procstat
         # S. Matera 09/25/2012
-        self.integ_rates[:]=atoms.integ_rates
+        if hasattr(self.base, 'get_integ_rate'):
+            self.integ_rates[:]=atoms.integ_rates
         # S. Matera 09/25/2012
         self.time = atoms.kmc_time
 
