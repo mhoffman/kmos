@@ -1255,7 +1255,7 @@ class ProcListWriter():
                           % (lat_int_group, lat_int_group))
             else:
                 out.write('\n    select case(n)\n')
-                for i, proc_name in compression_map.iteritems():
+                for i, proc_name in sorted(compression_map.iteritems()):
                     if proc_name:
                         out.write('    case(%s)\n' % i)
                         out.write('        nli_%s = %s\n' %
