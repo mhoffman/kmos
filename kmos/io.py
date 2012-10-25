@@ -121,7 +121,6 @@ class ProcListWriter():
           '    assertion_fail, &\n'
           '    set_rate_const, &\n'
           '    update_accum_rate, &\n'
-          '    update_integ_rate, &\n'
           '    update_clocks\n\n'
           '\n\nimplicit none\n\n')
 
