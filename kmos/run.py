@@ -156,7 +156,7 @@ class KMC_Model(multiprocessing.Process):
         # prepare procstat
         self.procstat = np.zeros((proclist.nr_of_proc,))
          # prepare integ_rates (S.Matera 09/25/2012)
-        self.integ_rates = np.zeros((proclist.nr_of_proc,))
+        self.integ_rates = np.zeros((proclist.nr_of_proc, ))
         self.time = 0.
 
         self.species_representation = []
@@ -443,7 +443,7 @@ class KMC_Model(multiprocessing.Process):
         if hasattr(self.base, 'get_integ_rate'):
             atoms.integ_rates = np.zeros((proclist.nr_of_proc,))
             for i in range(proclist.nr_of_proc):
-                    atoms.integ_rates[i]=base.get_integ_rate(i+1)
+                    atoms.integ_rates[i] = base.get_integ_rate(i + 1)
         # S. Matera 09/25/2012
         delta_t = (atoms.kmc_time - self.time)
         size = self.size ** lattice.model_dimension
@@ -461,7 +461,8 @@ class KMC_Model(multiprocessing.Process):
             # S. Matera 09/25/2012
             if hasattr(self.base, 'get_integ_rate'):
                 atoms.tof_integ = np.dot(self.tof_matrix,
-                                (atoms.integ_rates - self.integ_rates ) / delta_t / size)
+                                (atoms.integ_rates - self.integ_rates)
+                                / delta_t / size)
             # S. Matera 09/25/2012
 
         atoms.delta_t = delta_t
@@ -470,7 +471,7 @@ class KMC_Model(multiprocessing.Process):
         self.procstat[:] = atoms.procstat
         # S. Matera 09/25/2012
         if hasattr(self.base, 'get_integ_rate'):
-            self.integ_rates[:]=atoms.integ_rates
+            self.integ_rates[:] = atoms.integ_rates
         # S. Matera 09/25/2012
         self.time = atoms.kmc_time
 
@@ -517,7 +518,7 @@ class KMC_Model(multiprocessing.Process):
     def switch_surface_processes_on(self):
         set_rate_constants(settings.parameters, self.print_rates)
 
-    def show_coverages(self):
+    def print_coverages(self):
         """Show coverages (per unit cell) for each species
         and site type for current configurations.
 
@@ -550,7 +551,7 @@ class KMC_Model(multiprocessing.Process):
         print(len(header_line)*'-')
         print('Units: "molecules (or atoms) per unit cell"')
 
-    def show_accum_rate_summation(self, order='-rate'):
+    def print_accum_rate_summation(self, order='-rate'):
         """Shows rate individual processes contribute to the total rate
 
         The optional argument order can be one of: name, rate, rate_constant,
