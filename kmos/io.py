@@ -1196,7 +1196,7 @@ class ProcListWriter():
             # into a contiguous one
             compression_map = {}
             #print("# proc %s" % len(processes))
-            for i, process in enumerate(processes):
+            for i, process in enumerate(sorted(processes)):
                 # calculate lat. int. nr
                 lat_int_nr = 0
                 if len(data.layer_list) > 1:
