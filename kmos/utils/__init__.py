@@ -62,10 +62,15 @@ def write_py(fileobj, images, **kwargs):
     fileobj.write('images = [\n')
 
     for image in images:
+        if hasattr(self.atoms, 'get_chemical_formula'):
+            chemical_formula = image.get_chemical_formula(mode='reduce')
+        else:
+            chemical_formula = image.get_name()
+
         fileobj.write("    Atoms(symbols='%s',\n"
                       "          pbc=np.%s,\n"
                       "          cell=np.array(\n      %s,\n" % (
-            image.get_chemical_formula(mode='reduce'),
+            chemical_formula,
             repr(image.pbc),
             repr(image.cell)[6:]))
 
