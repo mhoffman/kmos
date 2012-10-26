@@ -503,6 +503,18 @@ class KMC_Model(multiprocessing.Process):
 
         [parameters] [TOFs] [occupations] kmc_time kmc_step
 
+        Parameter tof_method allows to switch between two different methods for
+        evaluating turn-over-frequencies. The default method *procstat* evaluates
+        the procstat counter, i.e. simply the number of executed events in the
+        simulated time interval. *integ* will evaluate the number of times the
+        reaction `could` be evaluated in the simulated time interval
+        based on the local configurations and the rate constant.
+
+        Credit for this latter method has to be given to Sebastian Matera for
+        the idea and implementation.
+
+        In each case check carefully that the observable is sampled good enough!
+
         """
 
         # initialize lists for averages
@@ -517,6 +529,8 @@ class KMC_Model(multiprocessing.Process):
             occs.append(list(atoms.occupation.flatten()))
             if tof_method == 'procrates':
                 tofs.append(atoms.tof_data.flatten())
+            elif tof_method == 'integ':
+                tofs.append(atoms.tof_integ.flatten())
             else:
                 raise NotImplementedError('Working on it ..')
 
