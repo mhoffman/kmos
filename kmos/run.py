@@ -85,7 +85,7 @@ class KMC_Model(multiprocessing.Process):
                        print_rates=True,
                        autosend=True,
                        steps_per_frame=50000,
-                       config_cache_file=None):
+                       cache_file=None):
 
         # initialize multiprocessing.Process hooks
         super(KMC_Model, self).__init__()
@@ -105,7 +105,7 @@ class KMC_Model(multiprocessing.Process):
         self.size = int(settings.simulation_size) \
                         if size is None else int(size)
         self.steps_per_frame = steps_per_frame
-        self.config_cache_file = config_cache_file
+        self.cache_file = cache_file
 
         # bind Fortran submodules
         self.base = base
@@ -133,15 +133,10 @@ class KMC_Model(multiprocessing.Process):
 
     def __enter__(self, *args, **kwargs):
         """__enter/exit__ function for with-statement protocol."""
-        if self.config_cache_file is not None:
-            if os.path.exists(self.config_cache_file):
-                self.load_config(self.config_cache_file)
         return self
 
     def __exit__(self, *args, **kwargs):
         """__enter/exit__ function for with-statement protocol."""
-        if self.config_cache_file is not None:
-            self.dump_config(self.config_cache_file)
         self.deallocate()
         return self
 
@@ -206,6 +201,11 @@ class KMC_Model(multiprocessing.Process):
         if hasattr(self.base, 'update_integ_rate'):
             self.base.update_integ_rate()
 
+        # load cached configuration if available
+        if self.cache_file is not None:
+            if os.path.exists(self.cache_file):
+                self.load_config(self.cache_file)
+
     def __repr__(self):
         """Print short summary of current parameters and rate
         constants. It is advisable to include this at the beginning
@@ -261,6 +261,8 @@ class KMC_Model(multiprocessing.Process):
         portable way to control garbage collection.
         """
 
+        if self.cache_file is not None:
+            self.dump_config(self.cache_file)
         lattice.deallocate_system()
 
     def do_steps(self, n=10000):
