@@ -517,6 +517,8 @@ class KMC_Model(multiprocessing.Process):
 
         In each case check carefully that the observable is sampled good enough!
 
+        [EXPERIMENTAL]
+
         """
 
         # initialize lists for averages
