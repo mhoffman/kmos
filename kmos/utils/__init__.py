@@ -62,7 +62,7 @@ def write_py(fileobj, images, **kwargs):
     fileobj.write('images = [\n')
 
     for image in images:
-        if hasattr(self.atoms, 'get_chemical_formula'):
+        if hasattr(image, 'get_chemical_formula'):
             chemical_formula = image.get_chemical_formula(mode='reduce')
         else:
             chemical_formula = image.get_name()
