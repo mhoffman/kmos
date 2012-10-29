@@ -262,7 +262,12 @@ class KMC_Model(multiprocessing.Process):
         """
 
         if self.cache_file is not None:
+            # create directory if necessary
+            dirname = os.path.dirname(self.cache_file)
+            if dirname and not os.path.exists(dirname):
+                os.makedirs(dirname)
             self.dump_config(self.cache_file)
+
         lattice.deallocate_system()
 
     def do_steps(self, n=10000):
