@@ -267,8 +267,7 @@ class KMC_Model(multiprocessing.Process):
 
     def do_steps(self, n=10000):
         """Propagate the model `n` steps."""
-        for _ in xrange(n):
-            proclist.do_kmc_step()
+        proclist.do_kmc_steps(n)
 
     def run(self):
         """Runs the model indefinitely. To control the
@@ -530,6 +529,9 @@ class KMC_Model(multiprocessing.Process):
         for sample in xrange(samples):
             self.do_steps(sample_size)
             atoms = self.get_atoms(geometry=False)
+
+            delta_ts.append(atoms.delta_t)
+
             occs.append(list(atoms.occupation.flatten()))
             if tof_method == 'procrates':
                 tofs.append(atoms.tof_data.flatten())
@@ -538,15 +540,16 @@ class KMC_Model(multiprocessing.Process):
             else:
                 raise NotImplementedError('Working on it ..')
 
-            delta_ts.append(atoms.delta_t)
         # calculate time averages
         occs_mean = np.average(occs, axis=0, weights=delta_ts)
         tof_mean = np.average(tofs, axis=0, weights=delta_ts)
 
+        #return tofs, delta_ts
+
         # write out averages
         outdata = tuple(atoms.params
-                        + list(occs_mean.flatten())
                         + list(tof_mean.flatten())
+                        + list(occs_mean.flatten())
                         + [self.base.get_kmc_time(),
                            self.base.get_kmc_step()])
         return ((' '.join(['%.5e'] * len(outdata)) + '\n') % outdata)
