@@ -135,10 +135,9 @@ class KMC_Model(multiprocessing.Process):
         """__enter/exit__ function for with-statement protocol."""
         return self
 
-    def __exit__(self, *args, **kwargs):
+    def __exit__(self, exc_type, exc_value, exc_tb):
         """__enter/exit__ function for with-statement protocol."""
         self.deallocate()
-        return self
 
     def reset(self):
         self.size = int(settings.simulation_size)
