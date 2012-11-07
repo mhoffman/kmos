@@ -41,6 +41,7 @@ __all__ = ['base', 'lattice', 'proclist', 'KMC_Model']
 
 from copy import deepcopy
 import os
+import sys
 from fnmatch import fnmatch
 import multiprocessing
 import random
@@ -70,6 +71,7 @@ except Exception, e:
     Hint: are you in a directory containing a compiled kMC model?
     """ % e)
 
+INTERACTIVE = hasattr(sys, 'ps1') or hasattr(sys, 'ipcompleter')
 
 class KMC_Model(multiprocessing.Process):
     """API Front-end to initialize and run a kMC model using python bindings.
@@ -673,17 +675,23 @@ class KMC_Model(multiprocessing.Process):
             entries = sorted(entries, key=lambda x: - x[0])
 
         # print
+        res = ''
         total_contribution = 0
-        print('(cumulative)    nrofsites * rate_constant    = rate            [name]')
-        print('-------------------------------------------------------------------------------')
+        res += ('(cumulative)    nrofsites * rate_constant    = rate            [name]\n')
+        res += ('-------------------------------------------------------------------------------\n')
         for entry in entries:
             total_contribution += float(entry[2])
             percent = '(%8.4f %%)' % (total_contribution * 100 / accum_rate)
             entry = '% 12i * % 8.4e s^-1 = %8.4e s^-1 [%s]' % entry
-            print('%s %s' % (percent, entry))
+            res += ('%s %s\n' % (percent, entry))
 
-        print('-------------------------------------------------------------------------------')
-        print('  = total rate = %.8e s^-1' % accum_rate)
+        res += ('-------------------------------------------------------------------------------\n')
+        res += ('  = total rate = %.8e s^-1\n' % accum_rate)
+
+        if INTERACTIVE :
+            print(res)
+        else :
+            return res
 
     def _put(self, site, new_species):
         """
@@ -955,7 +963,10 @@ class KMC_Model(multiprocessing.Process):
         res = ''
         for label, ratio in ratios:
             res += ('%s: %s\n' % (label, ratio))
-        return res
+        if INTERACTIVE :
+            print(res)
+        else:
+            return res
 
     def dump_config(self, filename):
         """Use numpy mechanism to store current configuration in a file.
@@ -1021,13 +1032,16 @@ class Model_Parameters(object):
                 names.append(attr)
         return names
 
-    def __call__(self, match=None):
+    def __call__(self, match=None, interactive=False):
         res = ''
         for attr in sorted(settings.parameters):
             if match is None or fnmatch(attr, match):
                 res += ('# %s = %s\n'
                       % (attr, settings.parameters[attr]['value']))
-        return res
+        if INTERACTIVE :
+            print(res)
+        else :
+            return res
 
 
 class Model_Rate_Constants(object):
@@ -1061,6 +1075,7 @@ class Model_Rate_Constants(object):
                                                   #settings.parameters)
             res += '# %s: %s = %.2e s^{-1}\n' % (proc, rate_expr, rate_const)
         res += '# ------------------\n'
+
         return res
 
     def __call__(self, pattern=None):
@@ -1071,7 +1086,10 @@ class Model_Rate_Constants(object):
                 rate_const = evaluate_rate_expression(rate_expr,
                                                       settings.parameters)
                 res += ('# %s: %s = %.2e s^{-1}\n' % (proc, rate_expr, rate_const))
-        return res
+        if INTERACTIVE :
+            print(res)
+        else:
+            return res
 
     def names(self, pattern=None):
         """Return names of processes that match `pattern`."""
@@ -1095,7 +1113,10 @@ class Model_Rate_Constants(object):
                                                   settings.parameters)
             res += '# %s: %.2e s^{-1} = %s\n' % (proc, rate_const, rate_expr)
         res += '# ------------------\n'
-        return res
+        if INTERACTIVE:
+            print(res)
+        else:
+            return res
 
     def set(self, pattern, rate_constant, parameters=None):
         """Set rate constants. Pattern can be a glob pattern,
