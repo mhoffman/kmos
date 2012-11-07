@@ -1000,11 +1000,18 @@ class Model_Parameters(object):
             self.__dict__[attr] = value
 
     def __repr__(self):
-        res = '# kMC model parameters (%i)\n' % len(settings.parameters)
+        fixed_parameters = dict((name, param) for name, param in settings.parameters.items() if not param['adjustable'])
+        res = '# kMC model parameters (%i, fixed %i)\n' % (len(settings.parameters), len(fixed_parameters))
         res += '# --------------------\n'
         for attr in sorted(settings.parameters):
-            res += ('# %s = %s\n' % (attr, settings.parameters[attr]['value']))
+            res += ('# %s = %s' % (attr, settings.parameters[attr]['value']))
+            if settings.parameters[attr]['adjustable'] :
+                res += '  # *\n'
+            else:
+                res += '\n'
         res += '# --------------------\n'
+        if not len(fixed_parameters) == len(settings.parameters):
+            res += '# * adjustable parameters\n'
         return res
 
     def names(self, pattern=None):
@@ -1016,10 +1023,12 @@ class Model_Parameters(object):
         return names
 
     def __call__(self, match=None):
+        res = ''
         for attr in sorted(settings.parameters):
             if match is None or fnmatch(attr, match):
-                print('# %s = %s'
+                res += ('# %s = %s\n'
                       % (attr, settings.parameters[attr]['value']))
+        return res
 
 
 class Model_Rate_Constants(object):
@@ -1056,12 +1065,14 @@ class Model_Rate_Constants(object):
         return res
 
     def __call__(self, pattern=None):
+        res = ''
         for i, proc in enumerate(sorted(settings.rate_constants.keys())):
             if pattern is None or fnmatch(proc, pattern):
                 rate_expr = settings.rate_constants[proc][0]
                 rate_const = evaluate_rate_expression(rate_expr,
                                                       settings.parameters)
-                print('# %s: %s = %.2e s^{-1}' % (proc, rate_expr, rate_const))
+                res += ('# %s: %s = %.2e s^{-1}\n' % (proc, rate_expr, rate_const))
+        return res
 
     def names(self, pattern=None):
         """Return names of processes that match `pattern`."""
