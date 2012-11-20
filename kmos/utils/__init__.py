@@ -420,3 +420,21 @@ def p_grid(p_min, p_max, n):
     grid = logspace(p_minlog, p_maxlog, n)
 
     return grid
+
+def timeit(func):
+    """
+    Generic timing decorator
+
+    To stop time for function call f
+    just ::
+        from kmos.utils import timeit
+        @timeit
+        def f():
+            ...
+
+     """
+    def wrapper(*args, **kwargs):
+        time0 = time()
+        func(*args, **kwargs)
+        print('Executing %s took %.3f s' % (func.__name__, time()-time0))
+    return wrapper
