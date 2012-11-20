@@ -2880,7 +2880,7 @@ pure function nli_destruct9(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
 
     select case(n)
-    case(438)
+    case(252)
         nli_destruct9 = destruct9
     case default
         nli_destruct9 = 0
@@ -2903,7 +2903,7 @@ pure function nli_destruct8(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
 
     select case(n)
-    case(443)
+    case(262)
         nli_destruct8 = destruct8
     case default
         nli_destruct8 = 0
@@ -2924,7 +2924,7 @@ pure function nli_o_COdif_h1h2up(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_hollow2/))*nr_of_species**1
 
     select case(n)
-    case(17)
+    case(10)
         nli_o_COdif_h1h2up = o_COdif_h1h2up
     case default
         nli_o_COdif_h1h2up = 0
@@ -2947,7 +2947,7 @@ pure function nli_destruct3(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
 
     select case(n)
-    case(343)
+    case(62)
         nli_destruct3 = destruct3
     case default
         nli_destruct3 = 0
@@ -2970,7 +2970,7 @@ pure function nli_destruct2(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
 
     select case(n)
-    case(463)
+    case(302)
         nli_destruct2 = destruct2
     case default
         nli_destruct2 = 0
@@ -2993,7 +2993,7 @@ pure function nli_destruct1(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
 
     select case(n)
-    case(468)
+    case(312)
         nli_destruct1 = destruct1
     case default
         nli_destruct1 = 0
@@ -3016,7 +3016,7 @@ pure function nli_destruct7(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
 
     select case(n)
-    case(337)
+    case(50)
         nli_destruct7 = destruct7
     case default
         nli_destruct7 = 0
@@ -3039,7 +3039,7 @@ pure function nli_destruct6(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
 
     select case(n)
-    case(342)
+    case(60)
         nli_destruct6 = destruct6
     case default
         nli_destruct6 = 0
@@ -3062,7 +3062,7 @@ pure function nli_destruct5(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
 
     select case(n)
-    case(462)
+    case(300)
         nli_destruct5 = destruct5
     case default
         nli_destruct5 = 0
@@ -3085,7 +3085,7 @@ pure function nli_destruct4(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
 
     select case(n)
-    case(467)
+    case(310)
         nli_destruct4 = destruct4
     case default
         nli_destruct4 = 0
@@ -3105,7 +3105,7 @@ pure function nli_m_COads_b10(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b10/))*nr_of_species**0
 
     select case(n)
-    case(3)
+    case(2)
         nli_m_COads_b10 = m_COads_b10
     case default
         nli_m_COads_b10 = 0
@@ -3125,7 +3125,7 @@ pure function nli_m_COdes_b9(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b9/))*nr_of_species**0
 
     select case(n)
-    case(2)
+    case(0)
         nli_m_COdes_b9 = m_COdes_b9
     case default
         nli_m_COdes_b9 = 0
@@ -3145,7 +3145,7 @@ pure function nli_m_COdes_b8(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b8/))*nr_of_species**0
 
     select case(n)
-    case(2)
+    case(0)
         nli_m_COdes_b8 = m_COdes_b8
     case default
         nli_m_COdes_b8 = 0
@@ -3165,7 +3165,7 @@ pure function nli_o_COads_hollow2(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_hollow2/))*nr_of_species**0
 
     select case(n)
-    case(3)
+    case(2)
         nli_o_COads_hollow2 = o_COads_hollow2
     case default
         nli_o_COads_hollow2 = 0
@@ -3185,7 +3185,7 @@ pure function nli_m_COdes_b5(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b5/))*nr_of_species**0
 
     select case(n)
-    case(2)
+    case(0)
         nli_m_COdes_b5 = m_COdes_b5
     case default
         nli_m_COdes_b5 = 0
@@ -3205,7 +3205,7 @@ pure function nli_m_COdes_b4(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b4/))*nr_of_species**0
 
     select case(n)
-    case(2)
+    case(0)
         nli_m_COdes_b4 = m_COdes_b4
     case default
         nli_m_COdes_b4 = 0
@@ -3225,7 +3225,7 @@ pure function nli_m_COdes_b7(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b7/))*nr_of_species**0
 
     select case(n)
-    case(2)
+    case(0)
         nli_m_COdes_b7 = m_COdes_b7
     case default
         nli_m_COdes_b7 = 0
@@ -3245,7 +3245,7 @@ pure function nli_m_COdes_b6(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b6/))*nr_of_species**0
 
     select case(n)
-    case(2)
+    case(0)
         nli_m_COdes_b6 = m_COdes_b6
     case default
         nli_m_COdes_b6 = 0
@@ -3265,7 +3265,7 @@ pure function nli_m_COdes_b1(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b1/))*nr_of_species**0
 
     select case(n)
-    case(2)
+    case(0)
         nli_m_COdes_b1 = m_COdes_b1
     case default
         nli_m_COdes_b1 = 0
@@ -3285,7 +3285,7 @@ pure function nli_o_COads_hollow1(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_hollow1/))*nr_of_species**0
 
     select case(n)
-    case(3)
+    case(2)
         nli_o_COads_hollow1 = o_COads_hollow1
     case default
         nli_o_COads_hollow1 = 0
@@ -3305,7 +3305,7 @@ pure function nli_m_COdes_b3(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b3/))*nr_of_species**0
 
     select case(n)
-    case(2)
+    case(0)
         nli_m_COdes_b3 = m_COdes_b3
     case default
         nli_m_COdes_b3 = 0
@@ -3325,7 +3325,7 @@ pure function nli_m_COdes_b2(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b2/))*nr_of_species**0
 
     select case(n)
-    case(2)
+    case(0)
         nli_m_COdes_b2 = m_COdes_b2
     case default
         nli_m_COdes_b2 = 0
@@ -3345,7 +3345,7 @@ pure function nli_m_COads_b3(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b3/))*nr_of_species**0
 
     select case(n)
-    case(3)
+    case(2)
         nli_m_COads_b3 = m_COads_b3
     case default
         nli_m_COads_b3 = 0
@@ -3365,7 +3365,7 @@ pure function nli_m_COads_b2(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b2/))*nr_of_species**0
 
     select case(n)
-    case(3)
+    case(2)
         nli_m_COads_b2 = m_COads_b2
     case default
         nli_m_COads_b2 = 0
@@ -3385,7 +3385,7 @@ pure function nli_m_COads_b1(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b1/))*nr_of_species**0
 
     select case(n)
-    case(3)
+    case(2)
         nli_m_COads_b1 = m_COads_b1
     case default
         nli_m_COads_b1 = 0
@@ -3405,7 +3405,7 @@ pure function nli_m_COads_b7(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b7/))*nr_of_species**0
 
     select case(n)
-    case(3)
+    case(2)
         nli_m_COads_b7 = m_COads_b7
     case default
         nli_m_COads_b7 = 0
@@ -3425,7 +3425,7 @@ pure function nli_m_COads_b6(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b6/))*nr_of_species**0
 
     select case(n)
-    case(3)
+    case(2)
         nli_m_COads_b6 = m_COads_b6
     case default
         nli_m_COads_b6 = 0
@@ -3445,7 +3445,7 @@ pure function nli_m_COads_b5(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b5/))*nr_of_species**0
 
     select case(n)
-    case(3)
+    case(2)
         nli_m_COads_b5 = m_COads_b5
     case default
         nli_m_COads_b5 = 0
@@ -3465,7 +3465,7 @@ pure function nli_m_COads_b4(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b4/))*nr_of_species**0
 
     select case(n)
-    case(3)
+    case(2)
         nli_m_COads_b4 = m_COads_b4
     case default
         nli_m_COads_b4 = 0
@@ -3485,7 +3485,7 @@ pure function nli_m_COads_b9(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b9/))*nr_of_species**0
 
     select case(n)
-    case(3)
+    case(2)
         nli_m_COads_b9 = m_COads_b9
     case default
         nli_m_COads_b9 = 0
@@ -3505,7 +3505,7 @@ pure function nli_m_COads_b8(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b8/))*nr_of_species**0
 
     select case(n)
-    case(3)
+    case(2)
         nli_m_COads_b8 = m_COads_b8
     case default
         nli_m_COads_b8 = 0
@@ -3525,7 +3525,7 @@ pure function nli_o_COdes_bridge2(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_bridge2/))*nr_of_species**0
 
     select case(n)
-    case(2)
+    case(0)
         nli_o_COdes_bridge2 = o_COdes_bridge2
     case default
         nli_o_COdes_bridge2 = 0
@@ -3545,7 +3545,7 @@ pure function nli_o_COdes_bridge1(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**0
 
     select case(n)
-    case(2)
+    case(0)
         nli_o_COdes_bridge1 = o_COdes_bridge1
     case default
         nli_o_COdes_bridge1 = 0
@@ -3566,7 +3566,7 @@ pure function nli_o_COdif_h1h2down(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_hollow1/))*nr_of_species**1
 
     select case(n)
-    case(13)
+    case(2)
         nli_o_COdif_h1h2down = o_COdif_h1h2down
     case default
         nli_o_COdif_h1h2down = 0
@@ -3587,7 +3587,7 @@ pure function nli_o_O2des_h2h1(cell)
     n = n + get_species(cell + (/0, 1, 0, PdO_hollow1/))*nr_of_species**1
 
     select case(n)
-    case(6)
+    case(18)
         nli_o_O2des_h2h1 = o_O2des_h2h1
     case default
         nli_o_O2des_h2h1 = 0
@@ -3607,7 +3607,7 @@ pure function nli_o_COdes_hollow1(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_hollow1/))*nr_of_species**0
 
     select case(n)
-    case(2)
+    case(0)
         nli_o_COdes_hollow1 = o_COdes_hollow1
     case default
         nli_o_COdes_hollow1 = 0
@@ -3627,7 +3627,7 @@ pure function nli_o_COdes_hollow2(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_hollow2/))*nr_of_species**0
 
     select case(n)
-    case(2)
+    case(0)
         nli_o_COdes_hollow2 = o_COdes_hollow2
     case default
         nli_o_COdes_hollow2 = 0
@@ -3648,7 +3648,7 @@ pure function nli_o_O2des_h1h2(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_hollow2/))*nr_of_species**1
 
     select case(n)
-    case(6)
+    case(18)
         nli_o_O2des_h1h2 = o_O2des_h1h2
     case default
         nli_o_O2des_h1h2 = 0
@@ -3671,7 +3671,7 @@ pure function nli_destruct11(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
 
     select case(n)
-    case(313)
+    case(2)
         nli_destruct11 = destruct11
     case default
         nli_destruct11 = 0
@@ -3694,7 +3694,7 @@ pure function nli_destruct10(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
 
     select case(n)
-    case(318)
+    case(12)
         nli_destruct10 = destruct10
     case default
         nli_destruct10 = 0
@@ -3718,7 +3718,7 @@ pure function nli_oxidize1(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b9/))*nr_of_species**4
 
     select case(n)
-    case(2293)
+    case(1587)
         nli_oxidize1 = oxidize1
     case default
         nli_oxidize1 = 0
@@ -3739,7 +3739,7 @@ pure function nli_o_O2ads_h2h1(cell)
     n = n + get_species(cell + (/0, 1, 0, PdO_hollow1/))*nr_of_species**1
 
     select case(n)
-    case(18)
+    case(12)
         nli_o_O2ads_h2h1 = o_O2ads_h2h1
     case default
         nli_o_O2ads_h2h1 = 0
@@ -3759,7 +3759,7 @@ pure function nli_o_COads_bridge1(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**0
 
     select case(n)
-    case(3)
+    case(2)
         nli_o_COads_bridge1 = o_COads_bridge1
     case default
         nli_o_COads_bridge1 = 0
@@ -3779,7 +3779,7 @@ pure function nli_m_COdes_b10(cell)
     n = n + get_species(cell + (/0, 0, 0, Pd100_b10/))*nr_of_species**0
 
     select case(n)
-    case(2)
+    case(0)
         nli_m_COdes_b10 = m_COdes_b10
     case default
         nli_m_COdes_b10 = 0
@@ -3799,7 +3799,7 @@ pure function nli_o_COads_bridge2(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_bridge2/))*nr_of_species**0
 
     select case(n)
-    case(3)
+    case(2)
         nli_o_COads_bridge2 = o_COads_bridge2
     case default
         nli_o_COads_bridge2 = 0
@@ -3820,7 +3820,7 @@ pure function nli_o_O2ads_h1h2(cell)
     n = n + get_species(cell + (/0, 0, 0, PdO_hollow2/))*nr_of_species**1
 
     select case(n)
-    case(18)
+    case(12)
         nli_o_O2ads_h1h2 = o_O2ads_h1h2
     case default
         nli_o_O2ads_h1h2 = 0
