@@ -1553,6 +1553,8 @@ class ProcListWriter():
         out.write('       e.g. ::\n')
         out.write('    model.put([0,0,0,model.lattice.default_a], model.proclist.species_a)\n')
         out.write('    """\n')
+        out.write('    #from setup_model import setup_model\n')
+        out.write('    #setup_model(model)\n')
         out.write('    pass\n\n')
 
         # Parameters
