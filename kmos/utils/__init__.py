@@ -375,9 +375,9 @@ def build(options):
     if os.name == 'nt':
         call.append('%s' % ccompiler)
     extra_flags = extra_flags.get(options.fcompiler, '')
-    if options.debug :
+    if options.debug:
         extra_flags += ' -DDEBUG'
-    call.append('--f90flags="%s"' % extra_flags )
+    call.append('--f90flags="%s"' % extra_flags)
     call.append('-m')
     call.append(module_name)
     call += src_files.split()
@@ -422,6 +422,7 @@ def p_grid(p_min, p_max, n):
 
     return grid
 
+
 def timeit(func):
     """
     Generic timing decorator
@@ -437,5 +438,23 @@ def timeit(func):
     def wrapper(*args, **kwargs):
         time0 = time()
         func(*args, **kwargs)
-        print('Executing %s took %.3f s' % (func.__name__, time()-time0))
+        print('Executing %s took %.3f s' % (func.__name__, time() - time0))
     return wrapper
+
+
+def col_str2tuple(hex_string):
+    """Convenience function that turns a HTML type color
+    into a tuple of three float between 0 and 1
+    """
+    color = gtk.gdk.Color(hex_string)
+    return (color.red_float, color.green_float, color.blue_float)
+
+
+def jmolcolor_in_hex(i):
+    """Return a given jmol color in hexadecimal representation."""
+    from ase.data.colors import jmol_colors
+    color = [int(x) for x in 255 * jmol_colors[i]]
+    r, g, b = color
+    a = 255
+    color = (r << 24) | (g << 16) | (b << 8) | a
+    return color

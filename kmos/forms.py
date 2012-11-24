@@ -40,7 +40,11 @@ from kiwi.ui.objectlist import Column
 
 # own modules
 from kmos.config import GLADEFILE
-from kmos.utils import CorrectlyNamed, get_ase_constructor
+from kmos.utils import CorrectlyNamed, \
+                       get_ase_constructor, \
+                       col_str2tuple, \
+                       jmolcolor_in_hex
+
 from kmos.types import ProcessFormSite, Process, OutputItem, Coord, \
                        ConditionAction, Site
 
@@ -56,24 +60,6 @@ from ase.data import covalent_radii
 from kmos.pygtkcanvas.canvas import Canvas
 from kmos.pygtkcanvas.canvaslayer import CanvasLayer
 from kmos.pygtkcanvas.canvasitem import *
-
-
-def col_str2tuple(hex_string):
-    """Convenience function that turns a HTML type color
-    into a tuple of three float between 0 and 1
-    """
-    color = gtk.gdk.Color(hex_string)
-    return (color.red_float, color.green_float, color.blue_float)
-
-
-def jmolcolor_in_hex(i):
-    """Return a given jmol color in hexadecimal representation."""
-    from ase.data.colors import jmol_colors
-    color = [int(x) for x in 255 * jmol_colors[i]]
-    r, g, b = color
-    a = 255
-    color = (r << 24) | (g << 16) | (b << 8) | a
-    return color
 
 
 class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
