@@ -107,8 +107,13 @@ usage['rebuild'] = """kmos rebuild
             Turn on assertion statements in F90 code
                     """
 
+usage['shell'] = """kmos shell
+    Open an interactive shell and create a KMC_Model in it
+               run == shell
+               """
 usage['run'] = """kmos run
     Open an interactive shell and create a KMC_Model in it
+               run == shell
                """
 
 usage['view'] = """kmos view
@@ -364,7 +369,7 @@ def main(args=None):
         os.remove(tempfile)
         model.deallocate()
 
-    elif args[0] == 'run':
+    elif args[0] in ['run', 'shell']:
         from sys import path
         path.append(os.path.abspath(os.curdir))
         from kmos.run import KMC_Model
