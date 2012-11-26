@@ -156,7 +156,7 @@ class KMC_Model(multiprocessing.Process):
         self.deallocate()
 
     def reset(self):
-        #self.size = int(settings.simulation_size)
+        self.size = np.array(self.size)
         proclist.init(self.size,
             self.system_name,
             lattice.default_layer,
@@ -376,10 +376,10 @@ class KMC_Model(multiprocessing.Process):
                   **kwargs)
             self.do_steps(skip)
 
-    def show(self):
+    def show(self, *args, **kwargs):
         """Visualize the current configuration of the model using ASE ag."""
         ase = import_ase()
-        ase.visualize.view(self.get_atoms())
+        ase.visualize.view(self.get_atoms(), *args, **kwargs)
 
     def view(self):
         """Start current model in live view mode."""
