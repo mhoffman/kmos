@@ -105,8 +105,21 @@ class KMC_Model(multiprocessing.Process):
         self.print_rates = print_rates
         self.parameters = Model_Parameters(self.print_rates)
         self.rate_constants = Model_Rate_Constants()
-        self.size = int(settings.simulation_size) \
-                        if size is None else int(size)
+
+        if size is None:
+            size = settings.simulation_size
+        if isinstance(size, int) :
+            print(size, lattice.model_dimension, [size]*int(lattice.model_dimension))
+            self.size = np.array([size]*int(lattice.model_dimension))
+        elif isinstance(size, (tuple, list)) :
+            if not len(size) == lattice.model_dimension :
+                raise UserWarning(('You requested a size %s '
+                                   '(i. e. %s dimensions),\n '
+                                   'but the compiled model'
+                                   'has %s dimensions!')
+                                   % (list(size), len(size), lattice.model_dimension))
+            self.size = np.array(size)
+
         self.steps_per_frame = steps_per_frame
         self.cache_file = cache_file
 
@@ -143,8 +156,8 @@ class KMC_Model(multiprocessing.Process):
         self.deallocate()
 
     def reset(self):
-        self.size = int(settings.simulation_size)
-        proclist.init((self.size,) * int(lattice.model_dimension),
+        #self.size = int(settings.simulation_size)
+        proclist.init(self.size,
             self.system_name,
             lattice.default_layer,
             not self.banner)
@@ -463,7 +476,7 @@ class KMC_Model(multiprocessing.Process):
                     atoms.integ_rates[i] = base.get_integ_rate(i + 1)
         # S. Matera 09/25/2012
         delta_t = (atoms.kmc_time - self.time)
-        size = self.size ** lattice.model_dimension
+        size = self.size.prod()
         if delta_t == 0. and atoms.kmc_time > 0:
             print(
                 "Warning: numerical precision too low, to resolve time-steps")
