@@ -442,10 +442,25 @@ def timeit(func):
     return wrapper
 
 
+def col_tuple2str(tup):
+    """Convenience function that turns a HTML type color
+    into a tuple of three float between 0 and 1
+    """
+    r, g, b = tup
+    b *= 255
+    res = '#'
+    res += hex(int(255 * r))[-2:].replace('x', '0')
+    res += hex(int(255 * g))[-2:].replace('x', '0')
+    res += hex(int(255 * b))[-2:].replace('x', '0')
+
+    return res
+
+
 def col_str2tuple(hex_string):
     """Convenience function that turns a HTML type color
     into a tuple of three float between 0 and 1
     """
+    import gtk
     color = gtk.gdk.Color(hex_string)
     return (color.red_float, color.green_float, color.blue_float)
 

@@ -695,7 +695,7 @@ class KMC_Model(multiprocessing.Process):
         else :
             return res
 
-    def _put(self, site, new_species):
+    def _put(self, site, new_species, reduce=False):
         """
         Works exactly like put, but without updating the database of
         available processes. This is faster for when one does a lot updates
@@ -714,8 +714,12 @@ class KMC_Model(multiprocessing.Process):
             model._adjust_database() # Important !
 
         """
-        # Error checking
         x, y, z, n = site
+        if reduce:
+            x, y, z = (x, y, z) % self.lattice.system_size
+            site = np.array([x, y, z, n])
+
+        # Error checking
         if not x in range(self.lattice.system_size[0]):
             raise UserWarning('x-coordinate %s seems to fall outside lattice'
                               % x)
