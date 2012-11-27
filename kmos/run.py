@@ -109,7 +109,6 @@ class KMC_Model(multiprocessing.Process):
         if size is None:
             size = settings.simulation_size
         if isinstance(size, int) :
-            print(size, lattice.model_dimension, [size]*int(lattice.model_dimension))
             self.size = np.array([size]*int(lattice.model_dimension))
         elif isinstance(size, (tuple, list)) :
             if not len(size) == lattice.model_dimension :
