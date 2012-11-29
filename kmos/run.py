@@ -544,6 +544,8 @@ class KMC_Model(multiprocessing.Process):
         occs = []
         tofs = []
         delta_ts = []
+        t0 = self.base.get_kmc_time()
+        step0 = self.base.get_kmc_step()
 
         # sample over trajectory
         for sample in xrange(samples):
@@ -563,6 +565,8 @@ class KMC_Model(multiprocessing.Process):
         # calculate time averages
         occs_mean = np.average(occs, axis=0, weights=delta_ts)
         tof_mean = np.average(tofs, axis=0, weights=delta_ts)
+        total_time = self.base.get_kmc_time() - t0
+        total_steps = self.base.get_kmc_step() - step0
 
         #return tofs, delta_ts
 
@@ -570,8 +574,8 @@ class KMC_Model(multiprocessing.Process):
         outdata = tuple(atoms.params
                         + list(tof_mean.flatten())
                         + list(occs_mean.flatten())
-                        + [self.base.get_kmc_time(),
-                           self.base.get_kmc_step()])
+                        + [total_time,
+                           total_steps])
         return ((' '.join(['%.5e'] * len(outdata)) + '\n') % outdata)
 
     def double(self):
