@@ -7,6 +7,8 @@ def setup_model(model):
        e.g. ::
     model.put([0,0,0,model.lattice.default_a], model.proclist.species_a)
     """
+    #from setup_model import setup_model
+    #setup_model(model)
     pass
 
 parameters = {
