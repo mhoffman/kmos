@@ -4,7 +4,6 @@ Functionality
 - make and base.save_system(<seed_name>)
   TODO: make sure .reloading is more sugar-coated,
   e.g. check for correct size of file and document
-- add convenient 'cachefile' mechanism into model constructor/destructor
 - standardize definition of those parameters that are logged
   in the output file (header/data)
 - Explicitly allow for non-orthogonal unit cells in
