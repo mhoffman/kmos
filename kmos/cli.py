@@ -373,9 +373,10 @@ def main(args=None):
         from sys import path
         path.append(os.path.abspath(os.curdir))
         from kmos.run import KMC_Model
+        import numpy as np
 
         model = KMC_Model(print_rates=False)
-        global model
+        global model, np
         sh(banner='Note: model = KMC_Model(print_rates=False)')
         model.deallocate()
 
