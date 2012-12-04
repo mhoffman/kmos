@@ -961,7 +961,9 @@ class ProcListWriter():
                 if action not in true_actions:
                     if not(action.species.startswith('^')
                            or action.species.startswith('$')):
-                        raise UserWarning('Found unmatched action that is not a multi-lattice action: %s' % action)
+                        #raise UserWarning('Found unmatched action that is not a multi-lattice action: %s' % action)
+                        print(('UserWarning: Found unmatched action that is not a multi-lattice action: %s' % action))
+                        # turn exceptions into warning for now
                     else:
                         true_actions.append(action)
 
@@ -1186,6 +1188,9 @@ class ProcListWriter():
                 out.write('function nli_%s(cell)\n'
                           % (lat_int_group))
             else:
+                ## DEBUGGING
+                #out.write('function nli_%s(cell)\n'
+                          #% (lat_int_group))
                 out.write('pure function nli_%s(cell)\n'
                           % (lat_int_group))
             out.write('    integer(kind=iint), dimension(4), intent(in) :: cell\n')
@@ -1246,9 +1251,17 @@ class ProcListWriter():
 
             conditions0 = sorted(process0.condition_list + process0.bystanders,
                                  key=lambda x: x.coord, cmp=cmp_coords)
+            ## DEBUGGING
+            #out.write('print *, "nli_%s"\n' % (process.name))
+
             for i, bystander in enumerate(conditions0):
                 out.write('    n = n + get_species(cell%s)*nr_of_species**%s\n'
                 % (bystander.coord.radd_ff(), i))
+
+                ## DEBUGGING
+                #out.write('print *, "    ", get_species(cell%s), nr_of_species**%s,get_species(cell%s)*nr_of_species**%s, "%s"\n'
+                            #% (bystander.coord.radd_ff(), i, bystander.coord.radd_ff(), i, bystander.coord.radd_ff()))
+            #out.write('print *,"SUM", n')
 
             if USE_ARRAY :
                 out.write('\n    nli_%s = lat_int_index_%s(n)\n'
