@@ -983,12 +983,20 @@ class ProcListWriter():
             for lat_int_group, processes in lat_int_groups.iteritems():
                 p0 = processes[0]
                 same = True
+                # check if conditions are identical
                 if sorted(p0.condition_list, key=lambda x: x.coord, cmp=cmp_coords) \
                    != sorted(process.condition_list, key=lambda x: x.coord, cmp=cmp_coords):
                     same = False
+                # check if actions are identical
                 if sorted(p0.action_list, key=lambda x: x.coord, cmp=cmp_coords) \
                    != sorted(process.action_list, key=lambda x: x.coord, cmp=cmp_coords):
                     same = False
+
+                # check if coords of bystanders are identical
+                if [x.coord for x in sorted(p0.bystanders, key=lambda x: x.coord, cmp=cmp_coords)] \
+                   != [x.coord for x in sorted(process.bystanders, key=lambda x: x.coord, cmp=cmp_coords)]:
+                    same = False
+
                 if same:
                     self._db_print('    %s <- %s\n' % (lat_int_group, process.name))
                     processes.append(process)
