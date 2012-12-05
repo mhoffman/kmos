@@ -5,6 +5,7 @@
 # stdlib imports
 import os
 import re
+from fnmatch import fnmatch
 
 # numpy
 import numpy as np
@@ -290,6 +291,7 @@ class Project(object):
             for condition in process.condition_list:
                 condition_elem = ET.SubElement(process_elem, 'condition')
                 condition_elem.set('species', condition.species)
+                condition_elem.set('implicit', str(condition.implicit))
                 condition_elem.set('coord_layer', condition.coord.layer)
                 condition_elem.set('coord_name', condition.coord.name)
                 condition_elem.set('coord_offset',
@@ -463,6 +465,7 @@ class Project(object):
                         for sub in process:
                             if sub.tag == 'action' or sub.tag == 'condition':
                                 species = sub.attrib['species']
+                                implicit = (sub.attrib.get('implicit', '') == 'True')
                                 coord_layer = sub.attrib['coord_layer']
                                 coord_name = sub.attrib['coord_name']
                                 coord_offset = tuple(
@@ -470,9 +473,12 @@ class Project(object):
                                     sub.attrib['coord_offset'].split()])
                                 coord = Coord(layer=coord_layer,
                                               name=coord_name,
-                                              offset=coord_offset)
-                                condition_action = ConditionAction(
-                                    species=species, coord=coord)
+                                              offset=coord_offset,
+                                              )
+                                condition_action = \
+                                    ConditionAction(species=species,
+                                                    coord=coord,
+                                                    implicit=implicit)
                                 if sub.tag == 'action':
                                     process_elem.add_action(condition_action)
                                 elif sub.tag == 'condition':
@@ -730,6 +736,9 @@ class ParameterList(FixedObject, list):
     """A list of parameters
     """
     attributes = ['name']
+
+    def __call__(self, match):
+        return [x for x in self if fnmatch(x.name, match)]
 
     def __init__(self, **kwargs):
         self.name = 'Parameters'
@@ -1112,6 +1121,9 @@ class SpeciesList(FixedObject, list):
     """
     attributes = ['default_species', 'name']
 
+    def __call__(self, match):
+        return [x for x in self if fnmatch(x.name, match)]
+
     def __init__(self, **kwargs):
         kwargs['name'] = 'Species'
         FixedObject.__init__(self, **kwargs)
@@ -1121,6 +1133,9 @@ class ProcessList(FixedObject, list):
     """A list of processes
     """
     attributes = ['name']
+
+    def __call__(self, match):
+        return [x for x in self if fnmatch(x.name, match)]
 
     def __init__(self, **kwargs):
         self.name = 'Processes'
@@ -1236,8 +1251,10 @@ class ConditionAction(FixedObject):
         return self.__repr__() == other.__repr__()
 
     def __repr__(self):
-        return ("[COND_ACT] Species: %s Coord:%s\n" %
-               (self.species, self.coord))
+        return ("[COND_ACT] Species: %s Coord:%s%s\n" %
+               (self.species,
+                self.coord,
+                ' (implicit)' if self.implicit else ''))
 
     def __hash__(self):
         return self.__repr__()

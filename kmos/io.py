@@ -939,7 +939,8 @@ class ProcListWriter():
             true_conditions = []
             true_actions = []
             bystanders = []
-            for condition in process.condition_list:
+            #for condition in [x for x in process.condition_list if not x.implicit]:
+            for condition in process.condition_list :
                 corresponding_actions = [action for action in actions if condition.coord == action.coord]
 
 
@@ -1054,16 +1055,12 @@ class ProcListWriter():
         out.write('    integer(kind=iint) :: proc_nr\n\n')
         out.write('    site = cell + (/0, 0, 0, 1/)\n')
         out.write('    do proc_nr = 1, nr_of_proc\n')
-        if data.meta.debug > 1:
-            out.write('print *,"PROCLIST/TOUCHUP_CELL/DEL/%s"\n' % lat_int_group.upper())
         out.write('        if(avail_sites(proc_nr, lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then\n')
         out.write('            call del_proc(proc_nr, site)\n')
         out.write('        endif\n')
         out.write('    end do\n\n')
 
         for lat_int_group, process in lat_int_groups.iteritems():
-            if data.meta.debug > 1:
-                out.write('print *,"PROCLIST/TOUCHUP_CELL/ADD/%s"\n' % lat_int_group.upper())
             out.write('    call add_proc(nli_%s(cell), site)\n' % (lat_int_group))
         out.write('end subroutine touchup_cell\n\n')
 
@@ -1183,12 +1180,21 @@ class ProcListWriter():
         #########################################
         for lat_int_loop, (lat_int_group, processes) in enumerate(lat_int_groups.iteritems()):
             process0 = processes[0]
-            conditions0 = process0.condition_list + process0.bystanders
+
+            # put together the bystander conditions and true conditions,
+            # sort them in a unique way and throw out those that are
+            # implicit
+            conditions0 = [y for y in sorted(process0.condition_list + process0.bystanders,
+                                             key=lambda x: x.coord, cmp=cmp_coords)
+                                             if not y.implicit]
+            # DEBUGGING
+            print(process.name, conditions0)
+
             if data.meta.debug > 0:
                 out.write('function nli_%s(cell)\n'
                           % (lat_int_group))
             else:
-                ## DEBUGGING
+                # DEBUGGING
                 #out.write('function nli_%s(cell)\n'
                           #% (lat_int_group))
                 out.write('pure function nli_%s(cell)\n'
@@ -1208,10 +1214,14 @@ class ProcListWriter():
                     nr_of_species = len(data.species_list) + 1
                 else:
                     nr_of_species = len(data.species_list)
-                conditions = process.condition_list + process.bystanders
-                for j, bystander in enumerate(sorted(conditions,
-                                     key=lambda x: x.coord,
-                                     cmp=cmp_coords)):
+                conditions = [y for y in sorted(process.condition_list + process.bystanders,
+                                                key=lambda x: x.coord, cmp=cmp_coords)
+                                                if not y.implicit]
+
+                ## DEBUGGING
+                #print(process.name, conditions)
+
+                for j, bystander in enumerate(conditions):
                     species_nr = [x for (x, species) in
                                   enumerate(sorted(data.species_list))
                                   if species.name == bystander.species][0]
@@ -1249,8 +1259,6 @@ class ProcListWriter():
                 out.write('print *,"PROCLIST/NLI_%s"\n' % lat_int_group.upper())
                 out.write('print *,"    PROCLIST/NLI_%s/CELL", cell\n' % lat_int_group.upper())
 
-            conditions0 = sorted(process0.condition_list + process0.bystanders,
-                                 key=lambda x: x.coord, cmp=cmp_coords)
             ## DEBUGGING
             #out.write('print *, "nli_%s"\n' % (process.name))
 

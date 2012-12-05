@@ -67,6 +67,7 @@
         coord_layer CDATA #REQUIRED
         coord_offset CDATA #REQUIRED
         species CDATA #REQUIRED
+        implicit CDATA #IMPLIED
       >
       <!ELEMENT action EMPTY>
       <!ATTLIST action
