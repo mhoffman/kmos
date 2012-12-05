@@ -1219,9 +1219,9 @@ class ProcListWriter():
                     #print(lat_int_nr, species.name, nr_of_species, j)
                 compression_map[lat_int_nr] = process.name
                 if lat_int_nr > sys.maxint :
-                    print(("Warning: Lateral interaction index is too large to compile."
-                          "          Try to reduce the number of conditions for process %s"
-                          "          or the total number of species.") % process)
+                    print(("Warning: Lateral interaction index is too large to compile.\n"
+                          "          Try to reduce the number of (non-implicit conditions\n"
+                          "          or the total number of species.\n\n%s") % process)
 
 
             # use a threshold of 1./3 for very sparse maps

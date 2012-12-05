@@ -1150,7 +1150,7 @@ class Process(FixedObject):
         self.enabled = kwargs.get('enabled', True)
 
     def __repr__(self):
-        return '[PROCESS] Name:%s Rate: %s\nConditions: %s\nActions: %s' \
+        return '[PROCESS] Name:%s\n     Rate: %s\nConditions: %s\nActions: %s' \
             % (self.name, self.rate_constant,
                self.condition_list, self.action_list)
 
@@ -1226,9 +1226,10 @@ class ConditionAction(FixedObject):
     have the same attributes we use the same class here, and just
     store them in different lists, depending on its role.
     """
-    attributes = ['species', 'coord']
+    attributes = ['species', 'coord', 'implicit']
 
     def __init__(self, **kwargs):
+        kwargs['implicit'] = kwargs.get('implicit', False)
         FixedObject.__init__(self, **kwargs)
 
     def __eq__(self, other):
