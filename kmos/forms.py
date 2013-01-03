@@ -939,6 +939,68 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 o.type = 'action'
                 o.action = elem
 
+    def draw_from_data_goocanvas(self):
+        def toscrn(coord,
+                   screen_size=(500, 500),
+                   scale=20,
+                   offset=(50, 100)):
+            return (scale*coord[0]+offset[0],
+                    screen_size[1] - (scale*coord[1] + offset[1]))
+
+        atoms = self._get_atoms()
+        zoom = 5
+        canvas = goocanvas.Canvas()
+        #self.canvas = canvas
+        root = canvas.get_root_item()
+        canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
+        #canvas.grab_focus()
+        canvas.show()
+        self.process_pad.add(canvas)
+
+        radius = 10
+
+        # draw lattice
+        for i in range(zoom + 1):
+            for _0, _1, _2, _3 in [[i, i, 0, zoom],
+                                   [0, zoom, i, i]]:
+                points = goocanvas.Points([
+                    toscrn(atoms.cell[0]*_0 + atoms.cell[1]*_2),
+                    toscrn(atoms.cell[0]*_1 + atoms.cell[1]*_3),
+                ])
+                goocanvas.Polyline(parent=root,
+                                  points=points,
+                                  stroke_color='black',
+                                  fill_color='white',
+                                  line_width=1.0)
+        # draw sites
+        for x in range(zoom):
+            for y in range(zoom):
+                sites = self.project_tree.get_layers()[0].sites
+                for site in sites:
+                    X, Y = toscrn(x*atoms.cell[0]
+                                  + y*atoms.cell[1]
+                                  + np.inner(atoms.cell.T, site.pos))
+                    o = goocanvas.Ellipse(parent=root,
+                                          center_x=X,
+                                          center_y=Y,
+                                          radius_x=.5 * radius,
+                                          radius_y=.5 * radius,
+                                          stroke_color='black',
+                                          fill_color='white',
+                                          line_width=1.0,)
+
+        # draw reservoir circles
+        for k, species in enumerate(self.project_tree.get_speciess()):
+            color = col_str2tuple(species.color)
+            o = goocanvas.Ellipse(parent=root,
+                           center_x=30 + k * 50,
+                           center_y=30,
+                           radius_x=0.8*radius,
+                           radius_y=0.8*radius,
+                           stroke_color='black',
+                           fill_color_rgba=eval('0x' + species.color[1:] + 'ff' ))
+
+
     def _get_atoms(self, layer_nr=0):
         if self.project_tree.lattice.representation:
             representations = eval(self.project_tree.lattice.representation)
