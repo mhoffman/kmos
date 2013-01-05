@@ -187,7 +187,16 @@ def evaluate_kind_values(infile, outfile):
     import re
     import os
     import sys
+    import shutil
     sys.path.append(os.path.abspath(os.curdir))
+
+    with open(infile) as infh:
+        intext = infh.read()
+    if not ('select_int_kind' in intext
+            or 'selected_real_kind' in intext):
+        shutil.copy(infile, outfile)
+        return
+
 
     def import_selected_kind():
         """Tries to import the module which provides
