@@ -193,8 +193,8 @@ def evaluate_kind_values(infile, outfile):
 
     with open(infile) as infh:
         intext = infh.read()
-    if not ('select_int_kind' in intext
-            or 'selected_real_kind' in intext):
+    if not ('selected_int_kind' in intext.lower()
+            or 'selected_real_kind' in intext.lower()):
         shutil.copy(infile, outfile)
         return
 
