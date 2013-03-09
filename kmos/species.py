@@ -59,8 +59,7 @@ except:
             to the `janaf_data` directory.""")
 
 
-
-class Species:
+class Species(object):
     def __init__(self, atoms, gas=False, janaf_file='', name=''):
         self.atoms = atoms
         self.gas = gas
@@ -104,7 +103,11 @@ class Species:
         # from CODATA 2010
         Jmol_in_eV = 1.03642E-5
         # load data
-        data = np.loadtxt(filename, skiprows=2, usecols=(0, 2, 4))
+        try:
+            data = np.loadtxt(filename, skiprows=2, usecols=(0, 2, 4))
+        except IOError:
+            print('Warning: JANAF table %s not installed' % filename)
+            return
 
         # define data
         self.T_grid = data[:, 0]
