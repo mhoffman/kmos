@@ -18,6 +18,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import with_statement
 from time import time
 from StringIO import StringIO
 
@@ -192,8 +193,8 @@ def evaluate_kind_values(infile, outfile):
 
     with open(infile) as infh:
         intext = infh.read()
-    if not ('select_int_kind' in intext
-            or 'selected_real_kind' in intext):
+    if not ('selected_int_kind' in intext.lower()
+            or 'selected_real_kind' in intext.lower()):
         shutil.copy(infile, outfile)
         return
 
