@@ -415,7 +415,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
             # Assumes a binding distance of 1.3 Angstrom
             atoms = self._get_atoms()
             z_pos = atoms.get_positions()[:, 2]
-            z_pos = z_pos if z_pos else [0]
+            z_pos = z_pos if len(z_pos) else [0]
             Z = max(z_pos) + 1.3
             z = Z / atoms.cell[2, 2]
             new_site.pos[2] = z
