@@ -46,6 +46,14 @@ class FixedObject(object):
             raise AttributeError('Tried to set illegal attribute %s' \
                                                             % attrname)
 
+    def __hash__(self):
+        """Since python-kiwi update to 1.9.32 it requires all objecst in
+           a object tree to be hashable. So, here we give it a hash
+           function that is just 'good enough' to do the job.
+
+        """
+        return hash(self.__class__.__name__)
+
 
 class Project(object):
     """A Project is where (almost) everything comes together.
