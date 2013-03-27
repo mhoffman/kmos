@@ -27,10 +27,37 @@ import sys
 from pprint import PrettyPrinter, pformat
 import pdb
 
-from kmos.types import ConditionAction, LatIntProcess, SingleLatIntProcess
+from kmos.types import ConditionAction, LatIntProcess, SingleLatIntProcess, Coord
 from kmos.config import APP_ABS_PATH
 from kmos.types import cmp_coords
 
+
+def _casetree_dict(dictionary, indent='', out=None):
+    """ Recursively prints nested dictionaries."""
+    for key, value in reversed(list(dictionary.iteritems())):
+        if isinstance(value, dict):
+            if isinstance(key, Coord):
+                out.write('%sselect case(get_species(cell%s))\n' % (indent, key.radd_ff()))
+                _casetree_dict(value, indent + '  ', out)
+                out.write('%send select\n' % indent)
+            else:
+                if key != 'default':
+                    out.write('%scase(%s)\n' % (indent, key))
+                else:
+                    out.write('%scase %s\n' % (indent, key))
+                _casetree_dict(value, indent + '  ', out)
+        else:
+            out.write(indent+'%s = %s\n' % (key, value))
+
+def _print_dict(dictionary, indent = ''):
+    """ Recursively prints nested dictionaries."""
+
+    for key, value in dictionary.iteritems():
+        if isinstance(value, dict):
+            print('%s%s:' % (indent, key) )
+            _print_dict(value, indent+'    ')
+        else:
+            print(indent+'%s = %s' %(key, value))
 
 def _flatten(L):
     return [item for sublist in L for item in sublist]
@@ -1037,7 +1064,8 @@ class ProcListWriter():
         self.write_proclist_lat_int_run_proc_nr(data, lat_int_groups, progress_bar, out)
         self.write_proclist_lat_int_touchup(lat_int_groups, out)
         self.write_proclist_lat_int_run_proc(data, lat_int_groups, progress_bar, out)
-        self.write_proclist_lat_int_nli_selectcase(data, lat_int_groups, progress_bar, out)
+        #self.write_proclist_lat_int_nli_caselist(data, lat_int_groups, progress_bar, out)
+        self.write_proclist_lat_int_nli_casetree(data, lat_int_groups, progress_bar, out)
 
         # and we are done!
         if os.name == 'posix':
@@ -1210,7 +1238,46 @@ class ProcListWriter():
                 progress_bar.render(int(10+40*float(lat_int_loop)/len(lat_int_groups)),
                                     'run_proc_%s' % lat_int_group)
 
-    def write_proclist_lat_int_nli_selectcase(self, data, lat_int_groups, progress_bar, out):
+    def write_proclist_lat_int_nli_casetree(selef, data, lat_int_groups, progress_bar, out):
+        for lat_int_loop, (lat_int_group, processes) in enumerate(lat_int_groups.iteritems()):
+            fname = 'nli_%s' % lat_int_group
+            if data.meta.debug > 0:
+                out.write('function %(cell)\n'
+                          % (fname))
+            else:
+                # DEBUGGING
+                #out.write('function nli_%s(cell)\n'
+                          #% (lat_int_group))
+                out.write('pure function nli_%s(cell)\n'
+                          % (lat_int_group))
+            out.write('    integer(kind=iint), dimension(4), intent(in) :: cell\n')
+            out.write('    integer(kind=iint) :: %s\n\n' % fname)
+
+
+
+            # sort processes into a nested list (dictionary)
+            # ordered by coords
+            case_tree = {}
+            for process in processes:
+                conditions = [y for y in sorted(process.condition_list + process.bystanders,
+                                                 key=lambda x: x.coord, cmp=cmp_coords)
+                                                 if not y.implicit]
+                node = case_tree
+                for condition in conditions:
+                    species_node = node.setdefault(condition.coord, {})
+                    node = species_node.setdefault(condition.species, {})
+                    species_node.setdefault('default', {fname: 0})
+                node[fname] = process.name
+
+            _casetree_dict(case_tree, '    ', out)
+
+            if os.name == 'posix':
+                progress_bar.render(int(50+50*float(lat_int_loop)/len(lat_int_groups)),
+                                    'nli_%s' % lat_int_group)
+
+            out.write('\nend function %s\n\n' % (fname))
+
+    def write_proclist_lat_int_nli_caselist(self, data, lat_int_groups, progress_bar, out):
         """
         subroutine nli_<processname>
 
