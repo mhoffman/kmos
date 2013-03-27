@@ -944,7 +944,7 @@ class ProcListWriter():
                 corresponding_actions = [action for action in actions if condition.coord == action.coord]
 
 
-                #self._db_print('%s: %s <-> %s' % (process.name, condition, corresponding_actions))
+                self._db_print('%s: %s <-> %s' % (process.name, condition, corresponding_actions))
 
                 if corresponding_actions:
                     action = corresponding_actions[0]
@@ -1196,7 +1196,7 @@ class ProcListWriter():
                                              key=lambda x: x.coord, cmp=cmp_coords)
                                              if not y.implicit]
             # DEBUGGING
-            print(process.name, conditions0)
+            self._db_print(process.name, conditions0)
 
             if data.meta.debug > 0:
                 out.write('function nli_%s(cell)\n'
