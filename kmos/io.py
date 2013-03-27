@@ -1022,15 +1022,36 @@ class ProcListWriter():
         On the downside, it might be a little less optimized though
         it is local in a very strict sense. [EXPERIMENTAL/UNFINISHED!!!]
         """
+        # initialize progress bar
         if os.name == 'posix':
             from kmos.utils.progressbar import ProgressBar
             progress_bar = ProgressBar('blue', width=80)
             progress_bar.render(10, 'generic part')
 
+        # categorize elementary steps into
+        # lateral interaction groups
         lat_int_groups = self._get_lat_int_groups()
-        #####################################################
-        # def run_proc_nr
-        #####################################################
+
+
+        # write out the process list
+        self.write_proclist_lat_int_run_proc_nr(data, lat_int_groups, progress_bar, out)
+        self.write_proclist_lat_int_touchup(lat_int_groups, out)
+        self.write_proclist_lat_int_run_proc(data, lat_int_groups, progress_bar, out)
+        self.write_proclist_lat_int_nli_selectcase(data, lat_int_groups, progress_bar, out)
+
+        # and we are done!
+        if os.name == 'posix':
+            progress_bar.render(100, 'finished proclist.f90')
+
+    def write_proclist_lat_int_run_proc_nr(self, data, lat_int_groups, progress_bar, out):
+        """
+        subroutine run_proc_nr(proc, cell)
+
+        Central function at the beginning of each executed elementary step.
+        Dispatches from the determined process number to the corresponding
+        subroutine.
+
+        """
         out.write('subroutine run_proc_nr(proc, nr_cell)\n')
         out.write('    integer(kind=iint), intent(in) :: nr_cell\n')
         out.write('    integer(kind=iint), intent(in) :: proc\n\n')
@@ -1054,9 +1075,16 @@ class ProcListWriter():
         out.write('    end select\n\n')
         out.write('end subroutine run_proc_nr\n\n')
 
-        #########################################
-        # The touchup function
-        #########################################
+    def write_proclist_lat_int_touchup(self, lat_int_groups, out):
+        """
+        The touchup function
+
+        Updates the elementary steps that a cell can do
+        given the current lattice configuration. This has
+        to be run once for every cell to initialize
+        the simulation book-keeping.
+
+        """
         out.write('subroutine touchup_cell(cell)\n')
         out.write('    integer(kind=iint), intent(in), dimension(4) :: cell\n\n')
         out.write('    integer(kind=iint), dimension(4) :: site\n\n')
@@ -1072,9 +1100,15 @@ class ProcListWriter():
             out.write('    call add_proc(nli_%s(cell), site)\n' % (lat_int_group))
         out.write('end subroutine touchup_cell\n\n')
 
-        #####################################################
-        # def run_proc_<processname>
-        #####################################################
+
+    def write_proclist_lat_int_run_proc(self, data, lat_int_groups, progress_bar, out):
+        """
+        subroutine run_proc_<processname>(cell)
+
+        Performs the lattice and avail_sites updates
+        for a given process.
+        """
+
         for lat_int_loop, (lat_int_group, processes) in enumerate(lat_int_groups.iteritems()):
             self._db_print('PROCESS: %s' % lat_int_group)
             # initialize needed data structure
@@ -1176,16 +1210,20 @@ class ProcListWriter():
                 progress_bar.render(int(10+40*float(lat_int_loop)/len(lat_int_groups)),
                                     'run_proc_%s' % lat_int_group)
 
-        #########################################
-        # def nli_<processname>
-        # nli = number of lateral interaction
-        # inspect a local enviroment for a set
-        # of processes that only differ by lateral
-        # interaction and return the process number
-        # corrresponding to the present configuration.
-        # If no process is applicable an integer "0"
-        # is returned.
-        #########################################
+    def write_proclist_lat_int_nli_selectcase(self, data, lat_int_groups, progress_bar, out):
+        """
+        subroutine nli_<processname>
+
+        nli = number of lateral interaction
+        inspect a local enviroment for a set
+        of processes that only differ by lateral
+        interaction and return the process number
+        corrresponding to the present configuration.
+        If no process is applicable an integer "0"
+        is returned.
+
+        """
+
         for lat_int_loop, (lat_int_group, processes) in enumerate(lat_int_groups.iteritems()):
             process0 = processes[0]
 
@@ -1196,7 +1234,7 @@ class ProcListWriter():
                                              key=lambda x: x.coord, cmp=cmp_coords)
                                              if not y.implicit]
             # DEBUGGING
-            self._db_print(process.name, conditions0)
+            self._db_print(process0.name, conditions0)
 
             if data.meta.debug > 0:
                 out.write('function nli_%s(cell)\n'
@@ -1226,9 +1264,6 @@ class ProcListWriter():
                                                 key=lambda x: x.coord, cmp=cmp_coords)
                                                 if not y.implicit]
 
-                ## DEBUGGING
-                #print(process.name, conditions)
-
                 for j, bystander in enumerate(conditions):
                     species_nr = [x for (x, species) in
                                   enumerate(sorted(data.species_list))
@@ -1247,7 +1282,6 @@ class ProcListWriter():
                 USE_ARRAY = True
             else:
                 USE_ARRAY = False
-            #print(lat_int_group, float(len(compression_map)), (nr_of_species**len(conditions)), USE_ARRAY)
 
             # use generator object to save memory
             if USE_ARRAY:
@@ -1267,17 +1301,9 @@ class ProcListWriter():
                 out.write('print *,"PROCLIST/NLI_%s"\n' % lat_int_group.upper())
                 out.write('print *,"    PROCLIST/NLI_%s/CELL", cell\n' % lat_int_group.upper())
 
-            ## DEBUGGING
-            #out.write('print *, "nli_%s"\n' % (process.name))
-
             for i, bystander in enumerate(conditions0):
                 out.write('    n = n + get_species(cell%s)*nr_of_species**%s\n'
                 % (bystander.coord.radd_ff(), i))
-
-                ## DEBUGGING
-                #out.write('print *, "    ", get_species(cell%s), nr_of_species**%s,get_species(cell%s)*nr_of_species**%s, "%s"\n'
-                            #% (bystander.coord.radd_ff(), i, bystander.coord.radd_ff(), i, bystander.coord.radd_ff()))
-            #out.write('print *,"SUM", n')
 
             if USE_ARRAY :
                 out.write('\n    nli_%s = lat_int_index_%s(n)\n'
@@ -1301,8 +1327,6 @@ class ProcListWriter():
             if os.name == 'posix':
                 progress_bar.render(int(50+50*float(lat_int_loop)/len(lat_int_groups)),
                                     'nli_%s' % lat_int_group)
-        if os.name == 'posix':
-            progress_bar.render(100, 'finished proclist.f90')
 
     def write_proclist_put_take(self, data, out):
         """
