@@ -5096,20 +5096,17 @@ pure function nli_oxygen_diffusion_bridge_bridge_down(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_oxygen_diffusion_bridge_bridge_down
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, -1, 0, ruo2_bridge/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
-
-    select case(n)
-    case(6)
-        nli_oxygen_diffusion_bridge_bridge_down = oxygen_diffusion_bridge_bridge_down
-    case default
+    select case(get_species(cell + (/0, -1, 0, ruo2_bridge/)))
+      case(empty)
+        select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+          case(oxygen)
+            nli_oxygen_diffusion_bridge_bridge_down = oxygen_diffusion_bridge_bridge_down
+          case default
+            nli_oxygen_diffusion_bridge_bridge_down = 0
+        end select
+      case default
         nli_oxygen_diffusion_bridge_bridge_down = 0
     end select
-
 
 end function nli_oxygen_diffusion_bridge_bridge_down
 
@@ -5117,20 +5114,17 @@ pure function nli_oxygen_diffusion_cus_bridge_right(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_oxygen_diffusion_cus_bridge_right
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**0
-    n = n + get_species(cell + (/1, 0, 0, ruo2_bridge/))*nr_of_species**1
-
-    select case(n)
-    case(2)
-        nli_oxygen_diffusion_cus_bridge_right = oxygen_diffusion_cus_bridge_right
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+      case(oxygen)
+        select case(get_species(cell + (/1, 0, 0, ruo2_bridge/)))
+          case(empty)
+            nli_oxygen_diffusion_cus_bridge_right = oxygen_diffusion_cus_bridge_right
+          case default
+            nli_oxygen_diffusion_cus_bridge_right = 0
+        end select
+      case default
         nli_oxygen_diffusion_cus_bridge_right = 0
     end select
-
 
 end function nli_oxygen_diffusion_cus_bridge_right
 
@@ -5138,20 +5132,17 @@ pure function nli_co_diffusion_bridge_cus_left(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_co_diffusion_bridge_cus_left
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/-1, 0, 0, ruo2_cus/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
-
-    select case(n)
-    case(3)
-        nli_co_diffusion_bridge_cus_left = co_diffusion_bridge_cus_left
-    case default
+    select case(get_species(cell + (/-1, 0, 0, ruo2_cus/)))
+      case(empty)
+        select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+          case(co)
+            nli_co_diffusion_bridge_cus_left = co_diffusion_bridge_cus_left
+          case default
+            nli_co_diffusion_bridge_cus_left = 0
+        end select
+      case default
         nli_co_diffusion_bridge_cus_left = 0
     end select
-
 
 end function nli_co_diffusion_bridge_cus_left
 
@@ -5159,20 +5150,17 @@ pure function nli_co_diffusion_cus_cus_up(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_co_diffusion_cus_cus_up
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 1, 0, ruo2_cus/))*nr_of_species**1
-
-    select case(n)
-    case(1)
-        nli_co_diffusion_cus_cus_up = co_diffusion_cus_cus_up
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+      case(co)
+        select case(get_species(cell + (/0, 1, 0, ruo2_cus/)))
+          case(empty)
+            nli_co_diffusion_cus_cus_up = co_diffusion_cus_cus_up
+          case default
+            nli_co_diffusion_cus_cus_up = 0
+        end select
+      case default
         nli_co_diffusion_cus_cus_up = 0
     end select
-
 
 end function nli_co_diffusion_cus_cus_up
 
@@ -5180,20 +5168,17 @@ pure function nli_co_diffusion_bridge_bridge_down(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_co_diffusion_bridge_bridge_down
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, -1, 0, ruo2_bridge/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
-
-    select case(n)
-    case(3)
-        nli_co_diffusion_bridge_bridge_down = co_diffusion_bridge_bridge_down
-    case default
+    select case(get_species(cell + (/0, -1, 0, ruo2_bridge/)))
+      case(empty)
+        select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+          case(co)
+            nli_co_diffusion_bridge_bridge_down = co_diffusion_bridge_bridge_down
+          case default
+            nli_co_diffusion_bridge_bridge_down = 0
+        end select
+      case default
         nli_co_diffusion_bridge_bridge_down = 0
     end select
-
 
 end function nli_co_diffusion_bridge_bridge_down
 
@@ -5201,20 +5186,17 @@ pure function nli_reaction_oxygen_bridge_co_cus_left(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_reaction_oxygen_bridge_co_cus_left
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/-1, 0, 0, ruo2_cus/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
-
-    select case(n)
-    case(7)
-        nli_reaction_oxygen_bridge_co_cus_left = reaction_oxygen_bridge_co_cus_left
-    case default
+    select case(get_species(cell + (/-1, 0, 0, ruo2_cus/)))
+      case(co)
+        select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+          case(oxygen)
+            nli_reaction_oxygen_bridge_co_cus_left = reaction_oxygen_bridge_co_cus_left
+          case default
+            nli_reaction_oxygen_bridge_co_cus_left = 0
+        end select
+      case default
         nli_reaction_oxygen_bridge_co_cus_left = 0
     end select
-
 
 end function nli_reaction_oxygen_bridge_co_cus_left
 
@@ -5222,19 +5204,12 @@ pure function nli_co_desorption_cus(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_co_desorption_cus
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**0
-
-    select case(n)
-    case(1)
+    select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+      case(co)
         nli_co_desorption_cus = co_desorption_cus
-    case default
+      case default
         nli_co_desorption_cus = 0
     end select
-
 
 end function nli_co_desorption_cus
 
@@ -5242,20 +5217,17 @@ pure function nli_reaction_oxygen_bridge_co_bridge_up(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_reaction_oxygen_bridge_co_bridge_up
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 1, 0, ruo2_bridge/))*nr_of_species**1
-
-    select case(n)
-    case(5)
-        nli_reaction_oxygen_bridge_co_bridge_up = reaction_oxygen_bridge_co_bridge_up
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+      case(oxygen)
+        select case(get_species(cell + (/0, 1, 0, ruo2_bridge/)))
+          case(co)
+            nli_reaction_oxygen_bridge_co_bridge_up = reaction_oxygen_bridge_co_bridge_up
+          case default
+            nli_reaction_oxygen_bridge_co_bridge_up = 0
+        end select
+      case default
         nli_reaction_oxygen_bridge_co_bridge_up = 0
     end select
-
 
 end function nli_reaction_oxygen_bridge_co_bridge_up
 
@@ -5263,20 +5235,17 @@ pure function nli_oxygen_desorption_bridge_bridge(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_oxygen_desorption_bridge_bridge
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 1, 0, ruo2_bridge/))*nr_of_species**1
-
-    select case(n)
-    case(8)
-        nli_oxygen_desorption_bridge_bridge = oxygen_desorption_bridge_bridge
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+      case(oxygen)
+        select case(get_species(cell + (/0, 1, 0, ruo2_bridge/)))
+          case(oxygen)
+            nli_oxygen_desorption_bridge_bridge = oxygen_desorption_bridge_bridge
+          case default
+            nli_oxygen_desorption_bridge_bridge = 0
+        end select
+      case default
         nli_oxygen_desorption_bridge_bridge = 0
     end select
-
 
 end function nli_oxygen_desorption_bridge_bridge
 
@@ -5284,20 +5253,17 @@ pure function nli_oxygen_adsorption_bridge_bridge(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_oxygen_adsorption_bridge_bridge
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 1, 0, ruo2_bridge/))*nr_of_species**1
-
-    select case(n)
-    case(0)
-        nli_oxygen_adsorption_bridge_bridge = oxygen_adsorption_bridge_bridge
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+      case(empty)
+        select case(get_species(cell + (/0, 1, 0, ruo2_bridge/)))
+          case(empty)
+            nli_oxygen_adsorption_bridge_bridge = oxygen_adsorption_bridge_bridge
+          case default
+            nli_oxygen_adsorption_bridge_bridge = 0
+        end select
+      case default
         nli_oxygen_adsorption_bridge_bridge = 0
     end select
-
 
 end function nli_oxygen_adsorption_bridge_bridge
 
@@ -5305,20 +5271,17 @@ pure function nli_co_diffusion_bridge_cus_right(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_co_diffusion_bridge_cus_right
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**1
-
-    select case(n)
-    case(1)
-        nli_co_diffusion_bridge_cus_right = co_diffusion_bridge_cus_right
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+      case(co)
+        select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+          case(empty)
+            nli_co_diffusion_bridge_cus_right = co_diffusion_bridge_cus_right
+          case default
+            nli_co_diffusion_bridge_cus_right = 0
+        end select
+      case default
         nli_co_diffusion_bridge_cus_right = 0
     end select
-
 
 end function nli_co_diffusion_bridge_cus_right
 
@@ -5326,20 +5289,17 @@ pure function nli_oxygen_adsorption_cus_cus(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_oxygen_adsorption_cus_cus
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 1, 0, ruo2_cus/))*nr_of_species**1
-
-    select case(n)
-    case(0)
-        nli_oxygen_adsorption_cus_cus = oxygen_adsorption_cus_cus
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+      case(empty)
+        select case(get_species(cell + (/0, 1, 0, ruo2_cus/)))
+          case(empty)
+            nli_oxygen_adsorption_cus_cus = oxygen_adsorption_cus_cus
+          case default
+            nli_oxygen_adsorption_cus_cus = 0
+        end select
+      case default
         nli_oxygen_adsorption_cus_cus = 0
     end select
-
 
 end function nli_oxygen_adsorption_cus_cus
 
@@ -5347,20 +5307,17 @@ pure function nli_co_diffusion_cus_bridge_left(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_co_diffusion_cus_bridge_left
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
-
-    select case(n)
-    case(1)
-        nli_co_diffusion_cus_bridge_left = co_diffusion_cus_bridge_left
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+      case(co)
+        select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+          case(empty)
+            nli_co_diffusion_cus_bridge_left = co_diffusion_cus_bridge_left
+          case default
+            nli_co_diffusion_cus_bridge_left = 0
+        end select
+      case default
         nli_co_diffusion_cus_bridge_left = 0
     end select
-
 
 end function nli_co_diffusion_cus_bridge_left
 
@@ -5368,20 +5325,17 @@ pure function nli_oxygen_desorption_bridge_cus_left(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_oxygen_desorption_bridge_cus_left
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/-1, 0, 0, ruo2_cus/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
-
-    select case(n)
-    case(8)
-        nli_oxygen_desorption_bridge_cus_left = oxygen_desorption_bridge_cus_left
-    case default
+    select case(get_species(cell + (/-1, 0, 0, ruo2_cus/)))
+      case(oxygen)
+        select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+          case(oxygen)
+            nli_oxygen_desorption_bridge_cus_left = oxygen_desorption_bridge_cus_left
+          case default
+            nli_oxygen_desorption_bridge_cus_left = 0
+        end select
+      case default
         nli_oxygen_desorption_bridge_cus_left = 0
     end select
-
 
 end function nli_oxygen_desorption_bridge_cus_left
 
@@ -5389,20 +5343,17 @@ pure function nli_co_diffusion_cus_cus_down(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_co_diffusion_cus_cus_down
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, -1, 0, ruo2_cus/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**1
-
-    select case(n)
-    case(3)
-        nli_co_diffusion_cus_cus_down = co_diffusion_cus_cus_down
-    case default
+    select case(get_species(cell + (/0, -1, 0, ruo2_cus/)))
+      case(empty)
+        select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+          case(co)
+            nli_co_diffusion_cus_cus_down = co_diffusion_cus_cus_down
+          case default
+            nli_co_diffusion_cus_cus_down = 0
+        end select
+      case default
         nli_co_diffusion_cus_cus_down = 0
     end select
-
 
 end function nli_co_diffusion_cus_cus_down
 
@@ -5410,20 +5361,17 @@ pure function nli_reaction_oxygen_cus_co_bridge_right(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_reaction_oxygen_cus_co_bridge_right
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**0
-    n = n + get_species(cell + (/1, 0, 0, ruo2_bridge/))*nr_of_species**1
-
-    select case(n)
-    case(5)
-        nli_reaction_oxygen_cus_co_bridge_right = reaction_oxygen_cus_co_bridge_right
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+      case(oxygen)
+        select case(get_species(cell + (/1, 0, 0, ruo2_bridge/)))
+          case(co)
+            nli_reaction_oxygen_cus_co_bridge_right = reaction_oxygen_cus_co_bridge_right
+          case default
+            nli_reaction_oxygen_cus_co_bridge_right = 0
+        end select
+      case default
         nli_reaction_oxygen_cus_co_bridge_right = 0
     end select
-
 
 end function nli_reaction_oxygen_cus_co_bridge_right
 
@@ -5431,20 +5379,17 @@ pure function nli_co_diffusion_bridge_bridge_up(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_co_diffusion_bridge_bridge_up
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 1, 0, ruo2_bridge/))*nr_of_species**1
-
-    select case(n)
-    case(1)
-        nli_co_diffusion_bridge_bridge_up = co_diffusion_bridge_bridge_up
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+      case(co)
+        select case(get_species(cell + (/0, 1, 0, ruo2_bridge/)))
+          case(empty)
+            nli_co_diffusion_bridge_bridge_up = co_diffusion_bridge_bridge_up
+          case default
+            nli_co_diffusion_bridge_bridge_up = 0
+        end select
+      case default
         nli_co_diffusion_bridge_bridge_up = 0
     end select
-
 
 end function nli_co_diffusion_bridge_bridge_up
 
@@ -5452,20 +5397,17 @@ pure function nli_reaction_oxygen_cus_co_cus_up(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_reaction_oxygen_cus_co_cus_up
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 1, 0, ruo2_cus/))*nr_of_species**1
-
-    select case(n)
-    case(5)
-        nli_reaction_oxygen_cus_co_cus_up = reaction_oxygen_cus_co_cus_up
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+      case(oxygen)
+        select case(get_species(cell + (/0, 1, 0, ruo2_cus/)))
+          case(co)
+            nli_reaction_oxygen_cus_co_cus_up = reaction_oxygen_cus_co_cus_up
+          case default
+            nli_reaction_oxygen_cus_co_cus_up = 0
+        end select
+      case default
         nli_reaction_oxygen_cus_co_cus_up = 0
     end select
-
 
 end function nli_reaction_oxygen_cus_co_cus_up
 
@@ -5473,20 +5415,17 @@ pure function nli_reaction_oxygen_cus_co_cus_down(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_reaction_oxygen_cus_co_cus_down
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, -1, 0, ruo2_cus/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**1
-
-    select case(n)
-    case(7)
-        nli_reaction_oxygen_cus_co_cus_down = reaction_oxygen_cus_co_cus_down
-    case default
+    select case(get_species(cell + (/0, -1, 0, ruo2_cus/)))
+      case(co)
+        select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+          case(oxygen)
+            nli_reaction_oxygen_cus_co_cus_down = reaction_oxygen_cus_co_cus_down
+          case default
+            nli_reaction_oxygen_cus_co_cus_down = 0
+        end select
+      case default
         nli_reaction_oxygen_cus_co_cus_down = 0
     end select
-
 
 end function nli_reaction_oxygen_cus_co_cus_down
 
@@ -5494,20 +5433,17 @@ pure function nli_oxygen_diffusion_bridge_cus_right(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_oxygen_diffusion_bridge_cus_right
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**1
-
-    select case(n)
-    case(2)
-        nli_oxygen_diffusion_bridge_cus_right = oxygen_diffusion_bridge_cus_right
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+      case(oxygen)
+        select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+          case(empty)
+            nli_oxygen_diffusion_bridge_cus_right = oxygen_diffusion_bridge_cus_right
+          case default
+            nli_oxygen_diffusion_bridge_cus_right = 0
+        end select
+      case default
         nli_oxygen_diffusion_bridge_cus_right = 0
     end select
-
 
 end function nli_oxygen_diffusion_bridge_cus_right
 
@@ -5515,20 +5451,17 @@ pure function nli_oxygen_diffusion_cus_bridge_left(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_oxygen_diffusion_cus_bridge_left
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
-
-    select case(n)
-    case(2)
-        nli_oxygen_diffusion_cus_bridge_left = oxygen_diffusion_cus_bridge_left
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+      case(oxygen)
+        select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+          case(empty)
+            nli_oxygen_diffusion_cus_bridge_left = oxygen_diffusion_cus_bridge_left
+          case default
+            nli_oxygen_diffusion_cus_bridge_left = 0
+        end select
+      case default
         nli_oxygen_diffusion_cus_bridge_left = 0
     end select
-
 
 end function nli_oxygen_diffusion_cus_bridge_left
 
@@ -5536,20 +5469,17 @@ pure function nli_oxygen_diffusion_cus_cus_up(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_oxygen_diffusion_cus_cus_up
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 1, 0, ruo2_cus/))*nr_of_species**1
-
-    select case(n)
-    case(2)
-        nli_oxygen_diffusion_cus_cus_up = oxygen_diffusion_cus_cus_up
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+      case(oxygen)
+        select case(get_species(cell + (/0, 1, 0, ruo2_cus/)))
+          case(empty)
+            nli_oxygen_diffusion_cus_cus_up = oxygen_diffusion_cus_cus_up
+          case default
+            nli_oxygen_diffusion_cus_cus_up = 0
+        end select
+      case default
         nli_oxygen_diffusion_cus_cus_up = 0
     end select
-
 
 end function nli_oxygen_diffusion_cus_cus_up
 
@@ -5557,20 +5487,17 @@ pure function nli_reaction_oxygen_bridge_co_cus_right(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_reaction_oxygen_bridge_co_cus_right
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**1
-
-    select case(n)
-    case(5)
-        nli_reaction_oxygen_bridge_co_cus_right = reaction_oxygen_bridge_co_cus_right
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+      case(oxygen)
+        select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+          case(co)
+            nli_reaction_oxygen_bridge_co_cus_right = reaction_oxygen_bridge_co_cus_right
+          case default
+            nli_reaction_oxygen_bridge_co_cus_right = 0
+        end select
+      case default
         nli_reaction_oxygen_bridge_co_cus_right = 0
     end select
-
 
 end function nli_reaction_oxygen_bridge_co_cus_right
 
@@ -5578,20 +5505,17 @@ pure function nli_co_diffusion_cus_bridge_right(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_co_diffusion_cus_bridge_right
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**0
-    n = n + get_species(cell + (/1, 0, 0, ruo2_bridge/))*nr_of_species**1
-
-    select case(n)
-    case(1)
-        nli_co_diffusion_cus_bridge_right = co_diffusion_cus_bridge_right
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+      case(co)
+        select case(get_species(cell + (/1, 0, 0, ruo2_bridge/)))
+          case(empty)
+            nli_co_diffusion_cus_bridge_right = co_diffusion_cus_bridge_right
+          case default
+            nli_co_diffusion_cus_bridge_right = 0
+        end select
+      case default
         nli_co_diffusion_cus_bridge_right = 0
     end select
-
 
 end function nli_co_diffusion_cus_bridge_right
 
@@ -5599,20 +5523,17 @@ pure function nli_oxygen_adsorption_bridge_cus_right(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_oxygen_adsorption_bridge_cus_right
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**1
-
-    select case(n)
-    case(0)
-        nli_oxygen_adsorption_bridge_cus_right = oxygen_adsorption_bridge_cus_right
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+      case(empty)
+        select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+          case(empty)
+            nli_oxygen_adsorption_bridge_cus_right = oxygen_adsorption_bridge_cus_right
+          case default
+            nli_oxygen_adsorption_bridge_cus_right = 0
+        end select
+      case default
         nli_oxygen_adsorption_bridge_cus_right = 0
     end select
-
 
 end function nli_oxygen_adsorption_bridge_cus_right
 
@@ -5620,20 +5541,17 @@ pure function nli_oxygen_diffusion_bridge_bridge_up(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_oxygen_diffusion_bridge_bridge_up
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 1, 0, ruo2_bridge/))*nr_of_species**1
-
-    select case(n)
-    case(2)
-        nli_oxygen_diffusion_bridge_bridge_up = oxygen_diffusion_bridge_bridge_up
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+      case(oxygen)
+        select case(get_species(cell + (/0, 1, 0, ruo2_bridge/)))
+          case(empty)
+            nli_oxygen_diffusion_bridge_bridge_up = oxygen_diffusion_bridge_bridge_up
+          case default
+            nli_oxygen_diffusion_bridge_bridge_up = 0
+        end select
+      case default
         nli_oxygen_diffusion_bridge_bridge_up = 0
     end select
-
 
 end function nli_oxygen_diffusion_bridge_bridge_up
 
@@ -5641,20 +5559,17 @@ pure function nli_oxygen_diffusion_bridge_cus_left(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_oxygen_diffusion_bridge_cus_left
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/-1, 0, 0, ruo2_cus/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
-
-    select case(n)
-    case(6)
-        nli_oxygen_diffusion_bridge_cus_left = oxygen_diffusion_bridge_cus_left
-    case default
+    select case(get_species(cell + (/-1, 0, 0, ruo2_cus/)))
+      case(empty)
+        select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+          case(oxygen)
+            nli_oxygen_diffusion_bridge_cus_left = oxygen_diffusion_bridge_cus_left
+          case default
+            nli_oxygen_diffusion_bridge_cus_left = 0
+        end select
+      case default
         nli_oxygen_diffusion_bridge_cus_left = 0
     end select
-
 
 end function nli_oxygen_diffusion_bridge_cus_left
 
@@ -5662,20 +5577,17 @@ pure function nli_oxygen_diffusion_cus_cus_down(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_oxygen_diffusion_cus_cus_down
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, -1, 0, ruo2_cus/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**1
-
-    select case(n)
-    case(6)
-        nli_oxygen_diffusion_cus_cus_down = oxygen_diffusion_cus_cus_down
-    case default
+    select case(get_species(cell + (/0, -1, 0, ruo2_cus/)))
+      case(empty)
+        select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+          case(oxygen)
+            nli_oxygen_diffusion_cus_cus_down = oxygen_diffusion_cus_cus_down
+          case default
+            nli_oxygen_diffusion_cus_cus_down = 0
+        end select
+      case default
         nli_oxygen_diffusion_cus_cus_down = 0
     end select
-
 
 end function nli_oxygen_diffusion_cus_cus_down
 
@@ -5683,20 +5595,17 @@ pure function nli_reaction_oxygen_cus_co_bridge_left(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_reaction_oxygen_cus_co_bridge_left
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
-
-    select case(n)
-    case(5)
-        nli_reaction_oxygen_cus_co_bridge_left = reaction_oxygen_cus_co_bridge_left
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+      case(oxygen)
+        select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+          case(co)
+            nli_reaction_oxygen_cus_co_bridge_left = reaction_oxygen_cus_co_bridge_left
+          case default
+            nli_reaction_oxygen_cus_co_bridge_left = 0
+        end select
+      case default
         nli_reaction_oxygen_cus_co_bridge_left = 0
     end select
-
 
 end function nli_reaction_oxygen_cus_co_bridge_left
 
@@ -5704,20 +5613,17 @@ pure function nli_reaction_oxygen_bridge_co_bridge_down(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_reaction_oxygen_bridge_co_bridge_down
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, -1, 0, ruo2_bridge/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
-
-    select case(n)
-    case(7)
-        nli_reaction_oxygen_bridge_co_bridge_down = reaction_oxygen_bridge_co_bridge_down
-    case default
+    select case(get_species(cell + (/0, -1, 0, ruo2_bridge/)))
+      case(co)
+        select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+          case(oxygen)
+            nli_reaction_oxygen_bridge_co_bridge_down = reaction_oxygen_bridge_co_bridge_down
+          case default
+            nli_reaction_oxygen_bridge_co_bridge_down = 0
+        end select
+      case default
         nli_reaction_oxygen_bridge_co_bridge_down = 0
     end select
-
 
 end function nli_reaction_oxygen_bridge_co_bridge_down
 
@@ -5725,20 +5631,17 @@ pure function nli_oxygen_adsorption_bridge_cus_left(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_oxygen_adsorption_bridge_cus_left
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/-1, 0, 0, ruo2_cus/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**1
-
-    select case(n)
-    case(0)
-        nli_oxygen_adsorption_bridge_cus_left = oxygen_adsorption_bridge_cus_left
-    case default
+    select case(get_species(cell + (/-1, 0, 0, ruo2_cus/)))
+      case(empty)
+        select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+          case(empty)
+            nli_oxygen_adsorption_bridge_cus_left = oxygen_adsorption_bridge_cus_left
+          case default
+            nli_oxygen_adsorption_bridge_cus_left = 0
+        end select
+      case default
         nli_oxygen_adsorption_bridge_cus_left = 0
     end select
-
 
 end function nli_oxygen_adsorption_bridge_cus_left
 
@@ -5746,20 +5649,17 @@ pure function nli_oxygen_desorption_cus_cus(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_oxygen_desorption_cus_cus
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 1, 0, ruo2_cus/))*nr_of_species**1
-
-    select case(n)
-    case(8)
-        nli_oxygen_desorption_cus_cus = oxygen_desorption_cus_cus
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+      case(oxygen)
+        select case(get_species(cell + (/0, 1, 0, ruo2_cus/)))
+          case(oxygen)
+            nli_oxygen_desorption_cus_cus = oxygen_desorption_cus_cus
+          case default
+            nli_oxygen_desorption_cus_cus = 0
+        end select
+      case default
         nli_oxygen_desorption_cus_cus = 0
     end select
-
 
 end function nli_oxygen_desorption_cus_cus
 
@@ -5767,19 +5667,12 @@ pure function nli_co_desorption_bridge(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_co_desorption_bridge
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**0
-
-    select case(n)
-    case(1)
+    select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+      case(co)
         nli_co_desorption_bridge = co_desorption_bridge
-    case default
+      case default
         nli_co_desorption_bridge = 0
     end select
-
 
 end function nli_co_desorption_bridge
 
@@ -5787,20 +5680,17 @@ pure function nli_oxygen_desorption_bridge_cus_right(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_oxygen_desorption_bridge_cus_right
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**1
-
-    select case(n)
-    case(8)
-        nli_oxygen_desorption_bridge_cus_right = oxygen_desorption_bridge_cus_right
-    case default
+    select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+      case(oxygen)
+        select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+          case(oxygen)
+            nli_oxygen_desorption_bridge_cus_right = oxygen_desorption_bridge_cus_right
+          case default
+            nli_oxygen_desorption_bridge_cus_right = 0
+        end select
+      case default
         nli_oxygen_desorption_bridge_cus_right = 0
     end select
-
 
 end function nli_oxygen_desorption_bridge_cus_right
 
@@ -5808,19 +5698,12 @@ pure function nli_co_adsorption_bridge(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_co_adsorption_bridge
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_bridge/))*nr_of_species**0
-
-    select case(n)
-    case(0)
+    select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
+      case(empty)
         nli_co_adsorption_bridge = co_adsorption_bridge
-    case default
+      case default
         nli_co_adsorption_bridge = 0
     end select
-
 
 end function nli_co_adsorption_bridge
 
@@ -5828,19 +5711,12 @@ pure function nli_co_adsorption_cus(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_co_adsorption_cus
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, ruo2_cus/))*nr_of_species**0
-
-    select case(n)
-    case(0)
+    select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
+      case(empty)
         nli_co_adsorption_cus = co_adsorption_cus
-    case default
+      case default
         nli_co_adsorption_cus = 0
     end select
-
 
 end function nli_co_adsorption_cus
 

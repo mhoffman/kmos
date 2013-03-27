@@ -2870,22 +2870,27 @@ pure function nli_destruct9(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_destruct9
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, -1, 0, PdO_hollow2/))*nr_of_species**0
-    n = n + get_species(cell + (/0, -1, 0, PdO_bridge2/))*nr_of_species**1
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow1/))*nr_of_species**2
-    n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
-
-    select case(n)
-    case(252)
-        nli_destruct9 = destruct9
-    case default
+    select case(get_species(cell + (/0, -1, 0, PdO_hollow2/)))
+      case(empty)
+        select case(get_species(cell + (/0, -1, 0, PdO_bridge2/)))
+          case(CO)
+            select case(get_species(cell + (/0, 0, 0, PdO_hollow1/)))
+              case(CO)
+                select case(get_species(cell + (/0, 0, 0, PdO_bridge1/)))
+                  case(empty)
+                    nli_destruct9 = destruct9
+                  case default
+                    nli_destruct9 = 0
+                end select
+              case default
+                nli_destruct9 = 0
+            end select
+          case default
+            nli_destruct9 = 0
+        end select
+      case default
         nli_destruct9 = 0
     end select
-
 
 end function nli_destruct9
 
@@ -2893,22 +2898,27 @@ pure function nli_destruct8(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_destruct8
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, -1, 0, PdO_hollow2/))*nr_of_species**0
-    n = n + get_species(cell + (/0, -1, 0, PdO_bridge2/))*nr_of_species**1
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow1/))*nr_of_species**2
-    n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
-
-    select case(n)
-    case(262)
-        nli_destruct8 = destruct8
-    case default
+    select case(get_species(cell + (/0, -1, 0, PdO_hollow2/)))
+      case(empty)
+        select case(get_species(cell + (/0, -1, 0, PdO_bridge2/)))
+          case(empty)
+            select case(get_species(cell + (/0, 0, 0, PdO_hollow1/)))
+              case(CO)
+                select case(get_species(cell + (/0, 0, 0, PdO_bridge1/)))
+                  case(empty)
+                    nli_destruct8 = destruct8
+                  case default
+                    nli_destruct8 = 0
+                end select
+              case default
+                nli_destruct8 = 0
+            end select
+          case default
+            nli_destruct8 = 0
+        end select
+      case default
         nli_destruct8 = 0
     end select
-
 
 end function nli_destruct8
 
@@ -2916,20 +2926,17 @@ pure function nli_o_COdif_h1h2up(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_o_COdif_h1h2up
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow1/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow2/))*nr_of_species**1
-
-    select case(n)
-    case(10)
-        nli_o_COdif_h1h2up = o_COdif_h1h2up
-    case default
+    select case(get_species(cell + (/0, 0, 0, PdO_hollow1/)))
+      case(CO)
+        select case(get_species(cell + (/0, 0, 0, PdO_hollow2/)))
+          case(empty)
+            nli_o_COdif_h1h2up = o_COdif_h1h2up
+          case default
+            nli_o_COdif_h1h2up = 0
+        end select
+      case default
         nli_o_COdif_h1h2up = 0
     end select
-
 
 end function nli_o_COdif_h1h2up
 
@@ -2937,22 +2944,27 @@ pure function nli_destruct3(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_destruct3
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, -1, 0, PdO_hollow2/))*nr_of_species**0
-    n = n + get_species(cell + (/0, -1, 0, PdO_bridge2/))*nr_of_species**1
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow1/))*nr_of_species**2
-    n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
-
-    select case(n)
-    case(62)
-        nli_destruct3 = destruct3
-    case default
+    select case(get_species(cell + (/0, -1, 0, PdO_hollow2/)))
+      case(empty)
+        select case(get_species(cell + (/0, -1, 0, PdO_bridge2/)))
+          case(empty)
+            select case(get_species(cell + (/0, 0, 0, PdO_hollow1/)))
+              case(empty)
+                select case(get_species(cell + (/0, 0, 0, PdO_bridge1/)))
+                  case(CO)
+                    nli_destruct3 = destruct3
+                  case default
+                    nli_destruct3 = 0
+                end select
+              case default
+                nli_destruct3 = 0
+            end select
+          case default
+            nli_destruct3 = 0
+        end select
+      case default
         nli_destruct3 = 0
     end select
-
 
 end function nli_destruct3
 
@@ -2960,22 +2972,27 @@ pure function nli_destruct2(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_destruct2
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, -1, 0, PdO_hollow2/))*nr_of_species**0
-    n = n + get_species(cell + (/0, -1, 0, PdO_bridge2/))*nr_of_species**1
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow1/))*nr_of_species**2
-    n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
-
-    select case(n)
-    case(302)
-        nli_destruct2 = destruct2
-    case default
+    select case(get_species(cell + (/0, -1, 0, PdO_hollow2/)))
+      case(empty)
+        select case(get_species(cell + (/0, -1, 0, PdO_bridge2/)))
+          case(CO)
+            select case(get_species(cell + (/0, 0, 0, PdO_hollow1/)))
+              case(empty)
+                select case(get_species(cell + (/0, 0, 0, PdO_bridge1/)))
+                  case(empty)
+                    nli_destruct2 = destruct2
+                  case default
+                    nli_destruct2 = 0
+                end select
+              case default
+                nli_destruct2 = 0
+            end select
+          case default
+            nli_destruct2 = 0
+        end select
+      case default
         nli_destruct2 = 0
     end select
-
 
 end function nli_destruct2
 
@@ -2983,22 +3000,27 @@ pure function nli_destruct1(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_destruct1
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, -1, 0, PdO_hollow2/))*nr_of_species**0
-    n = n + get_species(cell + (/0, -1, 0, PdO_bridge2/))*nr_of_species**1
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow1/))*nr_of_species**2
-    n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
-
-    select case(n)
-    case(312)
-        nli_destruct1 = destruct1
-    case default
+    select case(get_species(cell + (/0, -1, 0, PdO_hollow2/)))
+      case(empty)
+        select case(get_species(cell + (/0, -1, 0, PdO_bridge2/)))
+          case(empty)
+            select case(get_species(cell + (/0, 0, 0, PdO_hollow1/)))
+              case(empty)
+                select case(get_species(cell + (/0, 0, 0, PdO_bridge1/)))
+                  case(empty)
+                    nli_destruct1 = destruct1
+                  case default
+                    nli_destruct1 = 0
+                end select
+              case default
+                nli_destruct1 = 0
+            end select
+          case default
+            nli_destruct1 = 0
+        end select
+      case default
         nli_destruct1 = 0
     end select
-
 
 end function nli_destruct1
 
@@ -3006,22 +3028,27 @@ pure function nli_destruct7(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_destruct7
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, -1, 0, PdO_hollow2/))*nr_of_species**0
-    n = n + get_species(cell + (/0, -1, 0, PdO_bridge2/))*nr_of_species**1
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow1/))*nr_of_species**2
-    n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
-
-    select case(n)
-    case(50)
-        nli_destruct7 = destruct7
-    case default
+    select case(get_species(cell + (/0, -1, 0, PdO_hollow2/)))
+      case(CO)
+        select case(get_species(cell + (/0, -1, 0, PdO_bridge2/)))
+          case(CO)
+            select case(get_species(cell + (/0, 0, 0, PdO_hollow1/)))
+              case(empty)
+                select case(get_species(cell + (/0, 0, 0, PdO_bridge1/)))
+                  case(CO)
+                    nli_destruct7 = destruct7
+                  case default
+                    nli_destruct7 = 0
+                end select
+              case default
+                nli_destruct7 = 0
+            end select
+          case default
+            nli_destruct7 = 0
+        end select
+      case default
         nli_destruct7 = 0
     end select
-
 
 end function nli_destruct7
 
@@ -3029,22 +3056,27 @@ pure function nli_destruct6(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_destruct6
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, -1, 0, PdO_hollow2/))*nr_of_species**0
-    n = n + get_species(cell + (/0, -1, 0, PdO_bridge2/))*nr_of_species**1
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow1/))*nr_of_species**2
-    n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
-
-    select case(n)
-    case(60)
-        nli_destruct6 = destruct6
-    case default
+    select case(get_species(cell + (/0, -1, 0, PdO_hollow2/)))
+      case(CO)
+        select case(get_species(cell + (/0, -1, 0, PdO_bridge2/)))
+          case(empty)
+            select case(get_species(cell + (/0, 0, 0, PdO_hollow1/)))
+              case(empty)
+                select case(get_species(cell + (/0, 0, 0, PdO_bridge1/)))
+                  case(CO)
+                    nli_destruct6 = destruct6
+                  case default
+                    nli_destruct6 = 0
+                end select
+              case default
+                nli_destruct6 = 0
+            end select
+          case default
+            nli_destruct6 = 0
+        end select
+      case default
         nli_destruct6 = 0
     end select
-
 
 end function nli_destruct6
 
@@ -3052,22 +3084,27 @@ pure function nli_destruct5(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_destruct5
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, -1, 0, PdO_hollow2/))*nr_of_species**0
-    n = n + get_species(cell + (/0, -1, 0, PdO_bridge2/))*nr_of_species**1
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow1/))*nr_of_species**2
-    n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
-
-    select case(n)
-    case(300)
-        nli_destruct5 = destruct5
-    case default
+    select case(get_species(cell + (/0, -1, 0, PdO_hollow2/)))
+      case(CO)
+        select case(get_species(cell + (/0, -1, 0, PdO_bridge2/)))
+          case(CO)
+            select case(get_species(cell + (/0, 0, 0, PdO_hollow1/)))
+              case(empty)
+                select case(get_species(cell + (/0, 0, 0, PdO_bridge1/)))
+                  case(empty)
+                    nli_destruct5 = destruct5
+                  case default
+                    nli_destruct5 = 0
+                end select
+              case default
+                nli_destruct5 = 0
+            end select
+          case default
+            nli_destruct5 = 0
+        end select
+      case default
         nli_destruct5 = 0
     end select
-
 
 end function nli_destruct5
 
@@ -3075,22 +3112,27 @@ pure function nli_destruct4(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_destruct4
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, -1, 0, PdO_hollow2/))*nr_of_species**0
-    n = n + get_species(cell + (/0, -1, 0, PdO_bridge2/))*nr_of_species**1
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow1/))*nr_of_species**2
-    n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
-
-    select case(n)
-    case(310)
-        nli_destruct4 = destruct4
-    case default
+    select case(get_species(cell + (/0, -1, 0, PdO_hollow2/)))
+      case(CO)
+        select case(get_species(cell + (/0, -1, 0, PdO_bridge2/)))
+          case(empty)
+            select case(get_species(cell + (/0, 0, 0, PdO_hollow1/)))
+              case(empty)
+                select case(get_species(cell + (/0, 0, 0, PdO_bridge1/)))
+                  case(empty)
+                    nli_destruct4 = destruct4
+                  case default
+                    nli_destruct4 = 0
+                end select
+              case default
+                nli_destruct4 = 0
+            end select
+          case default
+            nli_destruct4 = 0
+        end select
+      case default
         nli_destruct4 = 0
     end select
-
 
 end function nli_destruct4
 
@@ -3098,19 +3140,12 @@ pure function nli_m_COads_b10(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_m_COads_b10
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b10/))*nr_of_species**0
-
-    select case(n)
-    case(2)
+    select case(get_species(cell + (/0, 0, 0, Pd100_b10/)))
+      case(empty)
         nli_m_COads_b10 = m_COads_b10
-    case default
+      case default
         nli_m_COads_b10 = 0
     end select
-
 
 end function nli_m_COads_b10
 
@@ -3118,19 +3153,12 @@ pure function nli_m_COdes_b9(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_m_COdes_b9
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b9/))*nr_of_species**0
-
-    select case(n)
-    case(0)
+    select case(get_species(cell + (/0, 0, 0, Pd100_b9/)))
+      case(CO)
         nli_m_COdes_b9 = m_COdes_b9
-    case default
+      case default
         nli_m_COdes_b9 = 0
     end select
-
 
 end function nli_m_COdes_b9
 
@@ -3138,19 +3166,12 @@ pure function nli_m_COdes_b8(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_m_COdes_b8
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b8/))*nr_of_species**0
-
-    select case(n)
-    case(0)
+    select case(get_species(cell + (/0, 0, 0, Pd100_b8/)))
+      case(CO)
         nli_m_COdes_b8 = m_COdes_b8
-    case default
+      case default
         nli_m_COdes_b8 = 0
     end select
-
 
 end function nli_m_COdes_b8
 
@@ -3158,19 +3179,12 @@ pure function nli_o_COads_hollow2(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_o_COads_hollow2
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow2/))*nr_of_species**0
-
-    select case(n)
-    case(2)
+    select case(get_species(cell + (/0, 0, 0, PdO_hollow2/)))
+      case(empty)
         nli_o_COads_hollow2 = o_COads_hollow2
-    case default
+      case default
         nli_o_COads_hollow2 = 0
     end select
-
 
 end function nli_o_COads_hollow2
 
@@ -3178,19 +3192,12 @@ pure function nli_m_COdes_b5(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_m_COdes_b5
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b5/))*nr_of_species**0
-
-    select case(n)
-    case(0)
+    select case(get_species(cell + (/0, 0, 0, Pd100_b5/)))
+      case(CO)
         nli_m_COdes_b5 = m_COdes_b5
-    case default
+      case default
         nli_m_COdes_b5 = 0
     end select
-
 
 end function nli_m_COdes_b5
 
@@ -3198,19 +3205,12 @@ pure function nli_m_COdes_b4(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_m_COdes_b4
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b4/))*nr_of_species**0
-
-    select case(n)
-    case(0)
+    select case(get_species(cell + (/0, 0, 0, Pd100_b4/)))
+      case(CO)
         nli_m_COdes_b4 = m_COdes_b4
-    case default
+      case default
         nli_m_COdes_b4 = 0
     end select
-
 
 end function nli_m_COdes_b4
 
@@ -3218,19 +3218,12 @@ pure function nli_m_COdes_b7(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_m_COdes_b7
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b7/))*nr_of_species**0
-
-    select case(n)
-    case(0)
+    select case(get_species(cell + (/0, 0, 0, Pd100_b7/)))
+      case(CO)
         nli_m_COdes_b7 = m_COdes_b7
-    case default
+      case default
         nli_m_COdes_b7 = 0
     end select
-
 
 end function nli_m_COdes_b7
 
@@ -3238,19 +3231,12 @@ pure function nli_m_COdes_b6(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_m_COdes_b6
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b6/))*nr_of_species**0
-
-    select case(n)
-    case(0)
+    select case(get_species(cell + (/0, 0, 0, Pd100_b6/)))
+      case(CO)
         nli_m_COdes_b6 = m_COdes_b6
-    case default
+      case default
         nli_m_COdes_b6 = 0
     end select
-
 
 end function nli_m_COdes_b6
 
@@ -3258,19 +3244,12 @@ pure function nli_m_COdes_b1(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_m_COdes_b1
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b1/))*nr_of_species**0
-
-    select case(n)
-    case(0)
+    select case(get_species(cell + (/0, 0, 0, Pd100_b1/)))
+      case(CO)
         nli_m_COdes_b1 = m_COdes_b1
-    case default
+      case default
         nli_m_COdes_b1 = 0
     end select
-
 
 end function nli_m_COdes_b1
 
@@ -3278,19 +3257,12 @@ pure function nli_o_COads_hollow1(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_o_COads_hollow1
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow1/))*nr_of_species**0
-
-    select case(n)
-    case(2)
+    select case(get_species(cell + (/0, 0, 0, PdO_hollow1/)))
+      case(empty)
         nli_o_COads_hollow1 = o_COads_hollow1
-    case default
+      case default
         nli_o_COads_hollow1 = 0
     end select
-
 
 end function nli_o_COads_hollow1
 
@@ -3298,19 +3270,12 @@ pure function nli_m_COdes_b3(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_m_COdes_b3
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b3/))*nr_of_species**0
-
-    select case(n)
-    case(0)
+    select case(get_species(cell + (/0, 0, 0, Pd100_b3/)))
+      case(CO)
         nli_m_COdes_b3 = m_COdes_b3
-    case default
+      case default
         nli_m_COdes_b3 = 0
     end select
-
 
 end function nli_m_COdes_b3
 
@@ -3318,19 +3283,12 @@ pure function nli_m_COdes_b2(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_m_COdes_b2
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b2/))*nr_of_species**0
-
-    select case(n)
-    case(0)
+    select case(get_species(cell + (/0, 0, 0, Pd100_b2/)))
+      case(CO)
         nli_m_COdes_b2 = m_COdes_b2
-    case default
+      case default
         nli_m_COdes_b2 = 0
     end select
-
 
 end function nli_m_COdes_b2
 
@@ -3338,19 +3296,12 @@ pure function nli_m_COads_b3(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_m_COads_b3
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b3/))*nr_of_species**0
-
-    select case(n)
-    case(2)
+    select case(get_species(cell + (/0, 0, 0, Pd100_b3/)))
+      case(empty)
         nli_m_COads_b3 = m_COads_b3
-    case default
+      case default
         nli_m_COads_b3 = 0
     end select
-
 
 end function nli_m_COads_b3
 
@@ -3358,19 +3309,12 @@ pure function nli_m_COads_b2(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_m_COads_b2
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b2/))*nr_of_species**0
-
-    select case(n)
-    case(2)
+    select case(get_species(cell + (/0, 0, 0, Pd100_b2/)))
+      case(empty)
         nli_m_COads_b2 = m_COads_b2
-    case default
+      case default
         nli_m_COads_b2 = 0
     end select
-
 
 end function nli_m_COads_b2
 
@@ -3378,19 +3322,12 @@ pure function nli_m_COads_b1(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_m_COads_b1
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b1/))*nr_of_species**0
-
-    select case(n)
-    case(2)
+    select case(get_species(cell + (/0, 0, 0, Pd100_b1/)))
+      case(empty)
         nli_m_COads_b1 = m_COads_b1
-    case default
+      case default
         nli_m_COads_b1 = 0
     end select
-
 
 end function nli_m_COads_b1
 
@@ -3398,19 +3335,12 @@ pure function nli_m_COads_b7(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_m_COads_b7
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b7/))*nr_of_species**0
-
-    select case(n)
-    case(2)
+    select case(get_species(cell + (/0, 0, 0, Pd100_b7/)))
+      case(empty)
         nli_m_COads_b7 = m_COads_b7
-    case default
+      case default
         nli_m_COads_b7 = 0
     end select
-
 
 end function nli_m_COads_b7
 
@@ -3418,19 +3348,12 @@ pure function nli_m_COads_b6(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_m_COads_b6
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b6/))*nr_of_species**0
-
-    select case(n)
-    case(2)
+    select case(get_species(cell + (/0, 0, 0, Pd100_b6/)))
+      case(empty)
         nli_m_COads_b6 = m_COads_b6
-    case default
+      case default
         nli_m_COads_b6 = 0
     end select
-
 
 end function nli_m_COads_b6
 
@@ -3438,19 +3361,12 @@ pure function nli_m_COads_b5(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_m_COads_b5
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b5/))*nr_of_species**0
-
-    select case(n)
-    case(2)
+    select case(get_species(cell + (/0, 0, 0, Pd100_b5/)))
+      case(empty)
         nli_m_COads_b5 = m_COads_b5
-    case default
+      case default
         nli_m_COads_b5 = 0
     end select
-
 
 end function nli_m_COads_b5
 
@@ -3458,19 +3374,12 @@ pure function nli_m_COads_b4(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_m_COads_b4
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b4/))*nr_of_species**0
-
-    select case(n)
-    case(2)
+    select case(get_species(cell + (/0, 0, 0, Pd100_b4/)))
+      case(empty)
         nli_m_COads_b4 = m_COads_b4
-    case default
+      case default
         nli_m_COads_b4 = 0
     end select
-
 
 end function nli_m_COads_b4
 
@@ -3478,19 +3387,12 @@ pure function nli_m_COads_b9(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_m_COads_b9
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b9/))*nr_of_species**0
-
-    select case(n)
-    case(2)
+    select case(get_species(cell + (/0, 0, 0, Pd100_b9/)))
+      case(empty)
         nli_m_COads_b9 = m_COads_b9
-    case default
+      case default
         nli_m_COads_b9 = 0
     end select
-
 
 end function nli_m_COads_b9
 
@@ -3498,19 +3400,12 @@ pure function nli_m_COads_b8(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_m_COads_b8
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b8/))*nr_of_species**0
-
-    select case(n)
-    case(2)
+    select case(get_species(cell + (/0, 0, 0, Pd100_b8/)))
+      case(empty)
         nli_m_COads_b8 = m_COads_b8
-    case default
+      case default
         nli_m_COads_b8 = 0
     end select
-
 
 end function nli_m_COads_b8
 
@@ -3518,19 +3413,12 @@ pure function nli_o_COdes_bridge2(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_o_COdes_bridge2
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, PdO_bridge2/))*nr_of_species**0
-
-    select case(n)
-    case(0)
+    select case(get_species(cell + (/0, 0, 0, PdO_bridge2/)))
+      case(CO)
         nli_o_COdes_bridge2 = o_COdes_bridge2
-    case default
+      case default
         nli_o_COdes_bridge2 = 0
     end select
-
 
 end function nli_o_COdes_bridge2
 
@@ -3538,19 +3426,12 @@ pure function nli_o_COdes_bridge1(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_o_COdes_bridge1
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**0
-
-    select case(n)
-    case(0)
+    select case(get_species(cell + (/0, 0, 0, PdO_bridge1/)))
+      case(CO)
         nli_o_COdes_bridge1 = o_COdes_bridge1
-    case default
+      case default
         nli_o_COdes_bridge1 = 0
     end select
-
 
 end function nli_o_COdes_bridge1
 
@@ -3558,20 +3439,17 @@ pure function nli_o_COdif_h1h2down(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_o_COdif_h1h2down
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, -1, 0, PdO_hollow2/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow1/))*nr_of_species**1
-
-    select case(n)
-    case(2)
-        nli_o_COdif_h1h2down = o_COdif_h1h2down
-    case default
+    select case(get_species(cell + (/0, -1, 0, PdO_hollow2/)))
+      case(empty)
+        select case(get_species(cell + (/0, 0, 0, PdO_hollow1/)))
+          case(CO)
+            nli_o_COdif_h1h2down = o_COdif_h1h2down
+          case default
+            nli_o_COdif_h1h2down = 0
+        end select
+      case default
         nli_o_COdif_h1h2down = 0
     end select
-
 
 end function nli_o_COdif_h1h2down
 
@@ -3579,20 +3457,17 @@ pure function nli_o_O2des_h2h1(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_o_O2des_h2h1
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow2/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 1, 0, PdO_hollow1/))*nr_of_species**1
-
-    select case(n)
-    case(18)
-        nli_o_O2des_h2h1 = o_O2des_h2h1
-    case default
+    select case(get_species(cell + (/0, 0, 0, PdO_hollow2/)))
+      case(oxygen)
+        select case(get_species(cell + (/0, 1, 0, PdO_hollow1/)))
+          case(oxygen)
+            nli_o_O2des_h2h1 = o_O2des_h2h1
+          case default
+            nli_o_O2des_h2h1 = 0
+        end select
+      case default
         nli_o_O2des_h2h1 = 0
     end select
-
 
 end function nli_o_O2des_h2h1
 
@@ -3600,19 +3475,12 @@ pure function nli_o_COdes_hollow1(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_o_COdes_hollow1
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow1/))*nr_of_species**0
-
-    select case(n)
-    case(0)
+    select case(get_species(cell + (/0, 0, 0, PdO_hollow1/)))
+      case(CO)
         nli_o_COdes_hollow1 = o_COdes_hollow1
-    case default
+      case default
         nli_o_COdes_hollow1 = 0
     end select
-
 
 end function nli_o_COdes_hollow1
 
@@ -3620,19 +3488,12 @@ pure function nli_o_COdes_hollow2(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_o_COdes_hollow2
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow2/))*nr_of_species**0
-
-    select case(n)
-    case(0)
+    select case(get_species(cell + (/0, 0, 0, PdO_hollow2/)))
+      case(CO)
         nli_o_COdes_hollow2 = o_COdes_hollow2
-    case default
+      case default
         nli_o_COdes_hollow2 = 0
     end select
-
 
 end function nli_o_COdes_hollow2
 
@@ -3640,20 +3501,17 @@ pure function nli_o_O2des_h1h2(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_o_O2des_h1h2
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow1/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow2/))*nr_of_species**1
-
-    select case(n)
-    case(18)
-        nli_o_O2des_h1h2 = o_O2des_h1h2
-    case default
+    select case(get_species(cell + (/0, 0, 0, PdO_hollow1/)))
+      case(oxygen)
+        select case(get_species(cell + (/0, 0, 0, PdO_hollow2/)))
+          case(oxygen)
+            nli_o_O2des_h1h2 = o_O2des_h1h2
+          case default
+            nli_o_O2des_h1h2 = 0
+        end select
+      case default
         nli_o_O2des_h1h2 = 0
     end select
-
 
 end function nli_o_O2des_h1h2
 
@@ -3661,22 +3519,27 @@ pure function nli_destruct11(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_destruct11
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, -1, 0, PdO_hollow2/))*nr_of_species**0
-    n = n + get_species(cell + (/0, -1, 0, PdO_bridge2/))*nr_of_species**1
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow1/))*nr_of_species**2
-    n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
-
-    select case(n)
-    case(2)
-        nli_destruct11 = destruct11
-    case default
+    select case(get_species(cell + (/0, -1, 0, PdO_hollow2/)))
+      case(empty)
+        select case(get_species(cell + (/0, -1, 0, PdO_bridge2/)))
+          case(CO)
+            select case(get_species(cell + (/0, 0, 0, PdO_hollow1/)))
+              case(CO)
+                select case(get_species(cell + (/0, 0, 0, PdO_bridge1/)))
+                  case(CO)
+                    nli_destruct11 = destruct11
+                  case default
+                    nli_destruct11 = 0
+                end select
+              case default
+                nli_destruct11 = 0
+            end select
+          case default
+            nli_destruct11 = 0
+        end select
+      case default
         nli_destruct11 = 0
     end select
-
 
 end function nli_destruct11
 
@@ -3684,22 +3547,27 @@ pure function nli_destruct10(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_destruct10
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, -1, 0, PdO_hollow2/))*nr_of_species**0
-    n = n + get_species(cell + (/0, -1, 0, PdO_bridge2/))*nr_of_species**1
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow1/))*nr_of_species**2
-    n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**3
-
-    select case(n)
-    case(12)
-        nli_destruct10 = destruct10
-    case default
+    select case(get_species(cell + (/0, -1, 0, PdO_hollow2/)))
+      case(empty)
+        select case(get_species(cell + (/0, -1, 0, PdO_bridge2/)))
+          case(empty)
+            select case(get_species(cell + (/0, 0, 0, PdO_hollow1/)))
+              case(CO)
+                select case(get_species(cell + (/0, 0, 0, PdO_bridge1/)))
+                  case(CO)
+                    nli_destruct10 = destruct10
+                  case default
+                    nli_destruct10 = 0
+                end select
+              case default
+                nli_destruct10 = 0
+            end select
+          case default
+            nli_destruct10 = 0
+        end select
+      case default
         nli_destruct10 = 0
     end select
-
 
 end function nli_destruct10
 
@@ -3707,23 +3575,32 @@ pure function nli_oxidize1(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_oxidize1
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, -1, 0, Pd100_b10/))*nr_of_species**0
-    n = n + get_species(cell + (/0, -1, 0, Pd100_b7/))*nr_of_species**1
-    n = n + get_species(cell + (/0, 0, 0, Pd100_h1/))*nr_of_species**2
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b1/))*nr_of_species**3
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b9/))*nr_of_species**4
-
-    select case(n)
-    case(1587)
-        nli_oxidize1 = oxidize1
-    case default
+    select case(get_species(cell + (/0, -1, 0, Pd100_b10/)))
+      case(empty)
+        select case(get_species(cell + (/0, -1, 0, Pd100_b7/)))
+          case(empty)
+            select case(get_species(cell + (/0, 0, 0, Pd100_h1/)))
+              case(oxygen)
+                select case(get_species(cell + (/0, 0, 0, Pd100_b1/)))
+                  case(empty)
+                    select case(get_species(cell + (/0, 0, 0, Pd100_b9/)))
+                      case(empty)
+                        nli_oxidize1 = oxidize1
+                      case default
+                        nli_oxidize1 = 0
+                    end select
+                  case default
+                    nli_oxidize1 = 0
+                end select
+              case default
+                nli_oxidize1 = 0
+            end select
+          case default
+            nli_oxidize1 = 0
+        end select
+      case default
         nli_oxidize1 = 0
     end select
-
 
 end function nli_oxidize1
 
@@ -3731,20 +3608,17 @@ pure function nli_o_O2ads_h2h1(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_o_O2ads_h2h1
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow2/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 1, 0, PdO_hollow1/))*nr_of_species**1
-
-    select case(n)
-    case(12)
-        nli_o_O2ads_h2h1 = o_O2ads_h2h1
-    case default
+    select case(get_species(cell + (/0, 0, 0, PdO_hollow2/)))
+      case(empty)
+        select case(get_species(cell + (/0, 1, 0, PdO_hollow1/)))
+          case(empty)
+            nli_o_O2ads_h2h1 = o_O2ads_h2h1
+          case default
+            nli_o_O2ads_h2h1 = 0
+        end select
+      case default
         nli_o_O2ads_h2h1 = 0
     end select
-
 
 end function nli_o_O2ads_h2h1
 
@@ -3752,19 +3626,12 @@ pure function nli_o_COads_bridge1(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_o_COads_bridge1
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, PdO_bridge1/))*nr_of_species**0
-
-    select case(n)
-    case(2)
+    select case(get_species(cell + (/0, 0, 0, PdO_bridge1/)))
+      case(empty)
         nli_o_COads_bridge1 = o_COads_bridge1
-    case default
+      case default
         nli_o_COads_bridge1 = 0
     end select
-
 
 end function nli_o_COads_bridge1
 
@@ -3772,19 +3639,12 @@ pure function nli_m_COdes_b10(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_m_COdes_b10
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, Pd100_b10/))*nr_of_species**0
-
-    select case(n)
-    case(0)
+    select case(get_species(cell + (/0, 0, 0, Pd100_b10/)))
+      case(CO)
         nli_m_COdes_b10 = m_COdes_b10
-    case default
+      case default
         nli_m_COdes_b10 = 0
     end select
-
 
 end function nli_m_COdes_b10
 
@@ -3792,19 +3652,12 @@ pure function nli_o_COads_bridge2(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_o_COads_bridge2
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, PdO_bridge2/))*nr_of_species**0
-
-    select case(n)
-    case(2)
+    select case(get_species(cell + (/0, 0, 0, PdO_bridge2/)))
+      case(empty)
         nli_o_COads_bridge2 = o_COads_bridge2
-    case default
+      case default
         nli_o_COads_bridge2 = 0
     end select
-
 
 end function nli_o_COads_bridge2
 
@@ -3812,20 +3665,17 @@ pure function nli_o_O2ads_h1h2(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
     integer(kind=iint) :: nli_o_O2ads_h1h2
 
-    integer(kind=ilong) :: n
-
-    n = 0
-
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow1/))*nr_of_species**0
-    n = n + get_species(cell + (/0, 0, 0, PdO_hollow2/))*nr_of_species**1
-
-    select case(n)
-    case(12)
-        nli_o_O2ads_h1h2 = o_O2ads_h1h2
-    case default
+    select case(get_species(cell + (/0, 0, 0, PdO_hollow1/)))
+      case(empty)
+        select case(get_species(cell + (/0, 0, 0, PdO_hollow2/)))
+          case(empty)
+            nli_o_O2ads_h1h2 = o_O2ads_h1h2
+          case default
+            nli_o_O2ads_h1h2 = 0
+        end select
+      case default
         nli_o_O2ads_h1h2 = 0
     end select
-
 
 end function nli_o_O2ads_h1h2
 
