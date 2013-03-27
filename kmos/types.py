@@ -299,7 +299,6 @@ class Project(object):
             for condition in process.condition_list:
                 condition_elem = ET.SubElement(process_elem, 'condition')
                 condition_elem.set('species', condition.species)
-                condition_elem.set('implicit', str(condition.implicit))
                 condition_elem.set('coord_layer', condition.coord.layer)
                 condition_elem.set('coord_name', condition.coord.name)
                 condition_elem.set('coord_offset',
