@@ -1023,7 +1023,7 @@ class Coord(FixedObject):
                (other.layer, other.name)) and (self.offset == other.offset).all()
 
     def __hash__(self):
-        return self.__repr__()
+        return hash(self.__repr__())
 
     def __sub__(a, b):
         """When subtracting two lattice coordinates from each other,
@@ -1265,7 +1265,7 @@ class ConditionAction(FixedObject):
                 ' (implicit)' if self.implicit else ''))
 
     def __hash__(self):
-        return self.__repr__()
+        return hash(self.__repr__())
 
 
 # Add aliases for ConditionAction
