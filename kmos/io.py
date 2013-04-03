@@ -34,6 +34,10 @@ from kmos.types import cmp_coords
 
 def _casetree_dict(dictionary, indent='', out=None):
     """ Recursively prints nested dictionaries."""
+    # Fortran90 always expects the default branch
+    # at the end of a 'select case' statement.
+    # Thus we use reversed() to move the 'default'
+    # branch from the beginning to the end.
     for key, value in reversed(list(dictionary.iteritems())):
         if isinstance(value, dict):
             if isinstance(key, Coord):
@@ -1238,7 +1242,20 @@ class ProcListWriter():
                 progress_bar.render(int(10+40*float(lat_int_loop)/len(lat_int_groups)),
                                     'run_proc_%s' % lat_int_group)
 
-    def write_proclist_lat_int_nli_casetree(selef, data, lat_int_groups, progress_bar, out):
+    def write_proclist_lat_int_nli_casetree(self, data, lat_int_groups, progress_bar, out):
+        """
+        Write out subroutines that do the following:
+        Take a given cell and determine from a group a processes
+        that only differ by lateral interaction which one is possible.
+        This version writes out explicit 'select case'-tree which is
+        somewhat slower than the module version but can theoretically
+        accomodate for infinitely many conditions for one elementary step.
+
+        If no process is applicable an integer "0"
+        is returned.
+
+        """
+
         for lat_int_loop, (lat_int_group, processes) in enumerate(lat_int_groups.iteritems()):
             fname = 'nli_%s' % lat_int_group
             if data.meta.debug > 0:
@@ -1255,8 +1272,13 @@ class ProcListWriter():
 
 
 
+            #######################################################
             # sort processes into a nested list (dictionary)
             # ordered by coords
+            #######################################################
+
+            # first build up a tree where each result has all
+            # the needed conditions as parent nodes
             case_tree = {}
             for process in processes:
                 conditions = [y for y in sorted(process.condition_list + process.bystanders,
@@ -1269,13 +1291,15 @@ class ProcListWriter():
                     species_node.setdefault('default', {fname: 0})
                 node[fname] = process.name
 
+            # second write out the generated tree by traversing it
             _casetree_dict(case_tree, '    ', out)
 
+            out.write('\nend function %s\n\n' % (fname))
+
+            # update the progress bar
             if os.name == 'posix':
                 progress_bar.render(int(50+50*float(lat_int_loop)/len(lat_int_groups)),
                                     'nli_%s' % lat_int_group)
-
-            out.write('\nend function %s\n\n' % (fname))
 
     def write_proclist_lat_int_nli_caselist(self, data, lat_int_groups, progress_bar, out):
         """
@@ -1288,6 +1312,11 @@ class ProcListWriter():
         corrresponding to the present configuration.
         If no process is applicable an integer "0"
         is returned.
+
+        This version is the fastest found so far but has the problem
+        that nr_of_species**nr_of_sites quickly runs over sys.max_int
+        or whatever is the largest available integer for your Fortran
+        compiler.
 
         """
 
