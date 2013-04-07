@@ -704,13 +704,13 @@ class KMC_Model(multiprocessing.Process):
         elif order == 'nrofsites':
             entries = sorted(entries, key=lambda x: x[0])
         elif order == '-name':
-            entries = sorted(entries, key=lambda x: - x[3])
+            entries = reversed(sorted(entries, key=lambda x: x[3]))
         elif order == '-rate':
-            entries = sorted(entries, key=lambda x: - x[2])
+            entries = reversed(sorted(entries, key=lambda x: x[2]))
         elif order == '-rate_constant':
-            entries = sorted(entries, key=lambda x: - x[1])
+            entries = reversed(sorted(entries, key=lambda x: x[1]))
         elif order == '-nrofsites':
-            entries = sorted(entries, key=lambda x: - x[0])
+            entries = reversed(sorted(entries, key=lambda x: x[0]))
 
         # print
         res = ''
