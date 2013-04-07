@@ -675,8 +675,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         finally:
             self.draw_from_data()
 
-    def query_tooltip(self, _canvas, widget, tooltip):
-        tooltip.set_text(widget.tooltip_text)
+    def query_tooltip(self, item, x, y, keyboard_mode, tooltip, *args, **kwargs):
+        tooltip.set_text(item.tooltip_text)
         return True
 
     def on_lattice(self, x, y):
@@ -755,7 +755,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.chemical_expression.update(self.generate_expression(), )
         self.canvas.redraw()
 
-    def draw_from_data(self):
+    def draw_from_data_old(self):
         """Places circles on the current lattice according
         to the conditions and actions defined
         """
@@ -903,6 +903,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 o.set_radius(self.r_cond)
                 o.type = 'condition'
                 o.condition = elem
+                o.tooltip_text = '%s@%s' % (elem.species, elem.coord)  # for tooltip
+                o.connect('query-tooltip', self.query_tooltip)
 
         for elem in self.process.action_list:
             matching_sites = [x for x in self.site_layer
@@ -941,6 +943,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 o.set_radius(radius)
                 o.type = 'action'
                 o.action = elem
+                o.tooltip_text = '%s@%s' % (elem.species, elem.coord)  # for tooltip
+                o.connect('query-tooltip', self.query_tooltip)
 
     def draw_from_data(self):
         atoms = self._get_atoms()
@@ -970,6 +974,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.canvas = canvas
         root = canvas.get_root_item()
         canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
+        canvas.set_property('has-tooltip', True)
         #canvas.grab_focus()
         canvas.show()
         self.process_pad.add(canvas)
@@ -1010,6 +1015,11 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                     X, Y = toscrn(x*atoms.cell[0]
                                   + y*atoms.cell[1]
                                   + np.inner(atoms.cell.T, site.pos))
+                    tooltip = '%s.(%s, %s, 0).%s' % (site.name,
+                                                     x-1, y-1,
+                                                     self.project_tree.get_layers()[0].name
+                                                     )
+
                     o = goocanvas.Ellipse(parent=root,
                                           center_x=X,
                                           center_y=Y,
@@ -1017,7 +1027,9 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                                           radius_y=.5 * radius,
                                           stroke_color='black',
                                           fill_color='white',
-                                          line_width=1.0,)
+                                          line_width=1.0,
+                                          tooltip=tooltip,
+                                          )
 
         # draw reservoir circles
         for k, species in enumerate(self.project_tree.get_speciess()):
@@ -1028,9 +1040,9 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                            radius_x=0.8*radius,
                            radius_y=0.8*radius,
                            stroke_color='black',
-                           fill_color_rgba=eval('0x' + species.color[1:] + 'ff' ))
-            o.tooltip_text = species.name  # for tooltip
-            o.connect('query-tooltip', self.query_tooltip)
+                           fill_color_rgba=eval('0x' + species.color[1:] + 'ff' ),
+                           tooltip=species.name,
+                           )
 
         for elem in self.process.condition_list:
             pos = [x.pos
@@ -1041,13 +1053,20 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             species_color = [x.color for x in self.project_tree.get_speciess()
                              if x.name == elem.species][0]
             center = toscrn(np.inner(pos + elem.coord.offset + center_x, atoms.cell.T))
+
+            tooltip = 'Condition: %s@%s.%s.%s' % (elem.species,
+                                       elem.coord.name,
+                                       tuple(elem.coord.offset),
+                                       elem.coord.layer)  # for tooltip
             o = goocanvas.Ellipse(parent=root,
                                   center_x=center[0],
                                   center_y=center[1],
                                   radius_x=0.8*radius,
                                   radius_y=0.8*radius,
-                           stroke_color='black',
-                           fill_color_rgba=eval('0x' + species_color[1:] + 'ff' ))
+                                  stroke_color='black',
+                                  fill_color_rgba=eval('0x' + species_color[1:] + 'ff' ),
+                                  tooltip=tooltip,
+                                  )
 
 
         for elem in self.process.action_list:
@@ -1060,13 +1079,19 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                       ][0]
 
             center = toscrn(np.inner(pos + elem.coord.offset + center_x, atoms.cell.T))
+            tooltip = 'Action: %s@%s.%s.%s' % (elem.species,
+                                       elem.coord.name,
+                                       tuple(elem.coord.offset),
+                                       elem.coord.layer)  # for tooltip
             o = goocanvas.Ellipse(parent=root,
                                   center_x=center[0],
                                   center_y=center[1],
                                   radius_x=0.4*radius,
                                   radius_y=0.4*radius,
-                           stroke_color='black',
-                           fill_color_rgba=eval('0x' + species_color[1:] + 'ff' ))
+                                  stroke_color='black',
+                                  fill_color_rgba=eval('0x' + species_color[1:] + 'ff' ),
+                                  tooltip=tooltip,
+                                  )
 
 
 
