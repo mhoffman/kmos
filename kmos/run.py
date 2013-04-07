@@ -73,6 +73,8 @@ except Exception, e:
 
 
 INTERACTIVE = hasattr(sys, 'ps1') or hasattr(sys, 'ipcompleter')
+INTERACTIVE = True  # Turn it off for now because it doesn work reliably
+
 
 class KMC_Model(multiprocessing.Process):
     """API Front-end to initialize and run a kMC model using python bindings.
@@ -108,10 +110,10 @@ class KMC_Model(multiprocessing.Process):
 
         if size is None:
             size = settings.simulation_size
-        if isinstance(size, int) :
-            self.size = np.array([size]*int(lattice.model_dimension))
-        elif isinstance(size, (tuple, list)) :
-            if not len(size) == lattice.model_dimension :
+        if isinstance(size, int):
+            self.size = np.array([size] * int(lattice.model_dimension))
+        elif isinstance(size, (tuple, list)):
+            if not len(size) == lattice.model_dimension:
                 raise UserWarning(('You requested a size %s '
                                    '(i. e. %s dimensions),\n '
                                    'but the compiled model'
@@ -176,19 +178,20 @@ class KMC_Model(multiprocessing.Process):
         self.integ_rates = np.zeros((proclist.nr_of_proc, ))
         self.time = 0.
 
-        self.species_representation = []
+        self.species_representation = {}
         for species in sorted(settings.representations):
             if settings.representations[species].strip():
                 try:
-                    self.species_representation.append(
-                        eval(settings.representations[species]))
+                    self.species_representation[len(self.species_representation)] \
+                    = eval(settings.representations[species])
                 except Exception, e:
                     print('Trouble with representation %s'
                            % settings.representations[species])
                     print(e)
                     raise
             else:
-                self.species_representation.append(Atoms())
+                self.species_representation[len(self.species_representation)] = Atoms()
+                #self.species_representation.append(Atoms())
         if hasattr(settings, 'species_tags'):
             self.species_tags = settings.species_tags
         else:
@@ -419,7 +422,7 @@ class KMC_Model(multiprocessing.Process):
                             species = lattice.get_species([i, j, k, n])
                             if species == self.null_species:
                                 continue
-                            if self.species_representation[species]:
+                            if self.species_representation.get(species, ''):
                                 # create the ad_atoms
                                 ad_atoms = deepcopy(
                                     self.species_representation[species])
@@ -439,7 +442,7 @@ class KMC_Model(multiprocessing.Process):
                                         kmos_tags[atom] = \
                                         self.species_tags.values()[species]
 
-                        if self.lattice_representation :
+                        if self.lattice_representation:
                             lattice_repr = deepcopy(self.lattice_representation)
                             lattice_repr.translate(np.dot(np.array([i, j, k]),
                                                           lattice.unit_cell_size))
@@ -619,6 +622,21 @@ class KMC_Model(multiprocessing.Process):
     def switch_surface_processes_on(self):
         set_rate_constants(settings.parameters, self.print_rates)
 
+    def print_adjustable_parameters(self, match=None):
+        res = ''
+        w = 80
+        res += (w * '-') + '\n'
+        for i, attr in enumerate(sorted(self.settings.parameters)):
+            if (match is None or fnmatch(attr, match))\
+                and settings.parameters[attr]['adjustable']:
+                res += '|{0:^78s}|\n'.format((' %40s = %s'
+                      % (attr, settings.parameters[attr]['value'])))
+        res += (w * '-') + '\n'
+        if INTERACTIVE:
+            print(res)
+        else:
+            return res
+
     def print_coverages(self):
         """Show coverages (per unit cell) for each species
         and site type for current configurations.
@@ -639,17 +657,19 @@ class KMC_Model(multiprocessing.Process):
 
         header_line = ('|' +
                       ('%18s|' % 'site \ species') +
-                      '|'.join([ ('%11s' % sn) for sn in species_names ] + ['']))
-        print(len(header_line)*'-')
+                      '|'.join([('%11s' % sn)
+                                for sn in species_names] + ['']))
+        print(len(header_line) * '-')
         print(header_line)
-        print(len(header_line)*'-')
+        print(len(header_line) * '-')
         for i in range(self.lattice.spuck):
-            site_name = self.settings.site_names[i];
+            site_name = self.settings.site_names[i]
             print('|'
                  + '{0:<18s}|'.format(site_name)
-                 + '|'.join([('{0:^11.5f}'.format(x) if x else 11*' ') for x in list(occupation[:,i])]
+                 + '|'.join([('{0:^11.5f}'.format(x) if x else 11 * ' ')
+                             for x in list(occupation[:, i])]
                  + ['']))
-        print(len(header_line)*'-')
+        print(len(header_line) * '-')
         print('Units: "molecules (or atoms) per unit cell"')
 
     def print_accum_rate_summation(self, order='-rate'):
@@ -695,21 +715,22 @@ class KMC_Model(multiprocessing.Process):
         # print
         res = ''
         total_contribution = 0
-        res += ('(cumulative)    nrofsites * rate_constant    = rate            [name]\n')
-        res += ('-------------------------------------------------------------------------------\n')
+        res += ('+' + 118 * '-' + '+' + '\n')
+        res += '|{0:<118s}|\n'.format('(cumulative)    nrofsites * rate_constant'
+                                      '    = rate            [name]')
+        res += ('+' + 118 * '-' + '+' + '\n')
         for entry in entries:
             total_contribution += float(entry[2])
             percent = '(%8.4f %%)' % (total_contribution * 100 / accum_rate)
             entry = '% 12i * % 8.4e s^-1 = %8.4e s^-1 [%s]' % entry
-            res += ('%s %s\n' % (percent, entry))
+            res += '|{0:<118s}|\n'.format('%s %s' % (percent, entry))
 
-        res += ('-------------------------------------------------------------------------------\n')
-        res += ('  = total rate = %.8e s^-1\n' % accum_rate)
+        res += ('+' + 118 * '-' + '+' + '\n')
+        res += '|{0:<118s}|\n'.format(('  = total rate = %.8e s^-1'
+                                       % accum_rate))
+        res += ('+' + 118 * '-' + '+' + '\n')
 
-        if INTERACTIVE :
-            print(res)
-        else :
-            return res
+        print(res)
 
     def _put(self, site, new_species, reduce=False):
         """
@@ -719,7 +740,7 @@ class KMC_Model(multiprocessing.Process):
 
         Examples ::
 
-            model._put([0,0,0,model.lattice.lattice_bridge], model.proclist.co ])
+            model._put([0,0,0,model.lattice.lattice_bridge], model.proclist.co])
             # puts a CO molecule at the `bridge` site of the lower left unit cell
 
             model._put([1,0,0,model.lattice.lattice_bridge], model.proclist.co ])
@@ -985,7 +1006,7 @@ class KMC_Model(multiprocessing.Process):
         res = ''
         for label, ratio in ratios:
             res += ('%s: %s\n' % (label, ratio))
-        if INTERACTIVE :
+        if INTERACTIVE:
             print(res)
         else:
             return res
@@ -1032,12 +1053,16 @@ class Model_Parameters(object):
             self.__dict__[attr] = value
 
     def __repr__(self):
-        fixed_parameters = dict((name, param) for name, param in settings.parameters.items() if not param['adjustable'])
-        res = '# kMC model parameters (%i, fixed %i)\n' % (len(settings.parameters), len(fixed_parameters))
+        fixed_parameters = dict((name, param)
+                                for name, param
+                                in settings.parameters.items()
+                                if not param['adjustable'])
+        res = '# kMC model parameters (%i, fixed %i)\n' % (len(settings.parameters),
+                                                           len(fixed_parameters))
         res += '# --------------------\n'
         for attr in sorted(settings.parameters):
             res += ('# %s = %s' % (attr, settings.parameters[attr]['value']))
-            if settings.parameters[attr]['adjustable'] :
+            if settings.parameters[attr]['adjustable']:
                 res += '  # *\n'
             else:
                 res += '\n'
@@ -1060,9 +1085,9 @@ class Model_Parameters(object):
             if match is None or fnmatch(attr, match):
                 res += ('# %s = %s\n'
                       % (attr, settings.parameters[attr]['value']))
-        if INTERACTIVE :
+        if INTERACTIVE:
             print(res)
-        else :
+        else:
             return res
 
 
@@ -1107,8 +1132,9 @@ class Model_Rate_Constants(object):
                 rate_expr = settings.rate_constants[proc][0]
                 rate_const = evaluate_rate_expression(rate_expr,
                                                       settings.parameters)
-                res += ('# %s: %s = %.2e s^{-1}\n' % (proc, rate_expr, rate_const))
-        if INTERACTIVE :
+                res += ('# %s: %s = %.2e s^{-1}\n' % (proc, rate_expr,
+                                                      rate_const))
+        if INTERACTIVE:
             print(res)
         else:
             return res
