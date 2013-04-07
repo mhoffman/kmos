@@ -84,21 +84,27 @@ class Project(object):
 
         # Quick'n'dirty define access functions
         # needed in context with GTKProject
-        self.get_parameters = lambda: sorted(self.parameter_list,
-                                              key=lambda x: x.name)
-
         self.get_layers = lambda: sorted(self.layer_list,
                                           key=lambda x: x.name)
-
-        self.get_processes = lambda: sorted(self.process_list,
-                                             key=lambda x: x.name)
-
-        self.get_speciess = lambda: sorted(self.species_list,
-                                            key=lambda x: x.name)
 
         self.add_output = lambda output: self.output_list.append(output)
         self.get_outputs = lambda: sorted(self.output_list,
                                            key=lambda x: x.name)
+
+    def get_speciess(self, pattern=None):
+        return sorted([item for item in self.species_list
+                if pattern is None or fnmatch(item.name, pattern)
+               ], key=lambda x: x.name)
+
+    def get_parameters(self, pattern=None):
+        return sorted([item for item in self.parameter_list
+                if pattern is None or fnmatch(item.name, pattern)
+               ], key=lambda x: x.name)
+
+    def get_processes(self, pattern=None):
+        return sorted([item for item in self.process_list
+                if pattern is None or fnmatch(item.name, pattern)
+               ], key=lambda x: x.name)
 
     def add_parameter(self, *parameters, **kwargs):
         """Add a parameter to the project. A Parameter,
@@ -961,8 +967,10 @@ class Site(FixedObject):
             self.pos = np.array([0., 0., 0.])
 
     def __repr__(self):
-        return '[SITE] %s %s %s' % (self.name,
-                                   self.pos, self.tags)
+        return '[SITE] {0:12s} ({1:5s}) {2:s} {3:s}'.format(self.name,
+                                                            self.default_species,
+                                                            self.pos,
+                                                            self.tags)
 
 
 class ProcessFormSite(Site):
