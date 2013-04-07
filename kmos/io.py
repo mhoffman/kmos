@@ -994,7 +994,8 @@ class ProcListWriter():
                     if not(action.species.startswith('^')
                            or action.species.startswith('$')):
                         #raise UserWarning('Found unmatched action that is not a multi-lattice action: %s' % action)
-                        print(('UserWarning: Found unmatched action that is not a multi-lattice action: %s' % action))
+                        print(('UserWarning: Found unmatched action (%s) that is not a multi-lattice action: %s'
+                               % (process.name, action)))
                         # turn exceptions into warning for now
                     else:
                         true_actions.append(action)
