@@ -416,7 +416,7 @@ def T_grid(T_min, T_max, n):
     grid.reverse()
     grid = [x ** (-1.) for x in grid]
 
-    return grid
+    return np.array(grid)
 
 
 def p_grid(p_min, p_max, n):
