@@ -647,8 +647,8 @@ class Project(object):
         for process in self.get_processes():
             for x in process.condition_list:
                 if len([y for y in process.condition_list if x == y]) > 1:
-                    raise UserWarning('%s of process %s is not unique!' %
-                                        (x, process.name))
+                    raise UserWarning('%s of process %s is not unique!\n\n%s' %
+                                        (x, process.name, process))
         # check if actions for each process are unique
         for process in self.get_processes():
             for x in process.action_list:
