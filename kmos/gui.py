@@ -365,14 +365,14 @@ class UndoStack():
 
     def start_new_action(self, action, elem):
         """Puts a new diff on the stack of actions."""
-        if self.get_state_cb() != self.state:
-            self.head += 1
-            self.stack = self.stack[:self.head] + [{
-                'action':self.current_action,
-                'state':self.get_state_cb(),
-                'elem':self.current_elem,
-                }]
-            self.state = self.get_state_cb()
+        #if self.get_state_cb() != self.state:
+            #self.head += 1
+            #self.stack = self.stack[:self.head] + [{
+                #'action':self.current_action,
+                #'state':self.get_state_cb(),
+                #'elem':self.current_elem,
+                #}]
+            #self.state = self.get_state_cb()
         self.current_action = action
         self.current_elem = elem
         self.menubar.get_widget(
