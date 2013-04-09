@@ -666,11 +666,14 @@ class Project(object):
         species_names = [x.name for x in self.get_speciess()]
         for x in self.get_processes():
             for y in x.condition_list + x.action_list:
-                stripped_species = y.species.replace('$', '').replace('^', '')
-                if not stripped_species in species_names:
-                    raise UserWarning(('Species %s used by %s in process %s'
-                                       'is not defined') %
-                                       (y.species, y, x.name))
+                stripped_speciess = y.species.replace('$', '').replace('^', '')
+                stripped_speciess = map(lambda x: x.strip(), stripped_speciess.split('or'))
+
+                for stripped_species in stripped_speciess:
+                    if not stripped_species in species_names:
+                        raise UserWarning(('Species %s used by %s in process %s'
+                                           'is not defined') %
+                                           (y.species, y, x.name))
 
         # check if all sites in processes are defined: actions, conditions
         return True
