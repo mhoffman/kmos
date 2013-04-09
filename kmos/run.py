@@ -339,10 +339,13 @@ class KMC_Model(multiprocessing.Process):
                     atoms = self.get_atoms()
                     step = self.base.get_kmc_step()
                     from ase.io import write
-                    filename = '%s_%s.traj' % (self.settings.model_name,
-                                               step)
+                    filename = '%s_%s.traj' % (self.settings.model_name, step)
                     print('Wrote snapshot to %s' % filename)
                     write(filename, atoms)
+                elif signal.upper() == 'ACCUM_RATE_SUMMATION':
+                    self.print_accum_rate_summation()
+                elif signal.upper() == 'COVERAGE':
+                    self.print_coverages()
 
             if not self.parameter_queue.empty():
                 while not self.parameter_queue.empty():
