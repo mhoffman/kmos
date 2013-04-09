@@ -305,6 +305,8 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
             self.signal_queue.put('SWITCH_SURFACE_PROCESSES_OFF')
         elif event.string == 'S':
             self.signal_queue.put('SWITCH_SURFACE_PROCESSES_ON')
+        elif event.string == 'w':
+            self.signal_queue.put('WRITEOUT')
 
     def scroll_event(self, _window, event):
         """Zoom in/out when using mouse wheel"""

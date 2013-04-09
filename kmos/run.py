@@ -321,8 +321,10 @@ class KMC_Model(multiprocessing.Process):
                 elif signal.upper() == 'ATOMS':
                     self.image_queue.put(self.get_atoms())
                 elif signal.upper() == 'DOUBLE':
+                    print('Doubling model size')
                     self.double()
                 elif signal.upper() == 'HALVE':
+                    print('Halving model size')
                     self.halve()
                 elif signal.upper() == 'SWITCH_SURFACE_PROCESSES_OFF':
                     self.switch_surface_processes_off()
@@ -333,6 +335,14 @@ class KMC_Model(multiprocessing.Process):
                     self.terminate()
                 elif signal.upper() == 'JOIN':
                     self.join()
+                elif signal.upper() == 'WRITEOUT':
+                    atoms = self.get_atoms()
+                    step = self.base.get_kmc_step()
+                    from ase.io import write
+                    filename = '%s_%s.traj' % (self.settings.model_name,
+                                               step)
+                    print('Wrote snapshot to %s' % filename)
+                    write(filename, atoms)
 
             if not self.parameter_queue.empty():
                 while not self.parameter_queue.empty():
