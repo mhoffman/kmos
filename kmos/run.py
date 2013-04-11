@@ -61,6 +61,11 @@ except Exception, e:
     """ % e)
 
 try:
+    from kmc_model import proclist_constants
+except:
+    proclist_constants = None
+
+try:
     import kmc_settings as settings
 except Exception, e:
     settings = None
@@ -168,7 +173,10 @@ class KMC_Model(multiprocessing.Process):
         self.tofs = tofs = get_tof_names()
         self.tof_matrix = np.zeros((len(tofs), proclist.nr_of_proc))
         for process, tof_count in sorted(settings.tof_count.iteritems()):
-            process_nr = eval('proclist.%s' % process.lower())
+            try:
+                process_nr = eval('proclist.%s' % process.lower())
+            except:
+                process_nr = eval('proclist_constants.%s' % process.lower())
             for tof, tof_factor in tof_count.iteritems():
                 self.tof_matrix[tofs.index(tof), process_nr - 1] += tof_factor
 
@@ -1217,7 +1225,10 @@ def set_rate_constants(parameters=None, print_rates=True):
         rate_const = evaluate_rate_expression(rate_expr, parameters)
 
         try:
-            base.set_rate_const(eval('proclist.%s' % proc.lower()), rate_const)
+            if proclist_constants is None:
+                base.set_rate_const(eval('proclist.%s' % proc.lower()), rate_const)
+            else:
+                base.set_rate_const(eval('proclist_constants.%s' % proc.lower()), rate_const)
             if print_rates:
                 n = int(4 * log(rate_const))
                 print('%30s: %.3e s^{-1}: %s' % (proc, rate_const, '#' * n))

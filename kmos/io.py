@@ -54,7 +54,7 @@ def _casetree_dict(dictionary, indent='', out=None):
                     out.write('%scase %s\n' % (indent, key))
                     _casetree_dict(value, indent + '  ', out)
         else:
-            out.write(indent+'%s = %s\n' % (key, value))
+            out.write(indent+'%s = %s; return\n' % (key, value))
 
 def _print_dict(dictionary, indent = ''):
     """ Recursively prints nested dictionaries."""
@@ -82,6 +82,27 @@ def _chop_line(outstr, line_length=100):
         outstr_list.append(outstr[:NEXT_BREAK] + '&\n' )
         outstr = outstr[NEXT_BREAK:]
     return ''.join(outstr_list)
+
+
+def compact_deladd_init(modified_process, out):
+    n = len(modified_processes)
+    out.write('integer :: n\n')
+    out.write('integer, dimension(%s, 4) :: sites, cells\n\n' % n)
+
+def compact_deladd_statements(modified_processes, out, action):
+    n = len(modified_processes)
+    processes = []
+    sites = np.zeros((n, 4), int)
+    cells = np.zeros((n, 4), int)
+
+    for i, (process, offset) in enumerate(modified_procs):
+        cells[i, :] = np.array(offset + [0])
+        sites[i, :] = np.array(offset + [1])
+
+    out.write('do n = 1, %s\n' % (n + 1))
+    out.write('    call %s_proc(nli_%s(cell + %s), cell + %s)\n'
+        % ())
+    out.write('enddo\n')
 
 
 def _most_common(L):
@@ -460,9 +481,10 @@ class ProcListWriter():
             self.write_proclist_end(out)
 
         elif code_generator == 'lat_int':
-            self.write_proclist_generic_part(data, out, code_generator=code_generator)
+            constants_out = open('%s/proclist_constants.f90' % self.dir, 'w')
+            self.write_proclist_constants(data, constants_out, close_module=True, module_name='proclist_constants')
+            constants_out.close()
             self.write_proclist_lat_int(data, out)
-            #self.write_proclist_multilattice(data, out)
             self.write_proclist_end(out)
 
         else:
@@ -470,21 +492,24 @@ class ProcListWriter():
 
         out.close()
 
-    def write_proclist_generic_part(self, data, out, code_generator='local_smart'):
+    def write_proclist_constants(self, data, out,
+                                 code_generator='local_smart',
+                                 close_module=False,
+                                 module_name='proclist'):
         out.write(self._gpl_message())
-        out.write('!****h* kmos/proclist\n'
+        out.write(('!****h* kmos/proclist\n'
                   '! FUNCTION\n'
                   '!    Implements the kMC process list.\n'
                   '!\n'
                   '!******\n'
-                  '\n\nmodule proclist\n'
+                  '\n\nmodule %s\n'
                   'use kind_values\n'
                   'use base, only: &\n'
                   '    update_accum_rate, &\n'
                   '    update_integ_rate, &\n'
                   '    determine_procsite, &\n'
                   '    update_clocks, &\n'
-                  '    avail_sites, &\n')
+                  '    avail_sites, &\n') % module_name)
         if len(data.layer_list) == 1 : # multi-lattice mode
             out.write('    null_species, &\n')
         else:
@@ -526,36 +551,20 @@ class ProcListWriter():
             out.write('integer(kind=iint), parameter, public :: null_species = %s\n\n'\
                 % (len(data.species_list)))
         out.write('integer(kind=iint), public :: default_species = %s\n' % (data.species_list.default_species))
-        representation_length = max([len(species.representation) for species in data.species_list])
-
-        out.write('integer(kind=iint), parameter, public :: representation_length = %s\n' % representation_length)
-        if os.name == 'posix':
-            out.write('integer(kind=iint), public :: seed_size = 12\n')
-        elif os.name == 'nt':
-            out.write('integer(kind=iint), public :: seed_size = 12\n')
-        else:
-            out.write('integer(kind=iint), public :: seed_size = 8\n')
-
-        out.write('integer(kind=iint), public :: seed ! random seed\n')
-        out.write('integer(kind=iint), public, dimension(:), allocatable :: seed_arr ! random seed\n')
 
         out.write('\n\n! Process constants\n\n')
         for i, process in enumerate(self.data.process_list):
             out.write('integer(kind=iint), parameter, public :: %s = %s\n' % (process.name, i + 1))
 
-        out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_proc = %s\n'\
-            % (len(data.process_list)))
-        out.write('character(len=2000), dimension(%s) :: processes, rates'
-                  % (len(data.process_list)))
+        if close_module:
+            out.write('\n\nend module\n')
 
-        if code_generator == 'lat_int':
-            out.write('\ncharacter(len=%s), parameter, public :: backend = "%s"\n'
-                      % (len(code_generator), code_generator))
-        elif code_generator == 'local_smart':
-            pass # change nothing here, to not alter old code
-
+    def write_proclist_generic_part(self, data, out, code_generator='local_smart'):
+        self.write_proclist_constants(data, out, close_module=False)
         out.write('\n\ncontains\n\n')
+        self.write_proclist_generic_subroutines(data, out, code_generator=code_generator)
 
+    def write_proclist_generic_subroutines(self, data, out, code_generator='local_smart'):
         out.write('subroutine do_kmc_steps(n)\n\n'
                   '!****f* proclist/do_kmc_steps\n'
                   '! FUNCTION\n'
@@ -662,6 +671,7 @@ class ProcListWriter():
                   '!\n'
                   '!    ``none``\n'
                   '!******\n')
+        site_params = self._get_site_params()
         if len(data.layer_list) > 1 :  # multi-lattice mode
             out.write('    ! nr_of_species = %s, spuck = %s\n' % (len(data.species_list) + 1,
                                                                   len(site_params)))
@@ -1067,13 +1077,45 @@ class ProcListWriter():
         # lateral interaction groups
         lat_int_groups = self._get_lat_int_groups()
 
+        out.write('module proclist\n')
+        for i in range(len(lat_int_groups)):
+            out.write('use run_proc_%04d; use nli_%04d\n' % (i, i))
+        out.write('\nimplicit none\n')
+
+
+        representation_length = max([len(species.representation) for species in data.species_list])
+
+        out.write('integer(kind=iint), parameter, public :: representation_length = %s\n' % representation_length)
+        if os.name == 'posix':
+            out.write('integer(kind=iint), public :: seed_size = 12\n')
+        elif os.name == 'nt':
+            out.write('integer(kind=iint), public :: seed_size = 12\n')
+        else:
+            out.write('integer(kind=iint), public :: seed_size = 8\n')
+
+        out.write('integer(kind=iint), public :: seed ! random seed\n')
+        out.write('integer(kind=iint), public, dimension(:), allocatable :: seed_arr ! random seed\n')
+        out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_proc = %s\n'\
+            % (len(data.process_list)))
+        out.write('character(len=2000), dimension(%s) :: processes, rates'
+                  % (len(data.process_list)))
+
+        code_generator = 'lat_int'
+        if code_generator == 'lat_int':
+            out.write('\ncharacter(len=%s), parameter, public :: backend = "%s"\n'
+                      % (len(code_generator), code_generator))
+        elif code_generator == 'local_smart':
+            pass # change nothing here, to not alter old code
+
+
+        out.write('\ncontains\n\n')
 
         # write out the process list
         self.write_proclist_lat_int_run_proc_nr(data, lat_int_groups, progress_bar, out)
         self.write_proclist_lat_int_touchup(lat_int_groups, out)
-        self.write_proclist_lat_int_run_proc(data, lat_int_groups, progress_bar, out)
-        #self.write_proclist_lat_int_nli_caselist(data, lat_int_groups, progress_bar, out)
-        self.write_proclist_lat_int_nli_casetree(data, lat_int_groups, progress_bar, out)
+        self.write_proclist_generic_subroutines(data, out, code_generator='lat_int')
+        self.write_proclist_lat_int_run_proc(data, lat_int_groups, progress_bar)
+        self.write_proclist_lat_int_nli_casetree(data, lat_int_groups, progress_bar)
 
         # and we are done!
         if os.name == 'posix':
@@ -1137,7 +1179,7 @@ class ProcListWriter():
         out.write('end subroutine touchup_cell\n\n')
 
 
-    def write_proclist_lat_int_run_proc(self, data, lat_int_groups, progress_bar, out):
+    def write_proclist_lat_int_run_proc(self, data, lat_int_groups, progress_bar):
         """
         subroutine run_proc_<processname>(cell)
 
@@ -1146,11 +1188,18 @@ class ProcListWriter():
         """
 
         for lat_int_loop, (lat_int_group, processes) in enumerate(lat_int_groups.iteritems()):
+            out = open('%s/run_proc_%04d.f90' % (self.dir, lat_int_loop), 'w')
             self._db_print('PROCESS: %s' % lat_int_group)
             # initialize needed data structure
             process0 = processes[0]
             modified_procs = set()
 
+            out.write('module run_proc_%04d\n' % lat_int_loop)
+            out.write('use kind_values\n')
+            for i in range(len(lat_int_groups)):
+                out.write('use nli_%04d\n' % i)
+            out.write('use proclist_constants\n')
+            out.write('contains\n')
             # write F90 subroutine definition
             out.write('subroutine run_proc_%s(cell)\n\n' % lat_int_group)
             out.write('    integer(kind=iint), dimension(4), intent(in) :: cell\n')
@@ -1241,12 +1290,13 @@ class ProcListWriter():
                 out.write('    call add_proc(nli_%s(cell + %s), cell + %s)\n'
                     % (process.name, offset_cell, offset_site))
             out.write('\nend subroutine run_proc_%s\n\n' % lat_int_group)
+            out.write('end module\n')
 
             if os.name == 'posix':
                 progress_bar.render(int(10+40*float(lat_int_loop)/len(lat_int_groups)),
                                     'run_proc_%s' % lat_int_group)
 
-    def write_proclist_lat_int_nli_casetree(self, data, lat_int_groups, progress_bar, out):
+    def write_proclist_lat_int_nli_casetree(self, data, lat_int_groups, progress_bar):
         """
         Write out subroutines that do the following:
         Take a given cell and determine from a group a processes
@@ -1261,6 +1311,11 @@ class ProcListWriter():
         """
 
         for lat_int_loop, (lat_int_group, processes) in enumerate(lat_int_groups.iteritems()):
+            out = open('%s/nli_%04d.f90' % (self.dir, lat_int_loop), 'w')
+            out.write('module nli_%04d\n' % lat_int_loop)
+            out.write('use kind_values\n')
+            out.write('use proclist_constants\n')
+            out.write('contains\n')
             fname = 'nli_%s' % lat_int_group
             if data.meta.debug > 0:
                 out.write('function %(cell)\n'
@@ -1299,6 +1354,7 @@ class ProcListWriter():
             _casetree_dict(case_tree, '    ', out)
 
             out.write('\nend function %s\n\n' % (fname))
+            out.write('end module\n')
 
             # update the progress bar
             if os.name == 'posix':

@@ -349,8 +349,15 @@ def build(options):
     from os.path import isfile
     import os
     import sys
+    from glob import glob
 
-    src_files = 'kind_values_f2py.f90 base.f90 lattice.f90 proclist.f90'
+    src_files = ['kind_values_f2py.f90', 'base.f90', 'lattice.f90']
+
+    if isfile('proclist_constants.f90'):
+        src_files.append('proclist_constants.f90')
+    src_files.extend(glob('nli_*.f90'))
+    src_files.extend(glob('run_proc_*.f90'))
+    src_files.append('proclist.f90')
 
     extra_flags = {}
     extra_flags['gfortran'] = ('-ffree-line-length-none -ffree-form'
@@ -374,7 +381,7 @@ def build(options):
     if not isfile('kind_values_f2py.py'):
         evaluate_kind_values('kind_values.f90', 'kind_values_f2py.f90')
 
-    for src_file in src_files.split():
+    for src_file in src_files:
         if not isfile(src_file):
             raise IOError('File %s not found' % src_file)
 
@@ -390,7 +397,7 @@ def build(options):
     call.append('--f90flags="%s"' % extra_flags)
     call.append('-m')
     call.append(module_name)
-    call += src_files.split()
+    call += src_files
 
     print(call)
     #exit()
