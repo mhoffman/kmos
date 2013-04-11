@@ -403,7 +403,7 @@ def build(options):
 
 
 def T_grid(T_min, T_max, n):
-    from numpy import linspace
+    from numpy import linspace, array
     """Return a list of n temperatures between
        T_min and T_max such that the grid of T^(-1)
        is evenly spaced.
@@ -416,7 +416,7 @@ def T_grid(T_min, T_max, n):
     grid.reverse()
     grid = [x ** (-1.) for x in grid]
 
-    return np.array(grid)
+    return array(grid)
 
 
 def p_grid(p_min, p_max, n):
