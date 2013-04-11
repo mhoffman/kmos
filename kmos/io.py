@@ -47,10 +47,9 @@ def _casetree_dict(dictionary, indent='', out=None):
             else:
                 if key != 'default':
                     # allowing for or in species
-                    keys = map(lambda x: x.strip(), key.split('or'))
-                    for key in keys:
-                        out.write('%scase(%s)\n' % (indent, key))
-                        _casetree_dict(value, indent + '  ', out)
+                    keys = ', '.join(map(lambda x: x.strip(), key.split(' or ')))
+                    out.write('%scase(%s)\n' % (indent, keys))
+                    _casetree_dict(value, indent + '  ', out)
                 else:
                     out.write('%scase %s\n' % (indent, key))
                     _casetree_dict(value, indent + '  ', out)
