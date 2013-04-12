@@ -1080,6 +1080,10 @@ class ProcListWriter():
         out.write('module proclist\n')
         for i in range(len(lat_int_groups)):
             out.write('use run_proc_%04d; use nli_%04d\n' % (i, i))
+        out.write(
+            'use lattice, only: &\n'
+            '    system_size\n'
+        )
         out.write('\nimplicit none\n')
 
 
