@@ -482,7 +482,12 @@ class ProcListWriter():
 
         elif code_generator == 'lat_int':
             constants_out = open('%s/proclist_constants.f90' % self.dir, 'w')
-            self.write_proclist_constants(data, constants_out, close_module=True, module_name='proclist_constants')
+            self.write_proclist_constants(data,
+                                          constants_out,
+                                          close_module=True,
+                                          code_generator=code_generator,
+                                          module_name='proclist_constants',
+                                          )
             constants_out.close()
             self.write_proclist_lat_int(data, out)
             self.write_proclist_end(out)
@@ -503,19 +508,8 @@ class ProcListWriter():
                   '!\n'
                   '!******\n'
                   '\n\nmodule %s\n'
-                  'use kind_values\n'
-                  'use base, only: &\n'
-                  '    update_accum_rate, &\n'
-                  '    update_integ_rate, &\n'
-                  '    determine_procsite, &\n'
-                  '    update_clocks, &\n'
-                  '    avail_sites, &\n') % module_name)
-        if len(data.layer_list) == 1 : # multi-lattice mode
-            out.write('    null_species, &\n')
-        else:
-            out.write('    set_null_species, &\n')
-        out.write('    increment_procstat\n\n'
-                  'use lattice, only: &\n')
+                  'use kind_values\n') % module_name)
+        out.write('use lattice, only: &\n')
         site_params = []
         for layer in data.layer_list:
             out.write('    %s, &\n' % layer.name)
@@ -523,17 +517,6 @@ class ProcListWriter():
                 site_params.append((site.name, layer.name))
         for i, (site, layer) in enumerate(site_params):
             out.write(('    %s_%s, &\n') % (layer, site))
-        out.write('    allocate_system, &\n'
-              '    nr2lattice, &\n'
-              '    lattice2nr, &\n'
-              '    add_proc, &\n'
-              '    can_do, &\n'
-              '    set_rate_const, &\n'
-              '    replace_species, &\n'
-              '    del_proc, &\n'
-              '    reset_site, &\n'
-              '    system_size, &\n')
-        out.write('    spuck, &\n')
         out.write('    get_species\n'
               '\n\nimplicit none\n\n')
 
@@ -555,6 +538,22 @@ class ProcListWriter():
         out.write('\n\n! Process constants\n\n')
         for i, process in enumerate(self.data.process_list):
             out.write('integer(kind=iint), parameter, public :: %s = %s\n' % (process.name, i + 1))
+
+        if code_generator == 'local_smart':
+            representation_length = max([len(species.representation) for species in data.species_list])
+            out.write('\n\ninteger(kind=iint), parameter, public :: representation_length = %s\n' % representation_length)
+            if os.name == 'posix':
+                out.write('integer(kind=iint), public :: seed_size = 12\n')
+            elif os.name == 'nt':
+                out.write('integer(kind=iint), public :: seed_size = 12\n')
+            else:
+                out.write('integer(kind=iint), public :: seed_size = 8\n')
+            out.write('integer(kind=iint), public :: seed ! random seed\n')
+            out.write('integer(kind=iint), public, dimension(:), allocatable :: seed_arr ! random seed\n')
+            out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_proc = %s\n'\
+                % (len(data.process_list)))
+        #out.write('character(len=2000), dimension(%s) :: processes, rates'
+                  #% (len(data.process_list)))
 
         if close_module:
             out.write('\n\nend module\n')
@@ -634,8 +633,8 @@ class ProcListWriter():
         out.write('    call run_proc_nr(proc_nr, nr_site)\n'
                   'end subroutine do_kmc_step\n\n')
 
-        # useful for debugging
-        out.write('subroutine get_kmc_step(proc_nr, nr_site)\n\n'
+        #useful for debugging
+        out.write('subroutine get_next_kmc_step(proc_nr, nr_site)\n\n'
                   '!****f* proclist/get_kmc_step\n'
                   '! FUNCTION\n'
                   '!    Determines next step without executing it.\n'
@@ -657,7 +656,7 @@ class ProcListWriter():
         out.write('    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n\n')
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/GET_KMC_STEP/PROC_NR", proc_nr\n')
-        out.write('end subroutine get_kmc_step\n\n')
+        out.write('end subroutine get_next_kmc_step\n\n')
 
         out.write('subroutine get_occupation(occupation)\n\n'
                   '!****f* proclist/get_occupation\n'
@@ -1077,18 +1076,86 @@ class ProcListWriter():
         # lateral interaction groups
         lat_int_groups = self._get_lat_int_groups()
 
-        out.write('module proclist\n')
+        out.write(('module proclist\n'
+                  'use kind_values\n'
+                  'use base, only: &\n'
+                  '    update_accum_rate, &\n'
+                  '    update_integ_rate, &\n'
+                  '    determine_procsite, &\n'
+                  '    update_clocks, &\n'
+                  '    avail_sites, &\n'))
+        if len(data.layer_list) == 1 : # multi-lattice mode
+            out.write('    null_species, &\n')
+        else:
+            out.write('    set_null_species, &\n')
+        out.write('    increment_procstat\n\n'
+                  'use lattice, only: &\n')
+        site_params = []
+        for layer in data.layer_list:
+            out.write('    %s, &\n' % layer.name)
+            for site in layer.sites:
+                site_params.append((site.name, layer.name))
+        for i, (site, layer) in enumerate(site_params):
+            out.write(('    %s_%s, &\n') % (layer, site))
+        out.write('    allocate_system, &\n'
+              '    nr2lattice, &\n'
+              '    lattice2nr, &\n'
+              '    add_proc, &\n'
+              '    can_do, &\n'
+              '    set_rate_const, &\n'
+              '    replace_species, &\n'
+              '    del_proc, &\n'
+              '    reset_site, &\n'
+              '    system_size, &\n')
+        out.write('    spuck, &\n')
+
+        out.write('    get_species\n')
         for i in range(len(lat_int_groups)):
             out.write('use run_proc_%04d; use nli_%04d\n' % (i, i))
-        out.write(
-            'use lattice, only: &\n'
-            '    system_size\n'
-        )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        #out.write('use proclist_constants')
+        #out.write(
+            #'use lattice, only: &\n'
+            #'    get_species, &\n'
+            #'    system_size, &\n'
+            #'    spuck\n'
+        #)
+        #out.write(
+            #'use base, only: &\n'
+            #'    null_species\n'
+        #)
         out.write('\nimplicit none\n')
 
 
         representation_length = max([len(species.representation) for species in data.species_list])
-
         out.write('integer(kind=iint), parameter, public :: representation_length = %s\n' % representation_length)
         if os.name == 'posix':
             out.write('integer(kind=iint), public :: seed_size = 12\n')
@@ -1096,13 +1163,10 @@ class ProcListWriter():
             out.write('integer(kind=iint), public :: seed_size = 12\n')
         else:
             out.write('integer(kind=iint), public :: seed_size = 8\n')
-
         out.write('integer(kind=iint), public :: seed ! random seed\n')
         out.write('integer(kind=iint), public, dimension(:), allocatable :: seed_arr ! random seed\n')
         out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_proc = %s\n'\
             % (len(data.process_list)))
-        out.write('character(len=2000), dimension(%s) :: processes, rates'
-                  % (len(data.process_list)))
 
         code_generator = 'lat_int'
         if code_generator == 'lat_int':
@@ -1203,6 +1267,7 @@ class ProcListWriter():
             for i in range(len(lat_int_groups)):
                 out.write('use nli_%04d\n' % i)
             out.write('use proclist_constants\n')
+            out.write('implicit none\n')
             out.write('contains\n')
             # write F90 subroutine definition
             out.write('subroutine run_proc_%s(cell)\n\n' % lat_int_group)
@@ -1318,7 +1383,10 @@ class ProcListWriter():
             out = open('%s/nli_%04d.f90' % (self.dir, lat_int_loop), 'w')
             out.write('module nli_%04d\n' % lat_int_loop)
             out.write('use kind_values\n')
+            out.write('use lattice\n'
+                    )
             out.write('use proclist_constants\n')
+            out.write('implicit none\n')
             out.write('contains\n')
             fname = 'nli_%s' % lat_int_group
             if data.meta.debug > 0:
