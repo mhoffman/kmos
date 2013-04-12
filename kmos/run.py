@@ -536,7 +536,7 @@ class KMC_Model(multiprocessing.Process):
 
         """
 
-        std_header = ('#%s %s %s kmc_steps kmc_time\n'
+        std_header = ('#%s %s %s kmc_time kmc_steps\n'
                   % (self.get_param_header(),
                      self.get_tof_header(),
                      self.get_occupation_header()))
