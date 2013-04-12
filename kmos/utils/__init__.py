@@ -400,7 +400,6 @@ def build(options):
     call += src_files
 
     print(call)
-    #exit()
     from copy import deepcopy
     true_argv = deepcopy(sys.argv)  # save for later
     from numpy import f2py
