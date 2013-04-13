@@ -81,6 +81,18 @@ INTERACTIVE = hasattr(sys, 'ps1') or hasattr(sys, 'ipcompleter')
 INTERACTIVE = True  # Turn it off for now because it doesn work reliably
 
 
+class ProclistProxy(object):
+    def __dir__(selftr):
+        return list(set(dir(proclist) + dir(proclist_constants)))
+
+    def __getattr__(self, attr):
+        if attr in dir(proclist):
+            return eval('proclist.%s' % attr)
+        elif attr in dir(proclist_constants):
+            return eval('proclist_constants.%s' % attr)
+        else:
+            raise AttributeError
+
 class KMC_Model(multiprocessing.Process):
     """API Front-end to initialize and run a kMC model using python bindings.
     Depending on the constructor call the model can be run either via directory
@@ -132,7 +144,7 @@ class KMC_Model(multiprocessing.Process):
         # bind Fortran submodules
         self.base = base
         self.lattice = lattice
-        self.proclist = proclist
+        self.proclist = ProclistProxy()
         self.settings = settings
 
         if hasattr(self.base, 'null_species'):
@@ -173,10 +185,7 @@ class KMC_Model(multiprocessing.Process):
         self.tofs = tofs = get_tof_names()
         self.tof_matrix = np.zeros((len(tofs), proclist.nr_of_proc))
         for process, tof_count in sorted(settings.tof_count.iteritems()):
-            try:
-                process_nr = eval('proclist.%s' % process.lower())
-            except:
-                process_nr = eval('proclist_constants.%s' % process.lower())
+            process_nr = getattr(self.proclist, process.lower())
             for tof, tof_factor in tof_count.iteritems():
                 self.tof_matrix[tofs.index(tof), process_nr - 1] += tof_factor
 
@@ -1215,6 +1224,7 @@ def set_rate_constants(parameters=None, print_rates=True):
     For the evaluation it draws on predefined natural constants, user defined
     parameters and mathematical functions.
     """
+    proclist = ProclistProxy()
     if parameters is None:
         parameters = settings.parameters
 
@@ -1225,10 +1235,8 @@ def set_rate_constants(parameters=None, print_rates=True):
         rate_const = evaluate_rate_expression(rate_expr, parameters)
 
         try:
-            if proclist_constants is None:
-                base.set_rate_const(eval('proclist.%s' % proc.lower()), rate_const)
-            else:
-                base.set_rate_const(eval('proclist_constants.%s' % proc.lower()), rate_const)
+            base.set_rate_const(getattr(proclist, proc.lower()),
+                                rate_const)
             if print_rates:
                 n = int(4 * log(rate_const))
                 print('%30s: %.3e s^{-1}: %s' % (proc, rate_const, '#' * n))
