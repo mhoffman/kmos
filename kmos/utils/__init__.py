@@ -361,7 +361,7 @@ def build(options):
 
     extra_flags = {}
     extra_flags['gfortran'] = ('-ffree-line-length-none -ffree-form'
-                               ' -xf95-cpp-input -Wall -O3')
+                               ' -xf95-cpp-input -Wall -O3 -fimplicit-none')
     extra_flags['gnu95'] = extra_flags['gfortran']
     extra_flags['intel'] = '-fast -fpp -Wall -I/opt/intel/fc/10.1.018/lib'
     extra_flags['intelem'] = '-fast -fpp -Wall'
@@ -400,7 +400,6 @@ def build(options):
     call += src_files
 
     print(call)
-    #exit()
     from copy import deepcopy
     true_argv = deepcopy(sys.argv)  # save for later
     from numpy import f2py
