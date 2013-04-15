@@ -509,6 +509,22 @@ class ProcListWriter():
                   '!******\n'
                   '\n\nmodule %s\n'
                   'use kind_values\n') % module_name)
+
+
+        if code_generator == 'local_smart':
+            out.write('use base, only: &\n'
+                      '    update_accum_rate, &\n'
+                      '    update_integ_rate, &\n'
+                      '    determine_procsite, &\n'
+                      '    update_clocks, &\n'
+                      '    avail_sites, &\n')
+            if len(data.layer_list) == 1 : # multi-lattice mode
+                out.write('    null_species, &\n')
+            else:
+                out.write('    set_null_species, &\n')
+            out.write('    increment_procstat\n\n')
+
+
         out.write('use lattice, only: &\n')
         site_params = []
         for layer in data.layer_list:
@@ -517,6 +533,19 @@ class ProcListWriter():
                 site_params.append((site.name, layer.name))
         for i, (site, layer) in enumerate(site_params):
             out.write(('    %s_%s, &\n') % (layer, site))
+
+        if code_generator == 'local_smart':
+            out.write('    allocate_system, &\n'
+                  '    nr2lattice, &\n'
+                  '    lattice2nr, &\n'
+                  '    add_proc, &\n'
+                  '    can_do, &\n'
+                  '    set_rate_const, &\n'
+                  '    replace_species, &\n'
+                  '    del_proc, &\n'
+                  '    reset_site, &\n'
+                  '    system_size, &\n'
+                  '    spuck, &\n')
         out.write('    get_species\n'
               '\n\nimplicit none\n\n')
 
@@ -1106,8 +1135,8 @@ class ProcListWriter():
               '    replace_species, &\n'
               '    del_proc, &\n'
               '    reset_site, &\n'
-              '    system_size, &\n')
-        out.write('    spuck, &\n')
+              '    system_size, &\n'
+              '    spuck, &\n')
 
         out.write('    get_species\n')
         for i in range(len(lat_int_groups)):
