@@ -240,6 +240,6 @@ H2Ogas = Species(gas=True,
                  name='H2Ogas',)
 
 H2Oliquid = Species(gas=False,
-                    janaf_files='H-063.txt',
+                    janaf_file='H-063.txt',
                     names='H2Oliquid',)
 
