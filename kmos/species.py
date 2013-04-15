@@ -245,5 +245,5 @@ H2Ogas = Species(ase.atoms.Atoms(),
 H2Oliquid = Species(ase.atoms.Atoms(),
                     gas=False,
                     janaf_file='H-063.txt',
-                    names='H2Oliquid',)
+                    name='H2Oliquid',)
 
