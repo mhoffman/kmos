@@ -226,3 +226,20 @@ C2H4gas = Species(ase.atoms.Atoms(),
                   gas=True,
                   janaf_file='C-128.txt',
                   name='C2H4gas')
+
+HClgas = Species(gas=True,
+                 janaf_file='Cl-026.txt',
+                 name='HClgas')
+
+Cl2gas = Species(gas=True,
+                 janaf_file='Cl-073.txt',
+                 name='Cl2gas',)
+
+H2Ogas = Species(gas=True,
+                 janaf_file='H-064.txt',
+                 name='H2Ogas',)
+
+H2Oliquid = Species(gas=False,
+                    janaf_files='H-063.txt',
+                    names='H2Oliquid',)
+
