@@ -765,15 +765,15 @@ class Parameter(FixedObject, CorrectlyNamed):
     and defined via some init file.
 
     :param name: The name of the parameter.
-    :type name: str.
+    :type name: str
     :param adjustable: Create controller in GUI.
-    :type adjustable: bool.
+    :type adjustable: bool
     :param min: Minimum value for controller.
-    :type min: float.
+    :type min: float
     :param max: Maximum value for controller.
-    :type max: float.
+    :type max: float
     :param scale: Controller scale: 'log' or 'lin'
-    :type scale: str.
+    :type scale: str
 
     """
     attributes = ['name', 'value', 'adjustable', 'min', 'max', 'scale']
@@ -962,14 +962,15 @@ class Layer(FixedObject, CorrectlyNamed):
 
 class Site(FixedObject):
     """Represents one lattice site.
+
     :param name: Name of site.
-    :type name: str.
+    :type name: str
     :param pos: Position within unit cell.
-    :type pos: np.array or str.
+    :type pos: np.array or str
     :param tags: Tags for this site (space separated).
-    :type tags: str.
+    :type tags: str
     :param default_species: Initial population for this site.
-    :type default_species: str.
+    :type default_species: str
 
     """
     attributes = ['name', 'pos', 'tags', 'default_species']
@@ -1018,6 +1019,19 @@ class Coord(FixedObject):
     """Class that holds exactly one coordinate as used in the description
     of a process. The distinction between a Coord and a Site may seem
     superfluous but it is made to avoid data duplication.
+
+    :param name: Name of coordinate.
+    :type name: str
+    :param offset: Offset in term of unit-cells.
+    :type offset: np.array or list
+    :param layer: Name of layer.
+    :type layer: str
+    :param tags: List of tags (space separated string).
+    :type tags: str
+
+    .. attribute:: pos
+       pos is np.array((3, 1)) and is calculated from offset and position. Not to be set manually.
+
     """
     attributes = ['offset', 'name', 'layer', 'pos', 'tags']
 
@@ -1140,13 +1154,13 @@ class Species(FixedObject):
     Note: `empty` is treated just like a species.
 
     :param name: Name of species.
-    :type name: str.
+    :type name: str
     :param color: Color of species in editor GUI (#ffffff hex-type specification).
-    :type color: str.
+    :type color: str
     :param representation: ase.atoms.Atoms constructor describing species geometry.
-    :type representation: str.
+    :type representation: str
     :param tags: Tags of species (space separated string).
-    :type tags: str.
+    :type tags: str
 
     """
     attributes = ['name', 'color', 'representation', 'tags']
@@ -1194,10 +1208,11 @@ class ProcessList(FixedObject, list):
 
 class Process(FixedObject):
     """One process in a kMC process list
+
     :param name: Name of process.
-    :type name: str.
+    :type name: str
     :param rate_constant: Expression for rate constant.
-    :type rate_constant: str.
+    :type rate_constant: str
     :param condition_list: List of conditions (class Condition).
     :type condition_list: list.
     :param action_list: List of conditions (class Action).
@@ -1562,6 +1577,7 @@ def parse_chemical_expression(eq, process, project_tree):
 
 
 def parse_process(string, project_tree):
+    
     name, chem_exp, rate_constant = [x.strip() for x in string.split(';')]
     process = Process(name=name,
                       rate_constant=rate_constant,)
