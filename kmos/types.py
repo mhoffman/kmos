@@ -1030,6 +1030,7 @@ class Coord(FixedObject):
     :type tags: str
 
     .. attribute:: pos
+
        pos is np.array((3, 1)) and is calculated from offset and position. Not to be set manually.
 
     """
