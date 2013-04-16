@@ -958,7 +958,7 @@ class KMC_Model(multiprocessing.Process):
                 found = 'NULL (%s)' % found
 
             self.do_steps(steps)
-            nprocess, nsite = proclist.get_kmc_step()
+            nprocess, nsite = proclist.get_next_kmc_step()
             process = list(
                 sorted(settings.rate_constants.keys()))[nprocess - 1]
             site = self.nr2site(nsite)
@@ -978,7 +978,7 @@ class KMC_Model(multiprocessing.Process):
                 self.do_steps(steps)
             else:
                 steps = base.get_kmc_step()
-            nprocess, nsite = proclist.get_kmc_step()
+            nprocess, nsite = proclist.get_next_kmc_step()
             process = list(
                 sorted(settings.rate_constants.keys()))[nprocess - 1]
             site = self.nr2site(nsite)
