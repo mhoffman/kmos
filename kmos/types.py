@@ -762,7 +762,19 @@ class ParameterList(FixedObject, list):
 
 class Parameter(FixedObject, CorrectlyNamed):
     """A parameter that can be used in a rate constant expression
-    and defined via some init file
+    and defined via some init file.
+
+    :param name: The name of the parameter.
+    :type name: str.
+    :param adjustable: Create controller in GUI.
+    :type adjustable: bool.
+    :param min: Minimum value for controller.
+    :type min: float.
+    :param max: Maximum value for controller.
+    :type max: float.
+    :param scale: Controller scale: 'log' or 'lin'
+    :type scale: str.
+
     """
     attributes = ['name', 'value', 'adjustable', 'min', 'max', 'scale']
 
@@ -950,6 +962,15 @@ class Layer(FixedObject, CorrectlyNamed):
 
 class Site(FixedObject):
     """Represents one lattice site.
+    :param name: Name of site.
+    :type name: str.
+    :param pos: Position within unit cell.
+    :type pos: np.array or str.
+    :param tags: Tags for this site (space separated).
+    :type tags: str.
+    :param default_species: Initial population for this site.
+    :type default_species: str.
+
     """
     attributes = ['name', 'pos', 'tags', 'default_species']
     # pos is now a list of floats for the graphical representation
@@ -1118,6 +1139,15 @@ class Species(FixedObject):
     """Class that represent a species such as oxygen, empty, ... .
     Note: `empty` is treated just like a species.
 
+    :param name: Name of species.
+    :type name: str.
+    :param color: Color of species in editor GUI (#ffffff hex-type specification).
+    :type color: str.
+    :param representation: ase.atoms.Atoms constructor describing species geometry.
+    :type representation: str.
+    :param tags: Tags of species (space separated string).
+    :type tags: str.
+
     """
     attributes = ['name', 'color', 'representation', 'tags']
 
@@ -1164,6 +1194,24 @@ class ProcessList(FixedObject, list):
 
 class Process(FixedObject):
     """One process in a kMC process list
+    :param name: Name of process.
+    :type name: str.
+    :param rate_constant: Expression for rate constant.
+    :type rate_constant: str.
+    :param condition_list: List of conditions (class Condition).
+    :type condition_list: list.
+    :param action_list: List of conditions (class Action).
+    :type action_list: list.
+    :param enabled: Switch this process on or of.
+    :type enabled: bool.
+    :param chemical_expression: Chemical expression (i.e: A@site1 + B@site2 -> empty@site1 + AB@site2) to generate process from.
+    :type chemical_expression: str.
+    :param tof_count: Stoichiometric factor for observable products {'NH3': 1, 'H2O(gas)': 2}. Hint: avoid space in keys.
+    :type tof_count: dict.
+
+
+
+
     """
     attributes = ['name',
                   'rate_constant',
