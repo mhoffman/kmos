@@ -94,10 +94,6 @@ integer(kind=iint), parameter, public :: oxygen = 3
 integer(kind=iint), parameter, public :: null_species = 4
 
 integer(kind=iint), public :: default_species = empty
-integer(kind=iint), parameter, public :: representation_length = 31
-integer(kind=iint), public :: seed_size = 12
-integer(kind=iint), public :: seed ! random seed
-integer(kind=iint), public, dimension(:), allocatable :: seed_arr ! random seed
 
 
 ! Process constants
@@ -150,8 +146,14 @@ integer(kind=iint), parameter, public :: o_O2des_h2h1 = 45
 integer(kind=iint), parameter, public :: oxidize1 = 46
 
 
+integer(kind=iint), parameter, public :: representation_length = 31
+integer(kind=iint), public :: seed_size = 12
+integer(kind=iint), public :: seed ! random seed
+integer(kind=iint), public, dimension(:), allocatable :: seed_arr ! random seed
+
+
 integer(kind=iint), parameter, public :: nr_of_proc = 46
-character(len=2000), dimension(46) :: processes, rates
+
 
 contains
 
@@ -216,7 +218,7 @@ subroutine do_kmc_step()
     call run_proc_nr(proc_nr, nr_site)
 end subroutine do_kmc_step
 
-subroutine get_kmc_step(proc_nr, nr_site)
+subroutine get_next_kmc_step(proc_nr, nr_site)
 
 !****f* proclist/get_kmc_step
 ! FUNCTION
@@ -235,7 +237,7 @@ subroutine get_kmc_step(proc_nr, nr_site)
     call update_accum_rate
     call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)
 
-end subroutine get_kmc_step
+end subroutine get_next_kmc_step
 
 subroutine get_occupation(occupation)
 
