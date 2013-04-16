@@ -3,7 +3,7 @@ Reference
 ********************
 
 Command Line Interface (CLI)
-===========================
+============================
 
 .. include:: cli.rst
 
