@@ -12,6 +12,7 @@ What other kMC codes are there?
   - `chimp <http://www.koders.com/cpp/fid7FA324E3E76DB9874158BE3CF722405FA44AECE8.aspx?s=mdef%3Ainsert>`_ (D. Dooling)
   - `mapkmc <http://www.dion.che.udel.edu/downloads.php>`_ (D. Vlachos)
   - `Monty <http://www.vsc.science.ru.nl/deij/monty.html>`_ (SXM Boerrrigter)
+  - `MoCKa <http://www.itcp.kit.edu/deutschmann/288.php>`_ (L. Kunz)
   - `NASCAM <http://www.fundp.ac.be/sciences/physique/larn/NASCAM-Homepage>`_ (S. Lucas)
   - `Spparks <http://www.cs.sandia.gov/~sjplimp/spparks/doc/Manual.html>`_ (S. Plimpton):
 
