@@ -16,7 +16,7 @@ kmos.types
 
 .. automodule:: kmos.types
 .. autoclass:: kmos.types.Project
-   :members: add_layer, add_parameter, add_process, add_species,
+   :members: add_layer, add_parameter, add_process, add_species, add_site,
              get_layers, get_parameters, get_processes, get_speciess,
              import_xml_file, lattice, parse_and_add_process, parse_process,
              print_statistics, save, set_meta, validate_model
@@ -67,27 +67,56 @@ kmos.run
 .. automodule:: kmos.run
 
 .. autoclass:: kmos.run.KMC_Model
-  :members: deallocate,
+  :members: _adjust_database,
+            _get_configuration,
+            _put,
+            _set_configuration,
+            base,
+            cell_size,
+            deallocate,
             do_steps,
             double,
+            dump_config,
             export_movie,
             get_atoms,
+            get_backend,
             get_occupation_header,
+            get_param_header,
+            get_std_sampled_data,
             get_tof_header,
             halve,
+            lattice,
+            load_config,
+            model.get_std_sampled_data,
+            nr2site,
+            null_species,
             parameters,
-            print_rates,
             post_mortem,
+            print_accum_rate_summation,
+            print_adjustable_parameters,
+            print_coverages,
+            print_rates,
+            procstat,
+            procstat_normalized,
+            procstat_pprint,
             put,
-            _put,
             rate_constants,
+            reset,
             run,
-            show_accum_rate_summation,
+            settings,
+            show,
+            site2nr,
             start,
+            steps_per_frame,
             view,
             xml,
-            _get_configuration,
-            _set_configuration,
+
+
+
+
+
+
+
 
 .. autoclass:: kmos.run.Model_Rate_Constants
    :members: __call__,
