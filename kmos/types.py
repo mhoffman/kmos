@@ -1577,7 +1577,7 @@ def parse_chemical_expression(eq, process, project_tree):
 
 
 def parse_process(string, project_tree):
-    
+
     name, chem_exp, rate_constant = [x.strip() for x in string.split(';')]
     process = Process(name=name,
                       rate_constant=rate_constant,)
