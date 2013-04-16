@@ -175,6 +175,13 @@ class Project(object):
         or keywords that are passed to the Layer
         constructor are accepted.
 
+        :param layers: List of layers.
+        :type layers: list
+        :param cell: Size of unit-cell.
+        :type cell: np.array (3x3)
+        :param default_layer: name of default layer.
+        :type default_layer: str.
+
         """
         for layer in layers:
             self.layer_list.append(layer)
@@ -198,9 +205,10 @@ class Project(object):
 
         add_site(layer_name, site)
 
-        where :
-            - layer_name : a string
-            - site : a Site instance
+        :param name: Name of layer to add the site to.
+        :type name: str
+        :param site: Site instance to add.
+        :type site: Site
 
         """
 
@@ -802,6 +810,12 @@ class Parameter(FixedObject, CorrectlyNamed):
 
 class LayerList(FixedObject, list):
     """A list of layers
+
+    :param cell: Size of unit-cell.
+    :type cell: np.array (3x3)
+    :param default_layer: name of default layer.
+    :type default_layer: str.
+
     """
     attributes = ['cell',
                   'default_layer',
@@ -922,7 +936,13 @@ class LayerList(FixedObject, list):
 
 
 class Layer(FixedObject, CorrectlyNamed):
-    """Represents one layer in a possibly multi-layer geometry
+    """Represents one layer in a possibly multi-layer geometry.
+
+    :param name: Name of layer.
+    :type name: str
+    :param sites: Sites associated with this layer (Default: [])
+    :type sites: list
+
     """
     attributes = ['name', 'sites', 'active', 'color']
 
