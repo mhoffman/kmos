@@ -110,7 +110,7 @@ kmos.cli
    :members: main
 
 kmos.utils
-^^^^^^^^^
+^^^^^^^^^^
 
 .. automodule:: kmos.utils
    :members: T_grid, build, evaluate_kind_values, get_ase_constructor, p_grid \
