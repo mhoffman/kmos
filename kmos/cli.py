@@ -374,7 +374,13 @@ def main(args=None):
         from sys import path
         path.append(os.path.abspath(os.curdir))
         from kmos.run import KMC_Model
+
+        # useful to have in interactive mode
         import numpy as np
+        try:
+            from matplotlib import pyplot as plt
+        except:
+            plt = None
 
         model = KMC_Model(print_rates=False)
         global model, np

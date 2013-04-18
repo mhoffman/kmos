@@ -25,7 +25,6 @@ import numpy as np
 import time
 
 
-import ase.gui.ag
 from ase.gui.images import Images
 
 try:
@@ -51,7 +50,7 @@ except Exception, e:
     print(e)
 
 
-from kmos.run import KMC_Model, base, get_tof_names, lattice, settings
+from kmos.run import KMC_Model, get_tof_names, lattice, settings
 
 
 class ParamSlider(gtk.HScale):

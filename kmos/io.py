@@ -24,10 +24,9 @@ import operator
 import shutil
 import os
 import sys
-from pprint import PrettyPrinter, pformat
-import pdb
+from pprint import pformat
 
-from kmos.types import ConditionAction, LatIntProcess, SingleLatIntProcess, Coord
+from kmos.types import ConditionAction, SingleLatIntProcess, Coord
 from kmos.config import APP_ABS_PATH
 from kmos.types import cmp_coords
 
