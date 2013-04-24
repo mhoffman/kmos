@@ -1368,9 +1368,9 @@ class Model_Rate_Constants(object):
 
 class ModelParameter(object):
 
-    def __init__(self, min, max, steps, type):
+    def __init__(self, min, max=None, steps=1, type=None):
         self.min = min
-        self.max = max
+        self.max = max if max is not None else min
         self.steps = steps
         self.type = type
 
@@ -1384,11 +1384,9 @@ class ModelParameter(object):
 
 class PressureParameter(ModelParameter):
 
-    def __init__(self, min, max, steps):
-        super(PressureParameter, self).__init__(min,
-                                                max,
-                                                steps,
-                                                'pressure')
+    def __init__(self, *args, **kwargs):
+        kwargs['type'] = 'pressure'
+        super(PressureParameter, self).__init__(*args, **kwargs)
 
     def get_grid(self):
         from kmos.utils import p_grid
@@ -1397,11 +1395,9 @@ class PressureParameter(ModelParameter):
 
 class TemperatureParameter(ModelParameter):
 
-    def __init__(self, min, max, steps):
-        super(TemperatureParameter, self).__init__(min,
-                                                   max,
-                                                   steps,
-                                                   'temperature')
+    def __init__(self, *args, **kwargs):
+        kwargs['type'] = 'temperature'
+        super(TemperatureParameter, self).__init__(*args, **kwargs)
 
     def get_grid(self):
         from kmos.utils import T_grid
@@ -1411,10 +1407,8 @@ class TemperatureParameter(ModelParameter):
 class LogParameter(ModelParameter):
 
     def __init__(self, min, max, steps):
-        super(LogParameter, self).__init__(min,
-                                           max,
-                                           steps,
-                                           'log')
+        kwargs['type'] = 'log'
+        super(LogParameter, self).__init__(*args, **kwargs)
 
     def get_grid(self):
         return np.logspace(self.min, self.max, self.steps)
@@ -1423,10 +1417,8 @@ class LogParameter(ModelParameter):
 class LinearParameter(ModelParameter):
 
     def __init__(self, min, max, steps):
-        super(LogParameter, self).__init__(min,
-                                           max,
-                                           steps,
-                                           'linear')
+        kwargs['type'] = 'linear'
+        super(LogParameter, self).__init__(*args, **kwargs)
 
     def get_grid(self):
         return np.linspace(self.min, self.max, self.steps)
