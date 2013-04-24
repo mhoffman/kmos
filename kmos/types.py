@@ -710,6 +710,27 @@ class Project(object):
             else:
                 print('\t- %s : %s' % (process_type, nprocs))
 
+    def compile_model(self, code_generator='local_smart'):
+        from tempfile import mkdtemp
+        import os
+        import shutil
+        from kmos.utils import build
+        from kmos.cli import get_options
+        from kmos.io import export_source
+        cwd = os.path.abspath(os.curdir)
+        dir = mkdtemp()
+        export_source(self, dir, code_generator=code_generator)
+        os.chdir(dir)
+
+        options, args = get_options()
+        build(options)
+        from kmos.run import KMC_Model
+        model = KMC_Model(print_rates=False, banner=False)
+        os.chdir(cwd)
+        shutil.rmtree(dir)
+        return model
+
+
     def set_meta(self,
                  author=None,
                  email=None,

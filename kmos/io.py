@@ -2056,23 +2056,3 @@ def export_xml(project_tree, filename=None):
     with open(filename, 'w') as f:
         for line in str(project_tree):
             f.write(line)
-
-
-def compile_model(project_tree):
-    from tempfile import mkdtemp
-    import os
-    import shutil
-    from kmos.utils import build
-    from kmos.cli import get_options
-    cwd = os.path.abspath(os.curdir)
-    dir = mkdtemp()
-    export_source(project_tree, dir)
-    os.chdir(dir)
-
-    options, args = get_options()
-    build(options)
-    from kmos.run import KMC_Model
-    model = KMC_Model(print_rates=False, banner=False)
-    os.chdir(cwd)
-    shutil.rmtree(dir)
-    return model
