@@ -39,16 +39,17 @@ the model happens through Queues.
 
 __all__ = ['base', 'lattice', 'proclist', 'KMC_Model']
 
-from copy import deepcopy
-import os
-import sys
-from fnmatch import fnmatch
-import multiprocessing
-import random
-from math import log
-import numpy as np
 from ase.atoms import Atoms
+from copy import deepcopy
+from fnmatch import fnmatch
 from kmos import evaluate_rate_expression
+from kmos.utils import OrderedDict
+from math import log
+from multiprocessing import Process
+import numpy as np
+import os
+import random
+import sys
 try:
     from kmc_model import base, lattice, proclist
 except Exception, e:
@@ -82,6 +83,7 @@ INTERACTIVE = True  # Turn it off for now because it doesn work reliably
 
 
 class ProclistProxy(object):
+
     def __dir__(selftr):
         return list(set(dir(proclist) + dir(proclist_constants)))
 
@@ -93,7 +95,8 @@ class ProclistProxy(object):
         else:
             raise AttributeError
 
-class KMC_Model(multiprocessing.Process):
+
+class KMC_Model(Process):
     """API Front-end to initialize and run a kMC model using python bindings.
     Depending on the constructor call the model can be run either via directory
     calls or in a separate processes access via multiprocessing.Queues.
@@ -135,7 +138,9 @@ class KMC_Model(multiprocessing.Process):
                                    '(i. e. %s dimensions),\n '
                                    'but the compiled model'
                                    'has %s dimensions!')
-                                   % (list(size), len(size), lattice.model_dimension))
+                                   % (list(size),
+                                      len(size),
+                                      lattice.model_dimension))
             self.size = np.array(size)
 
         self.steps_per_frame = steps_per_frame
@@ -208,7 +213,6 @@ class KMC_Model(multiprocessing.Process):
                     raise
             else:
                 self.species_representation[len(self.species_representation)] = Atoms()
-                #self.species_representation.append(Atoms())
         if hasattr(settings, 'species_tags'):
             self.species_tags = settings.species_tags
         else:
@@ -407,7 +411,9 @@ class KMC_Model(multiprocessing.Process):
         :type skip: int
         :param prefix: Prefix for filename (Default: movie).
         :type prefix: str
-        :param rotation: Angle from which movie is recorded (only useful if suffix is png). String to be interpreted by ASE (Default: '15x,-70x')
+        :param rotation: Angle from which movie is recorded
+                         (only useful if suffix is png).
+                         String to be interpreted by ASE (Default: '15x,-70x')
         :type rotation: str
         :param suffix: File suffix (type) of exported file (Default: png).
         :type suffix: str
@@ -456,7 +462,8 @@ class KMC_Model(multiprocessing.Process):
                    last `get_atoms()` call.
 
 
-        :param geometry: Return ASE object of current configuration (Default: True).
+        :param geometry: Return ASE object of current configuration
+                         (Default: True).
         :type geometry: bool
 
         """
@@ -596,10 +603,11 @@ class KMC_Model(multiprocessing.Process):
         :param tof_method: Method of how to sample TOFs.
                            Possible values are procrates or integ.
                            While procrates only counts the processes actually executed,
-                           while integ evaluates the configuration to estimate the actual rates.
-                           The latter can be several orders more efficient for very slow processes.
-                           Differences resulting from the two methods can be used as on estimate for
-                           the statistical error in samples.
+                           integ evaluates the configuration to estimate the actual
+                           rates. The latter can be several orders more efficient
+                           for very slow processes.
+                           Differences resulting from the two methods can be used
+                           as on estimate for the statistical error in samples.
         :type tof_method: str
 
         """
@@ -820,7 +828,8 @@ class KMC_Model(multiprocessing.Process):
         :type site: list or np.array
         :param new_species: Name of new species.
         :type new_species: str
-        :param reduce: Of periodic boundary conditions if site falls out site lattice (Default: False)
+        :param reduce: Of periodic boundary conditions if site falls out
+                       site lattice (Default: False)
         :type reduce: bool
 
         """
@@ -865,7 +874,8 @@ class KMC_Model(multiprocessing.Process):
         :type site: list or np.array
         :param new_species: Name of new species.
         :type new_species: str
-        :param reduce: Of periodic boundary conditions if site falls out site lattice (Default: False)
+        :param reduce: Of periodic boundary conditions if site falls out site
+                       lattice (Default: False)
         :type reduce: bool
 
         """
@@ -937,7 +947,8 @@ class KMC_Model(multiprocessing.Process):
            where X, Y, Z are the lattice size and N the number of
            sites in each unit cell.
 
-           :param config: Configuration to set for model. Shape of array has to match with model size.
+           :param config: Configuration to set for model. Shape of array
+                          has to match with model size.
            :type config: np.array
 
         """
@@ -1011,11 +1022,14 @@ class KMC_Model(multiprocessing.Process):
         by running that many steps and returning which process
         would be executed next without executing it.
 
-        :param steps: Number of steps to run before exit occurs (Default: None).
+        :param steps: Number of steps to run before exit occurs
+                     (Default: None).
         :type steps: int
-        :param propagate: Run this one more step, where error occurs (Default: False).
+        :param propagate: Run this one more step, where error occurs
+                          (Default: False).
         :type propagate: bool
-        :param err_code: Error code generated by backend if project.meta.debug > 0 at compile time.
+        :param err_code: Error code generated by backend if
+                         project.meta.debug > 0 at compile time.
         :type err_code: str
         """
         if err_code is not None:
@@ -1184,8 +1198,8 @@ class Model_Parameters(object):
                                 for name, param
                                 in settings.parameters.items()
                                 if not param['adjustable'])
-        res = '# kMC model parameters (%i, fixed %i)\n' % (len(settings.parameters),
-                                                           len(fixed_parameters))
+        res = '# kMC model parameters (%i, fixed %i)\n' \
+               % (len(settings.parameters), len(fixed_parameters))
         res += '# --------------------\n'
         for attr in sorted(settings.parameters):
             res += ('# %s = %s' % (attr, settings.parameters[attr]['value']))
@@ -1332,7 +1346,8 @@ class Model_Rate_Constants(object):
         :type pattern: str
         :param rate_constant: Rate constant to be set.
         :type rate_constant: str or float
-        :param parameters: List of parameters to be used when evaluating expression.
+        :param parameters: List of parameters to be used when
+                           evaluating expression.
         :type parameters: list
 
         """
@@ -1351,15 +1366,199 @@ class Model_Rate_Constants(object):
                 base.set_rate_const(i + 1, rate_constant)
 
 
+class ModelParameter(object):
+
+    def __init__(self, min, max, steps, type):
+        self.min = min
+        self.max = max
+        self.steps = steps
+        self.type = type
+
+    def __repr__(self):
+        return ('[%s] min: %s, max: %s, steps: %s'
+              % (self.type, self.min, self.max, self.steps))
+
+    def get_grid(self):
+        pass
+
+
+class PressureParameter(ModelParameter):
+
+    def __init__(self, min, max, steps):
+        super(PressureParameter, self).__init__(min,
+                                                max,
+                                                steps,
+                                                'pressure')
+
+    def get_grid(self):
+        from kmos.utils import p_grid
+        return p_grid(self.min, self.max, self.steps)
+
+
+class TemperatureParameter(ModelParameter):
+
+    def __init__(self, min, max, steps):
+        super(TemperatureParameter, self).__init__(min,
+                                                   max,
+                                                   steps,
+                                                   'temperature')
+
+    def get_grid(self):
+        from kmos.utils import T_grid
+        return T_grid(self.min, self.max, self.steps)
+
+
+class LogParameter(ModelParameter):
+
+    def __init__(self, min, max, steps):
+        super(LogParameter, self).__init__(min,
+                                           max,
+                                           steps,
+                                           'log')
+
+    def get_grid(self):
+        return np.logspace(self.min, self.max, self.steps)
+
+
+class LinearParameter(ModelParameter):
+
+    def __init__(self, min, max, steps):
+        super(LogParameter, self).__init__(min,
+                                           max,
+                                           steps,
+                                           'linear')
+
+    def get_grid(self):
+        return np.linspace(self.min, self.max, self.steps)
+
+
+class _ModelRunner(type):
+
+    def __new__(cls, name, bases, dct):
+        obj = super(_ModelRunner, cls).__new__(cls, name, bases, dct)
+        obj.runner_name = name
+        obj.parameters = OrderedDict()
+        for key, item in dct.items():
+            if key == '__module__':
+                pass
+            else:
+                obj.parameters[key] = item
+
+        return obj
+
+
+class ModelRunner(object):
+    __metaclass__ = _ModelRunner
+
+    def __product(self, *args, **kwds):
+        """Manual implementation of itertools.product for
+          python <= 2.5 """
+
+        # product('ABCD', 'xy') --> Ax Ay Bx By Cx Cy Dx Dy
+        # product(range(2), repeat=3) --> 000 001 010 011 100 101 110 111
+        pools = map(tuple, args) * kwds.get('repeat', 1)
+        result = [[]]
+        for pool in pools:
+            result = [x + [y] for x in result for y in pool]
+        for prod in result:
+            yield tuple(prod)
+
+    def __split_seq(self, seq, size):
+        """Split a list into n chunks of roughly equal size."""
+        newseq = []
+        splitsize = 1.0 / size * len(seq)
+        for i in range(size):
+                newseq.append(seq[int(round(i * splitsize)):
+                                  int(round((i + 1) * splitsize))])
+        return newseq
+
+    def __touch(self, fname, times=None):
+        fhandle = file(fname, 'a')
+        try:
+            os.utime(fname, times)
+        finally:
+            fhandle.close()
+
+    def __run_sublist(self, sublist, init_steps, sample_steps):
+        for i, datapoint in enumerate(sublist):
+            #============================
+            # DEFINE labels
+            #===========================
+            lockfile = '%s.lock' % (self.runner_name)
+            format_string = '_'.join(['%s'] * (len(self.parameters) + 1))
+            arguments = tuple([self.runner_name] + list(datapoint))
+
+            input_line = format_string % arguments
+
+            outfile = os.path.abspath('%s.dat' % (self.runner_name))
+
+
+            #============================
+            # lockfile mechanism
+            #===========================
+            self.__touch(lockfile)
+            fdata = file(lockfile)
+            readlines = fdata.readlines()
+            fdata.close()
+            if input_line in readlines:
+                continue
+            fdata = file(lockfile, 'a')
+            fdata.write('%s\n' % input_line)
+            fdata.close()
+
+            #============================
+            # SETUP Model
+            #===========================
+            model = KMC_Model(print_rates=False,
+                              banner=False,
+                              cache_file='%s_configs/config_%s.pckl'
+                                          % (self.runner_name, input_line))
+            for name, value in zip(self.parameters.keys(), datapoint):
+                setattr(model.parameters, name, value)
+
+            #============================
+            # EVALUATE model
+            #===========================
+            model.do_steps(int(init_steps))
+            data = model.get_std_sampled_data(samples=1,
+                                              sample_size=int(sample_steps),
+                                              tof_method='integ')
+
+            if not os.path.exists(outfile):
+                out = file(outfile, 'a')
+                out.write(model.get_std_header())
+                out.close()
+            out = file(outfile, 'a')
+            out.write(data)
+            out.close()
+            model.deallocate()
+
+    def run(self, init_steps=1e8, sample_steps=1e8, cores=4):
+        parameters = []
+        for parameter in self.parameters.values():
+            parameters.append(parameter.get_grid())
+        points = list(self.__product(*tuple(parameters)))
+
+        random.shuffle(points)
+
+        for sub_list in self.__split_seq(points, cores):
+            p = Process(target=self.__run_sublist, args=(sub_list,
+                                                         init_steps,
+                                                         sample_steps))
+            p.start()
+
+
 def set_rate_constants(parameters=None, print_rates=True):
     """Tries to evaluate the supplied expression for a rate constant
     to a simple real number and sets it for the corresponding process.
     For the evaluation it draws on predefined natural constants, user defined
     parameters and mathematical functions.
 
-    :param parameters: List of parameters to be used when evaluating expression. (default: None)
+    :param parameters: List of parameters to be used when evaluating expression.
+                      (Default: None)
     :type parameters: list
-    :param print_rates: Print the rates while setting them (default: True)
+    :param print_rates: Print the rates while setting them
+                        (Default: True)
     :type print_rates: bool
 
     """
