@@ -1490,7 +1490,7 @@ class ModelRunner(object):
             #===========================
             self.__touch(lockfile)
             fdata = file(lockfile)
-            readlines = fdata.readlines()
+            readlines = map(lambda x: x.strip(), fdata.readlines())
             fdata.close()
             if input_line in readlines:
                 continue
