@@ -1028,7 +1028,7 @@ class Site(FixedObject):
             elif type(kwargs['pos']) is np.ndarray:
                 self.pos = kwargs['pos']
             else:
-                raise 'Input %s not understood!' % kwargs['pos']
+                raise Exception('Input %s not understood!' % kwargs['pos'])
         else:
             self.pos = np.array([0., 0., 0.])
 
