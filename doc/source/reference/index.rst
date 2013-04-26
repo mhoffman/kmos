@@ -66,6 +66,19 @@ kmos.run
 
 .. automodule:: kmos.run
 
+.. autoclass:: kmos.run.ModelRunner
+   :members: run
+
+.. autoclass:: kmos.run.ModelParameter
+
+.. autoclass:: kmos.run.PressureParameter
+
+.. autoclass:: kmos.run.TemperatureParameter
+
+.. autoclass:: kmos.run.LinearParameter
+
+.. autoclass:: kmos.run.LogParameter
+
 .. autoclass:: kmos.run.KMC_Model
   :members: _adjust_database,
             _get_configuration,
@@ -110,12 +123,6 @@ kmos.run
             steps_per_frame,
             view,
             xml,
-
-
-
-
-
-
 
 
 .. autoclass:: kmos.run.Model_Rate_Constants
