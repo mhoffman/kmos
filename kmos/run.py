@@ -1367,6 +1367,19 @@ class Model_Rate_Constants(object):
 
 
 class ModelParameter(object):
+    """A model parameter to be scanned. If instantiated with only
+    one value this parameter will be fixed at this value.
+
+    Use a subclass for specific type of grid.
+
+    :param min: Minimum value for this parameter.
+    :type min: float
+    :param max: Maximum value for this parameter (Default: min)
+    :type max: float
+    :param steps: Number of steps between minimum and maximum.
+    :type steps: int
+
+    """
 
     def __init__(self, min, max=None, steps=1, type=None):
         self.min = min
@@ -1383,6 +1396,10 @@ class ModelParameter(object):
 
 
 class PressureParameter(ModelParameter):
+    """Create a grid of p \in [p_min, p_max] such
+    that ln({p}) is a regular grid.
+
+    """
 
     def __init__(self, *args, **kwargs):
         kwargs['type'] = 'pressure'
@@ -1394,6 +1411,10 @@ class PressureParameter(ModelParameter):
 
 
 class TemperatureParameter(ModelParameter):
+    """Create a grid of p \in [T_min, T_max] such
+    that ({T})**(-1) is a regular grid.
+
+    """
 
     def __init__(self, *args, **kwargs):
         kwargs['type'] = 'temperature'
@@ -1405,6 +1426,10 @@ class TemperatureParameter(ModelParameter):
 
 
 class LogParameter(ModelParameter):
+    """Create a log grid  between 10^min and 10^max
+    (like np.logspace)
+
+    """
 
     def __init__(self, min, max, steps):
         kwargs['type'] = 'log'
@@ -1415,6 +1440,9 @@ class LogParameter(ModelParameter):
 
 
 class LinearParameter(ModelParameter):
+    """Create a regular grid between min and max.
+
+    """
 
     def __init__(self, min, max, steps):
         kwargs['type'] = 'linear'
@@ -1433,13 +1461,36 @@ class _ModelRunner(type):
         for key, item in dct.items():
             if key == '__module__':
                 pass
-            else:
+            elif isinstance(item, ModelParameter):
                 obj.parameters[key] = item
 
         return obj
 
 
 class ModelRunner(object):
+    """
+Setup and initiate many runs in parallel over a regular grid
+of parameters. A standard type of script is given below.
+
+To allow execution from multiple hosts connected
+to the same filesystem calculated points are blocked
+via <classname>.lock. To redo a calculation <classname>.dat
+and <classname>.lock should be moved out of the way.
+
+    from kmos.run import ModelRunner, PressureParameter, TemperatureParameter
+
+
+    class ScanKinetics(ModelRunner):
+        p_O2gas = PressureParameter(1)
+        T = TemperatureParameter(600)
+        p_COgas = PressureParameter(min=1, max=10, steps=40)
+        # ... other parameters to scan
+
+
+    ScanKinetics().run(init_steps=1e7, sample_steps=1e7, cores=4)
+
+    """
+
     __metaclass__ = _ModelRunner
 
     def __product(self, *args, **kwds):
@@ -1465,13 +1516,34 @@ class ModelRunner(object):
         return newseq
 
     def __touch(self, fname, times=None):
+        """Pythonic version of Unix touch.
+
+        :param fname: filename.
+        :type fname: str
+        :param times: timestamp (Default: None meaning now).
+        :type times: datetime timestamp
+
+        """
         fhandle = file(fname, 'a')
         try:
             os.utime(fname, times)
         finally:
             fhandle.close()
 
-    def __run_sublist(self, sublist, init_steps, sample_steps):
+    def __run_sublist(self, sublist, init_steps, sample_steps, samples):
+        """
+        Run sampling run for a list of parameter-tuples.
+
+        :param init_steps: Steps to run model before sampling (.ie. to reach steady-state).
+        :type init_steps: int
+        :param sample_steps: Number of steps to sample over.
+        :type sample_steps: int
+        :param cores: Number of parallel processes to launch.
+        :type cores: int
+        :param samples: Number of samples. Use more samples if precise coverages are needed.
+        :type samples: int
+
+        """
         for i, datapoint in enumerate(sublist):
             #============================
             # DEFINE labels
@@ -1512,7 +1584,7 @@ class ModelRunner(object):
             # EVALUATE model
             #===========================
             model.do_steps(int(init_steps))
-            data = model.get_std_sampled_data(samples=1,
+            data = model.get_std_sampled_data(samples=samples,
                                               sample_size=int(sample_steps),
                                               tof_method='integ')
 
@@ -1525,7 +1597,25 @@ class ModelRunner(object):
             out.close()
             model.deallocate()
 
-    def run(self, init_steps=1e8, sample_steps=1e8, cores=4):
+    def run(self, init_steps=1e8,
+                  sample_steps=1e8,
+                  cores=4,
+                  samples=1):
+        """Launch the ModelRunner instance. Creates a regular grid over
+        all ModelParameters defined in the ModelRunner class.
+
+        :param init_steps: Steps to run model before sampling (.ie. to reach steady-state).
+        (Default: 1e8)
+        :type init_steps: int
+        :param sample_steps: Number of steps to sample over (Default: 1e8)
+        :type sample_steps: int
+        :param cores: Number of parallel processes to launch.
+        :type cores: int
+        :param samples: Number of samples. Use more samples if precise coverages are needed (Default: 1).
+        :type samples: int
+
+        """
+
         parameters = []
         for parameter in self.parameters.values():
             parameters.append(parameter.get_grid())
@@ -1536,7 +1626,8 @@ class ModelRunner(object):
         for sub_list in self.__split_seq(points, cores):
             p = Process(target=self.__run_sublist, args=(sub_list,
                                                          init_steps,
-                                                         sample_steps))
+                                                         sample_steps,
+                                                         samples,))
             p.start()
 
 
