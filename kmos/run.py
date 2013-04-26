@@ -1475,7 +1475,7 @@ of parameters. A standard type of script is given below.
 To allow execution from multiple hosts connected
 to the same filesystem calculated points are blocked
 via <classname>.lock. To redo a calculation <classname>.dat
-and <classname>.lock should be moved out of the way.
+and <classname>.lock should be moved out of the way ::
 
     from kmos.run import ModelRunner, PressureParameter, TemperatureParameter
 
