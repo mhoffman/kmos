@@ -26,6 +26,7 @@ import time
 
 
 from ase.gui.images import Images
+import ase
 
 try:
     import gtk
