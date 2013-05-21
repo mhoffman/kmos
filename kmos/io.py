@@ -827,7 +827,9 @@ class ProcListWriter():
         for layer in data.layer_list:
             out.write('                case (%s)\n' % layer.name)
             for site in layer.sites:
-                out.write('                    call replace_species((/i, j, k, %s_%s/), null_species, %s)\n' % (layer.name, site.name, site.default_species))
+                out.write(('                    call replace_species'
+                           '((/i, j, k, %s_%s/), null_species, %s)\n')
+                           % (layer.name, site.name, site.default_species))
         out.write('                end select\n')
         out.write('            end do\n')
         out.write('        end do\n')
@@ -1141,47 +1143,7 @@ class ProcListWriter():
         for i in range(len(lat_int_groups)):
             out.write('use run_proc_%04d; use nli_%04d\n' % (i, i))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        #out.write('use proclist_constants')
-        #out.write(
-            #'use lattice, only: &\n'
-            #'    get_species, &\n'
-            #'    system_size, &\n'
-            #'    spuck\n'
-        #)
-        #out.write(
-            #'use base, only: &\n'
-            #'    null_species\n'
-        #)
         out.write('\nimplicit none\n')
-
 
         representation_length = max([len(species.representation) for species in data.species_list])
         out.write('integer(kind=iint), parameter, public :: representation_length = %s\n' % representation_length)
