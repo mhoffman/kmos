@@ -535,6 +535,7 @@ class KMC_Model(Process):
                     atoms.integ_rates[i] = base.get_integ_rate(i + 1)
         # S. Matera 09/25/2012
         delta_t = (atoms.kmc_time - self.time)
+        atoms.delta_t = delta_t
         size = self.size.prod()
         if delta_t == 0. and atoms.kmc_time > 0:
             print(
