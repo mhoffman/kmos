@@ -654,7 +654,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             parse_chemical_expression(eq=text,
                                       process=self.process,
                                       project_tree=self.project_tree)
-        except Exception as e:
+        except Exception, e:
             # first remove last term and try again
             try:
                 print("Error ...")
@@ -668,7 +668,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                                           process=self.process,
                                           project_tree=self.project_tree)
 
-            except Exception as e:
+            except Exception, e:
                 print("Fatal Error ... %s" % e)
                 self.process.condition_list = []
                 self.process.action_list = []

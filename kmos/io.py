@@ -993,8 +993,9 @@ class ProcListWriter():
     def _db_print(self, line, debug=False):
         """Write out debugging statement if requested."""
         if debug:
-            with open('dbg_file.txt', 'a') as dbg_file:
-                dbg_file.write(line)
+            dbg_file = open('dbg_file.txt', 'a')
+            dbg_file.write(line)
+            dbg_file.close()
 
     def _get_lat_int_groups(self):
         data = self.data
@@ -1299,7 +1300,7 @@ class ProcListWriter():
                 try:
                     action = [action for action in process0.action_list
                                             if condition.coord == action.coord][0]
-                except Exception as e:
+                except Exception, e:
                     print(e)
                     print('Trouble with process %s' % process.name)
                     print('And condition %s' % condition)
@@ -2015,6 +2016,7 @@ def export_xml(project_tree, filename=None):
     """Writes a project to an XML file."""
     if filename is None:
         filename = '%s.xml' % project_tree.meta.model_name
-    with open(filename, 'w') as f:
-        for line in str(project_tree):
-            f.write(line)
+    f = open(filename, 'w')
+    for line in str(project_tree):
+        f.write(line)
+    f.close()
