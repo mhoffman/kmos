@@ -26,4 +26,4 @@ class ScanKinetics(ModelRunner):
     p_COgas = PressureParameter(min=1, max=10, steps=40)
 
 
-ScanKinetics().run(init_steps=1e7, sample_steps=1e7, cores=4)
+ScanKinetics().run(init_steps=1e8, sample_steps=1e8, cores=4)
