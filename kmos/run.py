@@ -925,6 +925,43 @@ class KMC_Model(Process):
                             random.choice(choices))
         self._adjust_database()
 
+    def get_avail(self, arg):
+        """Return available (enabled) processes or sites
+           :param arg: type or process to query
+           :type arg: int or [int]
+
+        """
+
+        class Proc(int):
+
+            def __new__(cls, value, *args, **kwargs):
+                return int.__new__(cls, value)
+
+            def __init__(self, value, settings):
+                self.procnames = sorted(settings.rate_constants.keys())
+
+            def __repr__(self):
+                name = self.procnames[self.__int__() - 1]
+                return '%s <model.proclist.%s> (%s)' % (name, name.lower(), self.__int__())
+
+
+        avail = []
+        try:
+            arg = list(iter(arg))
+            # if is iterable, interpret as site
+            for process in range(1, self.proclist.nr_of_proc + 1):
+                if self.base.get_avail_site(process, self.lattice.calculate_lattice2nr(arg), 2):
+                    avail.append(Proc(process, self.settings))
+
+        except Exception as e:
+            # if is not iterable, interpret as process
+            for x in range(self.lattice.system_size[0]):
+                for y in range(self.lattice.system_size[1]):
+                    for z in range(self.lattice.system_size[2]):
+                        if self.base.get_avail_site(arg, self.lattice.calculate_lattice2nr([x, y, z, 1]), 2):
+                            avail.append([x, y, z, 1])
+        return avail
+
     def _get_configuration(self):
         """ Return current configuration of model.
 
@@ -1271,8 +1308,6 @@ class Model_Rate_Constants(object):
         for i, proc in enumerate(sorted(settings.rate_constants)):
             rate_expr = settings.rate_constants[proc][0]
             rate_const = base.get_rate(i + 1)
-            #rate_const = evaluate_rate_expression(rate_expr,
-                                                  #settings.parameters)
             res += '# %s: %s = %.2e s^{-1}\n' % (proc, rate_expr, rate_const)
         res += '# ------------------\n'
 
