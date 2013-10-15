@@ -1318,10 +1318,23 @@ class ProcListWriter():
                     condition_species = condition.species
                     action_species = action.species
 
-                out.write('    call replace_species(cell%s, %s, %s)\n'
-                          % (condition.coord.radd_ff(),
-                             condition_species,
-                             action_species))
+                if len(condition_species.split(' or ') ) > 1 :
+                    out.write('    select case(get_species((cell%s)))\n'
+                              % (action.coord.radd_ff(),))
+                    for condition_species in map(lambda x: x.strip(), condition_species.split(' or ')):
+                        out.write('    case(%s)\n' % condition_species)
+                        out.write('    call replace_species(cell%s, %s, %s)\n'
+                                  % (action.coord.radd_ff(),
+                                     condition_species,
+                                     action_species))
+                    out.write('    case default\n        print *, "ILLEGAL SPECIES ENCOUNTERED"\n        stop\n    end select\n')
+
+                else:
+                    out.write('    call replace_species(cell%s, %s, %s)\n'
+                              % (action.coord.radd_ff(),
+                                 condition_species,
+                                 action_species))
+
             # extra part for multi-lattice action
             # without explicit condition
             for action in process0.action_list:
@@ -1336,10 +1349,23 @@ class ProcListWriter():
                         action_species = action.species[1:]
                     else:
                         raise UserWarning('Unmatched action that is not a multi-lattice action: %s' % (action))
-                    out.write('    call replace_species(cell%s, %s, %s)\n'
-                              % (action.coord.radd_ff(),
-                                 condition_species,
-                                 action_species))
+                    print(condition_species)
+                    if len(condition_species.split(' or ') ) > 1 :
+                        out.write('    select case(get_species((cell%s)))\n'
+                                  % (action.coord.radd_ff(),))
+                        for condition_species in map(lambda x: x.strip(), condition_species.split(' or ')):
+                            out.write('    case(%s)\n' % condition_species)
+                            out.write('            call replace_species(cell%s, %s, %s)\n'
+                                      % (action.coord.radd_ff(),
+                                         condition_species,
+                                         action_species))
+                        out.write('    case default\n        print *, "ILLEGAL SPECIES ENCOUNTERED"\n        stop    \nend select\n')
+
+                    else:
+                        out.write('    call replace_species(cell%s, %s, %s)\n'
+                                  % (action.coord.radd_ff(),
+                                     condition_species,
+                                     action_species))
 
 
             # write out necessary ADDITION statements
