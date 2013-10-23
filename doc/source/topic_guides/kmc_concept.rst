@@ -70,7 +70,7 @@ Basic Kinetic Carlo Algorithm
       #. draw random numbers :math:`R_{1}, R_{2} \in ]0,1]`
 
       #. find :math:`l` such that
-         :math:`\sum_{j=1}^{l}k_{i,\mathrm{tot}}R_{1}\le\sum_{j_1}^{l+1}k_{ij}`
+         :math:`\sum_{j=1}^{l} k_{ij} < k_{i,\mathrm{tot}}R_{1} < \sum_{j_1}^{l+1}k_{ij}`
 
       #. increment time :math:`t\rightarrow t - \frac{\ln(R_{2})}{k_{i, \mathrm{tot}}}`
 
