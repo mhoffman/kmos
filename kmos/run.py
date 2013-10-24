@@ -737,7 +737,7 @@ class KMC_Model(multiprocessing.Process):
     def _get_configuration(self):
         """ Return current configuration of model."""
         config = np.zeros(list(self.lattice.system_size) + \
-            [int(self.lattice.spuck)])
+            [int(self.lattice.spuck)], dtype=np.int8)
         for x in range(self.lattice.system_size[0]):
             for y in range(self.lattice.system_size[1]):
                 for z in range(self.lattice.system_size[2]):
