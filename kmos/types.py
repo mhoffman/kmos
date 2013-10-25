@@ -675,7 +675,7 @@ class Project(object):
         for x in self.get_processes():
             for y in x.condition_list + x.action_list:
                 stripped_speciess = y.species.replace('$', '').replace('^', '')
-                stripped_speciess = map(lambda x: x.strip(), stripped_speciess.split('or'))
+                stripped_speciess = map(lambda x: x.strip(), stripped_speciess.split(' or '))
 
                 for stripped_species in stripped_speciess:
                     if not stripped_species in species_names:

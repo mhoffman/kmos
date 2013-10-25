@@ -1051,7 +1051,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                    if x.name == elem.coord.name
                       ][0]
             species_color = [x.color for x in self.project_tree.get_speciess()
-                             if x.name == elem.species][0]
+                             if x.name == elem.species.split(' or ')[0]][0]
             center = toscrn(np.inner(pos + elem.coord.offset + center_x, atoms.cell.T))
 
             tooltip = 'Condition: %s@%s.%s.%s' % (elem.species,

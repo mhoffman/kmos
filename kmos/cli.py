@@ -166,6 +166,11 @@ def get_options(args=None, get_parser=False):
                       default=False,
                       dest='debug',
                       action='store_true')
+    parser.add_option('-n', '--no-compiler-optimization',
+                      default=False,
+                      dest='no_optimize',
+                      action='store_true')
+
     try:
         from numpy.distutils.fcompiler import get_default_fcompiler
         from numpy.distutils import log

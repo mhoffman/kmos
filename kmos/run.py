@@ -107,7 +107,7 @@ class KMC_Model(Process):
                        signal_queue=None,
                        size=None, system_name='kmc_model',
                        banner=True,
-                       print_rates=True,
+                       print_rates=False,
                        autosend=True,
                        steps_per_frame=50000,
                        cache_file=None):
@@ -306,7 +306,10 @@ class KMC_Model(Process):
                 os.makedirs(dirname)
             self.dump_config(self.cache_file)
 
-        lattice.deallocate_system()
+        if bool(base.is_allocated()):
+            lattice.deallocate_system()
+        else:
+            print("Model is not allocated.")
 
     def do_steps(self, n=10000):
         """Propagate the model `n` steps.
@@ -383,7 +386,7 @@ class KMC_Model(Process):
                     frames=30,
                     skip=1,
                     prefix='movie',
-                    rotation='15x,-70x',
+                    rotation='15z,-70x',
                     suffix='png',
                     **kwargs):
         """Export series of snapshots of model instance to an image
@@ -432,15 +435,17 @@ class KMC_Model(Process):
 
     def show(self, *args, **kwargs):
         """Visualize the current configuration of the model using ASE ag."""
+        tag = kwargs.pop('tag', None)
+
         ase = import_ase()
-        ase.visualize.view(self.get_atoms(), *args, **kwargs)
+        ase.visualize.view(self.get_atoms(tag=tag), *args, **kwargs)
 
     def view(self):
         """Start current model in live view mode."""
         from kmos import view
         view.main(self)
 
-    def get_atoms(self, geometry=True):
+    def get_atoms(self, geometry=True, tag=None):
         """Return an ASE Atoms object with additional
         information such as coverage and Turn-over-frequencies
         attached.
@@ -483,6 +488,17 @@ class KMC_Model(Process):
                                 # create the ad_atoms
                                 ad_atoms = deepcopy(
                                     self.species_representation[species])
+
+                                if tag == 'species':
+                                    ad_atoms.set_initial_magnetic_moments([species]*len(ad_atoms))
+                                elif tag == 'site':
+                                    ad_atoms.set_initial_magnetic_moments([n]*len(ad_atoms))
+                                elif tag == 'x':
+                                    ad_atoms.set_initial_magnetic_moments([i]*len(ad_atoms))
+                                elif tag == 'y':
+                                    ad_atoms.set_initial_magnetic_moments([j]*len(ad_atoms))
+                                elif tag == 'z':
+                                    ad_atoms.set_initial_magnetic_moments([k]*len(ad_atoms))
 
                                 # move to the correct location
                                 ad_atoms.translate(
@@ -579,7 +595,7 @@ class KMC_Model(Process):
                      self.get_occupation_header()))
         return std_header
 
-    def get_std_sampled_data(self, samples, sample_size, tof_method='procrates'):
+    def get_std_sampled_data(self, samples, sample_size, tof_method='integ'):
         """Sample an average model and return TOFs and coverages
         in a standardized format :
 
@@ -924,6 +940,44 @@ class KMC_Model(Process):
                             self.lattice.get_species([x, y, z, n + 1]),
                             random.choice(choices))
         self._adjust_database()
+
+    def run_proc_nr(self, proc, site):
+        if self.base.get_avail_site(proc, site, 2):
+            self.proclist.run_proc_nr(proc, site)
+            return True
+        else:
+            print("Process not enabled")
+            return False
+
+    def get_next_kmc_step(self):
+        proc, site = proclist.get_next_kmc_step()
+        return ProcInt(proc), SiteInt(site)
+
+    def get_avail(self, arg):
+        """Return available (enabled) processes or sites
+           :param arg: type or process to query
+           :type arg: int or [int]
+
+        """
+
+        avail = []
+        try:
+            arg = list(iter(arg))
+            # if is iterable, interpret as site
+            site = self.lattice.calculate_lattice2nr([arg[0], arg[1], arg[2], 1])
+            for process in range(1, self.proclist.nr_of_proc + 1):
+                if self.base.get_avail_site(process, site, 2):
+                    avail.append(ProcInt(process, self.settings))
+
+        except Exception as e:
+            # if is not iterable, interpret as process
+            for x in range(self.lattice.system_size[0]):
+                for y in range(self.lattice.system_size[1]):
+                    for z in range(self.lattice.system_size[2]):
+                        nr = self.lattice.calculate_lattice2nr([x, y, z, 1])
+                        if self.base.get_avail_site(arg, nr, 2):
+                            avail.append(SiteInt(nr))
+        return avail
 
     def _get_configuration(self):
         """ Return current configuration of model.
@@ -1271,8 +1325,6 @@ class Model_Rate_Constants(object):
         for i, proc in enumerate(sorted(settings.rate_constants)):
             rate_expr = settings.rate_constants[proc][0]
             rate_const = base.get_rate(i + 1)
-            #rate_const = evaluate_rate_expression(rate_expr,
-                                                  #settings.parameters)
             res += '# %s: %s = %.2e s^{-1}\n' % (proc, rate_expr, rate_const)
         res += '# ------------------\n'
 
@@ -1632,7 +1684,7 @@ and <classname>.lock should be moved out of the way ::
             p.start()
 
 
-def set_rate_constants(parameters=None, print_rates=True):
+def set_rate_constants(parameters=None, print_rates=None):
     """Tries to evaluate the supplied expression for a rate constant
     to a simple real number and sets it for the corresponding process.
     For the evaluation it draws on predefined natural constants, user defined
@@ -1647,6 +1699,9 @@ def set_rate_constants(parameters=None, print_rates=True):
 
     """
     proclist = ProclistProxy()
+    if print_rates is None :
+        print_rates = self.print_rates
+
     if parameters is None:
         parameters = settings.parameters
 
@@ -1689,3 +1744,30 @@ def get_tof_names():
             if tof not in tofs:
                 tofs.append(tof)
     return sorted(tofs)
+
+
+class ProcInt(int):
+
+    def __new__(cls, value, *args, **kwargs):
+        return int.__new__(cls, value)
+
+    def __init__(self, value):
+        self.procnames = sorted(settings.rate_constants.keys())
+
+    def __repr__(self):
+        name = self.procnames[self.__int__() - 1]
+        return 'Process model.proclist.%s (%s)' % (name.lower(), self.__int__())
+
+
+class SiteInt(int):
+
+    def __new__(cls, value, *args, **kwargs):
+        return int.__new__(cls, value)
+
+    def __repr__(self):
+        x, y, z, n = lattice.calculate_nr2lattice(self.__int__())
+        return 'Site (%s, %s, %s, %s) [#%s]' % (x, y, z, n, self.__int__())
+
+    def __getitem__(self, item):
+        site = lattice.calculate_nr2lattice(self.__int__())
+        return site[item]
