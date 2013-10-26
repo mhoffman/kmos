@@ -50,7 +50,7 @@ or it may be used as an API via the kmos module.
 #import kmos.types
 #import kmos.io
 
-__version__ = "0.2.3"
+__version__ = "0.3.2"
 VERSION = __version__
 
 
