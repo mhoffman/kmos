@@ -24,13 +24,46 @@ import operator
 import shutil
 import os
 import sys
-from pprint import PrettyPrinter, pformat
-import pdb
+from pprint import pformat
 
-from kmos.types import ConditionAction, LatIntProcess, SingleLatIntProcess
+from kmos.types import ConditionAction, SingleLatIntProcess, Coord
 from kmos.config import APP_ABS_PATH
 from kmos.types import cmp_coords
 
+
+def _casetree_dict(dictionary, indent='', out=None):
+    """ Recursively prints nested dictionaries."""
+    # Fortran90 always expects the default branch
+    # at the end of a 'select case' statement.
+    # Thus we use reversed() to move the 'default'
+    # branch from the beginning to the end.
+    for key, value in reversed(list(dictionary.iteritems())):
+        if isinstance(value, dict):
+            if isinstance(key, Coord):
+                out.write('%sselect case(get_species(cell%s))\n' % (indent, key.radd_ff()))
+                _casetree_dict(value, indent + '  ', out)
+                out.write('%send select\n' % indent)
+            else:
+                if key != 'default':
+                    # allowing for or in species
+                    keys = ', '.join(map(lambda x: x.strip(), key.split(' or ')))
+                    out.write('%scase(%s)\n' % (indent, keys))
+                    _casetree_dict(value, indent + '  ', out)
+                else:
+                    out.write('%scase %s\n' % (indent, key))
+                    _casetree_dict(value, indent + '  ', out)
+        else:
+            out.write(indent+'%s = %s; return\n' % (key, value))
+
+def _print_dict(dictionary, indent = ''):
+    """ Recursively prints nested dictionaries."""
+
+    for key, value in dictionary.iteritems():
+        if isinstance(value, dict):
+            print('%s%s:' % (indent, key) )
+            _print_dict(value, indent+'    ')
+        else:
+            print(indent+'%s = %s' %(key, value))
 
 def _flatten(L):
     return [item for sublist in L for item in sublist]
@@ -48,6 +81,27 @@ def _chop_line(outstr, line_length=100):
         outstr_list.append(outstr[:NEXT_BREAK] + '&\n' )
         outstr = outstr[NEXT_BREAK:]
     return ''.join(outstr_list)
+
+
+def compact_deladd_init(modified_process, out):
+    n = len(modified_processes)
+    out.write('integer :: n\n')
+    out.write('integer, dimension(%s, 4) :: sites, cells\n\n' % n)
+
+def compact_deladd_statements(modified_processes, out, action):
+    n = len(modified_processes)
+    processes = []
+    sites = np.zeros((n, 4), int)
+    cells = np.zeros((n, 4), int)
+
+    for i, (process, offset) in enumerate(modified_procs):
+        cells[i, :] = np.array(offset + [0])
+        sites[i, :] = np.array(offset + [1])
+
+    out.write('do n = 1, %s\n' % (n + 1))
+    out.write('    call %s_proc(nli_%s(cell + %s), cell + %s)\n'
+        % ())
+    out.write('enddo\n')
 
 
 def _most_common(L):
@@ -426,9 +480,15 @@ class ProcListWriter():
             self.write_proclist_end(out)
 
         elif code_generator == 'lat_int':
-            self.write_proclist_generic_part(data, out, code_generator=code_generator)
+            constants_out = open('%s/proclist_constants.f90' % self.dir, 'w')
+            self.write_proclist_constants(data,
+                                          constants_out,
+                                          close_module=True,
+                                          code_generator=code_generator,
+                                          module_name='proclist_constants',
+                                          )
+            constants_out.close()
             self.write_proclist_lat_int(data, out)
-            #self.write_proclist_multilattice(data, out)
             self.write_proclist_end(out)
 
         else:
@@ -436,26 +496,35 @@ class ProcListWriter():
 
         out.close()
 
-    def write_proclist_generic_part(self, data, out, code_generator='local_smart'):
+    def write_proclist_constants(self, data, out,
+                                 code_generator='local_smart',
+                                 close_module=False,
+                                 module_name='proclist'):
         out.write(self._gpl_message())
-        out.write('!****h* kmos/proclist\n'
+        out.write(('!****h* kmos/proclist\n'
                   '! FUNCTION\n'
                   '!    Implements the kMC process list.\n'
                   '!\n'
                   '!******\n'
-                  '\n\nmodule proclist\n'
-                  'use kind_values\n'
-                  'use base, only: &\n'
-                  '    update_accum_rate, &\n'
-                  '    determine_procsite, &\n'
-                  '    update_clocks, &\n'
-                  '    avail_sites, &\n')
-        if len(data.layer_list) == 1 : # multi-lattice mode
-            out.write('    null_species, &\n')
-        else:
-            out.write('    set_null_species, &\n')
-        out.write('    increment_procstat\n\n'
-                  'use lattice, only: &\n')
+                  '\n\nmodule %s\n'
+                  'use kind_values\n') % module_name)
+
+
+        if code_generator == 'local_smart':
+            out.write('use base, only: &\n'
+                      '    update_accum_rate, &\n'
+                      '    update_integ_rate, &\n'
+                      '    determine_procsite, &\n'
+                      '    update_clocks, &\n'
+                      '    avail_sites, &\n')
+            if len(data.layer_list) == 1 : # multi-lattice mode
+                out.write('    null_species, &\n')
+            else:
+                out.write('    set_null_species, &\n')
+            out.write('    increment_procstat\n\n')
+
+
+        out.write('use lattice, only: &\n')
         site_params = []
         for layer in data.layer_list:
             out.write('    %s, &\n' % layer.name)
@@ -463,17 +532,19 @@ class ProcListWriter():
                 site_params.append((site.name, layer.name))
         for i, (site, layer) in enumerate(site_params):
             out.write(('    %s_%s, &\n') % (layer, site))
-        out.write('    allocate_system, &\n'
-              '    nr2lattice, &\n'
-              '    lattice2nr, &\n'
-              '    add_proc, &\n'
-              '    can_do, &\n'
-              '    set_rate_const, &\n'
-              '    replace_species, &\n'
-              '    del_proc, &\n'
-              '    reset_site, &\n'
-              '    system_size, &\n')
-        out.write('    spuck, &\n')
+
+        if code_generator == 'local_smart':
+            out.write('    allocate_system, &\n'
+                  '    nr2lattice, &\n'
+                  '    lattice2nr, &\n'
+                  '    add_proc, &\n'
+                  '    can_do, &\n'
+                  '    set_rate_const, &\n'
+                  '    replace_species, &\n'
+                  '    del_proc, &\n'
+                  '    reset_site, &\n'
+                  '    system_size, &\n'
+                  '    spuck, &\n')
         out.write('    get_species\n'
               '\n\nimplicit none\n\n')
 
@@ -491,43 +562,45 @@ class ProcListWriter():
             out.write('integer(kind=iint), parameter, public :: null_species = %s\n\n'\
                 % (len(data.species_list)))
         out.write('integer(kind=iint), public :: default_species = %s\n' % (data.species_list.default_species))
-        representation_length = max([len(species.representation) for species in data.species_list])
-
-        out.write('integer(kind=iint), parameter, public :: representation_length = %s\n' % representation_length)
-        if os.name == 'posix':
-            out.write('integer(kind=iint), public :: seed_size = 12\n')
-        elif os.name == 'nt':
-            out.write('integer(kind=iint), public :: seed_size = 12\n')
-        else:
-            out.write('integer(kind=iint), public :: seed_size = 8\n')
-
-        out.write('integer(kind=iint), public :: seed ! random seed\n')
-        out.write('integer(kind=iint), public, dimension(:), allocatable :: seed_arr ! random seed\n')
 
         out.write('\n\n! Process constants\n\n')
         for i, process in enumerate(self.data.process_list):
             out.write('integer(kind=iint), parameter, public :: %s = %s\n' % (process.name, i + 1))
 
-        out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_proc = %s\n'\
-            % (len(data.process_list)))
-        out.write('character(len=2000), dimension(%s) :: processes, rates'
-                  % (len(data.process_list)))
+        if code_generator == 'local_smart':
+            representation_length = max([len(species.representation) for species in data.species_list])
+            out.write('\n\ninteger(kind=iint), parameter, public :: representation_length = %s\n' % representation_length)
+            if os.name == 'posix':
+                out.write('integer(kind=iint), public :: seed_size = 12\n')
+            elif os.name == 'nt':
+                out.write('integer(kind=iint), public :: seed_size = 12\n')
+            else:
+                out.write('integer(kind=iint), public :: seed_size = 8\n')
+            out.write('integer(kind=iint), public :: seed ! random seed\n')
+            out.write('integer(kind=iint), public, dimension(:), allocatable :: seed_arr ! random seed\n')
+            out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_proc = %s\n'\
+                % (len(data.process_list)))
+        #out.write('character(len=2000), dimension(%s) :: processes, rates'
+                  #% (len(data.process_list)))
 
-        if code_generator == 'lat_int':
-            out.write('\ncharacter(len=%s), parameter, public :: backend = "%s"\n'
-                      % (len(code_generator), code_generator))
-        elif code_generator == 'local_smart':
-            pass # change nothing here, to not alter old code
+        if close_module:
+            out.write('\n\nend module\n')
 
+    def write_proclist_generic_part(self, data, out, code_generator='local_smart'):
+        self.write_proclist_constants(data, out, close_module=False)
         out.write('\n\ncontains\n\n')
+        self.write_proclist_generic_subroutines(data, out, code_generator=code_generator)
 
-        # do n kmc steps
+    def write_proclist_generic_subroutines(self, data, out, code_generator='local_smart'):
         out.write('subroutine do_kmc_steps(n)\n\n'
                   '!****f* proclist/do_kmc_steps\n'
                   '! FUNCTION\n'
                   '!    Performs ``n`` kMC step.\n'
                   '!    If one has to run many steps without evaluation\n'
                   '!    do_kmc_steps might perform a little better.\n'
+                  '!      first update clock\n'
+                  '!      then configuration sampling step\n'
+                  '!      last execute process\n'
                   '!\n'
                   '! ARGUMENTS\n'
                   '!\n'
@@ -545,21 +618,24 @@ class ProcListWriter():
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_TIME",ran_time\n'
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc\n'
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_site",ran_site\n')
-        out.write('    call update_accum_rate\n')
-        out.write('    call update_clocks(ran_time)\n\n')
-        out.write('    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
+        out.write('    call update_accum_rate\n'
+                  '    call update_clocks(ran_time)\n\n'
+                  '    call update_integ_rate\n'
+                  '    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr\n')
             out.write('print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site\n')
-        out.write('    call run_proc_nr(proc_nr, nr_site)\n')
-        out.write('    enddo\n\n'
+        out.write('    call run_proc_nr(proc_nr, nr_site)\n'
+                  '    enddo\n\n'
                   'end subroutine do_kmc_steps\n\n')
 
-        # do exactly one kmc step
         out.write('subroutine do_kmc_step()\n\n'
                   '!****f* proclist/do_kmc_step\n'
                   '! FUNCTION\n'
                   '!    Performs exactly one kMC step.\n'
+                  '!      first update clock\n'
+                  '!      then configuration sampling step\n'
+                  '!      last execute process\n'
                   '!\n'
                   '! ARGUMENTS\n'
                   '!\n'
@@ -575,17 +651,18 @@ class ProcListWriter():
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_TIME",ran_time\n'
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc\n'
                       'print *,"    PROCLIST/DO_KMC_STEP/RAN_site",ran_site\n')
-        out.write('    call update_accum_rate\n')
-        out.write('    call update_clocks(ran_time)\n\n')
-        out.write('    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
+        out.write('    call update_accum_rate\n'
+                  '    call update_clocks(ran_time)\n\n'
+                  '    call update_integ_rate\n'
+                  '    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr\n')
             out.write('print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site\n')
-        out.write('    call run_proc_nr(proc_nr, nr_site)\n')
-        out.write('end subroutine do_kmc_step\n\n')
+        out.write('    call run_proc_nr(proc_nr, nr_site)\n'
+                  'end subroutine do_kmc_step\n\n')
 
-        # useful for debugging
-        out.write('subroutine get_kmc_step(proc_nr, nr_site)\n\n'
+        #useful for debugging
+        out.write('subroutine get_next_kmc_step(proc_nr, nr_site)\n\n'
                   '!****f* proclist/get_kmc_step\n'
                   '! FUNCTION\n'
                   '!    Determines next step without executing it.\n'
@@ -607,7 +684,7 @@ class ProcListWriter():
         out.write('    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n\n')
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/GET_KMC_STEP/PROC_NR", proc_nr\n')
-        out.write('end subroutine get_kmc_step\n\n')
+        out.write('end subroutine get_next_kmc_step\n\n')
 
         out.write('subroutine get_occupation(occupation)\n\n'
                   '!****f* proclist/get_occupation\n'
@@ -621,6 +698,7 @@ class ProcListWriter():
                   '!\n'
                   '!    ``none``\n'
                   '!******\n')
+        site_params = self._get_site_params()
         if len(data.layer_list) > 1 :  # multi-lattice mode
             out.write('    ! nr_of_species = %s, spuck = %s\n' % (len(data.species_list) + 1,
                                                                   len(site_params)))
@@ -749,7 +827,9 @@ class ProcListWriter():
         for layer in data.layer_list:
             out.write('                case (%s)\n' % layer.name)
             for site in layer.sites:
-                out.write('                    call replace_species((/i, j, k, %s_%s/), null_species, %s)\n' % (layer.name, site.name, site.default_species))
+                out.write(('                    call replace_species'
+                           '((/i, j, k, %s_%s/), null_species, %s)\n')
+                           % (layer.name, site.name, site.default_species))
         out.write('                end select\n')
         out.write('            end do\n')
         out.write('        end do\n')
@@ -779,6 +859,26 @@ class ProcListWriter():
             out.write('print *, "    PROCLIST/INITALIZE_STATE/INITIALIZED_AVAIL_SITES"\n')
 
         out.write('\nend subroutine initialize_state\n\n')
+
+##################################################################
+#By S.Matera 09/18/2012
+#    def write_proclist_integrate_TOF(self, data, out):
+#        # calculates the total rates (not normalized to surface area) for predefined TOFs
+#        # in one time step. Used for sampling the TOFs by time integration instead
+#        # of the common counting.
+#        list_proc = [(i+1, proc.name, proc.tof_count ) for i, proc in enumerate(sorted(pt.get_processes(), key=lambda x: x.name)) if proc.tof_count]
+#        tof_count_names = []
+#        for item in list_proc:
+#            tof_count_names.extend(eval(item[2]).keys())
+#
+#        tof_names=list(set(tof_count_names))
+#        j=0
+#        for item in tof_names:
+#            tof_list[j]=[(i+1, proc.name, proc.tof_count ) for i, proc in enumerate(sorted(pt.get_processes(), key=lambda x: x.name)) if name in proc.tof_count ]
+#
+#      !!! not necessary anymore !!!
+#
+##################################################################
 
     def write_proclist_run_proc_nr_smart(self, data, out):
         # run_proc_nr runs the process selected by determine_procsite
@@ -893,8 +993,9 @@ class ProcListWriter():
     def _db_print(self, line, debug=False):
         """Write out debugging statement if requested."""
         if debug:
-            with open('dbg_file.txt', 'a') as dbg_file:
-                dbg_file.write(line)
+            dbg_file = open('dbg_file.txt', 'a')
+            dbg_file.write(line)
+            dbg_file.close()
 
     def _get_lat_int_groups(self):
         data = self.data
@@ -912,11 +1013,12 @@ class ProcListWriter():
             true_conditions = []
             true_actions = []
             bystanders = []
-            for condition in process.condition_list:
+            #for condition in [x for x in process.condition_list if not x.implicit]:
+            for condition in process.condition_list :
                 corresponding_actions = [action for action in actions if condition.coord == action.coord]
 
 
-                #self._db_print('%s: %s <-> %s' % (process.name, condition, corresponding_actions))
+                self._db_print('%s: %s <-> %s' % (process.name, condition, corresponding_actions))
 
                 if corresponding_actions:
                     action = corresponding_actions[0]
@@ -934,7 +1036,10 @@ class ProcListWriter():
                 if action not in true_actions:
                     if not(action.species.startswith('^')
                            or action.species.startswith('$')):
-                        raise UserWarning('Found unmatched action that is not a multi-lattice action: %s' % action)
+                        #raise UserWarning('Found unmatched action that is not a multi-lattice action: %s' % action)
+                        print(('UserWarning: Found unmatched action (%s) that is not a multi-lattice action: %s'
+                               % (process.name, action)))
+                        # turn exceptions into warning for now
                     else:
                         true_actions.append(action)
 
@@ -953,12 +1058,20 @@ class ProcListWriter():
             for lat_int_group, processes in lat_int_groups.iteritems():
                 p0 = processes[0]
                 same = True
+                # check if conditions are identical
                 if sorted(p0.condition_list, key=lambda x: x.coord, cmp=cmp_coords) \
                    != sorted(process.condition_list, key=lambda x: x.coord, cmp=cmp_coords):
                     same = False
+                # check if actions are identical
                 if sorted(p0.action_list, key=lambda x: x.coord, cmp=cmp_coords) \
                    != sorted(process.action_list, key=lambda x: x.coord, cmp=cmp_coords):
                     same = False
+
+                # check if coords of bystanders are identical
+                if [x.coord for x in sorted(p0.bystanders, key=lambda x: x.coord, cmp=cmp_coords)] \
+                   != [x.coord for x in sorted(process.bystanders, key=lambda x: x.coord, cmp=cmp_coords)]:
+                    same = False
+
                 if same:
                     self._db_print('    %s <- %s\n' % (lat_int_group, process.name))
                     processes.append(process)
@@ -984,15 +1097,98 @@ class ProcListWriter():
         On the downside, it might be a little less optimized though
         it is local in a very strict sense. [EXPERIMENTAL/UNFINISHED!!!]
         """
+        # initialize progress bar
         if os.name == 'posix':
             from kmos.utils.progressbar import ProgressBar
             progress_bar = ProgressBar('blue', width=80)
             progress_bar.render(10, 'generic part')
 
+        # categorize elementary steps into
+        # lateral interaction groups
         lat_int_groups = self._get_lat_int_groups()
-        #####################################################
-        # def run_proc_nr
-        #####################################################
+
+        out.write(('module proclist\n'
+                  'use kind_values\n'
+                  'use base, only: &\n'
+                  '    update_accum_rate, &\n'
+                  '    update_integ_rate, &\n'
+                  '    determine_procsite, &\n'
+                  '    update_clocks, &\n'
+                  '    avail_sites, &\n'))
+        if len(data.layer_list) == 1 : # multi-lattice mode
+            out.write('    null_species, &\n')
+        else:
+            out.write('    set_null_species, &\n')
+        out.write('    increment_procstat\n\n'
+                  'use lattice, only: &\n')
+        site_params = []
+        for layer in data.layer_list:
+            out.write('    %s, &\n' % layer.name)
+            for site in layer.sites:
+                site_params.append((site.name, layer.name))
+        for i, (site, layer) in enumerate(site_params):
+            out.write(('    %s_%s, &\n') % (layer, site))
+        out.write('    allocate_system, &\n'
+              '    nr2lattice, &\n'
+              '    lattice2nr, &\n'
+              '    add_proc, &\n'
+              '    can_do, &\n'
+              '    set_rate_const, &\n'
+              '    replace_species, &\n'
+              '    del_proc, &\n'
+              '    reset_site, &\n'
+              '    system_size, &\n'
+              '    spuck, &\n')
+
+        out.write('    get_species\n')
+        for i in range(len(lat_int_groups)):
+            out.write('use run_proc_%04d; use nli_%04d\n' % (i, i))
+
+        out.write('\nimplicit none\n')
+
+        representation_length = max([len(species.representation) for species in data.species_list])
+        out.write('integer(kind=iint), parameter, public :: representation_length = %s\n' % representation_length)
+        if os.name == 'posix':
+            out.write('integer(kind=iint), public :: seed_size = 12\n')
+        elif os.name == 'nt':
+            out.write('integer(kind=iint), public :: seed_size = 12\n')
+        else:
+            out.write('integer(kind=iint), public :: seed_size = 8\n')
+        out.write('integer(kind=iint), public :: seed ! random seed\n')
+        out.write('integer(kind=iint), public, dimension(:), allocatable :: seed_arr ! random seed\n')
+        out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_proc = %s\n'\
+            % (len(data.process_list)))
+
+        code_generator = 'lat_int'
+        if code_generator == 'lat_int':
+            out.write('\ncharacter(len=%s), parameter, public :: backend = "%s"\n'
+                      % (len(code_generator), code_generator))
+        elif code_generator == 'local_smart':
+            pass # change nothing here, to not alter old code
+
+
+        out.write('\ncontains\n\n')
+
+        # write out the process list
+        self.write_proclist_lat_int_run_proc_nr(data, lat_int_groups, progress_bar, out)
+        self.write_proclist_lat_int_touchup(lat_int_groups, out)
+        self.write_proclist_generic_subroutines(data, out, code_generator='lat_int')
+        self.write_proclist_lat_int_run_proc(data, lat_int_groups, progress_bar)
+        self.write_proclist_lat_int_nli_casetree(data, lat_int_groups, progress_bar)
+
+        # and we are done!
+        if os.name == 'posix':
+            progress_bar.render(100, 'finished proclist.f90')
+
+    def write_proclist_lat_int_run_proc_nr(self, data, lat_int_groups, progress_bar, out):
+        """
+        subroutine run_proc_nr(proc, cell)
+
+        Central function at the beginning of each executed elementary step.
+        Dispatches from the determined process number to the corresponding
+        subroutine.
+
+        """
         out.write('subroutine run_proc_nr(proc, nr_cell)\n')
         out.write('    integer(kind=iint), intent(in) :: nr_cell\n')
         out.write('    integer(kind=iint), intent(in) :: proc\n\n')
@@ -1016,37 +1212,54 @@ class ProcListWriter():
         out.write('    end select\n\n')
         out.write('end subroutine run_proc_nr\n\n')
 
-        #########################################
-        # The touchup function
-        #########################################
+    def write_proclist_lat_int_touchup(self, lat_int_groups, out):
+        """
+        The touchup function
+
+        Updates the elementary steps that a cell can do
+        given the current lattice configuration. This has
+        to be run once for every cell to initialize
+        the simulation book-keeping.
+
+        """
         out.write('subroutine touchup_cell(cell)\n')
         out.write('    integer(kind=iint), intent(in), dimension(4) :: cell\n\n')
         out.write('    integer(kind=iint), dimension(4) :: site\n\n')
         out.write('    integer(kind=iint) :: proc_nr\n\n')
         out.write('    site = cell + (/0, 0, 0, 1/)\n')
         out.write('    do proc_nr = 1, nr_of_proc\n')
-        if data.meta.debug > 1:
-            out.write('print *,"PROCLIST/TOUCHUP_CELL/DEL/%s"\n' % lat_int_group.upper())
         out.write('        if(avail_sites(proc_nr, lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then\n')
         out.write('            call del_proc(proc_nr, site)\n')
         out.write('        endif\n')
         out.write('    end do\n\n')
 
         for lat_int_group, process in lat_int_groups.iteritems():
-            if data.meta.debug > 1:
-                out.write('print *,"PROCLIST/TOUCHUP_CELL/ADD/%s"\n' % lat_int_group.upper())
             out.write('    call add_proc(nli_%s(cell), site)\n' % (lat_int_group))
         out.write('end subroutine touchup_cell\n\n')
 
-        #####################################################
-        # def run_proc_<processname>
-        #####################################################
+
+    def write_proclist_lat_int_run_proc(self, data, lat_int_groups, progress_bar):
+        """
+        subroutine run_proc_<processname>(cell)
+
+        Performs the lattice and avail_sites updates
+        for a given process.
+        """
+
         for lat_int_loop, (lat_int_group, processes) in enumerate(lat_int_groups.iteritems()):
+            out = open('%s/run_proc_%04d.f90' % (self.dir, lat_int_loop), 'w')
             self._db_print('PROCESS: %s' % lat_int_group)
             # initialize needed data structure
             process0 = processes[0]
             modified_procs = set()
 
+            out.write('module run_proc_%04d\n' % lat_int_loop)
+            out.write('use kind_values\n')
+            for i in range(len(lat_int_groups)):
+                out.write('use nli_%04d\n' % i)
+            out.write('use proclist_constants\n')
+            out.write('implicit none\n')
+            out.write('contains\n')
             # write F90 subroutine definition
             out.write('subroutine run_proc_%s(cell)\n\n' % lat_int_group)
             out.write('    integer(kind=iint), dimension(4), intent(in) :: cell\n')
@@ -1087,7 +1300,7 @@ class ProcListWriter():
                 try:
                     action = [action for action in process0.action_list
                                             if condition.coord == action.coord][0]
-                except Exception as e:
+                except Exception, e:
                     print(e)
                     print('Trouble with process %s' % process.name)
                     print('And condition %s' % condition)
@@ -1105,10 +1318,23 @@ class ProcListWriter():
                     condition_species = condition.species
                     action_species = action.species
 
-                out.write('    call replace_species(cell%s, %s, %s)\n'
-                          % (condition.coord.radd_ff(),
-                             condition_species,
-                             action_species))
+                if len(condition_species.split(' or ') ) > 1 :
+                    out.write('    select case(get_species((cell%s)))\n'
+                              % (action.coord.radd_ff(),))
+                    for condition_species in map(lambda x: x.strip(), condition_species.split(' or ')):
+                        out.write('    case(%s)\n' % condition_species)
+                        out.write('    call replace_species(cell%s, %s, %s)\n'
+                                  % (action.coord.radd_ff(),
+                                     condition_species,
+                                     action_species))
+                    out.write('    case default\n        print *, "ILLEGAL SPECIES ENCOUNTERED"\n        stop\n    end select\n')
+
+                else:
+                    out.write('    call replace_species(cell%s, %s, %s)\n'
+                              % (action.coord.radd_ff(),
+                                 condition_species,
+                                 action_species))
+
             # extra part for multi-lattice action
             # without explicit condition
             for action in process0.action_list:
@@ -1123,10 +1349,23 @@ class ProcListWriter():
                         action_species = action.species[1:]
                     else:
                         raise UserWarning('Unmatched action that is not a multi-lattice action: %s' % (action))
-                    out.write('    call replace_species(cell%s, %s, %s)\n'
-                              % (action.coord.radd_ff(),
-                                 condition_species,
-                                 action_species))
+                    print(condition_species)
+                    if len(condition_species.split(' or ') ) > 1 :
+                        out.write('    select case(get_species((cell%s)))\n'
+                                  % (action.coord.radd_ff(),))
+                        for condition_species in map(lambda x: x.strip(), condition_species.split(' or ')):
+                            out.write('    case(%s)\n' % condition_species)
+                            out.write('            call replace_species(cell%s, %s, %s)\n'
+                                      % (action.coord.radd_ff(),
+                                         condition_species,
+                                         action_species))
+                        out.write('    case default\n        print *, "ILLEGAL SPECIES ENCOUNTERED"\n        stop    \nend select\n')
+
+                    else:
+                        out.write('    call replace_species(cell%s, %s, %s)\n'
+                                  % (action.coord.radd_ff(),
+                                     condition_species,
+                                     action_species))
 
 
             # write out necessary ADDITION statements
@@ -1137,28 +1376,118 @@ class ProcListWriter():
                 out.write('    call add_proc(nli_%s(cell + %s), cell + %s)\n'
                     % (process.name, offset_cell, offset_site))
             out.write('\nend subroutine run_proc_%s\n\n' % lat_int_group)
+            out.write('end module\n')
 
             if os.name == 'posix':
                 progress_bar.render(int(10+40*float(lat_int_loop)/len(lat_int_groups)),
                                     'run_proc_%s' % lat_int_group)
 
-        #########################################
-        # def nli_<processname>
-        # nli = number of lateral interaction
-        # inspect a local enviroment for a set
-        # of processes that only differ by lateral
-        # interaction and return the process number
-        # corrresponding to the present configuration.
-        # If no process is applicable an integer "0"
-        # is returned.
-        #########################################
+    def write_proclist_lat_int_nli_casetree(self, data, lat_int_groups, progress_bar):
+        """
+        Write out subroutines that do the following:
+        Take a given cell and determine from a group a processes
+        that only differ by lateral interaction which one is possible.
+        This version writes out explicit 'select case'-tree which is
+        somewhat slower than the module version but can theoretically
+        accomodate for infinitely many conditions for one elementary step.
+
+        If no process is applicable an integer "0"
+        is returned.
+
+        """
+
+        for lat_int_loop, (lat_int_group, processes) in enumerate(lat_int_groups.iteritems()):
+            out = open('%s/nli_%04d.f90' % (self.dir, lat_int_loop), 'w')
+            out.write('module nli_%04d\n' % lat_int_loop)
+            out.write('use kind_values\n')
+            out.write('use lattice\n'
+                    )
+            out.write('use proclist_constants\n')
+            out.write('implicit none\n')
+            out.write('contains\n')
+            fname = 'nli_%s' % lat_int_group
+            if data.meta.debug > 0:
+                out.write('function %(cell)\n'
+                          % (fname))
+            else:
+                # DEBUGGING
+                #out.write('function nli_%s(cell)\n'
+                          #% (lat_int_group))
+                out.write('pure function nli_%s(cell)\n'
+                          % (lat_int_group))
+            out.write('    integer(kind=iint), dimension(4), intent(in) :: cell\n')
+            out.write('    integer(kind=iint) :: %s\n\n' % fname)
+
+
+
+            #######################################################
+            # sort processes into a nested list (dictionary)
+            # ordered by coords
+            #######################################################
+
+            # first build up a tree where each result has all
+            # the needed conditions as parent nodes
+            case_tree = {}
+            for process in processes:
+                conditions = [y for y in sorted(process.condition_list + process.bystanders,
+                                                 key=lambda x: x.coord, cmp=cmp_coords)
+                                                 if not y.implicit]
+                node = case_tree
+                for condition in conditions:
+                    species_node = node.setdefault(condition.coord, {})
+                    node = species_node.setdefault(condition.species, {})
+                    species_node.setdefault('default', {fname: 0})
+                node[fname] = process.name
+
+            # second write out the generated tree by traversing it
+            _casetree_dict(case_tree, '    ', out)
+
+            out.write('\nend function %s\n\n' % (fname))
+            out.write('end module\n')
+
+            # update the progress bar
+            if os.name == 'posix':
+                progress_bar.render(int(50+50*float(lat_int_loop)/len(lat_int_groups)),
+                                    'nli_%s' % lat_int_group)
+
+    def write_proclist_lat_int_nli_caselist(self, data, lat_int_groups, progress_bar, out):
+        """
+        subroutine nli_<processname>
+
+        nli = number of lateral interaction
+        inspect a local enviroment for a set
+        of processes that only differ by lateral
+        interaction and return the process number
+        corrresponding to the present configuration.
+        If no process is applicable an integer "0"
+        is returned.
+
+        This version is the fastest found so far but has the problem
+        that nr_of_species**nr_of_sites quickly runs over sys.max_int
+        or whatever is the largest available integer for your Fortran
+        compiler.
+
+        """
+
         for lat_int_loop, (lat_int_group, processes) in enumerate(lat_int_groups.iteritems()):
             process0 = processes[0]
-            conditions0 = process0.condition_list + process0.bystanders
+
+            # put together the bystander conditions and true conditions,
+            # sort them in a unique way and throw out those that are
+            # implicit
+            conditions0 = [y for y in sorted(process0.condition_list + process0.bystanders,
+                                             key=lambda x: x.coord, cmp=cmp_coords)
+                                             if not y.implicit]
+            # DEBUGGING
+            self._db_print(process0.name, conditions0)
+
             if data.meta.debug > 0:
                 out.write('function nli_%s(cell)\n'
                           % (lat_int_group))
             else:
+                # DEBUGGING
+                #out.write('function nli_%s(cell)\n'
+                          #% (lat_int_group))
                 out.write('pure function nli_%s(cell)\n'
                           % (lat_int_group))
             out.write('    integer(kind=iint), dimension(4), intent(in) :: cell\n')
@@ -1169,17 +1498,18 @@ class ProcListWriter():
             # into a contiguous one
             compression_map = {}
             #print("# proc %s" % len(processes))
-            for i, process in enumerate(processes):
+            for i, process in enumerate(sorted(processes)):
                 # calculate lat. int. nr
                 lat_int_nr = 0
                 if len(data.layer_list) > 1:
                     nr_of_species = len(data.species_list) + 1
                 else:
                     nr_of_species = len(data.species_list)
-                conditions = process.condition_list + process.bystanders
-                for j, bystander in enumerate(sorted(conditions,
-                                     key=lambda x: x.coord,
-                                     cmp=cmp_coords)):
+                conditions = [y for y in sorted(process.condition_list + process.bystanders,
+                                                key=lambda x: x.coord, cmp=cmp_coords)
+                                                if not y.implicit]
+
+                for j, bystander in enumerate(conditions):
                     species_nr = [x for (x, species) in
                                   enumerate(sorted(data.species_list))
                                   if species.name == bystander.species][0]
@@ -1187,9 +1517,9 @@ class ProcListWriter():
                     #print(lat_int_nr, species.name, nr_of_species, j)
                 compression_map[lat_int_nr] = process.name
                 if lat_int_nr > sys.maxint :
-                    print(("Warning: Lateral interaction index is too large to compile."
-                          "          Try to reduce the number of conditions for process %s"
-                          "          or the total number of species.") % process)
+                    print(("Warning: Lateral interaction index is too large to compile.\n"
+                          "          Try to reduce the number of (non-implicit conditions\n"
+                          "          or the total number of species.\n\n%s") % process)
 
 
             # use a threshold of 1./3 for very sparse maps
@@ -1197,7 +1527,6 @@ class ProcListWriter():
                 USE_ARRAY = True
             else:
                 USE_ARRAY = False
-            #print(lat_int_group, float(len(compression_map)), (nr_of_species**len(conditions)), USE_ARRAY)
 
             # use generator object to save memory
             if USE_ARRAY:
@@ -1217,8 +1546,6 @@ class ProcListWriter():
                 out.write('print *,"PROCLIST/NLI_%s"\n' % lat_int_group.upper())
                 out.write('print *,"    PROCLIST/NLI_%s/CELL", cell\n' % lat_int_group.upper())
 
-            conditions0 = sorted(process0.condition_list + process0.bystanders,
-                                 key=lambda x: x.coord, cmp=cmp_coords)
             for i, bystander in enumerate(conditions0):
                 out.write('    n = n + get_species(cell%s)*nr_of_species**%s\n'
                 % (bystander.coord.radd_ff(), i))
@@ -1228,7 +1555,7 @@ class ProcListWriter():
                           % (lat_int_group, lat_int_group))
             else:
                 out.write('\n    select case(n)\n')
-                for i, proc_name in compression_map.iteritems():
+                for i, proc_name in sorted(compression_map.iteritems()):
                     if proc_name:
                         out.write('    case(%s)\n' % i)
                         out.write('        nli_%s = %s\n' %
@@ -1245,8 +1572,6 @@ class ProcListWriter():
             if os.name == 'posix':
                 progress_bar.render(int(50+50*float(lat_int_loop)/len(lat_int_groups)),
                                     'nli_%s' % lat_int_group)
-        if os.name == 'posix':
-            progress_bar.render(100, 'finished proclist.f90')
 
     def write_proclist_put_take(self, data, out):
         """
@@ -1526,6 +1851,8 @@ class ProcListWriter():
         out.write('       e.g. ::\n')
         out.write('    model.put([0,0,0,model.lattice.default_a], model.proclist.species_a)\n')
         out.write('    """\n')
+        out.write('    #from setup_model import setup_model\n')
+        out.write('    #setup_model(model)\n')
         out.write('    pass\n\n')
 
         # Parameters
@@ -1715,26 +2042,7 @@ def export_xml(project_tree, filename=None):
     """Writes a project to an XML file."""
     if filename is None:
         filename = '%s.xml' % project_tree.meta.model_name
-    with open(filename, 'w') as f:
-        for line in str(project_tree):
-            f.write(line)
-
-
-def compile_model(project_tree):
-    from tempfile import mkdtemp
-    import os
-    import shutil
-    from kmos.utils import build
-    from kmos.cli import get_options
-    cwd = os.path.abspath(os.curdir)
-    dir = mkdtemp()
-    export_source(project_tree, dir)
-    os.chdir(dir)
-
-    options, args = get_options()
-    build(options)
-    from kmos.run import KMC_Model
-    model = KMC_Model(print_rates=False, banner=False)
-    os.chdir(cwd)
-    shutil.rmtree(dir)
-    return model
+    f = open(filename, 'w')
+    for line in str(project_tree):
+        f.write(line)
+    f.close()

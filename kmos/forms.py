@@ -40,7 +40,11 @@ from kiwi.ui.objectlist import Column
 
 # own modules
 from kmos.config import GLADEFILE
-from kmos.utils import CorrectlyNamed, get_ase_constructor
+from kmos.utils import CorrectlyNamed, \
+                       get_ase_constructor, \
+                       col_str2tuple, \
+                       jmolcolor_in_hex
+
 from kmos.types import ProcessFormSite, Process, OutputItem, Coord, \
                        ConditionAction, Site
 
@@ -56,24 +60,6 @@ from ase.data import covalent_radii
 from kmos.pygtkcanvas.canvas import Canvas
 from kmos.pygtkcanvas.canvaslayer import CanvasLayer
 from kmos.pygtkcanvas.canvasitem import *
-
-
-def col_str2tuple(hex_string):
-    """Convenience function that turns a HTML type color
-    into a tuple of three float between 0 and 1
-    """
-    color = gtk.gdk.Color(hex_string)
-    return (color.red_float, color.green_float, color.blue_float)
-
-
-def jmolcolor_in_hex(i):
-    """Return a given jmol color in hexadecimal representation."""
-    from ase.data.colors import jmol_colors
-    color = [int(x) for x in 255 * jmol_colors[i]]
-    r, g, b = color
-    a = 255
-    color = (r << 24) | (g << 16) | (b << 8) | a
-    return color
 
 
 class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
@@ -429,7 +415,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
             # Assumes a binding distance of 1.3 Angstrom
             atoms = self._get_atoms()
             z_pos = atoms.get_positions()[:, 2]
-            z_pos = z_pos if z_pos else [0]
+            z_pos = z_pos if len(z_pos) else [0]
             Z = max(z_pos) + 1.3
             z = Z / atoms.cell[2, 2]
             new_site.pos[2] = z
@@ -650,7 +636,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         if not text:
             self.process.condition_list = []
             self.process.action_list = []
-            self.draw_from_data()
+            self.traw_from_data()
             return
         # Delete trailing plusses
         text = re.sub(r'\s*\+\s', '', text)
@@ -668,7 +654,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             parse_chemical_expression(eq=text,
                                       process=self.process,
                                       project_tree=self.project_tree)
-        except Exception as e:
+        except Exception, e:
             # first remove last term and try again
             try:
                 print("Error ...")
@@ -682,15 +668,15 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                                           process=self.process,
                                           project_tree=self.project_tree)
 
-            except Exception as e:
+            except Exception, e:
                 print("Fatal Error ... %s" % e)
                 self.process.condition_list = []
                 self.process.action_list = []
         finally:
             self.draw_from_data()
 
-    def query_tooltip(self, _canvas, widget, tooltip):
-        tooltip.set_text(widget.tooltip_text)
+    def query_tooltip(self, item, x, y, keyboard_mode, tooltip, *args, **kwargs):
+        tooltip.set_text(item.tooltip_text)
         return True
 
     def on_lattice(self, x, y):
@@ -769,7 +755,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.chemical_expression.update(self.generate_expression(), )
         self.canvas.redraw()
 
-    def draw_from_data(self):
+    def draw_from_data_old(self):
         """Places circles on the current lattice according
         to the conditions and actions defined
         """
@@ -917,6 +903,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 o.set_radius(self.r_cond)
                 o.type = 'condition'
                 o.condition = elem
+                o.tooltip_text = '%s@%s' % (elem.species, elem.coord)  # for tooltip
+                o.connect('query-tooltip', self.query_tooltip)
 
         for elem in self.process.action_list:
             matching_sites = [x for x in self.site_layer
@@ -943,7 +931,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                     radius = self.r_act
                     line_width = 1.0
                 color = col_str2tuple(color)
-                o = CanvasOval(layer, bg=color,
+                o = CanvasOval(layer,
+                               bg=color,
                                fg=black,
                                line_width=line_width,
                                filled=True,
@@ -954,6 +943,158 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 o.set_radius(radius)
                 o.type = 'action'
                 o.action = elem
+                o.tooltip_text = '%s@%s' % (elem.species, elem.coord)  # for tooltip
+                o.connect('query-tooltip', self.query_tooltip)
+
+    def draw_from_data(self):
+        atoms = self._get_atoms()
+        def toscrn(coord,
+                   screen_size=(500, 500),
+                   scale=None,
+                   offset=None):
+
+            if scale is None:
+                scale = min(screen_size[0]/(atoms.cell[0] + atoms.cell[1])[0],
+                            screen_size[1]/(atoms.cell[0] + atoms.cell[1])[1])
+                scale /= (zoom + 1)
+
+            if offset is None:
+                offset = ((screen_size[0] - zoom*scale*(atoms.cell[0] + atoms.cell[1])[0])/2,
+                          (screen_size[1] - zoom*scale*(atoms.cell[0] + atoms.cell[1])[1])/2,)
+            return (scale * coord[0] + offset[0],
+                    screen_size[1] - (scale * coord[1] + offset[1]))
+
+        zoom = 3
+
+        center_x = zoom / 2
+        center_y = zoom / 2
+        if hasattr(self, 'canvas'):
+            self.process_pad.remove(self.canvas)
+        canvas = goocanvas.Canvas()
+        self.canvas = canvas
+        root = canvas.get_root_item()
+        canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
+        canvas.set_property('has-tooltip', True)
+        #canvas.grab_focus()
+        canvas.show()
+        self.process_pad.add(canvas)
+
+        radius = 10
+
+        # draw lattice
+        for i in range(zoom + 1):
+            for _0, _1, _2, _3 in [[i, i, 0, zoom],
+                                   [0, zoom, i, i]]:
+                points = goocanvas.Points([
+                    toscrn(atoms.cell[0]*_0 + atoms.cell[1]*_2),
+                    toscrn(atoms.cell[0]*_1 + atoms.cell[1]*_3),
+                ])
+                goocanvas.Polyline(parent=root,
+                                  points=points,
+                                  stroke_color='black',
+                                  fill_color='white',
+                                  line_width=1.0)
+        # emphasize central cell
+        points = goocanvas.Points([
+            toscrn(atoms.cell[0]*center_x + atoms.cell[1]*center_x),
+            toscrn(atoms.cell[0]*center_x + atoms.cell[1]*(center_x + 1)),
+            toscrn(atoms.cell[0]*(center_x + 1) + atoms.cell[1]*(center_x + 1)),
+            toscrn(atoms.cell[0]*(center_x + 1) + atoms.cell[1]*center_x),
+            toscrn(atoms.cell[0]*center_x + atoms.cell[1]*center_x),
+        ])
+        goocanvas.Polyline(parent=root,
+                          points=points,
+                          stroke_color='black',
+                          fill_color='white',
+                          line_width=2.0)
+        # draw sites
+        for x in range(zoom):
+            for y in range(zoom):
+                sites = self.project_tree.get_layers()[0].sites
+                for site in sites:
+                    X, Y = toscrn(x*atoms.cell[0]
+                                  + y*atoms.cell[1]
+                                  + np.inner(atoms.cell.T, site.pos))
+                    tooltip = '%s.(%s, %s, 0).%s' % (site.name,
+                                                     x-1, y-1,
+                                                     self.project_tree.get_layers()[0].name
+                                                     )
+
+                    o = goocanvas.Ellipse(parent=root,
+                                          center_x=X,
+                                          center_y=Y,
+                                          radius_x=.4 * radius,
+                                          radius_y=.4 * radius,
+                                          stroke_color='black',
+                                          fill_color='white',
+                                          line_width=1.0,
+                                          tooltip=tooltip,
+                                          )
+
+        # draw reservoir circles
+        for k, species in enumerate(self.project_tree.get_speciess()):
+            color = col_str2tuple(species.color)
+            o = goocanvas.Ellipse(parent=root,
+                           center_x=30 + k * 50,
+                           center_y=30,
+                           radius_x=0.8*radius,
+                           radius_y=0.8*radius,
+                           stroke_color='black',
+                           fill_color_rgba=eval('0x' + species.color[1:] + 'ff' ),
+                           tooltip=species.name,
+                           )
+
+        for elem in self.process.condition_list:
+            pos = [x.pos
+                   for layer in self.project_tree.get_layers()
+                   for x in layer.sites
+                   if x.name == elem.coord.name
+                      ][0]
+            species_color = [x.color for x in self.project_tree.get_speciess()
+                             if x.name == elem.species.split(' or ')[0]][0]
+            center = toscrn(np.inner(pos + elem.coord.offset + center_x, atoms.cell.T))
+
+            tooltip = 'Condition: %s@%s.%s.%s' % (elem.species,
+                                       elem.coord.name,
+                                       tuple(elem.coord.offset),
+                                       elem.coord.layer)  # for tooltip
+            o = goocanvas.Ellipse(parent=root,
+                                  center_x=center[0],
+                                  center_y=center[1],
+                                  radius_x=0.8*radius,
+                                  radius_y=0.8*radius,
+                                  stroke_color='black',
+                                  fill_color_rgba=eval('0x' + species_color[1:] + 'ff' ),
+                                  tooltip=tooltip,
+                                  )
+
+
+        for elem in self.process.action_list:
+            species_color = [x.color for x in self.project_tree.get_speciess()
+                             if x.name == elem.species][0]
+            pos = [x.pos
+                   for layer in self.project_tree.get_layers()
+                   for x in layer.sites
+                   if x.name == elem.coord.name
+                      ][0]
+
+            center = toscrn(np.inner(pos + elem.coord.offset + center_x, atoms.cell.T))
+            tooltip = 'Action: %s@%s.%s.%s' % (elem.species,
+                                       elem.coord.name,
+                                       tuple(elem.coord.offset),
+                                       elem.coord.layer)  # for tooltip
+            o = goocanvas.Ellipse(parent=root,
+                                  center_x=center[0],
+                                  center_y=center[1],
+                                  radius_x=0.4*radius,
+                                  radius_y=0.4*radius,
+                                  stroke_color='black',
+                                  fill_color_rgba=eval('0x' + species_color[1:] + 'ff' ),
+                                  tooltip=tooltip,
+                                  )
+
+
+
 
     def _get_atoms(self, layer_nr=0):
         if self.project_tree.lattice.representation:
@@ -965,128 +1106,6 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         else:
             atoms = Atoms()
         return atoms
-
-    def _draw_from_data(self):
-        """Draw the current lattice with unit cell
-           and sites defined on it.
-
-           [Temporary function using goocanvas that
-           will replace the old function.]
-        """
-        # initialize canvas
-        if hasattr(self, 'canvas'):
-            self.process_pad.remove(self.canvas)
-        self.canvas = goocanvas.Canvas()
-        self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
-        #self.canvas.grab_focus()
-        self.canvas.show()
-        self.process_pad.add(self.canvas)
-        self.root = self.canvas.get_root_item()
-
-        # draw atoms in background
-        atoms = self._get_atoms()
-
-        self.lower_left = (self.offset[0],
-                           self.offset[1]
-                           + self.scale * atoms.cell[1, 1])
-        self.upper_right = (self.offset[0]
-                           + self.scale * atoms.cell[0, 0],
-                           self.offset[1])
-        x_range = (-1, 3)
-        y_range = (-1, 3)
-        for i in range(*x_range):
-            for j in range(*y_range):
-                for atom in sorted(atoms, key=lambda x: x.position[2]):
-                    pos = atom.position + np.dot(np.array([i, j, 0]),
-                                                 atoms.cell)
-                    pos *= np.array([1, -1, 1])
-                    pos *= self.scale
-                    pos += self.offset
-                    X = pos[0]
-                    Y = pos[1]
-                    n = atom.number
-                    radius = self.radius_scale * covalent_radii[n]
-                    color = jmolcolor_in_hex(n)
-                    goocanvas.Ellipse(parent=self.root,
-                                      center_x=(X),
-                                      center_y=(Y),
-                                      radius_x=radius,
-                                      radius_y=radius,
-                                      stroke_color='black',
-                                      fill_color_rgba=color,
-                                      line_width=1.0)
-
-        # draw unit cell
-        A = tuple(self.offset[:2])
-        B = (self.offset[0] + self.scale * (atoms.cell[0, 0]),
-             self.offset[1] + self.scale * (atoms.cell[0, 1]))
-
-        C = (self.offset[0] + self.scale * (atoms.cell[0, 0]
-                                       + atoms.cell[1, 0]),
-             self.offset[1] - self.scale * (atoms.cell[0, 1]
-                                       + atoms.cell[1, 1]))
-
-        D = (self.offset[0] + self.scale * (atoms.cell[1, 0]),
-             self.offset[1] - self.scale * (atoms.cell[1, 1]))
-        goocanvas.Polyline(parent=self.root,
-                           close_path=True,
-                           points=goocanvas.Points([A, B, C, D]),
-                           stroke_color='black',)
-
-        # draw sites
-        for x in range(*x_range):
-            for y in range(*y_range):
-                sites = self.project_tree.get_layers()[0].sites
-                for site in sites:
-                    # convert to screen coordinates
-                    pos = np.dot(site.pos + np.array([x, y, 0]), atoms.cell)
-                    pos *= np.array([1, -1, 1])
-                    pos *= self.scale
-                    pos += self.offset
-                    X = pos[0]
-                    Y = pos[1]
-                    o = goocanvas.Ellipse(parent=self.root,
-                                          center_x=X,
-                                          center_y=Y,
-                                          radius_x=.5 * self.radius_scale,
-                                          radius_y=.5 * self.radius_scale,
-                                          stroke_color='white',
-                                          line_width=2.0,)
-                    o.site = site
-                    o.connect('query-tooltip', self.query_tooltip)
-                self.canvas.hide()
-                self.canvas.show()
-
-        # draw conditions/actions
-        for i in range(*x_range):
-            for j in range(*y_range):
-                for condition in self.process.condition_list \
-                               + self.process.action_list:
-                    coord = condition.coord
-                    species = condition.species
-                    pos = [x for x in self.project_tree.get_layers()[0].sites
-                           if x.name == coord.name][0].pos
-                    pos += np.array([i, j, 0])
-                    pos = self.project_tree.lattice.cell * pos
-                    representation = [x for x in
-                                      self.project_tree.get_speciess()
-                                  if x.name == species][0].representation
-                    if representation:
-                        atoms = eval(representation)
-                    else:
-                        atoms = []
-                    for atom in atoms:
-                        n = atom.number
-                        color = jmolcolor_in_hex(n)
-                        radius = self.radius_scale * covalent_radii[n]
-                        goocanvas.Ellipse(parent=self.root,
-                                          center_x=(X),
-                                          center_y=(Y),
-                                          radius_x=radius,
-                                          radius_y=radius,
-                                          stroke_color='black',
-                                          fill_color_rgba=color,
-                                          line_width=1.0)
 
     def on_condition_action_clicked(self, _canvas, widget, event):
         if event.button == 2:

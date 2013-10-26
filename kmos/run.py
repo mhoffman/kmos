@@ -39,15 +39,17 @@ the model happens through Queues.
 
 __all__ = ['base', 'lattice', 'proclist', 'KMC_Model']
 
-from copy import deepcopy
-import os
-from fnmatch import fnmatch
-import multiprocessing
-import random
-from math import log
-import numpy as np
 from ase.atoms import Atoms
+from copy import deepcopy
+from fnmatch import fnmatch
 from kmos import evaluate_rate_expression
+from kmos.utils import OrderedDict
+from math import log
+from multiprocessing import Process
+import numpy as np
+import os
+import random
+import sys
 try:
     from kmc_model import base, lattice, proclist
 except Exception, e:
@@ -58,6 +60,11 @@ except Exception, e:
     kmos export <xml-file>
     Hint: are you in a directory containing a compiled kMC model?\n\n
     """ % e)
+
+try:
+    from kmc_model import proclist_constants
+except:
+    proclist_constants = None
 
 try:
     import kmc_settings as settings
@@ -71,7 +78,25 @@ except Exception, e:
     """ % e)
 
 
-class KMC_Model(multiprocessing.Process):
+INTERACTIVE = hasattr(sys, 'ps1') or hasattr(sys, 'ipcompleter')
+INTERACTIVE = True  # Turn it off for now because it doesn work reliably
+
+
+class ProclistProxy(object):
+
+    def __dir__(selftr):
+        return list(set(dir(proclist) + dir(proclist_constants)))
+
+    def __getattr__(self, attr):
+        if attr in dir(proclist):
+            return eval('proclist.%s' % attr)
+        elif attr in dir(proclist_constants):
+            return eval('proclist_constants.%s' % attr)
+        else:
+            raise AttributeError
+
+
+class KMC_Model(Process):
     """API Front-end to initialize and run a kMC model using python bindings.
     Depending on the constructor call the model can be run either via directory
     calls or in a separate processes access via multiprocessing.Queues.
@@ -82,10 +107,10 @@ class KMC_Model(multiprocessing.Process):
                        signal_queue=None,
                        size=None, system_name='kmc_model',
                        banner=True,
-                       print_rates=True,
+                       print_rates=False,
                        autosend=True,
                        steps_per_frame=50000,
-                       config_cache_file=None):
+                       cache_file=None):
 
         # initialize multiprocessing.Process hooks
         super(KMC_Model, self).__init__()
@@ -102,15 +127,29 @@ class KMC_Model(multiprocessing.Process):
         self.print_rates = print_rates
         self.parameters = Model_Parameters(self.print_rates)
         self.rate_constants = Model_Rate_Constants()
-        self.size = int(settings.simulation_size) \
-                        if size is None else int(size)
+
+        if size is None:
+            size = settings.simulation_size
+        if isinstance(size, int):
+            self.size = np.array([size] * int(lattice.model_dimension))
+        elif isinstance(size, (tuple, list)):
+            if not len(size) == lattice.model_dimension:
+                raise UserWarning(('You requested a size %s '
+                                   '(i. e. %s dimensions),\n '
+                                   'but the compiled model'
+                                   'has %s dimensions!')
+                                   % (list(size),
+                                      len(size),
+                                      lattice.model_dimension))
+            self.size = np.array(size)
+
         self.steps_per_frame = steps_per_frame
-        self.config_cache_file = config_cache_file
+        self.cache_file = cache_file
 
         # bind Fortran submodules
         self.base = base
         self.lattice = lattice
-        self.proclist = proclist
+        self.proclist = ProclistProxy()
         self.settings = settings
 
         if hasattr(self.base, 'null_species'):
@@ -133,21 +172,15 @@ class KMC_Model(multiprocessing.Process):
 
     def __enter__(self, *args, **kwargs):
         """__enter/exit__ function for with-statement protocol."""
-        if self.config_cache_file is not None:
-            if os.path.exists(self.config_cache_file):
-                self.load_config(self.config_cache_file)
         return self
 
-    def __exit__(self, *args, **kwargs):
+    def __exit__(self, exc_type, exc_value, exc_tb):
         """__enter/exit__ function for with-statement protocol."""
-        if self.config_cache_file is not None:
-            self.dump_config(self.config_cache_file)
         self.deallocate()
-        return self
 
     def reset(self):
-        self.size = int(settings.simulation_size)
-        proclist.init((self.size,) * int(lattice.model_dimension),
+        self.size = np.array(self.size)
+        proclist.init(self.size,
             self.system_name,
             lattice.default_layer,
             not self.banner)
@@ -157,27 +190,29 @@ class KMC_Model(multiprocessing.Process):
         self.tofs = tofs = get_tof_names()
         self.tof_matrix = np.zeros((len(tofs), proclist.nr_of_proc))
         for process, tof_count in sorted(settings.tof_count.iteritems()):
-            process_nr = eval('proclist.%s' % process.lower())
+            process_nr = getattr(self.proclist, process.lower())
             for tof, tof_factor in tof_count.iteritems():
                 self.tof_matrix[tofs.index(tof), process_nr - 1] += tof_factor
 
         # prepare procstat
         self.procstat = np.zeros((proclist.nr_of_proc,))
+         # prepare integ_rates (S.Matera 09/25/2012)
+        self.integ_rates = np.zeros((proclist.nr_of_proc, ))
         self.time = 0.
 
-        self.species_representation = []
+        self.species_representation = {}
         for species in sorted(settings.representations):
             if settings.representations[species].strip():
                 try:
-                    self.species_representation.append(
-                        eval(settings.representations[species]))
+                    self.species_representation[len(self.species_representation)] \
+                    = eval(settings.representations[species])
                 except Exception, e:
                     print('Trouble with representation %s'
                            % settings.representations[species])
                     print(e)
                     raise
             else:
-                self.species_representation.append(Atoms())
+                self.species_representation[len(self.species_representation)] = Atoms()
         if hasattr(settings, 'species_tags'):
             self.species_tags = settings.species_tags
         else:
@@ -200,6 +235,14 @@ class KMC_Model(multiprocessing.Process):
             self.lattice_representation = Atoms()
         set_rate_constants(settings.parameters, self.print_rates)
         self.base.update_accum_rate()
+        # S. matera 09/25/2012
+        if hasattr(self.base, 'update_integ_rate'):
+            self.base.update_integ_rate()
+
+        # load cached configuration if available
+        if self.cache_file is not None:
+            if os.path.exists(self.cache_file):
+                self.load_config(self.cache_file)
 
     def __repr__(self):
         """Print short summary of current parameters and rate
@@ -256,12 +299,26 @@ class KMC_Model(multiprocessing.Process):
         portable way to control garbage collection.
         """
 
-        lattice.deallocate_system()
+        if self.cache_file is not None:
+            # create directory if necessary
+            dirname = os.path.dirname(self.cache_file)
+            if dirname and not os.path.exists(dirname):
+                os.makedirs(dirname)
+            self.dump_config(self.cache_file)
+
+        if bool(base.is_allocated()):
+            lattice.deallocate_system()
+        else:
+            print("Model is not allocated.")
 
     def do_steps(self, n=10000):
-        """Propagate the model `n` steps."""
-        for _ in xrange(n):
-            proclist.do_kmc_step()
+        """Propagate the model `n` steps.
+
+        :param n: Number of steps to run (Default: 10000)
+        :type n: int
+
+        """
+        proclist.do_kmc_steps(n)
 
     def run(self):
         """Runs the model indefinitely. To control the
@@ -293,8 +350,10 @@ class KMC_Model(multiprocessing.Process):
                 elif signal.upper() == 'ATOMS':
                     self.image_queue.put(self.get_atoms())
                 elif signal.upper() == 'DOUBLE':
+                    print('Doubling model size')
                     self.double()
                 elif signal.upper() == 'HALVE':
+                    print('Halving model size')
                     self.halve()
                 elif signal.upper() == 'SWITCH_SURFACE_PROCESSES_OFF':
                     self.switch_surface_processes_off()
@@ -305,6 +364,17 @@ class KMC_Model(multiprocessing.Process):
                     self.terminate()
                 elif signal.upper() == 'JOIN':
                     self.join()
+                elif signal.upper() == 'WRITEOUT':
+                    atoms = self.get_atoms()
+                    step = self.base.get_kmc_step()
+                    from ase.io import write
+                    filename = '%s_%s.traj' % (self.settings.model_name, step)
+                    print('Wrote snapshot to %s' % filename)
+                    write(filename, atoms)
+                elif signal.upper() == 'ACCUM_RATE_SUMMATION':
+                    self.print_accum_rate_summation()
+                elif signal.upper() == 'COVERAGE':
+                    self.print_coverages()
 
             if not self.parameter_queue.empty():
                 while not self.parameter_queue.empty():
@@ -316,7 +386,7 @@ class KMC_Model(multiprocessing.Process):
                     frames=30,
                     skip=1,
                     prefix='movie',
-                    rotation='15x,-70x',
+                    rotation='15z,-70x',
                     suffix='png',
                     **kwargs):
         """Export series of snapshots of model instance to an image
@@ -338,6 +408,19 @@ class KMC_Model(multiprocessing.Process):
 
         using bash.
 
+        :param frames: Number of frames to records (Default: 30).
+        :type frames: int
+        :param skip: Number of kMC steps between frames (Default: 1).
+        :type skip: int
+        :param prefix: Prefix for filename (Default: movie).
+        :type prefix: str
+        :param rotation: Angle from which movie is recorded
+                         (only useful if suffix is png).
+                         String to be interpreted by ASE (Default: '15x,-70x')
+        :type rotation: str
+        :param suffix: File suffix (type) of exported file (Default: png).
+        :type suffix: str
+
         """
 
         from ase.io import write
@@ -350,17 +433,19 @@ class KMC_Model(multiprocessing.Process):
                   **kwargs)
             self.do_steps(skip)
 
-    def show(self):
+    def show(self, *args, **kwargs):
         """Visualize the current configuration of the model using ASE ag."""
+        tag = kwargs.pop('tag', None)
+
         ase = import_ase()
-        ase.visualize.view(self.get_atoms())
+        ase.visualize.view(self.get_atoms(tag=tag), *args, **kwargs)
 
     def view(self):
         """Start current model in live view mode."""
         from kmos import view
         view.main(self)
 
-    def get_atoms(self, geometry=True):
+    def get_atoms(self, geometry=True, tag=None):
         """Return an ASE Atoms object with additional
         information such as coverage and Turn-over-frequencies
         attached.
@@ -371,6 +456,7 @@ class KMC_Model(multiprocessing.Process):
           - `kmc_time`
           - `occupation`
           - `procstat`
+          - `integ_rates`
           - `tof_data`
 
         `tof_data` contains previously defined TOFs in reaction per seconds per
@@ -379,6 +465,11 @@ class KMC_Model(multiprocessing.Process):
                post-processing
         `procstat` holds the number of times each process was executed since
                    last `get_atoms()` call.
+
+
+        :param geometry: Return ASE object of current configuration
+                         (Default: True).
+        :type geometry: bool
 
         """
 
@@ -393,10 +484,21 @@ class KMC_Model(multiprocessing.Process):
                             species = lattice.get_species([i, j, k, n])
                             if species == self.null_species:
                                 continue
-                            if self.species_representation[species]:
+                            if self.species_representation.get(species, ''):
                                 # create the ad_atoms
                                 ad_atoms = deepcopy(
                                     self.species_representation[species])
+
+                                if tag == 'species':
+                                    ad_atoms.set_initial_magnetic_moments([species]*len(ad_atoms))
+                                elif tag == 'site':
+                                    ad_atoms.set_initial_magnetic_moments([n]*len(ad_atoms))
+                                elif tag == 'x':
+                                    ad_atoms.set_initial_magnetic_moments([i]*len(ad_atoms))
+                                elif tag == 'y':
+                                    ad_atoms.set_initial_magnetic_moments([j]*len(ad_atoms))
+                                elif tag == 'z':
+                                    ad_atoms.set_initial_magnetic_moments([k]*len(ad_atoms))
 
                                 # move to the correct location
                                 ad_atoms.translate(
@@ -413,10 +515,11 @@ class KMC_Model(multiprocessing.Process):
                                         kmos_tags[atom] = \
                                         self.species_tags.values()[species]
 
-                        lattice_repr = deepcopy(self.lattice_representation)
-                        lattice_repr.translate(np.dot(np.array([i, j, k]),
-                                                      lattice.unit_cell_size))
-                        atoms += lattice_repr
+                        if self.lattice_representation:
+                            lattice_repr = deepcopy(self.lattice_representation)
+                            lattice_repr.translate(np.dot(np.array([i, j, k]),
+                                                          lattice.unit_cell_size))
+                            atoms += lattice_repr
             atoms.set_cell(self.cell_size)
 
             # workaround for older ASE < 3.6
@@ -441,22 +544,41 @@ class KMC_Model(multiprocessing.Process):
         atoms.occupation = proclist.get_occupation()
         for i in range(proclist.nr_of_proc):
             atoms.procstat[i] = base.get_procstat(i + 1)
+        # S. Matera 09/25/2012
+        if hasattr(self.base, 'get_integ_rate'):
+            atoms.integ_rates = np.zeros((proclist.nr_of_proc,))
+            for i in range(proclist.nr_of_proc):
+                    atoms.integ_rates[i] = base.get_integ_rate(i + 1)
+        # S. Matera 09/25/2012
         delta_t = (atoms.kmc_time - self.time)
-        size = self.size ** lattice.model_dimension
+        atoms.delta_t = delta_t
+        size = self.size.prod()
         if delta_t == 0. and atoms.kmc_time > 0:
             print(
                 "Warning: numerical precision too low, to resolve time-steps")
             print('         Will reset kMC time to 0s.')
             base.set_kmc_time(0.0)
             atoms.tof_data = np.zeros_like(self.tof_matrix[:, 0])
+            atoms.tof_integ = np.zeros_like(self.tof_matrix[:, 0])
+
         else:
             atoms.tof_data = np.dot(self.tof_matrix,
                             (atoms.procstat - self.procstat) / delta_t / size)
+            # S. Matera 09/25/2012
+            if hasattr(self.base, 'get_integ_rate'):
+                atoms.tof_integ = np.dot(self.tof_matrix,
+                                (atoms.integ_rates - self.integ_rates)
+                                / delta_t / size)
+            # S. Matera 09/25/2012
 
         atoms.delta_t = delta_t
 
         # update trackers for next call
         self.procstat[:] = atoms.procstat
+        # S. Matera 09/25/2012
+        if hasattr(self.base, 'get_integ_rate'):
+            self.integ_rates[:] = atoms.integ_rates
+        # S. Matera 09/25/2012
         self.time = atoms.kmc_time
 
         return atoms
@@ -467,17 +589,43 @@ class KMC_Model(multiprocessing.Process):
 
         """
 
-        std_header = ('#%s %s %s kmc_steps kmc_time\n'
+        std_header = ('#%s %s %s kmc_time kmc_steps\n'
                   % (self.get_param_header(),
                      self.get_tof_header(),
                      self.get_occupation_header()))
         return std_header
 
-    def get_std_sampled_data(self, samples, sample_size, tof_method='procrates'):
+    def get_std_sampled_data(self, samples, sample_size, tof_method='integ'):
         """Sample an average model and return TOFs and coverages
         in a standardized format :
 
         [parameters] [TOFs] [occupations] kmc_time kmc_step
+
+        Parameter tof_method allows to switch between two different methods for
+        evaluating turn-over-frequencies. The default method *procstat* evaluates
+        the procstat counter, i.e. simply the number of executed events in the
+        simulated time interval. *integ* will evaluate the number of times the
+        reaction `could` be evaluated in the simulated time interval
+        based on the local configurations and the rate constant.
+
+        Credit for this latter method has to be given to Sebastian Matera for
+        the idea and implementation.
+
+        In each case check carefully that the observable is sampled good enough!
+
+        :param samples: Number of batches to average over.
+        :type sample: int
+        :param sample_size: Number of kMC steps per batch.
+        :type sample_size: int
+        :param tof_method: Method of how to sample TOFs.
+                           Possible values are procrates or integ.
+                           While procrates only counts the processes actually executed,
+                           integ evaluates the configuration to estimate the actual
+                           rates. The latter can be several orders more efficient
+                           for very slow processes.
+                           Differences resulting from the two methods can be used
+                           as on estimate for the statistical error in samples.
+        :type tof_method: str
 
         """
 
@@ -485,28 +633,38 @@ class KMC_Model(multiprocessing.Process):
         occs = []
         tofs = []
         delta_ts = []
+        t0 = self.base.get_kmc_time()
+        step0 = self.base.get_kmc_step()
 
         # sample over trajectory
         for sample in xrange(samples):
             self.do_steps(sample_size)
             atoms = self.get_atoms(geometry=False)
+
+            delta_ts.append(atoms.delta_t)
+
             occs.append(list(atoms.occupation.flatten()))
             if tof_method == 'procrates':
                 tofs.append(atoms.tof_data.flatten())
+            elif tof_method == 'integ':
+                tofs.append(atoms.tof_integ.flatten())
             else:
                 raise NotImplementedError('Working on it ..')
 
-            delta_ts.append(atoms.delta_t)
         # calculate time averages
         occs_mean = np.average(occs, axis=0, weights=delta_ts)
         tof_mean = np.average(tofs, axis=0, weights=delta_ts)
+        total_time = self.base.get_kmc_time() - t0
+        total_steps = self.base.get_kmc_step() - step0
+
+        #return tofs, delta_ts
 
         # write out averages
         outdata = tuple(atoms.params
-                        + list(occs_mean.flatten())
                         + list(tof_mean.flatten())
-                        + [self.base.get_kmc_time(),
-                           self.base.get_kmc_step()])
+                        + list(occs_mean.flatten())
+                        + [total_time,
+                           total_steps])
         return ((' '.join(['%.5e'] * len(outdata)) + '\n') % outdata)
 
     def double(self):
@@ -550,7 +708,27 @@ class KMC_Model(multiprocessing.Process):
     def switch_surface_processes_on(self):
         set_rate_constants(settings.parameters, self.print_rates)
 
-    def show_coverages(self):
+    def print_adjustable_parameters(self, match=None):
+        """Print those methods that are adjustable via the GUI.
+
+        :param pattern: fname pattern to limit the parameters.
+        :type pattern: str
+        """
+        res = ''
+        w = 80
+        res += (w * '-') + '\n'
+        for i, attr in enumerate(sorted(self.settings.parameters)):
+            if (match is None or fnmatch(attr, match))\
+                and settings.parameters[attr]['adjustable']:
+                res += '|{0:^78s}|\n'.format((' %40s = %s'
+                      % (attr, settings.parameters[attr]['value'])))
+        res += (w * '-') + '\n'
+        if INTERACTIVE:
+            print(res)
+        else:
+            return res
+
+    def print_coverages(self):
         """Show coverages (per unit cell) for each species
         and site type for current configurations.
 
@@ -570,20 +748,22 @@ class KMC_Model(multiprocessing.Process):
 
         header_line = ('|' +
                       ('%18s|' % 'site \ species') +
-                      '|'.join([ ('%11s' % sn) for sn in species_names ] + ['']))
-        print(len(header_line)*'-')
+                      '|'.join([('%11s' % sn)
+                                for sn in species_names] + ['']))
+        print(len(header_line) * '-')
         print(header_line)
-        print(len(header_line)*'-')
+        print(len(header_line) * '-')
         for i in range(self.lattice.spuck):
-            site_name = self.settings.site_names[i];
+            site_name = self.settings.site_names[i]
             print('|'
                  + '{0:<18s}|'.format(site_name)
-                 + '|'.join([('{0:^11.5f}'.format(x) if x else 11*' ') for x in list(occupation[:,i])]
+                 + '|'.join([('{0:^11.5f}'.format(x) if x else 11 * ' ')
+                             for x in list(occupation[:, i])]
                  + ['']))
-        print(len(header_line)*'-')
+        print(len(header_line) * '-')
         print('Units: "molecules (or atoms) per unit cell"')
 
-    def show_accum_rate_summation(self, order='-rate'):
+    def print_accum_rate_summation(self, order='-rate'):
         """Shows rate individual processes contribute to the total rate
 
         The optional argument order can be one of: name, rate, rate_constant,
@@ -615,28 +795,35 @@ class KMC_Model(multiprocessing.Process):
         elif order == 'nrofsites':
             entries = sorted(entries, key=lambda x: x[0])
         elif order == '-name':
-            entries = sorted(entries, key=lambda x: - x[3])
+            entries = reversed(sorted(entries, key=lambda x: x[3]))
         elif order == '-rate':
-            entries = sorted(entries, key=lambda x: - x[2])
+            entries = reversed(sorted(entries, key=lambda x: x[2]))
         elif order == '-rate_constant':
-            entries = sorted(entries, key=lambda x: - x[1])
+            entries = reversed(sorted(entries, key=lambda x: x[1]))
         elif order == '-nrofsites':
-            entries = sorted(entries, key=lambda x: - x[0])
+            entries = reversed(sorted(entries, key=lambda x: x[0]))
 
         # print
+        res = ''
         total_contribution = 0
-        print('(cumulative)    nrofsites * rate_constant    = rate            [name]')
-        print('-------------------------------------------------------------------------------')
+        res += ('+' + 118 * '-' + '+' + '\n')
+        res += '|{0:<118s}|\n'.format('(cumulative)    nrofsites * rate_constant'
+                                      '    = rate            [name]')
+        res += ('+' + 118 * '-' + '+' + '\n')
         for entry in entries:
             total_contribution += float(entry[2])
             percent = '(%8.4f %%)' % (total_contribution * 100 / accum_rate)
             entry = '% 12i * % 8.4e s^-1 = %8.4e s^-1 [%s]' % entry
-            print('%s %s' % (percent, entry))
+            res += '|{0:<118s}|\n'.format('%s %s' % (percent, entry))
 
-        print('-------------------------------------------------------------------------------')
-        print('  = total rate = %.8e s^-1' % accum_rate)
+        res += ('+' + 118 * '-' + '+' + '\n')
+        res += '|{0:<118s}|\n'.format(('  = total rate = %.8e s^-1'
+                                       % accum_rate))
+        res += ('+' + 118 * '-' + '+' + '\n')
 
-    def _put(self, site, new_species):
+        print(res)
+
+    def _put(self, site, new_species, reduce=False):
         """
         Works exactly like put, but without updating the database of
         available processes. This is faster for when one does a lot updates
@@ -644,7 +831,7 @@ class KMC_Model(multiprocessing.Process):
 
         Examples ::
 
-            model._put([0,0,0,model.lattice.lattice_bridge], model.proclist.co ])
+            model._put([0,0,0,model.lattice.lattice_bridge], model.proclist.co])
             # puts a CO molecule at the `bridge` site of the lower left unit cell
 
             model._put([1,0,0,model.lattice.lattice_bridge], model.proclist.co ])
@@ -654,9 +841,21 @@ class KMC_Model(multiprocessing.Process):
 
             model._adjust_database() # Important !
 
+        :param site: Site where to put the new species, i.e. [x, y, z, bridge]
+        :type site: list or np.array
+        :param new_species: Name of new species.
+        :type new_species: str
+        :param reduce: Of periodic boundary conditions if site falls out
+                       site lattice (Default: False)
+        :type reduce: bool
+
         """
-        # Error checking
         x, y, z, n = site
+        if reduce:
+            x, y, z = (x, y, z) % self.lattice.system_size
+            site = np.array([x, y, z, n])
+
+        # Error checking
         if not x in range(self.lattice.system_size[0]):
             raise UserWarning('x-coordinate %s seems to fall outside lattice'
                               % x)
@@ -673,7 +872,7 @@ class KMC_Model(multiprocessing.Process):
         old_species = self.lattice.get_species(site)
         self.lattice.replace_species(site, old_species, new_species)
 
-    def put(self, site, new_species):
+    def put(self, site, new_species, reduce=False):
         """
         Puts new_species at site. The site is given by 4-entry sequence
         like [x, y, z, n], where the first 3 entries define the unit cell
@@ -688,9 +887,17 @@ class KMC_Model(multiprocessing.Process):
             # puts a CO molecule at the `bridge` site
             # of the lower left unit cell
 
+        :param site: Site where to put the new species, i.e. [x, y, z, bridge]
+        :type site: list or np.array
+        :param new_species: Name of new species.
+        :type new_species: str
+        :param reduce: Of periodic boundary conditions if site falls out site
+                       lattice (Default: False)
+        :type reduce: bool
+
         """
 
-        self._put(site, new_species)
+        self._put(site, new_species, reduce=reduce)
         self._adjust_database()
 
     def halve(self):
@@ -734,8 +941,49 @@ class KMC_Model(multiprocessing.Process):
                             random.choice(choices))
         self._adjust_database()
 
+    def run_proc_nr(self, proc, site):
+        if self.base.get_avail_site(proc, site, 2):
+            self.proclist.run_proc_nr(proc, site)
+            return True
+        else:
+            print("Process not enabled")
+            return False
+
+    def get_next_kmc_step(self):
+        proc, site = proclist.get_next_kmc_step()
+        return ProcInt(proc), SiteInt(site)
+
+    def get_avail(self, arg):
+        """Return available (enabled) processes or sites
+           :param arg: type or process to query
+           :type arg: int or [int]
+
+        """
+
+        avail = []
+        try:
+            arg = list(iter(arg))
+            # if is iterable, interpret as site
+            site = self.lattice.calculate_lattice2nr([arg[0], arg[1], arg[2], 1])
+            for process in range(1, self.proclist.nr_of_proc + 1):
+                if self.base.get_avail_site(process, site, 2):
+                    avail.append(ProcInt(process, self.settings))
+
+        except Exception as e:
+            # if is not iterable, interpret as process
+            for x in range(self.lattice.system_size[0]):
+                for y in range(self.lattice.system_size[1]):
+                    for z in range(self.lattice.system_size[2]):
+                        nr = self.lattice.calculate_lattice2nr([x, y, z, 1])
+                        if self.base.get_avail_site(arg, nr, 2):
+                            avail.append(SiteInt(nr))
+        return avail
+
     def _get_configuration(self):
-        """ Return current configuration of model."""
+        """ Return current configuration of model.
+
+           :rtype: np.array
+        """
         config = np.zeros(list(self.lattice.system_size) + \
             [int(self.lattice.spuck)], dtype=np.int8)
         for x in range(self.lattice.system_size[0]):
@@ -752,7 +1000,13 @@ class KMC_Model(multiprocessing.Process):
 
            Expects a 4-dimensional array, with dimensions [X, Y, Z, N]
            where X, Y, Z are the lattice size and N the number of
-           sites in each unit cell."""
+           sites in each unit cell.
+
+           :param config: Configuration to set for model. Shape of array
+                          has to match with model size.
+           :type config: np.array
+
+        """
         X, Y, Z = self.lattice.system_size
         N = self.lattice.spuck
         if not all(config.shape == np.array([X, Y, Z, N])):
@@ -771,7 +1025,9 @@ class KMC_Model(multiprocessing.Process):
 
     def _adjust_database(self):
         """Set the database of processes currently
-        possible according to the current configuration."""
+        possible according to the current configuration.
+
+        """
         for x in range(self.lattice.system_size[0]):
             for y in range(self.lattice.system_size[1]):
                 for z in range(self.lattice.system_size[2]):
@@ -787,6 +1043,11 @@ class KMC_Model(multiprocessing.Process):
         self.base.update_accum_rate()
 
     def get_backend(self):
+        """Return name of backend that model was compiled with.
+
+        :rtype: str
+
+        """
         if hasattr(self.proclist, 'backend'):
             return ''.join(self.proclist.backend)
         else:
@@ -794,12 +1055,19 @@ class KMC_Model(multiprocessing.Process):
 
     def xml(self):
         """Returns the XML representation that this model was created from.
+
+        :rtype: str
         """
         return settings.xml
 
     def nr2site(self, n):
         """Accepts a site index and return the site in human readable
-        coordinates"""
+        coordinates.
+
+        :param n: Index of site.
+        :type n: int
+        :rtype: str
+        """
         site = list(lattice.calculate_nr2lattice(n))
         site[-1] = settings.site_names[site[-1] - 1]
         return site
@@ -808,6 +1076,16 @@ class KMC_Model(multiprocessing.Process):
         """Accepts an integer and generates a post-mortem report
         by running that many steps and returning which process
         would be executed next without executing it.
+
+        :param steps: Number of steps to run before exit occurs
+                     (Default: None).
+        :type steps: int
+        :param propagate: Run this one more step, where error occurs
+                          (Default: False).
+        :type propagate: bool
+        :param err_code: Error code generated by backend if
+                         project.meta.debug > 0 at compile time.
+        :type err_code: str
         """
         if err_code is not None:
             old, new, found, err_site, steps = err_code
@@ -828,7 +1106,7 @@ class KMC_Model(multiprocessing.Process):
                 found = 'NULL (%s)' % found
 
             self.do_steps(steps)
-            nprocess, nsite = proclist.get_kmc_step()
+            nprocess, nsite = proclist.get_next_kmc_step()
             process = list(
                 sorted(settings.rate_constants.keys()))[nprocess - 1]
             site = self.nr2site(nsite)
@@ -848,7 +1126,7 @@ class KMC_Model(multiprocessing.Process):
                 self.do_steps(steps)
             else:
                 steps = base.get_kmc_step()
-            nprocess, nsite = proclist.get_kmc_step()
+            nprocess, nsite = proclist.get_next_kmc_step()
             process = list(
                 sorted(settings.rate_constants.keys()))[nprocess - 1]
             site = self.nr2site(nsite)
@@ -862,7 +1140,12 @@ class KMC_Model(multiprocessing.Process):
 
     def procstat_pprint(self, match=None):
         """Print an overview view process names along with
-        the number of times it has been executed."""
+        the number of times it has been executed.
+
+        :param match: fname pattern to filter matching parameter name.
+        :type match: str
+
+        """
 
         for i, name in enumerate(sorted(self.settings.rate_constants.keys())):
             if match is None:
@@ -877,7 +1160,12 @@ class KMC_Model(multiprocessing.Process):
         the current rate constant times the kmc time.
 
         Can help to find those processes which are kinetically
-        hindered."""
+        hindered.
+
+        :param match: fname pattern to filter matching parameter name.
+        :type match: str
+
+        """
         kmc_time = self.base.get_kmc_time()
 
         for i, name in enumerate(sorted(self.settings.rate_constants.keys())):
@@ -906,16 +1194,27 @@ class KMC_Model(multiprocessing.Process):
         res = ''
         for label, ratio in ratios:
             res += ('%s: %s\n' % (label, ratio))
-        return res
+        if INTERACTIVE:
+            print(res)
+        else:
+            return res
 
     def dump_config(self, filename):
         """Use numpy mechanism to store current configuration in a file.
+
+        :param filename: Name of file, to write configuration to.
+        :type filename: str
+
         """
         self._get_configuration().tofile(filename)
 
     def load_config(self, filename):
         """Use numpy mechanism to load configuration from a file. User
         must ensure that size of stored configuration is correct.
+
+        :param filename: Name of file, to write configuration to.
+        :type filename: str
+
         """
         x, y, z = self.lattice.system_size
         spuck = self.lattice.spuck
@@ -950,26 +1249,53 @@ class Model_Parameters(object):
             self.__dict__[attr] = value
 
     def __repr__(self):
-        res = '# kMC model parameters (%i)\n' % len(settings.parameters)
+        fixed_parameters = dict((name, param)
+                                for name, param
+                                in settings.parameters.items()
+                                if not param['adjustable'])
+        res = '# kMC model parameters (%i, fixed %i)\n' \
+               % (len(settings.parameters), len(fixed_parameters))
         res += '# --------------------\n'
         for attr in sorted(settings.parameters):
-            res += ('# %s = %s\n' % (attr, settings.parameters[attr]['value']))
+            res += ('# %s = %s' % (attr, settings.parameters[attr]['value']))
+            if settings.parameters[attr]['adjustable']:
+                res += '  # *\n'
+            else:
+                res += '\n'
         res += '# --------------------\n'
+        if not len(fixed_parameters) == len(settings.parameters):
+            res += '# * adjustable parameters\n'
         return res
 
     def names(self, pattern=None):
-        """Return names of paramters that match `pattern'"""
+        """Return names of parameters that match `pattern'
+
+        :param pattern: fname pattern to filter matching parameter name.
+        :type pattern: str
+
+        """
         names = []
         for attr in sorted(settings.parameters):
             if pattern is None or fnmatch(attr, pattern):
                 names.append(attr)
         return names
 
-    def __call__(self, match=None):
+    def __call__(self, match=None, interactive=False):
+        """Return parameters that match `pattern'
+
+        :param match: fname pattern to filter matching parameter name.
+        :type match: str
+
+        """
+        res = ''
         for attr in sorted(settings.parameters):
             if match is None or fnmatch(attr, match):
-                print('# %s = %s'
+                res += ('# %s = %s\n'
                       % (attr, settings.parameters[attr]['value']))
+        if INTERACTIVE:
+            print(res)
+        else:
+            return res
 
 
 class Model_Rate_Constants(object):
@@ -999,22 +1325,38 @@ class Model_Rate_Constants(object):
         for i, proc in enumerate(sorted(settings.rate_constants)):
             rate_expr = settings.rate_constants[proc][0]
             rate_const = base.get_rate(i + 1)
-            #rate_const = evaluate_rate_expression(rate_expr,
-                                                  #settings.parameters)
             res += '# %s: %s = %.2e s^{-1}\n' % (proc, rate_expr, rate_const)
         res += '# ------------------\n'
+
         return res
 
     def __call__(self, pattern=None):
+        """Return rate constants.
+
+        :param pattern: fname pattern to filter matching parameter name.
+        :type pattern: str
+
+        """
+        res = ''
         for i, proc in enumerate(sorted(settings.rate_constants.keys())):
             if pattern is None or fnmatch(proc, pattern):
                 rate_expr = settings.rate_constants[proc][0]
                 rate_const = evaluate_rate_expression(rate_expr,
                                                       settings.parameters)
-                print('# %s: %s = %.2e s^{-1}' % (proc, rate_expr, rate_const))
+                res += ('# %s: %s = %.2e s^{-1}\n' % (proc, rate_expr,
+                                                      rate_const))
+        if INTERACTIVE:
+            print(res)
+        else:
+            return res
 
     def names(self, pattern=None):
-        """Return names of processes that match `pattern`."""
+        """Return names of processes that match `pattern`.
+
+        :param pattern: fname pattern to filter matching parameter name.
+        :type pattern: str
+
+        """
         names = []
         for i, proc in enumerate(sorted(settings.rate_constants.keys())):
             if pattern is None or fnmatch(proc, pattern):
@@ -1022,11 +1364,18 @@ class Model_Rate_Constants(object):
         return names
 
     def by_name(self, proc):
-        """Return rate constant currently set for `proc`"""
+        """Return rate constant currently set for `proc`
+
+        :param proc: Name of process.
+        :type proc: str
+        """
         rate_expr = settings.rate_constants[proc][0]
         return evaluate_rate_expression(rate_expr, settings.parameters)
 
     def inverse(self):
+        """Return inverse list of rate constants.
+
+        """
         res = '# kMC rate constants (%i)\n' % len(settings.rate_constants)
         res += '# ------------------\n'
         for proc in sorted(settings.rate_constants):
@@ -1035,13 +1384,24 @@ class Model_Rate_Constants(object):
                                                   settings.parameters)
             res += '# %s: %.2e s^{-1} = %s\n' % (proc, rate_const, rate_expr)
         res += '# ------------------\n'
-        return res
+        if INTERACTIVE:
+            print(res)
+        else:
+            return res
 
     def set(self, pattern, rate_constant, parameters=None):
         """Set rate constants. Pattern can be a glob pattern,
         and the rate constant will be applied to all processes,
         where the pattern matches. The rate constant can be either
         a number or a rate expression.
+
+        :param pattern: fname pattern that selects the process affected.
+        :type pattern: str
+        :param rate_constant: Rate constant to be set.
+        :type rate_constant: str or float
+        :param parameters: List of parameters to be used when
+                           evaluating expression.
+        :type parameters: list
 
         """
 
@@ -1059,12 +1419,289 @@ class Model_Rate_Constants(object):
                 base.set_rate_const(i + 1, rate_constant)
 
 
-def set_rate_constants(parameters=None, print_rates=True):
+class ModelParameter(object):
+    """A model parameter to be scanned. If instantiated with only
+    one value this parameter will be fixed at this value.
+
+    Use a subclass for specific type of grid.
+
+    :param min: Minimum value for this parameter.
+    :type min: float
+    :param max: Maximum value for this parameter (Default: min)
+    :type max: float
+    :param steps: Number of steps between minimum and maximum.
+    :type steps: int
+
+    """
+
+    def __init__(self, min, max=None, steps=1, type=None):
+        self.min = min
+        self.max = max if max is not None else min
+        self.steps = steps
+        self.type = type
+
+    def __repr__(self):
+        return ('[%s] min: %s, max: %s, steps: %s'
+              % (self.type, self.min, self.max, self.steps))
+
+    def get_grid(self):
+        pass
+
+
+class PressureParameter(ModelParameter):
+    """Create a grid of p \in [p_min, p_max] such
+    that ln({p}) is a regular grid.
+
+    """
+
+    def __init__(self, *args, **kwargs):
+        kwargs['type'] = 'pressure'
+        super(PressureParameter, self).__init__(*args, **kwargs)
+
+    def get_grid(self):
+        from kmos.utils import p_grid
+        return p_grid(self.min, self.max, self.steps)
+
+
+class TemperatureParameter(ModelParameter):
+    """Create a grid of p \in [T_min, T_max] such
+    that ({T})**(-1) is a regular grid.
+
+    """
+
+    def __init__(self, *args, **kwargs):
+        kwargs['type'] = 'temperature'
+        super(TemperatureParameter, self).__init__(*args, **kwargs)
+
+    def get_grid(self):
+        from kmos.utils import T_grid
+        return T_grid(self.min, self.max, self.steps)
+
+
+class LogParameter(ModelParameter):
+    """Create a log grid  between 10^min and 10^max
+    (like np.logspace)
+
+    """
+
+    def __init__(self, min, max, steps):
+        kwargs['type'] = 'log'
+        super(LogParameter, self).__init__(*args, **kwargs)
+
+    def get_grid(self):
+        return np.logspace(self.min, self.max, self.steps)
+
+
+class LinearParameter(ModelParameter):
+    """Create a regular grid between min and max.
+
+    """
+
+    def __init__(self, min, max, steps):
+        kwargs['type'] = 'linear'
+        super(LogParameter, self).__init__(*args, **kwargs)
+
+    def get_grid(self):
+        return np.linspace(self.min, self.max, self.steps)
+
+
+class _ModelRunner(type):
+
+    def __new__(cls, name, bases, dct):
+        obj = super(_ModelRunner, cls).__new__(cls, name, bases, dct)
+        obj.runner_name = name
+        obj.parameters = OrderedDict()
+        for key, item in dct.items():
+            if key == '__module__':
+                pass
+            elif isinstance(item, ModelParameter):
+                obj.parameters[key] = item
+
+        return obj
+
+
+class ModelRunner(object):
+    """
+Setup and initiate many runs in parallel over a regular grid
+of parameters. A standard type of script is given below.
+
+To allow execution from multiple hosts connected
+to the same filesystem calculated points are blocked
+via <classname>.lock. To redo a calculation <classname>.dat
+and <classname>.lock should be moved out of the way ::
+
+    from kmos.run import ModelRunner, PressureParameter, TemperatureParameter
+
+
+    class ScanKinetics(ModelRunner):
+        p_O2gas = PressureParameter(1)
+        T = TemperatureParameter(600)
+        p_COgas = PressureParameter(min=1, max=10, steps=40)
+        # ... other parameters to scan
+
+
+    ScanKinetics().run(init_steps=1e7, sample_steps=1e7, cores=4)
+
+    """
+
+    __metaclass__ = _ModelRunner
+
+    def __product(self, *args, **kwds):
+        """Manual implementation of itertools.product for
+          python <= 2.5 """
+
+        # product('ABCD', 'xy') --> Ax Ay Bx By Cx Cy Dx Dy
+        # product(range(2), repeat=3) --> 000 001 010 011 100 101 110 111
+        pools = map(tuple, args) * kwds.get('repeat', 1)
+        result = [[]]
+        for pool in pools:
+            result = [x + [y] for x in result for y in pool]
+        for prod in result:
+            yield tuple(prod)
+
+    def __split_seq(self, seq, size):
+        """Split a list into n chunks of roughly equal size."""
+        newseq = []
+        splitsize = 1.0 / size * len(seq)
+        for i in range(size):
+                newseq.append(seq[int(round(i * splitsize)):
+                                  int(round((i + 1) * splitsize))])
+        return newseq
+
+    def __touch(self, fname, times=None):
+        """Pythonic version of Unix touch.
+
+        :param fname: filename.
+        :type fname: str
+        :param times: timestamp (Default: None meaning now).
+        :type times: datetime timestamp
+
+        """
+        fhandle = file(fname, 'a')
+        try:
+            os.utime(fname, times)
+        finally:
+            fhandle.close()
+
+    def __run_sublist(self, sublist, init_steps, sample_steps, samples):
+        """
+        Run sampling run for a list of parameter-tuples.
+
+        :param init_steps: Steps to run model before sampling (.ie. to reach steady-state).
+        :type init_steps: int
+        :param sample_steps: Number of steps to sample over.
+        :type sample_steps: int
+        :param cores: Number of parallel processes to launch.
+        :type cores: int
+        :param samples: Number of samples. Use more samples if precise coverages are needed.
+        :type samples: int
+
+        """
+        for i, datapoint in enumerate(sublist):
+            #============================
+            # DEFINE labels
+            #===========================
+            lockfile = '%s.lock' % (self.runner_name)
+            format_string = '_'.join(['%s'] * (len(self.parameters) + 1))
+            arguments = tuple([self.runner_name] + list(datapoint))
+
+            input_line = format_string % arguments
+
+            outfile = os.path.abspath('%s.dat' % (self.runner_name))
+
+
+            #============================
+            # lockfile mechanism
+            #===========================
+            self.__touch(lockfile)
+            fdata = file(lockfile)
+            readlines = map(lambda x: x.strip(), fdata.readlines())
+            fdata.close()
+            if input_line in readlines:
+                continue
+            fdata = file(lockfile, 'a')
+            fdata.write('%s\n' % input_line)
+            fdata.close()
+
+            #============================
+            # SETUP Model
+            #===========================
+            model = KMC_Model(print_rates=False,
+                              banner=False,
+                              cache_file='%s_configs/config_%s.pckl'
+                                          % (self.runner_name, input_line))
+            for name, value in zip(self.parameters.keys(), datapoint):
+                setattr(model.parameters, name, value)
+
+            #============================
+            # EVALUATE model
+            #===========================
+            model.do_steps(int(init_steps))
+            data = model.get_std_sampled_data(samples=samples,
+                                              sample_size=int(sample_steps),
+                                              tof_method='integ')
+
+            if not os.path.exists(outfile):
+                out = file(outfile, 'a')
+                out.write(model.get_std_header())
+                out.close()
+            out = file(outfile, 'a')
+            out.write(data)
+            out.close()
+            model.deallocate()
+
+    def run(self, init_steps=1e8,
+                  sample_steps=1e8,
+                  cores=4,
+                  samples=1):
+        """Launch the ModelRunner instance. Creates a regular grid over
+        all ModelParameters defined in the ModelRunner class.
+
+        :param init_steps: Steps to run model before sampling (.ie. to reach steady-state).
+        (Default: 1e8)
+        :type init_steps: int
+        :param sample_steps: Number of steps to sample over (Default: 1e8)
+        :type sample_steps: int
+        :param cores: Number of parallel processes to launch.
+        :type cores: int
+        :param samples: Number of samples. Use more samples if precise coverages are needed (Default: 1).
+        :type samples: int
+
+        """
+
+        parameters = []
+        for parameter in self.parameters.values():
+            parameters.append(parameter.get_grid())
+        points = list(self.__product(*tuple(parameters)))
+
+        random.shuffle(points)
+
+        for sub_list in self.__split_seq(points, cores):
+            p = Process(target=self.__run_sublist, args=(sub_list,
+                                                         init_steps,
+                                                         sample_steps,
+                                                         samples,))
+            p.start()
+
+
+def set_rate_constants(parameters=None, print_rates=None):
     """Tries to evaluate the supplied expression for a rate constant
     to a simple real number and sets it for the corresponding process.
     For the evaluation it draws on predefined natural constants, user defined
     parameters and mathematical functions.
+
+    :param parameters: List of parameters to be used when evaluating expression.
+                      (Default: None)
+    :type parameters: list
+    :param print_rates: Print the rates while setting them
+                        (Default: True)
+    :type print_rates: bool
+
     """
+    proclist = ProclistProxy()
+    if print_rates is None :
+        print_rates = self.print_rates
+
     if parameters is None:
         parameters = settings.parameters
 
@@ -1075,7 +1712,8 @@ def set_rate_constants(parameters=None, print_rates=True):
         rate_const = evaluate_rate_expression(rate_expr, parameters)
 
         try:
-            base.set_rate_const(eval('proclist.%s' % proc.lower()), rate_const)
+            base.set_rate_const(getattr(proclist, proc.lower()),
+                                rate_const)
             if print_rates:
                 n = int(4 * log(rate_const))
                 print('%30s: %.3e s^{-1}: %s' % (proc, rate_const, '#' * n))
@@ -1106,3 +1744,30 @@ def get_tof_names():
             if tof not in tofs:
                 tofs.append(tof)
     return sorted(tofs)
+
+
+class ProcInt(int):
+
+    def __new__(cls, value, *args, **kwargs):
+        return int.__new__(cls, value)
+
+    def __init__(self, value):
+        self.procnames = sorted(settings.rate_constants.keys())
+
+    def __repr__(self):
+        name = self.procnames[self.__int__() - 1]
+        return 'Process model.proclist.%s (%s)' % (name.lower(), self.__int__())
+
+
+class SiteInt(int):
+
+    def __new__(cls, value, *args, **kwargs):
+        return int.__new__(cls, value)
+
+    def __repr__(self):
+        x, y, z, n = lattice.calculate_nr2lattice(self.__int__())
+        return 'Site (%s, %s, %s, %s) [#%s]' % (x, y, z, n, self.__int__())
+
+    def __getitem__(self, item):
+        site = lattice.calculate_nr2lattice(self.__int__())
+        return site[item]

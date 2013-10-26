@@ -2,6 +2,7 @@
 import os, sys
 import os.path, shutil
 import filecmp
+from glob import glob
 
 def test_import_export():
 
@@ -47,7 +48,9 @@ def test_import_export_lat_int():
     pt = kmos.types.Project()
     pt.import_xml_file('default.xml')
     kmos.io.export_source(pt, TEST_DIR, code_generator='lat_int')
-    for filename in ['base', 'lattice', 'proclist']:
+    for filename in ['base', 'lattice', 'proclist'] \
+        + [os.path.basename(os.path.splitext(x)[0]) for x in glob(os.path.join(TEST_DIR, 'run_proc*.f90'))] \
+        + [os.path.basename(os.path.splitext(x)[0]) for x in glob(os.path.join(TEST_DIR, 'nli*.f90'))]:
         print(filename)
         assert filecmp.cmp(os.path.join(REFERENCE_DIR, '%s.f90' % filename),
                           os.path.join(TEST_DIR, '%s.f90' % filename)),\
@@ -97,7 +100,10 @@ def test_import_export_pdopd_lat_int():
     pt = kmos.types.Project()
     pt.import_xml_file('pdopd.xml')
     kmos.io.export_source(pt, TEST_DIR, code_generator='lat_int')
-    for filename in ['base', 'lattice', 'proclist']:
+    for filename in ['base', 'lattice', 'proclist', 'proclist_constants'] \
+        + [os.path.basename(os.path.splitext(x)[0]) for x in glob(os.path.join(TEST_DIR, 'run_proc*.f90'))] \
+        + [os.path.basename(os.path.splitext(x)[0]) for x in glob(os.path.join(TEST_DIR, 'nli*.f90'))]:
+
         print(filename)
         assert filecmp.cmp(os.path.join(REFERENCE_DIR, '%s.f90' % filename),
                           os.path.join(TEST_DIR, '%s.f90' % filename)),\

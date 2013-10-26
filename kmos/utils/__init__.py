@@ -18,7 +18,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import with_statement
+from time import time
 from StringIO import StringIO
+from kmos.utils.ordered_dict import OrderedDict
 
 ValidationError = UserWarning
 try:
@@ -186,7 +189,16 @@ def evaluate_kind_values(infile, outfile):
     import re
     import os
     import sys
+    import shutil
     sys.path.append(os.path.abspath(os.curdir))
+
+    with open(infile) as infh:
+        intext = infh.read()
+    if not ('selected_int_kind' in intext.lower()
+            or 'selected_real_kind' in intext.lower()):
+        shutil.copy(infile, outfile)
+        return
+
 
     def import_selected_kind():
         """Tries to import the module which provides
@@ -338,15 +350,30 @@ def build(options):
     from os.path import isfile
     import os
     import sys
+    from glob import glob
 
-    src_files = 'kind_values_f2py.f90 base.f90 lattice.f90 proclist.f90'
+    src_files = ['kind_values_f2py.f90', 'base.f90', 'lattice.f90']
+
+    if isfile('proclist_constants.f90'):
+        src_files.append('proclist_constants.f90')
+    src_files.extend(glob('nli_*.f90'))
+    src_files.extend(glob('run_proc_*.f90'))
+    src_files.append('proclist.f90')
 
     extra_flags = {}
-    extra_flags['gfortran'] = ('-ffree-line-length-none -ffree-form'
-                               ' -xf95-cpp-input -Wall -O3')
-    extra_flags['gnu95'] = extra_flags['gfortran']
-    extra_flags['intel'] = '-fast -fpp -Wall -I/opt/intel/fc/10.1.018/lib'
-    extra_flags['intelem'] = '-fast -fpp -Wall'
+
+    if options.no_optimize:
+        extra_flags['gfortran'] = ('-ffree-line-length-none -ffree-form'
+                                   ' -xf95-cpp-input -Wall -fimplicit-none')
+        extra_flags['gnu95'] = extra_flags['gfortran']
+        extra_flags['intel'] = '-fpp -Wall -I/opt/intel/fc/10.1.018/lib'
+        extra_flags['intelem'] = '-fpp -Wall'
+    else:
+        extra_flags['gfortran'] = ('-ffree-line-length-none -ffree-form'
+                                   ' -xf95-cpp-input -Wall -O3 -fimplicit-none')
+        extra_flags['gnu95'] = extra_flags['gfortran']
+        extra_flags['intel'] = '-fast -fpp -Wall -I/opt/intel/fc/10.1.018/lib'
+        extra_flags['intelem'] = '-fast -fpp -Wall'
 
     # FIXME
     extra_libs = ''
@@ -363,7 +390,7 @@ def build(options):
     if not isfile('kind_values_f2py.py'):
         evaluate_kind_values('kind_values.f90', 'kind_values_f2py.f90')
 
-    for src_file in src_files.split():
+    for src_file in src_files:
         if not isfile(src_file):
             raise IOError('File %s not found' % src_file)
 
@@ -374,15 +401,14 @@ def build(options):
     if os.name == 'nt':
         call.append('%s' % ccompiler)
     extra_flags = extra_flags.get(options.fcompiler, '')
-    if options.debug :
+    if options.debug:
         extra_flags += ' -DDEBUG'
-    call.append('--f90flags="%s"' % extra_flags )
+    call.append('--f90flags="%s"' % extra_flags)
     call.append('-m')
     call.append(module_name)
-    call += src_files.split()
+    call += src_files
 
     print(call)
-    #exit()
     from copy import deepcopy
     true_argv = deepcopy(sys.argv)  # save for later
     from numpy import f2py
@@ -392,7 +418,7 @@ def build(options):
 
 
 def T_grid(T_min, T_max, n):
-    from numpy import linspace
+    from numpy import linspace, array
     """Return a list of n temperatures between
        T_min and T_max such that the grid of T^(-1)
        is evenly spaced.
@@ -405,7 +431,7 @@ def T_grid(T_min, T_max, n):
     grid.reverse()
     grid = [x ** (-1.) for x in grid]
 
-    return grid
+    return array(grid)
 
 
 def p_grid(p_min, p_max, n):
@@ -420,3 +446,55 @@ def p_grid(p_min, p_max, n):
     grid = logspace(p_minlog, p_maxlog, n)
 
     return grid
+
+
+def timeit(func):
+    """
+    Generic timing decorator
+
+    To stop time for function call f
+    just ::
+        from kmos.utils import timeit
+        @timeit
+        def f():
+            ...
+
+     """
+    def wrapper(*args, **kwargs):
+        time0 = time()
+        func(*args, **kwargs)
+        print('Executing %s took %.3f s' % (func.__name__, time() - time0))
+    return wrapper
+
+
+def col_tuple2str(tup):
+    """Convenience function that turns a HTML type color
+    into a tuple of three float between 0 and 1
+    """
+    r, g, b = tup
+    b *= 255
+    res = '#'
+    res += hex(int(255 * r))[-2:].replace('x', '0')
+    res += hex(int(255 * g))[-2:].replace('x', '0')
+    res += hex(int(255 * b))[-2:].replace('x', '0')
+
+    return res
+
+
+def col_str2tuple(hex_string):
+    """Convenience function that turns a HTML type color
+    into a tuple of three float between 0 and 1
+    """
+    import gtk
+    color = gtk.gdk.Color(hex_string)
+    return (color.red_float, color.green_float, color.blue_float)
+
+
+def jmolcolor_in_hex(i):
+    """Return a given jmol color in hexadecimal representation."""
+    from ase.data.colors import jmol_colors
+    color = [int(x) for x in 255 * jmol_colors[i]]
+    r, g, b = color
+    a = 255
+    color = (r << 24) | (g << 16) | (b << 8) | a
+    return color

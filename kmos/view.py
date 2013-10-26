@@ -25,8 +25,8 @@ import numpy as np
 import time
 
 
-import ase.gui.ag
 from ase.gui.images import Images
+import ase
 
 try:
     import gtk
@@ -51,7 +51,7 @@ except Exception, e:
     print(e)
 
 
-from kmos.run import KMC_Model, base, get_tof_names, lattice, settings
+from kmos.run import KMC_Model, get_tof_names, lattice, settings
 
 
 class ParamSlider(gtk.HScale):
@@ -290,6 +290,14 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
 
     def on_key_press(self, _widget, event):
         """Process key press event on view box."""
+        signal_dict = {'a': 'ACCUM_RATE_SUMMATION',
+                       'c': 'COVERAGE',
+                       'd': 'DOUBLE',
+                       'h': 'HALVE',
+                       's': 'SWITCH_SURFACE_PROCESSS_OFF',
+                       'S': 'SWITCH_SURFACE_PROCESSS_ON',
+                       'w': 'WRITEOUT',
+                      }
         if event.string in [' ', 'p']:
             if not self.paused:
                 self.signal_queue.put('PAUSE')
@@ -297,14 +305,11 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
             else:
                 self.signal_queue.put('START')
                 self.paused = False
-        elif event.string == 'd':
-            self.signal_queue.put('DOUBLE')
-        elif event.string == 'h':
-            self.signal_queue.put('HALVE')
-        elif event.string == 's':
-            self.signal_queue.put('SWITCH_SURFACE_PROCESSES_OFF')
-        elif event.string == 'S':
-            self.signal_queue.put('SWITCH_SURFACE_PROCESSES_ON')
+        elif event.string in ['?']:
+            for key, command in signal_dict.items():
+                print('%4s %s' % (key, command))
+        elif event.string in signal_dict:
+            self.signal_queue.put(signal_dict.get(event.string, ''))
 
     def scroll_event(self, _window, event):
         """Zoom in/out when using mouse wheel"""

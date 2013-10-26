@@ -39,6 +39,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import with_statement
 import os
 import shutil
 
@@ -107,8 +108,13 @@ usage['rebuild'] = """kmos rebuild
             Turn on assertion statements in F90 code
                     """
 
+usage['shell'] = """kmos shell
+    Open an interactive shell and create a KMC_Model in it
+               run == shell
+               """
 usage['run'] = """kmos run
     Open an interactive shell and create a KMC_Model in it
+               run == shell
                """
 
 usage['view'] = """kmos view
@@ -160,6 +166,11 @@ def get_options(args=None, get_parser=False):
                       default=False,
                       dest='debug',
                       action='store_true')
+    parser.add_option('-n', '--no-compiler-optimization',
+                      default=False,
+                      dest='no_optimize',
+                      action='store_true')
+
     try:
         from numpy.distutils.fcompiler import get_default_fcompiler
         from numpy.distutils import log
@@ -364,13 +375,20 @@ def main(args=None):
         os.remove(tempfile)
         model.deallocate()
 
-    elif args[0] == 'run':
+    elif args[0] in ['run', 'shell']:
         from sys import path
         path.append(os.path.abspath(os.curdir))
         from kmos.run import KMC_Model
 
+        # useful to have in interactive mode
+        import numpy as np
+        try:
+            from matplotlib import pyplot as plt
+        except:
+            plt = None
+
         model = KMC_Model(print_rates=False)
-        global model
+        global model, np
         sh(banner='Note: model = KMC_Model(print_rates=False)')
         model.deallocate()
 

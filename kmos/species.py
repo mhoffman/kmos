@@ -28,10 +28,38 @@ janaf_data = None
 try:
     import janaf_data
 except:
-    print('Could not import JANAF data')
+    raise Exception("""
+    Error: Could not import JANAF data
+    Installing JANAF Thermochemical Tables
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    You can conveniently use gas phase chemical potentials
+    inserted in rate constant expressions using
+    JANAF Thermochemical Tables. A couple of molecules
+    are automatically supported. If you need support
+    for more gas-phase species, drop me a line.
+
+    The tabulated values are not distributed since
+    the terms of distribution do not permit this.
+    Fortunately manual installation is easy.
+    Just create a directory called `janaf_data`
+    anywhere on your python path. To see the directories on your python
+    path run ::
+
+        python -c"import sys; print(sys.path)"
+
+        Inside the `janaf_data` directory has to be a file
+        named `__init__.py`, so that python recognizes it as a module ::
+
+            touch __init__.py
+
+            Then copy all needed data files from the
+            `NIST website <http://kinetics.nist.gov/janaf/Search>`_
+            in the tab-delimited text format
+            to the `janaf_data` directory.""")
 
 
-class Species:
+class Species(object):
     def __init__(self, atoms, gas=False, janaf_file='', name=''):
         self.atoms = atoms
         self.gas = gas
@@ -75,7 +103,11 @@ class Species:
         # from CODATA 2010
         Jmol_in_eV = 1.03642E-5
         # load data
-        data = np.loadtxt(filename, skiprows=2, usecols=(0, 2, 4))
+        try:
+            data = np.loadtxt(filename, skiprows=2, usecols=(0, 2, 4))
+        except IOError:
+            print('Warning: JANAF table %s not installed' % filename)
+            return
 
         # define data
         self.T_grid = data[:, 0]
@@ -194,3 +226,24 @@ C2H4gas = Species(ase.atoms.Atoms(),
                   gas=True,
                   janaf_file='C-128.txt',
                   name='C2H4gas')
+
+HClgas = Species(ase.atoms.Atoms(),
+                 gas=True,
+                 janaf_file='Cl-026.txt',
+                 name='HClgas')
+
+Cl2gas = Species(ase.atoms.Atoms(),
+                 gas=True,
+                 janaf_file='Cl-073.txt',
+                 name='Cl2gas',)
+
+H2Ogas = Species(ase.atoms.Atoms(),
+                 gas=True,
+                 janaf_file='H-064.txt',
+                 name='H2Ogas',)
+
+H2Oliquid = Species(ase.atoms.Atoms(),
+                    gas=False,
+                    janaf_file='H-063.txt',
+                    name='H2Oliquid',)
+

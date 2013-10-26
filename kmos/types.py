@@ -5,6 +5,7 @@
 # stdlib imports
 import os
 import re
+from fnmatch import fnmatch
 
 # numpy
 import numpy as np
@@ -83,21 +84,27 @@ class Project(object):
 
         # Quick'n'dirty define access functions
         # needed in context with GTKProject
-        self.get_parameters = lambda: sorted(self.parameter_list,
-                                              key=lambda x: x.name)
-
         self.get_layers = lambda: sorted(self.layer_list,
                                           key=lambda x: x.name)
-
-        self.get_processes = lambda: sorted(self.process_list,
-                                             key=lambda x: x.name)
-
-        self.get_speciess = lambda: sorted(self.species_list,
-                                            key=lambda x: x.name)
 
         self.add_output = lambda output: self.output_list.append(output)
         self.get_outputs = lambda: sorted(self.output_list,
                                            key=lambda x: x.name)
+
+    def get_speciess(self, pattern=None):
+        return sorted([item for item in self.species_list
+                if pattern is None or fnmatch(item.name, pattern)
+               ], key=lambda x: x.name)
+
+    def get_parameters(self, pattern=None):
+        return sorted([item for item in self.parameter_list
+                if pattern is None or fnmatch(item.name, pattern)
+               ], key=lambda x: x.name)
+
+    def get_processes(self, pattern=None):
+        return sorted([item for item in self.process_list
+                if pattern is None or fnmatch(item.name, pattern)
+               ], key=lambda x: x.name)
 
     def add_parameter(self, *parameters, **kwargs):
         """Add a parameter to the project. A Parameter,
@@ -168,6 +175,13 @@ class Project(object):
         or keywords that are passed to the Layer
         constructor are accepted.
 
+        :param layers: List of layers.
+        :type layers: list
+        :param cell: Size of unit-cell.
+        :type cell: np.array (3x3)
+        :param default_layer: name of default layer.
+        :type default_layer: str.
+
         """
         for layer in layers:
             self.layer_list.append(layer)
@@ -191,9 +205,10 @@ class Project(object):
 
         add_site(layer_name, site)
 
-        where :
-            - layer_name : a string
-            - site : a Site instance
+        :param name: Name of layer to add the site to.
+        :type name: str
+        :param site: Site instance to add.
+        :type site: Site
 
         """
 
@@ -471,6 +486,7 @@ class Project(object):
                         for sub in process:
                             if sub.tag == 'action' or sub.tag == 'condition':
                                 species = sub.attrib['species']
+                                implicit = (sub.attrib.get('implicit', '') == 'True')
                                 coord_layer = sub.attrib['coord_layer']
                                 coord_name = sub.attrib['coord_name']
                                 coord_offset = tuple(
@@ -478,9 +494,12 @@ class Project(object):
                                     sub.attrib['coord_offset'].split()])
                                 coord = Coord(layer=coord_layer,
                                               name=coord_name,
-                                              offset=coord_offset)
-                                condition_action = ConditionAction(
-                                    species=species, coord=coord)
+                                              offset=coord_offset,
+                                              )
+                                condition_action = \
+                                    ConditionAction(species=species,
+                                                    coord=coord,
+                                                    implicit=implicit)
                                 if sub.tag == 'action':
                                     process_elem.add_action(condition_action)
                                 elif sub.tag == 'condition':
@@ -636,8 +655,8 @@ class Project(object):
         for process in self.get_processes():
             for x in process.condition_list:
                 if len([y for y in process.condition_list if x == y]) > 1:
-                    raise UserWarning('%s of process %s is not unique!' %
-                                        (x, process.name))
+                    raise UserWarning('%s of process %s is not unique!\n\n%s' %
+                                        (x, process.name, process))
         # check if actions for each process are unique
         for process in self.get_processes():
             for x in process.action_list:
@@ -655,11 +674,14 @@ class Project(object):
         species_names = [x.name for x in self.get_speciess()]
         for x in self.get_processes():
             for y in x.condition_list + x.action_list:
-                stripped_species = y.species.replace('$', '').replace('^', '')
-                if not stripped_species in species_names:
-                    raise UserWarning(('Species %s used by %s in process %s'
-                                       'is not defined') %
-                                       (y.species, y, x.name))
+                stripped_speciess = y.species.replace('$', '').replace('^', '')
+                stripped_speciess = map(lambda x: x.strip(), stripped_speciess.split(' or '))
+
+                for stripped_species in stripped_speciess:
+                    if not stripped_species in species_names:
+                        raise UserWarning(('Species %s used by %s in process %s'
+                                           'is not defined') %
+                                           (y.species, y, x.name))
 
         # check if all sites in processes are defined: actions, conditions
         return True
@@ -687,6 +709,27 @@ class Project(object):
 
             else:
                 print('\t- %s : %s' % (process_type, nprocs))
+
+    def compile_model(self, code_generator='local_smart'):
+        from tempfile import mkdtemp
+        import os
+        import shutil
+        from kmos.utils import build
+        from kmos.cli import get_options
+        from kmos.io import export_source
+        cwd = os.path.abspath(os.curdir)
+        dir = mkdtemp()
+        export_source(self, dir, code_generator=code_generator)
+        os.chdir(dir)
+
+        options, args = get_options()
+        build(options)
+        from kmos.run import KMC_Model
+        model = KMC_Model(print_rates=False, banner=False)
+        os.chdir(cwd)
+        shutil.rmtree(dir)
+        return model
+
 
     def set_meta(self,
                  author=None,
@@ -739,13 +782,28 @@ class ParameterList(FixedObject, list):
     """
     attributes = ['name']
 
+    def __call__(self, match):
+        return [x for x in self if fnmatch(x.name, match)]
+
     def __init__(self, **kwargs):
         self.name = 'Parameters'
 
 
 class Parameter(FixedObject, CorrectlyNamed):
     """A parameter that can be used in a rate constant expression
-    and defined via some init file
+    and defined via some init file.
+
+    :param name: The name of the parameter.
+    :type name: str
+    :param adjustable: Create controller in GUI.
+    :type adjustable: bool
+    :param min: Minimum value for controller.
+    :type min: float
+    :param max: Maximum value for controller.
+    :type max: float
+    :param scale: Controller scale: 'log' or 'lin'
+    :type scale: str
+
     """
     attributes = ['name', 'value', 'adjustable', 'min', 'max', 'scale']
 
@@ -773,6 +831,12 @@ class Parameter(FixedObject, CorrectlyNamed):
 
 class LayerList(FixedObject, list):
     """A list of layers
+
+    :param cell: Size of unit-cell.
+    :type cell: np.array (3x3)
+    :param default_layer: name of default layer.
+    :type default_layer: str.
+
     """
     attributes = ['cell',
                   'default_layer',
@@ -893,7 +957,13 @@ class LayerList(FixedObject, list):
 
 
 class Layer(FixedObject, CorrectlyNamed):
-    """Represents one layer in a possibly multi-layer geometry
+    """Represents one layer in a possibly multi-layer geometry.
+
+    :param name: Name of layer.
+    :type name: str
+    :param sites: Sites associated with this layer (Default: [])
+    :type sites: list
+
     """
     attributes = ['name', 'sites', 'active', 'color']
 
@@ -933,6 +1003,16 @@ class Layer(FixedObject, CorrectlyNamed):
 
 class Site(FixedObject):
     """Represents one lattice site.
+
+    :param name: Name of site.
+    :type name: str
+    :param pos: Position within unit cell.
+    :type pos: np.array or str
+    :param tags: Tags for this site (space separated).
+    :type tags: str
+    :param default_species: Initial population for this site.
+    :type default_species: str
+
     """
     attributes = ['name', 'pos', 'tags', 'default_species']
     # pos is now a list of floats for the graphical representation
@@ -948,13 +1028,15 @@ class Site(FixedObject):
             elif type(kwargs['pos']) is np.ndarray:
                 self.pos = kwargs['pos']
             else:
-                raise 'Input %s not understood!' % kwargs['pos']
+                raise Exception('Input %s not understood!' % kwargs['pos'])
         else:
             self.pos = np.array([0., 0., 0.])
 
     def __repr__(self):
-        return '[SITE] %s %s %s' % (self.name,
-                                   self.pos, self.tags)
+        return '[SITE] {0:12s} ({1:5s}) {2:s} {3:s}'.format(self.name,
+                                                            self.default_species,
+                                                            self.pos,
+                                                            self.tags)
 
 
 class ProcessFormSite(Site):
@@ -978,6 +1060,20 @@ class Coord(FixedObject):
     """Class that holds exactly one coordinate as used in the description
     of a process. The distinction between a Coord and a Site may seem
     superfluous but it is made to avoid data duplication.
+
+    :param name: Name of coordinate.
+    :type name: str
+    :param offset: Offset in term of unit-cells.
+    :type offset: np.array or list
+    :param layer: Name of layer.
+    :type layer: str
+    :param tags: List of tags (space separated string).
+    :type tags: str
+
+    .. attribute:: pos
+
+       pos is np.array((3, 1)) and is calculated from offset and position. Not to be set manually.
+
     """
     attributes = ['offset', 'name', 'layer', 'pos', 'tags']
 
@@ -1014,7 +1110,7 @@ class Coord(FixedObject):
                (other.layer, other.name)) and (self.offset == other.offset).all()
 
     def __hash__(self):
-        return self.__repr__()
+        return hash(self.__repr__())
 
     def __sub__(a, b):
         """When subtracting two lattice coordinates from each other,
@@ -1099,6 +1195,15 @@ class Species(FixedObject):
     """Class that represent a species such as oxygen, empty, ... .
     Note: `empty` is treated just like a species.
 
+    :param name: Name of species.
+    :type name: str
+    :param color: Color of species in editor GUI (#ffffff hex-type specification).
+    :type color: str
+    :param representation: ase.atoms.Atoms constructor describing species geometry.
+    :type representation: str
+    :param tags: Tags of species (space separated string).
+    :type tags: str
+
     """
     attributes = ['name', 'color', 'representation', 'tags']
 
@@ -1120,6 +1225,9 @@ class SpeciesList(FixedObject, list):
     """
     attributes = ['default_species', 'name']
 
+    def __call__(self, match):
+        return [x for x in self if fnmatch(x.name, match)]
+
     def __init__(self, **kwargs):
         kwargs['name'] = 'Species'
         FixedObject.__init__(self, **kwargs)
@@ -1130,6 +1238,9 @@ class ProcessList(FixedObject, list):
     """
     attributes = ['name']
 
+    def __call__(self, match):
+        return [x for x in self if fnmatch(x.name, match)]
+
     def __init__(self, **kwargs):
         self.name = 'Processes'
 
@@ -1139,6 +1250,25 @@ class ProcessList(FixedObject, list):
 
 class Process(FixedObject):
     """One process in a kMC process list
+
+    :param name: Name of process.
+    :type name: str
+    :param rate_constant: Expression for rate constant.
+    :type rate_constant: str
+    :param condition_list: List of conditions (class Condition).
+    :type condition_list: list.
+    :param action_list: List of conditions (class Action).
+    :type action_list: list.
+    :param enabled: Switch this process on or of.
+    :type enabled: bool.
+    :param chemical_expression: Chemical expression (i.e: A@site1 + B@site2 -> empty@site1 + AB@site2) to generate process from.
+    :type chemical_expression: str.
+    :param tof_count: Stoichiometric factor for observable products {'NH3': 1, 'H2O(gas)': 2}. Hint: avoid space in keys.
+    :type tof_count: dict.
+
+
+
+
     """
     attributes = ['name',
                   'rate_constant',
@@ -1158,7 +1288,7 @@ class Process(FixedObject):
         self.enabled = kwargs.get('enabled', True)
 
     def __repr__(self):
-        return '[PROCESS] Name:%s Rate: %s\nConditions: %s\nActions: %s' \
+        return '[PROCESS] Name:%s\n     Rate: %s\nConditions: %s\nActions: %s' \
             % (self.name, self.rate_constant,
                self.condition_list, self.action_list)
 
@@ -1234,20 +1364,23 @@ class ConditionAction(FixedObject):
     have the same attributes we use the same class here, and just
     store them in different lists, depending on its role.
     """
-    attributes = ['species', 'coord']
+    attributes = ['species', 'coord', 'implicit']
 
     def __init__(self, **kwargs):
+        kwargs['implicit'] = kwargs.get('implicit', False)
         FixedObject.__init__(self, **kwargs)
 
     def __eq__(self, other):
         return self.__repr__() == other.__repr__()
 
     def __repr__(self):
-        return ("[COND_ACT] Species: %s Coord:%s\n" %
-               (self.species, self.coord))
+        return ("[COND_ACT] Species: %s Coord:%s%s\n" %
+               (self.species,
+                self.coord,
+                ' (implicit)' if self.implicit else ''))
 
     def __hash__(self):
-        return self.__repr__()
+        return hash(self.__repr__())
 
 
 # Add aliases for ConditionAction
@@ -1486,6 +1619,7 @@ def parse_chemical_expression(eq, process, project_tree):
 
 
 def parse_process(string, project_tree):
+
     name, chem_exp, rate_constant = [x.strip() for x in string.split(';')]
     process = Process(name=name,
                       rate_constant=rate_constant,)
