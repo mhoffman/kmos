@@ -20,6 +20,17 @@ What other kMC codes are there?
   Please drop me a line if you find any information
   inaccurate.
 
+What does kmos stand for anyways?
+  Good question, initially kmos was supposed to stand for
+  `kinetic modeling on steroids`, but that confused people
+  too much since we are not modelling steroids but surfaces.
+  Some popular variants are
+
+    - kMC modeling of surfaces
+    - kmos modeling offering source
+
+  I am open for other suggestions.
+
 
 When I run kmos the GUI way and close it, it seems to hang and I need to use the window manager to kill it.
   This is a bug waiting to be fixed. To avoid it close
