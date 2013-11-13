@@ -59,6 +59,9 @@ usage['build'] = """kmos build
     Additional Parameters ::
         -d/--debug
             Turn on assertion statements in F90 code
+
+        -n/--no-compiler-optimization
+            Do not send optimizing flags to compiler.
                  """ % ('pyd' if os.name == 'nt' else 'so')
 
 usage['help'] = """kmos help <command>
@@ -71,6 +74,7 @@ usage['export'] = """kmos export <xml-file> [<export-path>]
     build the kmc_model.%s.
 
     Additional Parameters ::
+
         -s/--source-only
             Export source only and don't build binary
 
@@ -82,6 +86,9 @@ usage['export'] = """kmos export <xml-file> [<export-path>]
         -d/--debug
             Turn on assertion statements in F90 code.
             (Only active in compile step)
+
+        -n/--no-compiler-optimization
+            Do not send optimizing flags to compiler.
                     """ % ('pyd' if os.name == 'nt' else 'so')
 
 usage['settings-export'] = """kmos settings-export <xml-file> [<export-path>]
