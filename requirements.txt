@@ -1,0 +1,4 @@
+kmos
+ase
+numpy
+pygtk
