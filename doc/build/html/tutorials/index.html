@@ -1,0 +1,898 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Tutorials &mdash; kmos 0.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="kmos 0.2.1 documentation" href="../index.html" />
+    <link rel="next" title="Topic Guides" href="../topic_guides/index.html" />
+    <link rel="prev" title="Welcome to kmos’s documentation!" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../topic_guides/index.html" title="Topic Guides"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../index.html" title="Welcome to kmos’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">kmos 0.2.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/kmos_logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Tutorials</a><ul>
+<li><a class="reference internal" href="#getting-started">Getting Started</a><ul>
+<li><a class="reference internal" href="#module-kmos">Introduction</a><ul>
+<li><a class="reference internal" href="#feature-overview">Feature overview</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#installation-on-ubuntu-linux">Installation on Ubuntu Linux</a></li>
+<li><a class="reference internal" href="#installation-on-opensuse-12-1-linux">Installation on openSUSE 12.1 Linux</a></li>
+<li><a class="reference internal" href="#installation-on-windoze-7">Installation on windoze 7</a></li>
+<li><a class="reference internal" href="#installing-janaf-thermochemical-tables">Installing JANAF Thermochemical Tables</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#screenshots">Screenshots</a><ul>
+<li><a class="reference internal" href="#the-editor">The  Editor</a></li>
+<li><a class="reference internal" href="#the-runtime-view">The Runtime View</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#a-first-kmc-model-the-api-way">A first kMC Model&#8211;the API way</a><ul>
+<li><a class="reference internal" href="#construct-the-model">Construct the model</a></li>
+<li><a class="reference internal" href="#populate-process-list-and-parameter-list">Populate process list and parameter list</a></li>
+<li><a class="reference internal" href="#export-save-compile">Export, save, compile</a></li>
+<li><a class="reference internal" href="#taking-it-home">Taking it home</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#a-first-kmc-model-the-gui-way">A first kMC Model&#8211;the GUI way</a></li>
+<li><a class="reference internal" href="#running-the-model-the-gui-way">Running the Model&#8211;the GUI way</a></li>
+<li><a class="reference internal" href="#how-to-prepare-a-model-and-run-it-interactively">How To Prepare a Model and Run It Interactively</a></li>
+<li><a class="reference internal" href="#running-the-model-the-api-way">Running the Model&#8211;the API way</a></li>
+<li><a class="reference internal" href="#manipulating-the-model-at-runtime">Manipulating the Model at Runtime</a></li>
+<li><a class="reference internal" href="#running-models-in-parallel">Running models in parallel</a></li>
+<li><a class="reference internal" href="#development">Development</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../index.html"
+                        title="previous chapter">Welcome to kmos&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../topic_guides/index.html"
+                        title="next chapter">Topic Guides</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/tutorials/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="tutorials">
+<h1>Tutorials<a class="headerlink" href="#tutorials" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="getting-started">
+<h2>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-kmos">
+<span id="introduction"></span><h3>Introduction<a class="headerlink" href="#module-kmos" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="feature-overview">
+<h4>Feature overview<a class="headerlink" href="#feature-overview" title="Permalink to this headline">¶</a></h4>
+<p>With kmos you can:</p>
+<blockquote>
+<div><ul class="simple">
+<li>easily create and modify kMC models through GUI</li>
+<li>store and exchange kMC models through XML</li>
+<li>generate fast, platform independent, self-contained code <a class="footnote-reference" href="#code" id="id1">[1]</a></li>
+<li>run kMC models through GUI or python bindings</li>
+</ul>
+</div></blockquote>
+<p>kmos has been developed in the context of first-principles based modelling
+of surface chemical reactions but might be of help for other types of
+kMC models as well.</p>
+<p>kmos&#8217; goal is to significantly reduce the time you need
+to implement and run a lattice kmc simulation. However it can not help
+you plan the model.</p>
+<p>kmos can be invoked directly from the command line in one of the following
+ways:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">kmos</span> <span class="p">[</span><span class="n">help</span><span class="p">]</span> <span class="p">(</span><span class="n">edit</span><span class="o">|</span><span class="n">export</span><span class="o">|</span><span class="n">view</span><span class="p">)</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>or it may be used as an API via the kmos module.</p>
+<p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="code" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>The source code is generated in Fortran90, written in a modular
+fashion. Python bindings are generated using <a class="reference external" href="http://cens.ioc.ee/projects/f2py2e/">f2py</a>.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="installation-on-ubuntu-linux">
+<h3>Installation on Ubuntu Linux<a class="headerlink" href="#installation-on-ubuntu-linux" title="Permalink to this headline">¶</a></h3>
+<p>You can fetch the current version of kmos using <em>git</em></p>
+<div class="highlight-python"><pre>git clone http://www.github.com/mhoffman/kmos</pre>
+</div>
+<p>and install it using <em>setuptools</em></p>
+<div class="highlight-python"><pre>./setup.py install [--user]</pre>
+</div>
+<p>To use the core functionality
+(programmatic model setup, code generation, model execution)
+kmos has a fairly modest depedency foot-print. You will need</p>
+<div class="highlight-python"><pre>python-numpy, a Fortran compiler, python-lxml</pre>
+</div>
+<p>In order to watch the model run on screen you will additionally
+need</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">python</span><span class="o">-</span><span class="n">matplotlib</span><span class="p">,</span> <span class="n">python</span><span class="o">-</span><span class="n">ase</span>
+</pre></div>
+</div>
+<p>Finally in order to use all features, in particular the GUI
+model editor of kmos you have to install
+a number of dependencies. This should not be very difficult
+on a recent Linux distribution with package management. So
+on Ubuntu it suffices to call:</p>
+<div class="highlight-python"><pre>sudo apt-get install gazpacho gfortran python-dev \
+                     python-glade2 python-kiwi python-lxml \
+                     python-matplotlib python-numpy \
+                     python-pygoocanvas</pre>
+</div>
+<p>and if you haven&#8217;t already installed it, one way to fetch the
+atomic simulation environment (ASE) is currently to</p>
+<div class="highlight-python"><pre>sudo add-apt-repository ppa:campos-dev/campos
+sudo apt-get update
+sudo apt-get install python-ase</pre>
+</div>
+<p>Or go to their <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/download.html">website</a>
+to fetch the latest version.</p>
+<p>If you think this dependency list hurts. Yes, it does!
+And I am happy about any suggestions how to
+minimize it. However one should note these dependencies are only
+required for the model development. Running a model has virtually
+no dependencies except for a Fortran compiler.</p>
+<p>To ease the installation further on Ubuntu one can simply run:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">kmos</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">dependencies</span><span class="o">-</span><span class="n">ubuntu</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">add pip way or something alike to automatically
+install dependencies.</p>
+</div>
+</div>
+<div class="section" id="installation-on-opensuse-12-1-linux">
+<h3>Installation on openSUSE 12.1 Linux<a class="headerlink" href="#installation-on-opensuse-12-1-linux" title="Permalink to this headline">¶</a></h3>
+<p>On a recent openSUSE some dependencies are distributed a little
+different but nevertheless doable. We start by install some
+package from the repositories</p>
+<div class="highlight-python"><pre>sudo zypper install libgfortran46, python-lxml, python-matplotlib, \
+                    python-numpy, python-numpy-devel, python-goocanvas,
+                    python-imaging</pre>
+</div>
+<p>And two more packages SUSE packages have to be fetched from the
+openSUSE <a class="reference external" href="https://build.opensuse.org/">build service</a></p>
+<ul class="simple">
+<li><a class="reference external" href="https://build.opensuse.org/package/files?package=gazpacho&amp;project=home%3Ajoshkress">gazpacho</a></li>
+<li><a class="reference external" href="https://build.opensuse.org/package/files?package=python-kiwi&amp;project=home%3Ajoshkress">python-kiwi</a></li>
+</ul>
+<p>For each one just download the *.tar.bz2 files. Unpack them and inside
+run</p>
+<div class="highlight-python"><pre>python setup.py install</pre>
+</div>
+<p>In the same vein you can install ASE. Download a recent version
+from the <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/download.html">DTU website</a>
+unzip it and install it with</p>
+<div class="highlight-python"><pre>python setup.py install</pre>
+</div>
+</div>
+<div class="section" id="installation-on-windoze-7">
+<h3>Installation on windoze 7<a class="headerlink" href="#installation-on-windoze-7" title="Permalink to this headline">¶</a></h3>
+<p>In order for kmos to work in a recent windoze we need a
+number of programs.</p>
+<ol class="arabic">
+<li><p class="first"><strong>Python</strong>
+If you have no python previously installed you should try
+<a class="reference external" href="http://www.enthought.com/products/epd_free.php">Enthought Python Distribution</a> (EPD) in its free version since it
+already comes with a number of useful libraries such a numpy, scipy,
+ipython and matplotlib.</p>
+<p>Otherwise you can simply download Python from <a class="reference external" href="http://www.python.org/download">python.org</a> and
+this installation has been successfully tested using python 2.7.</p>
+</li>
+<li><p class="first"><strong>numpy</strong>
+Fetch it for <cite>your version</cite> of python from
+<a class="reference external" href="http://sourceforge.net/project/numpy">sourceforge&#8217;s Numpy site</a>
+and install it. [Not needed with EPD ]</p>
+</li>
+<li><p class="first"><strong>MinGW</strong>
+provides free Fortran and C compilers and can be obtained from the
+<a class="reference external" href="http://sourceforge.net/projects/mingw/">sourceforge&#8217;s MinGW site</a> .
+Make sure you make a tick for the Fortran and the C compiler.</p>
+</li>
+<li><p class="first"><strong>pyGTK</strong>
+is needed for the GUI frontend so fetch the
+<a href="#id5"><span class="problematic" id="id6">`all-in-one &lt;&gt;`_</span></a> bundle installer and
+install most of it.</p>
+</li>
+<li><p class="first"><strong>lxml</strong>
+is an awesome library to process xml files, which has unfortunately
+not fully found its way into the standard library. As of this writing
+the latest version with prebuilt binaries is <a class="reference external" href="http://pypi.python.org/pypi/lxml/2.2.8">lxml 2.2.8</a> and installation
+works without troubles.</p>
+</li>
+<li><p class="first"><strong>ASE</strong>
+is needed for the representation of atoms in the frontend. So
+download the latest from the
+<a class="reference external" href="https://wiki.fysik.dtu.dk/ase/">DTU website</a>
+and install it. This has to be installed using e.g. the powershell.
+So after unpacking it, fire up the powershell, cd to the directory
+and run</p>
+<div class="highlight-python"><pre>python setup.py install</pre>
+</div>
+<p>in there. Note that there is currently a slight glitch in the
+<cite>setup.py</cite> script on windoze, so open <cite>setup.py</cite> in a text
+editor and find the line saying</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">version</span> <span class="o">=</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>comment out the lines above it and hard-code the current version
+number.</p>
+</li>
+<li><p class="first"><strong>kmos</strong>
+is finally what we are after, so download the latest version
+from <a class="reference external" href="http://mhoffman.github.com/kmos/">github</a> and install
+it in the same way as you installed <strong>ASE</strong>.</p>
+</li>
+</ol>
+<p>There are probably a number of small changes you have to make
+which are not described in this document. Please post questions
+and comments in the
+<a class="reference external" href="https://github.com/mhoffman/kmos/issues">issues forum</a> .</p>
+</div>
+<div class="section" id="installing-janaf-thermochemical-tables">
+<h3>Installing JANAF Thermochemical Tables<a class="headerlink" href="#installing-janaf-thermochemical-tables" title="Permalink to this headline">¶</a></h3>
+<p>You can conveniently use gas phase chemical potentials
+inserted in rate constant expressions using
+JANAF Thermochemical Tables. A couple of molecules
+are automatically supported. If you need support
+for more gas-phase species, drop me a line.</p>
+<p>The tabulated values are not distributed since
+the terms of distribution do not permit this.
+Fortunately manual installation is easy.
+Just create a directory called <cite>janaf_data</cite>
+anywhere on your python path. To see the directories on your python
+path run</p>
+<div class="highlight-python"><pre>python -c"import sys; print(sys.path)"</pre>
+</div>
+<p>Inside the <cite>janaf_data</cite> directory has to be a file
+named <cite>__init__.py</cite>, so that python recognizes it as a module</p>
+<div class="highlight-python"><pre>touch __init__.py</pre>
+</div>
+<p>Then copy all needed data files from the
+<a class="reference external" href="http://kinetics.nist.gov/janaf/Search">NIST website</a>
+in the tab-delimited text format
+to the <cite>janaf_data</cite> directory.</p>
+<div class="admonition-todo admonition" id="index-1">
+<p class="first admonition-title">Todo</p>
+<p class="last">test installation on other platforms</p>
+</div>
+</div>
+</div>
+<div class="section" id="screenshots">
+<h2>Screenshots<a class="headerlink" href="#screenshots" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="the-editor">
+<h3>The  Editor<a class="headerlink" href="#the-editor" title="Permalink to this headline">¶</a></h3>
+<div class="figure align-center">
+<img alt="../_images/screenshot_editor_lattice.png" src="../_images/screenshot_editor_lattice.png" style="width: 1000px;" />
+<p class="caption">The lattice view allows to define sites by simple pointing.</p>
+</div>
+<div class="figure align-center">
+<img alt="../_images/screenshot_editor_parameters.png" src="../_images/screenshot_editor_parameters.png" style="width: 1000px;" />
+<p class="caption">Model parameters can be defined including ranges to vary
+them over in the runtime viewer.</p>
+</div>
+<div class="figure align-center">
+<img alt="../_images/screenshot_editor_species.png" src="../_images/screenshot_editor_species.png" style="width: 1000px;" />
+<p class="caption">Species can be added here. The color is used to represent
+them in the 2D editor view. The string is an ASE atoms
+constructor for display at runtime.</p>
+</div>
+<div class="figure align-center">
+<img alt="../_images/screenshot_editor_diffusion.png" src="../_images/screenshot_editor_diffusion.png" style="width: 1000px;" />
+<p class="caption">Processes can be added by point and click or by entering
+a chemical expression.</p>
+</div>
+</div>
+<div class="section" id="the-runtime-view">
+<h3>The Runtime View<a class="headerlink" href="#the-runtime-view" title="Permalink to this headline">¶</a></h3>
+<div class="figure align-center">
+<img alt="../_images/screenshot_view_ruo2.png" src="../_images/screenshot_view_ruo2.png" style="width: 1000px;" />
+<p class="caption">The compiled module can be run and watched in realtime.
+When parameters are changed this is immediately reflected
+in the rate constants.</p>
+</div>
+</div>
+</div>
+<div class="section" id="a-first-kmc-model-the-api-way">
+<h2>A first kMC Model&#8211;the API way<a class="headerlink" href="#a-first-kmc-model-the-api-way" title="Permalink to this headline">¶</a></h2>
+<p>In general there are two interfaces to <em>defining</em> a new
+model: A GUI and an API. While the GUI can be quite
+nice especially for beginners, it turns out that the
+API is better maintained simply because ... well, maintaing
+a GUI is a lot more work.</p>
+<p>So we will start by learning how to setup the model using the
+API which will turn out not to be hard at all. It is knowing howto
+do this will also pay-off especially if you starting tinkering
+with your existing models and make little changes here and there.</p>
+<div class="section" id="construct-the-model">
+<h3>Construct the model<a class="headerlink" href="#construct-the-model" title="Permalink to this headline">¶</a></h3>
+<p>We start by making the necessary import statements (in <em>python</em> or better <em>ipython</em>):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">kmos.types</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">kmos.io</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<p>which imports all classes that make up a kMC project. The functions
+from <cite>kmos.io</cite> will only be needed at the end to save the project
+or to export compilable code.</p>
+<p>The example sketched out here leads you to a kMC model for CO adsorption
+and desorption on Pd(100) including a simple lateral interaction. Granted
+this hardly excites surface scientists but we need to start somewhere, right?</p>
+<p>First you should instantiate a new project and fill in meta information</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span> <span class="o">=</span> <span class="n">Project</span><span class="p">()</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">set_meta</span><span class="p">(</span><span class="n">author</span> <span class="o">=</span> <span class="s">&#39;Your Name&#39;</span><span class="p">,</span>
+            <span class="n">email</span> <span class="o">=</span> <span class="s">&#39;your.name@server.com&#39;</span><span class="p">,</span>
+            <span class="n">model_name</span> <span class="o">=</span> <span class="s">&#39;MyFirstModel&#39;</span><span class="p">,</span>
+            <span class="n">model_dimension</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,)</span>
+</pre></div>
+</div>
+<p>Next you add some species or states. Note that whichever
+species you add first is the default species with which all sites in the
+system will be initialized. Of course this can be changed later</p>
+<p>For surface science simulations it is useful to define an
+<em>empty</em> state, so we add</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_species</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and some surface species. Given you want to simulate CO adsorption and
+desorption on a single crystal surface you would say</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_species</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;CO&#39;</span><span class="p">,</span>
+               <span class="n">representation</span><span class="o">=</span><span class="s">&quot;Atoms(&#39;CO&#39;,[[0,0,0],[0,0,1.2]])&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where the string passed as <cite>representation</cite> is a string representing
+a CO molecule which can be evaluated in ASE namespace.</p>
+<p>Once you have all species declared is a good time to think about the geometry.
+To keep it simple we will stick with a simple-cubic lattice in 2D which
+could for example represent the (100) surface of a fcc crystal with only
+one adsorption site per unit cell. You start by giving your layer a name</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">layer</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;simple_cubic&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and adding a site</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">layer</span><span class="o">.</span><span class="n">sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Site</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;hollow&#39;</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="s">&#39;0.5 0.5 0.5&#39;</span><span class="p">,</span>
+                        <span class="n">default_species</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Where <cite>pos</cite> is given in fractional coordinates, so this site
+will be in the center of the unit cell.</p>
+<p>Simple, huh? Now you wonder where all the rest of the geometry went?
+For a simple reason: the geometric location of a site is
+meaningless from a kMC point of view. In order to solve the master
+equation none of the numerical coordinates
+of any lattice sites matter since the master equation is only
+defined in terms of states and transition between these. However
+to allow a graphical representation of the simulation one can add geometry
+as you have already done for the site. You set the size of the unit cell
+via</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">cell</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>which are prototypical dimensions for a single-crystal surface in
+Angstrom.</p>
+<p>Ok, let us see what we managed so far: you have a <em>lattice</em> with a
+<em>site</em> that can be either <em>empty</em> or occupied with <em>CO</em>.</p>
+</div>
+<div class="section" id="populate-process-list-and-parameter-list">
+<h3>Populate process list and parameter list<a class="headerlink" href="#populate-process-list-and-parameter-list" title="Permalink to this headline">¶</a></h3>
+<p>The remaining work is to populate the <cite>process list</cite> and the
+<cite>parameter list</cite>. The parameter list defines the parameters
+that can be used in the expressions of the rate constants.
+In principle one could do without the parameter
+list and simply hard code all parameters in the process list,
+however one looses some nifty functionality like easily
+changing parameters on-the-fly or even interactively.</p>
+<p>A second benefit is that you achieve a clear separation
+of the kinetic model from the barrier input,
+which usually has a different origin.</p>
+<p>In practice filling the parameter list and the process
+list is often an iterative process, however since
+we have a fairly short list, we can try to set all parameters
+at once.</p>
+<p>First of all you want to define the external parameters to
+which our model is coupled. Here we use the temperature
+and the CO partial pressure:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">600.</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;p_CO&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">1.e2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also set a default value and a minimum and maximum value
+set defines how the scrollbars a behave later in the runtime GUI.</p>
+<p>To describe the adsorption rate constant you will need the area
+of the unit cell:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;A&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s">&#39;(3.5*angstrom)**2&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Last but not least you need a binding energy of the particle on
+the surface. Since without further ado we have no value for the
+gas phase chemical potential, we&#8217;ll just call it deltaG and keep
+it adjustable</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;deltaG&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s">&#39;-0.5&#39;</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                           <span class="nb">min</span><span class="o">=-</span><span class="mf">1.3</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To define processes we first need a coordinate <a class="footnote-reference" href="#coord-minilanguage" id="id3">[3]</a></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">coord</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">generate_coord</span><span class="p">(</span><span class="s">&#39;hollow.(0,0,0).simple_cubic&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then you need to have at least two processes. A process or elementary step in kMC
+means that a certain local configuration must be given so that something
+can happen at a certain rate constant. In the framework here this is
+phrased in terms of &#8216;conditions&#8217; and &#8216;actions&#8217;. <a class="footnote-reference" href="#proc-minilanguage" id="id4">[2]</a>
+So for example an adsorption requires at least one site to be empty
+(condition). Then this site can be occupied by CO (action) with a
+rate constant. Written down in code this looks as follows</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_process</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;CO_adsorption&#39;</span><span class="p">,</span>
+               <span class="n">conditions</span><span class="o">=</span><span class="p">[</span><span class="n">Condition</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)],</span>
+               <span class="n">actions</span><span class="o">=</span><span class="p">[</span><span class="n">Action</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;CO&#39;</span><span class="p">)],</span>
+               <span class="n">rate_constant</span><span class="o">=</span><span class="s">&#39;p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now you might wonder, how come we can simply use m_CO and beta and such.
+Well, that is because the evaluator will to some trickery to resolve such
+terms. So beta will be first be translated into 1/(kboltzmann*T) and as
+long as you have set a parameter <cite>T</cite> before, this will go through. Same
+is true for m_CO, here the atomic masses are looked up and added. Note
+that we need conversion factors of bar and umass.</p>
+<p>Then the desorption process is almost the same, except the reverse:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">add_process</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;CO_desorption&#39;</span><span class="p">,</span>
+               <span class="n">conditions</span><span class="o">=</span><span class="p">[</span><span class="n">Condition</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;CO&#39;</span><span class="p">)],</span>
+               <span class="n">actions</span><span class="o">=</span><span class="p">[</span><span class="n">Action</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">coord</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s">&#39;empty&#39;</span><span class="p">)],</span>
+               <span class="n">rate_constant</span><span class="o">=</span><span class="s">&#39;p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(beta*deltaG*eV)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To reduce typing, kmos also knows a shorthand notation for processes.
+In order to produce the same process you could also type</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">parse_process</span><span class="p">(</span><span class="s">&#39;CO_desorption; CO@hollow-&gt;empty@hollow ; p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(beta*deltaG*eV)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and since any non-existing on either the left or the right side
+of the <cite>-&gt;</cite> symbol is replaced by a corresponding term with
+the <cite>default_species</cite> (in this case <cite>empty</cite>) you could as
+well type</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">parse_process</span><span class="p">(</span><span class="s">&#39;CO_desorption; CO@hollow-&gt;; p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(beta*deltaG*eV)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and to make it even shorter you can parse and add the process on one line</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">parse_and_add_process</span><span class="p">(</span><span class="s">&#39;CO_desorption; CO@hollow-&gt;; p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)*exp(beta*deltaG*eV)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In order to add processes on more than one site possible spanning across unit
+cells, there is a shorthand as well. The full-fledged syntax for each
+coordinate is</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">name</span><span class="o">.</span><span class="n">offset</span><span class="o">.</span><span class="n">lattice</span>
+</pre></div>
+</div>
+<p>check <a class="reference internal" href="../topic_guides/coord_syntax.html#manual-coord-generation"><em>Manual generation</em></a> for details.</p>
+</div>
+<div class="section" id="export-save-compile">
+<h3>Export, save, compile<a class="headerlink" href="#export-save-compile" title="Permalink to this headline">¶</a></h3>
+<p>Next, it&#8217;s a good idea to save your work</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pt</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="s">&#39;myfirst_kmc.xml&#39;</span>
+<span class="n">pt</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Now is the time to leave the python shell. In the current
+directory you should see a <cite>myfirst_kmc.xml</cite>.
+This XML file contains the full definition of your model
+and you can create the source code and binaries in just one line.
+So on the command line in the same directory as the XML file
+you run</p>
+<div class="highlight-python"><pre>kmos export myfirst_kmc.xml</pre>
+</div>
+<p>Make sure this finishes gracefully without any line
+containining an error.</p>
+<p>If you now <cite>cd</cite> to that folder <cite>myfirst_kmc</cite> and run:</p>
+<div class="highlight-python"><pre>kmos view</pre>
+</div>
+<p>... and dada! Your first running kMC model right there!</p>
+<p>If you wonder why the CO molecules are basically just dangling
+there in mid-air that is because you have no background setup, yet.
+Choose a transition metal of your choice and add it to the
+lattice setup for extra credit :-).</p>
+</div>
+<div class="section" id="taking-it-home">
+<h3>Taking it home<a class="headerlink" href="#taking-it-home" title="Permalink to this headline">¶</a></h3>
+<p>Despite its simplicity you have now seen all elements needed
+to implement a kMC model and hopefully gotten a first feeling for
+the workflow.</p>
+<table class="docutils footnote" frame="void" id="proc-minilanguage" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[2]</a></td><td>You will have to describe all processes
+in terms of  <cite>conditions</cite> and
+<cite>actions</cite> and you find a more complete
+description in the
+<a class="reference internal" href="../topic_guides/proc_syntax.html#proc-mini-language"><em>topic guide</em></a>
+to the process description syntax.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="coord-minilanguage" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>The description of coordinates follows
+the simple syntax of the coordinate
+syntax and the
+<a class="reference internal" href="../topic_guides/coord_syntax.html#coord-mini-language"><em>topic guide</em></a>
+explains how that works.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="a-first-kmc-model-the-gui-way">
+<h2>A first kMC Model&#8211;the GUI way<a class="headerlink" href="#a-first-kmc-model-the-gui-way" title="Permalink to this headline">¶</a></h2>
+<p>This tutorial will walk you through the creation of a
+simple adsorption/desorption model on a simple cubic surface.
+Despite its simplicity it touches all elements contained in
+the GUI and could be considered from first-principles.</p>
+<div class="admonition-todo admonition" id="index-2">
+<p class="first admonition-title">Todo</p>
+<p class="last">describe modelling more complicated structures
+and e.g. boundary conditions</p>
+</div>
+</div>
+<div class="section" id="running-the-model-the-gui-way">
+<h2>Running the Model&#8211;the GUI way<a class="headerlink" href="#running-the-model-the-gui-way" title="Permalink to this headline">¶</a></h2>
+<p>After successfully exporting and compiling a model you get
+two files: kmc_model.so and kmc_settings.py. These two files
+are really all you need for simulations. So a simple
+way to view the model is the</p>
+<div class="highlight-python"><pre>kmos view</pre>
+</div>
+<p>command from the command line. For this two work you need to
+be in the same directory as these two file (more precisely
+these two files need to be in the python import path) and
+you should see an instance of your model running.
+This feature can be quite useful to quickly obtain an
+intuitive understanding of the model at hand. A lot of settings
+can be changed through the kmc_settings.py such as rate constant
+or parameters.
+To be even more interactive you can set a parameter
+to be adjustable.  This can happen either in the generating XML
+file or directly in the kmc_settings.py. Also make sure to set
+sensible minimum and maximum values.</p>
+</div>
+<div class="section" id="how-to-prepare-a-model-and-run-it-interactively">
+<h2>How To Prepare a Model and Run It Interactively<a class="headerlink" href="#how-to-prepare-a-model-and-run-it-interactively" title="Permalink to this headline">¶</a></h2>
+<p>If you want to prepare a model in a certain
+way (parameters, size, configuration) and
+then run it interactively from there, there
+is in easy way, too.  Just write a little python
+script. The with-statement is nice because it takes
+care of the correct allocation and deallocation</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#!/usr/bin/env python</span>
+
+<span class="kn">from</span> <span class="nn">kmos.run</span> <span class="kn">import</span> <span class="n">KMC_Model</span>
+<span class="kn">from</span> <span class="nn">kmos.view</span> <span class="kn">import</span> <span class="n">main</span>
+
+
+<span class="k">with</span> <span class="n">KMC_Model</span><span class="p">(</span><span class="n">print_rates</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">banner</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">simulation_size</span> <span class="o">=</span> <span class="mi">5</span>
+
+<span class="k">with</span> <span class="n">KMC_Model</span><span class="p">(</span><span class="n">print_rates</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">banner</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">do_steps</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e7</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">double</span><span class="p">()</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">double</span><span class="p">()</span>
+    <span class="c"># one or more changes to the model</span>
+    <span class="c"># ...</span>
+    <span class="n">main</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="running-the-model-the-api-way">
+<h2>Running the Model&#8211;the API way<a class="headerlink" href="#running-the-model-the-api-way" title="Permalink to this headline">¶</a></h2>
+<p>In order to analyze a model in quantitatively it is
+more practical to write small client scripts that directly
+talk to the runtime API. As time passes and more of these
+scripts are written over and over some standard functionality
+will likely be integrated into the runtime API. For starters
+a simple script could look as follows</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#!/usr/bin/env python</span>
+
+<span class="kn">from</span> <span class="nn">kmos.run</span> <span class="kn">import</span> <span class="n">KMC_Model</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">KMC_Model</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>As you can see by default the model prints a disclaimer
+and all rate constants, which can each be turned off
+by instantiating</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span> <span class="o">=</span> <span class="n">KMC_Model</span><span class="p">(</span><span class="n">print_rates</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">banner</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The most important method is of course how to run
+the model, which you can do by saying</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">do_steps</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>which would run the model by 100,000 kMC steps.</p>
+<p>Let&#8217;s say you want to change the temperature and a partial pressure of
+the model you could type</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="mi">550</span>
+<span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">p_COgas</span> <span class="o">=</span> <span class="mf">0.5</span>
+</pre></div>
+</div>
+<p>and all rate constants are instantly updated. In order get a quick
+overview of the current settings you can issue e.g.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">rate_constants</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or just</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now an instantiated und configured model has mainly two functions: run
+kMC steps and report its current configuration.</p>
+<p>To analyze the current state you may use</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">atoms</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_atoms</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>If you want to fetch data from the current state without
+actually visualizing the geometry can speed up the get_atoms()
+call using</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="n">atoms</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_atoms</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>This will return an ASE atoms object of the current system, but
+it also contains some additional data piggy-backed such as</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">get_occupation_header</span><span class="p">()</span>
+<span class="n">atoms</span><span class="o">.</span><span class="n">occupation</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">get_tof_header</span><span class="p">()</span>
+<span class="n">atoms</span><span class="o">.</span><span class="n">tof_data</span>
+
+
+<span class="n">atoms</span><span class="o">.</span><span class="n">kmc_time</span>
+<span class="n">atoms</span><span class="o">.</span><span class="n">kmc_step</span>
+</pre></div>
+</div>
+<p>These quantities are often sufficient when running and simulating
+a catalyst surface, but of course the model could be expanded
+to more observables. The Fortran modules <cite>base</cite>, <cite>lattice</cite>,
+and <cite>proclist</cite> are atttributes of the model instance so,
+please feel free to explore the model instance e.g. using
+ipython and</p>
+<div class="highlight-python"><pre>model.base.&lt;TAB&gt;
+model.lattice.&lt;TAB&gt;
+model.proclist.&lt;TAB&gt;</pre>
+</div>
+<p>etc..</p>
+<p>The <cite>occupation</cite> is a 2-dimensional array which contains
+the <cite>occupation</cite> for each surface <cite>site</cite> divided by
+the number of unit cell. The first slot
+denotes the species and the second slot denotes the
+surface site, i.e.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">occupation</span><span class="p">[</span><span class="n">species</span><span class="p">,</span> <span class="n">site</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>So given there is a <cite>hydrogen</cite> species
+in the model, the occupation of <cite>hydrogen</cite> across all site
+type can be accessed like</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">hydrogen_occupation</span> <span class="o">=</span> <span class="n">occupation</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">proclist</span><span class="o">.</span><span class="n">hydrogen</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>To access the coverage of one surface site, we have to
+remember to subtract 1, when using the the builtin constants,
+like so</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">hollow_occupation</span> <span class="o">=</span> <span class="n">occupation</span><span class="p">[:,</span> <span class="n">model</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">hollow</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Lastly it is important to call</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">deallocate</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>once the simulation if finished as this frees the memory
+allocated by the Fortan modules. This is particularly
+necessary if you want to run more than one simulation
+in one script.</p>
+</div>
+<div class="section" id="manipulating-the-model-at-runtime">
+<span id="manipulate-model-runtime"></span><h2>Manipulating the Model at Runtime<a class="headerlink" href="#manipulating-the-model-at-runtime" title="Permalink to this headline">¶</a></h2>
+<p>It is quite easy to change not only model parameters but
+also the configuration at runtime. For instance if one
+would like to prepare a surface with a certain configuration
+or pattern.</p>
+<p>Given you instantiated a <cite>model</cite> instance a site occupation
+can be changed by calling</p>
+<div class="highlight-python"><pre>model.put(site=[x,y,z,n], model.proclist.&lt;species&gt;)</pre>
+</div>
+<p>However if changing many sites at once this is quite inefficient,
+since each <cite>put</cite> call, adjusts the book-keeping database. To circumvent
+this you can use the <cite>_put</cite> method, like so</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">_put</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">_put</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="o">...</span>
+<span class="n">model</span><span class="o">.</span><span class="n">_adjust_database</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>though at the end one must not forget to call <cite>_adjust_database()</cite>
+before executing any next step or the database of available processes
+is inaccurate and the model instance will crash soon.</p>
+<p>You can also get or set the whole configuration of the lattice
+at once using</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">config</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_get_configuration</span><span class="p">()</span>
+<span class="c"># possible change config</span>
+<span class="n">model</span><span class="o">.</span><span class="n">_set_configuration</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="running-models-in-parallel">
+<h2>Running models in parallel<a class="headerlink" href="#running-models-in-parallel" title="Permalink to this headline">¶</a></h2>
+<p>Due to the global clock in kMC there seems to be no
+simple and efficient way to parallelize a kMC program.
+kmos certainly cannot parallelize a single system over
+processors. However one can run several kmos instances
+in parallel which might accelerate sampling or efficiently
+check for steady state conditions.</p>
+<p>However in many applications it is still useful to
+run several models seperately at once, for example to scan
+some set of parameters one a multicore computer. This
+kind of problem can be considered <cite>embarrasingly parallel</cite>
+since it requires no communication between the runs.</p>
+<p>This is made very simple through the <cite>multiprocessing</cite> module,
+which is in the Python standard library since version 2.6.
+For older versions this needs to be <cite>downloaded &lt;http://pypi.python.org/pypi/multiprocessing/&gt;</cite>
+and installed manually. The latter is pretty straightforward.</p>
+<p>Then besides <cite>kmos</cite> we need to import <cite>multiprocessing</cite></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">linspace</span>
+<span class="kn">from</span> <span class="nn">kmos.run</span> <span class="kn">import</span> <span class="n">KMC_Model</span>
+</pre></div>
+</div>
+<p>and let&#8217;s say you wanted to scan a range of temperature,
+while keeping all other parameteres constant. You first
+define a function, that takes a set of temperatures
+and runs the simulation for each</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">run_temperatures</span><span class="p">(</span><span class="n">temperatures</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">temperatures</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">KMC_Model</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">T</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">do_steps</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
+
+        <span class="c"># do some evaluation</span>
+
+        <span class="n">model</span><span class="o">.</span><span class="n">deallocate</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>In order to split our full range of input parameters, we
+can use a utility function</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">kmos.utils</span> <span class="kn">import</span> <span class="n">split_sequence</span>
+</pre></div>
+</div>
+<p>All that is left to do, is to define the input parameters,
+split the list and start subprocesses for each sublist</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">temperatures</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+    <span class="n">nproc</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="k">for</span> <span class="n">temperatures</span> <span class="ow">in</span> <span class="n">split_sequence</span><span class="p">(</span><span class="n">temperatures</span><span class="p">,</span> <span class="n">nproc</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">run_temperatures</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">temperatures</span><span class="p">,</span> <span class="p">))</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="development">
+<h2>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h2>
+<p>Contributions of any sort are of course quite welcome.
+Patches and comments are ideally sent in form of email,
+pull request, or github issues.</p>
+<p>To make synergizing a most pleasing experience I suggest you use
+git, nose, pep8, and pylint</p>
+<div class="highlight-python"><pre>sudo apt-get install git python-nose pep8 pylint</pre>
+</div>
+<p>When sending a patch please make sure the nose tests pass, i.e. run
+from the top project directory</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">nosetests</span>
+</pre></div>
+</div>
+<p>Furthermore run</p>
+<div class="highlight-python"><pre>pep8 &lt;filename&gt;</pre>
+</div>
+<p>Thank you.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../topic_guides/index.html" title="Topic Guides"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../index.html" title="Welcome to kmos’s documentation!"
+             >previous</a> |</li>
+        <li><a href="../index.html">kmos 0.2.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

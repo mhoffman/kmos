@@ -1,0 +1,279 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>The TOC tree &mdash; kmos 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="kmos 0.0.1 documentation" href="../../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">The TOC tree</a><ul>
+<li><a class="reference internal" href="#special-names">Special names</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../../_sources/build/Sphinx/doc/markup/toctree.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="the-toc-tree">
+<span id="toctree-directive"></span><h1>The TOC tree<a class="headerlink" href="#the-toc-tree" title="Permalink to this headline">¶</a></h1>
+<p id="index-0">Since reST does not have facilities to interconnect several documents, or split
+documents into multiple output files, Sphinx uses a custom directive to add
+relations between the single files the documentation is made of, as well as
+tables of contents.  The <tt class="docutils literal"><span class="pre">toctree</span></tt> directive is the central element.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Simple &#8220;inclusion&#8221; of one file in another can be done with the
+<a href="#id1"><span class="problematic" id="id2">:dudir:`include`</span></a> directive.</p>
+</div>
+<dl class="directive">
+<dt id="directive-toctree">
+<tt class="descname">.. toctree::</tt><a class="headerlink" href="#directive-toctree" title="Permalink to this definition">¶</a></dt>
+<dd><p>This directive inserts a &#8220;TOC tree&#8221; at the current location, using the
+individual TOCs (including &#8220;sub-TOC trees&#8221;) of the documents given in the
+directive body.  Relative document names (not beginning with a slash) are
+relative to the document the directive occurs in, absolute names are relative
+to the source directory.  A numeric <tt class="docutils literal"><span class="pre">maxdepth</span></tt> option may be given to
+indicate the depth of the tree; by default, all levels are included. <a class="footnote-reference" href="#id11" id="id3">[1]</a></p>
+<p>Consider this example (taken from the Python docs&#8217; library reference index):</p>
+<div class="highlight-rst"><div class="highlight"><pre><span class="p">..</span> <span class="ow">toctree</span><span class="p">::</span>
+   <span class="nc">:maxdepth:</span> <span class="nf">2</span>
+
+   intro
+   strings
+   datatypes
+   numeric
+   (many more documents listed here)
+</pre></div>
+</div>
+<p>This accomplishes two things:</p>
+<ul class="simple">
+<li>Tables of contents from all those documents are inserted, with a maximum
+depth of two, that means one nested heading.  <tt class="docutils literal"><span class="pre">toctree</span></tt> directives in
+those documents are also taken into account.</li>
+<li>Sphinx knows that the relative order of the documents <tt class="docutils literal"><span class="pre">intro</span></tt>,
+<tt class="docutils literal"><span class="pre">strings</span></tt> and so forth, and it knows that they are children of the shown
+document, the library index.  From this information it generates &#8220;next
+chapter&#8221;, &#8220;previous chapter&#8221; and &#8220;parent chapter&#8221; links.</li>
+</ul>
+<p><strong>Entries</strong></p>
+<p>Document titles in the <a class="reference internal" href="#directive-toctree" title="toctree directive"><tt class="xref rst rst-dir docutils literal"><span class="pre">toctree</span></tt></a> will be automatically read from the
+title of the referenced document. If that isn&#8217;t what you want, you can
+specify an explicit title and target using a similar syntax to reST
+hyperlinks (and Sphinx&#8217;s <a class="reference internal" href="inline.html#xref-syntax"><em>cross-referencing syntax</em></a>). This
+looks like:</p>
+<div class="highlight-rst"><div class="highlight"><pre><span class="p">..</span> <span class="ow">toctree</span><span class="p">::</span>
+
+   intro
+   All about strings &lt;strings&gt;
+   datatypes
+</pre></div>
+</div>
+<p>The second line above will link to the <tt class="docutils literal"><span class="pre">strings</span></tt> document, but will use the
+title &#8220;All about strings&#8221; instead of the title of the <tt class="docutils literal"><span class="pre">strings</span></tt> document.</p>
+<p>You can also add external links, by giving an HTTP URL instead of a document
+name.</p>
+<p><strong>Section numbering</strong></p>
+<p>If you want to have section numbers even in HTML output, give the toctree a
+<tt class="docutils literal"><span class="pre">numbered</span></tt> option.  For example:</p>
+<div class="highlight-rst"><div class="highlight"><pre><span class="p">..</span> <span class="ow">toctree</span><span class="p">::</span>
+   <span class="nc">:numbered:</span>
+
+   foo
+   bar
+</pre></div>
+</div>
+<p>Numbering then starts at the heading of <tt class="docutils literal"><span class="pre">foo</span></tt>.  Sub-toctrees are
+automatically numbered (don&#8217;t give the <tt class="docutils literal"><span class="pre">numbered</span></tt> flag to those).</p>
+<p>Numbering up to a specific depth is also possible, by giving the depth as a
+numeric argument to <tt class="docutils literal"><span class="pre">numbered</span></tt>.</p>
+<p><strong>Additional options</strong></p>
+<p>If you want only the titles of documents in the tree to show up, not other
+headings of the same level, you can use the <tt class="docutils literal"><span class="pre">titlesonly</span></tt> option:</p>
+<div class="highlight-rst"><div class="highlight"><pre><span class="p">..</span> <span class="ow">toctree</span><span class="p">::</span>
+   <span class="nc">:titlesonly:</span>
+
+   foo
+   bar
+</pre></div>
+</div>
+<p>You can use &#8220;globbing&#8221; in toctree directives, by giving the <tt class="docutils literal"><span class="pre">glob</span></tt> flag
+option.  All entries are then matched against the list of available
+documents, and matches are inserted into the list alphabetically.  Example:</p>
+<div class="highlight-rst"><div class="highlight"><pre><span class="p">..</span> <span class="ow">toctree</span><span class="p">::</span>
+   <span class="nc">:glob:</span>
+
+   intro*
+   recipe/*
+   *
+</pre></div>
+</div>
+<p>This includes first all documents whose names start with <tt class="docutils literal"><span class="pre">intro</span></tt>, then all
+documents in the <tt class="docutils literal"><span class="pre">recipe</span></tt> folder, then all remaining documents (except the
+one containing the directive, of course.) <a class="footnote-reference" href="#id14" id="id4">[2]</a></p>
+<p>The special entry name <tt class="docutils literal"><span class="pre">self</span></tt> stands for the document containing the
+toctree directive.  This is useful if you want to generate a &#8220;sitemap&#8221; from
+the toctree.</p>
+<p>You can also give a &#8220;hidden&#8221; option to the directive, like this:</p>
+<div class="highlight-rst"><div class="highlight"><pre><span class="p">..</span> <span class="ow">toctree</span><span class="p">::</span>
+   <span class="nc">:hidden:</span>
+
+   doc_1
+   doc_2
+</pre></div>
+</div>
+<p>This will still notify Sphinx of the document hierarchy, but not insert links
+into the document at the location of the directive &#8211; this makes sense if you
+intend to insert these links yourself, in a different style, or in the HTML
+sidebar.</p>
+<p>In the end, all documents in the <a class="reference internal" href="../glossary.html#term-source-directory"><em class="xref std std-term">source directory</em></a> (or subdirectories)
+must occur in some <tt class="docutils literal"><span class="pre">toctree</span></tt> directive; Sphinx will emit a warning if it
+finds a file that is not included, because that means that this file will not
+be reachable through standard navigation.  Use <a href="#id5"><span class="problematic" id="id6">:confval:`unused_docs`</span></a> to
+explicitly exclude documents from building, and <a href="#id7"><span class="problematic" id="id8">:confval:`exclude_trees`</span></a> to
+exclude whole directories.</p>
+<p>The &#8220;master document&#8221; (selected by <a href="#id9"><span class="problematic" id="id10">:confval:`master_doc`</span></a>) is the &#8220;root&#8221; of
+the TOC tree hierarchy.  It can be used as the documentation&#8217;s main page, or
+as a &#8220;full table of contents&#8221; if you don&#8217;t give a <tt class="docutils literal"><span class="pre">maxdepth</span></tt> option.</p>
+<p class="versionchanged">
+<span class="versionmodified">Changed in version 0.3: </span>Added &#8220;globbing&#8221; option.</p>
+<p class="versionchanged">
+<span class="versionmodified">Changed in version 0.6: </span>Added &#8220;numbered&#8221; and &#8220;hidden&#8221; options as well as external links and
+support for &#8220;self&#8221; references.</p>
+<p class="versionchanged">
+<span class="versionmodified">Changed in version 1.0: </span>Added &#8220;titlesonly&#8221; option.</p>
+<p class="versionchanged">
+<span class="versionmodified">Changed in version 1.1: </span>Added numeric argument to &#8220;numbered&#8221;.</p>
+</dd></dl>
+
+<div class="section" id="special-names">
+<h2>Special names<a class="headerlink" href="#special-names" title="Permalink to this headline">¶</a></h2>
+<p>Sphinx reserves some document names for its own use; you should not try to
+create documents with these names &#8211; it will cause problems.</p>
+<p>The special document names (and pages generated for them) are:</p>
+<ul>
+<li><p class="first"><tt class="docutils literal"><span class="pre">genindex</span></tt>, <tt class="docutils literal"><span class="pre">modindex</span></tt>, <tt class="docutils literal"><span class="pre">search</span></tt></p>
+<p>These are used for the general index, the Python module index, and the search
+page, respectively.</p>
+<p>The general index is populated with entries from modules, all index-generating
+<a class="reference internal" href="../domains.html#basic-domain-markup"><em>object descriptions</em></a>, and from <a class="reference internal" href="misc.html#directive-index" title="index directive"><tt class="xref rst rst-dir docutils literal"><span class="pre">index</span></tt></a>
+directives.</p>
+<p>The Python module index contains one entry per <a class="reference internal" href="../domains.html#directive-py:module" title="py:module directive"><tt class="xref rst rst-dir docutils literal"><span class="pre">py:module</span></tt></a> directive.</p>
+<p>The search page contains a form that uses the generated JSON search index and
+JavaScript to full-text search the generated documents for search words; it
+should work on every major browser that supports modern JavaScript.</p>
+</li>
+<li><p class="first">every name beginning with <tt class="docutils literal"><span class="pre">_</span></tt></p>
+<p>Though only few such names are currently used by Sphinx, you should not create
+documents or document-containing directories with such names.  (Using <tt class="docutils literal"><span class="pre">_</span></tt> as
+a prefix for a custom template directory is fine.)</p>
+</li>
+</ul>
+<p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="id11" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[1]</a></td><td>The <tt class="docutils literal"><span class="pre">maxdepth</span></tt> option does not apply to the LaTeX writer, where the
+whole table of contents will always be presented at the begin of the
+document, and its depth is controlled by the <tt class="docutils literal"><span class="pre">tocdepth</span></tt> counter, which
+you can reset in your <a href="#id12"><span class="problematic" id="id13">:confval:`latex_preamble`</span></a> config value using
+e.g. <tt class="docutils literal"><span class="pre">\setcounter{tocdepth}{2}</span></tt>.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id14" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[2]</a></td><td>A note on available globbing syntax: you can use the standard shell
+constructs <tt class="docutils literal"><span class="pre">*</span></tt>, <tt class="docutils literal"><span class="pre">?</span></tt>, <tt class="docutils literal"><span class="pre">[...]</span></tt> and <tt class="docutils literal"><span class="pre">[!...]</span></tt> with the feature that
+these all don&#8217;t match slashes.  A double star <tt class="docutils literal"><span class="pre">**</span></tt> can be used to match
+any sequence of characters <em>including</em> slashes.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

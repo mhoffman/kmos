@@ -1,0 +1,205 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Modelling Workflows &mdash; kmos 0.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="kmos 0.2.1 documentation" href="../index.html" />
+    <link rel="up" title="Topic Guides" href="index.html" />
+    <link rel="next" title="The kmos data model" href="data_models.html" />
+    <link rel="prev" title="The Concept of Kinetic Monte Carlo" href="kmc_concept.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="data_models.html" title="The kmos data model"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="kmc_concept.html" title="The Concept of Kinetic Monte Carlo"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">kmos 0.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Topic Guides</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/kmos_logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Modelling Workflows</a><ul>
+<li><a class="reference internal" href="#kmc-modeling">kMC Modeling</a></li>
+<li><a class="reference internal" href="#kmos-workflows">kmos workflows</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="kmc_concept.html"
+                        title="previous chapter">The Concept of Kinetic Monte Carlo</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="data_models.html"
+                        title="next chapter">The kmos data model</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/topic_guides/workflows.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="modelling-workflows">
+<h1>Modelling Workflows<a class="headerlink" href="#modelling-workflows" title="Permalink to this headline">¶</a></h1>
+<p>At the core of modelling lies the art to capture
+the most important features of a system and leave
+all others out. kmos is designed around the fact
+that modelling is a creative and iterative process.</p>
+<p>A typical type of approach for modelling could be:</p>
+<ol class="arabic simple">
+<li>start with educated guess</li>
+<li>calculate outcome</li>
+<li>compare various observables and qualitative
+behavior with reference system</li>
+<li>adapt model, goto 2. or publish model</li>
+</ol>
+<p>So while this procedure is quite generic it may help
+to illustrate that the chances to find and capture
+the relevant features of a system are enhanced
+if the trial/learn loop is as short as possible.</p>
+<div class="section" id="kmc-modeling">
+<h2>kMC Modeling<a class="headerlink" href="#kmc-modeling" title="Permalink to this headline">¶</a></h2>
+<p>A good way to define a model is to use a paper and pencil to draw
+your lattice, choose the species that you will need, draw
+each process and write down an expression for each rate constant, and
+finally fix all energy barriers and external parameters that you will need.
+Putting a model prepared like this into a computer is a simple exercise.
+You enter a new model by filling in</p>
+<blockquote>
+<div><ul class="simple">
+<li>meta information</li>
+<li>lattice</li>
+<li>species</li>
+<li>parameters</li>
+<li>processes</li>
+</ul>
+</div></blockquote>
+<p>in roughly this order or open an existing one by opening a kMC XML file.</p>
+<p>If you want to see the model run
+<cite>kmos export &lt;xml-file&gt;</cite> and you will get a subfolder with a self-contained
+Fortran90 code, which solves the model. If all necessary dependencies are
+installed you can simply run <cite>kmos view</cite> in the export folder.</p>
+</div>
+<div class="section" id="kmos-workflows">
+<h2>kmos workflows<a class="headerlink" href="#kmos-workflows" title="Permalink to this headline">¶</a></h2>
+<p>Since <cite>kmos</cite> has several entry points, there are several ways of using it.
+This section will outline different ways of using kmos:</p>
+<ul>
+<li><p class="first"><em>the render script</em></p>
+<p>Just write complete scripts as outlined in
+<a class="reference internal" href="../tutorials/first_model_api.html"><em>A first kMC Model&#8211;the API way</em></a>. Export
+source from there or inspect XML file with one
+of the next methods below.</p>
+</li>
+<li><p class="first"><em>the GUI editor</em></p>
+<p>Open an existing project *.xml file with</p>
+<div class="highlight-python"><pre>kmos edit &lt;project_name&gt;.xml</pre>
+</div>
+<p>and inspect or edit it through on screen</p>
+</li>
+<li><p class="first"><em>the CLI editor</em></p>
+<p>Open an existing project *.xml file with</p>
+<div class="highlight-python"><pre>kmos import &lt;project_name&gt;.xml</pre>
+</div>
+<p>and edit the project interactively on the ipython console.</p>
+</li>
+<li><p class="first"><em>edit the XML file</em></p>
+<p>Just open the XML file of your kmos project with a text
+editor of your choice and inspect or your model right
+there. This might only be a last resort to figure out
+what is going on. XML is often not considered very
+readable and note that changing variable names in
+one place might often break inconsistencies in other.</p>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="data_models.html" title="The kmos data model"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="kmc_concept.html" title="The Concept of Kinetic Monte Carlo"
+             >previous</a> |</li>
+        <li><a href="../index.html">kmos 0.2.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Topic Guides</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>
