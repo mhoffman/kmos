@@ -54,7 +54,7 @@ try:
     from kmc_model import base, lattice, proclist
 except Exception, e:
     base = lattice = proclist = None
-    raise Exception("""Error: %s
+    print("""Error: %s
     Could not find the kmc module. The kmc implements the actual
     kmc model. This can be created from a kmos xml file using
     kmos export <xml-file>
@@ -70,7 +70,7 @@ try:
     import kmc_settings as settings
 except Exception, e:
     settings = None
-    raise Exception("""Error %s
+    print("""Error %s
     Could import settings file
     The kmc_settings.py contains all changeable model parameters
     and descriptions for the representation on screen.
