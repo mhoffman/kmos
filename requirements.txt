@@ -1,4 +1,3 @@
-kmos
-ase
+python-ase
 numpy
-pygtk
+lxml
