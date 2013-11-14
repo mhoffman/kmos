@@ -195,7 +195,7 @@ class KMC_Model(Process):
                 self.tof_matrix[tofs.index(tof), process_nr - 1] += tof_factor
 
         # prepare procstat
-        self.procstat = np.zeros((proclist.nr_of_proc,))
+        self.procstat = np.zeros((proclist.nr_of_proc), dtype=np.int64)
          # prepare integ_rates (S.Matera 09/25/2012)
         self.integ_rates = np.zeros((proclist.nr_of_proc, ))
         self.time = 0.
@@ -762,6 +762,38 @@ class KMC_Model(Process):
                  + ['']))
         print(len(header_line) * '-')
         print('Units: "molecules (or atoms) per unit cell"')
+
+    def print_procstat(self):
+        entries = []
+        longest_name = 0
+        for i, process_name in enumerate(
+                               sorted(
+                               self.settings.rate_constants)):
+            procstat = self.base.get_procstat(i + 1)
+            namelength = len(process_name)
+            if namelength > longest_name :
+                longest_name = namelength
+            entries.append((procstat, process_name))
+
+        entries = sorted(entries, key=lambda x: -x[0])
+        nsteps = self.base.get_kmc_step()
+
+        width = longest_name + 30
+
+        res = ''
+        printed_steps = 0
+        res += ('+' + width * '-' + '+' + '\n')
+        for entry in entries:
+            procstat, name = entry
+            printed_steps += procstat
+            if procstat :
+                res += ('|{0:<%ss}|\n' % width).format('%9.2f %% %12s     %s' % (100*float(printed_steps)/nsteps, procstat, name))
+
+        res += ('+' + width * '-' + '+' + '\n')
+        res += ('   Total steps %s' % nsteps)
+
+        print(res)
+
 
     def print_accum_rate_summation(self, order='-rate'):
         """Shows rate individual processes contribute to the total rate
