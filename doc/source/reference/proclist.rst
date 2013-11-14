@@ -6,6 +6,9 @@ kmos/proclist
 proclist/do_kmc_step
 """"""""""""""""""""""""""""""""""""""""""""""""""
     Performs exactly one kMC step.
+      first update clock
+      then configuration sampling step
+      last execute process
 
     ``none``
 
@@ -14,6 +17,9 @@ proclist/do_kmc_steps
     Performs ``n`` kMC step.
     If one has to run many steps without evaluation
     do_kmc_steps might perform a little better.
+      first update clock
+      then configuration sampling step
+      last execute process
 
     ``n`` : Number of steps to run
 

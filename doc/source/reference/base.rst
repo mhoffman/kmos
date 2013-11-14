@@ -75,7 +75,7 @@ base/can_do
 base/deallocate_system
 """"""""""""""""""""""""""""""""""""""""""""""""""
     Deallocate all allocatable arrays: avail_sites, lattice, rates,
-    accum_rates, procstat.
+    accum_rates, integ_rates, procstat.
 
     ``none``
 
@@ -123,6 +123,13 @@ base/get_avail_site
     * ``proc_nr`` integer representing the requested process.
     * ``field`` integer for the site at question
     * ``switch`` 1 or 2 for site or storage location
+
+base/get_integ_rate
+""""""""""""""""""""""""""""""""""""""""""""""""""
+    Return integrated rate at a given process.
+
+    * ``proc_nr`` integer representing the requested process.
+    * ``return_integ_rate`` writeable real, where the requested integrated rate will be stored.
 
 base/get_kmc_step
 """"""""""""""""""""""""""""""""""""""""""""""""""
@@ -193,6 +200,17 @@ base/increment_procstat
     Increment the process counter for process proc by one.
 
     * ``proc`` integer representing the process to be increment.
+
+base/integ_rates
+""""""""""""""""""""""""""""""""""""""""""""""""""
+   Stores the time-integrated rates (non-normalized to surface area)
+   Used to determine reaction rates, i.e. average number of reactions
+   per unit surface and time.
+   Let :math:`\mathbf{a}` the integrated rates, :math:`\mathbf{c}` be the
+   rate constants, :math:`\mathbf{n}_i` the number of available sites
+   during kMC-time interval i,  :math: `\{\Delta t_i\}` the corresponding
+   timesteps then :math:`a_{i}(t)` at the time :math: `t=\sum_{i=1}\Delta t_i`
+   is calculated according to :math:`a_{i}(t)=\sum_{i=1}} c_{i} n_{i}\Delta t_i`.
 
 base/interval_search_real
 """"""""""""""""""""""""""""""""""""""""""""""""""
@@ -343,6 +361,12 @@ base/update_clocks
     Updates walltime, kmc_step and kmc_time.
 
     * ``ran_time`` Random real number :math:`\in [0,1]`
+
+base/update_integ_rate
+""""""""""""""""""""""""""""""""""""""""""""""""""
+    Updates the vector of integ_rates.
+
+    ``none``
 
 base/volume
 """"""""""""""""""""""""""""""""""""""""""""""""""
