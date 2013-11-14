@@ -1,0 +1,300 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Running the Model–the API way &mdash; kmos 0.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="kmos 0.2.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">kmos 0.2.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/kmos_logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Running the Model&#8211;the API way</a></li>
+<li><a class="reference internal" href="#manipulating-the-model-at-runtime">Manipulating the Model at Runtime</a></li>
+<li><a class="reference internal" href="#running-models-in-parallel">Running models in parallel</a></li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/tutorials/run_model_api.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="running-the-model-the-api-way">
+<h1>Running the Model&#8211;the API way<a class="headerlink" href="#running-the-model-the-api-way" title="Permalink to this headline">¶</a></h1>
+<p>In order to analyze a model in quantitatively it is
+more practical to write small client scripts that directly
+talk to the runtime API. As time passes and more of these
+scripts are written over and over some standard functionality
+will likely be integrated into the runtime API. For starters
+a simple script could look as follows</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#!/usr/bin/env python</span>
+
+<span class="kn">from</span> <span class="nn">kmos.run</span> <span class="kn">import</span> <span class="n">KMC_Model</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">KMC_Model</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>As you can see by default the model prints a disclaimer
+and all rate constants, which can each be turned off
+by instantiating</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span> <span class="o">=</span> <span class="n">KMC_Model</span><span class="p">(</span><span class="n">print_rates</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">banner</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The most important method is of course how to run
+the model, which you can do by saying</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">do_steps</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>which would run the model by 100,000 kMC steps.</p>
+<p>Let&#8217;s say you want to change the temperature and a partial pressure of
+the model you could type</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="mi">550</span>
+<span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">p_COgas</span> <span class="o">=</span> <span class="mf">0.5</span>
+</pre></div>
+</div>
+<p>and all rate constants are instantly updated. In order get a quick
+overview of the current settings you can issue e.g.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">rate_constants</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or just</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now an instantiated und configured model has mainly two functions: run
+kMC steps and report its current configuration.</p>
+<p>To analyze the current state you may use</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">atoms</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_atoms</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>If you want to fetch data from the current state without
+actually visualizing the geometry can speed up the get_atoms()
+call using</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="n">atoms</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_atoms</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>This will return an ASE atoms object of the current system, but
+it also contains some additional data piggy-backed such as</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">get_occupation_header</span><span class="p">()</span>
+<span class="n">atoms</span><span class="o">.</span><span class="n">occupation</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">get_tof_header</span><span class="p">()</span>
+<span class="n">atoms</span><span class="o">.</span><span class="n">tof_data</span>
+
+
+<span class="n">atoms</span><span class="o">.</span><span class="n">kmc_time</span>
+<span class="n">atoms</span><span class="o">.</span><span class="n">kmc_step</span>
+</pre></div>
+</div>
+<p>These quantities are often sufficient when running and simulating
+a catalyst surface, but of course the model could be expanded
+to more observables. The Fortran modules <cite>base</cite>, <cite>lattice</cite>,
+and <cite>proclist</cite> are atttributes of the model instance so,
+please feel free to explore the model instance e.g. using
+ipython and</p>
+<div class="highlight-python"><pre>model.base.&lt;TAB&gt;
+model.lattice.&lt;TAB&gt;
+model.proclist.&lt;TAB&gt;</pre>
+</div>
+<p>etc..</p>
+<p>The <cite>occupation</cite> is a 2-dimensional array which contains
+the <cite>occupation</cite> for each surface <cite>site</cite> divided by
+the number of unit cell. The first slot
+denotes the species and the second slot denotes the
+surface site, i.e.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">occupation</span><span class="p">[</span><span class="n">species</span><span class="p">,</span> <span class="n">site</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>So given there is a <cite>hydrogen</cite> species
+in the model, the occupation of <cite>hydrogen</cite> across all site
+type can be accessed like</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">hydrogen_occupation</span> <span class="o">=</span> <span class="n">occupation</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">proclist</span><span class="o">.</span><span class="n">hydrogen</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>To access the coverage of one surface site, we have to
+remember to subtract 1, when using the the builtin constants,
+like so</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">hollow_occupation</span> <span class="o">=</span> <span class="n">occupation</span><span class="p">[:,</span> <span class="n">model</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">hollow</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Lastly it is important to call</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">deallocate</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>once the simulation if finished as this frees the memory
+allocated by the Fortan modules. This is particularly
+necessary if you want to run more than one simulation
+in one script.</p>
+</div>
+<div class="section" id="manipulating-the-model-at-runtime">
+<span id="manipulate-model-runtime"></span><h1>Manipulating the Model at Runtime<a class="headerlink" href="#manipulating-the-model-at-runtime" title="Permalink to this headline">¶</a></h1>
+<p>It is quite easy to change not only model parameters but
+also the configuration at runtime. For instance if one
+would like to prepare a surface with a certain configuration
+or pattern.</p>
+<p>Given you instantiated a <cite>model</cite> instance a site occupation
+can be changed by calling</p>
+<div class="highlight-python"><pre>model.put(site=[x,y,z,n], model.proclist.&lt;species&gt;)</pre>
+</div>
+<p>However if changing many sites at once this is quite inefficient,
+since each <cite>put</cite> call, adjusts the book-keeping database. To circumvent
+this you can use the <cite>_put</cite> method, like so</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">_put</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">_put</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="o">...</span>
+<span class="n">model</span><span class="o">.</span><span class="n">_adjust_database</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>though at the end one must not forget to call <cite>_adjust_database()</cite>
+before executing any next step or the database of available processes
+is inaccurate and the model instance will crash soon.</p>
+<p>You can also get or set the whole configuration of the lattice
+at once using</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">config</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_get_configuration</span><span class="p">()</span>
+<span class="c"># possible change config</span>
+<span class="n">model</span><span class="o">.</span><span class="n">_set_configuration</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="running-models-in-parallel">
+<h1>Running models in parallel<a class="headerlink" href="#running-models-in-parallel" title="Permalink to this headline">¶</a></h1>
+<p>Due to the global clock in kMC there seems to be no
+simple and efficient way to parallelize a kMC program.
+kmos certainly cannot parallelize a single system over
+processors. However one can run several kmos instances
+in parallel which might accelerate sampling or efficiently
+check for steady state conditions.</p>
+<p>However in many applications it is still useful to
+run several models seperately at once, for example to scan
+some set of parameters one a multicore computer. This
+kind of problem can be considered <cite>embarrasingly parallel</cite>
+since it requires no communication between the runs.</p>
+<p>This is made very simple through the <cite>multiprocessing</cite> module,
+which is in the Python standard library since version 2.6.
+For older versions this needs to be <cite>downloaded &lt;http://pypi.python.org/pypi/multiprocessing/&gt;</cite>
+and installed manually. The latter is pretty straightforward.</p>
+<p>Then besides <cite>kmos</cite> we need to import <cite>multiprocessing</cite></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">linspace</span>
+<span class="kn">from</span> <span class="nn">kmos.run</span> <span class="kn">import</span> <span class="n">KMC_Model</span>
+</pre></div>
+</div>
+<p>and let&#8217;s say you wanted to scan a range of temperature,
+while keeping all other parameteres constant. You first
+define a function, that takes a set of temperatures
+and runs the simulation for each</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">run_temperatures</span><span class="p">(</span><span class="n">temperatures</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">temperatures</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">KMC_Model</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">T</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">do_steps</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
+
+        <span class="c"># do some evaluation</span>
+
+        <span class="n">model</span><span class="o">.</span><span class="n">deallocate</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>In order to split our full range of input parameters, we
+can use a utility function</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">kmos.utils</span> <span class="kn">import</span> <span class="n">split_sequence</span>
+</pre></div>
+</div>
+<p>All that is left to do, is to define the input parameters,
+split the list and start subprocesses for each sublist</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">temperatures</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+    <span class="n">nproc</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="k">for</span> <span class="n">temperatures</span> <span class="ow">in</span> <span class="n">split_sequence</span><span class="p">(</span><span class="n">temperatures</span><span class="p">,</span> <span class="n">nproc</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">run_temperatures</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">temperatures</span><span class="p">,</span> <span class="p">))</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">kmos 0.2.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

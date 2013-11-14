@@ -1,0 +1,124 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sphinx.ext.oldcmarkup – Compatibility extension for old C markup &mdash; kmos 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="kmos 0.0.1 documentation" href="../../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../../_sources/build/Sphinx/doc/ext/oldcmarkup.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-sphinx.ext.oldcmarkup">
+<span id="sphinx-ext-oldcmarkup-compatibility-extension-for-old-c-markup"></span><h1><a class="reference internal" href="#module-sphinx.ext.oldcmarkup" title="sphinx.ext.oldcmarkup: Allow further use of the pre-domain C markup"><tt class="xref py py-mod docutils literal"><span class="pre">sphinx.ext.oldcmarkup</span></tt></a> &#8211; Compatibility extension for old C markup<a class="headerlink" href="#module-sphinx.ext.oldcmarkup" title="Permalink to this headline">¶</a></h1>
+<p class="versionadded">
+<span class="versionmodified">New in version 1.0.</span></p>
+<p>This extension is a transition helper for projects that used the old
+(pre-domain) C markup, i.e. the directives like <tt class="docutils literal"><span class="pre">cfunction</span></tt> and roles like
+<tt class="docutils literal"><span class="pre">cfunc</span></tt>.  Since the introduction of domains, they must be called by their
+fully-qualified name (<tt class="docutils literal"><span class="pre">c:function</span></tt> and <tt class="docutils literal"><span class="pre">c:func</span></tt>, respectively) or, with the
+default domain set to <tt class="docutils literal"><span class="pre">c</span></tt>, by their new name (<tt class="docutils literal"><span class="pre">function</span></tt> and <tt class="docutils literal"><span class="pre">func</span></tt>).
+(See <a class="reference internal" href="../domains.html#c-domain"><em>The C Domain</em></a> for the details.)</p>
+<p>If you activate this extension, it will register the old names, and you can
+use them like before Sphinx 1.0.  The directives are:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">cfunction</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">cmember</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">cmacro</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">ctype</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">cvar</span></tt></li>
+</ul>
+<p>The roles are:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">cdata</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">cfunc</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">cmacro</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">ctype</span></tt></li>
+</ul>
+<p>However, it is advised to migrate to the new markup &#8211; this extension is a
+compatibility convenience and will disappear in a future version of Sphinx.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

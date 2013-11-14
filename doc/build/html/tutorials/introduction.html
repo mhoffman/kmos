@@ -1,0 +1,147 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Getting Started &mdash; kmos 0.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="kmos 0.2.1 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">kmos 0.2.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/kmos_logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Getting Started</a><ul>
+<li><a class="reference internal" href="#module-kmos">Introduction</a><ul>
+<li><a class="reference internal" href="#feature-overview">Feature overview</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/tutorials/introduction.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-kmos">
+<span id="introduction"></span><h2>Introduction<a class="headerlink" href="#module-kmos" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="feature-overview">
+<h3>Feature overview<a class="headerlink" href="#feature-overview" title="Permalink to this headline">¶</a></h3>
+<p>With kmos you can:</p>
+<blockquote>
+<div><ul class="simple">
+<li>easily create and modify kMC models through GUI</li>
+<li>store and exchange kMC models through XML</li>
+<li>generate fast, platform independent, self-contained code <a class="footnote-reference" href="#code" id="id1">[1]</a></li>
+<li>run kMC models through GUI or python bindings</li>
+</ul>
+</div></blockquote>
+<p>kmos has been developed in the context of first-principles based modelling
+of surface chemical reactions but might be of help for other types of
+kMC models as well.</p>
+<p>kmos&#8217; goal is to significantly reduce the time you need
+to implement and run a lattice kmc simulation. However it can not help
+you plan the model.</p>
+<p>kmos can be invoked directly from the command line in one of the following
+ways:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">kmos</span> <span class="p">[</span><span class="n">help</span><span class="p">]</span> <span class="p">(</span><span class="n">edit</span><span class="o">|</span><span class="n">export</span><span class="o">|</span><span class="n">view</span><span class="p">)</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>or it may be used as an API via the kmos module.</p>
+<p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="code" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>The source code is generated in Fortran90, written in a modular
+fashion. Python bindings are generated using <a class="reference external" href="http://cens.ioc.ee/projects/f2py2e/">f2py</a>.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">kmos 0.2.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

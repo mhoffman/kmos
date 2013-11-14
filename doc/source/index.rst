@@ -1,6 +1,12 @@
 Welcome to kmos's documentation!
 ================================
 
+.. figure:: img/kmos_workflows.png
+  :align: center
+
+  Things you can do with kmos.
+
+
 kmos is a vigorous attempt to make (lattice) kMC modelling more accessible.
 
 
@@ -10,8 +16,13 @@ way to use kmos. kmos can be an Editor, an API, a viewer. However all in all
 kmos wants to save time filled with repetitive labor and enlarge your stride.
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 0
 
-   introduction
-   reference
+   tutorials/index
+   topic_guides/index
+   reference/index
+   troubleshooting/index
 
+.. |date| date:: %b %d, %Y
+
+This document was generated |date|.

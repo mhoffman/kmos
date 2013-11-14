@@ -1,0 +1,299 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sphinxcontrib.programoutput – Insert command output &mdash; kmos 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="kmos 0.0.1 documentation" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><tt class="docutils literal"><span class="pre">sphinxcontrib.programoutput</span></tt> – Insert command output</a><ul>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#usage">Usage</a><ul>
+<li><a class="reference internal" href="#shortening-the-output">Shortening the output</a></li>
+<li><a class="reference internal" href="#mimicing-shell-input">Mimicing shell input</a></li>
+<li><a class="reference internal" href="#command-execution-and-shell-expansion">Command execution and shell expansion</a></li>
+<li><a class="reference internal" href="#error-handling">Error handling</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#reference">Reference</a><ul>
+<li><a class="reference internal" href="#configuration">Configuration</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#contribution">Contribution</a><ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/build/sphinxcontrib-programoutput/doc/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-sphinxcontrib.programoutput">
+<span id="sphinxcontrib-programoutput-insert-command-output"></span><h1><a class="reference internal" href="#module-sphinxcontrib.programoutput" title="sphinxcontrib.programoutput: Include the output of programs into documents"><tt class="xref py py-mod docutils literal"><span class="pre">sphinxcontrib.programoutput</span></tt></a> – Insert command output<a class="headerlink" href="#module-sphinxcontrib.programoutput" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="http://sphinx.pocoo.org/">Sphinx</a> extension to insert the output of arbitrary commands into documents.</p>
+<p>The extension is available under the terms of the BSD license, see <a class="reference external" href="https://bitbucket.org/birkenfeld/sphinx-contrib/src/tip/LICENSE">LICENSE</a>
+for more information.</p>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>This extension requires <a class="reference external" href="http://sphinx.pocoo.org/">Sphinx</a> 1.1 and at least Python 2.6 or Python 3.2.  It
+is available in the Python Package Index:</p>
+<div class="highlight-rest"><div class="highlight"><pre>pip install sphinxcontrib-programoutput
+</pre></div>
+</div>
+<p>Alternatively, you can clone the <a class="reference external" href="https://bitbucket.org/birkenfeld/sphinx-contrib">sphinx-contrib</a> repository from BitBucket,
+and install the extension directly from the repository:</p>
+<div class="highlight-rest"><div class="highlight"><pre>hg clone https://bitbucket.org/birkenfeld/sphinx-contrib
+cd sphinx-contrib/programoutput
+python setup.py install
+</pre></div>
+</div>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>To include the output of a command into your document, use the
+<a class="reference internal" href="#directive-program-output" title="program-output directive"><tt class="xref rst rst-dir docutils literal"><span class="pre">program-output</span></tt></a> directive provided by this extension:</p>
+<div class="highlight-rest"><div class="highlight"><pre><span class="p">..</span> <span class="ow">program-output</span><span class="p">::</span> python -V
+</pre></div>
+</div>
+<p>The whole output of <tt class="docutils literal"><span class="pre">python</span> <span class="pre">-V</span></tt>, including any messages on standard error, is
+inserted into the current document, formatted as literal text without any
+syntax highlighting:</p>
+<p>You can omit the content of the standard error stream with the <tt class="docutils literal"><span class="pre">nostderr</span></tt>
+option.</p>
+<div class="section" id="shortening-the-output">
+<h3>Shortening the output<a class="headerlink" href="#shortening-the-output" title="Permalink to this headline">¶</a></h3>
+<p>Lengthy output can be shortened with the <tt class="docutils literal"><span class="pre">ellipsis</span></tt> option.  Its value
+denotes lines to omit when inserting the output of the command.  Instead, a
+single ellipsis <tt class="docutils literal"><span class="pre">...</span></tt> is inserted.</p>
+<p>If used with a single number, all lines after the specified line are omitted:</p>
+<div class="highlight-rest"><div class="highlight"><pre><span class="p">..</span> <span class="ow">program-output</span><span class="p">::</span> python --help
+   <span class="nc">:ellipsis:</span> <span class="nf">2</span>
+</pre></div>
+</div>
+<p>The above omits all lines after the second one:</p>
+<p>Negative numbers count from the last line backwards, thus replacing <tt class="docutils literal"><span class="pre">2</span></tt> with
+<tt class="docutils literal"><span class="pre">-2</span></tt> in the above example would only omit the last two lines.</p>
+<p>If used with two comma-separated line numbers, all lines in between the
+specified lines are omitted.  Again, a negative number counts from the last
+line backwards:</p>
+<div class="highlight-rest"><div class="highlight"><pre><span class="p">..</span> <span class="ow">program-output</span><span class="p">::</span> python --help
+   <span class="nc">:ellipsis:</span> <span class="nf">2,-2</span>
+</pre></div>
+</div>
+<p>The above omits all lines except the first two and the last two lines:</p>
+</div>
+<div class="section" id="mimicing-shell-input">
+<h3>Mimicing shell input<a class="headerlink" href="#mimicing-shell-input" title="Permalink to this headline">¶</a></h3>
+<p>You can mimic shell input with the <a class="reference internal" href="#directive-command-output" title="command-output directive"><tt class="xref rst rst-dir docutils literal"><span class="pre">command-output</span></tt></a> directive <a class="footnote-reference" href="#alias" id="id1">[1]</a>.
+This directive inserts the command along with its output into the document:</p>
+<div class="highlight-rest"><div class="highlight"><pre><span class="p">..</span> <span class="ow">command-output</span><span class="p">::</span> python -V
+</pre></div>
+</div>
+<p>The appearance of this output can be configured with
+<a href="#id2"><span class="problematic" id="id3">:confval:`programoutput_prompt_template`</span></a>.  When used in conjunction with
+<tt class="docutils literal"><span class="pre">ellipsis</span></tt>, the command itself and any additional text is <em>never</em> omitted.
+<tt class="docutils literal"><span class="pre">ellipsis</span></tt> always refers to the <em>immediate output</em> of the command:</p>
+<div class="highlight-rest"><div class="highlight"><pre><span class="p">..</span> <span class="ow">command-output</span><span class="p">::</span> python --help
+   <span class="nc">:ellipsis:</span> <span class="nf">2</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="command-execution-and-shell-expansion">
+<h3>Command execution and shell expansion<a class="headerlink" href="#command-execution-and-shell-expansion" title="Permalink to this headline">¶</a></h3>
+<p>Normally the command is splitted according to the POSIX shell syntax (see
+<tt class="xref py py-mod docutils literal"><span class="pre">shlex</span></tt>), and executed directly.  Thus special shell features like
+expansion of environment variables will not work:</p>
+<div class="highlight-rest"><div class="highlight"><pre><span class="p">..</span> <span class="ow">command-output</span><span class="p">::</span> echo &quot;$USER&quot;
+</pre></div>
+</div>
+<p>To enable these features, enable the <tt class="docutils literal"><span class="pre">shell</span></tt> option.  With this option, the
+command is literally passed to the system shell:</p>
+<div class="highlight-rest"><div class="highlight"><pre><span class="p">..</span> <span class="ow">command-output</span><span class="p">::</span> echo &quot;$USER&quot;
+   <span class="nc">:shell:</span>
+</pre></div>
+</div>
+<p>Other shell features like process expansion consequently work, too:</p>
+<div class="highlight-rest"><div class="highlight"><pre><span class="p">..</span> <span class="ow">command-output</span><span class="p">::</span> ls -l $(which grep)
+   <span class="nc">:shell:</span>
+</pre></div>
+</div>
+<p>Remember to use <tt class="docutils literal"><span class="pre">shell</span></tt> carefully to avoid unintented interpretation of shell
+syntax and swallowing of fatal errors!</p>
+</div>
+<div class="section" id="error-handling">
+<h3>Error handling<a class="headerlink" href="#error-handling" title="Permalink to this headline">¶</a></h3>
+<p>If an unexpected exit code (also known as <em>return code</em>) is returned by a
+command, it is considered to have failed.  In this case, a build warning is
+emitted to help you to detect misspelled commands or similar errors.  By
+default, a command is expected to exit with an exit code of 0, all other codes
+indicate an error.  In some cases however, it may be reasonable to demonstrate
+failed programs.  To avoid a (superfluous) warning in such a case, you can
+specify the expected return code of a command with the <tt class="docutils literal"><span class="pre">returncode</span></tt> option:</p>
+<div class="highlight-rest"><div class="highlight"><pre><span class="p">..</span> <span class="ow">command-output</span><span class="p">::</span> python -c &#39;import sys; sys.exit(1)&#39;
+   <span class="nc">:returncode:</span> <span class="nf">1</span>
+</pre></div>
+</div>
+<p>The above command returns the exit code 1 (as given to <tt class="xref py py-func docutils literal"><span class="pre">sys.exit()</span></tt>),
+but no warning will be emitted.  On the contrary, a warning will be emitted,
+should the command return 0!</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Upon fatal errors which even prevent the execution of the command neither
+return code nor command output are available.  In this case an error message
+is inserted into the document instead.</p>
+<p class="last">If <tt class="docutils literal"><span class="pre">shell</span></tt> is set however, most of these fatal errors are handled by the
+system shell and turned into return codes instead.  In this case the error
+message will only appear in the output of the shell.  If you&#8217;re using
+<tt class="docutils literal"><span class="pre">shell</span></tt>, double-check the output for errors.  Best avoid <tt class="docutils literal"><span class="pre">shell</span></tt>, if possible.</p>
+</div>
+</div>
+</div>
+<div class="section" id="reference">
+<h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h2>
+<dl class="directive">
+<dt id="directive-program-output">
+<tt class="descname">.. program-output::</tt><tt class="descclassname"> command</tt><a class="headerlink" href="#directive-program-output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Include the output of <tt class="docutils literal"><span class="pre">command</span></tt> in the documentation.</p>
+<p>The output is formatted as literal text, without any syntax highlighting.</p>
+<p>By default, the command is split according to the POSIX shell syntax (using
+<tt class="xref py py-func docutils literal"><span class="pre">shlex.split()</span></tt>), and executed directly.  Both standard output and
+standard error are captured from the invocation of <tt class="docutils literal"><span class="pre">command</span></tt> and included
+in the document.  However, if the option <tt class="docutils literal"><span class="pre">shell</span></tt> is given, <tt class="docutils literal"><span class="pre">command</span></tt> is
+literally passed to the system shell.  With the <tt class="docutils literal"><span class="pre">nostderr</span></tt> option,
+standard error is hidden from the output.</p>
+<p>If the <tt class="docutils literal"><span class="pre">prompt</span></tt> option is given, the <tt class="docutils literal"><span class="pre">command</span></tt> itself is included in the
+document, so that the output mimics input in a shell prompt.
+<a href="#id4"><span class="problematic" id="id5">:confval:`programoutput_prompt_template`</span></a> controlls the appearance of this.
+The value of the <tt class="docutils literal"><span class="pre">extraargs</span></tt> option is appended at the end of <tt class="docutils literal"><span class="pre">command</span></tt>
+(separated by a whitespace) before executing the command, but not included
+in the output of the <tt class="docutils literal"><span class="pre">prompt</span></tt> option.  Use this to pass extra arguments
+which should not appear in the document.</p>
+<p>The output can be shortened with the <tt class="docutils literal"><span class="pre">ellipsis</span></tt> option.  The value of this
+option is of the form <tt class="docutils literal"><span class="pre">start[,end]</span></tt> with <tt class="docutils literal"><span class="pre">start</span></tt> and <tt class="docutils literal"><span class="pre">end</span></tt> being
+integers which refer to lines in the output of <tt class="docutils literal"><span class="pre">command</span></tt>.  <tt class="docutils literal"><span class="pre">end</span></tt> is
+optional and defaults to the last line.  Negative line numbers count
+backwards from the last line.  Everything in the interval <tt class="docutils literal"><span class="pre">[start,</span> <span class="pre">end[</span></tt>
+is replaced with a single ellipsis <tt class="docutils literal"><span class="pre">...</span></tt>.  The <tt class="docutils literal"><span class="pre">ellipsis</span></tt> option only
+affects the immediate output of <tt class="docutils literal"><span class="pre">command</span></tt>, but never any additional text
+inserted by option <tt class="docutils literal"><span class="pre">prompt</span></tt>.</p>
+<p>If the command does return an exit code different from the expected one, a
+build warning is issued.  The expected return code defaults to 0, and can be
+changed with the <tt class="docutils literal"><span class="pre">returncode</span></tt> option.</p>
+</dd></dl>
+
+<dl class="directive">
+<dt id="directive-command-output">
+<tt class="descname">.. command-output::</tt><a class="headerlink" href="#directive-command-output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as <a class="reference internal" href="#directive-program-output" title="program-output directive"><tt class="xref rst rst-dir docutils literal"><span class="pre">program-output</span></tt></a>, but with enabled <tt class="docutils literal"><span class="pre">prompt</span></tt> option.</p>
+</dd></dl>
+
+<div class="section" id="configuration">
+<h3>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h3>
+<p>This extension understands the following configuration options:</p>
+</div>
+</div>
+<div class="section" id="contribution">
+<h2>Contribution<a class="headerlink" href="#contribution" title="Permalink to this headline">¶</a></h2>
+<p>Please contact the author or create an issue in the <a class="reference external" href="https://bitbucket.org/birkenfeld/sphinx-contrib/issues">issue tracker</a> of the
+<a class="reference external" href="https://bitbucket.org/birkenfeld/sphinx-contrib">sphinx-contrib</a> repository, if you have found any bugs or miss some
+functionality (e.g. integration of some other issue tracker).  Patches are
+welcome!</p>
+<p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="alias" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>This directive is just an alias for the <a class="reference internal" href="#directive-program-output" title="program-output directive"><tt class="xref rst rst-dir docutils literal"><span class="pre">program-output</span></tt></a>
+directive with the <tt class="docutils literal"><span class="pre">prompt</span></tt> option set.</td></tr>
+</tbody>
+</table>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

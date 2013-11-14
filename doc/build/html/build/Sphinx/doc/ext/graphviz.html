@@ -1,0 +1,171 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sphinx.ext.graphviz – Add Graphviz graphs &mdash; kmos 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="kmos 0.0.1 documentation" href="../../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../../_sources/build/Sphinx/doc/ext/graphviz.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-sphinx.ext.graphviz">
+<span id="sphinx-ext-graphviz-add-graphviz-graphs"></span><h1><a class="reference internal" href="#module-sphinx.ext.graphviz" title="sphinx.ext.graphviz: Support for Graphviz graphs."><tt class="xref py py-mod docutils literal"><span class="pre">sphinx.ext.graphviz</span></tt></a> &#8211; Add Graphviz graphs<a class="headerlink" href="#module-sphinx.ext.graphviz" title="Permalink to this headline">¶</a></h1>
+<p class="versionadded">
+<span class="versionmodified">New in version 0.6.</span></p>
+<p>This extension allows you to embed <a class="reference external" href="http://graphviz.org/">Graphviz</a> graphs in
+your documents.</p>
+<p>It adds these directives:</p>
+<dl class="directive">
+<dt id="directive-graphviz">
+<tt class="descname">.. graphviz::</tt><a class="headerlink" href="#directive-graphviz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Directive to embed graphviz code.  The input code for <tt class="docutils literal"><span class="pre">dot</span></tt> is given as the
+content.  For example:</p>
+<div class="highlight-rest"><div class="highlight"><pre><span class="p">..</span> <span class="ow">graphviz</span><span class="p">::</span>
+
+   digraph foo {
+      &quot;bar&quot; -&gt; &quot;baz&quot;;
+   }
+</pre></div>
+</div>
+<p>In HTML output, the code will be rendered to a PNG or SVG image (see
+<a href="#id1"><span class="problematic" id="id2">:confval:`graphviz_output_format`</span></a>).  In LaTeX output, the code will be
+rendered to an embeddable PDF file.</p>
+<p>You can also embed external dot files, by giving the file name as an
+argument to <a class="reference internal" href="#directive-graphviz" title="graphviz directive"><tt class="xref rst rst-dir docutils literal"><span class="pre">graphviz</span></tt></a> and no additional content:</p>
+<div class="highlight-rest"><div class="highlight"><pre><span class="p">..</span> <span class="ow">graphviz</span><span class="p">::</span> external.dot
+</pre></div>
+</div>
+<p>As for all file references in Sphinx, if the filename is absolute, it is
+taken as relative to the source directory.</p>
+<p class="versionchanged">
+<span class="versionmodified">Changed in version 1.1: </span>Added support for external files.</p>
+</dd></dl>
+
+<dl class="directive">
+<dt id="directive-graph">
+<tt class="descname">.. graph::</tt><a class="headerlink" href="#directive-graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Directive for embedding a single undirected graph.  The name is given as a
+directive argument, the contents of the graph are the directive content.
+This is a convenience directive to generate <tt class="docutils literal"><span class="pre">graph</span> <span class="pre">&lt;name&gt;</span> <span class="pre">{</span> <span class="pre">&lt;content&gt;</span> <span class="pre">}</span></tt>.</p>
+<p>For example:</p>
+<div class="highlight-rest"><div class="highlight"><pre><span class="p">..</span> <span class="ow">graph</span><span class="p">::</span> foo
+
+   &quot;bar&quot; -- &quot;baz&quot;;
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="directive">
+<dt id="directive-digraph">
+<tt class="descname">.. digraph::</tt><a class="headerlink" href="#directive-digraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Directive for embedding a single directed graph.  The name is given as a
+directive argument, the contents of the graph are the directive content.
+This is a convenience directive to generate <tt class="docutils literal"><span class="pre">digraph</span> <span class="pre">&lt;name&gt;</span> <span class="pre">{</span> <span class="pre">&lt;content&gt;</span> <span class="pre">}</span></tt>.</p>
+<p>For example:</p>
+<div class="highlight-rest"><div class="highlight"><pre><span class="p">..</span> <span class="ow">digraph</span><span class="p">::</span> foo
+
+   &quot;bar&quot; -&gt; &quot;baz&quot; -&gt; &quot;quux&quot;;
+</pre></div>
+</div>
+</dd></dl>
+
+<p class="versionadded">
+<span class="versionmodified">New in version 1.0: </span>All three directives support an <tt class="docutils literal"><span class="pre">alt</span></tt> option that determines the image&#8217;s
+alternate text for HTML output.  If not given, the alternate text defaults to
+the graphviz code.</p>
+<p class="versionadded">
+<span class="versionmodified">New in version 1.1: </span>All three directives support an <tt class="docutils literal"><span class="pre">inline</span></tt> flag that controls paragraph
+breaks in the output.  When set, the graph is inserted into the current
+paragraph.  If the flag is not given, paragraph breaks are introduced before
+and after the image (the default).</p>
+<p class="versionadded">
+<span class="versionmodified">New in version 1.1: </span>All three directives support a <tt class="docutils literal"><span class="pre">caption</span></tt> option that can be used to give a
+caption to the diagram.  Naturally, diagrams marked as &#8220;inline&#8221; cannot have a
+caption.</p>
+<p>There are also these new config values:</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">kmos 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2009-2012, Max J. Hoffmann.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>
