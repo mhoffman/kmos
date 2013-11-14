@@ -210,7 +210,7 @@ base/integ_rates
    rate constants, :math:`\mathbf{n}_i` the number of available sites
    during kMC-time interval i,  :math: `\{\Delta t_i\}` the corresponding
    timesteps then :math:`a_{i}(t)` at the time :math: `t=\sum_{i=1}\Delta t_i`
-   is calculated according to :math:`a_{i}(t)=\sum_{i=1}} c_{i} n_{i}\Delta t_i`.
+   is calculated according to :math:`a_{i}(t)=\sum_{i=1} c_{i} n_{i}\Delta t_i`.
 
 base/interval_search_real
 """"""""""""""""""""""""""""""""""""""""""""""""""

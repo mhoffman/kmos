@@ -394,10 +394,16 @@ def main(args=None):
         except:
             plt = None
 
-        model = KMC_Model(print_rates=False)
+        try:
+            model = KMC_Model(print_rates=False)
+        except:
+            print("Warning: could not import kmc_model! Please make sure you are in the right directory")
         global model, np
         sh(banner='Note: model = KMC_Model(print_rates=False)')
-        model.deallocate()
+        try:
+            model.deallocate()
+        except:
+            print("Warning: could not deallcate model. Was is allocated?")
 
     elif args[0] == 'view':
         from sys import path
