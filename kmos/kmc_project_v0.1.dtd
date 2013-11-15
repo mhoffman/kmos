@@ -1,0 +1,62 @@
+<!ELEMENT kmc (meta?,species_list?,parameter_list?,lattice_list?,process_list?,output_list?)>
+  <!ATTLIST kmc
+    version CDATA #IMPLIED
+  >
+  <!ELEMENT meta EMPTY>
+  <!ATTLIST meta
+    author CDATA #REQUIRED
+    debug CDATA #REQUIRED
+    email CDATA #REQUIRED
+    model_dimension CDATA #REQUIRED
+    model_name CDATA #REQUIRED
+  >
+
+  <!ELEMENT species_list (species)*>
+  <!ATTLIST species_list
+    default_species CDATA #REQUIRED
+  >
+  <!ELEMENT species EMPTY>
+  <!ATTLIST species
+    color CDATA #REQUIRED
+    id CDATA #REQUIRED
+    name CDATA #REQUIRED
+  >
+  <!ELEMENT parameter_list (parameter)*>
+  <!ELEMENT parameter EMPTY>
+  <!ATTLIST parameter
+    name CDATA #REQUIRED
+    value CDATA #IMPLIED
+  >
+  <!ELEMENT lattice_list (lattice)*>
+  <!ELEMENT lattice (site)*>
+  <!ATTLIST lattice
+    name CDATA #REQUIRED
+    unit_cell_size CDATA #REQUIRED
+  >
+  <!ELEMENT site EMPTY>
+  <!ATTLIST site
+    coord CDATA #REQUIRED
+    index CDATA #REQUIRED
+    type CDATA #REQUIRED
+  >
+  <!ELEMENT process_list (process)*>
+    <!ELEMENT process (condition|action)*>
+      <!ATTLIST process
+        name CDATA #REQUIRED
+        rate_constant CDATA #REQUIRED
+      >
+      <!ELEMENT condition EMPTY>
+      <!ATTLIST condition
+        coord CDATA #REQUIRED
+        species CDATA #REQUIRED
+      >
+      <!ELEMENT action EMPTY>
+      <!ATTLIST action
+        coord CDATA #REQUIRED
+        species CDATA #REQUIRED
+      >
+      <!ELEMENT output_list (output)*>
+        <!ELEMENT output EMPTY>
+        <!ATTLIST output
+          item CDATA #REQUIRED
+        >
