@@ -1,0 +1,83 @@
+<!ELEMENT kmc (meta?,species_list?,parameter_list?, lattice, process_list?,output_list?)>
+  <!ATTLIST kmc
+  version CDATA #REQUIRED
+  >
+  <!ELEMENT meta EMPTY>
+  <!ATTLIST meta
+    author CDATA #IMPLIED
+    debug CDATA #IMPLIED
+    email CDATA #IMPLIED
+    model_dimension CDATA #IMPLIED
+    model_name CDATA #IMPLIED
+  >
+
+  <!ELEMENT species_list (species)*>
+  <!ATTLIST species_list
+    default_species CDATA #IMPLIED
+  >
+  <!ELEMENT species EMPTY>
+  <!ATTLIST species
+    name CDATA #REQUIRED
+    color CDATA #IMPLIED
+    representation CDATA #IMPLIED
+    tags CDATA #IMPLIED
+  >
+  <!ELEMENT parameter_list (parameter)*>
+  <!ELEMENT parameter EMPTY>
+  <!ATTLIST parameter
+    name CDATA #REQUIRED
+    value CDATA #IMPLIED
+    adjustable CDATA #IMPLIED
+    min CDATA #IMPLIED
+    max CDATA #IMPLIED
+    scale CDATA #IMPLIED
+  >
+  <!ELEMENT lattice (layer)*>
+  <!ATTLIST lattice
+    cell_size CDATA #REQUIRED
+    default_layer CDATA #REQUIRED
+    substrate_layer CDATA #IMPLIED
+    representation CDATA #IMPLIED
+  >
+  <!ELEMENT layer (site)*>
+  <!ATTLIST layer
+    name CDATA #REQUIRED
+    grid CDATA #IMPLIED
+    grid_offset CDATA #IMPLIED
+    color CDATA #IMPLIED
+  >
+  <!ELEMENT site EMPTY>
+  <!ATTLIST site
+    pos CDATA #REQUIRED
+    type CDATA #REQUIRED
+    tags CDATA #IMPLIED
+    default_species CDATA #IMPLIED
+  >
+  <!ELEMENT process_list (process)*>
+    <!ELEMENT process (condition|action)*>
+      <!ATTLIST process
+        name CDATA #REQUIRED
+        rate_constant CDATA #REQUIRED
+        enabled CDATA #IMPLIED
+        tof_count CDATA #IMPLIED
+      >
+      <!ELEMENT condition EMPTY>
+      <!ATTLIST condition
+        coord_name CDATA #REQUIRED
+        coord_layer CDATA #REQUIRED
+        coord_offset CDATA #REQUIRED
+        species CDATA #REQUIRED
+        implicit CDATA #IMPLIED
+      >
+      <!ELEMENT action EMPTY>
+      <!ATTLIST action
+        coord_name CDATA #REQUIRED
+        coord_layer CDATA #REQUIRED
+        coord_offset CDATA #REQUIRED
+        species CDATA #REQUIRED
+      >
+      <!ELEMENT output_list (output)*>
+        <!ELEMENT output EMPTY>
+        <!ATTLIST output
+          item CDATA #REQUIRED
+        >
