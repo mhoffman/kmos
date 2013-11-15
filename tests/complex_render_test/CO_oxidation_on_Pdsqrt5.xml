@@ -26,20 +26,20 @@
        [  0.       ,   6.2265247,   0.       ],
        [  0.       ,   0.       ,  13.0389687]]),
           scaled_positions=np.array(
-      [[0.39483900000000005, 0.7887430000000001, 0.293451], [0.011497000000000002, 0.9963490000000002, 0.293767], [0.187443, 0.40542000000000006, 0.293183], [0.803676, 0.612895, 0.293355], [0.892799, 0.297215, 0.14982], [0.696229, 0.907204, 0.149862], [0.503082, 0.49384300000000003, 0.149846], [0.30593, 0.104266, 0.150102], [0.099721, 0.7007620000000001, 0.144328], [0.6, 0.2, 0.0], [0.4, 0.8, 0.0], [0.2, 0.4, 0.0], [0.0, 0.0, 0.0], [0.8, 0.6, 0.0]]),
+      [[0.4003960668460852, 0.79936902844053614, 0.29972485477321531], [0.0012440326463331946, 0.0037459579980467783, 0.29093060097613394], [0.1986870782027092, 0.40002892785440974, 0.29956640665914014], [0.80199296406870446, 0.60278007087966745, 0.29213713811583886], [0.8999999630612564, 0.29999993415267434, 0.14962839814164139], [0.69999995342506249, 0.8999999630612564, 0.14962839814164139], [0.49999994378886836, 0.49999994378886836, 0.14962839814164139], [0.29999993415267434, 0.099999924516480279, 0.14962839814164139], [0.099999924516480279, 0.69999995342506249, 0.14962839814164139], [0.60000002890858206, 0.20000000963619405, 0.0], [0.4000000192723881, 0.80000003854477619, 0.0], [0.20000000963619405, 0.4000000192723881, 0.0], [0.0, 0.0, 0.0], [0.80000003854477619, 0.60000002890858206, 0.0]]),
 ),]" substrate_layer="Pd100">
         <layer color="#ffffff" name="Pd100">
-            <site default_species="empty" pos="0.5992575 0.700819 0.354757545624" tags="strongbridge CO" type="bridge2"/>
-            <site default_species="empty" pos="0.291141 0.5970815 0.354671545624" tags="weakbridge CO" type="bridge3"/>
-            <site default_species="empty" pos="0.09947 0.2008845 0.354829545624" tags="strongbridge CO" type="bridge1"/>
-            <site default_species="empty" pos="0.203168 0.892546 0.354963545624" tags="weakbridge CO" type="bridge6"/>
-            <site default_species="empty" pos="-0.0044405 0.5091575 0.354623545624" tags="weakbridge CO" type="bridge4"/>
-            <site default_species="empty" pos="0.9075865 0.804622 0.354915545624" tags="weakbridge CO" type="bridge5"/>
-            <site default_species="empty" pos="0.09936375 0.70085175 0.354793545624" tags="hollow oxygen" type="hollow1"/>
-            <site default_species="empty" pos="0.703168 0.892546 0.354963545624" tags="corner oxygen" type="side4"/>
-            <site default_species="empty" pos="0.4955595 0.5091575 0.354623545624" tags="corner oxygen" type="side2"/>
-            <site default_species="empty" pos="0.9075865 0.304622 0.354915545624" tags="corner oxygen" type="side3"/>
-            <site default_species="empty" pos="0.291141 0.0970815 0.354671545624" tags="corner oxygen" type="side1"/>
+            <site default_species="empty" pos="0.601194515457 0.70107454966 0.357285542069" tags="strongbridge CO" type="bridge2"/>
+            <site default_species="empty" pos="0.299541572524 0.599698978147 0.361000176341" tags="weakbridge CO" type="bridge3"/>
+            <site default_species="empty" pos="0.0999655554245 0.201887442926 0.356603049442" tags="strongbridge CO" type="bridge1"/>
+            <site default_species="empty" pos="0.200820049746 0.901557493219 0.356682273499" tags="weakbridge CO" type="bridge6"/>
+            <site default_species="empty" pos="0.000340021135707 0.501404499367 0.357206318012" tags="weakbridge CO" type="bridge4"/>
+            <site default_species="empty" pos="0.901618498358 0.803263014439 0.35288841517" tags="weakbridge CO" type="bridge5"/>
+            <site default_species="empty" pos="0.100580035441 0.701480996293 0.356944295756" tags="hollow oxygen" type="hollow1"/>
+            <site default_species="empty" pos="0.700820049746 0.901557493219 0.356682273499" tags="corner oxygen" type="side4"/>
+            <site default_species="empty" pos="0.500340021136 0.501404499367 0.357206318012" tags="corner oxygen" type="side2"/>
+            <site default_species="empty" pos="0.901618498358 0.303263014439 0.35288841517" tags="corner oxygen" type="side3"/>
+            <site default_species="empty" pos="0.299541572524 0.0996989781475 0.361000176341" tags="corner oxygen" type="side1"/>
         </layer>
     </lattice>
     <process_list>
