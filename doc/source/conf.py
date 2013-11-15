@@ -236,6 +236,7 @@ MOCK_MODULES = ['lxml',
                 'kiwi',
                 'kiwi.ui',
                 'kiwi.ui.delegates',
+                'kiwi.ui.views',
 
                 ]
 for mod_name in MOCK_MODULES:
