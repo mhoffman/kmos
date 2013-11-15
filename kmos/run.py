@@ -1238,7 +1238,7 @@ class KMC_Model(Process):
         :type filename: str
 
         """
-        self._get_configuration().tofile(filename)
+        np.save('%s.npy' % filename, self._get_configuration())
 
     def load_config(self, filename):
         """Use numpy mechanism to load configuration from a file. User
@@ -1250,8 +1250,7 @@ class KMC_Model(Process):
         """
         x, y, z = self.lattice.system_size
         spuck = self.lattice.spuck
-        config = np.fromfile(filename)
-        config.shape = (x, y, z, spuck)
+        config = np.load('%s.npy' % filename)
 
         self._set_configuration(config)
         self._adjust_database()
