@@ -237,8 +237,9 @@ MOCK_MODULES = ['lxml',
                 'kiwi',
                 'kiwi.ui',
                 'kiwi.ui.delegates',
-                'kiwi.ui.views',
+                'kiwi.ui.dialogs',
                 'kiwi.ui.objectlist',
+                'kiwi.ui.views',
                 'kiwi.datatypes',
 
                 ]
