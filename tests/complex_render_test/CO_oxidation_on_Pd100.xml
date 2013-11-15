@@ -26,24 +26,24 @@
        [  0.       ,   6.2265247,   0.       ],
        [  0.       ,   0.       ,  13.0389687]]),
           scaled_positions=np.array(
-      [[0.39483900000000005, 0.7887430000000001, 0.293451], [0.011497000000000002, 0.9963490000000002, 0.293767], [0.187443, 0.40542000000000006, 0.293183], [0.803676, 0.612895, 0.293355], [0.892799, 0.297215, 0.14982], [0.696229, 0.907204, 0.149862], [0.503082, 0.49384300000000003, 0.149846], [0.30593, 0.104266, 0.150102], [0.099721, 0.7007620000000001, 0.144328], [0.6, 0.2, 0.0], [0.4, 0.8, 0.0], [0.2, 0.4, 0.0], [0.0, 0.0, 0.0], [0.8, 0.6, 0.0], [0.5992575, 0.200819, 0.29340299999999997]]),
+      [[0.4003960668460852, 0.79936902844053614, 0.29972485477321531], [0.0012440326463331946, 0.0037459579980467783, 0.29093060097613394], [0.1986870782027092, 0.40002892785440974, 0.29956640665914014], [0.80199296406870446, 0.60278007087966745, 0.29213713811583886], [0.8999999630612564, 0.29999993415267434, 0.14962839814164139], [0.69999995342506249, 0.8999999630612564, 0.14962839814164139], [0.49999994378886836, 0.49999994378886836, 0.14962839814164139], [0.29999993415267434, 0.099999924516480279, 0.14962839814164139], [0.099999924516480279, 0.69999995342506249, 0.14962839814164139], [0.60000002890858206, 0.20000000963619405, 0.0], [0.4000000192723881, 0.80000003854477619, 0.0], [0.20000000963619405, 0.4000000192723881, 0.0], [0.0, 0.0, 0.0], [0.80000003854477619, 0.60000002890858206, 0.0], [0.60119451545739488, 0.20107454966010183, 0.29593099644452708]]),
 ),]" substrate_layer="Pd100">
         <layer color="#ffffff" name="Pd100">
-            <site default_species="empty" pos="0.5992575 0.700819 0.354757545624" tags="strongbridge CO" type="bridge2"/>
-            <site default_species="empty" pos="0.291141 0.5970815 0.354671545624" tags="weakbridge CO" type="bridge3"/>
-            <site default_species="empty" pos="0.09947 0.2008845 0.354829545624" tags="strongbridge CO" type="bridge1"/>
-            <site default_species="empty" pos="0.203168 0.892546 0.354963545624" tags="weakbridge CO" type="bridge6"/>
-            <site default_species="empty" pos="-0.0044405 0.5091575 0.354623545624" tags="weakbridge CO" type="bridge4"/>
-            <site default_species="empty" pos="0.9075865 0.804622 0.354915545624" tags="weakbridge CO" type="bridge5"/>
-            <site default_species="empty" pos="0.09936375 0.70085175 0.354793545624" tags="hollow oxygen" type="hollow1"/>
-            <site default_species="empty" pos="0.703168 0.892546 0.354963545624" tags="corner oxygen" type="side4"/>
-            <site default_species="empty" pos="0.4955595 0.5091575 0.354623545624" tags="corner oxygen" type="side2"/>
-            <site default_species="empty" pos="0.9075865 0.304622 0.354915545624" tags="corner oxygen" type="side3"/>
-            <site default_species="empty" pos="0.291141 0.0970815 0.354671545624" tags="corner oxygen" type="side1"/>
-            <site default_species="empty" pos="0.39335025 0.3031195 0.293293" tags="weakbridge CO" type="bridge7"/>
-            <site default_species="empty" pos="0.70146675 0.406857 0.293379" tags="weakbridge CO" type="bridge8"/>
-            <site default_species="empty" pos="0.80537725 0.098584 0.293585" tags="weakbridge CO" type="bridge9"/>
-            <site default_species="empty" pos="0.49704825 -0.005219 0.293427" tags="weakbridge CO" type="bridge10"/>
+            <site default_species="empty" pos="0.601194515457 0.70107454966 0.357285542069" tags="strongbridge CO" type="bridge2"/>
+            <site default_species="empty" pos="0.299541572524 0.599698978147 0.361000176341" tags="weakbridge CO" type="bridge3"/>
+            <site default_species="empty" pos="0.0999655554245 0.201887442926 0.356603049442" tags="strongbridge CO" type="bridge1"/>
+            <site default_species="empty" pos="0.200820049746 0.901557493219 0.356682273499" tags="weakbridge CO" type="bridge6"/>
+            <site default_species="empty" pos="0.000340021135707 0.501404499367 0.357206318012" tags="weakbridge CO" type="bridge4"/>
+            <site default_species="empty" pos="0.901618498358 0.803263014439 0.35288841517" tags="weakbridge CO" type="bridge5"/>
+            <site default_species="empty" pos="0.100580035441 0.701480996293 0.356944295756" tags="hollow oxygen" type="hollow1"/>
+            <site default_species="empty" pos="0.700820049746 0.901557493219 0.356682273499" tags="corner oxygen" type="side4"/>
+            <site default_species="empty" pos="0.500340021136 0.501404499367 0.357206318012" tags="corner oxygen" type="side2"/>
+            <site default_species="empty" pos="0.901618498358 0.303263014439 0.35288841517" tags="corner oxygen" type="side3"/>
+            <site default_species="empty" pos="0.299541572524 0.0996989781475 0.361000176341" tags="corner oxygen" type="side1"/>
+            <site default_species="empty" pos="0.39994079683 0.300551738757 0.297748701552" tags="weakbridge CO" type="bridge7"/>
+            <site default_species="empty" pos="0.701593739763 0.40192731027 0.29403406728" tags="weakbridge CO" type="bridge8"/>
+            <site default_species="empty" pos="0.801219274052 0.102410253829 0.29343079871" tags="weakbridge CO" type="bridge9"/>
+            <site default_species="empty" pos="0.500795291152 0.000221789050319 0.297827925609" tags="weakbridge CO" type="bridge10"/>
         </layer>
     </lattice>
     <process_list>
@@ -249,6 +249,7 @@
             <condition coord_layer="Pd100" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 1 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="CO"/>
@@ -257,7 +258,9 @@
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side4" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
@@ -268,21 +271,40 @@
         </process>
         <process enabled="True" name="CO_diffusion_03" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_strong))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side2" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="CO_diffusion_04" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_strong))*eV)">
+            <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_04" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_strong))*eV)">
+        <process enabled="True" name="CO_diffusion_05" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_strong))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side4" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 1 0" species="empty"/>
@@ -290,25 +312,29 @@
             <action coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge10" coord_offset="0 1 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_05" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_strong))*eV)">
+        <process enabled="True" name="CO_diffusion_06" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_strong))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="hollow1" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="1 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_06" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_07" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side4" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="-1 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="-1 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
@@ -316,33 +342,36 @@
             <action coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_07" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_08" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side4" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side2" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_08" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_09" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side3" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_09" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_10" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 0 0" species="empty"/>
@@ -351,27 +380,33 @@
             <condition coord_layer="Pd100" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 1 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_10" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_11" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side3" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_11" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_12" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
@@ -380,12 +415,14 @@
             <action coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_12" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_strong))*eV)">
+        <process enabled="True" name="CO_diffusion_13" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_strong))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="-1 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side4" coord_offset="-1 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="-1 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 -1 0" species="empty"/>
@@ -393,7 +430,21 @@
             <action coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 -1 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_13" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_strong))*eV)">
+        <process enabled="True" name="CO_diffusion_14" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_strong))*eV)">
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side2" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side3" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge8" coord_offset="-1 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="CO_diffusion_15" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_strong))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 -1 0" species="empty"/>
@@ -402,10 +453,11 @@
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge9" coord_offset="-1 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_14" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_strong))*eV)">
+        <process enabled="True" name="CO_diffusion_16" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_strong))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 -1 0" species="empty"/>
@@ -414,11 +466,12 @@
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="hollow1" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_15" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_strong))*eV)">
+        <process enabled="True" name="CO_diffusion_17" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_strong))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 0 0" species="empty"/>
@@ -431,23 +484,28 @@
             <action coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_16" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_strong))*eV)">
+        <process enabled="True" name="CO_diffusion_18" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_strong))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side3" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_17" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_strong))*eV)">
+        <process enabled="True" name="CO_diffusion_19" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_strong))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
@@ -456,12 +514,28 @@
             <action coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_18" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_20" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_strong))*eV)">
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side4" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="CO_diffusion_21" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side4" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="-1 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="-1 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
@@ -469,20 +543,21 @@
             <action coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_19" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_22" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side4" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side2" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_20" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_23" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 0 0" species="empty"/>
@@ -495,37 +570,58 @@
             <action coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_21" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_24" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side3" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_22" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_25" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side3" coord_offset="-1 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="-1 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="-1 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 1 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge1" coord_offset="0 1 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_23" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_26" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+            <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side2" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 1 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge7" coord_offset="0 1 0" species="CO"/>
+        </process>
+        <process enabled="True" name="CO_diffusion_27" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side4" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 1 0" species="empty"/>
@@ -533,7 +629,7 @@
             <action coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge10" coord_offset="0 1 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_24" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_28" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="-1 0 0" species="empty"/>
@@ -541,17 +637,20 @@
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side4" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side2" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="-1 1 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge2" coord_offset="-1 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_25" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_29" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side4" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="-1 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="-1 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
@@ -559,19 +658,34 @@
             <action coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_26" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_30" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side2" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side3" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge8" coord_offset="-1 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_27" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_31" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side4" coord_offset="-1 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side3" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge9" coord_offset="-1 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="CO_diffusion_32" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 0 0" species="empty"/>
@@ -584,20 +698,22 @@
             <action coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_28" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_33" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side3" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_29" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_34" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 0 0" species="empty"/>
@@ -606,24 +722,55 @@
             <condition coord_layer="Pd100" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 1 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_30" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_35" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side2" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="CO_diffusion_36" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side4" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side2" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_31" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_37" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side2" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side3" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="CO_diffusion_38" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side4" coord_offset="0 0 0" species="empty"/>
@@ -632,10 +779,25 @@
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="1 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 1 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge9" coord_offset="0 1 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_32" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_39" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side4" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 1 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge10" coord_offset="0 1 0" species="CO"/>
+        </process>
+        <process enabled="True" name="CO_diffusion_40" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="1 0 0" species="empty"/>
@@ -648,7 +810,7 @@
             <action coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge3" coord_offset="1 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_33" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_41" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="1 0 0" species="empty"/>
@@ -657,37 +819,70 @@
             <condition coord_layer="Pd100" coord_name="hollow1" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="1 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="1 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="1 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="1 1 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge6" coord_offset="1 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_34" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_42" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="hollow1" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="1 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_35" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_43" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="1 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side3" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="1 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="1 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="1 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="1 1 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge1" coord_offset="1 1 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_36" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_44" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="hollow1" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="CO"/>
+        </process>
+        <process enabled="True" name="CO_diffusion_45" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side4" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side2" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="CO_diffusion_46" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 0 0" species="empty"/>
@@ -700,32 +895,51 @@
             <action coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_37" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_47" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side3" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="-1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_38" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_48" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side3" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="hollow1" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="CO_diffusion_49" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_39" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_50" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 -1 0" species="empty"/>
@@ -734,22 +948,25 @@
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_40" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_51" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side4" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_41" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_52" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
@@ -757,16 +974,35 @@
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side4" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side2" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_42" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_53" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side4" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="hollow1" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="1 1 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="CO_diffusion_54" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
@@ -774,7 +1010,7 @@
             <action coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_43" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_55" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 -1 0" species="empty"/>
@@ -783,39 +1019,61 @@
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_44" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_56" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side4" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_45" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_57" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side3" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="1 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side1" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="1 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge1" coord_offset="1 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="CO_diffusion_58" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side3" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="hollow1" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="1 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_46" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_59" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side4" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="1 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="1 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 -1 0" species="empty"/>
@@ -824,11 +1082,14 @@
             <action coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge5" coord_offset="0 -1 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_47" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_60" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
@@ -836,44 +1097,65 @@
             <action coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_48" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_61" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_49" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_62" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side4" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_50" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_63" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side3" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="1 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="1 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge1" coord_offset="1 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_51" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_64" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+            <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side3" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="hollow1" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="1 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="CO_diffusion_65" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 -1 0" species="empty"/>
@@ -881,12 +1163,13 @@
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side4" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side2" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 -1 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge2" coord_offset="0 -1 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_52" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_66" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 -1 0" species="empty"/>
@@ -896,14 +1179,48 @@
             <condition coord_layer="Pd100" coord_name="hollow1" coord_offset="0 -1 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_53" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_67" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side4" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="1 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="1 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="hollow1" coord_offset="1 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="1 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge5" coord_offset="0 -1 0" species="CO"/>
+        </process>
+        <process enabled="True" name="CO_diffusion_68" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_strong-E_CO_weak))*eV)">
+            <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="-1 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side3" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="CO_diffusion_69" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge6" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side1" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
@@ -911,19 +1228,21 @@
             <action coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_54" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_70" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge2" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side2" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="side3" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="1 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="CO"/>
         </process>
-        <process enabled="True" name="CO_diffusion_55" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
+        <process enabled="True" name="CO_diffusion_71" rate_constant="1/(beta*h)*exp(-beta*(E_CO_diff+max(0,E_CO_weak-E_CO_weak))*eV)">
             <condition coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="CO"/>
             <condition coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge5" coord_offset="0 -1 0" species="empty"/>
@@ -932,6 +1251,7 @@
             <condition coord_layer="Pd100" coord_name="bridge7" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge8" coord_offset="0 0 0" species="empty"/>
             <condition coord_layer="Pd100" coord_name="bridge1" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="Pd100" coord_name="bridge4" coord_offset="1 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge10" coord_offset="0 0 0" species="empty"/>
             <action coord_layer="Pd100" coord_name="bridge9" coord_offset="0 0 0" species="CO"/>
         </process>

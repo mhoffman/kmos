@@ -224,9 +224,9 @@ subroutine do_kmc_steps(n)
 !    Performs ``n`` kMC step.
 !    If one has to run many steps without evaluation
 !    do_kmc_steps might perform a little better.
-!      first update clock
-!      then configuration sampling step
-!      last execute process
+!    * first update clock
+!    * then configuration sampling step
+!    * last execute process
 !
 ! ARGUMENTS
 !
@@ -256,9 +256,9 @@ subroutine do_kmc_step()
 !****f* proclist/do_kmc_step
 ! FUNCTION
 !    Performs exactly one kMC step.
-!      first update clock
-!      then configuration sampling step
-!      last execute process
+!    *  first update clock
+!    *  then configuration sampling step
+!    *  last execute process
 !
 ! ARGUMENTS
 !
