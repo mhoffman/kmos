@@ -227,6 +227,16 @@ class Mock(object):
         else:
             return Mock()
 
-MOCK_MODULES = ['lxml', 'ase', 'ase.atoms', 'ase.gui.images', 'goocanvas']
+MOCK_MODULES = ['lxml',
+                'ase',
+                'ase.atoms',
+                'ase.gui',
+                'ase.gui.images',
+                'goocanvas',
+                'kiwi',
+                'kiwi.ui',
+                'kiwi.ui.delegates',
+
+                ]
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
