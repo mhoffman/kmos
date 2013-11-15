@@ -230,6 +230,7 @@ class Mock(object):
 MOCK_MODULES = ['lxml',
                 'ase',
                 'ase.atoms',
+                'ase.data',
                 'ase.gui',
                 'ase.gui.images',
                 'goocanvas',
