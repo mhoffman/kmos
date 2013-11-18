@@ -14,6 +14,17 @@ a simple script could look as follows ::
 
   model = KMC_Model()
 
+An alternative way that gets you started fast it to run ::
+
+    kmos shell
+
+and just interact directly with `model`. It is often a good idea to ::
+
+    %logstart some_scriptname.py
+
+first in the IPython command to save what you have typed for later use.
+
+
 As you can see by default the model prints a disclaimer
 and all rate constants, which can each be turned off
 by instantiating ::
@@ -90,6 +101,7 @@ the number of unit cell. The first slot
 denotes the species and the second slot denotes the
 surface site, i.e. ::
 
+  occupation = model.get_atoms().occupation
   occupation[species, site-1]
 
 So given there is a `hydrogen` species

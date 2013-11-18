@@ -10,8 +10,6 @@ Tutorials
 
 .. include:: first_model_api.rst
 
-.. include:: first_model_gui.rst
-
 .. TODO:: describe modelling more complicated structures
           and e.g. boundary conditions
 
