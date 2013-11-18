@@ -708,7 +708,7 @@ class KMC_Model(Process):
     def switch_surface_processes_on(self):
         set_rate_constants(settings.parameters, self.print_rates)
 
-    def print_adjustable_parameters(self, match=None):
+    def print_adjustable_parameters(self, match=None, to_stdout=True):
         """Print those methods that are adjustable via the GUI.
 
         :param pattern: fname pattern to limit the parameters.
@@ -723,17 +723,18 @@ class KMC_Model(Process):
                 res += '|{0:^78s}|\n'.format((' %40s = %s'
                       % (attr, settings.parameters[attr]['value'])))
         res += (w * '-') + '\n'
-        if INTERACTIVE:
+        if to_stdout:
             print(res)
         else:
             return res
 
-    def print_coverages(self):
+    def print_coverages(self, to_stdout=True):
         """Show coverages (per unit cell) for each species
         and site type for current configurations.
 
         """
 
+        res = ''
         # get atoms
         atoms = self.get_atoms(geometry=False)
 
@@ -750,20 +751,24 @@ class KMC_Model(Process):
                       ('%18s|' % 'site \ species') +
                       '|'.join([('%11s' % sn)
                                 for sn in species_names] + ['']))
-        print(len(header_line) * '-')
-        print(header_line)
-        print(len(header_line) * '-')
+        res += '%s\n' % (len(header_line) * '-')
+        res += '%s\n' % header_line
+        res += '%s\n' % (len(header_line) * '-')
         for i in range(self.lattice.spuck):
             site_name = self.settings.site_names[i]
-            print('|'
+            res += '%s\n' % ('|'
                  + '{0:<18s}|'.format(site_name)
                  + '|'.join([('{0:^11.5f}'.format(x) if x else 11 * ' ')
                              for x in list(occupation[:, i])]
                  + ['']))
-        print(len(header_line) * '-')
-        print('Units: "molecules (or atoms) per unit cell"')
+        res += '%s\n' % (len(header_line) * '-')
+        res += '%s\n' % ('Units: "molecules (or atoms) per unit cell"')
+        if to_stdout:
+            print(res)
+        else:
+            return res
 
-    def print_procstat(self):
+    def print_procstat(self, to_stdout=True):
         entries = []
         longest_name = 0
         for i, process_name in enumerate(
@@ -792,10 +797,13 @@ class KMC_Model(Process):
         res += ('+' + width * '-' + '+' + '\n')
         res += ('   Total steps %s' % nsteps)
 
-        print(res)
+        if to_stdout:
+            print(res)
+        else:
+            return res
 
 
-    def print_accum_rate_summation(self, order='-rate'):
+    def print_accum_rate_summation(self, order='-rate', to_stdout=True):
         """Shows rate individual processes contribute to the total rate
 
         The optional argument order can be one of: name, rate, rate_constant,
@@ -853,7 +861,10 @@ class KMC_Model(Process):
                                        % accum_rate))
         res += ('+' + 118 * '-' + '+' + '\n')
 
-        print(res)
+        if to_stdout:
+            print(res)
+        else:
+            return res
 
     def _put(self, site, new_species, reduce=False):
         """
