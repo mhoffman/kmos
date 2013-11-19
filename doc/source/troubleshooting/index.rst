@@ -32,6 +32,12 @@ What does kmos stand for anyways?
   I am open for other suggestions.
 
 
+When I use `kmos shell` the model doesn't have the species and sites
+I have defined.
+    Note that Fortran is case-insensitive. Therefore f2py turns
+    all variable and functions names into lower case by convention.
+    Try to lower-case your species or site name.
+
 When I run kmos the GUI way and close it, it seems to hang and I need to use the window manager to kill it.
   This is a bug waiting to be fixed. To avoid it close
   the window showing the atoms object by clicking on its
