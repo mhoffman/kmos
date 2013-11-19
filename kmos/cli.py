@@ -421,9 +421,10 @@ def sh(banner):
 
     """
 
+    from distutils.version import LooseVersion
     import IPython
     if hasattr(IPython, 'release') and \
-       map(int, IPython.release.version.split('.')) >= [0, 11]:
+       LooseVersion(IPython.release.version.split('.')) >= LooseVersion('0.11'):
         from IPython.frontend.terminal.embed \
             import InteractiveShellEmbed
         InteractiveShellEmbed(banner1=banner)()
