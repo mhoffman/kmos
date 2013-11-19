@@ -125,6 +125,32 @@ allocated by the Fortan modules. This is particularly
 necessary if you want to run more than one simulation
 in one script.
 
+Generate Grids of Sampled Data
+==============================
+
+For some kMC applications you simply require a large number of data points
+across a set of external parameters (phase diagrams, microkinetic models).
+For this case there is a convenient class `ModelRunner` to work with ::
+
+    from kmos.run import ModelRunner, PressureParameter, TemperatureParameter
+
+    class ScanKinetics(ModelRunner):
+        p_O2gas = PressureParameter(1)
+        T = TemperatureParameter(600)
+        p_COgas = PressureParameter(min=1, max=10, steps=40)
+
+
+    ScanKinetics().run(init_steps=1e8, sample_steps=1e8, cores=4)
+
+
+This script generates data points over the specified range(s). The
+temperature parameters is uniform grids over 1/T and the
+pressure parameters is uniform over log(p). The
+script can be run synchronously over many cores as long
+as the cores can access the same file system. You have to test whether
+the steps before sampling (`init_steps`) as well as the batch size
+(`sample_steps`) is sufficient.
+
 
 .. _manipulate_model_runtime:
 
