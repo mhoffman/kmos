@@ -22,6 +22,8 @@ kmos.types
              print_statistics, save, set_meta, validate_model
 .. autoclass:: kmos.types.Meta
 .. autoclass:: kmos.types.Parameter
+.. autoclass:: kmos.types.LayerList
+    :members: generate_coord_set, generate_coord
 .. autoclass:: kmos.types.Layer
 .. autoclass:: kmos.types.Site
 .. autoclass:: kmos.types.Species
