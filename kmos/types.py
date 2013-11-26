@@ -92,16 +92,31 @@ class Project(object):
                                            key=lambda x: x.name)
 
     def get_speciess(self, pattern=None):
+        """Return list of species in Project.
+
+        :param pattern: Pattern to fnmatch name of process against.
+        :type pattern: str
+        """
         return sorted([item for item in self.species_list
                 if pattern is None or fnmatch(item.name, pattern)
                ], key=lambda x: x.name)
 
     def get_parameters(self, pattern=None):
+        """Return list of parameters in Project.
+
+        :param pattern: Pattern to fnmatch name of parameter against.
+        :type pattern: str
+        """
         return sorted([item for item in self.parameter_list
                 if pattern is None or fnmatch(item.name, pattern)
                ], key=lambda x: x.name)
 
     def get_processes(self, pattern=None):
+        """Return list of processes.
+
+        :param pattern: Pattern to fnmatch name of process against.
+        :type pattern: str
+        """
         return sorted([item for item in self.process_list
                 if pattern is None or fnmatch(item.name, pattern)
                ], key=lambda x: x.name)
@@ -110,6 +125,17 @@ class Project(object):
         """Add a parameter to the project. A Parameter,
         or keywords that are passed to the Parameter
         constructor are accepted.
+
+        :param name: The name of the parameter.
+        :type name: str
+        :param adjustable: Create controller in GUI.
+        :type adjustable: bool
+        :param min: Minimum value for controller.
+        :type min: float
+        :param max: Maximum value for controller.
+        :type max: float
+        :param scale: Controller scale: 'log' or 'lin'
+        :type scale: str
 
         """
 
@@ -126,6 +152,21 @@ class Project(object):
         or keywords that are passed to the Process
         constructor are accepted.
 
+        :param name: Name of process.
+        :type name: str
+        :param rate_constant: Expression for rate constant.
+        :type rate_constant: str
+        :param condition_list: List of conditions (class Condition).
+        :type condition_list: list.
+        :param action_list: List of conditions (class Action).
+        :type action_list: list.
+        :param enabled: Switch this process on or of.
+        :type enabled: bool.
+        :param chemical_expression: Chemical expression (i.e: A@site1 + B@site2 -> empty@site1 + AB@site2) to generate process from.
+        :type chemical_expression: str.
+        :param tof_count: Stoichiometric factor for observable products {'NH3': 1, 'H2O(gas)': 2}. Hint: avoid space in keys.
+        :type tof_count: dict.
+
         """
         for process in processes:
             self.process_list.append(process)
@@ -141,10 +182,28 @@ class Project(object):
         return process
 
     def parse_process(self, string):
+        """Generate processes using a shorthand notation like, e.g. ::
+            process_name; species1A@coord1 + species2A@coord2 + ... -> species1B@coord1 + species2A@coord2 + ...; rate_constant_expression
+
+            .
+
+            :param string: shorthand notation for process
+            :type string: str
+
+        """
         process = parse_process(string, self)
         return process
 
     def parse_and_add_process(self, string):
+        """Generate and add processes using a shorthand notation like, e.g. ::
+            process_name; species1A@coord1 + species2A@coord2 + ... -> species1B@coord1 + species2A@coord2 + ...; rate_constant_expression
+
+            .
+
+            :param string: shorthand notation for process
+            :type string: str
+
+        """
         process = parse_process(string, self)
         self.process_list.append(process)
         return process
@@ -153,6 +212,15 @@ class Project(object):
         """Add a species to the project. A Species,
         or keywords that are passed to the Species
         constructor are accepted.
+
+        :param name: Name of species.
+        :type name: str
+        :param color: Color of species in editor GUI (#ffffff hex-type specification).
+        :type color: str
+        :param representation: ase.atoms.Atoms constructor describing species geometry.
+        :type representation: str
+        :param tags: Tags of species (space separated string).
+        :type tags: str
 
         """
         for species in speciess:
