@@ -2,6 +2,12 @@
 Trouble Shooting
 ================
 
+I found a bug or have a feature request. How can I get in touch ?
+    Please post issues `here <https://github.com/mhoffman/kmos/issues>`_
+    or via email mjhoffmann .at. gmail .dot. com
+    or via twitter @maxjhoffmann
+
+
 What other kMC codes are there?
   Kinetic Monte Carlo codes that I am currently aware of,
   that are in some form released on the intertubes are
@@ -107,10 +113,5 @@ How can I check the system size ?
 
 
 More to follow.
-
-Please post issues
-`here <https://github.com/mhoffman/kmos/issues>`_
-or via email mjhoffmann .at. gmail .dot. com
-or via twitter @maxjhoffmann
 
 .. TODO:: Explain `post-mortem` procedure
