@@ -1095,8 +1095,8 @@ class Site(FixedObject):
         if 'pos' in kwargs:
             if type(kwargs['pos']) is str:
                 self.pos = np.array([float(i) for i in kwargs['pos'].split()])
-            elif type(kwargs['pos']) is np.ndarray:
-                self.pos = kwargs['pos']
+            elif type(kwargs['pos']) in [np.ndarray, tuple, list]:
+                self.pos = np.array(kwargs['pos'])
             else:
                 raise Exception('Input %s not understood!' % kwargs['pos'])
         else:
