@@ -399,8 +399,10 @@ class Project(object):
                 output_elem.set('item', output.name)
         return root
 
-    def save(self):
-        if hasattr(self, 'filename'):
+    def save(self, filename=None):
+        if filename is not None:
+            self.export_xml_file(filename)
+        elif hasattr(self, 'filename'):
             self.export_xml_file(self.filename)
         else:
             print('Not saved because filename is not set.')
