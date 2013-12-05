@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """kMC modeling on steroids"""
 
 import os
