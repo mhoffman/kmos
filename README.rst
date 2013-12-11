@@ -2,7 +2,7 @@ kmos: kMC modelling on steroids
 =====================================
 *a vigorous attempt to make lattice kinetic Monte Carlo modelling more accessible.*
 
-Copyright (C) 2009-12 Max J. Hoffmann <mjhoffmann@gmail.com>
+Copyright (C) 2009-13 Max J. Hoffmann <mjhoffmann@gmail.com>
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -48,6 +48,28 @@ model and self-contained source code. Inside that directory run ::
   kmos view
 
 and readily watch your model and manipulate parameters at the same time.
+
+FILES
+#####
+
+The kmos framework consists of the python kmos module with the submodules ::
+    kmos /
+        io
+        gui
+
+        FILES
+        #####
+
+        The kmos framework consists of the python kmos module with the submodules ::
+            kmos /
+                io
+                gui
+                forms
+                run
+                utils
+        forms
+        run
+        utils
 
 THANKS
 ######
