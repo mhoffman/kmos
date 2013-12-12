@@ -128,6 +128,8 @@ class Project(object):
 
         :param name: The name of the parameter.
         :type name: str
+        :param value: Default value of parameter.
+        :type value: float
         :param adjustable: Create controller in GUI.
         :type adjustable: bool
         :param min: Minimum value for controller.
