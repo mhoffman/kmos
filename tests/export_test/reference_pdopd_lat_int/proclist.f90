@@ -309,7 +309,7 @@ subroutine do_kmc_steps(n)
     call update_clocks(ran_time)
 
     call update_integ_rate
-    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)
+    call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
     call run_proc_nr(proc_nr, nr_site)
     enddo
 
@@ -338,7 +338,7 @@ subroutine do_kmc_step()
     call update_clocks(ran_time)
 
     call update_integ_rate
-    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)
+    call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
     call run_proc_nr(proc_nr, nr_site)
 end subroutine do_kmc_step
 

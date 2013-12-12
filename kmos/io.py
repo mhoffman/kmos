@@ -621,7 +621,7 @@ class ProcListWriter():
         out.write('    call update_accum_rate\n'
                   '    call update_clocks(ran_time)\n\n'
                   '    call update_integ_rate\n'
-                  '    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
+                  '    call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)\n')
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr\n')
             out.write('print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site\n')
@@ -654,7 +654,7 @@ class ProcListWriter():
         out.write('    call update_accum_rate\n'
                   '    call update_clocks(ran_time)\n\n'
                   '    call update_integ_rate\n'
-                  '    call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)\n')
+                  '    call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)\n')
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr\n')
             out.write('print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site\n')
