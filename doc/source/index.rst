@@ -22,6 +22,7 @@ kmos wants to save time filled with repetitive labor and enlarge your stride.
    topic_guides/index
    reference/index
    troubleshooting/index
+   troubleshooting/faq
 
 .. |date| date:: %b %d, %Y
 

@@ -8,34 +8,24 @@ I found a bug or have a feature request. How can I get in touch ?
     or via twitter @maxjhoffmann
 
 
-What other kMC codes are there?
-  Kinetic Monte Carlo codes that I am currently aware of,
-  that are in some form released on the intertubes are
-  with no claim of completeness :
+My rate constant expression doesn't work. How can I debug it?
+    When initializing the model, the backend uses
+    `kmos.evaluate_rate_expression`. So you can try ::
 
-  - `akmc <http://theory.cm.utexas.edu/vtsttools/akmc/>`_ (G. Henkelman)
-  - `Carlos <http://www.win.tue.nl/~johanl/projects/Carlos/>`_ (J. Lukkien)
-  - `chimp <http://www.koders.com/cpp/fid7FA324E3E76DB9874158BE3CF722405FA44AECE8.aspx?s=mdef%3Ainsert>`_ (D. Dooling)
-  - `mapkmc <http://www.dion.che.udel.edu/downloads.php>`_ (D. Vlachos)
-  - `Monty <http://www.vsc.science.ru.nl/deij/monty.html>`_ (SXM Boerrrigter)
-  - `MoCKa <http://www.itcp.kit.edu/deutschmann/288.php>`_ (L. Kunz)
-  - `NASCAM <http://www.fundp.ac.be/sciences/physique/larn/NASCAM-Homepage>`_ (S. Lucas)
-  - `Spparks <http://www.cs.sandia.gov/~sjplimp/spparks/doc/Manual.html>`_ (S. Plimpton):
+        from kmos import evaluate_rate_expression
+        evaluate_rate_expression('<your-string-here'>, parameters={})
 
-  Though The Google might find you some more.
-  Please drop me a line if you find any information
-  inaccurate.
+    where parameters is a dictionary defining the variable that
+    are defined in the context of the expression evaluation, like so ::
 
-What does kmos stand for anyways?
-  Good question, initially kmos was supposed to stand for
-  `kinetic modeling on steroids`, but that confused people
-  too much since we are not modelling steroids but surfaces.
-  Some popular variants are
+        parameters = {'T': {'value': 500},
+                      'p_NClgas': {'value': 1},
+                      }
 
-    - kMC modeling of surfaces
-    - kmos modeling offering source
-
-  I am open for other suggestions.
+    Test only parts of your expression to localize the error. Typical
+    mistakes are syntax errors (e.g. unclosed parentheses) and
+    forgotten conversion factors (e.g. eV) which can easily lead to
+    overflow if written in the exponent.
 
 
 When I use `kmos shell` the model doesn't have the species and sites
@@ -76,14 +66,6 @@ What units is kmos using ?
   in bar, constants are taken from CODATA 2010. Note that the rate
   expressions though contain explicit conversion factors like `bar`,
   `eV` etc. If in doubt check the resulting rate constants by hand.
-
-When running the model I sometimes get mysterious `infty` or `nan` values!
-  This most likely can be traced back to fact that some variable ran outside
-  its range and is caused by the fact that the wrong `kind` values are chosen
-  (Fortran stuff). Kind values are currently all hard-code in the the `src`
-  directory at `/path-to-export/src/kind_values_f2py.f90` and set for ifort.
-  While I am working to have this set dynamically at compile time, you have
-  to figure out the right `kind` value for your compiler for now.
 
 How can I change the occupation of a model at runtime?
   This is explained in detail at :ref:`manipulate_model_runtime` though
