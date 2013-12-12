@@ -493,35 +493,4 @@ subroutine initialize_state(layer)
                     call replace_species((/i, j, k, Pd100_b5/), null_species, default_species)
                     call replace_species((/i, j, k, Pd100_b6/), null_species, default_species)
                     call replace_species((/i, j, k, Pd100_b7/), null_species, default_species)
-                    call replace_species((/i, j, k, Pd100_b8/), null_species, default_species)
-                    call replace_species((/i, j, k, Pd100_b9/), null_species, default_species)
-                    call replace_species((/i, j, k, Pd100_b10/), null_species, default_species)
-                    call replace_species((/i, j, k, Pd100_h3/), null_species, default_species)
-                case (PdO)
-                    call replace_species((/i, j, k, PdO_bridge2/), null_species, empty)
-                    call replace_species((/i, j, k, PdO_hollow1/), null_species, empty)
-                    call replace_species((/i, j, k, PdO_hollow2/), null_species, empty)
-                    call replace_species((/i, j, k, PdO_bridge1/), null_species, empty)
-                    call replace_species((/i, j, k, PdO_Pd2/), null_species, Pd)
-                    call replace_species((/i, j, k, PdO_Pd3/), null_species, Pd)
-                    call replace_species((/i, j, k, PdO_Pd4/), null_species, Pd)
-                    call replace_species((/i, j, k, PdO_hollow3/), null_species, oxygen)
-                    call replace_species((/i, j, k, PdO_hollow4/), null_species, oxygen)
-                    call replace_species((/i, j, k, PdO_Pd1/), null_species, Pd)
-                end select
-            end do
-        end do
-    end do
-
-    do k = 0, system_size(3)-1
-        do j = 0, system_size(2)-1
-            do i = 0, system_size(1)-1
-                call touchup_cell((/i, j, k, 0/))
-            end do
-        end do
-    end do
-
-
-end subroutine initialize_state
-
-end module proclist
+                    call replace_species((/i, j, k, Pd100_b8/)
