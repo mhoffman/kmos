@@ -270,8 +270,10 @@ def evaluate_kind_values(infile, outfile):
 
                 sys.argv = true_argv
             else:
+                fcompiler = os.environ.get('F2PY_FCOMPILER', 'gfortran')
                 compile(fcode, source_fn='f2py_selected_kind.f90',
-                        modulename='f2py_selected_kind')
+                        modulename='f2py_selected_kind',
+                        extra_args='--fcompiler=%s' % fcompiler)
             try:
                 import f2py_selected_kind
             except:
@@ -347,6 +349,7 @@ def build(options):
     set of source file in the current directory.
 
     """
+
     from os.path import isfile
     import os
     import sys
@@ -354,7 +357,7 @@ def build(options):
 
     src_files = ['kind_values_f2py.f90', 'base.f90', 'lattice.f90']
 
-    if isfile('proclist_constants.f90'):
+    if isfile('proclist_constants.f90'): # 
         src_files.append('proclist_constants.f90')
     src_files.extend(glob('nli_*.f90'))
     src_files.extend(glob('run_proc_*.f90'))
@@ -368,6 +371,7 @@ def build(options):
         extra_flags['gnu95'] = extra_flags['gfortran']
         extra_flags['intel'] = '-fpp -Wall -I/opt/intel/fc/10.1.018/lib'
         extra_flags['intelem'] = '-fpp -Wall'
+
     else:
         extra_flags['gfortran'] = ('-ffree-line-length-none -ffree-form'
                                    ' -xf95-cpp-input -Wall -O3 -fimplicit-none')
@@ -387,7 +391,7 @@ def build(options):
 
     module_name = 'kmc_model'
 
-    if not isfile('kind_values_f2py.py'):
+    if not isfile('kind_values_f2py.f90'):
         evaluate_kind_values('kind_values.f90', 'kind_values_f2py.f90')
 
     for src_file in src_files:
@@ -397,10 +401,14 @@ def build(options):
     call = []
     call.append('-c')
     call.append('-c')
-    call.append('--fcompiler=%s' % options.fcompiler)
+# ---- J.M. Lorenzi 2013-12-13 ----
+    if(options.fcompiler=='pg'): options.fcompiler='gnu95'
+# --------------------------------------------
+    call.append('--fcompiler=%s' % 'gnu95')
     if os.name == 'nt':
         call.append('%s' % ccompiler)
     extra_flags = extra_flags.get(options.fcompiler, '')
+
     if options.debug:
         extra_flags += ' -DDEBUG'
     call.append('--f90flags="%s"' % extra_flags)
@@ -408,6 +416,7 @@ def build(options):
     call.append(module_name)
     call += src_files
 
+    
     print(call)
     from copy import deepcopy
     true_argv = deepcopy(sys.argv)  # save for later
