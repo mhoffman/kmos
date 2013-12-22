@@ -56,11 +56,6 @@ import numpy as np
 from ase.atoms import Atoms
 from ase.data import covalent_radii
 
-# Canvas Import
-from kmos.pygtkcanvas.canvas import Canvas
-from kmos.pygtkcanvas.canvaslayer import CanvasLayer
-from kmos.pygtkcanvas.canvasitem import *
-
 
 class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
     """

@@ -43,7 +43,6 @@ long_description = file('README.rst').read()
 name='python-kmos'
 packages = [
            'kmos',
-           'kmos.pygtkcanvas',
            'kmos.utils',
            ]
 package_dir = {'kmos':'kmos'}
