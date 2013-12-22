@@ -128,6 +128,8 @@ class Project(object):
 
         :param name: The name of the parameter.
         :type name: str
+        :param value: Default value of parameter.
+        :type value: float
         :param adjustable: Create controller in GUI.
         :type adjustable: bool
         :param min: Minimum value for controller.
@@ -399,8 +401,10 @@ class Project(object):
                 output_elem.set('item', output.name)
         return root
 
-    def save(self):
-        if hasattr(self, 'filename'):
+    def save(self, filename=None):
+        if filename is not None:
+            self.export_xml_file(filename)
+        elif hasattr(self, 'filename'):
             self.export_xml_file(self.filename)
         else:
             print('Not saved because filename is not set.')
@@ -1093,8 +1097,8 @@ class Site(FixedObject):
         if 'pos' in kwargs:
             if type(kwargs['pos']) is str:
                 self.pos = np.array([float(i) for i in kwargs['pos'].split()])
-            elif type(kwargs['pos']) is np.ndarray:
-                self.pos = kwargs['pos']
+            elif type(kwargs['pos']) in [np.ndarray, tuple, list]:
+                self.pos = np.array(kwargs['pos'])
             else:
                 raise Exception('Input %s not understood!' % kwargs['pos'])
         else:

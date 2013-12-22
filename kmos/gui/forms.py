@@ -6,7 +6,7 @@ In the language of underlying MVC (Model-View-Controller) pattern these
 classes form the controller. The view is defined through a *.glade XML file
 and the models are instances of kmos.types.*
 """
-#    Copyright 2009-2012 Max J. Hoffmann (mjhoffmann@gmail.com)
+#    Copyright 2009-2013 Max J. Hoffmann (mjhoffmann@gmail.com)
 #    This file is part of kmos.
 #
 #    kmos is free software: you can redistribute it and/or modify

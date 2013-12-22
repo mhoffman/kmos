@@ -1,6 +1,6 @@
 !/* ROBODOC this makes robodoc to document this file */
 #include "assert.ppc"
-! Copyright (C) 2009-2012 Max J. Hoffmann
+! Copyright (C) 2009-2013 Max J. Hoffmann
 !
 ! This file is part of kmos.
 !
