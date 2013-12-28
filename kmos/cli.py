@@ -124,6 +124,10 @@ usage['run'] = """kmos run
                run == shell
                """
 
+usage['version'] = """kmos version
+    Print version number and exit.
+                   """
+
 usage['view'] = """kmos view
     Take a kmc_model.%s and kmc_settings.py in the
     same directory and start to simulate the
@@ -405,6 +409,10 @@ def main(args=None):
             model.deallocate()
         except:
             print("Warning: could not deallcate model. Was is allocated?")
+
+    elif args[0] == 'version':
+        from kmos import VERSION
+        print(VERSION)
 
     elif args[0] == 'view':
         from sys import path
