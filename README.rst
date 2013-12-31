@@ -17,6 +17,18 @@ You should have received a copy of the GNU General Public License along with
 this program; if not, see `http://www.gnu.org/licenses/ <http://www.gnu.org/licenses/>`_.
 
 
+DOCUMENTATION
+##############
+
+Please refer to
+
+* https://www.th4.ch.tum.de/index.php?id=1321
+* http://mhoffman.github.io/kmos/
+* http://kmos.readthedocs.org/
+
+or links therein for tutorials, user guide, reference, and troubleshooting hints.
+
+
 DEPENDENCIES
 ############
 In general this script has been developed and tested on Ubuntu 9.04-12.04 in
