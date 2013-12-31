@@ -26,7 +26,7 @@ import os
 from kmos.types import Project, Layer, LayerList, Meta, OutputList, \
                        Parameter, Process, ProcessList, SpeciesList, \
                        OutputItem, Species
-from kmos.forms import LayerEditor, MetaForm, InlineMessage, OutputForm, \
+from kmos.gui.forms import LayerEditor, MetaForm, InlineMessage, OutputForm, \
                        ParameterForm, ProcessForm, BatchProcessForm, \
                        SpeciesForm, SpeciesListForm, LatticeForm
 from kmos.config import GLADEFILE

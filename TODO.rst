@@ -4,17 +4,12 @@ Functionality
 - make and base.save_system(<seed_name>)
   TODO: make sure .reloading is more sugar-coated,
   e.g. check for correct size of file and document
-- standardize definition of those parameters that are logged
-  in the output file (header/data)
-- Explicitly allow for non-orthogonal unit cells in
-  GUI process editor
 - make sure one can (re)start and stop viewer from ipython ('kmos run')
 - kmos.gui.Editor should be able to process
   project_tree passed in automatically
   (and save changes directly to it)
   [should be transparent to the user]
 - add a tags field to all entities: parameters, process, species, layer
-- build standard class for model builder
 - change book-keeping/memory management from
   process based to site based
   (better storage for amorphous geometries)
@@ -34,7 +29,6 @@ Project related
 - configure pip mechanism
 - build virtualenv test environment(s): 2.4-3.0
 - build deb package
-- write overview/about page
 
 Future/optional projects
 =========================
