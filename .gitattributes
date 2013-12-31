@@ -1,5 +1,6 @@
 /tests export-ignore
 /doc export-ignore
+/build export-ignore
 .gitatributes export-ignore
 .gitignore export-ignore
 .nojekyll export-ignore
