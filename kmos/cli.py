@@ -23,7 +23,7 @@
 
 """
 
-#    Copyright 2009-2012 Max J. Hoffmann (mjhoffmann@gmail.com)
+#    Copyright 2009-2013 Max J. Hoffmann (mjhoffmann@gmail.com)
 #    This file is part of kmos.
 #
 #    kmos is free software: you can redistribute it and/or modify
@@ -123,6 +123,10 @@ usage['run'] = """kmos run
     Open an interactive shell and create a KMC_Model in it
                run == shell
                """
+
+usage['version'] = """kmos version
+    Print version number and exit.
+                   """
 
 usage['view'] = """kmos view
     Take a kmc_model.%s and kmc_settings.py in the
@@ -405,6 +409,10 @@ def main(args=None):
             model.deallocate()
         except:
             print("Warning: could not deallcate model. Was is allocated?")
+
+    elif args[0] == 'version':
+        from kmos import VERSION
+        print(VERSION)
 
     elif args[0] == 'view':
         from sys import path

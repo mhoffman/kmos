@@ -1,6 +1,6 @@
 !/* ROBODOC this makes robodoc to document this file */
 #include "assert.ppc"
-! Copyright (C)  2009-2012 Max J. Hoffmann
+! Copyright (C)  2009-2013 Max J. Hoffmann
 !
 ! This file is part of kmos.
 !
@@ -640,8 +640,8 @@ subroutine update_integ_rate()
         integ_rates(i)=integ_rates(i)+nr_of_sites(i)*rates(i)*kmc_time_step
     enddo
 
-!!$    ASSERT(accum_rates(nr_of_proc).gt.0.,"base/update_accum_rate found &
-!!$        accum_rates(nr_of_proc)=0, so no process is available at all")
+    ASSERT(accum_rates(nr_of_proc).gt.0.,"base/update_accum_rate found" // &
+        "accum_rates(nr_of_proc)=0, so no process is available at all")
 
 end subroutine update_integ_rate
 !------ S. Matera 09/18/2012------

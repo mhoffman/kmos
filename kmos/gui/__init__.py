@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """A GUI frontend to create and edit kMC models.
 """
-#    Copyright 2009-2012 Max J. Hoffmann (mjhoffmann@gmail.com)
+#    Copyright 2009-2013 Max J. Hoffmann (mjhoffmann@gmail.com)
 #    This file is part of kmos.
 #
 #    kmos is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@ import os
 from kmos.types import Project, Layer, LayerList, Meta, OutputList, \
                        Parameter, Process, ProcessList, SpeciesList, \
                        OutputItem, Species
-from kmos.forms import LayerEditor, MetaForm, InlineMessage, OutputForm, \
+from kmos.gui.forms import LayerEditor, MetaForm, InlineMessage, OutputForm, \
                        ParameterForm, ProcessForm, BatchProcessForm, \
                        SpeciesForm, SpeciesListForm, LatticeForm
 from kmos.config import GLADEFILE
