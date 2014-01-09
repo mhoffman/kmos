@@ -195,7 +195,7 @@ class KMC_Model(Process):
                 self.tof_matrix[tofs.index(tof), process_nr - 1] += tof_factor
 
         # prepare procstat
-        self.procstat = np.zeros((proclist.nr_of_proc,))
+        self.procstat = np.zeros((proclist.nr_of_proc), dtype=np.int64)
          # prepare integ_rates (S.Matera 09/25/2012)
         self.integ_rates = np.zeros((proclist.nr_of_proc, ))
         self.time = 0.
@@ -708,7 +708,7 @@ class KMC_Model(Process):
     def switch_surface_processes_on(self):
         set_rate_constants(settings.parameters, self.print_rates)
 
-    def print_adjustable_parameters(self, match=None):
+    def print_adjustable_parameters(self, match=None, to_stdout=True):
         """Print those methods that are adjustable via the GUI.
 
         :param pattern: fname pattern to limit the parameters.
@@ -723,17 +723,18 @@ class KMC_Model(Process):
                 res += '|{0:^78s}|\n'.format((' %40s = %s'
                       % (attr, settings.parameters[attr]['value'])))
         res += (w * '-') + '\n'
-        if INTERACTIVE:
+        if to_stdout:
             print(res)
         else:
             return res
 
-    def print_coverages(self):
+    def print_coverages(self, to_stdout=True):
         """Show coverages (per unit cell) for each species
         and site type for current configurations.
 
         """
 
+        res = ''
         # get atoms
         atoms = self.get_atoms(geometry=False)
 
@@ -750,20 +751,59 @@ class KMC_Model(Process):
                       ('%18s|' % 'site \ species') +
                       '|'.join([('%11s' % sn)
                                 for sn in species_names] + ['']))
-        print(len(header_line) * '-')
-        print(header_line)
-        print(len(header_line) * '-')
+        res += '%s\n' % (len(header_line) * '-')
+        res += '%s\n' % header_line
+        res += '%s\n' % (len(header_line) * '-')
         for i in range(self.lattice.spuck):
             site_name = self.settings.site_names[i]
-            print('|'
+            res += '%s\n' % ('|'
                  + '{0:<18s}|'.format(site_name)
                  + '|'.join([('{0:^11.5f}'.format(x) if x else 11 * ' ')
                              for x in list(occupation[:, i])]
                  + ['']))
-        print(len(header_line) * '-')
-        print('Units: "molecules (or atoms) per unit cell"')
+        res += '%s\n' % (len(header_line) * '-')
+        res += '%s\n' % ('Units: "molecules (or atoms) per unit cell"')
+        if to_stdout:
+            print(res)
+        else:
+            return res
 
-    def print_accum_rate_summation(self, order='-rate'):
+    def print_procstat(self, to_stdout=True):
+        entries = []
+        longest_name = 0
+        for i, process_name in enumerate(
+                               sorted(
+                               self.settings.rate_constants)):
+            procstat = self.base.get_procstat(i + 1)
+            namelength = len(process_name)
+            if namelength > longest_name :
+                longest_name = namelength
+            entries.append((procstat, process_name))
+
+        entries = sorted(entries, key=lambda x: -x[0])
+        nsteps = self.base.get_kmc_step()
+
+        width = longest_name + 30
+
+        res = ''
+        printed_steps = 0
+        res += ('+' + width * '-' + '+' + '\n')
+        for entry in entries:
+            procstat, name = entry
+            printed_steps += procstat
+            if procstat :
+                res += ('|{0:<%ss}|\n' % width).format('%9.2f %% %12s     %s' % (100*float(printed_steps)/nsteps, procstat, name))
+
+        res += ('+' + width * '-' + '+' + '\n')
+        res += ('   Total steps %s' % nsteps)
+
+        if to_stdout:
+            print(res)
+        else:
+            return res
+
+
+    def print_accum_rate_summation(self, order='-rate', to_stdout=True):
         """Shows rate individual processes contribute to the total rate
 
         The optional argument order can be one of: name, rate, rate_constant,
@@ -821,7 +861,10 @@ class KMC_Model(Process):
                                        % accum_rate))
         res += ('+' + 118 * '-' + '+' + '\n')
 
-        print(res)
+        if to_stdout:
+            print(res)
+        else:
+            return res
 
     def _put(self, site, new_species, reduce=False):
         """
@@ -1206,7 +1249,7 @@ class KMC_Model(Process):
         :type filename: str
 
         """
-        self._get_configuration().tofile(filename)
+        np.save('%s.npy' % filename, self._get_configuration())
 
     def load_config(self, filename):
         """Use numpy mechanism to load configuration from a file. User
@@ -1218,8 +1261,7 @@ class KMC_Model(Process):
         """
         x, y, z = self.lattice.system_size
         spuck = self.lattice.spuck
-        config = np.fromfile(filename)
-        config.shape = (x, y, z, spuck)
+        config = np.load('%s.npy' % filename)
 
         self._set_configuration(config)
         self._adjust_database()

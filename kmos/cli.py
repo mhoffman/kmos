@@ -59,6 +59,9 @@ usage['build'] = """kmos build
     Additional Parameters ::
         -d/--debug
             Turn on assertion statements in F90 code
+
+        -n/--no-compiler-optimization
+            Do not send optimizing flags to compiler.
                  """ % ('pyd' if os.name == 'nt' else 'so')
 
 usage['help'] = """kmos help <command>
@@ -71,6 +74,7 @@ usage['export'] = """kmos export <xml-file> [<export-path>]
     build the kmc_model.%s.
 
     Additional Parameters ::
+
         -s/--source-only
             Export source only and don't build binary
 
@@ -82,6 +86,9 @@ usage['export'] = """kmos export <xml-file> [<export-path>]
         -d/--debug
             Turn on assertion statements in F90 code.
             (Only active in compile step)
+
+        -n/--no-compiler-optimization
+            Do not send optimizing flags to compiler.
                     """ % ('pyd' if os.name == 'nt' else 'so')
 
 usage['settings-export'] = """kmos settings-export <xml-file> [<export-path>]
@@ -116,6 +123,10 @@ usage['run'] = """kmos run
     Open an interactive shell and create a KMC_Model in it
                run == shell
                """
+
+usage['version'] = """kmos version
+    Print version number and exit.
+                   """
 
 usage['view'] = """kmos view
     Take a kmc_model.%s and kmc_settings.py in the
@@ -279,7 +290,8 @@ def main(args=None):
         if len(args) < 2:
             parser.error('XML file and export path expected.')
         if len(args) < 3:
-            out_dir = os.path.splitext(args[1])[0]
+            out_dir = '%s_%s' % (os.path.splitext(args[1])[0], options.backend)
+
             print('No export path provided. Exporting to %s' % out_dir)
             args.append(out_dir)
 
@@ -398,6 +410,10 @@ def main(args=None):
         except:
             print("Warning: could not deallcate model. Was is allocated?")
 
+    elif args[0] == 'version':
+        from kmos import VERSION
+        print(VERSION)
+
     elif args[0] == 'view':
         from sys import path
         path.append(os.path.abspath(os.curdir))
@@ -424,7 +440,7 @@ def sh(banner):
     from distutils.version import LooseVersion
     import IPython
     if hasattr(IPython, 'release') and \
-       LooseVersion(IPython.release.version.split('.')) >= LooseVersion('0.11'):
+       LooseVersion(IPython.release.version) >= LooseVersion('0.11'):
         from IPython.frontend.terminal.embed \
             import InteractiveShellEmbed
         InteractiveShellEmbed(banner1=banner)()

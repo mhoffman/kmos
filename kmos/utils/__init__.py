@@ -29,6 +29,45 @@ try:
 except:
     print('kiwi Validation not working.')
 
+FCODE = """module kind
+implicit none
+contains
+subroutine real_kind(p, r, kind_value)
+  integer, intent(in), optional :: p, r
+  integer, intent(out) :: kind_value
+
+  if(present(p).and.present(r)) then
+    kind_value = selected_real_kind(p=p, r=r)
+  else
+    if (present(r)) then
+      kind_value = selected_real_kind(r=r)
+    else
+      if (present(p)) then
+        kind_value = selected_real_kind(p)
+      endif
+    endif
+  endif
+end subroutine real_kind
+
+subroutine int_kind(p, r, kind_value)
+  integer, intent(in), optional :: p, r
+  integer, intent(out) :: kind_value
+
+  if(present(p).and.present(r)) then
+    kind_value = selected_int_kind(p)
+  else
+    if (present(r)) then
+      kind_value = selected_int_kind(r=r)
+    else
+      if (present(p)) then
+        kind_value = selected_int_kind(p)
+      endif
+    endif
+  endif
+end subroutine int_kind
+
+end module kind
+"""
 
 class CorrectlyNamed:
     """Syntactic Sugar class for use with kiwi, that makes sure that the name
@@ -214,49 +253,10 @@ def evaluate_kind_values(infile, outfile):
             import f2py_selected_kind
         except:
             from numpy.f2py import compile
-            fcode = """module kind
-    implicit none
-    contains
-    subroutine real_kind(p, r, kind_value)
-      integer, intent(in), optional :: p, r
-      integer, intent(out) :: kind_value
-
-      if(present(p).and.present(r)) then
-        kind_value = selected_real_kind(p=p, r=r)
-      else
-        if (present(r)) then
-          kind_value = selected_real_kind(r=r)
-        else
-          if (present(p)) then
-            kind_value = selected_real_kind(p)
-          endif
-        endif
-      endif
-    end subroutine real_kind
-
-    subroutine int_kind(p, r, kind_value)
-      integer, intent(in), optional :: p, r
-      integer, intent(out) :: kind_value
-
-      if(present(p).and.present(r)) then
-        kind_value = selected_int_kind(p)
-      else
-        if (present(r)) then
-          kind_value = selected_int_kind(r=r)
-        else
-          if (present(p)) then
-            kind_value = selected_int_kind(p)
-          endif
-        endif
-      endif
-    end subroutine int_kind
-
-    end module kind
-            """
             # quick'n'dirty workaround for windoze
             if os.name == 'nt':
                 f = open('f2py_selected_kind.f90', 'w')
-                f.write(fcode)
+                f.write(FCODE)
                 f.close()
                 from copy import deepcopy
                 # save for later
@@ -271,7 +271,7 @@ def evaluate_kind_values(infile, outfile):
                 sys.argv = true_argv
             else:
                 fcompiler = os.environ.get('F2PY_FCOMPILER', 'gfortran')
-                compile(fcode, source_fn='f2py_selected_kind.f90',
+                compile(FCODE, source_fn='f2py_selected_kind.f90',
                         modulename='f2py_selected_kind',
                         extra_args='--fcompiler=%s' % fcompiler)
             try:
@@ -357,7 +357,7 @@ def build(options):
 
     src_files = ['kind_values_f2py.f90', 'base.f90', 'lattice.f90']
 
-    if isfile('proclist_constants.f90'): # 
+    if isfile('proclist_constants.f90'): #
         src_files.append('proclist_constants.f90')
     src_files.extend(glob('nli_*.f90'))
     src_files.extend(glob('run_proc_*.f90'))
@@ -401,10 +401,7 @@ def build(options):
     call = []
     call.append('-c')
     call.append('-c')
-# ---- J.M. Lorenzi 2013-12-13 ----
-    if(options.fcompiler=='pg'): options.fcompiler='gnu95'
-# --------------------------------------------
-    call.append('--fcompiler=%s' % 'gnu95')
+    call.append('--fcompiler=%s' % options.fcompiler)
     if os.name == 'nt':
         call.append('%s' % ccompiler)
     extra_flags = extra_flags.get(options.fcompiler, '')
@@ -416,7 +413,6 @@ def build(options):
     call.append(module_name)
     call += src_files
 
-    
     print(call)
     from copy import deepcopy
     true_argv = deepcopy(sys.argv)  # save for later

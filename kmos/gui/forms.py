@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""kmos.forms - GUI forms used by kmos.gui
+"""kmos.gui.forms - GUI forms used by kmos.gui
 The classes defined here heavily draw on the interface provided by
 python-kiwi.
 In the language of underlying MVC (Model-View-Controller) pattern these
@@ -55,11 +55,6 @@ from kmos.types import parse_chemical_expression
 import numpy as np
 from ase.atoms import Atoms
 from ase.data import covalent_radii
-
-# Canvas Import
-from kmos.pygtkcanvas.canvas import Canvas
-from kmos.pygtkcanvas.canvaslayer import CanvasLayer
-from kmos.pygtkcanvas.canvasitem import *
 
 
 class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
