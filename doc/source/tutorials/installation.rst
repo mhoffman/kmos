@@ -119,7 +119,7 @@ number of programs.
 
 #. **pyGTK**
    is needed for the GUI frontend so fetch the
-   `all-in-one <>`_ bundle installer and
+   `all-in-one <http://www.pygtk.org/downloads.html>`_ bundle installer and
    install most of it.
 
 #. **lxml**
