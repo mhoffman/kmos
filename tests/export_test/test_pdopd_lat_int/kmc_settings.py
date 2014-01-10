@@ -11,6 +11,9 @@ def setup_model(model):
     #setup_model(model)
     pass
 
+# Default history length in graph
+hist_length = 30
+
 parameters = {
     "E_adsorption_o2_bridge_bridge":{"value":"1.9", "adjustable":False, "min":"0.0", "max":"0.0","scale":"linear"},
     "E_co_bridge":{"value":"", "adjustable":False, "min":"0.0", "max":"0.0","scale":"linear"},
