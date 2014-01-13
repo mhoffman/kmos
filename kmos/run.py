@@ -1526,7 +1526,7 @@ class LogParameter(ModelParameter):
 
     """
 
-    def __init__(self, min, max, steps):
+    def __init__(self, *args, **kwargs):
         kwargs['type'] = 'log'
         super(LogParameter, self).__init__(*args, **kwargs)
 
