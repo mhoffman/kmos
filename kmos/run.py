@@ -1539,9 +1539,9 @@ class LinearParameter(ModelParameter):
 
     """
 
-    def __init__(self, min, max, steps):
+    def __init__(self, *args, **kwargs):
         kwargs['type'] = 'linear'
-        super(LogParameter, self).__init__(*args, **kwargs)
+        super(LinearParameter, self).__init__(*args, **kwargs)
 
     def get_grid(self):
         return np.linspace(self.min, self.max, self.steps)
