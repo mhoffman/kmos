@@ -199,6 +199,7 @@ class KMC_Model(Process):
          # prepare integ_rates (S.Matera 09/25/2012)
         self.integ_rates = np.zeros((proclist.nr_of_proc, ))
         self.time = 0.
+        self.steps = 0
 
         self.species_representation = {}
         for species in sorted(settings.representations):
@@ -551,9 +552,14 @@ class KMC_Model(Process):
                     atoms.integ_rates[i] = base.get_integ_rate(i + 1)
         # S. Matera 09/25/2012
         delta_t = (atoms.kmc_time - self.time)
+        delta_steps = atoms.kmc_step - self.steps
         atoms.delta_t = delta_t
         size = self.size.prod()
-        if delta_t == 0. and atoms.kmc_time > 0:
+        if delta_steps == 0 :
+            # if we haven't done any steps, return the last TOF again
+            atoms.tof_data = self.tof_data if hasattr(self, 'tof_data') else np.zeros_like(self.tof_matrix[:, 0])
+            atoms.tof_integ = self.tof_integ  if hasattr(self, 'tof_integ') else np.zeros_like(self.tof_matrix[:, 0])
+        elif delta_t == 0. and atoms.kmc_time > 0:
             print(
                 "Warning: numerical precision too low, to resolve time-steps")
             print('         Will reset kMC time to 0s.')
@@ -580,6 +586,9 @@ class KMC_Model(Process):
             self.integ_rates[:] = atoms.integ_rates
         # S. Matera 09/25/2012
         self.time = atoms.kmc_time
+        self.step = atoms.kmc_step
+        self.tof_data = atoms.tof_data
+        self.tof_integ = atoms.tof_integ
 
         return atoms
 
@@ -1753,6 +1762,9 @@ def set_rate_constants(parameters=None, print_rates=None):
         rate_expr = settings.rate_constants[proc][0]
         rate_const = evaluate_rate_expression(rate_expr, parameters)
 
+        if rate_const < 0. :
+            raise UserWarning('%s = %s: Negative rate-constants do no make sense'
+                              % (rate_expr, rate_const))
         try:
             base.set_rate_const(getattr(proclist, proc.lower()),
                                 rate_const)
