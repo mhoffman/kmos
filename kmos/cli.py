@@ -408,7 +408,7 @@ def main(args=None):
         try:
             model.deallocate()
         except:
-            print("Warning: could not deallcate model. Was is allocated?")
+            print("Warning: could not deallocate model. Was is allocated?")
 
     elif args[0] == 'version':
         from kmos import VERSION

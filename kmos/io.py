@@ -1855,6 +1855,8 @@ class ProcListWriter():
         out.write('    #setup_model(model)\n')
         out.write('    pass\n\n')
 
+        out.write('# Default history length in graph\n')
+        out.write('hist_length = 30\n\n')
         # Parameters
         out.write('parameters = {\n')
         for parameter in data.parameter_list:
