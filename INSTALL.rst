@@ -19,10 +19,12 @@ DEPENDENCIES
 
 In general this script has been developed and tested on Ubuntu 9.04-12.04 in
 conjunction with both gfortran and ifort. So things will most likely work
-best under a similar setup. Other than standard libraries you need to fetch:
+best under a similar setup. Other than standard libraries you most likely need to fetch:
 
 *  python-numpy : contains f2py
 *  python-lxml
+*  python-ase : download https://wiki.fysik.dtu.dk/ase/python-ase-3.9.0.3502.tar.gz, unzip and run `python setup.py install [--user]`
+*  python-dev
 
 Optional:
 
