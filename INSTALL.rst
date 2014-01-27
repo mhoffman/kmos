@@ -9,7 +9,7 @@ or ::
 
     python setup.py install --user
 
-to install without admin rights. Please refer to the
+in order to install without admin rights. Please refer to the
 `user-guide http://kmos.readthedocs.org` for further
 instructions.
 
