@@ -586,7 +586,7 @@ class KMC_Model(Process):
             self.integ_rates[:] = atoms.integ_rates
         # S. Matera 09/25/2012
         self.time = atoms.kmc_time
-        self.step = atoms.kmc_step
+        self.steps = atoms.kmc_step
         self.tof_data = atoms.tof_data
         self.tof_integ = atoms.tof_integ
 
