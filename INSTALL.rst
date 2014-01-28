@@ -37,6 +37,7 @@ quite useful for spotting logical error in process
 definitions as models grow more complex.
 
     *  python-gtk2: GUI toolkit
+    *  python-pygoocanvas
     *  python-kiwi, gazpacho: frameworks for python-gtk
        kiwi is currently available from many repositories
        Unfortunately the development of gazpacho has been
@@ -48,8 +49,6 @@ definitions as models grow more complex.
        and install it with ::
 
          sudo dpkg -i gazpacho_*.deb
-
-
 
 
 TEST INPUT
