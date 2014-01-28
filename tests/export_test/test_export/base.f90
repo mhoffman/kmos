@@ -822,7 +822,7 @@ subroutine set_system_name(input_system_name)
     !****f* base/set_system_name
     ! FUNCTION
     !    Set the systems name. Useful in conjunction with base.save_system
-    !    to save *.reload files under a different name than the default one.
+    !    to save \*.reload files under a different name than the default one.
     !
     ! ARGUMENTS
     !

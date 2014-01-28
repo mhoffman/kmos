@@ -199,6 +199,7 @@ class KMC_Model(Process):
          # prepare integ_rates (S.Matera 09/25/2012)
         self.integ_rates = np.zeros((proclist.nr_of_proc, ))
         self.time = 0.
+        self.steps = 0
 
         self.species_representation = {}
         for species in sorted(settings.representations):
@@ -490,15 +491,15 @@ class KMC_Model(Process):
                                     self.species_representation[species])
 
                                 if tag == 'species':
-                                    ad_atoms.set_initial_magnetic_moments([species]*len(ad_atoms))
+                                    ad_atoms.set_initial_magnetic_moments([species] * len(ad_atoms))
                                 elif tag == 'site':
-                                    ad_atoms.set_initial_magnetic_moments([n]*len(ad_atoms))
+                                    ad_atoms.set_initial_magnetic_moments([n] * len(ad_atoms))
                                 elif tag == 'x':
-                                    ad_atoms.set_initial_magnetic_moments([i]*len(ad_atoms))
+                                    ad_atoms.set_initial_magnetic_moments([i] * len(ad_atoms))
                                 elif tag == 'y':
-                                    ad_atoms.set_initial_magnetic_moments([j]*len(ad_atoms))
+                                    ad_atoms.set_initial_magnetic_moments([j] * len(ad_atoms))
                                 elif tag == 'z':
-                                    ad_atoms.set_initial_magnetic_moments([k]*len(ad_atoms))
+                                    ad_atoms.set_initial_magnetic_moments([k] * len(ad_atoms))
 
                                 # move to the correct location
                                 ad_atoms.translate(
@@ -551,9 +552,14 @@ class KMC_Model(Process):
                     atoms.integ_rates[i] = base.get_integ_rate(i + 1)
         # S. Matera 09/25/2012
         delta_t = (atoms.kmc_time - self.time)
+        delta_steps = atoms.kmc_step - self.steps
         atoms.delta_t = delta_t
         size = self.size.prod()
-        if delta_t == 0. and atoms.kmc_time > 0:
+        if delta_steps == 0:
+            # if we haven't done any steps, return the last TOF again
+            atoms.tof_data = self.tof_data if hasattr(self, 'tof_data') else np.zeros_like(self.tof_matrix[:, 0])
+            atoms.tof_integ = self.tof_integ  if hasattr(self, 'tof_integ') else np.zeros_like(self.tof_matrix[:, 0])
+        elif delta_t == 0. and atoms.kmc_time > 0:
             print(
                 "Warning: numerical precision too low, to resolve time-steps")
             print('         Will reset kMC time to 0s.')
@@ -580,6 +586,9 @@ class KMC_Model(Process):
             self.integ_rates[:] = atoms.integ_rates
         # S. Matera 09/25/2012
         self.time = atoms.kmc_time
+        self.step = atoms.kmc_step
+        self.tof_data = atoms.tof_data
+        self.tof_integ = atoms.tof_integ
 
         return atoms
 
@@ -776,11 +785,11 @@ class KMC_Model(Process):
                                self.settings.rate_constants)):
             procstat = self.base.get_procstat(i + 1)
             namelength = len(process_name)
-            if namelength > longest_name :
+            if namelength > longest_name:
                 longest_name = namelength
             entries.append((procstat, process_name))
 
-        entries = sorted(entries, key=lambda x: -x[0])
+        entries = sorted(entries, key=lambda x: - x[0])
         nsteps = self.base.get_kmc_step()
 
         width = longest_name + 30
@@ -791,8 +800,8 @@ class KMC_Model(Process):
         for entry in entries:
             procstat, name = entry
             printed_steps += procstat
-            if procstat :
-                res += ('|{0:<%ss}|\n' % width).format('%9.2f %% %12s     %s' % (100*float(printed_steps)/nsteps, procstat, name))
+            if procstat:
+                res += ('|{0:<%ss}|\n' % width).format('%9.2f %% %12s     %s' % (100 * float(printed_steps) / nsteps, procstat, name))
 
         res += ('+' + width * '-' + '+' + '\n')
         res += ('   Total steps %s' % nsteps)
@@ -801,7 +810,6 @@ class KMC_Model(Process):
             print(res)
         else:
             return res
-
 
     def print_accum_rate_summation(self, order='-rate', to_stdout=True):
         """Shows rate individual processes contribute to the total rate
@@ -1012,7 +1020,7 @@ class KMC_Model(Process):
                 if self.base.get_avail_site(process, site, 2):
                     avail.append(ProcInt(process, self.settings))
 
-        except Exception as e:
+        except Exception, e:
             # if is not iterable, interpret as process
             for x in range(self.lattice.system_size[0]):
                 for y in range(self.lattice.system_size[1]):
@@ -1476,11 +1484,12 @@ class ModelParameter(object):
 
     """
 
-    def __init__(self, min, max=None, steps=1, type=None):
+    def __init__(self, min, max=None, steps=1, type=None, unit=''):
         self.min = min
         self.max = max if max is not None else min
         self.steps = steps
         self.type = type
+        self.unit = ''
 
     def __repr__(self):
         return ('[%s] min: %s, max: %s, steps: %s'
@@ -1498,6 +1507,7 @@ class PressureParameter(ModelParameter):
 
     def __init__(self, *args, **kwargs):
         kwargs['type'] = 'pressure'
+        kwargs['unit'] = 'bar'
         super(PressureParameter, self).__init__(*args, **kwargs)
 
     def get_grid(self):
@@ -1513,6 +1523,7 @@ class TemperatureParameter(ModelParameter):
 
     def __init__(self, *args, **kwargs):
         kwargs['type'] = 'temperature'
+        kwargs['unit'] = 'K'
         super(TemperatureParameter, self).__init__(*args, **kwargs)
 
     def get_grid(self):
@@ -1692,6 +1703,167 @@ and <classname>.lock should be moved out of the way ::
             out.close()
             model.deallocate()
 
+    def plot(self,
+             rcParams=None,
+             touchup=None,
+             filename=None,
+             backend='Agg',
+             suffixes=['png', 'pdf', 'eps'],
+             variable_parameters=None,
+             fig_width_pt=246.0,
+             plot_tofs=None,
+             plot_occs=None,
+             occ_xlabel=None,
+             occ_ylabel=None,
+             tof_xlabel=None,
+             tof_ylabel=None,
+             label=None,
+             ):
+        """
+        Plot the generated data using matplotlib. By default we will try
+        to generate publication quality output of the specified TOFs and
+        coverages.
+        """
+        import matplotlib
+        matplotlib.use(backend, warn=False)
+        # Suppress backend warning, because we cannot
+        # control how often the current method is called from
+        # a script and superfluous warning tends to confuse users
+        from matplotlib import pyplot as plt
+
+
+        inches_per_pt = 1.0 / 72.27               # Convert pt to inches
+        golden_mean = (np.sqrt(5)-1.0) / 2.0         # Aesthetic ratio
+        fig_width = fig_width_pt * inches_per_pt  # width in inches
+        fig_height = fig_width * golden_mean       # height in inches
+        figsize = [fig_width, fig_height]
+        font_size = 10
+        tick_font_size = 8
+        xlabel_pad = 6
+        ylabel_pad = 16
+
+        default_rcParams = {
+            'font.family': 'serif',
+            'font.serif': 'Computer Modern Roman',
+            'font.sans-serif': 'Computer Modern Sans serif',
+            'font.size': 10,
+            'axes.labelsize': font_size,
+            'legend.fontsize': font_size,
+            'xtick.labelsize': tick_font_size,
+            'ytick.labelsize': tick_font_size,
+            'text.usetex': 'false',
+            'lines.linewidth': 1.,
+        }
+
+        data = np.recfromtxt('%s.dat' % self.runner_name, names=True, deletechars=None)
+
+        model = KMC_Model(print_rates=False,
+                          banner=False,)
+
+        # override with user-provided parameters
+        if rcParams is not None:
+            default_rcParams.update(rcParams)
+        matplotlib.rcParams.update(default_rcParams)
+
+        # plot all TOFs defined in model if not specified
+        if plot_tofs is None:
+            plot_tofs = model.tofs
+
+        if plot_occs is None:
+            plot_occs = list(data.dtype.names)
+            plot_occs.remove('kmc_time')
+            plot_occs.remove('kmc_steps')
+            for header_param in model.get_param_header().split():
+                plot_occs.remove(header_param)
+
+            for tof in model.tofs:
+                tof = tof.replace(')', '').replace('(', '')
+                try:
+                    plot_occs.remove(tof)
+                except ValueError:
+                    print('%s not in %s' % (tof, plot_occs))
+
+        # check how many variable parameters we have
+        # if not specified
+
+        if variable_parameters is None:
+            variable_parameters = {}
+            for param_name, param in self.parameters.items():
+                if param.steps > 1:
+                    variable_parameters[param_name] = param
+        else:
+            vparams = {}
+            for vparam in variable_parameters:
+                if vparam in self.parameters:
+                    vparams[vparam] = self.parameters[vparam]
+                else:
+                    raise UserWarning("Request variable not in ModelRunner.")
+
+            variable_parameters = vparams
+
+
+
+        ######################
+        # plot coverages     #
+        ######################
+        fig = plt.figure(figsize=figsize)
+        if len(variable_parameters) == 0:
+            print("No variable parameter. Nothing to plot.")
+        elif len(variable_parameters) == 1:
+            xvar = variable_parameters.keys()[0]
+            data.sort(order=xvar)
+            for occ in plot_occs:
+                occs = [data[name] for name in data.dtype.names if name.startswith(occ)]
+                N_occs = len(occs)
+                occ_data = np.array(occs).sum(axis=0) / N_occs
+                plt.plot(data[xvar], occ_data, label=occ.replace('_', '\_'))
+            legend = plt.legend(loc='best', fancybox=True)
+            legend.get_frame().set_alpha(0.5)
+            plt.ylim([0, 1])
+
+
+        elif len(variable_parameters) == 2:
+            print("Two variable parameters. Doing a surface plot.")
+        else:
+            print("Too many variable parameters. No automatic plotting possible.")
+
+        for suffix in suffixes:
+            if label is None:
+                plt.savefig('%s_coverages.%s' % (self.runner_name, suffix), bbox_inces='tight')
+            else:
+                plt.savefig('%s_coverages.%s' % (label, suffix), bbox_inces='tight')
+
+
+        ######################
+        # plot TOFs          #
+        ######################
+        fig = plt.figure(figsize=figsize)
+        if len(variable_parameters) == 0:
+            print("No variable parameter. Nothing to plot.")
+        elif len(variable_parameters) == 1:
+            xvar = variable_parameters.keys()[0]
+            param = variable_parameters.values()[0]
+            data.sort(order=xvar)
+            for tof in plot_tofs:
+                tof = tof.replace(')', '').replace('(', '')
+                plt.plot(data[xvar], data[tof], label=tof.replace('_', '\_'))
+            legend = plt.legend(loc='best', fancybox=True)
+            legend.get_frame().set_alpha(0.5)
+            plt.xlabel(r'\emph{%s} [%s]' % (xvar, param.unit))
+            plt.ylabel(r'TOF [s$^{-1}$ cell$^{-1}$]')
+        elif len(variable_parameters) == 2:
+            print("Two variable parameters. Doing a surface plot.")
+        else:
+            print("Too many variable parameters. No automatic plotting possible.")
+
+        for suffix in suffixes:
+            if label is None:
+                plt.savefig('%s_TOFs.%s' % (self.runner_name, suffix), bbox_inces='tight')
+            else:
+                plt.savefig('%s_TOFs.%s' % (label, suffix), bbox_inces='tight')
+
+        model.deallocate()
+
     def run(self, init_steps=1e8,
                   sample_steps=1e8,
                   cores=4,
@@ -1741,7 +1913,7 @@ def set_rate_constants(parameters=None, print_rates=None):
 
     """
     proclist = ProclistProxy()
-    if print_rates is None :
+    if print_rates is None:
         print_rates = self.print_rates
 
     if parameters is None:
@@ -1753,6 +1925,9 @@ def set_rate_constants(parameters=None, print_rates=None):
         rate_expr = settings.rate_constants[proc][0]
         rate_const = evaluate_rate_expression(rate_expr, parameters)
 
+        if rate_const < 0.:
+            raise UserWarning('%s = %s: Negative rate-constants do no make sense'
+                              % (rate_expr, rate_const))
         try:
             base.set_rate_const(getattr(proclist, proc.lower()),
                                 rate_const)

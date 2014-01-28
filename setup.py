@@ -44,6 +44,7 @@ name='python-kmos'
 packages = [
            'kmos',
            'kmos.utils',
+           'kmos.gui',
            ]
 package_dir = {'kmos':'kmos'}
 package_data = {'kmos':['fortran_src/*f90',
