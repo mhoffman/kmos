@@ -38,6 +38,9 @@ List of commands
         -d/--debug
             Turn on assertion statements in F90 code
 
+        -n/--no-compiler-optimization
+            Do not send optimizing flags to compiler.
+
 
 ``kmos edit <xml-file>``
     Open the kmos xml-file in a GUI to edit
@@ -50,6 +53,7 @@ List of commands
     build the kmc_model.so.
 
     Additional Parameters ::
+
         -s/--source-only
             Export source only and don't build binary
 
@@ -61,6 +65,9 @@ List of commands
         -d/--debug
             Turn on assertion statements in F90 code.
             (Only active in compile step)
+
+        -n/--no-compiler-optimization
+            Do not send optimizing flags to compiler.
 
 
 ``kmos help <command>``
@@ -99,6 +106,10 @@ List of commands
 ``kmos shell``
     Open an interactive shell and create a KMC_Model in it
                run == shell
+
+
+``kmos version``
+    Print version number and exit.
 
 
 ``kmos view``

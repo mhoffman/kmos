@@ -1,3 +1,5 @@
+.. _api-tutorial:
+
 A first kMC Model--the API way
 ==============================
 
@@ -52,12 +54,12 @@ For surface science simulations it is useful to define an
 
 and some surface species. Given you want to simulate CO adsorption and
 desorption on a single crystal surface you would say ::
-  
+
   pt.add_species(name='CO',
                  representation="Atoms('CO',[[0,0,0],[0,0,1.2]])")
 
 where the string passed as `representation` is a string representing
-a CO molecule which can be evaluated in ASE namespace. 
+a CO molecule which can be evaluated in ASE namespace.
 
 Once you have all species declared is a good time to think about the geometry.
 To keep it simple we will stick with a simple-cubic lattice in 2D which
@@ -67,7 +69,7 @@ one adsorption site per unit cell. You start by giving your layer a name ::
   layer = pt.add_layer(name='simple_cubic')
 
 and adding a site ::
-  
+
   layer.sites.append(Site(name='hollow', pos='0.5 0.5 0.5',
                           default_species='empty'))
 
@@ -138,16 +140,16 @@ it adjustable ::
                              min=-1.3, max=0.3)
 
 To define processes we first need a coordinate [#coord_minilanguage]_  ::
-  
+
   coord = pt.lattice.generate_coord('hollow.(0,0,0).simple_cubic')
 
 
 Then you need to have at least two processes. A process or elementary step in kMC
 means that a certain local configuration must be given so that something
 can happen at a certain rate constant. In the framework here this is
-phrased in terms of 'conditions' and 'actions'. [#proc_minilanguage]_ 
+phrased in terms of 'conditions' and 'actions'. [#proc_minilanguage]_
 So for example an adsorption requires at least one site to be empty
-(condition). Then this site can be occupied by CO (action) with a 
+(condition). Then this site can be occupied by CO (action) with a
 rate constant. Written down in code this looks as follows ::
 
   pt.add_process(name='CO_adsorption',
@@ -191,7 +193,7 @@ and to make it even shorter you can parse and add the process on one line ::
 In order to add processes on more than one site possible spanning across unit
 cells, there is a shorthand as well. The full-fledged syntax for each
 coordinate is ::
-  
+
   name.offset.lattice
 
 check :ref:`manual_coord_generation` for details.
@@ -235,6 +237,13 @@ If you wonder why the CO molecules are basically just dangling
 there in mid-air that is because you have no background setup, yet.
 Choose a transition metal of your choice and add it to the
 lattice setup for extra credit :-).
+
+Wondering where to go from here? If the work-flow makes
+complete sense, you have a specific model in mind,
+and just need some more idioms to implement it
+I suggest you take a look at the `examples folder <https://github.com/mhoffman/kmos/tree/master/examples>`_.
+for some hints. To learn more about the kmos approach
+and methods you should into :ref:`topic guides <topic-guides>`.
 
 Taking it home
 ^^^^^^^^^^^^^^^
