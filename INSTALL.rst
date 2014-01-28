@@ -83,11 +83,19 @@ If everything is working you should see
 the single-core CPU time to run 1 mio.
 steps printed on STDOUT.
 
-BASIC USAGE
-###########
+GETTING STARTED
+###############
 
-Create a model XML file as explained in the `Tutorials <http://kmos.readthedocs.org/en/latest/tutorials/index.html>`_ or alternatively  (and optionally) inspect
-and change it with ::
+Before creating any models of your own you might take look around
+the *examples* folder and try playing with the models already
+specified there. Instead of `kmos benchmark`, try ::
+
+    kmos view
+
+on an exported model and observe how it behaves for different
+conditions.
+
+Create a model XML file as explained in the `Tutorials <http://kmos.readthedocs.org/en/latest/tutorials/index.html>`_ or alternatively  (and optionally) inspect and change it with ::
 
   kmos edit [<xml-file>]
 
