@@ -1718,6 +1718,7 @@ and <classname>.lock should be moved out of the way ::
              tof_xlabel=None,
              tof_ylabel=None,
              label=None,
+             arrhenius=False,
              ):
         """
         Plot the generated data using matplotlib. By default we will try
@@ -1846,7 +1847,10 @@ and <classname>.lock should be moved out of the way ::
             data.sort(order=xvar)
             for tof in plot_tofs:
                 tof = tof.replace(')', '').replace('(', '')
-                plt.plot(data[xvar], data[tof], label=tof.replace('_', '\_'))
+                if arrhenius :
+                    plt.plot(1./data[xvar], np.log(data[tof]), label=tof.replace('_', '\_'))
+                else:
+                    plt.plot(data[xvar], data[tof], label=tof.replace('_', '\_'))
             legend = plt.legend(loc='best', fancybox=True)
             legend.get_frame().set_alpha(0.5)
             plt.xlabel(r'\emph{%s} [%s]' % (xvar, param.unit))
