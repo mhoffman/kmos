@@ -1489,7 +1489,7 @@ class ModelParameter(object):
         self.max = max if max is not None else min
         self.steps = steps
         self.type = type
-        self.unit = ''
+        self.unit = unit
 
     def __repr__(self):
         return ('[%s] min: %s, max: %s, steps: %s'
@@ -1720,6 +1720,7 @@ and <classname>.lock should be moved out of the way ::
              tof_xlabel=None,
              tof_ylabel=None,
              label=None,
+             sublabel=None,
              arrhenius=False,
              ):
         """
@@ -1832,9 +1833,15 @@ and <classname>.lock should be moved out of the way ::
 
         for suffix in suffixes:
             if label is None:
-                plt.savefig('%s_coverages.%s' % (self.runner_name, suffix), bbox_inces='tight')
+                if sublabel is None:
+                    plt.savefig('%s_coverages.%s' % (self.runner_name, suffix), bbox_inces='tight')
+                else:
+                    plt.savefig('%s_%s_coverages.%s' % (self.runner_name, sublabel, suffix), bbox_inces='tight')
             else:
-                plt.savefig('%s_coverages.%s' % (label, suffix), bbox_inces='tight')
+                if sublabel is None:
+                    plt.savefig('%s_coverages.%s' % (label, suffix), bbox_inces='tight')
+                else:
+                    plt.savefig('%s_%s_coverages.%s' % (label, sublabel, suffix), bbox_inces='tight')
 
 
         ######################
@@ -1850,13 +1857,17 @@ and <classname>.lock should be moved out of the way ::
             for tof in plot_tofs:
                 tof = tof.replace(')', '').replace('(', '')
                 if arrhenius :
-                    plt.plot(1./data[xvar], np.log(data[tof]), label=tof.replace('_', '\_'))
+                    plt.plot(1000./data[xvar], np.log(data[tof]), label=tof.replace('_', '\_'))
                 else:
                     plt.plot(data[xvar], data[tof], label=tof.replace('_', '\_'))
             legend = plt.legend(loc='best', fancybox=True)
             legend.get_frame().set_alpha(0.5)
-            plt.xlabel(r'\emph{%s} [%s]' % (xvar, param.unit))
-            plt.ylabel(r'TOF [s$^{-1}$ cell$^{-1}$]')
+            if arrhenius:
+                plt.xlabel(r'$1000\,/%s$ [%s$^{-1}$]' % (xvar, param.unit))
+                plt.ylabel(r'log(TOF)')
+            else:
+                plt.xlabel(r'\emph{%s} [%s]' % (xvar, param.unit))
+                plt.ylabel(r'TOF [s$^{-1}$ cell$^{-1}$]')
         elif len(variable_parameters) == 2:
             print("Two variable parameters. Doing a surface plot.")
         else:
@@ -1864,9 +1875,9 @@ and <classname>.lock should be moved out of the way ::
 
         for suffix in suffixes:
             if label is None:
-                plt.savefig('%s_TOFs.%s' % (self.runner_name, suffix), bbox_inces='tight')
+                plt.savefig('%s_TOFs.%s' % (self.runner_name, suffix), bbox_inches='tight')
             else:
-                plt.savefig('%s_TOFs.%s' % (label, suffix), bbox_inces='tight')
+                plt.savefig('%s_TOFs.%s' % (label, suffix), bbox_inches='tight')
 
         model.deallocate()
 
