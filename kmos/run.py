@@ -1697,6 +1697,8 @@ and <classname>.lock should be moved out of the way ::
             if not os.path.exists(outfile):
                 out = file(outfile, 'a')
                 out.write(model.get_std_header())
+                out.write(str(model.parameters))
+                out.write("""# If one or more parameters change between data lines\n# the set above corresponds to the first line.\n""")
                 out.close()
             out = file(outfile, 'a')
             out.write(data)
