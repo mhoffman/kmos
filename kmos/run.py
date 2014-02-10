@@ -110,6 +110,7 @@ class KMC_Model(Process):
                        print_rates=False,
                        autosend=True,
                        steps_per_frame=50000,
+                       random_seed=None,
                        cache_file=None):
 
         # initialize multiprocessing.Process hooks
@@ -127,6 +128,9 @@ class KMC_Model(Process):
         self.print_rates = print_rates
         self.parameters = Model_Parameters(self.print_rates)
         self.rate_constants = Model_Rate_Constants()
+
+        if random_seed is not None:
+            settings.random_seed = random_seed
 
         if size is None:
             size = settings.simulation_size
@@ -183,6 +187,7 @@ class KMC_Model(Process):
         proclist.init(self.size,
             self.system_name,
             lattice.default_layer,
+            self.settings.random_seed,
             not self.banner)
         self.cell_size = lattice.unit_cell_size * lattice.system_size
 
@@ -1636,7 +1641,7 @@ and <classname>.lock should be moved out of the way ::
         finally:
             fhandle.close()
 
-    def __run_sublist(self, sublist, init_steps, sample_steps, samples):
+    def __run_sublist(self, sublist, init_steps, sample_steps, samples, random_seed=None):
         """
         Run sampling run for a list of parameter-tuples.
 
@@ -1681,6 +1686,7 @@ and <classname>.lock should be moved out of the way ::
             #===========================
             model = KMC_Model(print_rates=False,
                               banner=False,
+                              random_seed=random_seed,
                               cache_file='%s_configs/config_%s.pckl'
                                           % (self.runner_name, input_line))
             for name, value in zip(self.parameters.keys(), datapoint):
@@ -1884,7 +1890,8 @@ and <classname>.lock should be moved out of the way ::
     def run(self, init_steps=1e8,
                   sample_steps=1e8,
                   cores=4,
-                  samples=1):
+                  samples=1,
+                  random_seed=None):
         """Launch the ModelRunner instance. Creates a regular grid over
         all ModelParameters defined in the ModelRunner class.
 
@@ -1911,7 +1918,9 @@ and <classname>.lock should be moved out of the way ::
             p = Process(target=self.__run_sublist, args=(sub_list,
                                                          init_steps,
                                                          sample_steps,
-                                                         samples,))
+                                                         samples,
+                                                         random_seed,
+                                                         ))
             p.start()
 
 
