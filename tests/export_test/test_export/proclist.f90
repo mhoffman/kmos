@@ -241,7 +241,7 @@ subroutine get_occupation(occupation)
     occupation = occupation/real(system_size(1)*system_size(2)*system_size(3))
 end subroutine get_occupation
 
-subroutine init(input_system_size, system_name, layer, no_banner)
+subroutine init(input_system_size, system_name, layer, seed_in, no_banner)
 
 !****f* proclist/init
 ! FUNCTION
@@ -255,7 +255,7 @@ subroutine init(input_system_size, system_name, layer, no_banner)
 !    * ``layer`` initial layer.
 !    * ``no_banner`` [optional] if True no copyright is issued.
 !******
-    integer(kind=iint), intent(in) :: layer
+    integer(kind=iint), intent(in) :: layer, seed_in
     integer(kind=iint), dimension(2), intent(in) :: input_system_size
 
     character(len=400), intent(in) :: system_name
@@ -289,10 +289,10 @@ subroutine init(input_system_size, system_name, layer, no_banner)
         print *, ""
     endif
     call allocate_system(nr_of_proc, input_system_size, system_name)
-    call initialize_state(layer)
+    call initialize_state(layer, seed_in)
 end subroutine init
 
-subroutine initialize_state(layer)
+subroutine initialize_state(layer, seed_in)
 
 !****f* proclist/initialize_state
 ! FUNCTION
@@ -303,11 +303,12 @@ subroutine initialize_state(layer)
 !
 !    * ``layer`` integer representing layer
 !******
-    integer(kind=iint), intent(in) :: layer
+    integer(kind=iint), intent(in) :: layer, seed_in
 
     integer(kind=iint) :: i, j, k, nr
     ! initialize random number generator
     allocate(seed_arr(seed_size))
+    seed = seed_in
     seed_arr = seed
     call random_seed(seed_size)
     call random_seed(put=seed_arr)
