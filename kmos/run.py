@@ -93,7 +93,7 @@ class ProclistProxy(object):
         elif attr in dir(proclist_constants):
             return eval('proclist_constants.%s' % attr)
         else:
-            raise AttributeError
+            raise AttributeError('%s not found' % attr)
 
 
 class KMC_Model(Process):
@@ -184,11 +184,19 @@ class KMC_Model(Process):
 
     def reset(self):
         self.size = np.array(self.size)
-        proclist.init(self.size,
-            self.system_name,
-            lattice.default_layer,
-            self.settings.random_seed,
-            not self.banner)
+        try:
+            proclist.init(self.size,
+                self.system_name,
+                lattice.default_layer,
+                self.settings.random_seed,
+                not self.banner)
+        except:
+            # fallback if API
+            # does not support random seed.
+            proclist.init(self.size,
+                self.system_name,
+                lattice.default_layer,
+                not self.banner)
         self.cell_size = lattice.unit_cell_size * lattice.system_size
 
         # prepare structures for TOF evaluation
@@ -1105,7 +1113,10 @@ class KMC_Model(Process):
 
         """
         if hasattr(self.proclist, 'backend'):
-            return ''.join(self.proclist.backend)
+            try:
+                return ''.join(self.proclist.backend)
+            except:
+                return '???'
         else:
             return 'local_smart'
 
@@ -1940,7 +1951,7 @@ def set_rate_constants(parameters=None, print_rates=None):
     """
     proclist = ProclistProxy()
     if print_rates is None:
-        print_rates = self.print_rates
+        print_rates = True
 
     if parameters is None:
         parameters = settings.parameters
