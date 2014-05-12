@@ -1021,7 +1021,7 @@ class KMC_Model(Process):
                 if self.base.get_avail_site(process, site, 2):
                     avail.append(ProcInt(process, self.settings))
 
-        except Exception as e:
+        except Exception, e:
             # if is not iterable, interpret as process
             for x in range(self.lattice.system_size[0]):
                 for y in range(self.lattice.system_size[1]):
