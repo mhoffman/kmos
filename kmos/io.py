@@ -258,7 +258,7 @@ class ProcListWriter():
             out.write('    calculate_nr2lattice(1) = (nr - 1 - spuck*(system_size(1)*system_size(2)*calculate_nr2lattice(3) &\n'
                 + '        + system_size(1)*calculate_nr2lattice(2))) / spuck\n')
             out.write('    calculate_nr2lattice(4) = nr - spuck*(system_size(1)*system_size(2)*calculate_nr2lattice(3) + &\n'
-                + '        system_size(2)*calculate_nr2lattice(2) + calculate_nr2lattice(1))\n')
+                + '        system_size(1)*calculate_nr2lattice(2) + calculate_nr2lattice(1))\n')
         elif data.meta.model_dimension == 2:
             out.write('    calculate_nr2lattice(3) = 0\n')
             out.write('    calculate_nr2lattice(2) = (nr -1) / (system_size(1)*spuck)\n')

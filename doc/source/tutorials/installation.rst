@@ -48,6 +48,12 @@ atomic simulation environment (ASE) is currently to ::
 Or go to their `website <https://wiki.fysik.dtu.dk/ase/download.html>`_
 to fetch the latest version.
 
+Unfortunately Debian/Ubuntu have discontinued maintaining the gazpacho package which I find very unfortunate since it eased gtk GUI building a lot and I haven't found a simple transition path (simple as in one reliable conversion script and two changed import lines) towards gtkbuilder. Therefore for the moment I can only suggest to fetch the latest old package from e.g. `Debian Packages <https://packages.debian.org/de/squeeze/all/gazpacho/download>`_ and install it manually with ::
+
+    sudo dpkg -i gazpacho_*.deb
+
+
+
 If you think this dependency list hurts. Yes, it does!
 And I am happy about any suggestions how to
 minimize it. However one should note these dependencies are only
