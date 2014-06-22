@@ -11,6 +11,10 @@ and install it using *setuptools* ::
     ./setup.py install [--user]
 
 
+or if you have `pip <http://www.pip-installer.org/en/latest/installing.html>`_ run ::
+
+    pip install python-kmos --upgrade [--user]
+
 To use the core functionality
 (programmatic model setup, code generation, model execution)
 kmos has a fairly modest depedency foot-print. You will need ::
@@ -59,12 +63,6 @@ no dependencies except for a Fortran compiler.
 To ease the installation further on Ubuntu one can simply run::
 
  kmos-install-dependencies-ubuntu
-
-
-.. todo ::
-
-    add pip way or something alike to automatically
-    install dependencies.
 
 
 Installation on openSUSE 12.1 Linux
