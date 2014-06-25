@@ -1,0 +1,42 @@
+<?xml version="1.0" ?>
+<kmc version="(0, 2)">
+    <meta author="Felix Engelmann" debug="0" email="felix.engelmann@tum.de" model_dimension="1" model_name="simple_model"/>
+    <species_list default_species="empty">
+        <species name="A" representation="" tags=""/>
+        <species name="B" representation="" tags=""/>
+        <species name="empty" representation="" tags=""/>
+    </species_list>
+    <parameter_list/>
+    <lattice cell_size="1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0" default_layer="default" representation="" substrate_layer="default">
+        <layer color="#ffffff" name="default">
+            <site default_species="default_species" pos="0.0 0.0 0.0" tags="" type="s"/>
+        </layer>
+    </lattice>
+    <process_list>
+        <process enabled="True" name="adsA" rate_constant="1">
+            <condition coord_layer="default" coord_name="s" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="default" coord_name="s" coord_offset="0 0 0" species="A"/>
+        </process>
+        <process enabled="True" name="adsB" rate_constant="20">
+            <condition coord_layer="default" coord_name="s" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="default" coord_name="s" coord_offset="0 0 0" species="B"/>
+        </process>
+        <process enabled="True" name="desA" rate_constant="10">
+            <condition coord_layer="default" coord_name="s" coord_offset="0 0 0" species="A"/>
+            <action coord_layer="default" coord_name="s" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="desB" rate_constant="1">
+            <condition coord_layer="default" coord_name="s" coord_offset="0 0 0" species="B"/>
+            <action coord_layer="default" coord_name="s" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="react" rate_constant="1" tof_count="{'react': 1}">
+            <condition coord_layer="default" coord_name="s" coord_offset="0 0 0" species="A"/>
+            <action coord_layer="default" coord_name="s" coord_offset="0 0 0" species="B"/>
+        </process>
+        <process enabled="True" name="unreact" rate_constant="10" tof_count="{'unreact': 1}">
+            <condition coord_layer="default" coord_name="s" coord_offset="0 0 0" species="B"/>
+            <action coord_layer="default" coord_name="s" coord_offset="0 0 0" species="A"/>
+        </process>
+    </process_list>
+    <output_list/>
+</kmc>
