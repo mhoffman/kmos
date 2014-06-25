@@ -166,9 +166,13 @@ subroutine do_drc_steps(n)
 !
 !    ``n`` : Number of steps to run
 !******
-	integer(kind=iint), intent(in) :: n
+    integer(kind=iint), intent(in) :: n
 	
-	call do_kmc_steps(n)
+    real(kind=rsingle) :: ran_proc, ran_time, ran_site, ran_idle
+    
+    do i = 1, n
+        !pass
+    end do
 
 end subroutine do_drc_steps
 
