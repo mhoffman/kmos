@@ -150,6 +150,29 @@ subroutine do_kmc_step()
     call run_proc_nr(proc_nr, nr_site)
 end subroutine do_kmc_step
 
+subroutine do_drc_steps(n)
+
+!****f* proclist/do_drc_steps
+! FUNCTION
+!    Performs ``n`` kMC steps. Do nothing 50% of time.
+!    sampling degree of rate control
+!
+!    * first update clock
+!    * continue in 50%
+!    * then configuration sampling step
+!    * last execute process
+!
+! ARGUMENTS
+!
+!    ``n`` : Number of steps to run
+!******
+	integer(kind=iint), intent(in) :: n
+	
+	call do_kmc_steps(n)
+
+end subroutine do_drc_steps
+
+
 subroutine get_next_kmc_step(proc_nr, nr_site)
 
 !****f* proclist/get_kmc_step
