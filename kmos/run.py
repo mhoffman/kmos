@@ -333,6 +333,15 @@ class KMC_Model(Process):
 
         """
         proclist.do_kmc_steps(n)
+        
+    def do_drc_steps(self, n=10000):
+        """Propagate the model `n` steps and sample DRCs
+
+        :param n: Number of steps to run (Default: 10000)
+        :type n: int
+
+        """
+        proclist.do_drc_steps(n)
 
     def run(self):
         """Runs the model indefinitely. To control the
