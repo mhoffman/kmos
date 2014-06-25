@@ -3,3 +3,4 @@ tags
 dist
 MANIFEST
 /build
+.DS_Store
