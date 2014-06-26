@@ -1055,7 +1055,7 @@ end subroutine get_integ_rate
 
 subroutine get_chi(order, return_chi)
     integer(kind=iint), intent(in) :: order
-    real(kind=iint), intent(out) :: return_chi
+    real(kind=rdouble), intent(out) :: return_chi
     
     ASSERT(order.ge.1,"base/get_chi: order has to be greater than 1")
     ASSERT(order.le.drc_order,"base/get_chi: order has to be less than maxorder")
