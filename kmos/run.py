@@ -352,7 +352,75 @@ class KMC_Model(Process):
         """
         proclist.do_drc_steps(n)
         
-    def sample_drc(self, process, pertubation = 1.0, n=10000):
+    def _pair_swap(self,liste):
+        for i in range(0,len(liste)-1,2):
+            tmp=liste[i]
+            liste[i]=liste[i+1]
+            liste[i+1]=tmp
+        return(liste)
+        
+    def _cont_frac(self,chi):
+        
+        if not (all(map(lambda x: x!=0,chi))):
+            print "found zeros in chis:"
+            print chi
+            return
+            
+        
+        coeff=[0.0]*len(chi)
+
+        pl=chi[0];
+        coeff[1]=pl
+        pa=chi[1]
+        coeff[2]=-pa/pl
+        pl=chi[2]+chi[1]*coeff[2]
+        coeff[3]=-pl/pa
+        pa=chi[3]+chi[2]*(coeff[2]+coeff[3])
+        coeff[4]=-pa/pl
+    
+        Dlast=pa
+    
+        aux=[coeff[2]+coeff[3],coeff[2]]+[0.0]*len(chi)
+    
+        for n in range(5,len(chi)):
+            L=2*int((n-1)/2)
+        
+            for k in range(L,3,-2):
+                aux[k-1]=aux[k-1-1]+coeff[n-1]*aux[k-2-1]
+            aux[1]=aux[0]+coeff[n-1]
+        
+            aux=self._pair_swap(aux)
+        
+            asum=0
+            for i in range(1,(L/2)+1):
+                asum+=chi[n-1-i]*aux[2*i-2]
+            D=chi[n-1]+asum
+        
+            coeff[n]=-D/Dlast
+        
+            Dlast=D
+    
+        omega=10**(-5)
+    
+        evenorder=2*int((len(chi)-1)/2)
+    
+        lim=coeff[evenorder]
+    
+        for i in range(evenorder-1,0,-1):
+            div=1 if (i%2==0) else -omega
+            lim=coeff[i]/(div+lim)
+        
+        #print " ".join(map(str,[lim]+coeff[1:]))
+    
+        return lim
+        
+        
+    def sample_drc(self, process, n=10000, pertubation = 1.0):
+        
+        if(process < 1 or process > self.proclist.nr_of_proc):
+            print str(process)+" is not a valid process (between 1 and "+str(self.proclist.nr_of_proc)+")"
+            return
+        
         
         t0 = self.base.get_kmc_time()
         
@@ -361,7 +429,7 @@ class KMC_Model(Process):
         for i in range(20):
             chi0[i] = base.get_chi(i + 1)
             
-        proclist.do_drc_steps(n,4,1.0)
+        proclist.do_drc_steps(n,process,pertubation)
         
         chi1=np.zeros(20,dtype=np.float64)
         for i in range(20):
@@ -371,9 +439,18 @@ class KMC_Model(Process):
         
         chi=map(lambda x: x/(t1-t0),(chi1-chi0))
         
+        limit=self._cont_frac(chi)
+        
+        if self.tof_matrix[0,process-1]>0 :
+            print "sample depencency from tof on tof"
+            limit+=self.base.get_integ_rate(process)/(t1)/self.base.get_rate(process)
+        
         #watch out of TOF==process
+        
+        #print self.tof_matrix
+        #getattr(self.proclist, process.lower())
             
-        print chi
+        print limit
         
 
     def run(self):
