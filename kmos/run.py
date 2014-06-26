@@ -192,9 +192,7 @@ class KMC_Model(Process):
                 self.settings.random_seed,
                 not self.banner,
                 20)
-            print "succeded to put drc"
         except:
-            print "failed to allo cdrc"
             try:
                 proclist.init(self.size,
                     self.system_name,
