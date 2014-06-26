@@ -30,6 +30,7 @@ use kind_values
 use base, only: &
     update_accum_rate, &
     update_integ_rate, &
+    update_chi, &
     determine_procsite, &
     update_clocks, &
     avail_sites, &
@@ -222,6 +223,7 @@ subroutine do_drc_steps(n)
             O=G*abs(accum_pert*pertubation)/accum_rate
         end if
         
+        call update_chi(G,O)
     end do
 
 end subroutine do_drc_steps

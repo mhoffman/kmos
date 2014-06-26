@@ -78,6 +78,7 @@ public :: add_proc, &
     get_null_species, &
     update_accum_rate, &
     update_integ_rate, &
+    update_chi, &
     update_clocks
 
 
@@ -212,6 +213,11 @@ character(len=200) :: system_name
 !   Unique indentifier of this simulation to be used for restart files.
 !   This name should not contain any characters that you don't want to
 !   have in a filename either, i.e. only [A-Za-z0-9\_-].
+!******
+integer(kind=iint) :: drc_order
+!****v* base/drc_order
+! FUNCTION
+!   Number of orders for chis to calculate.
 !******
 
 !****************
@@ -656,7 +662,13 @@ subroutine update_integ_rate()
 end subroutine update_integ_rate
 !------ S. Matera 09/18/2012------
 
-subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name, drc_order_in)
+subroutine update_chi(G,O)
+    
+    real(kind=iint), intent(in) :: G, O
+
+end subroutine update_chi
+
+subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name, input_drc_order)
     !****f* base/allocate_system
     ! FUNCTION
     !   Allocates all book-keeping structures and stores
@@ -670,17 +682,10 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name, dr
     !---------------I/O variables---------------
     character(len=200), intent(in) :: input_system_name
     integer(kind=iint), intent(in) :: input_volume, input_nr_of_proc
-    integer(kind=iint), intent(in), optional :: drc_order_in
-    integer(kind=iint) :: drc_order
+    integer(kind=iint), intent(in), optional :: input_drc_order
     logical :: system_allocated
 
     system_allocated = .false.
-
-    if(present(drc_order_in))then
-        drc_order=drc_order_in
-    else
-        drc_order=20
-    endif
     
     ! Make sure we have at least one process
     if(input_nr_of_proc.le.0)then
@@ -739,6 +744,12 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name, dr
         nr_of_proc = input_nr_of_proc
         volume = input_volume
         system_name = input_system_name
+        
+        if(present(input_drc_order))then
+            drc_order=input_drc_order
+        else
+            drc_order=20
+        endif
 
         ! Set clocks and step counter to 0
         kmc_time = 0.
