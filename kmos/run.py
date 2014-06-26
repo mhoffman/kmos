@@ -426,6 +426,9 @@ class KMC_Model(Process):
         
         chi0=np.zeros(20,dtype=np.float64)
         
+        print "begin:"
+        print chi0
+        
         for i in range(20):
             chi0[i] = base.get_chi(i + 1)
             
@@ -436,6 +439,10 @@ class KMC_Model(Process):
             chi1[i] = base.get_chi(i + 1)
         
         t1 = self.base.get_kmc_time()
+        
+        if(not all(np.isfinite(chi1))):
+            print "ERROR: precision error in sampled chis"
+            return
         
         chi=map(lambda x: x/(t1-t0),(chi1-chi0))
         
