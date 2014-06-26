@@ -422,10 +422,10 @@ class KMC_Model(Process):
         
         t0 = self.base.get_kmc_time()
         
-        chi0=np.zeros(20,dtype=np.float64)
+        #chi0=np.zeros(20,dtype=np.float64)
         
-        for i in range(20):
-            chi0[i] = base.get_chi(i + 1)
+        #for i in range(20):
+        #    chi0[i] = base.get_chi(i + 1)
             
         proclist.do_drc_steps(n,process,pertubation)
         
@@ -435,11 +435,14 @@ class KMC_Model(Process):
         
         t1 = self.base.get_kmc_time()
         
+        self.drc_sum_time = self.drc_sum_time+(t1-t0) if hasattr(self, 'drc_sum_time') else (t1-t0)
+        
         if(not all(np.isfinite(chi1))):
             print "ERROR: precision error in sampled chis"
             return
         
-        chi=map(lambda x: x/(t1-t0),(chi1-chi0))
+        chi=map(lambda x: x/(self.drc_sum_time),chi1)
+        
         
         limit=self._cont_frac(chi)
         
@@ -447,8 +450,16 @@ class KMC_Model(Process):
             #print "INFO: sample depencency from tof on tof"
             limit+=self.base.get_integ_rate(process)/(t1)/self.base.get_rate(process)
         
-        print limit
+        print " ".join(map(str,[limit]+chi))
         
+        #print limit
+        
+    def get_chi(self):
+        chi=np.zeros(20,dtype=np.float64)
+        for i in range(20):
+            chi[i] = base.get_chi(i + 1)
+            
+        return chi
 
     def run(self):
         """Runs the model indefinitely. To control the
