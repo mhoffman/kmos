@@ -410,8 +410,6 @@ class KMC_Model(Process):
             div=1 if (i%2==0) else -omega
             lim=coeff[i]/(div+lim)
         
-        #print " ".join(map(str,[lim]+coeff[1:]))
-    
         return lim
         
         
@@ -425,9 +423,6 @@ class KMC_Model(Process):
         t0 = self.base.get_kmc_time()
         
         chi0=np.zeros(20,dtype=np.float64)
-        
-        print "begin:"
-        print chi0
         
         for i in range(20):
             chi0[i] = base.get_chi(i + 1)
@@ -449,14 +444,9 @@ class KMC_Model(Process):
         limit=self._cont_frac(chi)
         
         if self.tof_matrix[0,process-1]>0 :
-            print "sample depencency from tof on tof"
+            #print "INFO: sample depencency from tof on tof"
             limit+=self.base.get_integ_rate(process)/(t1)/self.base.get_rate(process)
         
-        #watch out of TOF==process
-        
-        #print self.tof_matrix
-        #getattr(self.proclist, process.lower())
-            
         print limit
         
 
