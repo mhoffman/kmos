@@ -154,7 +154,7 @@ subroutine do_kmc_step()
     call run_proc_nr(proc_nr, nr_site)
 end subroutine do_kmc_step
 
-subroutine do_drc_steps(n)
+subroutine do_drc_steps(n, process, pertubation)
 
 !****f* proclist/do_drc_steps
 ! FUNCTION
@@ -170,7 +170,8 @@ subroutine do_drc_steps(n)
 !
 !    ``n`` : Number of steps to run
 !******
-    integer(kind=iint), intent(in) :: n
+    integer(kind=iint), intent(in) :: n, process
+    real(kind=rdouble), intent(in) :: pertubation
 	
     real(kind=rsingle) :: ran_proc, ran_time, ran_site, ran_idle
     
@@ -179,14 +180,11 @@ subroutine do_drc_steps(n)
     real(kind=iint) :: G, O, accum_rate
     integer(kind=iint) :: accum_pert
     
-    real(kind=rdouble) :: pertubation, rate_desA
+    real(kind=rdouble) :: rate_process
     
     integer(kind=iint) :: i
     
-    call get_rate(desA,rate_desA)
-    
-    !value of which the rateconstant should be perturbed
-    pertubation=1.0
+    call get_rate(process,rate_process)
     
     do i = 1, n
         call random_number(ran_time)
@@ -207,8 +205,8 @@ subroutine do_drc_steps(n)
             
             G=2*abs(accum_rate)
             
-            if(proc_nr .EQ. desA) then
-                O=G*abs(pertubation)/rate_desA
+            if(proc_nr .EQ. process) then
+                O=G*abs(pertubation)/rate_process
             else
                 O=0.0
             end if
@@ -218,7 +216,7 @@ subroutine do_drc_steps(n)
         else
             G=-2*abs(accum_rate)
             
-            call get_nrofsites(desA,accum_pert)
+            call get_nrofsites(process,accum_pert)
             
             O=G*abs(accum_pert*pertubation)/accum_rate
         end if
@@ -289,7 +287,7 @@ subroutine get_occupation(occupation)
     occupation = occupation/real(system_size(1)*system_size(2)*system_size(3))
 end subroutine get_occupation
 
-subroutine init(input_system_size, system_name, layer, seed_in, no_banner)
+subroutine init(input_system_size, system_name, layer, seed_in, no_banner, in_drc_order)
 
 !****f* proclist/init
 ! FUNCTION
@@ -309,6 +307,7 @@ subroutine init(input_system_size, system_name, layer, seed_in, no_banner)
     character(len=400), intent(in) :: system_name
 
     logical, optional, intent(in) :: no_banner
+    integer(kind=iint), optional, intent(in) :: in_drc_order
 
     if (.not. no_banner) then
         print *, "+------------------------------------------------------------+"
@@ -336,7 +335,11 @@ subroutine init(input_system_size, system_name, layer, seed_in, no_banner)
         print *, ""
         print *, ""
     endif
-    call allocate_system(nr_of_proc, input_system_size, system_name)
+    if(present(in_drc_order))then
+        call allocate_system(nr_of_proc, input_system_size, system_name, in_drc_order)
+    else
+        call allocate_system(nr_of_proc, input_system_size, system_name)
+    endif
     call initialize_state(layer, seed_in)
 end subroutine init
 

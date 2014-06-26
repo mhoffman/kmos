@@ -127,7 +127,7 @@ pure function calculate_nr2lattice(nr)
 
 end function calculate_nr2lattice
 
-subroutine allocate_system(nr_of_proc, input_system_size, system_name)
+subroutine allocate_system(nr_of_proc, input_system_size, system_name, in_drc_order)
 
 !****f* lattice/allocate_system
 ! FUNCTION
@@ -141,6 +141,7 @@ subroutine allocate_system(nr_of_proc, input_system_size, system_name)
     integer(kind=iint), intent(in) :: nr_of_proc
     integer(kind=iint), dimension(1), intent(in) :: input_system_size
     character(len=200), intent(in) :: system_name
+    integer(kind=iint), optional, intent(in) :: in_drc_order
 
     integer(kind=iint) :: i, j, k, nr
     integer(kind=iint) :: check_nr
@@ -194,8 +195,12 @@ subroutine allocate_system(nr_of_proc, input_system_size, system_name)
         end do
     end do
 
-    call base_allocate_system(nr_of_proc, volume, system_name)
-
+    if(present(in_drc_order))then
+        call base_allocate_system(nr_of_proc, volume, system_name, in_drc_order)
+    else
+        call base_allocate_system(nr_of_proc, volume, system_name)
+    endif
+    
     unit_cell_size(1, 1) = 1.0
     unit_cell_size(1, 2) = 0.0
     unit_cell_size(1, 3) = 0.0
