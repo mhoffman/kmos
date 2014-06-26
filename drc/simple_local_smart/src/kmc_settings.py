@@ -1,5 +1,5 @@
 model_name = 'simple_model'
-simulation_size = 20
+simulation_size = 1
 random_seed = 1
 
 def setup_model(model):

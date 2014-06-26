@@ -34,7 +34,10 @@ use base, only: &
     update_clocks, &
     avail_sites, &
     null_species, &
-    increment_procstat
+    increment_procstat, &
+    get_nrofsites, &
+    get_rate, &
+    get_accum_rate 
 
 use lattice, only: &
     default, &
@@ -170,10 +173,55 @@ subroutine do_drc_steps(n)
 	
     real(kind=rsingle) :: ran_proc, ran_time, ran_site, ran_idle
     
+    integer(kind=iint) :: nr_site, proc_nr
+    
+    real(kind=iint) :: G, O, accum_rate
+    integer(kind=iint) :: accum_pert
+    
+    real(kind=rdouble) :: pertubation, rate_desA
+    
     integer(kind=iint) :: i
     
+    call get_rate(desA,rate_desA)
+    
+    !value of which the rateconstant should be perturbed
+    pertubation=1.0
+    
     do i = 1, n
-        !pass
+        call random_number(ran_time)
+        call random_number(ran_proc)
+        call random_number(ran_site)
+        call update_accum_rate
+        call update_clocks(ran_time)
+
+        call update_integ_rate
+        
+        call random_number(ran_idle)
+        
+        call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
+        
+        call get_accum_rate(0, accum_rate)
+        
+        if(ran_idle .LE. 0.5) then !execute step
+            
+            G=2*abs(accum_rate)
+            
+            if(proc_nr .EQ. desA) then
+                O=G*abs(pertubation)/rate_desA
+            else
+                O=0.0
+            end if
+            
+            
+            call run_proc_nr(proc_nr, nr_site)
+        else
+            G=-2*abs(accum_rate)
+            
+            call get_nrofsites(desA,accum_pert)
+            
+            O=G*abs(accum_pert*pertubation)/accum_rate
+        end if
+        
     end do
 
 end subroutine do_drc_steps
