@@ -193,7 +193,7 @@ subroutine do_drc_steps(n)
         call random_number(ran_proc)
         call random_number(ran_site)
         call update_accum_rate
-        call update_clocks(ran_time)
+        call update_clocks(ran_time,2)
 
         call update_integ_rate
         

@@ -665,6 +665,21 @@ end subroutine update_integ_rate
 subroutine update_chi(G,O)
     
     real(kind=iint), intent(in) :: G, O
+    
+    integer(kind=iint) :: i
+    
+    !react=5
+    chi(1) = chi(1)+nr_of_sites(5)*rates(5)*O*kmc_time_step
+    do i=2,drc_order
+        chi(i) = chi(i)+nr_of_sites(5)*rates(5)*G*tchi(i-1)
+    end do
+    
+    do i=drc_order,2,-1
+        tchi(i)=G*tchi(i-1)
+    end do
+    tchi(1)=O*kmc_time_step
+    
+    print *,"c0=",chi(1),"c1=",chi(2),"c2=",chi(3)
 
 end subroutine update_chi
 
@@ -1171,7 +1186,7 @@ subroutine determine_procsite(ran_proc, ran_site, proc, site)
 end subroutine determine_procsite
 
 
-subroutine update_clocks(ran_time)
+subroutine update_clocks(ran_time, factor)
     !****f* base/update_clocks
     ! FUNCTION
     !    Updates walltime, kmc_step and kmc_time.
@@ -1181,6 +1196,7 @@ subroutine update_clocks(ran_time)
     !    * ``ran_time`` Random real number :math:`\in [0,1]`
     !******
     real(kind=rsingle), intent(in) :: ran_time
+    integer, intent(in), optional :: factor
     real(kind=rsingle) :: runtime
 
 
@@ -1188,7 +1204,12 @@ subroutine update_clocks(ran_time)
     ASSERT(ran_time.ge.0.,"base/update_clocks: ran_time variable has to be positive.")
     ASSERT(ran_time.le.1.,"base/update_clocks: ran_time variable has to be less than 1.")
 
-    kmc_time_step = -log(ran_time)/accum_rates(nr_of_proc)
+	!Check for factor if not present, use it
+	if (present(factor)) then
+    	kmc_time_step = (-log(ran_time)/accum_rates(nr_of_proc))/factor
+	else
+		kmc_time_step = -log(ran_time)/accum_rates(nr_of_proc)
+	endif
     ! Make sure the difference is not so small, that it is rounded off
     ! ASSERT(kmc_time+kmc_time_step>kmc_time,"base/update_clocks: precision of kmc_time is not sufficient")
 
