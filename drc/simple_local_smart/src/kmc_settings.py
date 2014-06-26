@@ -1,5 +1,5 @@
 model_name = 'simple_model'
-simulation_size = 1
+simulation_size = 100
 random_seed = 1
 
 def setup_model(model):
@@ -18,12 +18,12 @@ parameters = {
     }
 
 rate_constants = {
-    "adsA":("1", True),
-    "adsB":("20", True),
-    "desA":("10", True),
-    "desB":("1", True),
-    "react":("1", True),
-    "unreact":("10", True),
+    "adsA":("1000", True),
+    "adsB":("50", True),
+    "desA":("80", True),
+    "desB":("700", True),
+    "react":("200", True),
+    "unreact":("30", True),
     }
 
 site_names = ['default_s']

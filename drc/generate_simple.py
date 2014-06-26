@@ -26,33 +26,33 @@ pt.add_site(layer='default',
 coord = pt.layer_list.generate_coord
 
 pt.add_process(name='adsA',
-               rate_constant='1',
+               rate_constant='1000',
                conditions=[Condition(species='empty', coord=coord('s'))],
                actions=[Action(species='A', coord=coord('s'))])
 			   
 pt.add_process(name='adsB',
-               rate_constant='20',
+               rate_constant='50',
                conditions=[Condition(species='empty', coord=coord('s'))],
                actions=[Action(species='B', coord=coord('s'))])
 
 pt.add_process(name='desA',
-               rate_constant='10',
+               rate_constant='80',
                conditions=[Condition(species='A', coord=coord('s'))],
                actions=[Action(species='empty', coord=coord('s'))])
 			   
 pt.add_process(name='desB',
-               rate_constant='1',
+               rate_constant='700',
                conditions=[Condition(species='B', coord=coord('s'))],
                actions=[Action(species='empty', coord=coord('s'))])
 
 pt.add_process(name='react',
-               rate_constant='1',
+               rate_constant='200',
                conditions=[Condition(species='A', coord=coord('s'))],
                actions=[Action(species='B', coord=coord('s'))],
                tof_count={'react': 1})
 			   
 pt.add_process(name='unreact',
-               rate_constant='10',
+               rate_constant='30',
                conditions=[Condition(species='B', coord=coord('s'))],
                actions=[Action(species='A', coord=coord('s'))],
                tof_count={'unreact': 1})
