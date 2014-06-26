@@ -185,18 +185,29 @@ class KMC_Model(Process):
     def reset(self):
         self.size = np.array(self.size)
         try:
+            #first try with drc order
             proclist.init(self.size,
                 self.system_name,
                 lattice.default_layer,
                 self.settings.random_seed,
-                not self.banner)
+                not self.banner,
+                20)
+            print "succeded to put drc"
         except:
-            # fallback if API
-            # does not support random seed.
-            proclist.init(self.size,
-                self.system_name,
-                lattice.default_layer,
-                not self.banner)
+            print "failed to allo cdrc"
+            try:
+                proclist.init(self.size,
+                    self.system_name,
+                    lattice.default_layer,
+                    self.settings.random_seed,
+                    not self.banner)
+            except:
+                # fallback if API
+                # does not support random seed.
+                proclist.init(self.size,
+                    self.system_name,
+                    lattice.default_layer,
+                    not self.banner)
         self.cell_size = np.dot(np.diag(lattice.system_size), lattice.unit_cell_size)
 
         # prepare structures for TOF evaluation
@@ -342,6 +353,30 @@ class KMC_Model(Process):
 
         """
         proclist.do_drc_steps(n)
+        
+    def sample_drc(self, process, pertubation = 1.0, n=10000):
+        
+        t0 = self.base.get_kmc_time()
+        
+        chi0=np.zeros(20,dtype=np.float64)
+        
+        for i in range(20):
+            chi0[i] = base.get_chi(i + 1)
+            
+        proclist.do_drc_steps(n,4,1.0)
+        
+        chi1=np.zeros(20,dtype=np.float64)
+        for i in range(20):
+            chi1[i] = base.get_chi(i + 1)
+        
+        t1 = self.base.get_kmc_time()
+        
+        chi=map(lambda x: x/(t1-t0),(chi1-chi0))
+        
+        #watch out of TOF==process
+            
+        print chi
+        
 
     def run(self):
         """Runs the model indefinitely. To control the
