@@ -62,6 +62,7 @@ public :: add_proc, &
     get_nrofsites, &
     get_procstat, &
     get_rate, &
+    get_chi, &
     get_species, &
     get_system_name, &
     get_walltime, &
@@ -679,8 +680,6 @@ subroutine update_chi(G,O)
     end do
     tchi(1)=O*kmc_time_step
     
-    print *,"c0=",chi(1),"c1=",chi(2),"c2=",chi(3)
-
 end subroutine update_chi
 
 subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name, input_drc_order)
@@ -1053,6 +1052,18 @@ subroutine get_integ_rate(proc_nr, return_integ_rate)
 
 end subroutine get_integ_rate
 !------ S. Matera 09/18/2012------
+
+subroutine get_chi(order, return_chi)
+    integer(kind=iint), intent(in) :: order
+    real(kind=iint), intent(out) :: return_chi
+    
+    ASSERT(order.ge.1,"base/get_chi: order has to be greater than 1")
+    ASSERT(order.le.drc_order,"base/get_chi: order has to be less than maxorder")
+    
+    return_chi=chi(order)
+    
+    
+end subroutine get_chi
 
 subroutine get_rate(proc_nr, return_rate)
     !****f* base/get_rate
