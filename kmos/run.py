@@ -342,6 +342,30 @@ class KMC_Model(Process):
 
         """
         proclist.do_drc_steps(n)
+        
+    def sample_drc(self, n=10000):
+        
+        t0 = self.base.get_kmc_time()
+        
+        chi0=np.zeros(20,dtype=np.float64)
+        
+        for i in range(20):
+            chi0[i] = base.get_chi(i + 1)
+            
+        proclist.do_drc_steps(n)
+        
+        chi1=np.zeros(20,dtype=np.float64)
+        for i in range(20):
+            chi1[i] = base.get_chi(i + 1)
+        
+        t1 = self.base.get_kmc_time()
+        
+        chi=map(lambda x: x/(t1-t0),(chi1-chi0))
+        
+        
+            
+        print chi
+        
 
     def run(self):
         """Runs the model indefinitely. To control the
