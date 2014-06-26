@@ -170,6 +170,8 @@ subroutine do_drc_steps(n)
 	
     real(kind=rsingle) :: ran_proc, ran_time, ran_site, ran_idle
     
+    integer(kind=iint) :: i
+    
     do i = 1, n
         !pass
     end do
