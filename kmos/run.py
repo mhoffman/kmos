@@ -454,6 +454,12 @@ class KMC_Model(Process):
         
         #print limit
         
+    def get_chi(self):
+        chi=np.zeros(20,dtype=np.float64)
+        for i in range(20):
+            chi[i] = base.get_chi(i + 1)
+            
+        return chi
 
     def run(self):
         """Runs the model indefinitely. To control the
