@@ -140,6 +140,16 @@ real(kind=rdouble), dimension(:), allocatable :: integ_rates
 !
 !******
 !------ S. Matera 09/18/2012------
+real(kind=rdouble), dimension(:), allocatable :: chi
+!****v* base/chi
+! FUNCTION
+!    Stores the summation of the first dim orders of chis
+!******
+real(kind=rdouble), dimension(:), allocatable :: tchi
+!****v* base/tchi
+! FUNCTION
+!    Stores the partial history for fast calculation of chis
+!******
 integer(kind=iint), dimension(:), allocatable :: nr_of_sites
 !****v* base/nr_of_sites
 ! FUNCTION
@@ -646,7 +656,7 @@ subroutine update_integ_rate()
 end subroutine update_integ_rate
 !------ S. Matera 09/18/2012------
 
-subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
+subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name, drc_order_in)
     !****f* base/allocate_system
     ! FUNCTION
     !   Allocates all book-keeping structures and stores
@@ -660,11 +670,18 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
     !---------------I/O variables---------------
     character(len=200), intent(in) :: input_system_name
     integer(kind=iint), intent(in) :: input_volume, input_nr_of_proc
+    integer(kind=iint), intent(in), optional :: drc_order_in
+    integer(kind=iint) :: drc_order
     logical :: system_allocated
 
     system_allocated = .false.
 
-
+    if(present(drc_order_in))then
+        drc_order=drc_order_in
+    else
+        drc_order=20
+    endif
+    
     ! Make sure we have at least one process
     if(input_nr_of_proc.le.0)then
         print *,"kmos/base/allocate_system: there needs to be at least one process in a kMC system"
@@ -704,6 +721,14 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
         system_allocated = .true.
     endif
 !------ S. Matera 09/18/2012------
+    if(allocated(chi))then
+        print *,"kmos/base/allocate_system: Tried to allocate chi twice, please deallocate first"
+        system_allocated = .true.
+    endif
+    if(allocated(tchi))then
+        print *,"kmos/base/allocate_system: Tried to allocate tchi twice, please deallocate first"
+        system_allocated = .true.
+    endif
     if(allocated(procstat))then
         print *,"kmos/base/allocate_system: Tried to allocate procstat twice, please deallocate first"
         system_allocated = .true.
@@ -736,6 +761,10 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
         allocate(integ_rates(nr_of_proc))
         integ_rates = 0
 !------ S. Matera 09/18/2012------
+        allocate(chi(drc_order))
+        chi = 0
+        allocate(tchi(drc_order))
+        tchi = 0
         allocate(procstat(nr_of_proc))
         procstat = 0
 
@@ -793,6 +822,16 @@ subroutine deallocate_system()
         print *,"Warning: integ_rates was not allocated, tried to deallocate."
     endif
 !------ S. Matera 09/18/2012------
+    if(allocated(chi))then
+        deallocate(chi)
+    else
+        print *,"Warning: chi was not allocated, tried to deallocate."
+    endif
+    if(allocated(tchi))then
+        deallocate(tchi)
+    else
+        print *,"Warning: tchi was not allocated, tried to deallocate."
+    endif
     if(allocated(procstat))then
         deallocate(procstat)
     else
