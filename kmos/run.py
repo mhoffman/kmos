@@ -431,7 +431,7 @@ class KMC_Model(Process):
         
         chi1=np.zeros(20,dtype=np.float64)
         for i in range(20):
-            chi1[i] = base.get_chi(i + 1)
+            chi1[i] = base.get_chi(i + 1,1,1)
         
         t1 = self.base.get_kmc_time()
         
@@ -457,7 +457,7 @@ class KMC_Model(Process):
     def get_chi(self):
         chi=np.zeros(20,dtype=np.float64)
         for i in range(20):
-            chi[i] = base.get_chi(i + 1)
+            chi[i] = base.get_chi(i + 1,1,1)
             
         return chi
 
