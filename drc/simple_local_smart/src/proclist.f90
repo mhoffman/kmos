@@ -186,6 +186,13 @@ subroutine do_drc_steps(n, process, pertubation)
     
     call get_rate(process,rate_process)
     
+    !init if first loop nothing happens
+    
+    call random_number(ran_proc)
+    call random_number(ran_site)
+    call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
+    call get_accum_rate(0, accum_rate)
+    
     do i = 1, n
         call random_number(ran_time)
         call random_number(ran_proc)
@@ -197,11 +204,12 @@ subroutine do_drc_steps(n, process, pertubation)
         
         call random_number(ran_idle)
         
-        call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
-        
-        call get_accum_rate(0, accum_rate)
-        
         if(ran_idle .LE. 0.5) then !execute step
+        
+            call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
+        
+            call get_accum_rate(0, accum_rate)
+        
             
             G=2*abs(accum_rate)
             
@@ -211,6 +219,7 @@ subroutine do_drc_steps(n, process, pertubation)
                 O=0.0
             end if
             
+            update_chi()
             
             call run_proc_nr(proc_nr, nr_site)
         else

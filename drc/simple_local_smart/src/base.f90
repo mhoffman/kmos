@@ -142,15 +142,17 @@ real(kind=rdouble), dimension(:), allocatable :: integ_rates
 !
 !******
 !------ S. Matera 09/18/2012------
-real(kind=rdouble), dimension(:), allocatable :: chi
+real(kind=rdouble), dimension(:,:,:), allocatable :: chi
 !****v* base/chi
 ! FUNCTION
 !    Stores the summation of the first dim orders of chis
+!    chi(order,pert process,nr_tof)
 !******
-real(kind=rdouble), dimension(:), allocatable :: tchi
+real(kind=rdouble), dimension(:,:,:), allocatable :: tchi
 !****v* base/tchi
 ! FUNCTION
 !    Stores the partial history for fast calculation of chis
+!    tchi(order,pert process,nr_tof)
 !******
 integer(kind=iint), dimension(:), allocatable :: nr_of_sites
 !****v* base/nr_of_sites
@@ -667,18 +669,19 @@ subroutine update_chi(G,O)
     
     real(kind=iint), intent(in) :: G, O
     
+    
     integer(kind=iint) :: i
     
     !react=5
-    chi(1) = chi(1)+nr_of_sites(5)*rates(5)*O*kmc_time_step
+    chi(1,1,1) = chi(1,1,1)+nr_of_sites(5)*rates(5)*O*kmc_time_step
     do i=2,drc_order
-        chi(i) = chi(i)+nr_of_sites(5)*rates(5)*G*tchi(i-1)
+        chi(i,1,1) = chi(i,1,1)+nr_of_sites(5)*rates(5)*G*tchi(i-1,1,1)
     end do
     
     do i=drc_order,2,-1
-        tchi(i)=G*tchi(i-1)
+        tchi(i,1,1)=G*tchi(i-1,1,1)
     end do
-    tchi(1)=O*kmc_time_step
+    tchi(1,1,1)=O*kmc_time_step
     
 end subroutine update_chi
 
@@ -786,9 +789,9 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name, in
         allocate(integ_rates(nr_of_proc))
         integ_rates = 0
 !------ S. Matera 09/18/2012------
-        allocate(chi(drc_order))
+        allocate(chi(drc_order,nr_of_proc,2)) !nr of tofs
         chi = 0
-        allocate(tchi(drc_order))
+        allocate(tchi(drc_order,nr_of_proc,2)) !nr of tofs
         tchi = 0
         allocate(procstat(nr_of_proc))
         procstat = 0
@@ -1053,14 +1056,14 @@ subroutine get_integ_rate(proc_nr, return_integ_rate)
 end subroutine get_integ_rate
 !------ S. Matera 09/18/2012------
 
-subroutine get_chi(order, return_chi)
-    integer(kind=iint), intent(in) :: order
+subroutine get_chi(order, proc, tof, return_chi)
+    integer(kind=iint), intent(in) :: order, proc, tof
     real(kind=rdouble), intent(out) :: return_chi
     
     ASSERT(order.ge.1,"base/get_chi: order has to be greater than 1")
     ASSERT(order.le.drc_order,"base/get_chi: order has to be less than maxorder")
     
-    return_chi=chi(order)
+    return_chi=chi(order,proc,tof)
     
     
 end subroutine get_chi
