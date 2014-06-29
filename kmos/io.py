@@ -182,91 +182,20 @@ class ProcListWriter():
                                  code_generator='local_smart',
                                  close_module=False,
                                  module_name='proclist'):
-        out.write(self._gpl_message())
-        out.write(('!****h* kmos/proclist\n'
-                  '! FUNCTION\n'
-                  '!    Implements the kMC process list.\n'
-                  '!\n'
-                  '!******\n'
-                  '\n\nmodule %s\n'
-                  'use kind_values\n') % module_name)
+        from kmos.utils import evaluate_template
 
+        with open(os.path.join(os.path.dirname(__file__),
+                               'fortran_src',
+                               'proclist_constants.py')) as infile:
+            template = infile.read()
 
-        if code_generator == 'local_smart':
-            out.write('use base, only: &\n'
-                      '    update_accum_rate, &\n'
-                      '    update_integ_rate, &\n'
-                      '    determine_procsite, &\n'
-                      '    update_clocks, &\n'
-                      '    avail_sites, &\n')
-            if len(data.layer_list) == 1 : # multi-lattice mode
-                out.write('    null_species, &\n')
-            else:
-                out.write('    set_null_species, &\n')
-            out.write('    increment_procstat\n\n')
+        out.write(evaluate_template(template, 
+                                    self=self,
+                                    data=data,
+                                    code_generator=code_generator,
+                                    close_module=close_module,
+                                    module_name=module_name))
 
-
-        out.write('use lattice, only: &\n')
-        site_params = []
-        for layer in data.layer_list:
-            out.write('    %s, &\n' % layer.name)
-            for site in layer.sites:
-                site_params.append((site.name, layer.name))
-        for i, (site, layer) in enumerate(site_params):
-            out.write(('    %s_%s, &\n') % (layer, site))
-
-        if code_generator == 'local_smart':
-            out.write('    allocate_system, &\n'
-                  '    nr2lattice, &\n'
-                  '    lattice2nr, &\n'
-                  '    add_proc, &\n'
-                  '    can_do, &\n'
-                  '    set_rate_const, &\n'
-                  '    replace_species, &\n'
-                  '    del_proc, &\n'
-                  '    reset_site, &\n'
-                  '    system_size, &\n'
-                  '    spuck, &\n')
-        out.write('    get_species\n'
-              '\n\nimplicit none\n\n')
-
-        # initialize various parameter kind of data
-        out.write('\n\n ! Species constants\n\n')
-        if len(data.layer_list) > 1 : # multi-lattice mode
-            out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_species = %s\n'\
-                % (len(data.species_list)+1))
-        else:
-            out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_species = %s\n'\
-                % (len(data.species_list)))
-        for i, species in enumerate(sorted(data.species_list, key=lambda x: x.name)):
-            out.write('integer(kind=iint), parameter, public :: %s = %s\n' % (species.name, i))
-        if len(data.layer_list) > 1 : # multi-lattice mode
-            out.write('integer(kind=iint), parameter, public :: null_species = %s\n\n'\
-                % (len(data.species_list)))
-        out.write('integer(kind=iint), public :: default_species = %s\n' % (data.species_list.default_species))
-
-        out.write('\n\n! Process constants\n\n')
-        for i, process in enumerate(self.data.process_list):
-            out.write('integer(kind=iint), parameter, public :: %s = %s\n' % (process.name, i + 1))
-
-        if code_generator == 'local_smart':
-            representation_length = max([len(species.representation) for species in data.species_list])
-            out.write('\n\ninteger(kind=iint), parameter, public :: representation_length = %s\n' % representation_length)
-            if os.name == 'posix':
-                out.write('integer(kind=iint), public :: seed_size = 12\n')
-            elif os.name == 'nt':
-                out.write('integer(kind=iint), public :: seed_size = 12\n')
-            else:
-                out.write('integer(kind=iint), public :: seed_size = 8\n')
-            out.write('integer(kind=iint), public :: seed ! random seed\n')
-            out.write('integer(kind=iint), public, dimension(:), allocatable :: seed_arr ! random seed\n')
-            out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_proc = %s\n'\
-                % (len(data.process_list)))
-        #out.write('character(len=2000), dimension(%s) :: processes, rates'
-                  #% (len(data.process_list)))
-
-        if close_module:
-            out.write('\n\nend module\n')
 
     def write_proclist_generic_part(self, data, out, code_generator='local_smart'):
         self.write_proclist_constants(data, out, close_module=False)
@@ -1700,8 +1629,7 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     # SECOND
     # produce those source files that are written on the fly
     writer = ProcListWriter(project_tree, export_dir)
-    #writer.write_lattice()
-    writer.write_lattice_from_template()
+    writer.write_lattice()
     writer.write_proclist(code_generator=code_generator)
     writer.write_settings()
     project_tree.validate_model()
