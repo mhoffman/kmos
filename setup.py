@@ -48,6 +48,7 @@ packages = [
            ]
 package_dir = {'kmos':'kmos'}
 package_data = {'kmos':['fortran_src/*f90',
+                        'fortran_src/*py',
                         'kmc_editor.glade',
                         'fortran_src/assert.ppc',
                         'kmc_project_v0.1.dtd',
