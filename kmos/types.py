@@ -495,12 +495,16 @@ class Project(object):
         return root
 
     def save(self, filename=None):
-        if filename is not None:
+        if filename is None:
+            filename = self.filename
+        if filename.endswith('.xml'):
             self.export_xml_file(filename)
-        elif hasattr(self, 'filename'):
-            self.export_xml_file(self.filename)
+        elif filename.endswith('.ini'):
+            with open(filename, 'w') as outfile:
+                outfile.write(self._get_ini_string())
         else:
-            print('Not saved because filename is not set.')
+            raise UserWarning('Cannot export to file suffix %s' %
+                  os.path.splitext(filename)[-1])
 
     def export_xml_file(self, filename):
         f = file(filename, 'w')
