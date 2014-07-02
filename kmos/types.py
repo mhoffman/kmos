@@ -513,6 +513,156 @@ class Project(object):
 
         self.validate_model()
 
+    def import_ini_file(self, filename):
+        from ConfigParser import ConfigParser
+
+        config = ConfigParser()
+        config.readfp(filename)
+
+        for section in config.sections():
+            if section == 'Lattice':
+                options = config.options(section)
+                for option in options:
+                    value = config.get(section, option)
+                    if option == 'cell_size':
+                        cell = np.array([float(i)
+                                         for i in
+                                         value.split()])
+                        if len(cell) == 3 :
+                            self.layer_list.cell = np.diag(cell)
+                        elif len(cell) == 9 :
+                            self.layer_list.cell = cell.reshape(3, 3)
+                        else:
+                            raise UserWarning('%s not understood' % cell)
+                    elif option == 'default_layer':
+                        self.layer_list.default_layer = value
+                if 'substrate_layer' in options:
+                    self.layer_list.substrate_layer = config.get(section, 'substrate_layer')
+                else:
+                    self.layer_list.default_layer
+
+                if 'representation' in options:
+                    self.layer_list.representation = config.get(section, 'representation')
+                else:
+                    self.layer_list.representation = ''
+
+            elif section.startswith('Layer '):
+                layer = self.add_layer(name=section.split()[-1],
+                               color=config.get(section, 'color'))
+                options = config.options(section)
+                for option in options:
+                    if option.startswith('site'):
+                        name = option.split()[-1]
+                        pos, default_species, tags = config.get(section, option).split(';')
+                        pos = eval(pos)
+
+                        site = Site(name=name.strip(),
+                                    pos=pos,
+                                    default_species=default_species.strip(),
+                                    tags=tags.strip())
+                        layer.sites.append(site)
+            elif section == 'Meta':
+                options = config.options(section)
+                for option in options:
+                    value = config.get(section, option)
+                    self.meta.add({option: value})
+            elif section.startswith('Parameter '):
+                options = config.options(section)
+                name = section.split()[-1]
+                min = config.get(section, 'min') if 'min' in options else None
+                max = config.get(section, 'max') if 'max' in options else None
+                value = config.get(section, 'value') if 'value' in options else None
+                scale = config.get(section, 'scale') if 'scale' in options else None
+                adjustable = config.getboolean(section, 'adjustable') if 'adjustable' in options else None
+                self.add_parameter(name=name,
+                                   value=value,
+                                   min=min,
+                                   max=max,
+                                   scale=scale,
+                                   adjustable=adjustable,)
+
+            elif section.startswith('Process '):
+                options = config.options(section)
+                name = section.split()[-1]
+                rate_constant = config.get(section, 'rate_constant')
+                if 'tof_count' in options:
+                    tof_count = config.get(section, 'tof_count')
+                else:
+                    tof_count = None
+
+                if 'enabled' in options:
+                    enabled = config.getboolean(section, 'enabled')
+                else:
+                    enabled = True
+
+                process = self.add_process(name=name,
+                                           rate_constant=rate_constant,
+                                           tof_count=tof_count,
+                                           enabled=enabled)
+
+                for action in config.get(section, 'actions').split('\n'):
+                    species, coord = action.split('@')
+                    coord = coord.split('.')
+                    if len(coord) == 3:
+                        name, offset, layer = coord
+                        offset = eval(offset)
+                    elif len(coord) == 2:
+                        name, offset = coord
+                        offset = eval(offset)
+                        layer = [x.split()[-1] for x in config.sections() if x.startswith('Layer')][0]
+                    else:
+                        name = coord[0]
+                        offset = (0, 0, 0)
+                        layer = [x.split()[-1] for x in config.sections() if x.startswith('Layer')][0]
+
+                    process.add_action(Action(
+                        species=species,
+                        coord=Coord(name=name,
+                                    offset=offset,
+                                    layer=layer)))
+
+                for condition in config.get(section, 'conditions').split('\n'):
+                    species, coord = condition.split('@')
+                    coord = coord.split('.')
+                    if len(coord) == 3:
+                        name, offset, layer = coord
+                        offset = eval(offset)
+                    elif len(coord) == 2:
+                        name, offset = coord
+                        offset = eval(offset)
+                        layer = [x.split()[-1] for x in config.sections() if x.startswith('Layer')][0]
+                    else:
+                        name = coord[0]
+                        offset = (0, 0, 0)
+                        layer = [x.split()[-1] for x in config.sections() if x.startswith('Layer')][0]
+
+                    process.add_condition(Condition(
+                        species=species,
+                        coord=Coord(name=name,
+                                    offset=offset,
+                                    layer=layer)))
+
+            elif section == 'SpeciesList':
+                self.species_list.default_species = \
+                        config.get(section, 'default_species') \
+                        if 'default_species' in config.options(section) \
+                        else ''
+
+            elif section.startswith('Species '):
+                name = section.split()[-1]
+                options = config.options(section)
+                color = config.get(section, 'color') \
+                        if 'color' in options else ''
+                representation = config.get(section, 'representation') \
+                                 if 'representation' in options else ''
+                tags = config.get(section, 'tags') \
+                       if 'tags' in options else ''
+                self.add_species(name=name,
+                                 color=color,
+                                 representation=representation,
+                                 tags=tags)
+
+
     def import_xml_file(self, filename):
         """Takes a filename, validates the content against kmc_project.dtd
         and import all fields into the current project tree
