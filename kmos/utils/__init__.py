@@ -505,8 +505,11 @@ def jmolcolor_in_hex(i):
     color = (r << 24) | (g << 16) | (b << 8) | a
     return color
 
-def evaluate_template(template, **kwargs):
+def evaluate_template(template, escape_python=False, **kwargs):
     """Very simple template evaluation function using only exec and str.format()
+
+    There are two flavors of the template language, depending on wether
+    the python parts or the template parts are escaped.
 
     A template can use the full python syntax. Every line starts with '#@ '
     is interpreted as a template line. Please use proper indentation before
@@ -526,31 +529,71 @@ def evaluate_template(template, **kwargs):
 
     result = ''
     NEWLINE = '\n'
-    lines = [ line + NEWLINE for line in template.split(NEWLINE)]
+    PREFIX = '#@'
+    lines = [line + NEWLINE for line in template.split(NEWLINE)]
 
-    # first just replace verbose lines by pass to check syntax
-    python_lines = ''
-    for line in lines:
-        if re.match('\s*#@ ?', line):
-            python_lines += '%spass %s' \
-                % (' ' * (len(line) - len(line.lstrip())),
-                   line.lstrip())
-        else:
-            python_lines += line
-    exec(python_lines)
 
-    # second turn literary lines into write statements
-    python_lines = ''
-    for line in lines:
-        if re.match('\s*#@ ', line):
-            python_lines += '%sresult += ("""%s""".format(**dict(locals())))\n' \
-                % (' ' * (len(line) - len(line.lstrip())),
-                   line.lstrip()[3:])
-        elif re.match('\s*#@', line):
-            python_lines += '%sresult += "\\n"\n' % (' ' * (len(line) - len(line.lstrip())))
-        else:
-            python_lines += line
+    if escape_python :
+        # first just replace verbose lines by pass to check syntax
+        python_lines = ''
+        matched = False
+        for line in lines:
+            if re.match('^\s*%s ?' % PREFIX, line):
+                python_lines += line.lstrip()[3:]
+                matched = True
+            else:
+                python_lines += 'pass # %s' % line.lstrip()
+        # if the tempate didn't contain any meta strings
+        # just return the original
+        if not matched :
+            return template
+        exec(python_lines)
 
-    exec(python_lines)
+        # second turn literary lines into write statements
+        python_lines = ''
+        for line in lines:
+            if re.match('^\s*%s ' % PREFIX, line):
+                python_lines += line.lstrip()[3:]
+            elif re.match('^\s*%s$' % PREFIX, line):
+                python_lines += '%sresult += "\\n"\n' % (' ' * (len(line) - len(line.lstrip())))
+            elif re.match('^$', line):
+                #python_lines += 'result += """\n"""\n'
+                pass
+            else:
+                python_lines += '%sresult += ("""%s""".format(**dict(locals())))\n' \
+                    % (' '*(len(line.expandtabs(4)) - len(line.lstrip())),  line.lstrip())
+
+        exec(python_lines)
+        
+    else:
+        # first just replace verbose lines by pass to check syntax
+        python_lines = ''
+        matched = False
+        for line in lines:
+            if re.match('\s*%s ?' % PREFIX, line):
+                python_lines += '%spass %s' \
+                    % (' ' * (len(line) - len(line.lstrip())),
+                       line.lstrip())
+
+                matched = True
+            else:
+                python_lines += line
+        if not matched:
+            return template
+        exec(python_lines)
+
+        # second turn literary lines into write statements
+        python_lines = ''
+        for line in lines:
+            if re.match('\s*%s ' % PREFIX, line):
+                python_lines += '%sresult += ("""%s""".format(**dict(locals())))\n' \
+                    % (' ' * (len(line) - len(line.lstrip())),
+                       line.lstrip()[3:])
+            elif re.match('\s*%s' % PREFIX, line):
+                python_lines += '%sresult += "\\n"\n' % (' ' * (len(line) - len(line.lstrip())))
+            else:
+                python_lines += line
+
+        exec(python_lines)
 
     return result
