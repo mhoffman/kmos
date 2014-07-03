@@ -513,11 +513,24 @@ class Project(object):
 
         self.validate_model()
 
+    def import_file(self, filename):
+        if filename.endswith('.ini'):
+            self.import_ini_file(filename)
+        elif filename.endswith('.xml'):
+            self.import_xml_file(filename)
+
+        else:
+            raise UserWarning('Don\'t know what to do with this file ending %s' % filename)
+
     def import_ini_file(self, filename):
         from ConfigParser import ConfigParser
 
         config = ConfigParser()
-        config.readfp(filename)
+        if type(filename) is str:
+            with open(filename) as infile:
+                config.readfp(infile)
+        else:
+            config.readfp(filename)
 
         for section in config.sections():
             if section == 'Lattice':
@@ -600,8 +613,12 @@ class Project(object):
                                            tof_count=tof_count,
                                            enabled=enabled)
 
-                for action in [x.strip() for x in config.get(section, 'actions').split('\n')]:
-                    species, coord = action.split('@')
+                for action in [x.strip() for x in config.get(section, 'actions').split('+')]:
+                    try:
+                        species, coord = action.split('@')
+                    except:
+                        print(action)
+                        raise
                     coord = coord.split('.')
                     if len(coord) == 3:
                         name, offset, layer = coord
