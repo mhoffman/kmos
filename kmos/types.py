@@ -383,11 +383,11 @@ class Project(object):
                 config.set(section_name, 'tof_count', str(process.tof_count))
             conditions = [condition._shorthand() for condition in process.condition_list]
             config.set(section_name, 'conditions',
-                       '\n'.join(conditions))
+                       ' + '.join(conditions))
 
             actions = [action._shorthand() for action in process.action_list]
             config.set(section_name, 'actions',
-                       '\n'.join(actions))
+                       ' + '.join(actions))
 
         f = StringIO()
         config.write(f)
@@ -600,7 +600,7 @@ class Project(object):
                                            tof_count=tof_count,
                                            enabled=enabled)
 
-                for action in config.get(section, 'actions').split('\n'):
+                for action in [x.strip() for x in config.get(section, 'actions').split('\n')]:
                     species, coord = action.split('@')
                     coord = coord.split('.')
                     if len(coord) == 3:
@@ -621,7 +621,7 @@ class Project(object):
                                     offset=offset,
                                     layer=layer)))
 
-                for condition in config.get(section, 'conditions').split('\n'):
+                for condition in [x.strip() for x in config.get(section, 'conditions').split('+')]:
                     species, coord = condition.split('@')
                     coord = coord.split('.')
                     if len(coord) == 3:
