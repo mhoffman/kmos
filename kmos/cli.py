@@ -281,7 +281,7 @@ def main(args=None):
         xml_file = args[1]
         export_dir = args[2]
         project = kmos.types.Project()
-        project.import_xml_file(xml_file)
+        project.import_file(xml_file)
 
         writer = ProcListWriter(project, export_dir)
         writer.write_settings()
@@ -302,7 +302,7 @@ def main(args=None):
         export_dir = os.path.join(args[2], 'src')
 
         project = kmos.types.Project()
-        project.import_xml_file(xml_file)
+        project.import_file(xml_file)
 
         kmos.io.export_source(project,
                               export_dir,
@@ -326,7 +326,7 @@ def main(args=None):
 
     elif args[0] == 'settings-export':
         import kmos.io
-        pt = kmos.io.import_xml_file(args[1])
+        pt = kmos.io.import_file(args[1])
         if len(args) < 3:
             out_dir = os.path.splitext(args[1])[0]
             print('No export path provided. Exporting kmc_settings.py to %s'
