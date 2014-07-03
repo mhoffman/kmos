@@ -1372,7 +1372,7 @@ def import_xml_file(filename):
     """Imports and returns project from an XML file."""
     import kmos.types
     project_tree = kmos.types.Project()
-    project_tree.import_xml_file(filename)
+    project_tree.import_file(filename)
     return project_tree
 
 
