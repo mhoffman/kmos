@@ -560,19 +560,44 @@ class Project(object):
                     self.layer_list.representation = ''
 
             elif section.startswith('Layer '):
-                layer = self.add_layer(name=section.split()[-1],
-                               color=config.get(section, 'color'))
                 options = config.options(section)
+                if 'color' in options:
+                    layer = self.add_layer(name=section.split()[-1],
+                                   color=config.get(section, 'color'))
+                else:
+                    layer = self.add_layer(name=section.split()[-1],)
                 for option in options:
                     if option.startswith('site'):
                         name = option.split()[-1]
-                        pos, default_species, tags = config.get(section, option).split(';')
-                        pos = eval(pos)
+                        pos_line = config.get(section, option).split(';')
+                        if len(pos_line) == 3:
+                            pos, default_species, tags = pos_line
+                            pos = tuple(eval(pos))
+                            site = Site(name=name.strip(),
+                                        pos=pos,
+                                        default_species=default_species.strip(),
+                                        tags=tags.strip())
+                        elif len(pos_line) == 2:
+                            pos, default_species = pos_line
+                            pos = tuple(eval(pos))
+                            tags = ''
+                            site = Site(name=name.strip(),
+                                        pos=pos,
+                                        default_species=default_species.strip(),)
+                        elif len(pos_line) == 1:
+                            print(pos_line)
+                            pos = tuple(eval(pos_line[0]))
 
-                        site = Site(name=name.strip(),
-                                    pos=pos,
-                                    default_species=default_species.strip(),
-                                    tags=tags.strip())
+                            if hasattr(self.species_list, 'default_species'):
+                                default_species = self.species_list.default_species
+                                site = Site(name=name.strip(),
+                                            pos=pos,
+                                            default_species=default_species.strip(),)
+                            else:
+                                site = Site(name=name.strip(),
+                                            pos=pos,)
+
+
                         layer.sites.append(site)
             elif section == 'Meta':
                 options = config.options(section)
