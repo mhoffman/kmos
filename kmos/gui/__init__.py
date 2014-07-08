@@ -116,7 +116,7 @@ class GTKProject(SlaveDelegate):
 
         self.undo_stack = UndoStack(
             self.model_tree.__repr__,
-            self.import_xml_file,
+            self.import_file,
             self.project_data.select,
             menubar,
             self.meta,
@@ -192,6 +192,7 @@ class GTKProject(SlaveDelegate):
         if len(self.get_layers()) == 1:
             self.set_default_layer(layer.name)
             self.set_substrate_layer(layer.name)
+        return layer
 
     def set_default_species(self, species):
         self.model_tree.species_list.default_species = species
@@ -220,13 +221,13 @@ class GTKProject(SlaveDelegate):
     def __repr__(self):
         return str(self.model_tree)
 
-    def import_xml_file(self, filename):
+    def import_file(self, filename):
         """Import XML project file into editor GUI,
         unfolding the object tree.
 
         """
         self.filename = filename
-        self.model_tree.import_xml_file(filename)
+        self.model_tree.import_file(filename)
         self.expand_all()
 
     def expand_all(self):
@@ -698,12 +699,16 @@ class Editor(GladeDelegate):
             self.attach_slave('overviewtree', self.project_tree)
             self.set_title('%s - kmos' % self.project_tree.get_name())
             self.project_tree.show()
-            self.import_xml_file(filename)
+            self.import_file(filename)
 
     def import_xml_file(self, filename):
+        """Stub for legacy support."""
+        return self.import_file(filename)
+
+    def import_file(self, filename):
         self.project_tree._set_treeview_hooks()
         # Import
-        self.project_tree.import_xml_file(filename)
+        self.project_tree.import_file(filename)
         self.set_title('%s - kmos' % self.project_tree.get_name())
         if hasattr(self.project_tree.meta, 'model_name'):
             self.toast('Imported model %s' %
@@ -720,13 +725,14 @@ class Editor(GladeDelegate):
         else:
             if not self.project_tree.filename:
                 self.on_btn_save_as__clicked(None)
-            outfile = open(self.project_tree.filename, 'w')
-            outfile.write(xml_string)
-            outfile.write('<!-- This is an automatically generated XML ' +
-                          'file, representing a kMC model ' +
-                          'please do not change this unless ' +
-                          'you know what you are doing -->\n')
-            outfile.close()
+            #outfile = open(self.project_tree.filename, 'w')
+            #outfile.write(xml_string)
+            #outfile.write('<!-- This is an automatically generated XML ' +
+                          #'file, representing a kMC model ' +
+                          #'please do not change this unless ' +
+                          #'you know what you are doing -->\n')
+            #outfile.close()
+            self.project_tree.model_tree.save(self.project_tree.filename)
             self.saved_state = xml_string
             self.toast('Saved %s' % self.project_tree.filename)
 
@@ -819,7 +825,7 @@ def main():
         options.xml_file = args[1]
 
     if options.xml_file:
-        editor.import_xml_file(options.xml_file)
+        editor.import_file(options.xml_file)
         editor.toast('Imported %s' % options.xml_file)
     else:
         print('No XML file provided, starting a new model.')
