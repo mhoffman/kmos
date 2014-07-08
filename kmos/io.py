@@ -137,7 +137,7 @@ class ProcListWriter():
 
         with open(os.path.join(os.path.dirname(__file__),
                                'fortran_src',
-                               'lattice.py')) as infile:
+                               'lattice.mpy')) as infile:
             template = infile.read()
 
         with open(os.path.join(self.dir, 'lattice.f90'), 'w') as out:
@@ -186,7 +186,7 @@ class ProcListWriter():
 
         with open(os.path.join(os.path.dirname(__file__),
                                'fortran_src',
-                               'proclist_constants.py')) as infile:
+                               'proclist_constants.mpy')) as infile:
             template = infile.read()
 
         out.write(evaluate_template(template,
@@ -207,7 +207,7 @@ class ProcListWriter():
 
         with open(os.path.join(os.path.dirname(__file__),
                                'fortran_src',
-                               'proclist_generic_subroutines.py')) as infile:
+                               'proclist_generic_subroutines.mpy')) as infile:
             template = infile.read()
 
         out.write(evaluate_template(template,
