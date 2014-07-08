@@ -522,6 +522,8 @@ class Project(object):
         else:
             raise UserWarning('Don\'t know what to do with this file ending %s' % filename)
 
+        self.filename = filename
+
     def import_ini_file(self, filename):
         from ConfigParser import ConfigParser
 
@@ -562,10 +564,10 @@ class Project(object):
             elif section.startswith('Layer '):
                 options = config.options(section)
                 if 'color' in options:
-                    layer = self.add_layer(name=section.split()[-1],
-                                   color=config.get(section, 'color'))
+                    layer = self.add_layer(Layer(name=section.split()[-1],
+                                   color=config.get(section, 'color')))
                 else:
-                    layer = self.add_layer(name=section.split()[-1],)
+                    layer = self.add_layer(Layer(name=section.split()[-1],))
                 for option in options:
                     if option.startswith('site'):
                         name = option.split()[-1]
@@ -585,7 +587,6 @@ class Project(object):
                                         pos=pos,
                                         default_species=default_species.strip(),)
                         elif len(pos_line) == 1:
-                            print(pos_line)
                             pos = tuple(eval(pos_line[0]))
 
                             if hasattr(self.species_list, 'default_species'):
@@ -597,7 +598,6 @@ class Project(object):
                                 site = Site(name=name.strip(),
                                             pos=pos,)
 
-
                         layer.sites.append(site)
             elif section == 'Meta':
                 options = config.options(section)
@@ -607,17 +607,17 @@ class Project(object):
             elif section.startswith('Parameter '):
                 options = config.options(section)
                 name = section.split()[-1]
-                min = config.get(section, 'min') if 'min' in options else None
-                max = config.get(section, 'max') if 'max' in options else None
+                min = config.getfloat(section, 'min') if 'min' in options else None
+                max = config.getfloat(section, 'max') if 'max' in options else None
                 value = config.get(section, 'value') if 'value' in options else None
                 scale = config.get(section, 'scale') if 'scale' in options else None
                 adjustable = config.getboolean(section, 'adjustable') if 'adjustable' in options else None
-                self.add_parameter(name=name,
+                self.add_parameter(Parameter(name=name,
                                    value=value,
                                    min=min,
                                    max=max,
                                    scale=scale,
-                                   adjustable=adjustable,)
+                                   adjustable=adjustable,))
 
             elif section.startswith('Process '):
                 options = config.options(section)
@@ -633,10 +633,10 @@ class Project(object):
                 else:
                     enabled = True
 
-                process = self.add_process(name=name,
+                process = self.add_process(Process(name=name,
                                            rate_constant=rate_constant,
                                            tof_count=tof_count,
-                                           enabled=enabled)
+                                           enabled=enabled))
 
                 for action in [x.strip() for x in config.get(section, 'actions').split('+')]:
                     try:
@@ -699,10 +699,10 @@ class Project(object):
                                  if 'representation' in options else ''
                 tags = config.get(section, 'tags') \
                        if 'tags' in options else ''
-                self.add_species(name=name,
+                self.add_species(Species(name=name,
                                  color=color,
                                  representation=representation,
-                                 tags=tags)
+                                 tags=tags))
 
 
     def import_xml_file(self, filename):
