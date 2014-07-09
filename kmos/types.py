@@ -526,13 +526,20 @@ class Project(object):
 
     def import_ini_file(self, filename):
         from ConfigParser import ConfigParser
+        from kmos.utils import evaluate_template
+        from StringIO import StringIO
 
         config = ConfigParser()
         if type(filename) is str:
             with open(filename) as infile:
-                config.readfp(infile)
+                inputtxt = infile.read()
         else:
-            config.readfp(filename)
+            inputtxt = filename.read()
+
+        infile = StringIO()
+        infile.write(evaluate_template(inputtxt, escape_python=True, pt=self))
+        infile.seek(0)
+        config.readfp(infile)
 
         for section in config.sections():
             if section == 'Lattice':
@@ -643,6 +650,7 @@ class Project(object):
                         species, coord = action.split('@')
                     except:
                         print(action)
+                        print(action.split('@'))
                         raise
                     coord = coord.split('.')
                     if len(coord) == 3:
