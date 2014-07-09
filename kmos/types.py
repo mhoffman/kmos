@@ -558,23 +558,29 @@ class Project(object):
                             raise UserWarning('%s not understood' % cell)
                     elif option == 'default_layer':
                         self.layer_list.default_layer = value
+                if 'default_layer' in options:
+                    self.layer_list.default_layer = config.get(section, 'default_layer')
+
                 if 'substrate_layer' in options:
                     self.layer_list.substrate_layer = config.get(section, 'substrate_layer')
-                else:
-                    self.layer_list.default_layer
 
                 if 'representation' in options:
                     self.layer_list.representation = config.get(section, 'representation')
-                else:
-                    self.layer_list.representation = ''
 
             elif section.startswith('Layer '):
                 options = config.options(section)
+                layer_name = section.split()[-1]
                 if 'color' in options:
-                    layer = self.add_layer(Layer(name=section.split()[-1],
+                    layer = self.add_layer(Layer(name=layer_name,
                                    color=config.get(section, 'color')))
                 else:
-                    layer = self.add_layer(Layer(name=section.split()[-1],))
+                    layer = self.add_layer(Layer(name=layer_name))
+
+                if not hasattr(self.layer_list, 'default_layer'):
+                    self.layer_list.default_layer = layer_name
+                if not hasattr(self.layer_list, 'substrate_layer'):
+                    self.layer_list.substrate_layer = layer_name
+
                 for option in options:
                     if option.startswith('site'):
                         name = option.split()[-1]
@@ -617,7 +623,7 @@ class Project(object):
                 min = config.getfloat(section, 'min') if 'min' in options else None
                 max = config.getfloat(section, 'max') if 'max' in options else None
                 value = config.get(section, 'value') if 'value' in options else None
-                scale = config.get(section, 'scale') if 'scale' in options else None
+                scale = config.get(section, 'scale') if 'scale' in options else 'linear'
                 adjustable = config.getboolean(section, 'adjustable') if 'adjustable' in options else None
                 self.add_parameter(Parameter(name=name,
                                    value=value,
