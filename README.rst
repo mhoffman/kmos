@@ -29,16 +29,18 @@ Prepare a minimal input file with the following content and save it as ``mini_10
     model_name = fcc_100
 
     [Species empty]
+    color = #FFFFFF
 
     [Species CO]
     representation = Atoms("CO", [[0, 0, 0], [0, 0, 1.17]])
+    color = #FF0000
 
     [Lattice]
     cell_size = 3.5 3.5 10.0
 
     [Layer simple_cubic]
     site hollow = (0.5, 0.5, 0.5)
-    color = #ffffff
+    color = #FFFFFF
 
     [Parameter k_CO_ads]
     value = 100
@@ -66,7 +68,6 @@ Prepare a minimal input file with the following content and save it as ``mini_10
     actions = empty@hollow
     tof_count = {'desorption':1}
 
-
 In the same directory run ``kmos export mini_101.ini``. You should now have a folder ``mini_101_local_smart``
 in the same directory. ``cd`` into it and run ``kmos benchmark``. If everything went well you should see something
 like ::
@@ -77,7 +78,7 @@ like ::
 
 In the same directory try running ``kmos view`` to watch the model run or fire up ``kmos shell``
 to interact with the model interactively. Explore more commands with ``kmos help`` and please
-refer to the documentation how to build complex model and evaluate them systematically.
+refer to the documentation how to build complex model and evaluate them systematically. To test all bells and whistles try ``kmos edit mini_101.ini`` and inspect the model visually.
 
 DOCUMENTATION
 ##############
