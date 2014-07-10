@@ -195,8 +195,6 @@ subroutine do_drc_steps(n, process, pertubation)
     
     do i = 1, n
         call random_number(ran_time)
-        call random_number(ran_proc)
-        call random_number(ran_site)
         call update_accum_rate
         call update_clocks(ran_time,2)
 
@@ -205,6 +203,9 @@ subroutine do_drc_steps(n, process, pertubation)
         call random_number(ran_idle)
         
         if(ran_idle .LE. 0.5) then !execute step
+        
+            call random_number(ran_proc)
+            call random_number(ran_site)
         
             call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
         
@@ -219,7 +220,7 @@ subroutine do_drc_steps(n, process, pertubation)
                 O=0.0
             end if
             
-            update_chi()
+            !update_chi(executed,proc_nr)
             
             call run_proc_nr(proc_nr, nr_site)
         else
