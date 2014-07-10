@@ -1,0 +1,303 @@
+#@ subroutine do_kmc_steps(n)
+#@
+#@ !****f* proclist/do_kmc_steps
+#@ ! FUNCTION
+#@ !    Performs ``n`` kMC step.
+#@ !    If one has to run many steps without evaluation
+#@ !    do_kmc_steps might perform a little better.
+#@ !    * first update clock
+#@ !    * then configuration sampling step
+#@ !    * last execute process
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    ``n`` : Number of steps to run
+#@ !******
+#@     integer(kind=iint), intent(in) :: n
+#@
+#@     real(kind=rsingle) :: ran_proc, ran_time, ran_site
+#@     integer(kind=iint) :: nr_site, proc_nr, i
+#@
+#@     do i = 1, n
+#@     call random_number(ran_time)
+#@     call random_number(ran_proc)
+#@     call random_number(ran_site)
+
+if data.meta.debug > 0:
+    #@ print *, "PROCLIST/DO_KMC_STEP"
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_TIME",ran_time
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_site",ran_site
+
+#@     call update_accum_rate
+#@     call update_clocks(ran_time)
+#@
+#@     call update_integ_rate
+#@     call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
+if data.meta.debug > 0:
+    #@ print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr
+    #@ print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site
+#@     call run_proc_nr(proc_nr, nr_site)
+#@     enddo
+#@
+#@ end subroutine do_kmc_steps
+#@
+
+#@ subroutine do_kmc_step()
+#@
+#@ !****f* proclist/do_kmc_step
+#@ ! FUNCTION
+#@ !    Performs exactly one kMC step.
+#@ !    *  first update clock
+#@ !    *  then configuration sampling step
+#@ !    *  last execute process
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    ``none``
+#@ !******
+#@     real(kind=rsingle) :: ran_proc, ran_time, ran_site
+#@     integer(kind=iint) :: nr_site, proc_nr
+#@
+#@     call random_number(ran_time)
+#@     call random_number(ran_proc)
+#@     call random_number(ran_site)
+if data.meta.debug > 0:
+    #@ print *, "PROCLIST/DO_KMC_STEP"
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_TIME",ran_time
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_site",ran_site
+#@     call update_accum_rate
+#@     call update_clocks(ran_time)
+#@
+#@     call update_integ_rate
+#@     call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
+if data.meta.debug > 0:
+    #@ print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr
+    #@ print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site
+#@     call run_proc_nr(proc_nr, nr_site)
+#@ end subroutine do_kmc_step
+#@
+
+#useful for debugging
+
+#@ subroutine get_next_kmc_step(proc_nr, nr_site)
+#@
+#@ !****f* proclist/get_kmc_step
+#@ ! FUNCTION
+#@ !    Determines next step without executing it.
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    ``none``
+#@ !******
+#@     real(kind=rsingle) :: ran_proc, ran_time, ran_site
+#@     integer(kind=iint), intent(out) :: nr_site, proc_nr
+#@
+#@     call random_number(ran_time)
+#@     call random_number(ran_proc)
+#@     call random_number(ran_site)
+if data.meta.debug > 0:
+    #@ print *,"PROCLIST/GET_KMC_STEP/RAN_TIME",ran_time
+    #@ print *,"PROCLIST/GET_KMC_STEP/RAN_PROC",ran_proc
+    #@ print *,"PROCLIST/GET_KMC_STEP/RAN_site",ran_site
+#@     call update_accum_rate
+#@     call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)
+#@
+if data.meta.debug > 0:
+    #@ print *,"PROCLIST/GET_KMC_STEP/PROC_NR", proc_nr
+#@ end subroutine get_next_kmc_step
+#@
+
+#@ subroutine get_occupation(occupation)
+#@
+#@ !****f* proclist/get_occupation
+#@ ! FUNCTION
+#@ !    Evaluate current lattice configuration and returns
+#@ !    the normalized occupation as matrix. Different species
+#@ !    run along the first axis and different sites run
+#@ !    along the second.
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    ``none``
+#@ !******
+site_params = self._get_site_params()
+len_species_list_p1 = len(data.species_list) + 1
+len_species_list_m1 = len(data.species_list) - 1
+len_species_list = len(data.species_list)
+len_site_params = len(site_params)
+if len(data.layer_list) > 1 :  # multi-lattice mode
+    #@     ! nr_of_species = {len_species_list_p1}, spuck = {len_site_params}
+else:
+    #@     ! nr_of_species = {len_species_list}, spuck = {len_site_params}
+#@     real(kind=rdouble), dimension(0:{len_species_list_m1}, 1:{len_site_params}), intent(out) :: occupation
+#@
+#@     integer(kind=iint) :: i, j, k, nr, species
+#@
+#@     occupation = 0
+#@
+#@     do k = 0, system_size(3)-1
+#@         do j = 0, system_size(2)-1
+#@             do i = 0, system_size(1)-1
+#@                 do nr = 1, spuck
+#@                     ! shift position by 1, so it can be accessed
+#@                     ! more straightforwardly from f2py interface
+#@                     species = get_species((/i,j,k,nr/))
+#@                     if(species.ne.null_species) then
+#@                     occupation(species, nr) = &
+#@                         occupation(species, nr) + 1
+#@                     endif
+#@                 end do
+#@             end do
+#@         end do
+#@     end do
+#@
+#@     occupation = occupation/real(system_size(1)*system_size(2)*system_size(3))
+#@ end subroutine get_occupation
+#@
+
+# Here we replicate the allocate_system call, initialize
+# all book-keeping databases
+# and calculate the rate constants for the first time
+model_name_line = ('This kMC Model \'%s\' was written by' % data.meta.model_name).ljust(59)
+author_name_line = ('%s (%s)' % (data.meta.author, data.meta.email)).center(60)
+#@ subroutine init(input_system_size, system_name, layer, seed_in, no_banner)
+#@
+#@ !****f* proclist/init
+#@ ! FUNCTION
+#@ !     Allocates the system and initializes all sites in the given
+#@ !     layer.
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    * ``input_system_size`` number of unit cell per axis.
+#@ !    * ``system_name`` identifier for reload file.
+#@ !    * ``layer`` initial layer.
+#@ !    * ``no_banner`` [optional] if True no copyright is issued.
+#@ !******
+#@     integer(kind=iint), intent(in) :: layer, seed_in
+#@     integer(kind=iint), dimension({data.meta.model_dimension}), intent(in) :: input_system_size
+#@
+#@     character(len=400), intent(in) :: system_name
+#@
+#@     logical, optional, intent(in) :: no_banner
+#@
+#@     if (.not. no_banner) then
+#@         print *, "+------------------------------------------------------------+"
+#@         print *, "|                                                            |"
+#@         print *, "| {model_name_line}|"
+#@         print *, "|                                                            |"
+#@         print *, "|{author_name_line}|"
+#@         print *, "|                                                            |"
+#@         print *, "| and implemented with the help of kmos,                     |"
+#@         print *, "| which is distributed under GNU/GPL Version 3               |"
+#@         print *, "| (C) Max J. Hoffmann mjhoffmann@gmail.com                   |"
+#@         print *, "|                                                            |"
+#@         print *, "| kmos is distributed in the hope that it will be useful     |"
+#@         print *, "| but WIHTOUT ANY WARRANTY; without even the implied         |"
+#@         print *, "| waranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR     |"
+#@         print *, "| PURPOSE. See the GNU General Public License for more       |"
+#@         print *, "| details.                                                   |"
+#@         print *, "|                                                            |"
+#@         print *, "| If using kmos for a publication, attribution is            |"
+#@         print *, "| greatly appreciated.                                       |"
+#@         print *, "| Hoffmann, M. J., Matera, S., & Reuter, K. (2014).          |"
+#@         print *, "| kmos: A lattice kinetic Monte Carlo framework.             |"
+#@         print *, "| Computer Physics Communications, 185(7), 2138-2150.        |"
+#@         print *, "|                                                            |"
+#@         print *, "| Development http://mhoffman.github.org/kmos                |"
+#@         print *, "| Documentation http://kmos.readthedocs.org                  |"
+#@         print *, "| Reference http://dx.doi.org/10.1016/j.cpc.2014.04.003      |"
+#@         print *, "|                                                            |"
+#@         print *, "+------------------------------------------------------------+"
+#@         print *, ""
+#@         print *, ""
+#@     endif
+
+if data.meta.debug > 0:
+    #@ print *,"PROCLIST/INIT"
+    #@ print *,"    PROCLIST/INIT/SYSTEM_SIZE",input_system_size
+if len(data.layer_list) > 1 :
+    #@     call set_null_species(null_species)
+#@     call allocate_system(nr_of_proc, input_system_size, system_name)
+if data.meta.debug > 0:
+    #@ print *,"    PROCLIST/INIT/ALLOCATED_LATTICE"
+#@     call initialize_state(layer, seed_in)
+if data.meta.debug > 0:
+    #@ print *,"    PROCLIST/INIT/INITIALIZED_STATE"
+#@ end subroutine init
+#@
+
+# initialize the system with the default layer and the default species
+# initialize all book-keeping databases
+# and representation strings for ASE representation
+#@ subroutine initialize_state(layer, seed_in)
+#@
+#@ !****f* proclist/initialize_state
+#@ ! FUNCTION
+#@ !    Initialize all sites and book-keeping array
+#@ !    for the given layer.
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    * ``layer`` integer representing layer
+#@ !******
+#@     integer(kind=iint), intent(in) :: layer, seed_in
+#@
+#@     integer(kind=iint) :: i, j, k, nr
+if data.meta.debug > 0:
+    #@ print *,"PROCLIST/INITIALIZE_STATE"
+#@     ! initialize random number generator
+#@     allocate(seed_arr(seed_size))
+#@     seed = seed_in
+#@     seed_arr = seed
+#@     call random_seed(seed_size)
+#@     call random_seed(put=seed_arr)
+#@     deallocate(seed_arr)
+if data.meta.debug > 0:
+    #@ print *, "    PROCLIST/INITALIZE_STATE/INITIALIZED_RNG"
+#@     do k = 0, system_size(3)-1
+#@         do j = 0, system_size(2)-1
+#@             do i = 0, system_size(1)-1
+#@                 do nr = 1, spuck
+#@                     call reset_site((/i, j, k, nr/), null_species)
+#@                 end do
+#@                 select case(layer)
+for layer in data.layer_list:
+    #@                 case ({layer.name})
+    for site in layer.sites:
+        #@                     call replace_species((/i, j, k, {layer.name}_{site.name}/), null_species, {site.default_species})
+#@                 end select
+#@             end do
+#@         end do
+#@     end do
+#@
+if data.meta.debug > 0:
+    #@ print *, "    PROCLIST/INITALIZE_STATE/INITIALIZED_DEFAULT_SPECIES"
+#@     do k = 0, system_size(3)-1
+#@         do j = 0, system_size(2)-1
+#@             do i = 0, system_size(1)-1
+if data.meta.debug > 0:
+    #@ print *, "    PROCLIST/INITIALIZE_STATE/TOUCHUP_CELL", i, j, k
+if code_generator == 'local_smart':
+    #@                 select case(layer)
+    for layer in data.layer_list:
+        #@                 case({layer.name})
+        for site in layer.sites:
+            #@                     call touchup_{layer.name}_{site.name}((/i, j, k, {layer.name}_{site.name}/))
+    #@                 end select
+elif code_generator == 'lat_int':
+    #@                 call touchup_cell((/i, j, k, 0/))
+else:
+    raise UserWarning("Don't know this code generator")
+#@             end do
+#@         end do
+#@     end do
+#@
+if data.meta.debug > 0:
+    #@ print *, "    PROCLIST/INITALIZE_STATE/INITIALIZED_AVAIL_SITES"
+
+#@
+#@ end subroutine initialize_state
+#@

@@ -44,8 +44,8 @@ class FixedObject(object):
         if attrname in self.attributes + ['__doc__']:
             self.__dict__[attrname] = value
         else:
-            raise AttributeError('Tried to set illegal attribute %s' \
-                                                            % attrname)
+            raise AttributeError('Tried to set illegal attribute %s'
+                                 % attrname)
 
     def __hash__(self):
         """Since python-kiwi update to 1.9.32 it requires all objecst in
@@ -85,11 +85,11 @@ class Project(object):
         # Quick'n'dirty define access functions
         # needed in context with GTKProject
         self.get_layers = lambda: sorted(self.layer_list,
-                                          key=lambda x: x.name)
+                                         key=lambda x: x.name)
 
         self.add_output = lambda output: self.output_list.append(output)
         self.get_outputs = lambda: sorted(self.output_list,
-                                           key=lambda x: x.name)
+                                          key=lambda x: x.name)
 
     def get_speciess(self, pattern=None):
         """Return list of species in Project.
@@ -98,8 +98,8 @@ class Project(object):
         :type pattern: str
         """
         return sorted([item for item in self.species_list
-                if pattern is None or fnmatch(item.name, pattern)
-               ], key=lambda x: x.name)
+                       if pattern is None or fnmatch(item.name, pattern)
+                       ], key=lambda x: x.name)
 
     def get_parameters(self, pattern=None):
         """Return list of parameters in Project.
@@ -108,8 +108,8 @@ class Project(object):
         :type pattern: str
         """
         return sorted([item for item in self.parameter_list
-                if pattern is None or fnmatch(item.name, pattern)
-               ], key=lambda x: x.name)
+                       if pattern is None or fnmatch(item.name, pattern)
+                       ], key=lambda x: x.name)
 
     def get_processes(self, pattern=None):
         """Return list of processes.
@@ -118,8 +118,8 @@ class Project(object):
         :type pattern: str
         """
         return sorted([item for item in self.process_list
-                if pattern is None or fnmatch(item.name, pattern)
-               ], key=lambda x: x.name)
+                       if pattern is None or fnmatch(item.name, pattern)
+                       ], key=lambda x: x.name)
 
     def add_parameter(self, *parameters, **kwargs):
         """Add a parameter to the project. A Parameter,
@@ -302,6 +302,98 @@ class Project(object):
         """
         return prettify_xml(self._get_etree_xml())
 
+    def _get_ini_string(self):
+        from ConfigParser import ConfigParser
+        from StringIO import StringIO
+
+        config = ConfigParser()
+        # Meta
+        config.add_section('Meta')
+        config.set('Meta', 'author', self.meta.author)
+        config.set('Meta', 'email', self.meta.email)
+        config.set('Meta', 'model_name', self.meta.model_name)
+        config.set('Meta', 'model_dimension', self.meta.model_dimension)
+        config.set('Meta', 'debug', self.meta.debug)
+
+        config.add_section('SpeciesList')
+        if hasattr(self.species_list, 'default_species'):
+            config.set('SpeciesList', 'default_species',
+                       self.species_list.default_species)
+        else:
+            config.set('SpeciesList', 'default_species', '')
+
+        for species in self.get_speciess():
+            section_name = 'Species %s' % species.name
+            config.add_section(section_name)
+            if hasattr(species, 'representation'):
+                config.set(section_name,
+                           'representation', species.representation)
+            if hasattr(species, 'color'):
+                config.set(section_name, 'color', species.color)
+            config.set(section_name, 'tags', getattr(species, 'tags'))
+
+        for parameter in self.get_parameters():
+            section_name = 'Parameter %s' % parameter.name
+            config.add_section(section_name)
+            config.set(section_name, 'value', parameter.value)
+            config.set(section_name, 'adjustable', str(parameter.adjustable))
+            config.set(section_name, 'min', str(parameter.min))
+            config.set(section_name, 'max', str(parameter.max))
+            if hasattr(parameter, 'scale'):
+                config.set(section_name, 'scale', str(parameter.scale))
+            else:
+                config.set(section_name, 'scale', 'linear')
+
+        config.add_section('Lattice')
+        if hasattr(self.layer_list, 'cell'):
+            config.set('Lattice', 'cell_size', ' '.join([str(i) for i in self.layer_list.cell.flatten()]))
+
+            if hasattr(self.layer_list, 'default_layer'):
+                config.set('Lattice', 'default_layer', self.layer_list.default_layer)
+
+            if hasattr(self.layer_list, 'substrate_layer'):
+                config.set('Lattice',
+                           'substrate_layer',
+                           self.layer_list.substrate_layer)
+
+        if hasattr(self.layer_list, 'representation'):
+            config.set('Lattice',
+                       'representation',
+                       self.layer_list.representation)
+
+        for layer in self.get_layers():
+            section_name = 'Layer %s' % layer.name
+            config.add_section(section_name)
+            config.set(section_name, 'color', layer.color)
+
+            for site in layer.sites:
+                config.set(section_name, 'site %s' % site.name,
+                           '%s; %s; %s' %
+                           (tuple(site.pos),
+                            site.default_species,
+                            site.tags,
+                            ))
+
+        for process in self.get_processes():
+            section_name = 'Process %s' % process.name
+            config.add_section(section_name)
+            config.set(section_name, 'rate_constant', process.rate_constant)
+            config.set(section_name, 'enabled', str(process.enabled))
+            if process.tof_count:
+                config.set(section_name, 'tof_count', str(process.tof_count))
+            conditions = [condition._shorthand() for condition in process.condition_list]
+            config.set(section_name, 'conditions',
+                       ' + '.join(conditions))
+
+            actions = [action._shorthand() for action in process.action_list]
+            config.set(section_name, 'actions',
+                       ' + '.join(actions))
+
+        f = StringIO()
+        config.write(f)
+
+        return f.getvalue()
+
     def _get_etree_xml(self):
         """Produces an ElemenTree object
         representing the Project"""
@@ -351,7 +443,8 @@ class Project(object):
         if hasattr(self.layer_list, 'cell'):
             lattice_elem.set('cell_size',
                              ' '.join([str(i)
-                                   for i in self.layer_list.cell.flatten()]))
+                                       for i in
+                                       self.layer_list.cell.flatten()]))
             if hasattr(self.layer_list, 'default_layer'):
                 lattice_elem.set('default_layer',
                                  self.layer_list.default_layer)
@@ -386,14 +479,14 @@ class Project(object):
                 condition_elem.set('coord_layer', condition.coord.layer)
                 condition_elem.set('coord_name', condition.coord.name)
                 condition_elem.set('coord_offset',
-                    ' '.join([str(i) for i in condition.coord.offset]))
+                                   ' '.join([str(i) for i in condition.coord.offset]))
             for action in process.action_list:
                 action_elem = ET.SubElement(process_elem, 'action')
                 action_elem.set('species', action.species)
                 action_elem.set('coord_layer', action.coord.layer)
                 action_elem.set('coord_name', action.coord.name)
                 action_elem.set('coord_offset',
-                    ' '.join([str(i) for i in action.coord.offset]))
+                                ' '.join([str(i) for i in action.coord.offset]))
         output_list = ET.SubElement(root, 'output_list')
         for output in self.get_outputs():
             if output.output:
@@ -402,12 +495,16 @@ class Project(object):
         return root
 
     def save(self, filename=None):
-        if filename is not None:
+        if filename is None:
+            filename = self.filename
+        if filename.endswith('.xml'):
             self.export_xml_file(filename)
-        elif hasattr(self, 'filename'):
-            self.export_xml_file(self.filename)
+        elif filename.endswith('.ini'):
+            with open(filename, 'w') as outfile:
+                outfile.write(self._get_ini_string())
         else:
-            print('Not saved because filename is not set.')
+            raise UserWarning('Cannot export to file suffix %s' %
+                  os.path.splitext(filename)[-1])
 
     def export_xml_file(self, filename):
         f = file(filename, 'w')
@@ -415,6 +512,212 @@ class Project(object):
         f.close()
 
         self.validate_model()
+
+    def import_file(self, filename):
+        if filename.endswith('.ini'):
+            self.import_ini_file(filename)
+        elif filename.endswith('.xml'):
+            self.import_xml_file(filename)
+
+        else:
+            raise UserWarning('Don\'t know what to do with this file ending %s' % filename)
+
+        self.filename = filename
+
+    def import_ini_file(self, filename):
+        from ConfigParser import ConfigParser
+        from kmos.utils import evaluate_template
+        from StringIO import StringIO
+
+        config = ConfigParser()
+        if type(filename) is str:
+            with open(filename) as infile:
+                inputtxt = infile.read()
+        else:
+            inputtxt = filename.read()
+
+        infile = StringIO()
+        infile.write(evaluate_template(inputtxt, escape_python=True, pt=self))
+        infile.seek(0)
+        config.readfp(infile)
+
+        for section in config.sections():
+            if section == 'Lattice':
+                options = config.options(section)
+                for option in options:
+                    value = config.get(section, option)
+                    if option == 'cell_size':
+                        cell = np.array([float(i)
+                                         for i in
+                                         value.split()])
+                        if len(cell) == 3 :
+                            self.layer_list.cell = np.diag(cell)
+                        elif len(cell) == 9 :
+                            self.layer_list.cell = cell.reshape(3, 3)
+                        else:
+                            raise UserWarning('%s not understood' % cell)
+                    elif option == 'default_layer':
+                        self.layer_list.default_layer = value
+                if 'default_layer' in options:
+                    self.layer_list.default_layer = config.get(section, 'default_layer')
+
+                if 'substrate_layer' in options:
+                    self.layer_list.substrate_layer = config.get(section, 'substrate_layer')
+
+                if 'representation' in options:
+                    self.layer_list.representation = config.get(section, 'representation')
+
+            elif section.startswith('Layer '):
+                options = config.options(section)
+                layer_name = section.split()[-1]
+                if 'color' in options:
+                    layer = self.add_layer(Layer(name=layer_name,
+                                   color=config.get(section, 'color')))
+                else:
+                    layer = self.add_layer(Layer(name=layer_name))
+
+                if not hasattr(self.layer_list, 'default_layer'):
+                    self.layer_list.default_layer = layer_name
+                if not hasattr(self.layer_list, 'substrate_layer'):
+                    self.layer_list.substrate_layer = layer_name
+
+                for option in options:
+                    if option.startswith('site'):
+                        name = option.split()[-1]
+                        pos_line = config.get(section, option).split(';')
+                        if len(pos_line) == 3:
+                            pos, default_species, tags = pos_line
+                            pos = tuple(eval(pos))
+                            site = Site(name=name.strip(),
+                                        pos=pos,
+                                        default_species=default_species.strip(),
+                                        tags=tags.strip())
+                        elif len(pos_line) == 2:
+                            pos, default_species = pos_line
+                            pos = tuple(eval(pos))
+                            tags = ''
+                            site = Site(name=name.strip(),
+                                        pos=pos,
+                                        default_species=default_species.strip(),)
+                        elif len(pos_line) == 1:
+                            pos = tuple(eval(pos_line[0]))
+
+                            if hasattr(self.species_list, 'default_species'):
+                                default_species = self.species_list.default_species
+                                site = Site(name=name.strip(),
+                                            pos=pos,
+                                            default_species=default_species.strip(),)
+                            else:
+                                site = Site(name=name.strip(),
+                                            pos=pos,)
+
+                        layer.sites.append(site)
+            elif section == 'Meta':
+                options = config.options(section)
+                for option in options:
+                    value = config.get(section, option)
+                    self.meta.add({option: value})
+            elif section.startswith('Parameter '):
+                options = config.options(section)
+                name = section.split()[-1]
+                min = config.getfloat(section, 'min') if 'min' in options else None
+                max = config.getfloat(section, 'max') if 'max' in options else None
+                value = config.get(section, 'value') if 'value' in options else None
+                scale = config.get(section, 'scale') if 'scale' in options else 'linear'
+                adjustable = config.getboolean(section, 'adjustable') if 'adjustable' in options else None
+                self.add_parameter(Parameter(name=name,
+                                   value=value,
+                                   min=min,
+                                   max=max,
+                                   scale=scale,
+                                   adjustable=adjustable,))
+
+            elif section.startswith('Process '):
+                options = config.options(section)
+                name = section.split()[-1]
+                rate_constant = config.get(section, 'rate_constant')
+                if 'tof_count' in options:
+                    tof_count = config.get(section, 'tof_count')
+                else:
+                    tof_count = None
+
+                if 'enabled' in options:
+                    enabled = config.getboolean(section, 'enabled')
+                else:
+                    enabled = True
+
+                process = self.add_process(Process(name=name,
+                                           rate_constant=rate_constant,
+                                           tof_count=tof_count,
+                                           enabled=enabled))
+
+                for action in [x.strip() for x in config.get(section, 'actions').split('+')]:
+                    try:
+                        species, coord = action.split('@')
+                    except:
+                        print(action)
+                        print(action.split('@'))
+                        raise
+                    coord = coord.split('.')
+                    if len(coord) == 3:
+                        name, offset, layer = coord
+                        offset = eval(offset)
+                    elif len(coord) == 2:
+                        name, offset = coord
+                        offset = eval(offset)
+                        layer = [x.split()[-1] for x in config.sections() if x.startswith('Layer')][0]
+                    else:
+                        name = coord[0]
+                        offset = (0, 0, 0)
+                        layer = [x.split()[-1] for x in config.sections() if x.startswith('Layer')][0]
+
+                    process.add_action(Action(
+                        species=species,
+                        coord=Coord(name=name,
+                                    offset=offset,
+                                    layer=layer)))
+
+                for condition in [x.strip() for x in config.get(section, 'conditions').split('+')]:
+                    species, coord = condition.split('@')
+                    coord = coord.split('.')
+                    if len(coord) == 3:
+                        name, offset, layer = coord
+                        offset = eval(offset)
+                    elif len(coord) == 2:
+                        name, offset = coord
+                        offset = eval(offset)
+                        layer = [x.split()[-1] for x in config.sections() if x.startswith('Layer')][0]
+                    else:
+                        name = coord[0]
+                        offset = (0, 0, 0)
+                        layer = [x.split()[-1] for x in config.sections() if x.startswith('Layer')][0]
+
+                    process.add_condition(Condition(
+                        species=species,
+                        coord=Coord(name=name,
+                                    offset=offset,
+                                    layer=layer)))
+
+            elif section == 'SpeciesList':
+                self.species_list.default_species = \
+                        config.get(section, 'default_species') \
+                        if 'default_species' in config.options(section) \
+                        else ''
+
+            elif section.startswith('Species '):
+                name = section.split()[-1]
+                options = config.options(section)
+                color = config.get(section, 'color') \
+                        if 'color' in options else ''
+                representation = config.get(section, 'representation') \
+                                 if 'representation' in options else ''
+                tags = config.get(section, 'tags') \
+                       if 'tags' in options else ''
+                self.add_species(Species(name=name,
+                                 color=color,
+                                 representation=representation,
+                                 tags=tags))
+
 
     def import_xml_file(self, filename):
         """Takes a filename, validates the content against kmc_project.dtd
@@ -454,7 +757,8 @@ class Project(object):
             for child in root:
                 if child.tag == 'lattice':
                     cell = np.array([float(i)
-                        for i in child.attrib['cell_size'].split()])
+                                     for i in
+                                     child.attrib['cell_size'].split()])
                     if len(cell) == 3:
                         self.layer_list.cell = np.diag(cell)
                     elif len(cell) == 9:
@@ -470,8 +774,8 @@ class Project(object):
                         self.layer_list.substrate_layer = \
                             self.layer_list.default_layer
                     if 'representation' in child.attrib:
-                        self.layer_list.representation = child.attrib[
-                                                             'representation']
+                        self.layer_list.representation = \
+                            child.attrib['representation']
                     else:
                         self.layer_list.representation = ''
 
@@ -493,21 +797,21 @@ class Project(object):
                                 else:
                                     tags = ''
                                 if 'default_species' in site.attrib:
-                                    default_species = site.attrib[
-                                                         'default_species']
+                                    default_species = \
+                                        site.attrib['default_species']
                                 else:
                                     default_species = 'default_species'
                                 site_elem = Site(name=name,
-                                    pos=pos,
-                                    tags=tags,
-                                    default_species=default_species)
+                                                 pos=pos,
+                                                 tags=tags,
+                                                 default_species=default_species)
                                 layer.sites.append(site_elem)
                 elif child.tag == 'meta':
                     for attrib in ['author',
-                                    'debug',
-                                    'email',
-                                    'model_dimension',
-                                    'model_name']:
+                                   'debug',
+                                   'email',
+                                   'model_dimension',
+                                   'model_name']:
                         if attrib in child.attrib:
                             self.meta.add({attrib: child.attrib[attrib]})
                 elif child.tag == 'parameter_list':
@@ -517,7 +821,7 @@ class Project(object):
 
                         if 'adjustable' in parameter.attrib:
                             adjustable = bool(eval(
-                                            parameter.attrib['adjustable']))
+                                              parameter.attrib['adjustable']))
                         else:
                             adjustable = False
 
@@ -552,9 +856,9 @@ class Project(object):
                         else:
                             proc_enabled = True
                         process_elem = Process(name=name,
-                            rate_constant=rate_constant,
-                            enabled=proc_enabled,
-                            tof_count=tof_count)
+                                               rate_constant=rate_constant,
+                                               enabled=proc_enabled,
+                                               tof_count=tof_count)
                         for sub in process:
                             if sub.tag == 'action' or sub.tag == 'condition':
                                 species = sub.attrib['species']
@@ -563,7 +867,7 @@ class Project(object):
                                 coord_name = sub.attrib['coord_name']
                                 coord_offset = tuple(
                                     [int(i) for i in
-                                    sub.attrib['coord_offset'].split()])
+                                     sub.attrib['coord_offset'].split()])
                                 coord = Coord(layer=coord_layer,
                                               name=coord_name,
                                               offset=coord_offset,
@@ -576,7 +880,7 @@ class Project(object):
                                     process_elem.add_action(condition_action)
                                 elif sub.tag == 'condition':
                                     process_elem.add_condition(
-                                                            condition_action)
+                                        condition_action)
                         self.add_process(process_elem)
                 elif child.tag == 'species_list':
                     self.species_list.default_species = \
@@ -623,8 +927,8 @@ class Project(object):
             raise UserWarning('No layer defined.')
 
         # if a least one site if defined
-        if not len([x  for layer in self.get_layers()
-                       for x in layer.sites]) >= 1:
+        if not len([x for layer in self.get_layers()
+                    for x in layer.sites]) >= 1:
             raise UserWarning('No site defined.')
         # check if all  lattice sites are unique
         for layer in self.get_layers():
@@ -646,7 +950,7 @@ class Project(object):
                                   'First character has to be a letter.\n')
 
         # check if the default layer is actually defined
-        if len(self.get_layers()) > 1  and \
+        if len(self.get_layers()) > 1 and \
            self.layer_list.default_layer not in [layer.name
                                                  for layer
                                                  in self.get_layers()]:
@@ -691,7 +995,7 @@ class Project(object):
         for x in self.get_speciess():
             if [y.name for y in self.get_speciess()].count(x.name) > 1:
                 raise UserWarning('Species %s has no unique name!' %
-                                      x.name)
+                                  x.name)
 
         #################
         # PROCESSES
@@ -706,7 +1010,7 @@ class Project(object):
                 raise UserWarning(('Model %s is not a valid variable name.\n'
                                    'Only letters, numerals and "_" allowed.\n'
                                    'First character has to be a letter.\n')
-                                   % x.name)
+                                  % x.name)
 
         # check if all process names are unique
         for x in self.get_processes():
@@ -728,13 +1032,13 @@ class Project(object):
             for x in process.condition_list:
                 if len([y for y in process.condition_list if x == y]) > 1:
                     raise UserWarning('%s of process %s is not unique!\n\n%s' %
-                                        (x, process.name, process))
+                                      (x, process.name, process))
         # check if actions for each process are unique
         for process in self.get_processes():
             for x in process.action_list:
                 if len([y for y in process.action_list if x == y]) > 1:
                     raise UserWarning('%s of process %s is not unique!' %
-                                        (x, process.name))
+                                      (x, process.name))
         # check if all processes have a rate expression
         for x in self.get_processes():
             if not x.rate_constant:
@@ -753,7 +1057,7 @@ class Project(object):
                     if not stripped_species in species_names:
                         raise UserWarning(('Species %s used by %s in process %s'
                                            'is not defined') %
-                                           (y.species, y, x.name))
+                                          (y.species, y, x.name))
 
         # check if all sites in processes are defined: actions, conditions
         return True
@@ -769,7 +1073,7 @@ class Project(object):
         names = list(set(names))
         nrates = len(set([x.rate_constant for x in self.get_processes()]))
         print('Processes (%s/%s/%s)\n-------------' %
-               (len(names), nrates, len(self.get_processes())))
+              (len(names), nrates, len(self.get_processes())))
 
         for process_type in sorted(names):
             nprocs = len([x for x in self.get_processes()
@@ -801,7 +1105,6 @@ class Project(object):
         os.chdir(cwd)
         shutil.rmtree(dir)
         return model
-
 
     def set_meta(self,
                  author=None,
@@ -952,7 +1255,7 @@ class LayerList(FixedObject, list):
             self.representation = '[%s]' % get_ase_constructor(images)
         else:
             raise UserWarning("Data type %s of %s not understood." %
-                (type(images), images))
+                              (type(images), images))
 
     def __setattr__(self, key, value):
         if key == 'representation':
@@ -960,7 +1263,7 @@ class LayerList(FixedObject, list):
                 from kmos.utils import get_ase_constructor
                 from ase.atoms import Atoms
                 value = eval(value)
-                if (not hasattr(self, 'representation') or \
+                if (not hasattr(self, 'representation') or
                    not self.representation):
                     self.cell = value[0].cell
                 value = '[%s]' % get_ase_constructor(value)
@@ -987,10 +1290,10 @@ class LayerList(FixedObject, list):
         return [
             self.generate_coord('%s.(%s, %s, %s).%s' % (site.name, i, j, k,
                                                         layer_name))
-                    for i in drange(size[0])
-                    for j in drange(size[1])
-                    for k in drange(size[2])
-                    for site in layer.sites]
+            for i in drange(size[0])
+            for j in drange(size[1])
+            for k in drange(size[2])
+            for site in layer.sites]
 
     def generate_coord(self, terms):
         """Expecting something of the form site_name.offset.layer
@@ -999,23 +1302,23 @@ class LayerList(FixedObject, list):
         term = terms.split('.')
         if len(term) == 3:
             coord = Coord(name=term[0],
-                offset=eval(term[1]),
-                layer=term[2])
+                          offset=eval(term[1]),
+                          layer=term[2])
         elif len(term) == 2:
             coord = Coord(name=term[0],
-                offset=eval(term[1]),
-                layer=self.default_layer)
+                          offset=eval(term[1]),
+                          layer=self.default_layer)
         elif len(term) == 1:
             coord = Coord(name=term[0],
-                offset=(0, 0, 0),
-                layer=self.default_layer)
+                          offset=(0, 0, 0),
+                          layer=self.default_layer)
         else:
             raise UserWarning("Cannot parse coord description")
 
         offset = np.array(coord.offset)
         cell = self.cell
         layer = filter(lambda x: x.name == coord.layer, list(self))[0]
-        sites = [x for x in layer.sites  if x.name == coord.name]
+        sites = [x for x in layer.sites if x.name == coord.name]
         if not sites:
             raise UserWarning('No site names %s in %s found!' %
                               (coord.name, layer.name))
@@ -1162,7 +1465,7 @@ class Coord(FixedObject):
                                     self.offset[2]])
 
         self.pos = np.array([float(i) for i in kwargs['pos'].split()]) \
-                   if 'pos' in kwargs else np.array([0., 0., 0.])
+            if 'pos' in kwargs else np.array([0., 0., 0.])
 
         self.tags = kwargs.get('tags', '')
 
@@ -1178,7 +1481,7 @@ class Coord(FixedObject):
         return (self.layer, self.name) == (other.layer, other.name)
 
     def __eq__(self, other):
-        return ((self.layer, self.name) == \
+        return ((self.layer, self.name) ==
                (other.layer, other.name)) and (self.offset == other.offset).all()
 
     def __hash__(self):
@@ -1223,7 +1526,7 @@ class Coord(FixedObject):
             return 'site(1), site(2), site(3), site(4)'
         else:
             return 'site(1) + (%s), site(2) + (%s), site(3) + (%s), site(4) + (%s)' % \
-                    (self.offset[0], self.offset[1], self.offset[2], self.name)
+                (self.offset[0], self.offset[1], self.offset[2], self.name)
 
     def radd_ff(self):
         """Build term as if adding on the right, omit '+' if 0 anyway
@@ -1251,6 +1554,7 @@ class Coord(FixedObject):
         else:
             return "(/%s, %s, %s, %s/)" % (self.offset[0], self.offset[1],
                                            self.offset[2], self.name, )
+
 
 def cmp_coords(self, other):
     if self.layer != other.layer:
@@ -1335,7 +1639,7 @@ class Process(FixedObject):
     :type enabled: bool.
     :param chemical_expression: Chemical expression (i.e: A@site1 + B@site2 -> empty@site1 + AB@site2) to generate process from.
     :type chemical_expression: str.
-    :param tof_count: Stoichiometric factor for observable products {'NH3': 1, 'H2O(gas)': 2}. Hint: avoid space in keys.
+    :param tof_count: Stoichiometric factor for observable products {'NH3': 1, 'H2Ogas': 2}. Hint: avoid space in keys.
     :type tof_count: dict.
 
 
@@ -1360,7 +1664,10 @@ class Process(FixedObject):
         self.enabled = kwargs.get('enabled', True)
 
     def __repr__(self):
-        return '[PROCESS] Name:%s\n     Rate: %s\nConditions: %s\nActions: %s' \
+        return ('[PROCESS] Name:%s\n'
+                '     Rate: %s\n'
+                'Conditions: %s\n'
+                'Actions: %s') \
             % (self.name, self.rate_constant,
                self.condition_list, self.action_list)
 
@@ -1399,7 +1706,10 @@ class SingleLatIntProcess(Process):
                   'tof_count']
 
     def __repr__(self):
-        return '[PROCESS] Name:%s Rate: %s\nConditions: %s\nActions: %s\nBystanders: %s' \
+        return ('[PROCESS] Name:%s Rate: %s\n'
+                'Conditions: %s\n'
+                'Actions: %s\n'
+                'Bystanders: %s') \
             % (self.name,
                self.rate_constant,
                self.condition_list,
@@ -1427,9 +1737,11 @@ class LatIntProcess(Process):
 
 class Bystander(FixedObject):
     attributes = ['coord', 'allowed_species', 'counter']
+
     def __repr__(self):
         return ("[BYSTANDER] Coord:%s Allowed species: %s, Counter: %s\n" %
                (self.coord, self.allowed_species, self.counter))
+
 
 class ConditionAction(FixedObject):
     """Represents either a condition or an action. Since both
@@ -1438,7 +1750,8 @@ class ConditionAction(FixedObject):
     readability one can also use `Condition` or `Action` which are
     just aliases.
 
-    :param coord: Relative Coord (generated by :meth:`LayerList.generate_coord` or :meth:`Lattice.generate_coord_set`).
+    :param coord: Relative Coord (generated by :meth:`LayerList.generate_coord`
+                                  or :meth:`Lattice.generate_coord_set`).
     :type coord: Coord
     :param species: Name of species.
     :type species: str
@@ -1458,6 +1771,15 @@ class ConditionAction(FixedObject):
                (self.species,
                 self.coord,
                 ' (implicit)' if self.implicit else ''))
+
+    def _shorthand(self):
+        if self.coord.offset.any():
+            return '%s@%s.%s' % (self.species,
+                                 self.coord.name,
+                                 tuple(self.coord.offset))
+        else:
+            return '%s@%s' % (self.species,
+                              self.coord.name)
 
     def __hash__(self):
         return hash(self.__repr__())
@@ -1571,11 +1893,11 @@ def parse_chemical_expression(eq, process, project_tree):
     # check if species is defined
     for term in left + right:
         if term[0][0] in ['$', '^'] and term[0][1:]:
-            if not  filter(lambda x: x.name == term[0][1:], \
-                                     project_tree.get_speciess()):
+            if not filter(lambda x: x.name == term[0][1:],
+                          project_tree.get_speciess()):
                 raise UserWarning('Species %s unknown ' % term[0:])
-        elif not filter(lambda x: x.name == term[0], \
-                                  project_tree.get_speciess()):
+        elif not filter(lambda x: x.name == term[0],
+                        project_tree.get_speciess()):
             raise UserWarning('Species %s unknown ' % term[0])
 
     condition_list = []
@@ -1590,7 +1912,7 @@ def parse_chemical_expression(eq, process, project_tree):
         if len(coord_term) == 2:
             name = coord_term[0]
             active_layers = filter(lambda x: x.active,
-                                          project_tree.get_layers())
+                                   project_tree.get_layers())
             if len(active_layers) == 1:
                 layer = active_layers[0].name
             else:  # if more than one active try to guess layer from name
@@ -1611,8 +1933,8 @@ def parse_chemical_expression(eq, process, project_tree):
                     layer = possible_sites[0][1]
                 else:
                     raise UserWarning("Site %s is ambiguous because it" +
-                        "exists on the following lattices: %" %
-                        (name, [x[1] for x  in possible_sites]))
+                                      "exists on the following lattices: %" %
+                                      (name, [x[1] for x in possible_sites]))
             coord_term.append(layer)
 
         if len(coord_term) == 3:
@@ -1625,7 +1947,7 @@ def parse_chemical_expression(eq, process, project_tree):
                                   % (layer, layer_names))
             else:
                 layer_instance = filter(lambda x: x.name == layer,
-                                              project_tree.get_layers())[0]
+                                        project_tree.get_layers())[0]
                 site_names = [x.name for x in layer_instance.sites]
                 if name not in site_names:
                     raise UserWarning("Site %s not known, must be one of %s"
@@ -1651,8 +1973,8 @@ def parse_chemical_expression(eq, process, project_tree):
     # the same coordinate gets complemented with a 'default_species'
     # condition
     for action in action_list:
-        if not filter(lambda x: x.coord == action.coord, condition_list)\
-            and not action.species[0] in ['^', '$']:
+        if not filter(lambda x: x.coord == action.coord, condition_list) \
+                and not action.species[0] in ['^', '$']:
             condition_list.append(ConditionAction(species=default_species,
                                                   coord=action.coord))
 
@@ -1666,21 +1988,22 @@ def parse_chemical_expression(eq, process, project_tree):
         #      the left side, the condition will be added with the same
         #      species as the annihilated one.
         if action.species[0] == '$':
-            corresponding_condition = filter(lambda x: x.coord
-                                                        == action.coord,
-                                            condition_list)
+            corresponding_condition = filter(lambda x:
+                                             x.coord == action.coord,
+                                             condition_list)
             if action.species[1:]:
                 if not corresponding_condition:
                     condition_list.append(
-                            ConditionAction(
-                                species=action.species[1:],
-                                coord=action.coord))
+                        ConditionAction(
+                            species=action.species[1:],
+                            coord=action.coord))
                 else:
                     if corresponding_condition[0].species \
                        != action.species[1:]:
                         raise UserWarning(
-                        'When annihilating a site, species must be the same' +
-                        'for condition\n  and action.\n')
+                            'When annihilating a site,'
+                            ' species must be the same'
+                            'for condition\n  and action.\n')
             else:
                 if corresponding_condition:
                     action.species = '$%s' % corresponding_condition[0].species

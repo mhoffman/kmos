@@ -1,0 +1,164 @@
+<?xml version="1.0" ?>
+<kmc version="(0, 2)">
+    <meta author="Max J. Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="2" model_name="dummy_pairwise_interaction"/>
+    <species_list default_species="empty">
+        <species color="#000000" name="CO" representation="Atoms('CO',[[0,0,0],[0,0,1.2]])" tags="carbon"/>
+        <species color="#ff0000" name="O" representation="Atoms('O')" tags=""/>
+        <species color="#ffffff" name="empty" representation="" tags=""/>
+    </species_list>
+    <parameter_list>
+        <parameter adjustable="False" max="0.0" min="0.0" name="A" scale="linear" value="(3*angstrom)**2"/>
+        <parameter adjustable="True" max="0" min="-2" name="E_CO" scale="linear" value="-1"/>
+        <parameter adjustable="True" max="1" min="-1" name="E_CO_nn" scale="linear" value="0.2"/>
+        <parameter adjustable="True" max="1500" min="300" name="T" scale="linear" value="600"/>
+        <parameter adjustable="True" max="1000.0" min="1e-13" name="p_COgas" scale="log" value="0.2"/>
+    </parameter_list>
+    <lattice cell_size="1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 10.0" default_layer="simplecubic_2d" representation="" substrate_layer="simplecubic_2d">
+        <layer color="#ffffff" name="simplecubic_2d">
+            <site default_species="default_species" pos="0.0 0.0 0.0" tags="" type="a"/>
+        </layer>
+    </lattice>
+    <process_list>
+        <process enabled="True" name="CO_adsorption" rate_constant="p_COgas*A*bar/sqrt(2*m_CO*umass/beta)">
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="CO_desorption_0" rate_constant="p_COgas*A*bar/sqrt(2*m_CO*umass/beta)*exp(beta*(E_CO+0*E_CO_nn-mu_COgas)*eV)">
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="CO"/>
+            <action coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_desorption_1" rate_constant="p_COgas*A*bar/sqrt(2*m_CO*umass/beta)*exp(beta*(E_CO+1*E_CO_nn-mu_COgas)*eV)">
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="1 0 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="CO"/>
+            <action coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_desorption_10" rate_constant="p_COgas*A*bar/sqrt(2*m_CO*umass/beta)*exp(beta*(E_CO+2*E_CO_nn-mu_COgas)*eV)">
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="-1 0 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 1 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="CO"/>
+            <action coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_desorption_11" rate_constant="p_COgas*A*bar/sqrt(2*m_CO*umass/beta)*exp(beta*(E_CO+3*E_CO_nn-mu_COgas)*eV)">
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="-1 0 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 1 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="1 0 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="CO"/>
+            <action coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_desorption_12" rate_constant="p_COgas*A*bar/sqrt(2*m_CO*umass/beta)*exp(beta*(E_CO+2*E_CO_nn-mu_COgas)*eV)">
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="-1 0 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 -1 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="CO"/>
+            <action coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_desorption_13" rate_constant="p_COgas*A*bar/sqrt(2*m_CO*umass/beta)*exp(beta*(E_CO+3*E_CO_nn-mu_COgas)*eV)">
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="-1 0 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 -1 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="1 0 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="CO"/>
+            <action coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_desorption_14" rate_constant="p_COgas*A*bar/sqrt(2*m_CO*umass/beta)*exp(beta*(E_CO+3*E_CO_nn-mu_COgas)*eV)">
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="-1 0 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 -1 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 1 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="CO"/>
+            <action coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_desorption_15" rate_constant="p_COgas*A*bar/sqrt(2*m_CO*umass/beta)*exp(beta*(E_CO+4*E_CO_nn-mu_COgas)*eV)">
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="-1 0 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 -1 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 1 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="1 0 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="CO"/>
+            <action coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_desorption_2" rate_constant="p_COgas*A*bar/sqrt(2*m_CO*umass/beta)*exp(beta*(E_CO+1*E_CO_nn-mu_COgas)*eV)">
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 1 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="CO"/>
+            <action coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_desorption_3" rate_constant="p_COgas*A*bar/sqrt(2*m_CO*umass/beta)*exp(beta*(E_CO+2*E_CO_nn-mu_COgas)*eV)">
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 1 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="1 0 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="CO"/>
+            <action coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_desorption_4" rate_constant="p_COgas*A*bar/sqrt(2*m_CO*umass/beta)*exp(beta*(E_CO+1*E_CO_nn-mu_COgas)*eV)">
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 -1 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="CO"/>
+            <action coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_desorption_5" rate_constant="p_COgas*A*bar/sqrt(2*m_CO*umass/beta)*exp(beta*(E_CO+2*E_CO_nn-mu_COgas)*eV)">
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 -1 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="1 0 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="CO"/>
+            <action coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_desorption_6" rate_constant="p_COgas*A*bar/sqrt(2*m_CO*umass/beta)*exp(beta*(E_CO+2*E_CO_nn-mu_COgas)*eV)">
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 -1 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 1 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="CO"/>
+            <action coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_desorption_7" rate_constant="p_COgas*A*bar/sqrt(2*m_CO*umass/beta)*exp(beta*(E_CO+3*E_CO_nn-mu_COgas)*eV)">
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="-1 0 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 -1 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 1 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="1 0 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="CO"/>
+            <action coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_desorption_8" rate_constant="p_COgas*A*bar/sqrt(2*m_CO*umass/beta)*exp(beta*(E_CO+1*E_CO_nn-mu_COgas)*eV)">
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="-1 0 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="1 0 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="CO"/>
+            <action coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_desorption_9" rate_constant="p_COgas*A*bar/sqrt(2*m_CO*umass/beta)*exp(beta*(E_CO+2*E_CO_nn-mu_COgas)*eV)">
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="-1 0 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 -1 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 1 0" species="empty"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="1 0 0" species="CO"/>
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="CO"/>
+            <action coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="O_adsorption" rate_constant="p_COgas*A*bar/sqrt(2*m_O*umass/beta)">
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="O"/>
+        </process>
+        <process enabled="True" name="O_desorption" rate_constant="p_COgas*A*bar/sqrt(2*m_O*umass/beta)">
+            <condition coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="O"/>
+            <action coord_layer="simplecubic_2d" coord_name="a" coord_offset="0 0 0" species="empty"/>
+        </process>
+    </process_list>
+    <output_list/>
+</kmc>
