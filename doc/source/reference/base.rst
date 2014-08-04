@@ -336,7 +336,7 @@ base/set_rate_const
 base/set_system_name
 """"""""""""""""""""""""""""""""""""""""""""""""""
     Set the systems name. Useful in conjunction with base.save_system
-    to save *.reload files under a different name than the default one.
+    to save \*.reload files under a different name than the default one.
 
     * ``system_name`` Readable string of type character(len=200).
 

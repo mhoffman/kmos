@@ -366,8 +366,6 @@ pt.add_process(name='React_bridge_left',
                 rate_constant='(beta*h)**(-1)*exp(-beta*E_react_Obridge_COcus*eV)',
                 tof_count={'CO_oxidation':1})
 
-
-
-
-pt.export_xml_file('CO_oxidation_Ruo2.xml')
+pt.save('CO_oxidation.ini')
+pt.save('CO_oxidation.xml')
 pt.print_statistics()

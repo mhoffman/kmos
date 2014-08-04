@@ -1,0 +1,7 @@
+include kmos/*.dtd
+include kmos/fortran_src/*f90
+include kmos/kmc_editor.glade
+include kmos/fortran_src/assert.ppc
+include README.rst
+include INSTALL.rst
+include COPYING

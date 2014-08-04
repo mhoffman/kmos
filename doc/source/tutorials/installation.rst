@@ -11,6 +11,10 @@ and install it using *setuptools* ::
     ./setup.py install [--user]
 
 
+or if you have `pip <http://www.pip-installer.org/en/latest/installing.html>`_ run ::
+
+    pip install python-kmos --upgrade [--user]
+
 To use the core functionality
 (programmatic model setup, code generation, model execution)
 kmos has a fairly modest depedency foot-print. You will need ::
@@ -44,6 +48,12 @@ atomic simulation environment (ASE) is currently to ::
 Or go to their `website <https://wiki.fysik.dtu.dk/ase/download.html>`_
 to fetch the latest version.
 
+Unfortunately Debian/Ubuntu have discontinued maintaining the gazpacho package which I find very unfortunate since it eased gtk GUI building a lot and I haven't found a simple transition path (simple as in one reliable conversion script and two changed import lines) towards gtkbuilder. Therefore for the moment I can only suggest to fetch the latest old package from e.g. `Debian Packages <https://packages.debian.org/de/squeeze/all/gazpacho/download>`_ and install it manually with ::
+
+    sudo dpkg -i gazpacho_*.deb
+
+
+
 If you think this dependency list hurts. Yes, it does!
 And I am happy about any suggestions how to
 minimize it. However one should note these dependencies are only
@@ -53,12 +63,6 @@ no dependencies except for a Fortran compiler.
 To ease the installation further on Ubuntu one can simply run::
 
  kmos-install-dependencies-ubuntu
-
-
-.. todo ::
-
-    add pip way or something alike to automatically
-    install dependencies.
 
 
 Installation on openSUSE 12.1 Linux
@@ -119,7 +123,7 @@ number of programs.
 
 #. **pyGTK**
    is needed for the GUI frontend so fetch the
-   `all-in-one <>`_ bundle installer and
+   `all-in-one <http://www.pygtk.org/downloads.html>`_ bundle installer and
    install most of it.
 
 #. **lxml**

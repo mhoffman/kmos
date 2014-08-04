@@ -44,9 +44,11 @@ name='python-kmos'
 packages = [
            'kmos',
            'kmos.utils',
+           'kmos.gui',
            ]
 package_dir = {'kmos':'kmos'}
 package_data = {'kmos':['fortran_src/*f90',
+                        'fortran_src/*.mpy',
                         'kmc_editor.glade',
                         'fortran_src/assert.ppc',
                         'kmc_project_v0.1.dtd',

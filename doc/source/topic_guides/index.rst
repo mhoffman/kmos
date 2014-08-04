@@ -1,3 +1,5 @@
+.. _topic-guides:
+
 ============
 Topic Guides
 ============

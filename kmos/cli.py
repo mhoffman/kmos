@@ -143,6 +143,7 @@ usage['xml'] = """kmos xml
     Print xml representation of model to stdout
                """
 
+
 def get_options(args=None, get_parser=False):
     import optparse
     import os
@@ -164,14 +165,14 @@ def get_options(args=None, get_parser=False):
                       dest='path_to_f2py',
                       default='f2py')
 
-    parser.add_option('-b','--backend',
-                     dest='backend',
-                     default='local_smart')
+    parser.add_option('-b', '--backend',
+                      dest='backend',
+                      default='local_smart')
 
-    parser.add_option('-v','--steps-per-frame',
-                     dest='steps_per_frame',
-                     type='int',
-                     default='50000')
+    parser.add_option('-v', '--steps-per-frame',
+                      dest='steps_per_frame',
+                      type='int',
+                      default='50000')
 
     parser.add_option('-d', '--debug',
                       default=False,
@@ -191,19 +192,20 @@ def get_options(args=None, get_parser=False):
         fcompiler = 'gfortran'
 
     parser.add_option('-f', '--fcompiler',
-                     dest='fcompiler',
-                     default=os.environ.get('F2PY_FCOMPILER', fcompiler ))
+                      dest='fcompiler',
+                      default=os.environ.get('F2PY_FCOMPILER', fcompiler))
 
     if args is not None:
         options, args = parser.parse_args(args.split())
     else:
         options, args = parser.parse_args()
-    if len(args) < 1 :
+    if len(args) < 1:
         parser.error('Command expected')
     if get_parser:
         return options, args, parser
     else:
         return options, args
+
 
 def match_keys(arg, usage, parser):
     """Try to match part of a command against
@@ -212,13 +214,14 @@ def match_keys(arg, usage, parser):
 
     """
     possible_args = [key for key in usage if key.startswith(arg)]
-    if len(possible_args) == 0 :
+    if len(possible_args) == 0:
         parser.error('Command "%s" not understood.' % arg)
-    elif len(possible_args) > 1 :
+    elif len(possible_args) > 1:
         parser.error(('Command "%s" ambiguous.\n'
                       'Could be one of %s\n\n') % (arg, possible_args))
     else:
         return possible_args[0]
+
 
 def main(args=None):
     """The CLI main entry point function.
@@ -236,6 +239,8 @@ def main(args=None):
 
     options, args, parser = get_options(args, get_parser=True)
 
+    global model, pt, np
+
     if not args[0] in usage.keys():
         args[0] = match_keys(args[0], usage, parser)
 
@@ -249,7 +254,7 @@ def main(args=None):
         time0 = time()
         try:
             model.proclist.do_kmc_steps(nsteps)
-        except: # kmos < 0.3 had no model.proclist.do_kmc_steps
+        except:  # kmos < 0.3 had no model.proclist.do_kmc_steps
             model.do_steps(nsteps)
 
         needed_time = time() - time0
@@ -278,7 +283,7 @@ def main(args=None):
         xml_file = args[1]
         export_dir = args[2]
         project = kmos.types.Project()
-        project.import_xml_file(xml_file)
+        project.import_file(xml_file)
 
         writer = ProcListWriter(project, export_dir)
         writer.write_settings()
@@ -299,7 +304,7 @@ def main(args=None):
         export_dir = os.path.join(args[2], 'src')
 
         project = kmos.types.Project()
-        project.import_xml_file(xml_file)
+        project.import_file(xml_file)
 
         kmos.io.export_source(project,
                               export_dir,
@@ -323,11 +328,11 @@ def main(args=None):
 
     elif args[0] == 'settings-export':
         import kmos.io
-        pt = kmos.io.import_xml_file(args[1])
+        pt = kmos.io.import_file(args[1])
         if len(args) < 3:
             out_dir = os.path.splitext(args[1])[0]
             print('No export path provided. Exporting kmc_settings.py to %s'
-                   % out_dir)
+                  % out_dir)
             args.append(out_dir)
 
         if not os.path.exists(args[2]):
@@ -353,14 +358,14 @@ def main(args=None):
         import kmos.io
         if not len(args) >= 2:
             raise UserWarning('XML file name expected.')
-        global pt
         pt = kmos.io.import_xml_file(args[1])
         sh(banner='Note: pt = kmos.io.import_xml(\'%s\')' % args[1])
 
     elif args[0] == 'rebuild':
         from time import sleep
         print('Will rebuild model from kmc_settings.py in current directory')
-        print('Please do not interrupt, build process, as you will most likely')
+        print('Please do not interrupt,'
+              ' build process, as you will most likely')
         print('loose the current model files.')
         sleep(2.)
         from sys import path
@@ -402,8 +407,8 @@ def main(args=None):
         try:
             model = KMC_Model(print_rates=False)
         except:
-            print("Warning: could not import kmc_model! Please make sure you are in the right directory")
-        global model, np
+            print("Warning: could not import kmc_model!"
+                  " Please make sure you are in the right directory")
         sh(banner='Note: model = KMC_Model(print_rates=False)')
         try:
             model.deallocate()
@@ -439,11 +444,20 @@ def sh(banner):
 
     from distutils.version import LooseVersion
     import IPython
-    if hasattr(IPython, 'release') and \
-       LooseVersion(IPython.release.version) >= LooseVersion('0.11'):
-        from IPython.frontend.terminal.embed \
-            import InteractiveShellEmbed
-        InteractiveShellEmbed(banner1=banner)()
+    if hasattr(IPython, 'release'):
+        try:
+            from IPython.terminal.embed import InteractiveShellEmbed
+            InteractiveShellEmbed(banner1=banner)()
+
+        except ImportError:
+            try:
+                from IPython.frontend.terminal.embed \
+                    import InteractiveShellEmbed
+                InteractiveShellEmbed(banner1=banner)()
+
+            except ImportError:
+                from IPython.Shell import IPShellEmbed
+                IPShellEmbed(banner=banner)()
     else:
         from IPython.Shell import IPShellEmbed
         IPShellEmbed(banner=banner)()
