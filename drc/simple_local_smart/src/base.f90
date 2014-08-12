@@ -665,23 +665,85 @@ subroutine update_integ_rate()
 end subroutine update_integ_rate
 !------ S. Matera 09/18/2012------
 
-subroutine update_chi(G,O)
+subroutine update_chi(executed,proc_nr)
     
-    real(kind=iint), intent(in) :: G, O
+    logical , intent(in) :: executed
+    integer(kind=iint), intent(in) :: proc_nr
     
-    
+    integer(kind=iint) :: process
+    integer(kind=iint) :: tof
     integer(kind=iint) :: i
     
-    !react=5
-    chi(1,1,1) = chi(1,1,1)+nr_of_sites(5)*rates(5)*O*kmc_time_step
-    do i=2,drc_order
-        chi(i,1,1) = chi(i,1,1)+nr_of_sites(5)*rates(5)*G*tchi(i-1,1,1)
-    end do
+    real(kind=rdouble) :: pertubation
     
-    do i=drc_order,2,-1
-        tchi(i,1,1)=G*tchi(i-1,1,1)
-    end do
-    tchi(1,1,1)=O*kmc_time_step
+    real(kind=iint) :: G, O
+    
+    pertubation = 1
+    
+    !calculate G, O
+    
+    !for all processes
+    do process=1,1 !nr_of_proc
+        
+        !calculate G O for process
+        
+        !print *,"bs accum_rate=",accum_rates(nr_of_proc)
+        
+        if(executed) then
+            
+            G=2*abs(accum_rates(nr_of_proc))
+            
+            O=0.0
+            
+            if(proc_nr .EQ. process) then
+                O=G*abs(pertubation)/rates(process)
+            end if
+            
+        else
+            
+            G=-2*abs(accum_rates(nr_of_proc))
+            
+            O=G*abs(nr_of_sites(process)*pertubation)/accum_rates(nr_of_proc)
+            
+        end if
+        
+        !print *,"bs O=",O," bs G=",G," proc=",process
+        
+        !got O and G for proc
+        
+        
+        !tof 1: proc 5
+        
+        tof=1
+        
+        chi(1,process,tof) = chi(1,process,tof)+nr_of_sites(5)*rates(5)*O*kmc_time_step
+        do i=2,drc_order
+            chi(i,process,tof) = chi(i,process,tof)+nr_of_sites(5)*rates(5)*G*tchi(i-1,process,tof)
+        end do
+    
+        do i=drc_order,2,-1
+            tchi(i,process,tof)=G*tchi(i-1,process,tof)
+        end do
+        tchi(1,process,tof)=O*kmc_time_step
+        
+        !crap
+        !do tof=1,2 !total 2 tofs
+        !    
+        !    chi(1,process,tof) = chi(1,process,tof)+nr_of_sites(process)*rates(process)*O*kmc_time_step
+        !    do i=2,drc_order
+        !        chi(i,process,tof) = chi(i,process,tof)+nr_of_sites(process)*rates(process)*G*tchi(i-1,process,tof)
+        !    end do
+        !
+        !    do i=drc_order,2,-1
+        !        tchi(i,process,tof)=G*tchi(i-1,process,tof)
+        !    end do
+        !    tchi(1,process,tof)=O*kmc_time_step
+        !    
+        !end do !tofs
+        
+        
+    end do !procs
+    
     
 end subroutine update_chi
 
