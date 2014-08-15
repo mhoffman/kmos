@@ -342,7 +342,7 @@ class KMC_Model(Process):
 
         """
         proclist.do_kmc_steps(n)
-        
+
     def do_drc_steps(self, process, n=10000, pertubation=1.0):
         """Propagate the model `n` steps and sample DRCs
 
@@ -351,22 +351,66 @@ class KMC_Model(Process):
 
         """
         proclist.do_drc_steps(n,process,pertubation)
-        
+
     def _pair_swap(self,liste):
         for i in range(0,len(liste)-1,2):
             tmp=liste[i]
             liste[i]=liste[i+1]
             liste[i+1]=tmp
         return(liste)
-        
-    def _cont_frac(self,chi):
-        
+
+    def _cont_frac_mlentz(self,chi):
+
         if not (all(map(lambda x: x!=0,chi))):
             print "found zeros in chis:"
             print chi
             return
-            
-        
+
+        tiny = 1.e-30 # very small number to have something non-zero
+        eps = 1.e-7 # error tolerating machine precision
+
+        a = {}
+        b = {}
+        # first test need order of continued fraction expansion
+        # by using modified Lentz rule, put forward by
+        # IJ Thompson and AR Barnett, (1986), J. Comp. Phys. 64, 490-509
+
+        # And check for notation
+        # Numerical Recipes in C: The Art of Scientific Computing, Second Edition Hardcover – October 30, 1992
+        # by William H. Press  (Author), Brian P. Flannery (Author), Saul A. Teukolsky  (Author), & 1 more
+        # Hardcover: 994 pages
+        # Publisher: Cambridge University Press; 2 edition (October 30, 1992)
+        # Language: English
+        # ISBN-10: 0521431085
+        # ISBN-13: 978-0521431088
+
+        C = {}
+        D = {}
+        delta = {}
+        f = {}
+        j = 0
+
+        f[j] = b[j] if b[j] != 0 else tiny
+        C[j] = f[j]
+        D[j] = 0
+
+        while True:
+            j += 1
+
+            D[j] = b[j] + a[j] * D[j-1]
+            if D[j] == 0 :
+                D[j] = tiny
+            C[j] = b[j] + a[j] / C[j-1]
+            if C[j] == 0 :
+                C[j] = tiny
+            D[j] = 1 / D[j]
+            delta[j] = C[j] * D[j]
+            f[j] = f[j - 1] * delta[j]
+            if abs(delta[j] - 1) < eps :
+                break
+
+
+
         coeff=[0.0]*len(chi)
 
         pl=chi[0];
@@ -377,89 +421,143 @@ class KMC_Model(Process):
         coeff[3]=-pl/pa
         pa=chi[3]+chi[2]*(coeff[2]+coeff[3])
         coeff[4]=-pa/pl
-    
+
         Dlast=pa
-    
+
         aux=[coeff[2]+coeff[3],coeff[2]]+[0.0]*len(chi)
-    
+
         for n in range(5,len(chi)):
             L=2*int((n-1)/2)
-        
+
             for k in range(L,3,-2):
                 aux[k-1]=aux[k-1-1]+coeff[n-1]*aux[k-2-1]
             aux[1]=aux[0]+coeff[n-1]
-        
+
             aux=self._pair_swap(aux)
-        
+
             asum=0
             for i in range(1,(L/2)+1):
                 asum+=chi[n-1-i]*aux[2*i-2]
             D=chi[n-1]+asum
-        
+
             coeff[n]=-D/Dlast
-        
+
             Dlast=D
-    
+
         omega=10**(-5)
-    
+
         evenorder=2*int((len(chi)-1)/2)
-    
+
         lim=coeff[evenorder]
-    
+
         for i in range(evenorder-1,0,-1):
             div=1 if (i%2==0) else -omega
             lim=coeff[i]/(div+lim)
-        
+
         return lim
-        
-        
-    def sample_drc(self, process, n=10000, pertubation = 1.0):
-        
+
+
+    def _cont_frac(self,chi):
+
+        if not (all(map(lambda x: x!=0,chi))):
+            print "found zeros in chis:"
+            print chi
+            return
+
+
+        coeff=[0.0]*len(chi)
+
+        pl=chi[0];
+        coeff[1]=pl
+        pa=chi[1]
+        coeff[2]=-pa/pl
+        pl=chi[2]+chi[1]*coeff[2]
+        coeff[3]=-pl/pa
+        pa=chi[3]+chi[2]*(coeff[2]+coeff[3])
+        coeff[4]=-pa/pl
+
+        Dlast=pa
+
+        aux=[coeff[2]+coeff[3],coeff[2]]+[0.0]*len(chi)
+
+        for n in range(5,len(chi)):
+            L=2*int((n-1)/2)
+
+            for k in range(L,3,-2):
+                aux[k-1]=aux[k-1-1]+coeff[n-1]*aux[k-2-1]
+            aux[1]=aux[0]+coeff[n-1]
+
+            aux=self._pair_swap(aux)
+
+            asum=0
+            for i in range(1,(L/2)+1):
+                asum+=chi[n-1-i]*aux[2*i-2]
+            D=chi[n-1]+asum
+
+            coeff[n]=-D/Dlast
+
+            Dlast=D
+
+        omega=10**(-5)
+
+        evenorder=2*int((len(chi)-1)/2)
+
+        lim=coeff[evenorder]
+
+        for i in range(evenorder-1,0,-1):
+            div=1 if (i%2==0) else -omega
+            lim=coeff[i]/(div+lim)
+
+        return lim
+
+
+    def sample_drc(self, process, n=10000, order=20, pertubation=1.0):
+
         if(process < 1 or process > self.proclist.nr_of_proc):
             print str(process)+" is not a valid process (between 1 and "+str(self.proclist.nr_of_proc)+")"
             return
-        
-        
+
+
         t0 = self.base.get_kmc_time()
-        
+
         #chi0=np.zeros(20,dtype=np.float64)
-        
+
         #for i in range(20):
         #    chi0[i] = base.get_chi(i + 1)
-            
+
         proclist.do_drc_steps(n,process,pertubation)
-        
-        chi1=np.zeros(20,dtype=np.float64)
-        for i in range(20):
-            chi1[i] = base.get_chi(i + 1,1,1)
-        
+
+        chi1 = self.get_chi()
+
         t1 = self.base.get_kmc_time()
-        
+
         self.drc_sum_time = self.drc_sum_time+(t1-t0) if hasattr(self, 'drc_sum_time') else (t1-t0)
-        
+
         if(not all(np.isfinite(chi1))):
             print "ERROR: precision error in sampled chis"
             return
-        
-        chi=map(lambda x: x/(self.drc_sum_time),chi1)
-        
-        
-        limit=self._cont_frac(chi)
-        
+
+        chi = chi / self.drc_sum_time
+
+        limit = self._cont_frac(chi)
+
         if self.tof_matrix[0,process-1]>0 :
-            #print "INFO: sample depencency from tof on tof"
-            limit+=self.base.get_integ_rate(process)/(t1)/self.base.get_rate(process)
-        
-        print " ".join(map(str,[limit]+chi))
-        
+            print "INFO: sample dependency from tof on tof"
+            limit += self.base.get_integ_rate(process)/(t1)/self.base.get_rate(process)
+
+        #print " ".join(map(str,[limit]+chi))
+
         #print limit
-        
+        return limit, chi
+
     def get_chi(self):
-        chi=np.zeros(20,dtype=np.float64)
-        for i in range(20):
-            chi[i] = base.get_chi(i + 1,1,1)
-            
-        return chi
+        chi1 = np.zeros((order, proclist.nr_of_proc, proclist.nr_of_proc), dtype=np.float64)
+        for k in range(proclist.nr_of_proc):
+            for j in range(proclist.nr_of_proc):
+                for i in range(order):
+                    chi1[i] = base.get_chi(i + 1, j + 1, k + 1)
+
+        return chi1
 
     def run(self):
         """Runs the model indefinitely. To control the
