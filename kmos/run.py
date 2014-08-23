@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf8
 """
 A front-end module to run a compiled kMC model. The actual model is
 imported in kmc_model.so and all parameters are stored in kmc_settings.py.
@@ -343,14 +344,14 @@ class KMC_Model(Process):
         """
         proclist.do_kmc_steps(n)
 
-    def do_drc_steps(self, process, n=10000, pertubation=1.0):
+    def do_drc_steps(self, process, n=10000, perturbation=1.0):
         """Propagate the model `n` steps and sample DRCs
 
         :param n: Number of steps to run (Default: 10000)
         :type n: int
 
         """
-        proclist.do_drc_steps(n,process,pertubation)
+        proclist.do_drc_steps(n, process, perturbation)
 
     def _pair_swap(self,liste):
         for i in range(0,len(liste)-1,2):
@@ -358,104 +359,6 @@ class KMC_Model(Process):
             liste[i]=liste[i+1]
             liste[i+1]=tmp
         return(liste)
-
-    def _cont_frac_mlentz(self,chi):
-
-        if not (all(map(lambda x: x!=0,chi))):
-            print "found zeros in chis:"
-            print chi
-            return
-
-        tiny = 1.e-30 # very small number to have something non-zero
-        eps = 1.e-7 # error tolerating machine precision
-
-        a = {}
-        b = {}
-        # first test need order of continued fraction expansion
-        # by using modified Lentz rule, put forward by
-        # IJ Thompson and AR Barnett, (1986), J. Comp. Phys. 64, 490-509
-
-        # And check for notation
-        # Numerical Recipes in C: The Art of Scientific Computing, Second Edition Hardcover – October 30, 1992
-        # by William H. Press  (Author), Brian P. Flannery (Author), Saul A. Teukolsky  (Author), & 1 more
-        # Hardcover: 994 pages
-        # Publisher: Cambridge University Press; 2 edition (October 30, 1992)
-        # Language: English
-        # ISBN-10: 0521431085
-        # ISBN-13: 978-0521431088
-
-        C = {}
-        D = {}
-        delta = {}
-        f = {}
-        j = 0
-
-        f[j] = b[j] if b[j] != 0 else tiny
-        C[j] = f[j]
-        D[j] = 0
-
-        while True:
-            j += 1
-
-            D[j] = b[j] + a[j] * D[j-1]
-            if D[j] == 0 :
-                D[j] = tiny
-            C[j] = b[j] + a[j] / C[j-1]
-            if C[j] == 0 :
-                C[j] = tiny
-            D[j] = 1 / D[j]
-            delta[j] = C[j] * D[j]
-            f[j] = f[j - 1] * delta[j]
-            if abs(delta[j] - 1) < eps :
-                break
-
-
-
-        coeff=[0.0]*len(chi)
-
-        pl=chi[0];
-        coeff[1]=pl
-        pa=chi[1]
-        coeff[2]=-pa/pl
-        pl=chi[2]+chi[1]*coeff[2]
-        coeff[3]=-pl/pa
-        pa=chi[3]+chi[2]*(coeff[2]+coeff[3])
-        coeff[4]=-pa/pl
-
-        Dlast=pa
-
-        aux=[coeff[2]+coeff[3],coeff[2]]+[0.0]*len(chi)
-
-        for n in range(5,len(chi)):
-            L=2*int((n-1)/2)
-
-            for k in range(L,3,-2):
-                aux[k-1]=aux[k-1-1]+coeff[n-1]*aux[k-2-1]
-            aux[1]=aux[0]+coeff[n-1]
-
-            aux=self._pair_swap(aux)
-
-            asum=0
-            for i in range(1,(L/2)+1):
-                asum+=chi[n-1-i]*aux[2*i-2]
-            D=chi[n-1]+asum
-
-            coeff[n]=-D/Dlast
-
-            Dlast=D
-
-        omega=10**(-5)
-
-        evenorder=2*int((len(chi)-1)/2)
-
-        lim=coeff[evenorder]
-
-        for i in range(evenorder-1,0,-1):
-            div=1 if (i%2==0) else -omega
-            lim=coeff[i]/(div+lim)
-
-        return lim
-
 
     def _cont_frac(self,chi):
 
@@ -510,8 +413,126 @@ class KMC_Model(Process):
 
         return lim
 
+    def _cont_frac_mlentz(self, chi):
+        coeff = [0.0] * len(chi)
 
-    def sample_drc(self, process, n=10000, order=20, pertubation=1.0):
+        pl = chi[0]
+        coeff[1] = pl
+        pa = chi[1]
+        coeff[2] = -pa / pl
+        pl = chi[2] + chi[1] * coeff[2]
+        coeff[3] = -pl / pa
+        pa = chi[3] + chi[2] * (coeff[2] + coeff[3])
+        coeff[4] = -pa / pl
+
+        Dlast = pa
+
+        aux = [coeff[2] + coeff[3], coeff[2]] + [0.0] * len(chi)
+
+        for n in range(5, len(chi)):
+            L = 2 * int((n - 1) / 2)
+
+            for k in range(L, 3, -2):
+                aux[k - 1] = aux[k - 1 - 1] + coeff[n - 1] * aux[k - 2 - 1]
+            aux[1] = aux[0] + coeff[n - 1]
+
+            aux = self._pair_swap(aux)
+
+            asum = 0
+            for i in range(1, (L / 2) + 1):
+                asum += chi[n - 1 - i] * aux[2 * i - 2]
+            D = chi[n - 1] + asum
+
+            coeff[n] = -D / Dlast
+
+            Dlast = D
+
+        omega = 10 ** (-5)
+
+        evenorder = 2 * int((len(chi) - 1) / 2)
+
+        lim = coeff[evenorder]
+
+        for i in range(evenorder - 1, 0, -1):
+            div = 1 if (i % 2 == 0) else -omega
+            lim = coeff[i] / (div + lim)
+
+
+        # convert c_i into a_i, b_i representation
+        # following notation of
+        # Hänggi, Peter, and Harry Thomas.
+        # "Stochastic processes: Time evolution, symmetries and linear response."
+        # Physics Reports 88.4 (1982): 207-319.
+        # http://www.physik.uni-augsburg.de/theo1/hanggi/Papers/36.pdf (Aug 21, 2014)
+        c = coeff
+        a = {}
+        b = {}
+
+        b[1] = c[1]
+        a[1] = -c[2]
+        for k in range(1, (len(coeff) - 1)/2):
+            b[k + 1] = -c[2*k]*c[2*k+1]
+            a[k + 1] = -(c[2*k+1] + c[2*k+2])
+
+        tiny = 1.e-30  # very small number to have something non-zero
+        eps = 1.e-7  # error tolerating machine precision (single-precision epsilon = 5.96e-8)
+
+        # first test need order of continued fraction expansion
+        # by using modified Lentz rule, put forward by
+        # IJ Thompson and AR Barnett, (1986), J. Comp. Phys. 64, 490-509
+
+        # Following notation of
+        # Numerical Recipes in C: The Art of Scientific Computing, Second Edition Hardcover – October 30, 1992
+        # by William H. Press  (Author), Brian P. Flannery (Author), Saul A. Teukolsky  (Author), & 1 more
+        # Hardcover: 994 pages
+        # Publisher: Cambridge University Press; 2 edition (October 30, 1992)
+        # Language: English
+        # ISBN-10: 0521431085
+        # ISBN-13: 978-0521431088
+
+        C = {}
+        D = {}
+        delta = {}
+        f = {}
+        j = 1
+
+        f[j] = b[j] if b[j] != 0 else tiny
+        C[j] = f[j]
+        D[j] = 0
+
+        while True:
+            j += 1
+            D[j] = b[j] + a[j] * D[j - 1]
+            if D[j] == 0:
+                D[j] = tiny
+            C[j] = b[j] + a[j] / C[j - 1]
+            if C[j] == 0:
+                C[j] = tiny
+            D[j] = 1 / D[j]
+            delta[j] = C[j] * D[j]
+            f[j] = f[j - 1] * delta[j]
+            if abs(delta[j] - 1) < eps:
+                # Expansion reached machine precision.
+                # Adding further terms may actuallly cause noise.
+                if j % 2 :
+                    needed_order = j - 1
+                else:
+                    needed_order = j
+
+                break
+        else:
+            raise UserWarning("Did not sample high enough order %s > eps, j = %s" % (delta[j] - 1, j))
+
+        lim2 = coeff[needed_order]
+        for i in range(needed_order - 1, 0, -1):
+            div = 1 if (i % 2 == 0) else -omega
+            lim2 = coeff[i] / (div + lim2)
+
+        # return raw limit and safe limit for debugging
+        # change to return lim2 later
+        return lim, lim2
+
+    def sample_drc(self, process, n=10000, order=20, perturbation=1.0):
 
         if(process < 1 or process > self.proclist.nr_of_proc):
             print str(process)+" is not a valid process (between 1 and "+str(self.proclist.nr_of_proc)+")"
@@ -525,37 +546,37 @@ class KMC_Model(Process):
         #for i in range(20):
         #    chi0[i] = base.get_chi(i + 1)
 
-        proclist.do_drc_steps(n,process,pertubation)
+        proclist.do_drc_steps(n,process,perturbation)
 
-        chi1 = self.get_chi()
+        chi1 = self.get_chi(order=order)
+
 
         t1 = self.base.get_kmc_time()
 
         self.drc_sum_time = self.drc_sum_time+(t1-t0) if hasattr(self, 'drc_sum_time') else (t1-t0)
 
-        if(not all(np.isfinite(chi1))):
-            print "ERROR: precision error in sampled chis"
+        if not np.isfinite(chi1).all():
+            print("ERROR: precision error in sampled chis")
             return
 
-        chi = chi / self.drc_sum_time
+        chi = chi1[:, 0, 0] / self.drc_sum_time
 
-        limit = self._cont_frac(chi)
+
+        limit = self._cont_frac_mlentz(chi)
 
         if self.tof_matrix[0,process-1]>0 :
-            print "INFO: sample dependency from tof on tof"
+            print("INFO: sample dependency from tof on tof")
             limit += self.base.get_integ_rate(process)/(t1)/self.base.get_rate(process)
 
         #print " ".join(map(str,[limit]+chi))
+        return limit
 
-        #print limit
-        return limit, chi
-
-    def get_chi(self):
+    def get_chi(self, order=20):
         chi1 = np.zeros((order, proclist.nr_of_proc, proclist.nr_of_proc), dtype=np.float64)
         for k in range(proclist.nr_of_proc):
             for j in range(proclist.nr_of_proc):
                 for i in range(order):
-                    chi1[i] = base.get_chi(i + 1, j + 1, k + 1)
+                    chi1[i, j, k] = base.get_chi(i + 1, j + 1, k + 1)
 
         return chi1
 

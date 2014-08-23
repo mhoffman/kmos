@@ -38,7 +38,7 @@ use base, only: &
     increment_procstat, &
     get_nrofsites, &
     get_rate, &
-    get_accum_rate 
+    get_accum_rate
 
 use lattice, only: &
     default, &
@@ -154,7 +154,7 @@ subroutine do_kmc_step()
     call run_proc_nr(proc_nr, nr_site)
 end subroutine do_kmc_step
 
-subroutine do_drc_steps(n, process, pertubation)
+subroutine do_drc_steps(n, process, perturbation)
 
 !****f* proclist/do_drc_steps
 ! FUNCTION
@@ -171,66 +171,68 @@ subroutine do_drc_steps(n, process, pertubation)
 !    ``n`` : Number of steps to run
 !******
     integer(kind=iint), intent(in) :: n, process
-    real(kind=rdouble), intent(in) :: pertubation
-	
+    real(kind=rdouble), intent(in) :: perturbation
+
     real(kind=rsingle) :: ran_proc, ran_time, ran_site, ran_idle
-    
+
     integer(kind=iint) :: nr_site, proc_nr
-    
+
     real(kind=iint) :: G, O, accum_rate
     integer(kind=iint) :: accum_pert
-    
+
     real(kind=rdouble) :: rate_process
     
     integer(kind=iint) :: i
     
     call get_rate(process,rate_process)
-    
+
     !init if first loop nothing happens
-    
+
     call random_number(ran_proc)
     call random_number(ran_site)
     call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
     call get_accum_rate(0, accum_rate)
-    
+
     do i = 1, n
         call random_number(ran_time)
         call update_accum_rate
         call update_clocks(ran_time,2)
 
         call update_integ_rate
-        
+
         call random_number(ran_idle)
-        
+
         if(ran_idle .LE. 0.5) then !execute step
-        
+
             call random_number(ran_proc)
             call random_number(ran_site)
-        
+
             call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
-        
+
             call get_accum_rate(0, accum_rate)
-        
-            
+
+
             G=2*abs(accum_rate)
-            
+
             if(proc_nr .EQ. process) then
-                O=G*abs(pertubation)/rate_process
+                O=G*abs(perturbation)/rate_process
             else
                 O=0.0
             end if
-            
+
             !update_chi(executed,proc_nr)
-            
+
             call run_proc_nr(proc_nr, nr_site)
         else
             G=-2*abs(accum_rate)
-            
-            call get_nrofsites(process,accum_pert)
-            
-            O=G*abs(accum_pert*pertubation)/accum_rate
+            call get_nrofsites(process, accum_pert)
+
+            O=G*abs(accum_pert*perturbation)/accum_rate
+
         end if
-        
+
+        !print *, G, O, ran_idle < 0.5
+
         call update_chi(G,O)
     end do
 

@@ -668,24 +668,18 @@ end subroutine update_integ_rate
 subroutine update_chi(G,O)
     
     real(kind=iint), intent(in) :: G, O
-    
-    
-    integer(kind=iint) :: i, j, k
-    
+    integer(kind=iint) :: i
+
     !react=5
-    do k = 1, nr_of_proc
-        do j = 1, nr_of_proc
-            chi(1,j,k) = chi(1,j,k)+nr_of_sites(k)*rates(k)*O*kmc_time_step
-            do i=2,drc_order
-                chi(i,j,k) = chi(i,j,k)+nr_of_sites(k)*rates(k)*G*tchi(i-1,j,k)
-            end do
-            
-            do i=drc_order,2,-1
-                tchi(i,j,k)=G*tchi(i-1,j,k)
-            end do
-            tchi(1,j,k)=O*kmc_time_step
-        enddo
-    enddo
+    chi(1,1,1) = chi(1, 1, 1) + nr_of_sites(5) * rates(5) * O * kmc_time_step
+    do i=2,drc_order
+        chi(i,1,1) = chi(i,1,1) + nr_of_sites(5) * rates(5) * G * tchi(i-1, 1, 1)
+    end do
+    
+    do i=drc_order,2,-1
+        tchi(i,1,1)=G*tchi(i-1,1,1)
+    end do
+    tchi(1,1,1)=O*kmc_time_step
     
 end subroutine update_chi
 
@@ -793,9 +787,9 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name, in
         allocate(integ_rates(nr_of_proc))
         integ_rates = 0
 !------ S. Matera 09/18/2012------
-        allocate(chi(drc_order, nr_of_proc, nr_of_proc)) !nr of tofs
+        allocate(chi(drc_order,nr_of_proc,nr_of_proc)) !2=nr_of_tofs
         chi = 0
-        allocate(tchi(drc_order, nr_of_proc, nr_of_proc)) !nr of tofs
+        allocate(tchi(drc_order,nr_of_proc,nr_of_proc)) !2=nr_of_tofs
         tchi = 0
         allocate(procstat(nr_of_proc))
         procstat = 0
