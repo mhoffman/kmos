@@ -177,13 +177,14 @@ subroutine do_drc_steps(n, process, perturbation)
 
     integer(kind=iint) :: nr_site, proc_nr
 
-    real(kind=iint) :: G, O, accum_rate
+    real(kind=iint) :: accum_rate
+    real(kind=iint), dimension(nr_of_proc) :: G, O
     integer(kind=iint) :: accum_pert
 
     real(kind=rdouble) :: rate_process
     
     integer(kind=iint) :: i
-    
+
     call get_rate(process,rate_process)
 
     !init if first loop nothing happens
@@ -215,7 +216,7 @@ subroutine do_drc_steps(n, process, perturbation)
             G=2*abs(accum_rate)
 
             if(proc_nr .EQ. process) then
-                O=G*abs(perturbation)/rate_process
+                O(:)=G(:)*abs(perturbation)/rate_process
             else
                 O=0.0
             end if

@@ -414,6 +414,15 @@ class KMC_Model(Process):
         return lim
 
     def _cont_frac_mlentz(self, chi):
+        """Evaluate a representation of continued fraction
+        coefficient. In order to avoid numerical issues (round-off errors)
+        in long continued fractions the so-called modified Lentz rule
+        is used to truncate the evaluation of the continued fraction.
+
+
+        """
+
+
         coeff = [0.0] * len(chi)
 
         pl = chi[0]
@@ -559,10 +568,12 @@ class KMC_Model(Process):
             print("ERROR: precision error in sampled chis")
             return
 
-        chi = chi1[:, 0, 0] / self.drc_sum_time
+        chi = chi1[:, :, 0] / self.drc_sum_time
 
+        limit = np.zeros(proclist.nr_of_proc)
 
-        limit = self._cont_frac_mlentz(chi)
+        for i, chi_i in enumerate(chi.T):
+            limit[i] = self._cont_frac_mlentz(chi_i)[-1]
 
         if self.tof_matrix[0,process-1]>0 :
             print("INFO: sample dependency from tof on tof")

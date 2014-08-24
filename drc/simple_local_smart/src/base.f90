@@ -667,19 +667,19 @@ end subroutine update_integ_rate
 
 subroutine update_chi(G,O)
     
-    real(kind=iint), intent(in) :: G, O
-    integer(kind=iint) :: i
+    real(kind=iint), intent(in), dimension(:) :: G, O
+    integer(kind=iint) :: i, j
 
     !react=5
-    chi(1,1,1) = chi(1, 1, 1) + nr_of_sites(5) * rates(5) * O * kmc_time_step
+    chi(1,:,1) = chi(1, :, 1) + nr_of_sites(:) * rates(:) * O(:) * kmc_time_step
     do i=2,drc_order
-        chi(i,1,1) = chi(i,1,1) + nr_of_sites(5) * rates(5) * G * tchi(i-1, 1, 1)
+        chi(i,:,1) = chi(i,:,1) + nr_of_sites(:) * rates(:) * G(:) * tchi(i-1, :, 1)
     end do
     
     do i=drc_order,2,-1
-        tchi(i,1,1)=G*tchi(i-1,1,1)
+        tchi(i,:,1)=G*tchi(i-1,:,1)
     end do
-    tchi(1,1,1)=O*kmc_time_step
+    tchi(1,:,1)=O*kmc_time_step
     
 end subroutine update_chi
 
