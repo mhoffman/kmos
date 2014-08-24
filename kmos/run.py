@@ -419,9 +419,7 @@ class KMC_Model(Process):
         in long continued fractions the so-called modified Lentz rule
         is used to truncate the evaluation of the continued fraction.
 
-
         """
-
 
         coeff = [0.0] * len(chi)
 
