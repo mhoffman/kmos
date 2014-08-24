@@ -192,11 +192,17 @@ subroutine do_drc_steps(n, process, perturbation)
     call random_number(ran_proc)
     call random_number(ran_site)
     call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
+    
     call get_accum_rate(0, accum_rate)
 
     do i = 1, n
+        !print *,"in loop:",i
         call random_number(ran_time)
+        call random_number(ran_proc)
+        call random_number(ran_site)
+        
         call update_accum_rate
+        call get_accum_rate(0, accum_rate)
         call update_clocks(ran_time,2)
 
         call update_integ_rate
@@ -225,6 +231,10 @@ subroutine do_drc_steps(n, process, perturbation)
 
             call run_proc_nr(proc_nr, nr_site)
         else
+            
+            
+            !print *,"pl accum_rate nop=",accum_rate
+            
             G=-2*abs(accum_rate)
             call get_nrofsites(process, accum_pert)
 
