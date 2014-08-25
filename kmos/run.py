@@ -419,7 +419,16 @@ class KMC_Model(Process):
         in long continued fractions the so-called modified Lentz rule
         is used to truncate the evaluation of the continued fraction.
 
+        EXPERIMENTAL
+
         """
+
+        # first convert frequency moments into continued fraction
+        # coefficients according to
+        # P. Hänggi, F. Roesel, and D. Trautmann
+        # Evaluation of Infinite Series by Use of Continued Fraction Expansions: A Numerical Study 
+        # J. Computational Physics 37, 242–258 (1980), p. 244-246
+        # http://www.physik.uni-augsburg.de/theo1/hanggi/Papers/24.pdf
 
         coeff = [0.0] * len(chi)
 
@@ -470,7 +479,7 @@ class KMC_Model(Process):
         # Hänggi, Peter, and Harry Thomas.
         # "Stochastic processes: Time evolution, symmetries and linear response."
         # Physics Reports 88.4 (1982): 207-319.
-        # http://www.physik.uni-augsburg.de/theo1/hanggi/Papers/36.pdf (Aug 21, 2014)
+        # http://www.physik.uni-augsburg.de/theo1/hanggi/Papers/36.pdf, p. 286-287 (Aug 21, 2014)
         c = coeff
         a = {}
         b = {}
@@ -481,12 +490,12 @@ class KMC_Model(Process):
             b[k + 1] = -c[2*k]*c[2*k+1]
             a[k + 1] = -(c[2*k+1] + c[2*k+2])
 
-        tiny = 1.e-30  # very small number to have something non-zero
-        eps = 1.e-7  # error tolerating machine precision (single-precision epsilon = 5.96e-8)
 
-        # first test need order of continued fraction expansion
+        # third forward evaluate continued fraction expansion
+        # using the obtained coefficient and
         # by using modified Lentz rule, put forward by
-        # IJ Thompson and AR Barnett, (1986), J. Comp. Phys. 64, 490-509
+        # IJ Thompson and AR Barnett, (1986), J. Comp. Phys. 64, 490-509, p. 507
+        # http://kernz.org/it/papers/Thompson-Barnett-JCP.pdf (24. August 2014)
 
         # Following notation of
         # Numerical Recipes in C: The Art of Scientific Computing, Second Edition Hardcover – October 30, 1992
@@ -496,6 +505,9 @@ class KMC_Model(Process):
         # Language: English
         # ISBN-10: 0521431085
         # ISBN-13: 978-0521431088
+
+        tiny = 1.e-30  # very small number to have something non-zero
+        eps = 1.e-7  # error tolerating machine precision (single-precision epsilon = 5.96e-8)
 
         C = {}
         D = {}
@@ -537,6 +549,10 @@ class KMC_Model(Process):
 
         # return raw limit and safe limit for debugging
         # change to return lim2 later
+        #return lim, f[j]
+        # Oops, something is NOT working as intended
+        # FIXME
+
         return lim, lim2
 
     def sample_drc(self, process, n=10000, order=20, perturbation=1.0):
