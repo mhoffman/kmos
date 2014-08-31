@@ -405,7 +405,7 @@ class KMC_Model(Process):
 
         evenorder=2*int((len(chi)-1)/2)
 
-        lim=coeff[evenorder]
+        lim = coeff[evenorder]
 
         for i in range(evenorder-1,0,-1):
             div=1 if (i%2==0) else -omega
@@ -413,7 +413,7 @@ class KMC_Model(Process):
 
         return lim
 
-    def _cont_frac_mlentz(self, chi):
+    def _cont_frac_mlentz(self, chi, debug=False):
         """Evaluate a representation of continued fraction
         coefficient. In order to avoid numerical issues (round-off errors)
         in long continued fractions the so-called modified Lentz rule
@@ -467,11 +467,6 @@ class KMC_Model(Process):
 
         evenorder = 2 * int((len(chi) - 1) / 2)
 
-        lim = coeff[evenorder]
-
-        for i in range(evenorder - 1, 0, -1):
-            div = 1 if (i % 2 == 0) else -omega
-            lim = coeff[i] / (div + lim)
 
 
         # convert c_i into a_i, b_i representation
@@ -485,10 +480,15 @@ class KMC_Model(Process):
         b = {}
 
         b[1] = c[1]
-        a[1] = -c[2]
+        a[1] = c[2]
         for k in range(1, (len(coeff) - 1)/2):
-            b[k + 1] = -c[2*k]*c[2*k+1]
-            a[k + 1] = -(c[2*k+1] + c[2*k+2])
+            b[k + 1] = -(1+c[2*k])*(-omega + c[2*k+1])
+            a[k + 1] = (c[2*k+1] + c[2*k+2])
+
+        if debug:
+            print("\n\n\nCoeff %s" % coeff)
+            print("a %s" % a)
+            print("b %s" % b)
 
 
         # third forward evaluate continued fraction expansion
@@ -515,7 +515,7 @@ class KMC_Model(Process):
         f = {}
         j = 1
 
-        f[j] = b[j] if b[j] != 0 else tiny
+        f[j] = b[j] / a[j] if b[j] != 0 else tiny
         C[j] = f[j]
         D[j] = 0
 
@@ -529,6 +529,7 @@ class KMC_Model(Process):
                 C[j] = tiny
             D[j] = 1 / D[j]
             delta[j] = C[j] * D[j]
+
             f[j] = f[j - 1] * delta[j]
             if abs(delta[j] - 1) < eps:
                 # Expansion reached machine precision.
@@ -538,9 +539,24 @@ class KMC_Model(Process):
                 else:
                     needed_order = j
 
+                if debug:
+                    print('delta[j] %s' % delta)
+                    print('f[j] %s' % f)
                 break
         else:
             raise UserWarning("Did not sample high enough order %s > eps, j = %s" % (delta[j] - 1, j))
+
+        lim = coeff[evenorder]
+        #print("Coeff %s" % coeff)
+        #print("Evenorder %s, coeff[evenorder %s" % (evenorder, coeff[evenorder]))
+
+        for i in range(evenorder - 1, 0, -1):
+            div = 1 if (i % 2 == 0) else -omega
+            lim = coeff[i] / (div + lim)
+            if debug:
+                print(i, lim)
+
+
 
         lim2 = coeff[needed_order]
         for i in range(needed_order - 1, 0, -1):
@@ -549,13 +565,9 @@ class KMC_Model(Process):
 
         # return raw limit and safe limit for debugging
         # change to return lim2 later
-        #return lim, f[j]
-        # Oops, something is NOT working as intended
-        # FIXME
+        return lim, f[j]
 
-        return lim, lim2
-
-    def sample_drc(self, process, n=10000, order=20, perturbation=1.0):
+    def sample_drc(self, process, n=10000, order=20, perturbation=1.0, debug=False):
 
         if(process < 1 or process > self.proclist.nr_of_proc):
             print str(process)+" is not a valid process (between 1 and "+str(self.proclist.nr_of_proc)+")"
@@ -569,7 +581,7 @@ class KMC_Model(Process):
         #for i in range(20):
         #    chi0[i] = base.get_chi(i + 1)
 
-        proclist.do_drc_steps(n,process,perturbation)
+        proclist.do_drc_steps(n, process, perturbation)
 
         chi1 = self.get_chi(order=order)
 
@@ -587,11 +599,11 @@ class KMC_Model(Process):
         limit = np.zeros(proclist.nr_of_proc)
 
         for i, chi_i in enumerate(chi.T):
-            limit[i] = self._cont_frac_mlentz(chi_i)[-1]
+            limit[i] = self._cont_frac_mlentz(chi_i, debug=debug)[-1]
 
-        if self.tof_matrix[0,process-1]>0 :
-            print("INFO: sample dependency from tof on tof")
-            limit += self.base.get_integ_rate(process)/(t1)/self.base.get_rate(process)
+            # add contribution from TOF producing step on TOF
+            # TODO: generalize for more than one TOF
+            limit[i] += self.tof_matrix[0, i]*self.base.get_integ_rate(process)/(t1)/self.base.get_rate(process)
 
         #print " ".join(map(str,[limit]+chi))
         return limit
