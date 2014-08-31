@@ -239,6 +239,8 @@ def main(args=None):
 
     options, args, parser = get_options(args, get_parser=True)
 
+    global model, pt, np
+
     if not args[0] in usage.keys():
         args[0] = match_keys(args[0], usage, parser)
 
@@ -274,14 +276,14 @@ def main(args=None):
         if len(args) < 2:
             parser.error('XML file and export path expected.')
         if len(args) < 3:
-            out_dir = os.path.splitext(args[1])[0]
+            out_dir = '%s_%s' % (os.path.splitext(args[1])[0], options.backend)
             print('No export path provided. Exporting to %s' % out_dir)
             args.append(out_dir)
 
         xml_file = args[1]
         export_dir = args[2]
         project = kmos.types.Project()
-        project.import_xml_file(xml_file)
+        project.import_file(xml_file)
 
         writer = ProcListWriter(project, export_dir)
         writer.write_settings()
@@ -302,7 +304,7 @@ def main(args=None):
         export_dir = os.path.join(args[2], 'src')
 
         project = kmos.types.Project()
-        project.import_xml_file(xml_file)
+        project.import_file(xml_file)
 
         kmos.io.export_source(project,
                               export_dir,
@@ -326,7 +328,7 @@ def main(args=None):
 
     elif args[0] == 'settings-export':
         import kmos.io
-        pt = kmos.io.import_xml_file(args[1])
+        pt = kmos.io.import_file(args[1])
         if len(args) < 3:
             out_dir = os.path.splitext(args[1])[0]
             print('No export path provided. Exporting kmc_settings.py to %s'
@@ -356,7 +358,6 @@ def main(args=None):
         import kmos.io
         if not len(args) >= 2:
             raise UserWarning('XML file name expected.')
-        global pt
         pt = kmos.io.import_xml_file(args[1])
         sh(banner='Note: pt = kmos.io.import_xml(\'%s\')' % args[1])
 
@@ -408,7 +409,6 @@ def main(args=None):
         except:
             print("Warning: could not import kmc_model!"
                   " Please make sure you are in the right directory")
-        global model, np
         sh(banner='Note: model = KMC_Model(print_rates=False)')
         try:
             model.deallocate()
