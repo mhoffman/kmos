@@ -29,8 +29,7 @@ My rate constant expression doesn't work. How can I debug it?
 
 
 How can I print the chemical potential value, that kmos is using internally?
-     You
-    can then print the explicit value for specific conditions in `kmos shell`, for
+    You can then print the explicit value for specific conditions in `kmos shell`, for
     example like so ::
 
         from kmos import evaluate_rate_expression
