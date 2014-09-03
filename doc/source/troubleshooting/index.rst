@@ -28,8 +28,29 @@ My rate constant expression doesn't work. How can I debug it?
     overflow if written in the exponent.
 
 
-When I use `kmos shell` the model doesn't have the species and sites
-I have defined.
+How can I print the chemical potential value, that kmos is using internally?
+     You
+    can then print the explicit value for specific conditions in `kmos shell`, for
+    example like so ::
+
+        from kmos import evaluate_rate_expression
+        print(
+            evaluate_rate_expression('mu_COgas',
+                {'T':{'value':600},
+                 'p_COgas': {'value':1}
+                 }
+                 )))
+
+    where 'CO' should be replaced by whatever gas species you are inspecting. And the
+    resulting number is given in eV.
+    kmos linearly interpolates the gas phase chemical potential from the NIST JANAF
+    thermochemical tables if you have downloaded them manually. If you don't have them
+    installed, an error message should get raised which explains how to do so.
+
+
+
+
+When I use `kmos shell` the model doesn't have the species and sites I have defined.
     Note that Fortran is case-insensitive. Therefore f2py turns
     all variable and functions names into lower case by convention.
     Try to lower-case your species or site name.
@@ -39,8 +60,7 @@ When I run kmos the GUI way and close it, it seems to hang and I need to use the
   the window showing the atoms object by clicking on its
   close button or Alt-F4 or whichever shortcut your WM uses.
 
-Running a model it sometimes prints
-`Warning: numerical precision too low, to resolve time-steps`
+Running a model it sometimes prints `Warning: numerical precision too low, to resolve time-steps`
   This means that the kMC step of the current process was so
   small compared to the current kMC time that for the processor
   :math:`t + \Delta t = t`. This should under normal circumstances
