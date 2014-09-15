@@ -407,6 +407,10 @@ class KMC_Model(Process):
         file in the current directory which allows for easy post-processing
         of images, e.g. using `ffmpeg` ::
 
+            avconv -i movie_%06d.png -r 24 movie.avi
+
+        or ::
+
             ffmpeg -i movie_%06d.png -f image2 -r 24 movie.avi
 
         Allows suffixes are png, pov, and eps. Additional keyword arguments
