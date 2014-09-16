@@ -810,6 +810,8 @@ class KMC_Model(Process):
         res = ''
         printed_steps = 0
         res += ('+' + width * '-' + '+' + '\n')
+        res += ('| {0:<%ss}|\n' % (width-1)).format('%9s %12s  %s' % ('rel. contrib.', 'procstat', 'process name'))
+        res += ('+' + width * '-' + '+' + '\n')
         for entry in entries:
             procstat, name = entry
             printed_steps += procstat

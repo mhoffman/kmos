@@ -276,7 +276,7 @@ def main(args=None):
         if len(args) < 2:
             parser.error('XML file and export path expected.')
         if len(args) < 3:
-            out_dir = os.path.splitext(args[1])[0]
+            out_dir = '%s_%s' % (os.path.splitext(args[1])[0], options.backend)
             print('No export path provided. Exporting to %s' % out_dir)
             args.append(out_dir)
 
