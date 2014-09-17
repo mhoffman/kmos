@@ -61,7 +61,8 @@ gpl = self._gpl_message()
 #@     get_null_species, &
 #@     update_accum_rate, &
 #@     update_integ_rate, &
-#@     update_clocks
+#@     update_clocks, &
+#@     update_chi
 #@ 
 #@ 
 #@ ! Public constants
@@ -645,7 +646,70 @@ gpl = self._gpl_message()
 #@ 
 #@ end subroutine update_integ_rate
 #@ !------ S. Matera 09/18/2012------
+
+#@ subroutine update_chi(executed,proc_nr)
+#@     
+#@     logical , intent(in) :: executed
+#@     integer(kind=iint), intent(in) :: proc_nr
+#@     
+#@     integer(kind=iint) :: process
+#@     integer(kind=iint) :: tof
+#@     integer(kind=iint) :: i
+#@     
+#@     real(kind=iint) :: G, O
 #@ 
+#@     !calculate G (independent of executed process)
+#@     
+#@     if(executed) then
+#@         G=2*abs(accum_rates(nr_of_proc))
+#@     else    
+#@         G=-2*abs(accum_rates(nr_of_proc))
+#@     end if
+#@     
+#@     
+#@     !for all processes
+#@     do process=1,nr_of_proc
+#@         
+#@         !calculate O for process
+#@         
+#@         !print *,"bs accum_rate=",accum_rates(nr_of_proc)
+#@         
+#@         if(executed) then
+#@             
+#@             O=0.0
+#@             
+#@             if(proc_nr .EQ. process) then
+#@                 O=G*abs(1)/rates(process)
+#@             end if
+#@             
+#@         else
+#@                 
+#@             O=G*abs(nr_of_sites(process))/accum_rates(nr_of_proc)
+#@             
+#@         end if
+#@         
+#@         !print *,"bs O=",O," bs G=",G," proc=",process
+#@         
+#@         !got O and G for proc
+#@         
+#@         ! the following has to be dynamic
+#@         !tof 1: proc in tof: 5
+#@         
+#@         tof=1
+#@         
+#@         chi(1,process,tof) = chi(1,process,tof)+nr_of_sites(5)*rates(5)*O*kmc_time_step
+#@         do i=2,drc_order
+#@             chi(i,process,tof) = chi(i,process,tof)+nr_of_sites(5)*rates(5)*G*tchi(i-1,process,tof)
+#@         end do
+#@     
+#@         do i=drc_order,2,-1
+#@             tchi(i,process,tof)=G*tchi(i-1,process,tof)
+#@         end do
+#@         tchi(1,process,tof)=O*kmc_time_step
+#@         
+#@     end do !procs
+#@ end subroutine update_chi
+#@
 #@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name, input_drc_order)
 #@     !****f* base/allocate_system
 #@     ! FUNCTION
@@ -1167,7 +1231,7 @@ nr_of_tof=len(tofs)
 #@ end subroutine determine_procsite
 #@ 
 #@ 
-#@ subroutine update_clocks(ran_time)
+#@ subroutine update_clocks(ran_time, factor)
 #@     !****f* base/update_clocks
 #@     ! FUNCTION
 #@     !    Updates walltime, kmc_step and kmc_time.
@@ -1177,6 +1241,7 @@ nr_of_tof=len(tofs)
 #@     !    * ``ran_time`` Random real number :math:`\in [0,1]`
 #@     !******
 #@     real(kind=rsingle), intent(in) :: ran_time
+#@     integer, intent(in), optional :: factor
 #@     real(kind=rsingle) :: runtime
 #@ 
 #@ 
@@ -1184,7 +1249,11 @@ nr_of_tof=len(tofs)
 #@     ASSERT(ran_time.ge.0.,"base/update_clocks: ran_time variable has to be positive.")
 #@     ASSERT(ran_time.le.1.,"base/update_clocks: ran_time variable has to be less than 1.")
 #@ 
-#@     kmc_time_step = -log(ran_time)/accum_rates(nr_of_proc)
+#@     if (present(factor)) then
+#@         kmc_time_step = (-log(ran_time)/accum_rates(nr_of_proc))/factor
+#@     else
+#@         kmc_time_step = -log(ran_time)/accum_rates(nr_of_proc)
+#@     endif
 #@     ! Make sure the difference is not so small, that it is rounded off
 #@     ! ASSERT(kmc_time+kmc_time_step>kmc_time,"base/update_clocks: precision of kmc_time is not sufficient")
 #@ 

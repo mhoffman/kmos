@@ -346,6 +346,15 @@ class KMC_Model(Process):
         """
         proclist.do_kmc_steps(n)
         
+    def do_drc_steps(self, n=10000):
+        """Propagate the model `n` steps and sample DRCs
+
+        :param n: Number of steps to run (Default: 10000)
+        :type n: int
+
+        """
+        proclist.do_drc_steps(n)
+        
     def get_chi(self):
         chi=np.zeros((len(self.tofs),self.proclist.nr_of_proc,self.drc_order),dtype=np.float64)
         for drc in range(self.drc_order):

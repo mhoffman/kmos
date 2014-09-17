@@ -19,9 +19,9 @@
 #@     integer(kind=iint) :: nr_site, proc_nr, i
 #@
 #@     do i = 1, n
-#@     call random_number(ran_time)
-#@     call random_number(ran_proc)
-#@     call random_number(ran_site)
+#@         call random_number(ran_time)
+#@         call random_number(ran_proc)
+#@         call random_number(ran_site)
 
 if data.meta.debug > 0:
     #@ print *, "PROCLIST/DO_KMC_STEP"
@@ -29,15 +29,15 @@ if data.meta.debug > 0:
     #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc
     #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_site",ran_site
 
-#@     call update_accum_rate
-#@     call update_clocks(ran_time)
+#@         call update_accum_rate
+#@         call update_clocks(ran_time)
 #@
-#@     call update_integ_rate
-#@     call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
+#@         call update_integ_rate
+#@         call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
 if data.meta.debug > 0:
     #@ print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr
     #@ print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site
-#@     call run_proc_nr(proc_nr, nr_site)
+#@         call run_proc_nr(proc_nr, nr_site)
 #@     enddo
 #@
 #@ end subroutine do_kmc_steps
@@ -77,7 +77,62 @@ if data.meta.debug > 0:
     #@ print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site
 #@     call run_proc_nr(proc_nr, nr_site)
 #@ end subroutine do_kmc_step
-#@
+#@ 
+#@ subroutine do_drc_steps(n)
+#@ 
+#@ !****f* proclist/do_drc_steps
+#@ ! FUNCTION
+#@ !    Performs ``n`` kMC steps. Do nothing 50% of time.
+#@ !    sampling degree of rate control
+#@ !
+#@ !    * first update clock
+#@ !    * continue in 50%
+#@ !    * then configuration sampling step
+#@ !    * last execute process
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    ``n`` : Number of steps to run
+#@ !******
+#@     integer(kind=iint), intent(in) :: n
+#@ 
+#@     real(kind=rsingle) :: ran_proc, ran_time, ran_site, ran_idle
+#@     
+#@     integer(kind=iint) :: nr_site, proc_nr, i
+#@     
+#@     !init if first loop nothing happens
+#@     
+#@     call random_number(ran_proc)
+#@     call random_number(ran_site)
+#@     call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
+#@     
+#@     do i = 1, n
+#@         !print *,"in loop:",i
+#@         call random_number(ran_time)
+#@         call random_number(ran_proc)
+#@         call random_number(ran_site)
+#@         
+#@         call update_accum_rate
+#@         call update_clocks(ran_time,2)
+#@ 
+#@         call update_integ_rate
+#@         
+#@         call random_number(ran_idle)
+#@         
+#@         if(ran_idle .LE. 0.5) then !execute step
+#@         
+#@             call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
+#@             
+#@             call update_chi(.True.,proc_nr)
+#@             
+#@             call run_proc_nr(proc_nr, nr_site)
+#@         else
+#@             call update_chi(.False.,proc_nr)
+#@         end if
+#@         
+#@     end do
+#@ 
+#@ end subroutine do_drc_steps
 
 #useful for debugging
 
