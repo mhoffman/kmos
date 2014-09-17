@@ -1,3 +1,26 @@
+Create a new backend suitable for very large lateral interaction models.
+Key Ideas:
+    - develop new syntax fo entering processes with lateral interaction
+      akin:
+       conditions: [O,CO,empty]@site + CO@other_size
+       actions: empty@other_site
+       rate_constant: def rate_constant():
+        if O@site :
+            return 23000.
+        elif CO@site :
+            return 342000.
+        elif empty@site :
+            return 0
+
+    - lump all interaction-groups into one process for the sake of
+      storing them in /base because the all exclude each other
+    - use a prefix sum tree to update the accumulated rates to
+      keep overall dependency on system size in n*log(n)
+
+
+
+
+
 Functionality
 ========================
 
