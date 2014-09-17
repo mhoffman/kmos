@@ -1018,6 +1018,18 @@ nr_of_tofs=len(tofs)
 #@ end subroutine get_integ_rate
 #@ !------ S. Matera 09/18/2012------
 #@ 
+#@ subroutine get_chi(order, proc, tof, return_chi)
+#@     integer(kind=iint), intent(in) :: order, proc, tof
+#@     real(kind=rdouble), intent(out) :: return_chi
+#@     
+#@     ASSERT(order.ge.1,"base/get_chi: order has to be greater or equal than 1")
+#@     ASSERT(order.le.drc_order,"base/get_chi: order has to be less than maxorder")
+#@     
+#@     return_chi=chi(order,proc,tof)
+#@     
+#@ end subroutine get_chi
+#@ 
+#@ 
 #@ subroutine get_rate(proc_nr, return_rate)
 #@     !****f* base/get_rate
 #@     ! FUNCTION
