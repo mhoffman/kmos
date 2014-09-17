@@ -122,6 +122,18 @@ gpl = self._gpl_message()
 #@ !
 #@ !******
 #@ !------ S. Matera 09/18/2012------
+#@ real(kind=rdouble), dimension(:,:,:), allocatable :: chi
+#@ !****v* base/chi
+#@ ! FUNCTION
+#@ !    Stores the summation of the first drc_order orders of chis
+#@ !    chi(order,pertubated process,nr_tof)
+#@ !******
+#@ real(kind=rdouble), dimension(:,:,:), allocatable :: tchi
+#@ !****v* base/tchi
+#@ ! FUNCTION
+#@ !    Stores the partial history for fast calculation of chis
+#@ !    tchi(order,pertubated process,nr_tof)
+#@ !******
 #@ integer(kind=iint), dimension(:), allocatable :: nr_of_sites
 #@ !****v* base/nr_of_sites
 #@ ! FUNCTION
@@ -184,6 +196,11 @@ gpl = self._gpl_message()
 #@ !   Unique indentifier of this simulation to be used for restart files.
 #@ !   This name should not contain any characters that you don't want to
 #@ !   have in a filename either, i.e. only [A-Za-z0-9\_-].
+#@ !******
+#@ integer(kind=iint) :: drc_order
+#@ !****v* base/drc_order
+#@ ! FUNCTION
+#@ !   Number of orders for chis to calculate.
 #@ !******
 #@ 
 #@ !****************
@@ -628,7 +645,7 @@ gpl = self._gpl_message()
 #@ end subroutine update_integ_rate
 #@ !------ S. Matera 09/18/2012------
 #@ 
-#@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
+#@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name, input_drc_order)
 #@     !****f* base/allocate_system
 #@     ! FUNCTION
 #@     !   Allocates all book-keeping structures and stores
@@ -642,6 +659,7 @@ gpl = self._gpl_message()
 #@     !---------------I/O variables---------------
 #@     character(len=200), intent(in) :: input_system_name
 #@     integer(kind=iint), intent(in) :: input_volume, input_nr_of_proc
+#@     integer(kind=iint), intent(in), optional :: input_drc_order
 #@     logical :: system_allocated
 #@ 
 #@     system_allocated = .false.
@@ -696,6 +714,13 @@ gpl = self._gpl_message()
 #@         nr_of_proc = input_nr_of_proc
 #@         volume = input_volume
 #@         system_name = input_system_name
+#@
+#@         if(present(input_drc_order))then
+#@             drc_order=input_drc_order
+#@         else
+#@             ! assume a good defaut value (should never happen, as it is allways set by python)
+#@             drc_order=20
+#@         endif
 #@ 
 #@         ! Set clocks and step counter to 0
 #@         kmc_time = 0.
@@ -718,6 +743,18 @@ gpl = self._gpl_message()
 #@         allocate(integ_rates(nr_of_proc))
 #@         integ_rates = 0
 #@ !------ S. Matera 09/18/2012------
+# count tofs to allocate the right size of array 
+tofs = []
+for process in data.get_processes():
+    if process.tof_count is not None:
+        for name in eval(process.tof_count):
+            if name not in tofs:
+                tofs.append(name)
+nr_of_tofs=len(tofs)
+#@         allocate(chi(drc_order,nr_of_proc,{nr_of_tofs}))
+#@         chi = 0
+#@         allocate(tchi(drc_order,nr_of_proc,{nr_of_tofs}))
+#@         tchi = 0
 #@         allocate(procstat(nr_of_proc))
 #@         procstat = 0
 #@ 
@@ -775,6 +812,16 @@ gpl = self._gpl_message()
 #@         print *,"Warning: integ_rates was not allocated, tried to deallocate."
 #@     endif
 #@ !------ S. Matera 09/18/2012------
+#@     if(allocated(chi))then
+#@         deallocate(chi)
+#@     else
+#@         print *,"Warning: chi was not allocated, tried to deallocate."
+#@     endif
+#@     if(allocated(tchi))then
+#@         deallocate(tchi)
+#@     else
+#@         print *,"Warning: tchi was not allocated, tried to deallocate."
+#@     endif
 #@     if(allocated(procstat))then
 #@         deallocate(procstat)
 #@     else
