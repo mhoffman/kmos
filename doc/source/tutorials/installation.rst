@@ -96,6 +96,12 @@ unzip it and install it with ::
 
 
 
+Installation on openSUSE 13.1 Linux
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In order to use the editor GUI you will want to install python-kiwi (not KIWI)
+and right now you can find a recent build `here <https://build.opensuse.org/package/show/home:leopinheiro/python-kiwi>`_ .
+
 Installation on windoze 7
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 In order for kmos to work in a recent windoze we need a

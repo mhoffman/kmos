@@ -690,6 +690,10 @@ class KMC_Model(Process):
         file in the current directory which allows for easy post-processing
         of images, e.g. using `ffmpeg` ::
 
+            avconv -i movie_%06d.png -r 24 movie.avi
+
+        or ::
+
             ffmpeg -i movie_%06d.png -f image2 -r 24 movie.avi
 
         Allows suffixes are png, pov, and eps. Additional keyword arguments
@@ -1092,6 +1096,8 @@ class KMC_Model(Process):
 
         res = ''
         printed_steps = 0
+        res += ('+' + width * '-' + '+' + '\n')
+        res += ('| {0:<%ss}|\n' % (width-1)).format('%9s %12s  %s' % ('rel. contrib.', 'procstat', 'process name'))
         res += ('+' + width * '-' + '+' + '\n')
         for entry in entries:
             procstat, name = entry
