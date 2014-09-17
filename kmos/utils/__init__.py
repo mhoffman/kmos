@@ -602,7 +602,7 @@ def evaluate_template(template, escape_python=False, **kwargs):
                     ' ' * (len(line) - len(line.lstrip())))
             else:
                 python_lines += line
-            
+
         #print python_lines
         exec(python_lines)
 
