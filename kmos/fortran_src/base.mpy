@@ -43,6 +43,7 @@ gpl = self._gpl_message()
 #@     get_kmc_time_step, &
 #@     get_nrofsites, &
 #@     get_procstat, &
+#@     get_chi, &
 #@     get_rate, &
 #@     get_species, &
 #@     get_system_name, &
@@ -750,10 +751,10 @@ for process in data.get_processes():
         for name in eval(process.tof_count):
             if name not in tofs:
                 tofs.append(name)
-nr_of_tofs=len(tofs)
-#@         allocate(chi(drc_order,nr_of_proc,{nr_of_tofs}))
+nr_of_tof=len(tofs)
+#@         allocate(chi(drc_order,nr_of_proc,{nr_of_tof}))
 #@         chi = 0
-#@         allocate(tchi(drc_order,nr_of_proc,{nr_of_tofs}))
+#@         allocate(tchi(drc_order,nr_of_proc,{nr_of_tof}))
 #@         tchi = 0
 #@         allocate(procstat(nr_of_proc))
 #@         procstat = 0
@@ -1024,6 +1025,10 @@ nr_of_tofs=len(tofs)
 #@     
 #@     ASSERT(order.ge.1,"base/get_chi: order has to be greater or equal than 1")
 #@     ASSERT(order.le.drc_order,"base/get_chi: order has to be less than maxorder")
+#@     ASSERT(proc.ge.1,"base/get_chi: proc has to be greater or equal than 1")
+#@     ASSERT(proc.le.nr_of_proc,"base/get_chi: proc has to be less than nr_of_proc")
+#@     ASSERT(tof.ge.1,"base/get_chi: tof has to be greater or equal than 1")
+#@     ASSERT(tof.le.{nr_of_tof},"base/get_chi: tof has to be less than nr_of_tof")
 #@     
 #@     return_chi=chi(order,proc,tof)
 #@     

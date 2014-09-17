@@ -162,7 +162,7 @@ else:
 # and calculate the rate constants for the first time
 model_name_line = ('This kMC Model \'%s\' was written by' % data.meta.model_name).ljust(59)
 author_name_line = ('%s (%s)' % (data.meta.author, data.meta.email)).center(60)
-#@ subroutine init(input_system_size, system_name, layer, seed_in, no_banner)
+#@ subroutine init(input_system_size, system_name, layer, seed_in, no_banner, in_drc_order)
 #@
 #@ !****f* proclist/init
 #@ ! FUNCTION
@@ -182,6 +182,7 @@ author_name_line = ('%s (%s)' % (data.meta.author, data.meta.email)).center(60)
 #@     character(len=400), intent(in) :: system_name
 #@
 #@     logical, optional, intent(in) :: no_banner
+#@     integer(kind=iint), optional, intent(in) :: in_drc_order
 #@
 #@     if (.not. no_banner) then
 #@         print *, "+------------------------------------------------------------+"
@@ -220,7 +221,11 @@ if data.meta.debug > 0:
     #@ print *,"    PROCLIST/INIT/SYSTEM_SIZE",input_system_size
 if len(data.layer_list) > 1 :
     #@     call set_null_species(null_species)
-#@     call allocate_system(nr_of_proc, input_system_size, system_name)
+#@     if(present(in_drc_order))then
+#@         call allocate_system(nr_of_proc, input_system_size, system_name, in_drc_order)
+#@     else
+#@         call allocate_system(nr_of_proc, input_system_size, system_name)
+#@     endif
 if data.meta.debug > 0:
     #@ print *,"    PROCLIST/INIT/ALLOCATED_LATTICE"
 #@     call initialize_state(layer, seed_in)
