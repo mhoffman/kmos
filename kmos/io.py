@@ -1261,6 +1261,10 @@ class ProcListWriter():
         out.write('    }\n\n')
 
         # TOF counting
+        # as the drc needs the tofs in fortran, these can not be changed after export
+        out.write('# !READ ONLY!\n')
+        out.write('# changes in the following variables (tof_count) will have NO effect.\n')
+        out.write('# please adapt your model and export again to update the fortran code\n')
         out.write('tof_count = {\n')
         for process in data.get_processes():
             if process.tof_count is not None:
