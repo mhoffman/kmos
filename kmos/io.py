@@ -143,6 +143,17 @@ class ProcListWriter():
         with open(os.path.join(self.dir, 'lattice.f90'), 'w') as out:
             out.write(evaluate_template(template,  self=self, data=self.data))
 
+    def write_base(self):
+        from kmos.utils import evaluate_template
+
+        with open(os.path.join(os.path.dirname(__file__),
+                               'fortran_src',
+                               'base.mpy')) as infile:
+            template = infile.read()
+
+        with open(os.path.join(self.dir, 'base.f90'), 'w') as out:
+            out.write(evaluate_template(template,  self=self, data=self.data))
+
     def write_proclist(self, smart=True, code_generator='local_smart'):
         """Write the proclist.f90 module, i.e. the rules which make up
         the kMC process list.
@@ -1250,6 +1261,10 @@ class ProcListWriter():
         out.write('    }\n\n')
 
         # TOF counting
+        # as the drc needs the tofs in fortran, these can not be changed after export
+        out.write('# !READ ONLY!\n')
+        out.write('# changes in the following variables (tof_count) will have NO effect.\n')
+        out.write('# please adapt your model and export again to update the fortran code\n')
         out.write('tof_count = {\n')
         for process in data.get_processes():
             if process.tof_count is not None:
@@ -1320,7 +1335,6 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     # each file is tuple (source, target)
     if code_generator == 'local_smart':
         cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
-                    (os.path.join('fortran_src', 'base.f90'), 'base.f90'),
                     (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
                     (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
                     ]
@@ -1348,6 +1362,8 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     # SECOND
     # produce those source files that are written on the fly
     writer = ProcListWriter(project_tree, export_dir)
+    if code_generator == 'local_smart':
+        writer.write_base()
     writer.write_lattice()
     writer.write_proclist(code_generator=code_generator)
     writer.write_settings()

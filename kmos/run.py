@@ -112,8 +112,9 @@ class KMC_Model(Process):
                        autosend=True,
                        steps_per_frame=50000,
                        random_seed=None,
-                       cache_file=None):
-
+                       cache_file=None,
+                       drc_order=20):
+                       
         # initialize multiprocessing.Process hooks
         super(KMC_Model, self).__init__()
 
@@ -129,6 +130,7 @@ class KMC_Model(Process):
         self.print_rates = print_rates
         self.parameters = Model_Parameters(self.print_rates)
         self.rate_constants = Model_Rate_Constants()
+        self.drc_order=drc_order
 
         if random_seed is not None:
             settings.random_seed = random_seed
@@ -186,14 +188,15 @@ class KMC_Model(Process):
     def reset(self):
         self.size = np.array(self.size)
         try:
-            #first try with drc order
+            #try first with drc order
             proclist.init(self.size,
                 self.system_name,
                 lattice.default_layer,
                 self.settings.random_seed,
                 not self.banner,
-                20)
+                self.drc_order)
         except:
+            #raise UserWarning("Model does not support DRC, consider exporting again")
             try:
                 proclist.init(self.size,
                     self.system_name,
@@ -343,6 +346,24 @@ class KMC_Model(Process):
 
         """
         proclist.do_kmc_steps(n)
+        
+    def do_drc_steps(self, n=10000):
+        """Propagate the model `n` steps and sample DRCs
+
+        :param n: Number of steps to run (Default: 10000)
+        :type n: int
+
+        """
+        proclist.do_drc_steps(n)
+        
+    def get_chi(self):
+        chi=np.zeros((len(self.tofs),self.proclist.nr_of_proc,self.drc_order),dtype=np.float64)
+        for drc in range(self.drc_order):
+            for proc in range(self.proclist.nr_of_proc):
+                for tof in range(len(self.tofs)):
+                    chi[tof][proc][drc] = base.get_chi(drc + 1, proc + 1, tof + 1)
+            
+        return chi
 
     def do_drc_steps(self, process, n=10000, perturbation=1.0):
         """Propagate the model `n` steps and sample DRCs

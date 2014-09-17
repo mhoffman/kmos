@@ -13,6 +13,7 @@ if code_generator == 'local_smart':
     #@ use base, only: &
     #@     update_accum_rate, &
     #@     update_integ_rate, &
+    #@     update_chi, &
     #@     determine_procsite, &
     #@     update_clocks, &
     #@     avail_sites, &
