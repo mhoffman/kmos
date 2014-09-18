@@ -16,6 +16,8 @@ Key Ideas:
       storing them in /base because the all exclude each other
     - use a prefix sum tree to update the accumulated rates to
       keep overall dependency on system size in n*log(n)
+    - figure out exact rules what lat. int. can change to
+      what upon update to make updates highly efficient
 
 
 
