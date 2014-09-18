@@ -365,15 +365,6 @@ class KMC_Model(Process):
             
         return chi
 
-    def do_drc_steps(self, process, n=10000, perturbation=1.0):
-        """Propagate the model `n` steps and sample DRCs
-
-        :param n: Number of steps to run (Default: 10000)
-        :type n: int
-
-        """
-        proclist.do_drc_steps(n, process, perturbation)
-
     def _pair_swap(self,liste):
         for i in range(0,len(liste)-1,2):
             tmp=liste[i]
