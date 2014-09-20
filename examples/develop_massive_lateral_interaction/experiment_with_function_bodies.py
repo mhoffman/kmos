@@ -6,11 +6,12 @@ rate_constant = """N_CO_bridge = CO@bridge1 + CO@bridge2"
 
 import re
 from textwrap import dedent
-from StringIO import StringIO
+from io import StringIO
 from tokenize import generate_tokens
 
 def preprocess_rate_expression(rate_constant, **env):
-    """This is a string preprocessing function for generating
+    """
+    This is a string preprocessing function for generating
     suitable rate constant expressions for a particular
     lateral interaction configuration. The syntax is
     the one of a python function (body) and should use
@@ -29,16 +30,88 @@ def preprocess_rate_expression(rate_constant, **env):
     starting and ending with a double-underscore (like __x__) are used for
     the evaluation and should be avoided.
 
-    Code example ::
-        
-        N_CO = CO@bridge + CO@hollow
-        N_O = O@bridge + O@hollow
-        pref = "(kboltzmann*T)**(-1)"
 
-        if O@site:
-            return "pref*exp(-beta*(E_Obind + N_O*V_O_O + N_CO*V_CO_O)*eV)
-        elif CO@site :
-            return "pref*exp(-beta*(E_Obind + N_O*V_CO_O + N_CO*V_CO_CO)*eV)
+    >>> preprocess_rate_expression('100')
+    preprocess_rate_expression('100')
+    <BLANKLINE>
+    '100'
+
+    >>> preprocess_rate_expression(
+    ... \"\"\"
+    ... N_CO = CO@bridge + CO@hollow
+    ... N_O = O@bridge + O@hollow
+    ... pref = "(kboltzmann*T)**(-1)"
+    ... if O@site:
+    ...     return "pref*exp(-beta*(E_Obind + N_O*V_O_O + N_CO*V_CO_O)*eV)"
+    ... elif CO@site :
+    ...     return "pref*exp(-beta*(E_Obind + N_O*V_CO_O + N_CO*V_CO_CO)*eV)"
+    ... \"\"\", **{
+    ... 'CO__AT__bridge' : True,
+    ... 'CO__AT__hollow' : True,
+    ... 'O__AT__bridge': False,
+    ... 'O__AT__hollow' : True,
+    ... 'O__AT__site' : False,
+    ... 'CO__AT__site' : True,
+    ... })
+    preprocess_rate_expression(
+    \"\"\"
+    N_CO = CO@bridge + CO@hollow
+    N_O = O@bridge + O@hollow
+    pref = "(kboltzmann*T)**(-1)"
+    if O@site:
+        return "pref*exp(-beta*(E_Obind + N_O*V_O_O + N_CO*V_CO_O)*eV)"
+    elif CO@site :
+        return "pref*exp(-beta*(E_Obind + N_O*V_CO_O + N_CO*V_CO_CO)*eV)"
+    \"\"\", **{
+    'CO__AT__bridge' : True,
+    'CO__AT__hollow' : True,
+    'O__AT__bridge': False,
+    'O__AT__hollow' : True,
+    'O__AT__site' : False,
+    'CO__AT__site' : True,
+    })
+    <BLANKLINE>
+    '(kboltzmann*T)**(-1)*exp(-beta*(E_Obind + 1*V_CO_O + 2*V_CO_CO)*eV)'
+
+    >>> preprocess_rate_expression(
+    ... \"\"\"
+    ... import math
+    ... N_CO_bridge = CO@bridge1 + CO@bridge2
+    ... N_O_bridge = O@bridge1 + O@bridge2
+    ... foo = 2
+    ... beta = 3
+    ... if CO@bridge1 and CO@bridge2 :
+    ...     return "exp(-foo*beta*(V_OCO*N_CO_bridge+ V22*N_O_bridge))"
+    ... else:
+    ...     return "foo"
+    ... \"\"\" , **{
+    ...     'CO__AT__bridge1' : 1,
+    ...     'CO__AT__bridge2' : 1,
+    ...     'O__AT__bridge1': 0,
+    ...     'O__AT__bridge2': 3,
+    ... })
+    preprocess_rate_expression(
+    \"\"\"
+    import math
+    N_CO_bridge = CO@bridge1 + CO@bridge2
+    N_O_bridge = O@bridge1 + O@bridge2
+    foo = 2
+    beta = 3
+    if CO@bridge1 and CO@bridge2 :
+        return "exp(-foo*beta*(V_OCO*N_CO_bridge+ V22*N_O_bridge))"
+    else:
+        return "foo"
+    \"\"\" , **{
+        'CO__AT__bridge1' : 1,
+        'CO__AT__bridge2' : 1,
+        'O__AT__bridge1': 0,
+        'O__AT__bridge2': 3,
+    })
+    <BLANKLINE>
+    'exp(-2*3*(V_OCO*2+ V22*3))'
+
+
+
 
     """
 
@@ -86,25 +159,5 @@ def preprocess_rate_expression(rate_constant, **env):
                            Use 0 explicitly if that is the intention""")
 
 if __name__ == '__main__':
-    rate_constant = """
-    import math
-    N_CO_bridge = CO@bridge1 + CO@bridge2
-    N_O_bridge = O@bridge1 + O@bridge2
-    foo = 2
-    beta = 3
-    if CO@bridge1 and not CO@bridge2 :
-        return "exp(-foo*beta*(V_OCO*N_CO_bridge+ V22*N_O_bridge))"
-
-    else:
-        return "foo"
-    """
-
-    print(preprocess_rate_expression('100'))
-    print(preprocess_rate_expression(rate_constant,
-    **{
-        'CO__AT__bridge1' : 1,
-        'CO__AT__bridge2' : 1,
-        'O__AT__bridge1': 0,
-        'O__AT__bridge2': 3,
-    }
-    ))
+    import doctest
+    doctest.testmod()
