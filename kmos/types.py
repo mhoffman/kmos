@@ -1895,7 +1895,7 @@ def parse_condition_action(term, project_tree):
     if len(coord_term) == 3:
         name = coord_term[0]
         offset = eval(coord_term[1])
-        layer = coord_term[2]
+        layer = coord_term[2].strip()
         layer_names = [x.name for x in project_tree.get_layers()]
         if layer not in layer_names:
             raise UserWarning("Layer %s not known, must be one of %s"
