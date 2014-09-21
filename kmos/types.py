@@ -5,7 +5,10 @@
 # stdlib imports
 import os
 import re
+import math
 from fnmatch import fnmatch
+from copy import deepcopy
+from pprint import pprint, pformat
 
 # numpy
 import numpy as np
@@ -16,7 +19,7 @@ from lxml import etree as ET
 from xml.dom import minidom
 
 # kmos own modules
-from kmos.utils import CorrectlyNamed
+from kmos.utils import CorrectlyNamed, product, preprocess_rate_expression
 from kmos.config import APP_ABS_PATH
 
 kmcproject_v0_1_dtd = '/kmc_project_v0.1.dtd'
@@ -179,8 +182,44 @@ class Project(object):
             if 'actions' in kwargs:
                 kwargs['action_list'] = kwargs['actions']
                 kwargs.pop('actions')
-            process = Process(**kwargs)
-            self.process_list.append(process)
+
+            if 'condition_list' in kwargs:
+                if any([type(condition.species) == list
+                       for condition in kwargs['condition_list']]):
+                    process = []
+                    # lateral interaction mode
+                    conditions_set = []
+                    for condition in kwargs['condition_list']:
+                        if type(condition.species) is str:
+                            conditions_set.append([deepcopy(condition)])
+                        elif type(condition.species) is list:
+                            sublist = [
+                                Condition(species=species, coord=condition.coord)
+                                for species in condition.species
+                            ]
+                            conditions_set.append(sublist)
+
+                    # build all combinations of allowed occupations
+                    conditions_set = list(product(*conditions_set))
+
+                    name = kwargs['name']
+                    rate_constant = kwargs['rate_constant']
+                    len_nn = str(int(math.ceil(math.log10(len(conditions_set)))))
+                    for i, conditions in enumerate(conditions_set):
+                        kwargs['condition_list'] = list(conditions)
+                        kwargs['name'] = (('%s_%0' + len_nn +  'd') % (name, i))
+                        kwargs['rate_constant'] = preprocess_rate_expression(rate_constant,
+                                                  project_tree=self,
+                                                  env=kwargs['condition_list'])
+
+                        p = Process(**kwargs)
+                        process.append(p)
+                        self.process_list.append(p)
+
+                else:
+                    # normal mode
+                    process = Process(**kwargs)
+                    self.process_list.append(process)
         return process
 
     def parse_process(self, string):
@@ -1819,6 +1858,62 @@ def prettify_xml(elem):
     return reparsed.toprettyxml(indent='    ')
 
 
+def parse_condition_action(term, project_tree):
+    #parse coordinate
+    coord_term = term[1].split('.')
+    if len(coord_term) == 1:
+        coord_term.append('(0,0)')
+
+    if len(coord_term) == 2:
+        name = coord_term[0]
+        active_layers = filter(lambda x: x.active,
+                               project_tree.get_layers())
+        if len(active_layers) == 1:
+            layer = active_layers[0].name
+        else:  # if more than one active try to guess layer from name
+            possible_sites = []
+            # if no layer visible choose among all of them
+            # else choose among visible
+            if not len(active_layers):
+                layers = project_tree.get_layers()
+            else:
+                layers = active_layers
+            for ilayer in layers:
+                for jsite in ilayer.sites:
+                    if jsite.name == name:
+                        possible_sites.append((jsite.name, ilayer.name))
+            if not possible_sites:
+                raise UserWarning("Site %s not known" % name)
+            elif len(possible_sites) == 1:
+                layer = possible_sites[0][1]
+            else:
+                raise UserWarning("Site %s is ambiguous because it" +
+                                  "exists on the following lattices: %" %
+                                  (name, [x[1] for x in possible_sites]))
+        coord_term.append(layer)
+
+    if len(coord_term) == 3:
+        name = coord_term[0]
+        offset = eval(coord_term[1])
+        layer = coord_term[2]
+        layer_names = [x.name for x in project_tree.get_layers()]
+        if layer not in layer_names:
+            raise UserWarning("Layer %s not known, must be one of %s"
+                              % (layer, layer_names))
+        else:
+            layer_instance = filter(lambda x: x.name == layer,
+                                    project_tree.get_layers())[0]
+            site_names = [x.name for x in layer_instance.sites]
+            if name not in site_names:
+                raise UserWarning("Site %s not known, must be one of %s"
+                                  % (name, site_names))
+
+    species = term[0]
+    coord = Coord(name=name, offset=offset, layer=layer)
+
+    return species, coord
+
+
 def parse_chemical_expression(eq, process, project_tree):
     """Evaluates a chemical expression 'eq' and adds
     conditions and actions accordingly. Rules are:
@@ -1904,57 +1999,8 @@ def parse_chemical_expression(eq, process, project_tree):
     action_list = []
 
     for i, term in enumerate(left + right):
-        #parse coordinate
-        coord_term = term[1].split('.')
-        if len(coord_term) == 1:
-            coord_term.append('(0,0)')
+        species, coord = parse_condition_action(term, project_tree)
 
-        if len(coord_term) == 2:
-            name = coord_term[0]
-            active_layers = filter(lambda x: x.active,
-                                   project_tree.get_layers())
-            if len(active_layers) == 1:
-                layer = active_layers[0].name
-            else:  # if more than one active try to guess layer from name
-                possible_sites = []
-                # if no layer visible choose among all of them
-                # else choose among visible
-                if not len(active_layers):
-                    layers = project_tree.get_layers()
-                else:
-                    layers = active_layers
-                for ilayer in layers:
-                    for jsite in ilayer.sites:
-                        if jsite.name == name:
-                            possible_sites.append((jsite.name, ilayer.name))
-                if not possible_sites:
-                    raise UserWarning("Site %s not known" % name)
-                elif len(possible_sites) == 1:
-                    layer = possible_sites[0][1]
-                else:
-                    raise UserWarning("Site %s is ambiguous because it" +
-                                      "exists on the following lattices: %" %
-                                      (name, [x[1] for x in possible_sites]))
-            coord_term.append(layer)
-
-        if len(coord_term) == 3:
-            name = coord_term[0]
-            offset = eval(coord_term[1])
-            layer = coord_term[2]
-            layer_names = [x.name for x in project_tree.get_layers()]
-            if layer not in layer_names:
-                raise UserWarning("Layer %s not known, must be one of %s"
-                                  % (layer, layer_names))
-            else:
-                layer_instance = filter(lambda x: x.name == layer,
-                                        project_tree.get_layers())[0]
-                site_names = [x.name for x in layer_instance.sites]
-                if name not in site_names:
-                    raise UserWarning("Site %s not known, must be one of %s"
-                                      % (name, site_names))
-
-        species = term[0]
-        coord = Coord(name=name, offset=offset, layer=layer)
         if i < len(left):
             condition_list.append(ConditionAction(species=species,
                                                   coord=coord))
