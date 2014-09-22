@@ -70,27 +70,6 @@ pt.add_process(name='CO_desorption',
                N_CO = CO@a.(-1, 0, 0).simplecubic_2d + CO@a.(0, -1, 0) + CO@a.(0, 1, 0) + CO@a.(1, 0, 0)
                return "(kboltzmann*h)**(-1.)*exp(-beta*(E_CO + N_CO*E_CO_nn)*eV)"
                """)
-#for i, nn_config in enumerate(product(['empty', 'CO'], repeat=len(nn_coords))):
-#    # Number of CO atoms in neighborhood
-#    N_CO = nn_config.count('CO')
-#
-#    # rate constant with pairwise interaction
-#    rate_constant = 'p_COgas*A*bar/sqrt(2*m_CO*umass/beta)*exp(beta*(E_CO+%s*E_CO_nn-mu_COgas)*eV)' % N_CO
-#
-#    # turn neighborhood into conditions using zip
-#    conditions = [Condition(coord=coord, species=species)
-#                  for coord, species in zip(nn_coords, nn_config)]
-#
-#    # And the central site
-#    conditions += [Condition(species='CO', coord=center)]
-#
-#    # The action: central site is empty
-#    actions = [Action(species='empty', coord=center)]
-#
-#    pt.add_process(name='CO_desorption_%s' % i,
-#                   conditions=conditions,
-#                   actions=actions,
-#                   rate_constant=rate_constant)
 
 pt.save('pairwise_interaction2.xml')
 pt.save('pairwise_interaction2.ini')
