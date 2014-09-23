@@ -147,6 +147,7 @@ class ProcListWriter():
         """Write the proclist.f90 module, i.e. the rules which make up
         the kMC process list.
         """
+        from kmos.utils import evaluate_template
         # make long lines a little shorter
         data = self.data
 
@@ -172,6 +173,9 @@ class ProcListWriter():
             constants_out.close()
             self.write_proclist_lat_int(data, out)
             self.write_proclist_end(out)
+
+        elif code_generator == 'lat_int2':
+            pass
 
         else:
             raise Exception("Don't know this code generator '%s'" % code_generator)
@@ -1328,6 +1332,12 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     elif code_generator == 'lat_int':
         cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
                     (os.path.join('fortran_src', 'base_lat_int.f90'), 'base.f90'),
+                    (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
+                    (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
+                    ]
+    elif code_generator == 'lat_int2':
+        cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
+                    (os.path.join('fortran_src', 'base_lat_int2.f90'), 'base.f90'),
                     (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
                     (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
                     ]
