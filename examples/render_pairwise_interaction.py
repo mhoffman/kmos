@@ -80,5 +80,5 @@ for i, nn_config in enumerate(product(['empty', 'CO'], repeat=len(nn_coords))):
                    actions=actions,
                    rate_constant=rate_constant)
 
-pt.filename = 'pairwise_interaction.xml'
-pt.save()
+pt.save('pairwise_interaction.xml')
+pt.save('pairwise_interaction.ini')
