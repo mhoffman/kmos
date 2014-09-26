@@ -709,7 +709,7 @@ for process in data.get_processes():
 #@         !tof 1: proc in tof: 5
 #@         
 tofnr=1
-print tofs
+
 for tof,procs in tofs.items():
     #@
     #@         !processing tof: {tof}
@@ -730,7 +730,7 @@ for tof,procs in tofs.items():
 #@         !updating history
 #@
 #@         do i=drc_order,2,-1
-#@             tchi(i,process,{tofnr})=G*tchi(i-1,process)
+#@             tchi(i,process)=G*tchi(i-1,process)
 #@         end do
 #@         tchi(1,process)=O*kmc_time_step
 #@
