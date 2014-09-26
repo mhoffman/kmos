@@ -692,21 +692,46 @@ gpl = self._gpl_message()
 #@         
 #@         !got O and G for proc
 #@         
+procnames={}
+for i,proc in enumerate(data.process_list):
+    procnames.update({proc.name : i+1})
+    
+procnums=dict((v,k) for k,v in procnames.items())
+tofs = {}
+for process in data.get_processes():
+    if process.tof_count is not None:
+        for name in eval(process.tof_count):
+            if not tofs.has_key(name):
+                tofs.update({name:[procnames[process.name]]})
+            else:
+                tofs[name]+=[procnames[process.name]]
 #@         ! the following has to be dynamic
 #@         !tof 1: proc in tof: 5
 #@         
-#@         tof=1
-#@         
-#@         chi(1,process,tof) = chi(1,process,tof)+nr_of_sites(5)*rates(5)*O*kmc_time_step
-#@         do i=2,drc_order
-#@             chi(i,process,tof) = chi(i,process,tof)+nr_of_sites(5)*rates(5)*G*tchi(i-1,process,tof)
-#@         end do
-#@     
-#@         do i=drc_order,2,-1
-#@             tchi(i,process,tof)=G*tchi(i-1,process,tof)
-#@         end do
-#@         tchi(1,process,tof)=O*kmc_time_step
-#@         
+tofnr=1
+
+for tof,procs in tofs.items():
+    #@
+    #@         !processing tof: {tof}
+    #@         ! with process(es):
+    totplaces=""
+    for p in procs:
+        n=procnums[p]
+        #@         ! {n} ({p})
+        totplaces+="nr_of_sites(%i)*rates(%i)+" % (p,p)
+    totplaces=totplaces[:-1]
+    #@
+    #@         chi(1,process,{tofnr}) = chi(1,process,{tofnr})+({totplaces})*O*kmc_time_step
+    #@         do i=2,drc_order
+    #@             chi(i,process,{tofnr}) = chi(i,process,{tofnr})+({totplaces})*G*tchi(i-1,process,{tofnr})
+    #@         end do
+    #@         
+    #@         do i=drc_order,2,-1
+    #@             tchi(i,process,{tofnr})=G*tchi(i-1,process,{tofnr})
+    #@         end do
+    #@         tchi(1,process,{tofnr})=O*kmc_time_step
+    tofnr+=1
+    
 #@     end do !procs
 #@ end subroutine update_chi
 #@
