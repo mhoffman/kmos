@@ -62,13 +62,14 @@ nn_coords = [nn_coord for i, nn_coord in enumerate(coords)
 # interaction
 conditions = [Condition(coord=coord, species=['empty', 'CO'])
               for coord in nn_coords]
+conditions += [Condition(species='CO', coord=center)]
 actions = [Action(species='empty', coord=center)]
 pt.add_process(name='CO_desorption',
                conditions=conditions,
                actions=actions,
                rate_constant="""
                N_CO = CO@a.(-1, 0, 0).simplecubic_2d + CO@a.(0, -1, 0) + CO@a.(0, 1, 0) + CO@a.(1, 0, 0)
-               return "(kboltzmann*h)**(-1.)*exp(-beta*(E_CO + N_CO*E_CO_nn)*eV)"
+               return "p_COgas*A*bar/sqrt(2*m_CO*umass/beta)*exp(beta*(E_CO+N_CO*E_CO_nn-mu_COgas)*eV)"
                """)
 
 pt.save('pairwise_interaction2.xml')
