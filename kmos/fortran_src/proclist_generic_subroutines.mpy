@@ -123,9 +123,9 @@ if data.meta.debug > 0:
 #@
 #@             call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
 #@
-#@             call update_chi(.True.,proc_nr)
-#@
 #@             call run_proc_nr(proc_nr, nr_site)
+#@
+#@             call update_chi(.True.,proc_nr)
 #@         else
 #@             call update_chi(.False.,proc_nr)
 #@         end if
