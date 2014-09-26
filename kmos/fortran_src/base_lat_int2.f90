@@ -191,6 +191,11 @@ integer(kind=iint) :: nr_of_proc
 ! FUNCTION
 !   Total number of available processes.
 !******
+integer(kind=iint) :: nr_of_proc_groups
+!****v* base/nr_of_proc_groups
+! FUNCTION
+!   Total number of available process groups.
+!******
 integer(kind=iint) :: volume
 !****v* base/volume
 ! FUNCTION
@@ -208,7 +213,7 @@ character(len=200) :: system_name
 contains
 !****************
 
-subroutine del_proc(proc, site)
+subroutine del_proc(proc, proc_group, site)
   !****f* base/del_proc
   ! FUNCTION
   !    del_proc delete one process from the main book-keeping array
@@ -228,7 +233,7 @@ subroutine del_proc(proc, site)
   !    * ``proc`` positive integer that states the process
   !    * ``site`` positive integer that encodes the site to be manipulated
   !******
-  integer(kind=iint), intent(in) :: proc, site
+  integer(kind=iint), intent(in) :: proc, proc_group, site
 
   integer(kind=iint) :: memory_address
 
@@ -267,7 +272,7 @@ subroutine del_proc(proc, site)
 end subroutine del_proc
 
 
-subroutine add_proc(proc, site)
+subroutine add_proc(proc, proc_group, site)
   !****f* base/add_proc
   ! FUNCTION
   !    The main idea of this subroutine is described in del_proc. Adding one
@@ -279,7 +284,7 @@ subroutine add_proc(proc, site)
   !    * ``proc`` positive integer number that represents the process to be added.
   !    * ``site`` positive integer number that represents the site to be manipulated
   !******
-  integer(kind=iint), intent(in) :: proc, site
+  integer(kind=iint), intent(in) :: proc, proc_group, site
 
   ! Make sure proc_nr is in the right range
   ASSERT(proc.ge.0,"base/add_proc: proc has to be positive or zero")
@@ -304,6 +309,12 @@ subroutine add_proc(proc, site)
   endif
 
 end subroutine add_proc
+
+subroutine change_proc(proc, proc_group, new_proc, new_proc_group, site)
+  integer(kind=iint), intent(in) :: proc, proc_group, new_proc, new_proc, groupt site
+
+
+end subroutine change_proc
 
 pure function can_do(proc, site)
   !****f* base/can_do
