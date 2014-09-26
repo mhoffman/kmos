@@ -717,7 +717,7 @@ for tof,procs in tofs.items():
     totplaces=""
     for (p,factor) in procs:
         n=procnums[p]
-        #@         ! {n} ({p})
+        #@         ! {factor} * {n} ({p})
         totplaces+="(%f)*nr_of_sites(%i)*rates(%i)+" % (factor,p,p)
     totplaces=totplaces[:-1]
     #@
