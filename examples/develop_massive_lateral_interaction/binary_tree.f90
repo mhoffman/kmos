@@ -2,7 +2,8 @@ module btree
 
     implicit none
     type ::  binary_tree
-        real, allocatable, dimension(:) :: tdata
+        real, allocatable, dimension(:) :: rate_constants
+        integer, allocatable, dimension(:) :: procs
         integer :: levels, total_length, filled
     end type
 
@@ -16,7 +17,8 @@ contains
 
         self%levels = ceiling(log(real(n)) / log(2.) + 1)
         self%total_length = 2 ** self%levels
-        allocate(self%tdata(self%total_length))
+        allocate(self%rate_constants(self%total_length))
+        allocate(self%procs(self%total_length/2))
         self%filled = 0
 
     end function btree_init
@@ -25,7 +27,8 @@ contains
     subroutine btree_destroy(self)
         type(binary_tree),  intent(inout) :: self
 
-        deallocate(self%tdata)
+        deallocate(self%rate_constants)
+        deallocate(self%procs)
 
     end subroutine btree_destroy
 
@@ -42,21 +45,25 @@ contains
     end subroutine btree_repr
 
 
-    subroutine btree_add(self, value)
+    subroutine btree_add(self, rate_constant, proc)
         type(binary_tree) :: self
-        real :: value
+        real :: rate_constant
+        integer :: proc
 
         integer :: pos
 
-        if(self%filled * 2 > self%total_length)then
-            print *, "Tree is already full"
+        if(self%filled * 2 + 1 > self%total_length)then
+            print *, "btree_add"
+            print *, "Tree overfull!!! Quit."
             stop
         endif
 
         pos = self%total_length / 2 + self%filled
-        self%tdata(pos) = value
+        self%rate_constants(pos) = rate_constant
         call btree_update(self, pos)
+
         self%filled = self%filled + 1
+        self%procs(self%filled) = proc
 
     end subroutine btree_add
 
@@ -64,14 +71,22 @@ contains
     subroutine btree_del(self, pos)
         type(binary_tree) :: self
         integer, intent(in) :: pos
+        integer :: pos_, filled_
+
+        pos_ = pos + self%total_length / 2 
+        filled_ = self%filled + self%total_length / 2 
 
         ! move deleted new data field
-        self%tdata(pos) = self%tdata(self%filled)
-        self%tdata(self%filled) = 0.
+        self%rate_constants(pos_) = &
+            self%rate_constants(filled_)
+        self%rate_constants(filled_) = 0.
+
+        self%procs(pos_) = self%procs(filled_)
+        self%procs(filled_) = 0
 
         ! update tree structure
-        call btree_update(self, pos)
-        call btree_update(self, self%filled)
+        call btree_update(self, pos_)
+        call btree_update(self, filled_)
 
         ! decrease tree structure
         self%filled = self%filled - 1
@@ -84,8 +99,8 @@ contains
         real, intent(in) :: new_rate
         integer, intent(in) :: pos
 
-        self%tdata(pos) = new_rate
-        call btree_update(self, pos)
+        self%rate_constants(self%total_length/2 + pos) = new_rate
+        call btree_update(self, self%total_length/2 + pos)
 
     end subroutine btree_replace
 
@@ -98,7 +113,7 @@ contains
         pos_ = pos
         do while (pos_ > 1)
         pos_ = pos_ / 2
-        self%tdata(pos_) = self%tdata(2 * pos_) + self%tdata(2 * pos_ + 1)
+        self%rate_constants(pos_) = self%rate_constants(2 * pos_) + self%rate_constants(2 * pos_ + 1)
 
         end do
     end subroutine btree_update
@@ -112,19 +127,19 @@ contains
 
         n = 1
         do while (n < self%total_length / 2)
-        if (x < self%tdata(n)) then
+        if (x < self%rate_constants(n)) then
             n = 2 * n
         else
-            x = x - self%tdata(n)
+            x = x - self%rate_constants(n)
             n = 2 * n + 2
         endif
         enddo
 
-        if(x > self%tdata(n))then
+        if(x > self%rate_constants(n))then
             n = n + 1
         endif
 
-        n = 1 + n - self%total_length / 2
+        n = self%procs(1 + n - self%total_length / 2)
 
     end subroutine btree_pick
 
@@ -148,14 +163,14 @@ program main
     t(i) = btree_init(80)
     enddo
 
-    do i = 1, 80
-    call btree_add(t(1), 1.)
+    do i = 1, 800
+    call btree_add(t(1), 1., i)
     enddo
-    call btree_repr(t(1))
+    !call btree_repr(t(1))
 
 
-    do i = 1, n 
-    call btree_destroy(t(i))
-    enddo
+    !do i = 1, n 
+    !call btree_destroy(t(i))
+    !enddo
 
 end program
