@@ -1,0 +1,21 @@
+#@ module proclist
+#@
+#@ ! put use statements here
+#@
+#@ implicit none
+from pprint import pprint
+pprint(self._get_lat_int_groups())
+proc_id = 0
+for group_id, (key, value) in enumerate(self._get_lat_int_groups().items()):
+    for process in value:
+        proc_id += 1
+        gid = group_id + 1
+        #@ integer(kind=iint), parameter, public :: {process.name} = {proc_id}
+        #@ integer(kind=iint), parameter, public :: {process.name}_gid = {gid}
+
+
+#@
+#@ contains
+
+#@
+#@ end module proclist
