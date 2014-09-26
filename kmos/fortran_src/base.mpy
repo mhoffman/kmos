@@ -130,11 +130,11 @@ gpl = self._gpl_message()
 #@ !    Stores the summation of the first drc_order orders of chis
 #@ !    chi(order,pertubated process,nr_tof)
 #@ !******
-#@ real(kind=rdouble), dimension(:,:,:), allocatable :: tchi
+#@ real(kind=rdouble), dimension(:,:), allocatable :: tchi
 #@ !****v* base/tchi
 #@ ! FUNCTION
 #@ !    Stores the partial history for fast calculation of chis
-#@ !    tchi(order,pertubated process,nr_tof)
+#@ !    tchi(order,pertubated process)
 #@ !******
 #@ integer(kind=iint), dimension(:), allocatable :: nr_of_sites
 #@ !****v* base/nr_of_sites
@@ -700,38 +700,40 @@ procnums=dict((v,k) for k,v in procnames.items())
 tofs = {}
 for process in data.get_processes():
     if process.tof_count is not None:
-        for name in eval(process.tof_count):
+        for name,count in eval(process.tof_count).items():
             if not tofs.has_key(name):
-                tofs.update({name:[procnames[process.name]]})
+                tofs.update({name:[(procnames[process.name],count)]})
             else:
-                tofs[name]+=[procnames[process.name]]
+                tofs[name]+=[(procnames[process.name],count)]
 #@         ! the following has to be dynamic
 #@         !tof 1: proc in tof: 5
 #@         
 tofnr=1
-
+print tofs
 for tof,procs in tofs.items():
     #@
     #@         !processing tof: {tof}
     #@         ! with process(es):
     totplaces=""
-    for p in procs:
+    for (p,factor) in procs:
         n=procnums[p]
         #@         ! {n} ({p})
-        totplaces+="nr_of_sites(%i)*rates(%i)+" % (p,p)
+        totplaces+="(%f)*nr_of_sites(%i)*rates(%i)+" % (factor,p,p)
     totplaces=totplaces[:-1]
     #@
     #@         chi(1,process,{tofnr}) = chi(1,process,{tofnr})+({totplaces})*O*kmc_time_step
     #@         do i=2,drc_order
-    #@             chi(i,process,{tofnr}) = chi(i,process,{tofnr})+({totplaces})*G*tchi(i-1,process,{tofnr})
+    #@             chi(i,process,{tofnr}) = chi(i,process,{tofnr})+({totplaces})*G*tchi(i-1,process)
     #@         end do
-    #@         
-    #@         do i=drc_order,2,-1
-    #@             tchi(i,process,{tofnr})=G*tchi(i-1,process,{tofnr})
-    #@         end do
-    #@         tchi(1,process,{tofnr})=O*kmc_time_step
     tofnr+=1
-    
+#@
+#@         !updating history
+#@
+#@         do i=drc_order,2,-1
+#@             tchi(i,process,{tofnr})=G*tchi(i-1,process)
+#@         end do
+#@         tchi(1,process)=O*kmc_time_step
+#@
 #@     end do !procs
 #@ end subroutine update_chi
 #@
@@ -843,7 +845,7 @@ for process in data.get_processes():
 nr_of_tof=len(tofs)
 #@         allocate(chi(drc_order,nr_of_proc,{nr_of_tof}))
 #@         chi = 0
-#@         allocate(tchi(drc_order,nr_of_proc,{nr_of_tof}))
+#@         allocate(tchi(drc_order,nr_of_proc))
 #@         tchi = 0
 #@         allocate(procstat(nr_of_proc))
 #@         procstat = 0
