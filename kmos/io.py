@@ -29,6 +29,7 @@ from pprint import pformat
 from kmos.types import ConditionAction, SingleLatIntProcess, Coord
 from kmos.config import APP_ABS_PATH
 from kmos.types import cmp_coords
+from kmos.utils import evaluate_template
 
 
 def _casetree_dict(dictionary, indent='', out=None):
@@ -66,10 +67,16 @@ def _print_dict(dictionary, indent = ''):
             print(indent+'%s = %s' %(key, value))
 
 def _flatten(L):
+    """Turn a list of lists into one simple list. This
+    only works for one level of recursion.
+    """
     return [item for sublist in L for item in sublist]
 
 
 def _chop_line(outstr, line_length=100):
+    """Break very long lines into many shorter one
+    using Fortran 90 lines continuation syntax.
+    """
     if len(outstr) < line_length :
         return outstr
     outstr_list = []
@@ -133,7 +140,6 @@ class ProcListWriter():
         self.dir = dir
 
     def write_lattice(self):
-        from kmos.utils import evaluate_template
 
         with open(os.path.join(os.path.dirname(__file__),
                                'fortran_src',
@@ -147,7 +153,6 @@ class ProcListWriter():
         """Write the proclist.f90 module, i.e. the rules which make up
         the kMC process list.
         """
-        from kmos.utils import evaluate_template
         # make long lines a little shorter
         data = self.data
 
@@ -175,6 +180,7 @@ class ProcListWriter():
             self.write_proclist_end(out)
 
         elif code_generator == 'lat_int2':
+            self.write_proclist_lat_int2(data, out)
             pass
 
         else:
@@ -186,7 +192,6 @@ class ProcListWriter():
                                  code_generator='local_smart',
                                  close_module=False,
                                  module_name='proclist'):
-        from kmos.utils import evaluate_template
 
         with open(os.path.join(os.path.dirname(__file__),
                                'fortran_src',
@@ -207,7 +212,6 @@ class ProcListWriter():
         self.write_proclist_generic_subroutines(data, out, code_generator=code_generator)
 
     def write_proclist_generic_subroutines(self, data, out, code_generator='local_smart'):
-        from kmos.utils import evaluate_template
 
         with open(os.path.join(os.path.dirname(__file__),
                                'fortran_src',
@@ -429,6 +433,17 @@ class ProcListWriter():
         # let's assume it for now
 
         return lat_int_groups
+
+    def write_proclist_lat_int2(self, data, out, debug=False):
+        with open(os.path.join(os.path.dirname(__file__),
+                               'fortran_src',
+                               'proclist_lat_int2.mpy')) as infile:
+            template = infile.read()
+
+            out.write(evaluate_template(template,
+                                        self=self,
+                                        data=data,
+                                        ))
 
     def write_proclist_lat_int(self, data, out, debug=False):
         """

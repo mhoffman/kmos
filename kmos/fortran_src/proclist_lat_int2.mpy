@@ -1,10 +1,20 @@
+from kmos.io import _chop_line
 #@ module proclist
 #@
 #@ ! put use statements here
+#@ use kind_values
 #@
+#@ use base, only: &
+#@     update_accum_rate, &
+#@     update_integ_rate, &
+#@     determine_procsite, &
+#@     update_clocks, &
+#@     avail_sites, &
+#@     null_species, &
+#@     increment_procstat
+
 #@ implicit none
-from pprint import pprint
-pprint(self._get_lat_int_groups())
+lat_int_groups = self._get_lat_int_groups()
 proc_id = 0
 for group_id, (key, value) in enumerate(self._get_lat_int_groups().items()):
     for process in value:
@@ -14,8 +24,140 @@ for group_id, (key, value) in enumerate(self._get_lat_int_groups().items()):
         #@ integer(kind=iint), parameter, public :: {process.name}_gid = {gid}
 
 
+#@ integer(kind=iint), public :: seed_size = 12
+#@ integer(kind=iint), public :: seed ! random seed
+#@ integer(kind=iint), public, dimension(:), allocatable :: seed_arr ! random seed
+#@
 #@
 #@ contains
-
 #@
+#@ subroutine run_proc_nr(proc, nr_cell)
+#@     integer(kind=iint), intent(in) :: nr_cell
+#@     integer(kind=iint), intent(in) :: proc
+#@ 
+#@     integer(kind=iint), dimension(4) :: cell
+#@ 
+#@     cell = nr2lattice(nr_cell, :) + (/0, 0, 0, -1/)
+#@     call increment_procstat(proc)
+#@ 
+#@     select case(proc)
+for lat_int_group, processes in lat_int_groups.iteritems():
+    proc_names = ', '.join([proc.name for proc in processes])
+    chopped_line = _chop_line(proc_names, line_length=60)
+    #@     case({chopped_line})
+    #@         call run_proc_{lat_int_group}(cell)
+#@     case default
+#@         print *, "Whoops, should not get here!"
+#@         print *, "PROC_NR", proc
+#@         stop
+#@     end select
+#@ 
+#@ end subroutine run_proc_nr
+#@
+
+#@ subroutine do_kmc_steps(n)
+#@ 
+#@ !****f* proclist/do_kmc_steps
+#@ ! FUNCTION
+#@ !    Performs ``n`` kMC step.
+#@ !    If one has to run many steps without evaluation
+#@ !    do_kmc_steps might perform a little better.
+#@ !    * first update clock
+#@ !    * then configuration sampling step
+#@ !    * last execute process
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    ``n`` : Number of steps to run
+#@ !******
+#@     integer(kind=iint), intent(in) :: n
+#@ 
+#@     real(kind=rsingle) :: ran_proc, ran_time, ran_site
+#@     integer(kind=iint) :: nr_site, proc_nr, i
+#@ 
+#@     do i = 1, n
+#@     call random_number(ran_time)
+#@     call random_number(ran_proc)
+#@     call random_number(ran_site)
+#@     call update_accum_rate
+#@     call update_clocks(ran_time)
+#@ 
+#@     call update_integ_rate
+#@     call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
+#@     call run_proc_nr(proc_nr, nr_site)
+#@     enddo
+#@ 
+#@ end subroutine do_kmc_steps
+#@
+#@ subroutine get_next_kmc_step(proc_nr, nr_site)
+#@ 
+#@ !****f* proclist/get_kmc_step
+#@ ! FUNCTION
+#@ !    Determines next step without executing it.
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    ``none``
+#@ !******
+#@     real(kind=rsingle) :: ran_proc, ran_time, ran_site
+#@     integer(kind=iint), intent(out) :: nr_site, proc_nr
+#@ 
+#@     call random_number(ran_time)
+#@     call random_number(ran_proc)
+#@     call random_number(ran_site)
+#@     call update_accum_rate
+#@     call determine_procsite(ran_proc, ran_time, proc_nr, nr_site)
+#@ 
+#@ end subroutine get_next_kmc_step
+#@ 
+#@ subroutine get_occupation(occupation)
+#@     !****f* proclist/get_occupation
+#@     ! FUNCTION
+#@     !    Evaluate current lattice configuration and returns
+#@     !    the normalized occupation as matrix. Different species
+#@     !    run along the first axis and different sites run
+#@     !    along the second.
+#@     !
+#@     ! ARGUMENTS
+#@     !
+#@     !    ``none``
+#@     !******
+#@     ! nr_of_species = 3, spuck = 1
+#@     real(kind=rdouble), dimension(0:2, 1:1), intent(out) :: occupation
+#@     
+#@     integer(kind=iint) :: i, j, k, nr, species
+#@     
+#@     occupation = 0
+#@     
+#@     do k = 0, system_size(3)-1
+#@         do j = 0, system_size(2)-1
+#@             do i = 0, system_size(1)-1
+#@                 do nr = 1, spuck
+#@                     ! shift position by 1, so it can be accessed
+#@                     ! more straightforwardly from f2py interface
+#@                     species = get_species((/i,j,k,nr/))
+#@                     if(species.ne.null_species) then
+#@                     occupation(species, nr) = &
+#@                         occupation(species, nr) + 1
+#@                     endif
+#@                 end do
+#@             end do
+#@         end do
+#@     end do
+#@     
+#@     occupation = occupation/real(system_size(1)*system_size(2)*system_size(3))
+#@     
+#@ end subroutine get_occupation
+#@     
+
+
+for lat_int_group, processes in lat_int_groups.iteritems():
+    #@ subroutine run_proc_{lat_int_group}(cell)
+    #@     integer(kind=iint), dimension(4), intent(in) :: cell
+    #@
+    #@
+    #@ end subroutine run_proc_{lat_int_group}
+    #@
+
+    #@
 #@ end module proclist

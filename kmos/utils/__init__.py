@@ -741,7 +741,16 @@ def evaluate_template(template, escape_python=False, **kwargs):
                 python_lines += line
         if not matched:
             return template
-        exec(python_lines)
+        try:
+            exec(python_lines)
+        except SyntaxError :
+            print(python_lines)
+            raise
+        except ValueError :
+            print(python_lines)
+            raise
+
+
 
         # second turn literary lines into write statements
         python_lines = ''
