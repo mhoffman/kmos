@@ -1,4 +1,5 @@
 from kmos.io import _chop_line
+from copy import deepcopy
 #@ module proclist
 #@
 #@ ! put use statements here
@@ -154,6 +155,43 @@ for lat_int_group, processes in lat_int_groups.iteritems():
 for lat_int_group, processes in lat_int_groups.iteritems():
     #@ subroutine run_proc_{lat_int_group}(cell)
     #@     integer(kind=iint), dimension(4), intent(in) :: cell
+    #@     integer(kind=iint) :: stored_proc
+    #@
+    process = processes[0]
+    for action in process.action_list:
+        new_species = action.species
+        old_species = [c for c in process.condition_list if action.coord == c.coord][0].species
+        rel_action_coord = action.coord.radd_ff('cell')
+        #@     call replace_species({rel_action_coord}, {old_species}, {new_species})
+        for other_lat_int_group, other_processes in lat_int_groups.iteritems():
+            other_process = other_processes[0]
+
+            for i_other_condition, other_condition in enumerate(other_process.condition_list + other_process.bystanders):
+                if other_condition.coord.name == action.coord.name :
+                    allowed_species = [(other_process2.condition_list + other_process2.bystanders)[i_other_condition].species
+                                       for other_process2 in other_processes]
+                    # four cases
+                    if old_species in allowed_species and new_species in allowed_species:
+                        pass #  replace, quite complicated
+                        #@     call get_stored_proc({lat_int_group}, cell, stored_proc)
+                        #@     select case(stored_proc)
+                        # TODO XXX
+                        #@     case default
+                        #@         print *, "run_proc_{lat_int_group}"
+                        #@         print *, "Should not get there!"
+                        #@         exit
+                    elif old_species in allowed_species and new_species not in allowed_species:
+                        pass #  disable (more), easy
+                        #@     call del_site({lat_int_group}, cell)
+                    elif not old_species in allowed_species and new_species in allowed_species:
+                        pass #  enable (more), easy
+                        #@     call add_site(nli_{lat_int_group}(cell), cell)
+                        # FIXME
+                    elif not old_species in allowed_species and new_species not in allowed_species:
+                        pass #  do nothing, trivial
+
+
+
     #@
     #@
     #@ end subroutine run_proc_{lat_int_group}

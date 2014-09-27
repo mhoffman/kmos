@@ -1549,15 +1549,15 @@ class Coord(FixedObject):
         layer = ''
         return Coord(name=name, layer=layer, offset=offset)
 
-    def rsub_ff(self):
+    def rsub_ff(self, center=''):
         """Build term as if subtracting on the right, omit '-' if 0 anyway
         (in Fortran Form :-)
         """
         ff = self.ff()
         if ff == '(/0, 0, 0, 0/)':
-            return ''
+            return center
         else:
-            return ' - %s' % ff
+            return center + (' - %s' % ff)
 
     def site_offset_unpacked(self):
         ff = self.ff()
@@ -1567,15 +1567,15 @@ class Coord(FixedObject):
             return 'site(1) + (%s), site(2) + (%s), site(3) + (%s), site(4) + (%s)' % \
                 (self.offset[0], self.offset[1], self.offset[2], self.name)
 
-    def radd_ff(self):
+    def radd_ff(self, center=''):
         """Build term as if adding on the right, omit '+' if 0 anyway
         (in Fortran Form :-)
         """
         ff = self.ff()
         if ff == '(/0, 0, 0, 0/)':
-            return ''
+            return center
         else:
-            return ' + %s' % ff
+            return center + (' + %s' % ff)
 
     def sort_key(self):
         return "%s_%s_%s_%s_%s" % (self.layer,

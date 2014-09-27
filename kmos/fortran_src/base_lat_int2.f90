@@ -85,14 +85,14 @@ module base
     integer(kind=iint) :: null_species = -1
 
     !---- Allocatable, module wide, variables
-    integer(kind=iint), dimension(:,:,:), allocatable, public :: avail_sites
+    integer(kind=iint), dimension(:,:), allocatable, public :: avail_sites
     !****v* base/avail_sites
     ! FUNCTION
     !   Main book-keeping array that stores for each process the sites
     !   that are available and for each site the address
     !   in this very array. The meaning of the fields are:
     !
-    !       avail_sites(proc, field, switch)
+    !       avail_sites(proc_group, field)
     !
     !   where:
     !
@@ -105,6 +105,9 @@ module base
     !     or (2) the location where the site is stored in (1).
     !
     !******
+    integer(kind=iint), dimension(:,:), allocatable, public :: site_store_proc
+    integer(kind=iint), dimension(:,:), allocatable, public :: site_store_memaddr
+
     integer(kind=iint), dimension(:), allocatable :: lattice
     !****v* base/lattice
     ! FUNCTION
@@ -737,8 +740,16 @@ contains
             kmc_step = 0
 
             ! allocate data structures and initialize with 0
-            allocate(avail_sites(nr_of_proc_groups, volume, 2))
+            ! TODO FIXME
+            allocate(avail_sites(nr_of_proc_groups, 2*volume))
             avail_sites = 0
+
+            allocate(site_store_proc(nr_of_proc_groups, volume))
+            avail_sites = 0
+
+            allocate(site_store_memaddr(nr_of_proc_groups, volume))
+            avail_sites = 0
+
             allocate(lattice(volume))
             lattice = null_species
             allocate(nr_of_sites(nr_of_proc))
