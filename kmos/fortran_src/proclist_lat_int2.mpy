@@ -164,14 +164,30 @@ for lat_int_group, processes in lat_int_groups.iteritems():
     for action in process.action_list:
         new_species = action.species
         old_species = [c for c in process.condition_list if action.coord == c.coord][0].species
-        rel_action_coord = action.coord.radd_ff('cell')
+        rel_action_coord = action.coord.radd_offset('cell')
+        #@
         #@     call replace_species({rel_action_coord}, {old_species}, {new_species})
         for other_lat_int_group, other_processes in lat_int_groups.iteritems():
             other_process = other_processes[0]
 
-            if len(other_processes) > 1 :
+            for i_other_condition, other_condition in enumerate(other_process.condition_list):
+                if other_condition.coord.name == action.coord.name :
+                    rel_condition_coord = (action.coord - other_condition.coord).radd_offset('cell')
+                    if other_condition.species == old_species and other_condition.species != new_species:
+                        #@     call del_site({other_lat_int_group}, {rel_condition_coord})
+                    elif other_condition.species != old_species and other_condition.species == new_species:
+                        #@     call add_site({other_lat_int_group}, {rel_condition_coord})
+                    elif other_condition.species != old_species and other_condition.species != new_species:
+                        pass
+                    else:
+                        raise Exception('Check for logical error in your model: old_species(%s) vs. new_species(%s), Condition %s' %
+                                        (old_species, new_species, other_condition.species))
+            if other_process.bystanders : #  process with lateral interaction
+                #@
+                #@     ! bystander updates
                 for i_other_condition, other_condition in enumerate(other_process.bystanders):
                     if other_condition.coord.name == action.coord.name :
+                        rel_condition_coord = other_condition.coord.rsub_offset('cell')
                         allowed_species = [(other_process2.bystanders)[i_other_condition].species
                                            for other_process2 in other_processes]
                         # four cases
@@ -192,35 +208,32 @@ for lat_int_group, processes in lat_int_groups.iteritems():
                                                  " and new procs differs: %s vs %s") \
                                                  % (len(old_procs), len(new_procs)))
 
-                            #@     call get_stored_proc({lat_int_group}, cell, stored_proc)
+                            #@
+                            #@     call get_stored_proc({lat_int_group}, {rel_condition_coord}, stored_proc)
                             #@     select case(stored_proc)
                             for old_proc, new_proc in zip(old_procs, new_procs):
                                 old_proc_name = old_proc.name
                                 new_proc_name = new_proc.name
                                 #@         case({old_proc_name})
-                                #@             call change_proc({old_proc_name}, {lat_int_group}, {new_proc_name}, {lat_int_group}, cell)
-                            #@     case default
-                            #@         print *, "run_proc_{lat_int_group}"
-                            #@         print *, "stored_proc", stored_proc
-                            #@         print *, "Should not get there!"
-                            #@         exit
-                            #@     endif
+                                #@             call change_proc({lat_int_group}, {old_proc_name}, {new_proc_name}, {rel_condition_coord})
+                            #@         case default
+                            #@             print *, "run_proc_{lat_int_group}"
+                            #@             print *, "stored_proc", stored_proc
+                            #@             print *, "Should not get there!"
+                            #@             exit
+                            #@     end select
                         elif old_species in allowed_species and new_species not in allowed_species:
                             pass #  disable (more), easy
-                            #@     call del_site({lat_int_group}, cell)
+                            #@     call del_site({lat_int_group}, {rel_condition_coord})
                         elif not old_species in allowed_species and new_species in allowed_species:
                             pass #  enable (more), easy
-                            #@     call add_site(nli_{lat_int_group}(cell), cell)
+                            #@     call add_site(nli_{lat_int_group}({rel_condition_coord}), {rel_condition_coord})
                             # FIXME
                         elif not old_species in allowed_species and new_species not in allowed_species:
                             pass #  do nothing, trivial
-
             else:
                 # Simple process, treat later
                 pass
-
-
-    #@
     #@
     #@ end subroutine run_proc_{lat_int_group}
     #@

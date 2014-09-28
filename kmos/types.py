@@ -1549,6 +1549,14 @@ class Coord(FixedObject):
         layer = ''
         return Coord(name=name, layer=layer, offset=offset)
 
+    def site_offset_unpacked(self):
+        ff = self.ff()
+        if ff == '(/0, 0, 0, 0/)':
+            return 'site(1), site(2), site(3), site(4)'
+        else:
+            return 'site(1) + (%s), site(2) + (%s), site(3) + (%s), site(4) + (%s)' % \
+                (self.offset[0], self.offset[1], self.offset[2], self.name)
+
     def rsub_ff(self, center=''):
         """Build term as if subtracting on the right, omit '-' if 0 anyway
         (in Fortran Form :-)
@@ -1558,14 +1566,6 @@ class Coord(FixedObject):
             return center
         else:
             return center + (' - %s' % ff)
-
-    def site_offset_unpacked(self):
-        ff = self.ff()
-        if ff == '(/0, 0, 0, 0/)':
-            return 'site(1), site(2), site(3), site(4)'
-        else:
-            return 'site(1) + (%s), site(2) + (%s), site(3) + (%s), site(4) + (%s)' % \
-                (self.offset[0], self.offset[1], self.offset[2], self.name)
 
     def radd_ff(self, center=''):
         """Build term as if adding on the right, omit '+' if 0 anyway
@@ -1583,6 +1583,19 @@ class Coord(FixedObject):
                                    self.offset[0],
                                    self.offset[1],
                                    self.offset[2])
+
+    def rsub_offset(self, center=''):
+        if not np.any(self.offset):
+            return center
+        return '%s - %s' % (center, self.offset_ff())
+
+    def radd_offset(self, center=''):
+        if not np.any(self.offset):
+            return center
+        return '%s + %s' % (center, self.offset_ff())
+
+    def offset_ff(self):
+        return "(/%s, %s, %s, 0/)" % (self.offset[0], self.offset[1], self.offset[2])
 
     def ff(self):
         """ff like 'Fortran Form'"""
