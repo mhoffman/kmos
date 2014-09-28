@@ -32,8 +32,11 @@
 !    * determine the process and site to be executed
 !
 !******
+#include "btree.f90"
+
 module base
     use kind_values
+    use btree
     !------ No implicit definition of variables !
     implicit none
 
@@ -85,7 +88,7 @@ module base
     integer(kind=iint) :: null_species = -1
 
     !---- Allocatable, module wide, variables
-    integer(kind=iint), dimension(:,:), allocatable, public :: avail_sites
+    type(binary_tree), dimension(:), allocatable, public :: avail_sites
     !****v* base/avail_sites
     ! FUNCTION
     !   Main book-keeping array that stores for each process the sites
@@ -741,8 +744,7 @@ contains
 
             ! allocate data structures and initialize with 0
             ! TODO FIXME
-            allocate(avail_sites(nr_of_proc_groups, 2*volume))
-            avail_sites = 0
+            allocate(avail_sites(nr_of_proc_groups)
 
             allocate(site_store_proc(nr_of_proc_groups, volume))
             avail_sites = 0
