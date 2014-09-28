@@ -13,16 +13,19 @@ from copy import deepcopy
 #@     avail_sites, &
 #@     null_species, &
 #@     increment_procstat
-
+#@
 #@ implicit none
+#@
 lat_int_groups = self._get_lat_int_groups()
 proc_id = 0
 for group_id, (key, value) in enumerate(self._get_lat_int_groups().items()):
+    gid = group_id + 1
+    #@ integer(kind=iint), parameter, public :: {key}_group = {gid}
     for process in value:
         proc_id += 1
-        gid = group_id + 1
         #@ integer(kind=iint), parameter, public :: {process.name} = {proc_id}
-        #@ integer(kind=iint), parameter, public :: {process.name}_gid = {gid}
+    else:
+        #@ 
 
 
 #@ integer(kind=iint), public :: seed_size = 12
@@ -166,30 +169,55 @@ for lat_int_group, processes in lat_int_groups.iteritems():
         for other_lat_int_group, other_processes in lat_int_groups.iteritems():
             other_process = other_processes[0]
 
-            for i_other_condition, other_condition in enumerate(other_process.condition_list + other_process.bystanders):
-                if other_condition.coord.name == action.coord.name :
-                    allowed_species = [(other_process2.condition_list + other_process2.bystanders)[i_other_condition].species
-                                       for other_process2 in other_processes]
-                    # four cases
-                    if old_species in allowed_species and new_species in allowed_species:
-                        pass #  replace, quite complicated
-                        #@     call get_stored_proc({lat_int_group}, cell, stored_proc)
-                        #@     select case(stored_proc)
-                        # TODO XXX
-                        #@     case default
-                        #@         print *, "run_proc_{lat_int_group}"
-                        #@         print *, "Should not get there!"
-                        #@         exit
-                    elif old_species in allowed_species and new_species not in allowed_species:
-                        pass #  disable (more), easy
-                        #@     call del_site({lat_int_group}, cell)
-                    elif not old_species in allowed_species and new_species in allowed_species:
-                        pass #  enable (more), easy
-                        #@     call add_site(nli_{lat_int_group}(cell), cell)
-                        # FIXME
-                    elif not old_species in allowed_species and new_species not in allowed_species:
-                        pass #  do nothing, trivial
+            if len(other_processes) > 1 :
+                for i_other_condition, other_condition in enumerate(other_process.bystanders):
+                    if other_condition.coord.name == action.coord.name :
+                        allowed_species = [(other_process2.bystanders)[i_other_condition].species
+                                           for other_process2 in other_processes]
+                        # four cases
+                        if old_species in allowed_species and new_species in allowed_species:
+                            old_procs = [other_process2 for other_process2 in other_processes
+                                         if (other_process2.bystanders)[i_other_condition].species == old_species
+                                                 ]
+                            new_procs = []
+                            for old_proc in old_procs:
+                                conditions = deepcopy(old_proc.bystanders)
+                                conditions[i_other_condition].species = new_species
+                                new_procs.append([
+                                    new_proc for new_proc in other_processes if
+                                    conditions == (new_proc.bystanders)
+                                ][0])
+                            if not len(old_procs) == len(new_procs):
+                                raise Exception(("Number of possible old"
+                                                 " and new procs differs: %s vs %s") \
+                                                 % (len(old_procs), len(new_procs)))
 
+                            #@     call get_stored_proc({lat_int_group}, cell, stored_proc)
+                            #@     select case(stored_proc)
+                            for old_proc, new_proc in zip(old_procs, new_procs):
+                                old_proc_name = old_proc.name
+                                new_proc_name = new_proc.name
+                                #@         case({old_proc_name})
+                                #@             call change_proc({old_proc_name}, {lat_int_group}, {new_proc_name}, {lat_int_group}, cell)
+                            #@     case default
+                            #@         print *, "run_proc_{lat_int_group}"
+                            #@         print *, "stored_proc", stored_proc
+                            #@         print *, "Should not get there!"
+                            #@         exit
+                            #@     endif
+                        elif old_species in allowed_species and new_species not in allowed_species:
+                            pass #  disable (more), easy
+                            #@     call del_site({lat_int_group}, cell)
+                        elif not old_species in allowed_species and new_species in allowed_species:
+                            pass #  enable (more), easy
+                            #@     call add_site(nli_{lat_int_group}(cell), cell)
+                            # FIXME
+                        elif not old_species in allowed_species and new_species not in allowed_species:
+                            pass #  do nothing, trivial
+
+            else:
+                # Simple process, treat later
+                pass
 
 
     #@
