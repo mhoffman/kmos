@@ -743,11 +743,11 @@ def evaluate_template(template, escape_python=False, **kwargs):
             return template
         try:
             exec(python_lines)
-        except SyntaxError :
-            print(python_lines)
-            raise
-        except ValueError :
-            print(python_lines)
+        except (SyntaxError, ValueError, IndexError) :
+            print(''.join([('%05d %s\n' % line)
+                           for line in
+                           zip(range(len(python_lines.split('\n'))),
+                               python_lines.split('\n'))]))
             raise
 
 
