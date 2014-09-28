@@ -681,6 +681,7 @@ contains
         !---------------I/O variables---------------
         character(len=200), intent(in) :: input_system_name
         integer(kind=iint), intent(in) :: input_volume, input_nr_of_proc
+        integer(kind=iint) :: i
         logical :: system_allocated
 
         system_allocated = .false.
@@ -745,12 +746,15 @@ contains
             ! allocate data structures and initialize with 0
             ! TODO FIXME
             allocate(avail_sites(nr_of_proc_groups)
+            do i = 1, nr_of_proc_groups
+                btree_init(avail_sites(i), volume)
+            enddo
 
             allocate(site_store_proc(nr_of_proc_groups, volume))
-            avail_sites = 0
+            site_store_proc = 0
 
             allocate(site_store_memaddr(nr_of_proc_groups, volume))
-            avail_sites = 0
+            site_store_memaddr = 0
 
             allocate(lattice(volume))
             lattice = null_species
@@ -789,7 +793,12 @@ contains
         !
         !    ``none``
         !******
+        integer(kind=iint) :: i
+
         if(allocated(avail_sites))then
+            do i = 1, volume
+                btree_destroy(avail_sites(i))
+            enddo
             deallocate(avail_sites)
         else
             print *,"Warning: avail_sites was not allocated, tried to deallocate."
