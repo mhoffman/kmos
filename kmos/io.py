@@ -1354,6 +1354,7 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
         cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
                     (os.path.join('fortran_src', 'base_lat_int2.f90'), 'base.f90'),
                     (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
+                    (os.path.join('fortran_src', 'btree.f90'), 'btree.f90'),
                     (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
                     ]
     else:
