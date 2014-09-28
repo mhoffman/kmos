@@ -18,7 +18,9 @@ contains
         self%levels = ceiling(log(real(n)) / log(2.) + 1)
         self%total_length = 2 ** self%levels
         allocate(self%rate_constants(self%total_length))
+        self%rate_constants = 0.
         allocate(self%procs(self%total_length/2))
+        self%procs = 0
         self%filled = 0
 
     end function btree_init
@@ -163,7 +165,7 @@ program main
     t(i) = btree_init(80)
     enddo
 
-    do i = 1, 800
+    do i = 1, 80
     call btree_add(t(1), 1., i)
     enddo
     !call btree_repr(t(1))
