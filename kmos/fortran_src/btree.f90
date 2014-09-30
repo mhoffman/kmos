@@ -1,10 +1,12 @@
 module btree
 
+    use kind_values
+
     implicit none
     type ::  binary_tree
-        real, allocatable, dimension(:) :: rate_constants
-        integer, allocatable, dimension(:) :: procs
-        integer :: levels, total_length, filled
+        real(kind=rdouble), allocatable, dimension(:) :: rate_constants
+        integer(kind=iint), allocatable, dimension(:) :: procs, memaddrs
+        integer(kind=iint) :: levels, total_length, filled
     end type
 
 
@@ -12,15 +14,21 @@ contains
 
     function btree_init(n) result(self)
         type(binary_tree) :: self
-        integer, intent(in) :: n
+        integer(kind=iint), intent(in) :: n
 
 
         self%levels = ceiling(log(real(n)) / log(2.) + 1)
         self%total_length = 2 ** self%levels
+
         allocate(self%rate_constants(self%total_length))
         self%rate_constants = 0.
+
         allocate(self%procs(self%total_length/2))
         self%procs = 0
+
+        allocate(self%memaddrs(self%total_length/2))
+        self%memaddrs = 0
+
         self%filled = 0
 
     end function btree_init
@@ -31,28 +39,34 @@ contains
 
         deallocate(self%rate_constants)
         deallocate(self%procs)
+        deallocate(self%memaddrs)
 
     end subroutine btree_destroy
 
 
     subroutine btree_repr(self)
         type(binary_tree)  :: self
-        integer :: a, b, n
+        integer(kind=iint) :: a, b, n
 
+        print *, "PROCS", self%procs
+        print *, "MEMADDR", self%memaddrs
+        print *, "RATES"
         do n = 0, (self%levels - 1)
         a = 2 ** n
         b = 2 ** (n + 1) - 1
+        print *, self%rate_constants(a:b)
         enddo
 
     end subroutine btree_repr
 
 
-    subroutine btree_add(self, rate_constant, proc)
+    subroutine btree_add(self, rate_constant, proc, site)
         type(binary_tree) :: self
-        real :: rate_constant
-        integer :: proc
+        integer(kind=iint), intent(in) :: site
+        real(kind=rdouble) :: rate_constant
+        integer(kind=iint) :: proc
 
-        integer :: pos
+        integer(kind=iint) :: pos
 
         if(self%filled * 2 + 1 > self%total_length)then
             print *, "btree_add"
@@ -64,31 +78,34 @@ contains
         self%rate_constants(pos) = rate_constant
         call btree_update(self, pos)
 
+        self%memaddrs(site) = pos
         self%filled = self%filled + 1
         self%procs(self%filled) = proc
 
     end subroutine btree_add
 
 
-    subroutine btree_del(self, pos)
+    subroutine btree_del(self, site)
         type(binary_tree) :: self
-        integer, intent(in) :: pos
-        integer :: pos_, filled_
+        integer(kind=iint), intent(in) :: site
+        integer(kind=iint) :: pos, filled
 
-        pos_ = pos + self%total_length / 2 
-        filled_ = self%filled + self%total_length / 2 
+        pos = self%memaddrs(site)
+        filled = self%filled + self%total_length / 2
 
         ! move deleted new data field
-        self%rate_constants(pos_) = &
-            self%rate_constants(filled_)
-        self%rate_constants(filled_) = 0.
+        self%rate_constants(pos) = &
+            self%rate_constants(filled)
+        self%rate_constants(filled) = 0.
 
-        self%procs(pos_) = self%procs(filled_)
-        self%procs(filled_) = 0
+        print *, "FILLED", self%filled
+        print *, "PROCS_POS", pos - (self%total_length/2)
+
+        self%procs(pos - (self%total_length/2)) = self%procs(filled)
 
         ! update tree structure
-        call btree_update(self, pos_)
-        call btree_update(self, filled_)
+        call btree_update(self, pos)
+        call btree_update(self, filled)
 
         ! decrease tree structure
         self%filled = self%filled - 1
@@ -96,21 +113,23 @@ contains
     end subroutine btree_del
 
 
-    subroutine btree_replace(self, pos, new_rate)
+    subroutine btree_replace(self, site, new_rate)
         type(binary_tree) :: self
-        real, intent(in) :: new_rate
-        integer, intent(in) :: pos
+        real(kind=rdouble), intent(in) :: new_rate
+        integer(kind=iint), intent(in) :: site
+        integer(kind=iint) :: pos
 
-        self%rate_constants(self%total_length/2 + pos) = new_rate
-        call btree_update(self, self%total_length/2 + pos)
+        pos = self%memaddrs(site)
+        self%rate_constants(pos) = new_rate
+        call btree_update(self, pos)
 
     end subroutine btree_replace
 
 
     subroutine btree_update(self, pos)
         type(binary_tree) :: self
-        integer, intent(in) :: pos
-        integer :: pos_
+        integer(kind=iint), intent(in) :: pos
+        integer(kind=iint) :: pos_
 
         pos_ = pos
         do while (pos_ > 1)
@@ -123,21 +142,24 @@ contains
 
     subroutine btree_pick(self, x, n)
         type(binary_tree), intent(in) :: self
-        real, intent(inout) :: x
-        integer, intent(out) :: n
+        real(kind=rdouble), intent(in) :: x
+        integer(kind=iint), intent(out) :: n
+        real(kind=rdouble) :: x_
 
+
+        x_ = x
 
         n = 1
         do while (n < self%total_length / 2)
-        if (x < self%rate_constants(n)) then
+        if (x_ < self%rate_constants(n)) then
             n = 2 * n
         else
-            x = x - self%rate_constants(n)
+            x_ = x_ - self%rate_constants(n)
             n = 2 * n + 2
         endif
         enddo
 
-        if(x > self%rate_constants(n))then
+        if(x_ > self%rate_constants(n))then
             n = n + 1
         endif
 
