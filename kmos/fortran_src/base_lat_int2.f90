@@ -50,6 +50,7 @@ module base
         allocate_system, &
         assertion_fail, &
         can_do, &
+        change_proc, &
         deallocate_system, &
         del_proc, &
         determine_procsite, &

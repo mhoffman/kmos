@@ -73,7 +73,7 @@ def _flatten(L):
     return [item for sublist in L for item in sublist]
 
 
-def _chop_line(outstr, line_length=100):
+def _chop_line(outstr, line_length=100, continue_end=True):
     """Break very long lines into many shorter one
     using Fortran 90 lines continuation syntax.
     """
@@ -87,7 +87,10 @@ def _chop_line(outstr, line_length=100):
             NEXT_BREAK = len(outstr)
         outstr_list.append(outstr[:NEXT_BREAK] + '&\n' )
         outstr = outstr[NEXT_BREAK:]
-    return ''.join(outstr_list)
+    outstr = ''.join(outstr_list)
+    if not continue_end:
+        outstr = outstr[:-2] + '\n'
+    return outstr
 
 
 def compact_deladd_init(modified_process, out):
@@ -181,7 +184,15 @@ class ProcListWriter():
 
         elif code_generator == 'lat_int2':
             self.write_proclist_lat_int2(data, out)
-            pass
+            with open('%s/proclist_constants.f90' % self.dir, 'w') as constants_out:
+                with open(os.path.join(os.path.dirname(__file__),
+                          'fortran_src',
+                          'proclist_constants_lat_int2.mpy')) as infile:
+                    template = infile.read()
+                    constants_out.write(evaluate_template(template,
+                                                          self=self,
+                                                          data=data))
+                
 
         else:
             raise Exception("Don't know this code generator '%s'" % code_generator)

@@ -1,9 +1,16 @@
 from kmos.io import _chop_line
 from copy import deepcopy
+
 #@ module proclist
 #@
-#@ ! put use statements here
 #@ use kind_values
+#@ use proclist_constants
+#@
+#@ use lattice, only: &
+#@     spuck, &
+#@     system_size, &
+#@     nr2lattice, &
+#@     get_species
 #@
 #@ use base, only: &
 #@     update_accum_rate, &
@@ -17,16 +24,6 @@ from copy import deepcopy
 #@ implicit none
 #@
 lat_int_groups = self._get_lat_int_groups()
-proc_id = 0
-for group_id, (key, value) in enumerate(self._get_lat_int_groups().items()):
-    gid = group_id + 1
-    #@ integer(kind=iint), parameter, public :: {key}_group = {gid}
-    for process in value:
-        proc_id += 1
-        #@ integer(kind=iint), parameter, public :: {process.name} = {proc_id}
-    else:
-        #@ 
-
 
 #@ integer(kind=iint), public :: seed_size = 12
 #@ integer(kind=iint), public :: seed ! random seed
@@ -41,7 +38,7 @@ for group_id, (key, value) in enumerate(self._get_lat_int_groups().items()):
 #@ 
 #@     integer(kind=iint), dimension(4) :: cell
 #@ 
-#@     cell = nr2lattice(nr_cell) + (/0, 0, 0, -1/)
+#@     cell = nr2lattice(nr_cell, :) + (/0, 0, 0, -1/)
 #@     call increment_procstat(proc)
 #@ 
 #@     select case(proc)

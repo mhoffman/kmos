@@ -1,0 +1,46 @@
+from kmos.io import _chop_line
+
+#@ module proclist_constants
+#@ use kind_values
+#@
+#@ implicit none
+#@
+# initialize various parameter kind of data
+#@  ! Species constants
+#@
+#@
+#@
+len_species_list = len(data.species_list)
+len_species_list_p1 = len(data.species_list) + 1
+if len(data.layer_list) > 1 : # multi-lattice mode
+    #@ integer(kind=iint), parameter, public :: nr_of_species = {len_species_list_p1}
+else:
+    #@ integer(kind=iint), parameter, public :: nr_of_species = {len_species_list}
+for i, species in enumerate(sorted(data.species_list, key=lambda x: x.name)):
+    #@ integer(kind=iint), parameter, public :: {species.name} = {i}
+if len(data.layer_list) > 1 : # multi-lattice mode
+    #@ integer(kind=iint), parameter, public :: null_species = {len_species_list}
+    #@
+#@ integer(kind=iint), public :: default_species = {data.species_list.default_species}
+#@
+#@
+nr_of_proc = len(data.process_list)
+#@ integer(kind=iint), parameter, public :: nr_of_proc = {nr_of_proc}
+lat_int_groups = self._get_lat_int_groups()
+proc_id = 0
+proc_groups = []
+for group_id, (key, value) in enumerate(self._get_lat_int_groups().items()):
+    gid = group_id + 1
+    for process in value:
+        proc_groups.append(gid)
+        proc_id += 1
+        #@ integer(kind=iint), parameter, public :: {process.name} = {proc_id}
+    else:
+        #@ 
+
+proc_groups = _chop_line('(/%s/)' % str(proc_groups)[1:-1],
+                         continue_end=False)
+#@ integer(kind=iint), dimension({nr_of_proc}), parameter, public :: proc_groups = &
+#@ {proc_groups}
+
+#@ end module proclist_constants
