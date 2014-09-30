@@ -108,9 +108,6 @@ module base
     !     or (2) the location where the site is stored in (1).
     !
     !******
-    integer(kind=iint), dimension(:,:), allocatable, public :: site_store_proc
-    integer(kind=iint), dimension(:,:), allocatable, public :: site_store_memaddr
-
     integer(kind=iint), dimension(:), allocatable :: lattice
     !****v* base/lattice
     ! FUNCTION
@@ -219,7 +216,7 @@ module base
 contains
     !****************
 
-    subroutine del_proc(proc, proc_group, site)
+    subroutine del_proc(proc_group, site)
         !****f* base/del_proc
         ! FUNCTION
         !    del_proc delete one process from the main book-keeping array
@@ -239,7 +236,7 @@ contains
         !    * ``proc`` positive integer that states the process
         !    * ``site`` positive integer that encodes the site to be manipulated
         !******
-        integer(kind=iint), intent(in) :: proc, proc_group, site
+        integer(kind=iint), intent(in) :: proc_group, site
 
         integer(kind=iint) :: memory_address
 
@@ -250,35 +247,12 @@ contains
         ASSERT(site.ge.0,"add_proc: site has to be positive or zero")
         ASSERT(site.le.volume,"base/add_proc: site needs to be in volume")
 
-        if(proc.gt.0)then ! proc == 0, stands for process (group) did not match all
-            ! assert consistency
-            ASSERT(avail_sites(proc, site, 2) .ne. 0 , "Error: tried to take ability from site that is not there!")
+        call btree_del(avail_sites(proc_group), site)
 
-            memory_address = avail_sites(proc, site, 2)
-            if(memory_address .lt. nr_of_sites(proc))then
-                ! check if we are deleting the last field
-
-                ! move last field to deleted field
-                avail_sites(proc, memory_address, 1) = avail_sites(proc, nr_of_sites(proc), 1)
-                avail_sites(proc, nr_of_sites(proc), 1) = 0
-
-                ! change address of moved field
-                avail_sites(proc, avail_sites(proc, memory_address, 1), 2) = memory_address
-            else ! simply deleted last field
-                avail_sites(proc, memory_address , 1) = 0
-            endif
-            ! delete address of deleted field
-            avail_sites(proc, site, 2) = 0
-
-
-
-            ! decrement nr_of_sites(proc)
-            nr_of_sites(proc) = nr_of_sites(proc) - 1
-        endif
     end subroutine del_proc
 
 
-    subroutine add_proc(proc, proc_group, site)
+    subroutine add_proc(proc, site)
         !****f* base/add_proc
         ! FUNCTION
         !    The main idea of this subroutine is described in del_proc. Adding one
@@ -290,7 +264,11 @@ contains
         !    * ``proc`` positive integer number that represents the process to be added.
         !    * ``site`` positive integer number that represents the site to be manipulated
         !******
-        integer(kind=iint), intent(in) :: proc, proc_group, site
+        integer(kind=iint), intent(in) :: proc, site
+        integer(kind=iint) :: proc_group
+
+        ! TODO
+        proc_group = 1
 
         ! Make sure proc_nr is in the right range
         ASSERT(proc.ge.0,"base/add_proc: proc has to be positive or zero")
@@ -307,11 +285,8 @@ contains
             ! increment nr_of_sites(proc)
             nr_of_sites(proc) = nr_of_sites(proc) + 1
 
-            ! store site in nr_of_sites(proc)th slot
-            avail_sites(proc, nr_of_sites(proc), 1) = site
-
             ! let address of added site point to nr_of_sites(proc)th slot
-            avail_sites(proc, site, 2) = nr_of_sites(proc)
+            call btree_add(avail_sites(proc_group), rates(proc), proc, site)
         endif
 
     end subroutine add_proc
@@ -336,8 +311,12 @@ contains
         !---------------I/O variables---------------
         logical :: can_do
         integer(kind=iint), intent(in) :: proc, site
+        integer(kind=iint) :: proc_group
 
-        can_do = avail_sites(proc,site,2).ne.0
+        !TODO
+        proc_group = 1
+
+        can_do = avail_sites(proc_group)%procs(avail_sites(proc_group)%memaddrs(site)).eq.proc
 
     end function can_do
 
@@ -358,25 +337,8 @@ contains
         !---------------I/O variables---------------
         integer(kind=iint), intent(in) :: site, old_species
         !---------------internal variables---------------
-        integer(kind=iint) :: proc, species
+        integer(kind=iint) :: proc, proc_group, species
 
-        species = get_species(site)
-
-        ! Reset species if stated correctly
-        if(old_species.eq.species)then
-            call replace_species(site, species, null_species)
-        else
-            print *,'ERROR: base/reset_site: wrong species given'
-            print *,'Expected',old_species,'but found',species,'on',site
-            stop
-        endif
-
-        ! Strip all available capabilities from this site
-        do proc = 1, nr_of_proc
-        if(can_do(proc, site))then
-            call del_proc(proc, site)
-        endif
-        enddo
 
     end subroutine reset_site
 
@@ -406,131 +368,6 @@ contains
         logical :: file_exists
 
 
-        ! store system name in module variable
-        system_name = input_system_name
-        ! initialize input/output flag
-        io_state = 0
-        line = 0
-
-        write(filename,'(a,a)')TRIM(ADJUSTL(system_name)),'.reload'
-        inquire(file=trim(adjustl(filename)),exist=file_exists)
-        if(.not.file_exists)then
-            ! If there is no appropiate *.reload file, we can't reload
-            ! anything.
-            reloaded = .false.
-        else
-            ! Open file
-            open(filehandler, file = filename)
-
-            ! First parse loop: parse scalar values and system size
-            ! to allocate appropriate arrays for 2nd loop
-            do while(io_state == 0)
-            ! read one line into buffer
-            read(filehandler, '(a)', iostat=io_state) buffer
-            if(io_state == 0) then
-                ! advance line number
-                line = line + 1
-
-                ! Shuffle all non-space characters to the left.
-                buffer = adjustl(buffer)
-
-                ! Ignore comment lines
-                if(buffer(1:1) == '#')then
-                    cycle
-                endif
-                ! Find position of first space
-                pos = scan(buffer, ' ')
-                ! Store everything before pos in label
-                label = buffer(1:pos)
-                ! Everythings else remains in the buffer
-                buffer = buffer(pos+1:)
-
-                ! In the first go we are only interested in the variables that
-                ! determine the system's size (in memory)
-                select case(label)
-                case('nr_of_proc')
-                    read(buffer, *,iostat=io_state) nr_of_proc
-                case('volume')
-                    read(buffer, *, iostat=io_state) volume
-                endselect
-            endif
-            enddo
-
-            if(io_state>0)then
-                print *,"Some read error occured in the first reload loop, investigate!"
-                stop
-            endif
-
-
-            call allocate_system(nr_of_proc, volume, system_name)
-
-            ! Second loop: parse the "meat" of data
-            rewind(filehandler)
-            io_state = 0
-            line = 0
-            do while(io_state == 0)
-            read(filehandler, '(a)', iostat=io_state) buffer
-            if(io_state == 0) then
-                line = line + 1
-
-                buffer = adjustl(buffer)
-
-                ! Ignore comment lines
-                if(buffer(1:1) == '#')then
-                    cycle
-                endif
-                pos = scan(buffer, ' ')
-                label = buffer(1:pos)
-                buffer = buffer(pos+1:)
-                select case(label)
-                case('kmc_time')
-                    read(buffer, *, iostat=io_state) kmc_time
-                case('walltime')
-                    read(buffer, *, iostat=io_state) walltime
-                    start_time = walltime
-                case('kmc_step')
-                    read(buffer, *,iostat=io_state) kmc_step
-                case('lattice')
-                    read(buffer, *, iostat=io_state) lattice
-                case('nr_of_sites')
-                    read(buffer, *, iostat=io_state) nr_of_sites
-                case('rates')
-                    read(buffer, *, iostat=io) rates
-                case('procstat')
-                    read(buffer, *, iostat=io) procstat
-                    ! The two cases avail_sites and avail_sites_back are
-                    ! more complicated because the first entry determines the
-                    ! row and the remainder of the lines is the data
-                case('avail_sites')
-                    buffer = adjustl(buffer)
-                    pos = scan(buffer, ' ')
-                    label = buffer(1:pos)
-                    buffer = buffer(pos+1:)
-                    buffer = adjustl(buffer)
-
-                    read(label, * ,iostat = io_state) subindex
-                    read(buffer , *, iostat = io) avail_sites(subindex,:,1)
-
-                case('avail_sites_back')
-                    buffer = adjustl(buffer)
-                    pos = scan(buffer, ' ')
-                    label = buffer(1:pos)
-                    buffer = buffer(pos+1:)
-                    read(label, *, iostat = io) subindex
-                    read(buffer , *, iostat = io) avail_sites(subindex,:,2)
-
-                endselect
-            endif
-            enddo
-            if(io_state>0)then
-                print *,"Some read error occured in the second reload loop, investigate!"
-                stop
-            endif
-
-            close(filehandler)
-
-            reloaded = .true.
-        endif
 
     end subroutine reload_system
 
@@ -560,41 +397,6 @@ contains
         integer(kind=iint) :: i, io_state
 
         character(len=10) :: dummy_string
-
-        write(filename,'(2a)',iostat=io_state) trim(adjustl(system_name)),'.reload'
-        open(filehandler, file=filename)
-        ! Write scalar fields
-        write(filehandler,'(a)')"#Reload file written by kmos. Do not edit manually!"
-        write(filehandler,'(a)')"#Scalar variables"
-        write(filehandler,'(a,es22.15)')' kmc_time  ',kmc_time
-        write(filehandler,'(a,es13.7)')' walltime   ',walltime
-        write(filehandler,'(a,i22)')' kmc_step ',kmc_step
-        write(filehandler,*)'nr_of_proc ',nr_of_proc
-        write(filehandler,*)'volume ',volume
-
-        ! Write array fields
-        write(dummy_string,'(i9)') nr_of_proc
-
-        write(filehandler,'(a)')"#Vector variables"
-        write(filehandler,'(a,'//trim(adjustl(dummy_string))//'i21)')'procstat ',procstat
-        write(filehandler,'(a,'//trim(adjustl(dummy_string))//'i9)')'nr_of_sites ',nr_of_sites
-        write(filehandler,'(a,'//trim(adjustl(dummy_string))//'es14.7)')'rates ',rates
-
-        write(dummy_string,'(i9)') volume
-        write(filehandler,'(a,'//trim(adjustl(dummy_string))//'i9)')'lattice ',lattice
-
-        ! Avail_sites need one more field than 'volume' because first one describes the row
-        write(dummy_string,'(i9)') volume+1
-        do i = 1, nr_of_proc
-        write(filehandler,'(a,'//trim(adjustl(dummy_string))//'i9)')'avail_sites ',i,avail_sites(i,:,1)
-        enddo
-        do i = 1, nr_of_proc
-        write(filehandler,'(a,'//trim(adjustl(dummy_string))//'i9)')'avail_sites_back ',i,avail_sites(i,:,2)
-        enddo
-
-
-
-        close(filehandler)
 
     end subroutine save_system
 
@@ -745,16 +547,10 @@ contains
 
             ! allocate data structures and initialize with 0
             ! TODO FIXME
-            allocate(avail_sites(nr_of_proc_groups)
+            allocate(avail_sites(nr_of_proc_groups))
             do i = 1, nr_of_proc_groups
-                btree_init(avail_sites(i), volume)
+                avail_sites(i) = btree_init(volume)
             enddo
-
-            allocate(site_store_proc(nr_of_proc_groups, volume))
-            site_store_proc = 0
-
-            allocate(site_store_memaddr(nr_of_proc_groups, volume))
-            site_store_memaddr = 0
 
             allocate(lattice(volume))
             lattice = null_species
@@ -797,7 +593,7 @@ contains
 
         if(allocated(avail_sites))then
             do i = 1, volume
-                btree_destroy(avail_sites(i))
+                call btree_destroy(avail_sites(i))
             enddo
             deallocate(avail_sites)
         else
@@ -975,7 +771,11 @@ contains
         integer(kind=iint), intent(in) :: proc_nr, field, switch
         integer(kind=rdouble), intent(out) :: return_avail_site
 
-        return_avail_site = avail_sites(proc_nr, field, switch)
+        if(switch==1)then
+            return_avail_site = avail_sites(proc_nr)%procs(field)
+        else if(switch==2)then
+            return_avail_site = avail_sites(proc_nr)%memaddrs(field)
+        endif
 
     end subroutine get_avail_site
 
@@ -1145,9 +945,9 @@ contains
         ! scaled random number. But if the random number is closer to 1 than machine
         ! precision, e.g. 0.999999999, we would get nrofsits(proc)+1 so we have to
         ! cap it with min(...)
-        site =  avail_sites(proc, &
-            min(nr_of_sites(proc),int(1+ran_site*(nr_of_sites(proc)))),1)
-
+        !site =  avail_sites(proc, &
+        !   min(nr_of_sites(proc),int(1+ran_site*(nr_of_sites(proc)))),1)
+        call btree_pick(avail_sites(proc), ran_site*avail_sites(proc)%rate_constants(1), site)
 
         ASSERT(nr_of_sites(proc).gt.0,"base/determine_procsite: chosen process is invalid &
             because it has no sites available.")

@@ -41,7 +41,7 @@ for group_id, (key, value) in enumerate(self._get_lat_int_groups().items()):
 #@ 
 #@     integer(kind=iint), dimension(4) :: cell
 #@ 
-#@     cell = nr2lattice(nr_cell, :) + (/0, 0, 0, -1/)
+#@     cell = nr2lattice(nr_cell) + (/0, 0, 0, -1/)
 #@     call increment_procstat(proc)
 #@ 
 #@     select case(proc)
@@ -220,7 +220,7 @@ for lat_int_group, processes in lat_int_groups.iteritems():
                             #@             print *, "run_proc_{lat_int_group}"
                             #@             print *, "stored_proc", stored_proc
                             #@             print *, "Should not get there!"
-                            #@             exit
+                            #@             stop
                             #@     end select
                         elif old_species in allowed_species and new_species not in allowed_species:
                             pass #  disable (more), easy
