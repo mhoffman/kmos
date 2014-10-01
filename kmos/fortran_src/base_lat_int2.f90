@@ -37,6 +37,9 @@
 module base
     use kind_values
     use btree
+
+    use proclist_constants, only: &
+        proc_groups
     !------ No implicit definition of variables !
     implicit none
 
@@ -54,30 +57,31 @@ module base
         deallocate_system, &
         del_proc, &
         determine_procsite, &
-        replace_species, &
         get_accum_rate, &
-        get_integ_rate, &
         get_avail_site, &
+        get_integ_rate, &
         get_kmc_step, &
         get_kmc_time, &
-        set_kmc_time, &
-        set_system_name, &
         get_kmc_time_step, &
         get_nrofsites, &
         get_procstat, &
         get_rate, &
         get_species, &
+        get_stored_proc, &
         get_system_name, &
-        get_walltime, &
         get_volume , &
+        get_walltime, &
         increment_procstat, &
         interval_search_real, &
         is_allocated, &
         null_species, &
         reload_system, &
+        replace_species, &
         reset_site, &
         save_system, &
+        set_kmc_time, &
         set_rate_const, &
+        set_system_name, &
         set_null_species, &
         get_null_species, &
         update_accum_rate, &
@@ -268,8 +272,7 @@ contains
         integer(kind=iint), intent(in) :: proc, site
         integer(kind=iint) :: proc_group
 
-        ! TODO
-        proc_group = 1
+        proc_group = proc_groups(proc)
 
         ! Make sure proc_nr is in the right range
         ASSERT(proc.ge.0,"base/add_proc: proc has to be positive or zero")
@@ -292,11 +295,32 @@ contains
 
     end subroutine add_proc
 
-    subroutine change_proc(proc, proc_group, new_proc, new_proc_group, site)
-        integer(kind=iint), intent(in) :: proc, proc_group, new_proc, new_proc_group, site
+    subroutine change_proc(proc, new_proc, site)
+        integer(kind=iint), intent(in) :: proc, new_proc, site
+        integer(kind=iint) :: proc_group
+
+        proc_group = proc_groups(proc)
 
 
     end subroutine change_proc
+
+    pure function get_stored_proc(proc_group, site)
+        !****f* base/can_do
+        ! FUNCTION
+        !    Returns the current process within a process group if it possible at all
+        !
+        ! ARGUMENTS
+        !
+        !    * ``proc_group`` integer representing the requested process group.
+        !    * ``site`` integer representing the requested site.
+        !******
+        !---------------I/O variables---------------
+        integer(kind=iint) :: get_stored_proc
+        integer(kind=iint), intent(in) :: site, proc_group
+
+        get_stored_proc = avail_sites(proc_group)%procs(avail_sites(proc_group)%memaddrs(site))
+
+    end function get_stored_proc
 
     pure function can_do(proc, site)
         !****f* base/can_do
@@ -314,8 +338,7 @@ contains
         integer(kind=iint), intent(in) :: proc, site
         integer(kind=iint) :: proc_group
 
-        !TODO
-        proc_group = 1
+        proc_group = proc_groups(proc)
 
         can_do = avail_sites(proc_group)%procs(avail_sites(proc_group)%memaddrs(site)).eq.proc
 

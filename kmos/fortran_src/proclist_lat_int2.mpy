@@ -1,6 +1,8 @@
 from kmos.io import _chop_line
 from copy import deepcopy
 
+lat_int_groups = self._get_lat_int_groups()
+
 #@ module proclist
 #@
 #@ use kind_values
@@ -21,9 +23,11 @@ from copy import deepcopy
 #@     null_species, &
 #@     increment_procstat
 #@
+for i in range(len(lat_int_groups)):
+    #@ use nli_{i:04d}
+#@
 #@ implicit none
 #@
-lat_int_groups = self._get_lat_int_groups()
 
 #@ integer(kind=iint), public :: seed_size = 12
 #@ integer(kind=iint), public :: seed ! random seed
@@ -171,9 +175,9 @@ for lat_int_group, processes in lat_int_groups.iteritems():
                 if other_condition.coord.name == action.coord.name :
                     rel_condition_coord = (action.coord - other_condition.coord).radd_offset('cell')
                     if other_condition.species == old_species and other_condition.species != new_species:
-                        #@     call del_site({other_lat_int_group}, {rel_condition_coord})
+                        #@     call del_proc({other_lat_int_group}, {rel_condition_coord})
                     elif other_condition.species != old_species and other_condition.species == new_species:
-                        #@     call add_site({other_lat_int_group}, {rel_condition_coord})
+                        #@     call add_proc({other_lat_int_group}, {rel_condition_coord})
                     elif other_condition.species != old_species and other_condition.species != new_species:
                         pass
                     else:
@@ -206,13 +210,13 @@ for lat_int_group, processes in lat_int_groups.iteritems():
                                                  % (len(old_procs), len(new_procs)))
 
                             #@
-                            #@     call get_stored_proc({lat_int_group}, {rel_condition_coord}, stored_proc)
+                            #@     stored_proc = get_stored_proc({lat_int_group}, {rel_condition_coord})
                             #@     select case(stored_proc)
                             for old_proc, new_proc in zip(old_procs, new_procs):
                                 old_proc_name = old_proc.name
                                 new_proc_name = new_proc.name
                                 #@         case({old_proc_name})
-                                #@             call change_proc({lat_int_group}, {old_proc_name}, {new_proc_name}, {rel_condition_coord})
+                                #@             call change_proc({old_proc_name}, {new_proc_name}, {rel_condition_coord})
                             #@         case default
                             #@             print *, "run_proc_{lat_int_group}"
                             #@             print *, "stored_proc", stored_proc
@@ -221,10 +225,10 @@ for lat_int_group, processes in lat_int_groups.iteritems():
                             #@     end select
                         elif old_species in allowed_species and new_species not in allowed_species:
                             pass #  disable (more), easy
-                            #@     call del_site({lat_int_group}, {rel_condition_coord})
+                            #@     call del_proc({lat_int_group}, {rel_condition_coord})
                         elif not old_species in allowed_species and new_species in allowed_species:
                             pass #  enable (more), easy
-                            #@     call add_site(nli_{lat_int_group}({rel_condition_coord}), {rel_condition_coord})
+                            #@     call add_proc(nli_{lat_int_group}({rel_condition_coord}), {rel_condition_coord})
                             # FIXME
                         elif not old_species in allowed_species and new_species not in allowed_species:
                             pass #  do nothing, trivial

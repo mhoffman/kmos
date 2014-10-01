@@ -23,6 +23,9 @@ gpl = self._gpl_message()
 #@     get_rate, &
 #@     increment_procstat, &
 #@     base_add_proc => add_proc, &
+if code_generator == 'lat_int2':
+    #@     base_change_proc => change_proc, &
+    #@     base_get_stored_proc => get_stored_proc, &
 #@     base_reset_site => reset_site, &
 #@     base_allocate_system => allocate_system, &
 #@     base_can_do => can_do, &
@@ -314,6 +317,43 @@ if data.meta.debug > 1:
 #@
 #@ end subroutine del_proc
 #@
+
+if code_generator == 'lat_int2':
+    #@ subroutine change_proc(proc, new_proc, site)
+    #@
+    #@     integer(kind=iint), intent(in) :: proc, new_proc
+    #@     integer(kind=iint), dimension(4), intent(in) :: site
+    #@
+    #@     integer(kind=iint) :: nr
+    #@
+    if data.meta.debug > 1:
+        #@ print *,"    LATTICE/CHANGE_PROC/PROC",proc
+        #@ print *,"    LATTICE/CHANGE_PROC/SITE",site
+    #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
+    if data.meta.debug > 1:
+        #@ print *,"    LATTICE/CHANGE_PROC/SITE_NR",nr
+    #@     call base_change_proc(proc, new_proc, nr)
+    #@
+    #@ end subroutine change_proc
+    #@
+
+    #@ function get_stored_proc(proc_group, site)
+    #@
+    #@     integer(kind=iint), intent(in) :: proc_group
+    #@     integer(kind=iint), dimension(4), intent(in) :: site
+    #@
+    #@     integer(kind=iint) :: nr, get_stored_proc
+    #@
+    if data.meta.debug > 1:
+        #@ print *,"    LATTICE/GET_STORED_PROC/PROC",proc
+        #@ print *,"    LATTICE/GET_STORED_PROC/SITE",site
+    #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
+    if data.meta.debug > 1:
+        #@ print *,"    LATTICE/GET_STORED_PROC/SITE_NR",nr
+    #@     get_stored_proc = base_get_stored_proc(proc_group, nr)
+    #@
+    #@ end function get_stored_proc
+    #@
 
 #@ pure function can_do(proc, site)
 #@

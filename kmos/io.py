@@ -142,7 +142,7 @@ class ProcListWriter():
         self.data = data
         self.dir = dir
 
-    def write_lattice(self):
+    def write_lattice(self, code_generator='local_smart'):
 
         with open(os.path.join(os.path.dirname(__file__),
                                'fortran_src',
@@ -150,7 +150,7 @@ class ProcListWriter():
             template = infile.read()
 
         with open(os.path.join(self.dir, 'lattice.f90'), 'w') as out:
-            out.write(evaluate_template(template,  self=self, data=self.data))
+            out.write(evaluate_template(template,  self=self, data=self.data, code_generator=code_generator))
 
     def write_proclist(self, smart=True, code_generator='local_smart'):
         """Write the proclist.f90 module, i.e. the rules which make up
@@ -194,6 +194,8 @@ class ProcListWriter():
                                                           data=data))
                 
 
+            lat_int_groups = self._get_lat_int_groups()
+            self.write_proclist_lat_int_nli_casetree(data, lat_int_groups, progress_bar=None)
         else:
             raise Exception("Don't know this code generator '%s'" % code_generator)
 
@@ -748,7 +750,7 @@ class ProcListWriter():
                 progress_bar.render(int(10+40*float(lat_int_loop)/len(lat_int_groups)),
                                     'run_proc_%s' % lat_int_group)
 
-    def write_proclist_lat_int_nli_casetree(self, data, lat_int_groups, progress_bar):
+    def write_proclist_lat_int_nli_casetree(self, data, lat_int_groups, progress_bar=None):
         """
         Write out subroutines that do the following:
         Take a given cell and determine from a group a processes
@@ -812,7 +814,7 @@ class ProcListWriter():
             out.write('end module\n')
 
             # update the progress bar
-            if os.name == 'posix':
+            if os.name == 'posix' and progress_bar:
                 progress_bar.render(int(50+50*float(lat_int_loop)/len(lat_int_groups)),
                                     'nli_%s' % lat_int_group)
 
@@ -1385,7 +1387,7 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     # SECOND
     # produce those source files that are written on the fly
     writer = ProcListWriter(project_tree, export_dir)
-    writer.write_lattice()
+    writer.write_lattice(code_generator=code_generator)
     writer.write_proclist(code_generator=code_generator)
     writer.write_settings()
     project_tree.validate_model()

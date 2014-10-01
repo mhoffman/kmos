@@ -362,7 +362,7 @@ def build(options):
     src_files = ['kind_values_f2py.f90', 'base.f90', 'lattice.f90']
 
     if isfile('proclist_constants.f90'):
-        src_files.append('proclist_constants.f90')
+        src_files.insert(1, 'proclist_constants.f90')
     src_files.extend(glob('nli_*.f90'))
     src_files.extend(glob('run_proc_*.f90'))
     src_files.append('proclist.f90')
