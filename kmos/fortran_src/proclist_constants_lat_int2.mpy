@@ -27,6 +27,8 @@ if len(data.layer_list) > 1 : # multi-lattice mode
 nr_of_proc = len(data.process_list)
 #@ integer(kind=iint), parameter, public :: nr_of_proc = {nr_of_proc}
 lat_int_groups = self._get_lat_int_groups()
+nr_of_proc_groups = len(lat_int_groups)
+#@ integer(kind=iint), parameter, public :: nr_of_proc_groups = {nr_of_proc_groups}
 proc_id = 0
 proc_groups = []
 for group_id, (key, value) in enumerate(self._get_lat_int_groups().items()):

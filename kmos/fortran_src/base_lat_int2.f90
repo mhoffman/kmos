@@ -74,6 +74,7 @@ module base
         increment_procstat, &
         interval_search_real, &
         is_allocated, &
+        nr_of_proc_groups, &
         null_species, &
         reload_system, &
         replace_species, &
@@ -194,7 +195,7 @@ module base
 
 
     !--- Local copies of variables
-    integer(kind=iint) :: nr_of_proc
+    integer(kind=iint), public :: nr_of_proc
     !****v* base/nr_of_proc
     ! FUNCTION
     !   Total number of available processes.

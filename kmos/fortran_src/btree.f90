@@ -81,6 +81,7 @@ contains
         self%memaddrs(site) = pos
         self%filled = self%filled + 1
         self%procs(self%filled) = proc
+        call btree_repr(self)
 
     end subroutine btree_add
 
