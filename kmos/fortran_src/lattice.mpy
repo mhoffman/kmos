@@ -344,14 +344,15 @@ if code_generator == 'lat_int2':
     #@
     #@     integer(kind=iint) :: nr, get_stored_proc
     #@
-    if data.meta.debug > 1:
-        #@ print *,"    LATTICE/GET_STORED_PROC/PROC",proc
-        #@ print *,"    LATTICE/GET_STORED_PROC/SITE",site
     #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
     if data.meta.debug > 1:
+        #@ print *,"    LATTICE/GET_STORED_PROC/SITE", site
         #@ print *,"    LATTICE/GET_STORED_PROC/SITE_NR",nr
     #@     get_stored_proc = base_get_stored_proc(proc_group, nr)
     #@
+    if data.meta.debug > 1:
+        #@ print *,"    LATTICE/GET_STORED_PROC/PROC",get_stored_proc
+        #@ print *,"    LATTICE/GET_STORED_PROC/SITE",site
     #@ end function get_stored_proc
     #@
 
