@@ -702,12 +702,19 @@ def evaluate_template(template, escape_python=False, **kwargs):
                 python_lines += line.lstrip()[3:]
                 matched = True
             else:
-                python_lines += 'pass # %s' % line.lstrip()
-        # if the tempate didn't contain any meta strings
+                python_lines += 'pass # %s' % (line.lstrip('\t\x0b\x0c\r '))
+        # if the template didn't contain any meta strings
         # just return the original
         if not matched:
             return template
-        exec(python_lines)
+        try:
+            exec(python_lines)
+        except (SyntaxError, ValueError, IndexError, IndentationError, KeyError) :
+            print(''.join([('%05d %s\n' % line)
+                           for line in
+                           zip(range(len(python_lines.split('\n'))),
+                               python_lines.split('\n'))]))
+            raise
 
         # second turn literary lines into write statements
         python_lines = ''
@@ -743,7 +750,7 @@ def evaluate_template(template, escape_python=False, **kwargs):
             return template
         try:
             exec(python_lines)
-        except (SyntaxError, ValueError, IndexError) :
+        except (SyntaxError, ValueError, IndexError, NameError, KeyError) :
             print(''.join([('%05d %s\n' % line)
                            for line in
                            zip(range(len(python_lines.split('\n'))),
@@ -756,15 +763,28 @@ def evaluate_template(template, escape_python=False, **kwargs):
         python_lines = ''
         for line in lines:
             if re.match('\s*%s ' % PREFIX, line):
-                python_lines += '%sresult += ("""%s""".format(**dict(locals())))\n' \
-                    % (' ' * (len(line) - len(line.lstrip())),
-                       line.lstrip()[3:])
+                #hack to use LaTeX {} brackets for documentation: ignore each line which contains :math:
+                if ":math:" in line:
+                    python_lines += '%sresult += ("""%s""")\n' \
+                        % (' ' * (len(line) - len(line.lstrip())),
+                           line.lstrip()[3:])
+                else:
+                    python_lines += '%sresult += ("""%s""".format(**dict(locals())))\n' \
+                        % (' ' * (len(line) - len(line.lstrip())),
+                           line.lstrip()[3:])
             elif re.match('\s*%s' % PREFIX, line):
                 python_lines += '%sresult += "\\n"\n' % (
                     ' ' * (len(line) - len(line.lstrip())))
             else:
                 python_lines += line
 
-        exec(python_lines)
+        try:
+            exec(python_lines)
+        except (SyntaxError, ValueError, IndexError, NameError, KeyError) :
+            print(''.join([('%05d %s\n' % line)
+                           for line in
+                           zip(range(len(python_lines.split('\n'))),
+                               python_lines.split('\n'))]))
+            raise
 
     return result
