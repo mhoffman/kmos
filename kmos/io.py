@@ -23,6 +23,7 @@ import itertools
 import operator
 import shutil
 import os
+from os.path import join
 import sys
 from pprint import pformat
 
@@ -144,13 +145,9 @@ class ProcListWriter():
 
     def write_lattice(self, code_generator='local_smart'):
 
-        with open(os.path.join(os.path.dirname(__file__),
-                               'fortran_src',
-                               'lattice.mpy')) as infile:
-            template = infile.read()
-
-        with open(os.path.join(self.dir, 'lattice.f90'), 'w') as out:
-            out.write(evaluate_template(template,  self=self, data=self.data, code_generator=code_generator))
+        export_template(join(os.path.dirname(__file__), 'fortran_src', 'lattice.mpy'),
+                        join(self.dir, 'lattice.f90'),
+                        self=self, data=self.data, code_generator=code_generator)
 
     def write_proclist(self, smart=True, code_generator='local_smart'):
         """Write the proclist.f90 module, i.e. the rules which make up
@@ -185,7 +182,7 @@ class ProcListWriter():
         elif code_generator == 'lat_int2':
             self.write_proclist_lat_int2(data, out)
             with open('%s/proclist_constants.f90' % self.dir, 'w') as constants_out:
-                with open(os.path.join(os.path.dirname(__file__),
+                with open(join(os.path.dirname(__file__),
                           'fortran_src',
                           'proclist_constants_lat_int2.mpy')) as infile:
                     template = infile.read()
@@ -206,7 +203,7 @@ class ProcListWriter():
                                  close_module=False,
                                  module_name='proclist'):
 
-        with open(os.path.join(os.path.dirname(__file__),
+        with open(join(os.path.dirname(__file__),
                                'fortran_src',
                                'proclist_constants.mpy')) as infile:
             template = infile.read()
@@ -226,7 +223,7 @@ class ProcListWriter():
 
     def write_proclist_generic_subroutines(self, data, out, code_generator='local_smart'):
 
-        with open(os.path.join(os.path.dirname(__file__),
+        with open(join(os.path.dirname(__file__),
                                'fortran_src',
                                'proclist_generic_subroutines.mpy')) as infile:
             template = infile.read()
@@ -448,7 +445,7 @@ class ProcListWriter():
         return lat_int_groups
 
     def write_proclist_lat_int2(self, data, out, debug=False):
-        with open(os.path.join(os.path.dirname(__file__),
+        with open(join(os.path.dirname(__file__),
                                'fortran_src',
                                'proclist_lat_int2.mpy')) as infile:
             template = infile.read()
@@ -775,7 +772,7 @@ class ProcListWriter():
             out.write('contains\n')
             fname = 'nli_%s' % lat_int_group
             if data.meta.debug > 0:
-                out.write('function %(cell)\n'
+                out.write('function %s(cell)\n'
                           % (fname))
             else:
                 # DEBUGGING
@@ -1208,7 +1205,7 @@ class ProcListWriter():
         from kmos import evaluate_rate_expression
 
         data = self.data
-        out = open(os.path.join(self.dir, 'kmc_settings.py'), 'w')
+        out = open(join(self.dir, 'kmc_settings.py'), 'w')
         out.write('model_name = \'%s\'\n' % self.data.meta.model_name)
         out.write('simulation_size = 20\n')
         out.write('random_seed = 1\n\n')
@@ -1351,24 +1348,21 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     # copy static files
     # each file is tuple (source, target)
     if code_generator == 'local_smart':
-        cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
-                    (os.path.join('fortran_src', 'base.f90'), 'base.f90'),
-                    (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
-                    (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
+        cp_files = [(join('fortran_src', 'assert.ppc'), 'assert.ppc'),
+                    (join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
+                    (join('fortran_src', 'main.f90'), 'main.f90'),
                     ]
 
     elif code_generator == 'lat_int':
-        cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
-                    (os.path.join('fortran_src', 'base_lat_int.f90'), 'base.f90'),
-                    (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
-                    (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
+        cp_files = [(join('fortran_src', 'assert.ppc'), 'assert.ppc'),
+                    (join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
+                    (join('fortran_src', 'main.f90'), 'main.f90'),
                     ]
     elif code_generator == 'lat_int2':
-        cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
-                    (os.path.join('fortran_src', 'base_lat_int2.f90'), 'base.f90'),
-                    (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
-                    (os.path.join('fortran_src', 'btree.f90'), 'btree.f90'),
-                    (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
+        cp_files = [(join('fortran_src', 'assert.ppc'), 'assert.ppc'),
+                    (join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
+                    (join('fortran_src', 'btree.f90'), 'btree.f90'),
+                    (join('fortran_src', 'main.f90'), 'main.f90'),
                     ]
     else:
         raise UserWarning("Don't know this backend")
@@ -1377,15 +1371,31 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     print(APP_ABS_PATH)
 
     for filename, target in cp_files:
-        shutil.copy(os.path.join(APP_ABS_PATH, filename),
-                    os.path.join(export_dir, target))
+        shutil.copy(join(APP_ABS_PATH, filename),
+                    join(export_dir, target))
 
     for filename in exec_files:
-        shutil.copy(os.path.join(APP_ABS_PATH, filename), export_dir)
-        os.chmod(os.path.join(export_dir, filename), 0755)
+        shutil.copy(join(APP_ABS_PATH, filename), export_dir)
+        os.chmod(join(export_dir, filename), 0755)
 
     # SECOND
     # produce those source files that are written on the fly
+    if code_generator == 'local_smart':
+        export_template(join(APP_ABS_PATH, 'fortran_src', 'base.f90'),
+                        join(export_dir, 'base.f90'),
+                        escape_python=True)
+
+    elif code_generator == 'lat_int':
+        export_template(join(APP_ABS_PATH, 'fortran_src', 'base_lat_int.f90'),
+                        join(export_dir, 'base.f90'),
+                        escape_python=True)
+
+    elif code_generator == 'lat_int2':
+        export_template(join(APP_ABS_PATH, 'fortran_src', 'base_lat_int2.mpy'),
+                        join(export_dir, 'base.f90'), escape_python=True)
+
+
+
     writer = ProcListWriter(project_tree, export_dir)
     writer.write_lattice(code_generator=code_generator)
     writer.write_proclist(code_generator=code_generator)
@@ -1423,3 +1433,10 @@ def export_xml(project_tree, filename=None):
     for line in str(project_tree):
         f.write(line)
     f.close()
+
+
+def export_template(template_filename, target_filename, escape_python=False, **context):
+    with open(template_filename) as infile:
+        with open(target_filename, 'w') as outfile:
+            template = infile.read()
+            outfile.write(evaluate_template(template, escape_python=escape_python, **context))
