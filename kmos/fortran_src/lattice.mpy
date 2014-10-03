@@ -231,7 +231,10 @@ if data.meta.debug > 1:
 #@
 if data.meta.debug > 1:
     #@     print *, "    LATTICE/ALLOCATE_SYSTEM/FILLED_LOOKUP"
-#@     call base_allocate_system(nr_of_proc, volume, system_name)
+if code_generator == 'lat_int2':
+    #@     call base_allocate_system(volume, system_name)
+else:
+    #@     call base_allocate_system(nr_of_proc, volume, system_name)
 #@
 cell_00 = data.layer_list.cell[0, 0]
 cell_01 = data.layer_list.cell[0, 1]

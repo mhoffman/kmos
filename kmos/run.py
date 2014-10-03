@@ -156,6 +156,12 @@ class KMC_Model(Process):
         self.proclist = ProclistProxy()
         self.settings = settings
 
+        try:
+            self.nr_of_proc = self.proclist.nr_of_proc
+        except:
+            from kmc_model import proclist_constants
+            self.nr_of_proc = proclist_constants.nr_of_proc
+
         if hasattr(self.base, 'null_species'):
             self.null_species = self.base.null_species
         elif hasattr(self.base, 'get_null_species'):
@@ -201,16 +207,16 @@ class KMC_Model(Process):
 
         # prepare structures for TOF evaluation
         self.tofs = tofs = get_tof_names()
-        self.tof_matrix = np.zeros((len(tofs), proclist.nr_of_proc))
+        self.tof_matrix = np.zeros((len(tofs), self.nr_of_proc))
         for process, tof_count in sorted(settings.tof_count.iteritems()):
             process_nr = getattr(self.proclist, process.lower())
             for tof, tof_factor in tof_count.iteritems():
                 self.tof_matrix[tofs.index(tof), process_nr - 1] += tof_factor
 
         # prepare procstat
-        self.procstat = np.zeros((proclist.nr_of_proc), dtype=np.int64)
+        self.procstat = np.zeros((self.nr_of_proc), dtype=np.int64)
          # prepare integ_rates (S.Matera 09/25/2012)
-        self.integ_rates = np.zeros((proclist.nr_of_proc, ))
+        self.integ_rates = np.zeros((self.nr_of_proc, ))
         self.time = 0.
         self.steps = 0
 
@@ -558,14 +564,14 @@ class KMC_Model(Process):
         if self.settings.parameters[param_name].get('adjustable', False)]
 
         # calculate TOF since last call
-        atoms.procstat = np.zeros((proclist.nr_of_proc,))
+        atoms.procstat = np.zeros((self.nr_of_proc,))
         atoms.occupation = proclist.get_occupation()
-        for i in range(proclist.nr_of_proc):
+        for i in range(self.nr_of_proc):
             atoms.procstat[i] = base.get_procstat(i + 1)
         # S. Matera 09/25/2012
         if hasattr(self.base, 'get_integ_rate'):
-            atoms.integ_rates = np.zeros((proclist.nr_of_proc,))
-            for i in range(proclist.nr_of_proc):
+            atoms.integ_rates = np.zeros((self.nr_of_proc,))
+            for i in range(self.nr_of_proc):
                     atoms.integ_rates[i] = base.get_integ_rate(i + 1)
         # S. Matera 09/25/2012
         delta_t = (atoms.kmc_time - self.time)
@@ -1035,7 +1041,7 @@ class KMC_Model(Process):
             arg = list(iter(arg))
             # if is iterable, interpret as site
             site = self.lattice.calculate_lattice2nr([arg[0], arg[1], arg[2], 1])
-            for process in range(1, self.proclist.nr_of_proc + 1):
+            for process in range(1, self.nr_of_proc + 1):
                 if self.base.get_avail_site(process, site, 2):
                     avail.append(ProcInt(process, self.settings))
 

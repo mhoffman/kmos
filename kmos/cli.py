@@ -78,7 +78,7 @@ usage['export'] = """kmos export <xml-file> [<export-path>]
         -s/--source-only
             Export source only and don't build binary
 
-        -b/--backend (local_smart|lat_int)
+        -b/--backend (local_smart|lat_int|lat_int2)
             Choose backend. Default is "local_smart".
             lat_int is EXPERIMENTAL and not made
             for production, yet.
