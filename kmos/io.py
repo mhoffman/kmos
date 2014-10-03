@@ -1392,7 +1392,8 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
 
     elif code_generator == 'lat_int2':
         export_template(join(APP_ABS_PATH, 'fortran_src', 'base_lat_int2.mpy'),
-                        join(export_dir, 'base.f90'), escape_python=True)
+                        join(export_dir, 'base.f90'),
+                        data=project_tree)
 
 
 
