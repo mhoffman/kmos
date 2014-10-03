@@ -379,19 +379,21 @@ if data.meta.debug > 0:
 
 #@ subroutine touchup_cell(cell)
 #@     integer(kind=iint), intent(in), dimension(4) :: cell
+#@     integer(kind=iint), dimension(4) :: site
 #@
 #@     integer(kind=iint) :: proc_group, stored_proc
+#@     site = cell + (/0, 0 , 0, 1/)
 #@
 #@     do proc_group = 1, nr_of_proc_groups
-#@         stored_proc = get_stored_proc(proc_group, cell)
+#@         stored_proc = get_stored_proc(proc_group, site)
 #@         if(stored_proc>0) then
-#@             call del_proc(stored_proc, cell)
+#@             call del_proc(stored_proc, site)
 #@         endif
 #@     end do
 #@
 
 #for lat_int_group, process in lat_int_groups.iteritems():
-#    #@     call add_proc(nli_{lat_int_group}(cell), cell)
+#    #@     call add_proc(nli_{lat_int_group}(site), site)
 #@ end subroutine touchup_cell
 #@
 
