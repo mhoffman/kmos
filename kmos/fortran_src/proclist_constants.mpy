@@ -22,35 +22,34 @@ if code_generator == 'local_smart':
         #@     set_null_species, &
     #@     increment_procstat
     #@
-#@ use lattice, only: &
-site_params = []
-for layer in data.layer_list:
-    #@     {layer.name}, &
-    for site in layer.sites:
-        site_params.append((site.name, layer.name))
+    #@ use lattice, only: &
+    site_params = []
+    for layer in data.layer_list:
+        #@     {layer.name}, &
+        for site in layer.sites:
+            site_params.append((site.name, layer.name))
 
-for i, (site, layer) in enumerate(site_params):
-    #@     {layer}_{site}, &
-if code_generator == 'local_smart':
-    #@     allocate_system, &
-    #@     nr2lattice, &
-    #@     lattice2nr, &
-    #@     add_proc, &
-    #@     can_do, &
-    #@     set_rate_const, &
-    #@     replace_species, &
-    #@     del_proc, &
-    #@     reset_site, &
-    #@     system_size, &
-    #@     spuck, &
-#@     get_species
-#@ 
-#@ 
+    for i, (site, layer) in enumerate(site_params):
+        #@     {layer}_{site}, &
+    if code_generator == 'local_smart':
+        #@     allocate_system, &
+        #@     nr2lattice, &
+        #@     lattice2nr, &
+        #@     add_proc, &
+        #@     can_do, &
+        #@     set_rate_const, &
+        #@     replace_species, &
+        #@     del_proc, &
+        #@     reset_site, &
+        #@     system_size, &
+        #@     spuck, &
+    #@     get_species
+#@
+#@
 #@ implicit none
-#@ 
-#@ 
-#@ 
-
+#@
+#@
+#@
 # initialize various parameter kind of data
 #@  ! Species constants
 #@

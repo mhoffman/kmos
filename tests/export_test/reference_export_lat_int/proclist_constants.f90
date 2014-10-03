@@ -27,11 +27,6 @@
 
 module proclist_constants
 use kind_values
-use lattice, only: &
-    ruo2, &
-    ruo2_bridge, &
-    ruo2_cus, &
-    get_species
 
 
 implicit none
@@ -42,51 +37,64 @@ implicit none
 
 
 
-integer(kind=iint), parameter, public :: nr_of_species = 3
-integer(kind=iint), parameter, public :: co = 0
-integer(kind=iint), parameter, public :: empty = 1
-integer(kind=iint), parameter, public :: oxygen = 2
+integer(kind=iint), parameter, public :: nr_of_species = 5
+integer(kind=iint), parameter, public :: CO = 0
+integer(kind=iint), parameter, public :: Pd = 1
+integer(kind=iint), parameter, public :: empty = 2
+integer(kind=iint), parameter, public :: oxygen = 3
+integer(kind=iint), parameter, public :: null_species = 4
+
 integer(kind=iint), public :: default_species = empty
 
 
 ! Process constants
 
-integer(kind=iint), parameter, public :: co_adsorption_bridge = 1
-integer(kind=iint), parameter, public :: co_adsorption_cus = 2
-integer(kind=iint), parameter, public :: co_desorption_bridge = 3
-integer(kind=iint), parameter, public :: co_desorption_cus = 4
-integer(kind=iint), parameter, public :: co_diffusion_bridge_bridge_down = 5
-integer(kind=iint), parameter, public :: co_diffusion_bridge_bridge_up = 6
-integer(kind=iint), parameter, public :: co_diffusion_bridge_cus_left = 7
-integer(kind=iint), parameter, public :: co_diffusion_bridge_cus_right = 8
-integer(kind=iint), parameter, public :: co_diffusion_cus_bridge_left = 9
-integer(kind=iint), parameter, public :: co_diffusion_cus_bridge_right = 10
-integer(kind=iint), parameter, public :: co_diffusion_cus_cus_down = 11
-integer(kind=iint), parameter, public :: co_diffusion_cus_cus_up = 12
-integer(kind=iint), parameter, public :: oxygen_adsorption_bridge_bridge = 13
-integer(kind=iint), parameter, public :: oxygen_adsorption_bridge_cus_left = 14
-integer(kind=iint), parameter, public :: oxygen_adsorption_bridge_cus_right = 15
-integer(kind=iint), parameter, public :: oxygen_adsorption_cus_cus = 16
-integer(kind=iint), parameter, public :: oxygen_desorption_bridge_bridge = 17
-integer(kind=iint), parameter, public :: oxygen_desorption_bridge_cus_left = 18
-integer(kind=iint), parameter, public :: oxygen_desorption_bridge_cus_right = 19
-integer(kind=iint), parameter, public :: oxygen_desorption_cus_cus = 20
-integer(kind=iint), parameter, public :: oxygen_diffusion_bridge_bridge_down = 21
-integer(kind=iint), parameter, public :: oxygen_diffusion_bridge_bridge_up = 22
-integer(kind=iint), parameter, public :: oxygen_diffusion_bridge_cus_left = 23
-integer(kind=iint), parameter, public :: oxygen_diffusion_bridge_cus_right = 24
-integer(kind=iint), parameter, public :: oxygen_diffusion_cus_bridge_left = 25
-integer(kind=iint), parameter, public :: oxygen_diffusion_cus_bridge_right = 26
-integer(kind=iint), parameter, public :: oxygen_diffusion_cus_cus_down = 27
-integer(kind=iint), parameter, public :: oxygen_diffusion_cus_cus_up = 28
-integer(kind=iint), parameter, public :: reaction_oxygen_bridge_co_bridge_down = 29
-integer(kind=iint), parameter, public :: reaction_oxygen_bridge_co_bridge_up = 30
-integer(kind=iint), parameter, public :: reaction_oxygen_bridge_co_cus_left = 31
-integer(kind=iint), parameter, public :: reaction_oxygen_bridge_co_cus_right = 32
-integer(kind=iint), parameter, public :: reaction_oxygen_cus_co_bridge_left = 33
-integer(kind=iint), parameter, public :: reaction_oxygen_cus_co_bridge_right = 34
-integer(kind=iint), parameter, public :: reaction_oxygen_cus_co_cus_down = 35
-integer(kind=iint), parameter, public :: reaction_oxygen_cus_co_cus_up = 36
+integer(kind=iint), parameter, public :: destruct1 = 1
+integer(kind=iint), parameter, public :: destruct10 = 2
+integer(kind=iint), parameter, public :: destruct11 = 3
+integer(kind=iint), parameter, public :: destruct2 = 4
+integer(kind=iint), parameter, public :: destruct3 = 5
+integer(kind=iint), parameter, public :: destruct4 = 6
+integer(kind=iint), parameter, public :: destruct5 = 7
+integer(kind=iint), parameter, public :: destruct6 = 8
+integer(kind=iint), parameter, public :: destruct7 = 9
+integer(kind=iint), parameter, public :: destruct8 = 10
+integer(kind=iint), parameter, public :: destruct9 = 11
+integer(kind=iint), parameter, public :: m_COads_b1 = 12
+integer(kind=iint), parameter, public :: m_COads_b10 = 13
+integer(kind=iint), parameter, public :: m_COads_b2 = 14
+integer(kind=iint), parameter, public :: m_COads_b3 = 15
+integer(kind=iint), parameter, public :: m_COads_b4 = 16
+integer(kind=iint), parameter, public :: m_COads_b5 = 17
+integer(kind=iint), parameter, public :: m_COads_b6 = 18
+integer(kind=iint), parameter, public :: m_COads_b7 = 19
+integer(kind=iint), parameter, public :: m_COads_b8 = 20
+integer(kind=iint), parameter, public :: m_COads_b9 = 21
+integer(kind=iint), parameter, public :: m_COdes_b1 = 22
+integer(kind=iint), parameter, public :: m_COdes_b10 = 23
+integer(kind=iint), parameter, public :: m_COdes_b2 = 24
+integer(kind=iint), parameter, public :: m_COdes_b3 = 25
+integer(kind=iint), parameter, public :: m_COdes_b4 = 26
+integer(kind=iint), parameter, public :: m_COdes_b5 = 27
+integer(kind=iint), parameter, public :: m_COdes_b6 = 28
+integer(kind=iint), parameter, public :: m_COdes_b7 = 29
+integer(kind=iint), parameter, public :: m_COdes_b8 = 30
+integer(kind=iint), parameter, public :: m_COdes_b9 = 31
+integer(kind=iint), parameter, public :: o_COads_bridge1 = 32
+integer(kind=iint), parameter, public :: o_COads_bridge2 = 33
+integer(kind=iint), parameter, public :: o_COads_hollow1 = 34
+integer(kind=iint), parameter, public :: o_COads_hollow2 = 35
+integer(kind=iint), parameter, public :: o_COdes_bridge1 = 36
+integer(kind=iint), parameter, public :: o_COdes_bridge2 = 37
+integer(kind=iint), parameter, public :: o_COdes_hollow1 = 38
+integer(kind=iint), parameter, public :: o_COdes_hollow2 = 39
+integer(kind=iint), parameter, public :: o_COdif_h1h2down = 40
+integer(kind=iint), parameter, public :: o_COdif_h1h2up = 41
+integer(kind=iint), parameter, public :: o_O2ads_h1h2 = 42
+integer(kind=iint), parameter, public :: o_O2ads_h2h1 = 43
+integer(kind=iint), parameter, public :: o_O2des_h1h2 = 44
+integer(kind=iint), parameter, public :: o_O2des_h2h1 = 45
+integer(kind=iint), parameter, public :: oxidize1 = 46
 
 
 end module

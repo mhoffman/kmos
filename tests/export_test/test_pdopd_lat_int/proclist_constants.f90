@@ -27,35 +27,6 @@
 
 module proclist_constants
 use kind_values
-use lattice, only: &
-    Pd100, &
-    PdO, &
-    Pd100_h1, &
-    Pd100_h2, &
-    Pd100_h4, &
-    Pd100_h5, &
-    Pd100_b1, &
-    Pd100_b2, &
-    Pd100_b3, &
-    Pd100_b4, &
-    Pd100_b5, &
-    Pd100_b6, &
-    Pd100_b7, &
-    Pd100_b8, &
-    Pd100_b9, &
-    Pd100_b10, &
-    Pd100_h3, &
-    PdO_bridge2, &
-    PdO_hollow1, &
-    PdO_hollow2, &
-    PdO_bridge1, &
-    PdO_Pd2, &
-    PdO_Pd3, &
-    PdO_Pd4, &
-    PdO_hollow3, &
-    PdO_hollow4, &
-    PdO_Pd1, &
-    get_species
 
 
 implicit none

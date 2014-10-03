@@ -27,11 +27,6 @@
 
 module proclist_constants
 use kind_values
-use lattice, only: &
-    ruo2, &
-    ruo2_bridge, &
-    ruo2_cus, &
-    get_species
 
 
 implicit none
