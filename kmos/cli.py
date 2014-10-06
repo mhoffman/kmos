@@ -178,6 +178,9 @@ def get_options(args=None, get_parser=False):
                       default=False,
                       dest='debug',
                       action='store_true')
+    parser.add_option('-l', '--debug-level',
+                      default=None,
+                      dest='debug_level',)
     parser.add_option('-n', '--no-compiler-optimization',
                       default=False,
                       dest='no_optimize',
@@ -306,6 +309,9 @@ def main(args=None):
         project = kmos.types.Project()
         project.import_file(xml_file)
 
+        if options.debug_level is not None:
+            project.meta.debug = int(options.debug_level)
+
         kmos.io.export_source(project,
                               export_dir,
                               code_generator=options.backend)
@@ -409,6 +415,7 @@ def main(args=None):
         except:
             print("Warning: could not import kmc_model!"
                   " Please make sure you are in the right directory")
+            raise
         sh(banner='Note: model = KMC_Model(print_rates=False)')
         try:
             model.deallocate()

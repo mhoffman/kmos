@@ -33,7 +33,7 @@ from kmos.types import cmp_coords
 from kmos.utils import evaluate_template
 
 
-def _casetree_dict(dictionary, indent='', out=None):
+def _casetree_dict(dictionary, indent='', out=None, data=None):
     """ Recursively prints nested dictionaries."""
     # Fortran90 always expects the default branch
     # at the end of a 'select case' statement.
@@ -43,18 +43,20 @@ def _casetree_dict(dictionary, indent='', out=None):
         if isinstance(value, dict):
             if isinstance(key, Coord):
                 out.write('%sselect case(get_species(cell%s))\n' % (indent, key.radd_ff()))
-                _casetree_dict(value, indent + '  ', out)
+                _casetree_dict(value, indent + '  ', out, data=data)
                 out.write('%send select\n' % indent)
             else:
                 if key != 'default':
                     # allowing for or in species
                     keys = ', '.join(map(lambda x: x.strip(), key.split(' or ')))
                     out.write('%scase(%s)\n' % (indent, keys))
-                    _casetree_dict(value, indent + '  ', out)
+                    _casetree_dict(value, indent + '  ', out, data=data)
                 else:
                     out.write('%scase %s\n' % (indent, key))
-                    _casetree_dict(value, indent + '  ', out)
+                    _casetree_dict(value, indent + '  ', out, data=data)
         else:
+            if data and data.meta.debug > 1 :
+                out.write('print *, "    PROCLIST/NLI/", "%s"\n' % (value))
             out.write(indent+'%s = %s; return\n' % (key, value))
 
 def _print_dict(dictionary, indent = ''):
@@ -805,7 +807,7 @@ class ProcListWriter():
                 node[fname] = process.name
 
             # second write out the generated tree by traversing it
-            _casetree_dict(case_tree, '    ', out)
+            _casetree_dict(case_tree, '    ', out, data=data)
 
             out.write('\nend function %s\n\n' % (fname))
             out.write('end module\n')
@@ -1361,7 +1363,6 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     elif code_generator == 'lat_int2':
         cp_files = [(join('fortran_src', 'assert.ppc'), 'assert.ppc'),
                     (join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
-                    (join('fortran_src', 'btree.f90'), 'btree.f90'),
                     (join('fortran_src', 'main.f90'), 'main.f90'),
                     ]
     else:
@@ -1391,6 +1392,10 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
                         escape_python=True)
 
     elif code_generator == 'lat_int2':
+        export_template(join(APP_ABS_PATH, 'fortran_src', 'btree.mpy'),
+                        join(export_dir, 'btree.f90'),
+                        data=project_tree)
+
         export_template(join(APP_ABS_PATH, 'fortran_src', 'base_lat_int2.mpy'),
                         join(export_dir, 'base.f90'),
                         data=project_tree)

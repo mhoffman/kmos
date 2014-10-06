@@ -293,11 +293,11 @@ if data.meta.debug > 1:
 #@     integer(kind=iint) :: nr
 #@
 if data.meta.debug > 1:
-    #@ print *,"    LATTICE/ADD_PROC/PROC",proc
-    #@ print *,"    LATTICE/ADD_PROC/SITE",site
+    #@ print *,"      LATTICE/ADD_PROC/PROC",proc
+    #@ print *,"      LATTICE/ADD_PROC/SITE",site
 #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
 if data.meta.debug > 1:
-    #@ print *,"    LATTICE/ADD_PROC/SITE_NR",nr
+    #@ print *,"      LATTICE/ADD_PROC/SITE_NR",nr
 #@     call base_add_proc(proc, nr)
 #@
 #@ end subroutine add_proc
@@ -330,11 +330,11 @@ if code_generator == 'lat_int2':
     #@     integer(kind=iint) :: nr
     #@
     if data.meta.debug > 1:
-        #@ print *,"    LATTICE/CHANGE_PROC/PROC",proc
-        #@ print *,"    LATTICE/CHANGE_PROC/SITE",site
+        #@ print *,"        LATTICE/CHANGE_PROC/PROC",proc
+        #@ print *,"        LATTICE/CHANGE_PROC/SITE",site
     #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
     if data.meta.debug > 1:
-        #@ print *,"    LATTICE/CHANGE_PROC/SITE_NR",nr
+        #@ print *,"        LATTICE/CHANGE_PROC/SITE_NR",nr
     #@     call base_change_proc(proc, new_proc, nr)
     #@
     #@ end subroutine change_proc
@@ -349,13 +349,13 @@ if code_generator == 'lat_int2':
     #@
     #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
     if data.meta.debug > 1:
-        #@ print *,"    LATTICE/GET_STORED_PROC/SITE", site
-        #@ print *,"    LATTICE/GET_STORED_PROC/SITE_NR",nr
+        #@ print *,"        LATTICE/GET_STORED_PROC/SITE", site
+        #@ print *,"        LATTICE/GET_STORED_PROC/SITE_NR",nr
     #@     get_stored_proc = base_get_stored_proc(proc_group, nr)
     #@
     if data.meta.debug > 1:
-        #@ print *,"    LATTICE/GET_STORED_PROC/PROC",get_stored_proc
-        #@ print *,"    LATTICE/GET_STORED_PROC/SITE",site
+        #@ print *,"        LATTICE/GET_STORED_PROC/PROC",get_stored_proc
+        #@ print *,"        LATTICE/GET_STORED_PROC/SITE",site
     #@ end function get_stored_proc
     #@
 

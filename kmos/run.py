@@ -191,18 +191,35 @@ class KMC_Model(Process):
     def reset(self):
         self.size = np.array(self.size)
         try:
-            proclist.init(self.size,
+            proclist.allocate(self.size,
                 self.system_name,
                 lattice.default_layer,
                 self.settings.random_seed,
                 not self.banner)
-        except:
-            # fallback if API
-            # does not support random seed.
-            proclist.init(self.size,
-                self.system_name,
+            set_rate_constants(settings.parameters, self.print_rates)
+            proclist.initialize_state(
                 lattice.default_layer,
-                not self.banner)
+                self.settings.random_seed)
+
+            print("lat int initialization")
+        except:
+            try:
+                proclist.init(self.size,
+                    self.system_name,
+                    lattice.default_layer,
+                    self.settings.random_seed,
+                    not self.banner)
+                set_rate_constants(settings.parameters, self.print_rates)
+                print("regular initialization")
+
+            except:
+                # fallback if API
+                # does not support random seed.
+                proclist.init(self.size,
+                    self.system_name,
+                    lattice.default_layer,
+                    not self.banner)
+                set_rate_constants(settings.parameters, self.print_rates)
         self.cell_size = np.dot(np.diag(lattice.system_size), lattice.unit_cell_size)
 
         # prepare structures for TOF evaluation
@@ -253,7 +270,6 @@ class KMC_Model(Process):
                     self.lattice_representation = lattice_representation[0]
         else:
             self.lattice_representation = Atoms()
-        set_rate_constants(settings.parameters, self.print_rates)
         self.base.update_accum_rate()
         # S. matera 09/25/2012
         if hasattr(self.base, 'update_integ_rate'):

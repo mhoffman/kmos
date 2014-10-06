@@ -12,6 +12,9 @@ lat_int_groups = self._get_lat_int_groups()
 #@     spuck, &
 #@     system_size, &
 #@     nr2lattice, &
+#@     add_proc, &
+#@     del_proc, &
+#@     change_proc, &
 #@     get_species
 #@
 #@ use base, only: &
@@ -43,6 +46,9 @@ for i in range(len(lat_int_groups)):
 #@     integer(kind=iint), dimension(4) :: cell
 #@ 
 #@     cell = nr2lattice(nr_cell, :) + (/0, 0, 0, -1/)
+if data.meta.debug > 1:
+    #@ print *, "PROCLIST/DO_KMC_STEP/PROC", proc, "NR_CELL", nr_cell
+    #@ print *, "PROCLIST/DO_KMC_STEP/CELL", cell
 #@     call increment_procstat(proc)
 #@ 
 #@     select case(proc)
@@ -50,6 +56,8 @@ for lat_int_group, processes in lat_int_groups.iteritems():
     proc_names = ', '.join([proc.name for proc in processes])
     chopped_line = _chop_line(proc_names, line_length=60)
     #@     case({chopped_line})
+    if data.meta.debug > 1 :
+        #@ print *, "PROCLIST/RUN_PROC_{lat_int_group}/CELL", cell
     #@         call run_proc_{lat_int_group}(cell)
 #@     case default
 #@         print *, "Whoops, should not get here!"
@@ -81,14 +89,20 @@ for lat_int_group, processes in lat_int_groups.iteritems():
 #@     integer(kind=iint) :: nr_site, proc_nr, i
 #@ 
 #@     do i = 1, n
+if data.meta.debug > 1:
+    #@ print *, "PROCLIST/DO_KMC_STEP/N", n
 #@     call random_number(ran_time)
 #@     call random_number(ran_proc)
 #@     call random_number(ran_site)
+if data.meta.debug > 1:
+    #@ print *, "PROCLIST/DO_KMC_STEP/RAND", ran_time, ran_proc, ran_site
 #@     call update_accum_rate
 #@     call update_clocks(ran_time)
 #@ 
 #@     call update_integ_rate
 #@     call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
+if data.meta.debug > 1:
+    #@ print *, "PROCLIST/DO_KMC_STEP/PROC", proc_nr, "SITE", nr_site
 #@     call run_proc_nr(proc_nr, nr_site)
 #@     enddo
 #@ 
@@ -127,8 +141,17 @@ for lat_int_group, processes in lat_int_groups.iteritems():
 #@     !
 #@     !    ``none``
 #@     !******
+site_params = self._get_site_params()
+len_species_list_p1 = len(data.species_list) + 1
+len_species_list_m1 = len(data.species_list) - 1
+len_species_list = len(data.species_list)
+len_site_params = len(site_params)
+if len(data.layer_list) > 1 :  # multi-lattice mode
+    #@     ! nr_of_species = {len_species_list_p1}, spuck = {len_site_params}
+else:
+    #@     ! nr_of_species = {len_species_list}, spuck = {len_site_params}
 #@     ! nr_of_species = 3, spuck = 1
-#@     real(kind=rdouble), dimension(0:2, 1:1), intent(out) :: occupation
+#@     real(kind=rdouble), dimension(0:{len_species_list_m1}, 1:{len_site_params}), intent(out) :: occupation
 #@     
 #@     integer(kind=iint) :: i, j, k, nr, species
 #@     
@@ -159,21 +182,29 @@ for lat_int_group, processes in lat_int_groups.iteritems():
 for lat_int_group, processes in lat_int_groups.iteritems():
     #@ subroutine run_proc_{lat_int_group}(cell)
     #@     integer(kind=iint), dimension(4), intent(in) :: cell
+    #@     integer(kind=iint), dimension(4) :: in_cell
     #@     integer(kind=iint) :: stored_proc
     #@
+    #@     in_cell = cell + (/0, 0, 0, 1/)
     process = processes[0]
     for action in process.action_list:
         new_species = action.species
         old_species = [c for c in process.condition_list if action.coord == c.coord][0].species
-        rel_action_coord = action.coord.radd_offset('cell')
+        rel_action_coord = action.coord.radd_ff('cell')
+        action_coord = str(action.coord)
         #@
+        if data.meta.debug > 1 :
+            #@ print *, "PROCLIST/RUN_PROC_{lat_int_group}/ACTION_COORD {action_coord}"
+            #@ print *, "PROCLIST/RUN_PROC_{lat_int_group}/REL_ACTION_COORD", {rel_action_coord}
+            #@ print *, "PROCLIST/RUN_PROC_{lat_int_group}/OLD_SPECIES {old_species}"
+            #@ print *, "PROCLIST/RUN_PROC_{lat_int_group}/NEW_SPECIES {new_species}"
         #@     call replace_species({rel_action_coord}, {old_species}, {new_species})
         for other_lat_int_group, other_processes in lat_int_groups.iteritems():
             other_process = other_processes[0]
 
             for i_other_condition, other_condition in enumerate(other_process.condition_list):
                 if other_condition.coord.name == action.coord.name :
-                    rel_condition_coord = (action.coord - other_condition.coord).radd_offset('cell')
+                    rel_condition_coord = (action.coord - other_condition.coord).radd_offset('in_cell')
                     if other_condition.species == old_species and other_condition.species != new_species:
                         #@     call del_proc({other_lat_int_group}, {rel_condition_coord})
                     elif other_condition.species != old_species and other_condition.species == new_species:
@@ -188,7 +219,7 @@ for lat_int_group, processes in lat_int_groups.iteritems():
                 #@     ! bystander updates
                 for i_other_condition, other_condition in enumerate(other_process.bystanders):
                     if other_condition.coord.name == action.coord.name :
-                        rel_condition_coord = other_condition.coord.rsub_offset('cell')
+                        rel_condition_coord = other_condition.coord.rsub_offset('in_cell')
                         allowed_species = [(other_process2.bystanders)[i_other_condition].species
                                            for other_process2 in other_processes]
                         # four cases
@@ -211,6 +242,9 @@ for lat_int_group, processes in lat_int_groups.iteritems():
 
                             #@
                             #@     stored_proc = get_stored_proc({lat_int_group}, {rel_condition_coord})
+                            if data.meta.debug > 1 :
+                                #@             print *, "PROCLIST/run_proc_{lat_int_group}/COORD {rel_condition_coord}"
+                                #@             print *, "PROCLIST/run_proc_{lat_int_group}/STORED_PROC", stored_proc
                             #@     select case(stored_proc)
                             for old_proc, new_proc in zip(old_procs, new_procs):
                                 old_proc_name = old_proc.name
@@ -218,8 +252,7 @@ for lat_int_group, processes in lat_int_groups.iteritems():
                                 #@         case({old_proc_name})
                                 #@             call change_proc({old_proc_name}, {new_proc_name}, {rel_condition_coord})
                             #@         case default
-                            #@             print *, "run_proc_{lat_int_group}"
-                            #@             print *, "stored_proc", stored_proc
+                            #@             print *, "PROCLIST/run_proc_{lat_int_group}/STORED_PROC", stored_proc
                             #@             print *, "Should not get there!"
                             #@             stop
                             #@     end select
@@ -247,7 +280,7 @@ for lat_int_group, processes in lat_int_groups.iteritems():
 # and calculate the rate constants for the first time
 model_name_line = ('This kMC Model \'%s\' was written by' % data.meta.model_name).ljust(59)
 author_name_line = ('%s (%s)' % (data.meta.author, data.meta.email)).center(60)
-#@ subroutine init(input_system_size, system_name, layer, seed_in, no_banner)
+#@ subroutine allocate(input_system_size, system_name, layer, seed_in, no_banner)
 #@
 #@ !****f* proclist/init
 #@ ! FUNCTION
@@ -308,10 +341,7 @@ if len(data.layer_list) > 1 :
 #@     call allocate_system(nr_of_proc, input_system_size, system_name)
 if data.meta.debug > 0:
     #@ print *,"    PROCLIST/INIT/ALLOCATED_LATTICE"
-#@     call initialize_state(layer, seed_in)
-if data.meta.debug > 0:
-    #@ print *,"    PROCLIST/INIT/INITIALIZED_STATE"
-#@ end subroutine init
+#@ end subroutine allocate
 #@
 
 # initialize the system with the default layer and the default species
@@ -372,7 +402,7 @@ if data.meta.debug > 0:
 #@
 if data.meta.debug > 0:
     #@ print *, "    PROCLIST/INITALIZE_STATE/INITIALIZED_AVAIL_SITES"
-
+    #@ print *,"    PROCLIST/INIT/INITIALIZED_STATE"
 #@
 #@ end subroutine initialize_state
 #@
@@ -381,19 +411,31 @@ if data.meta.debug > 0:
 #@     integer(kind=iint), intent(in), dimension(4) :: cell
 #@     integer(kind=iint), dimension(4) :: site
 #@
-#@     integer(kind=iint) :: proc_group, stored_proc
+#@     integer(kind=iint) :: proc_group, stored_proc, nli
 #@     site = cell + (/0, 0 , 0, 1/)
+if data.meta.debug > 1:
+    #@ print *, "    PROCLIST/TOUCHUP_CELL/CELL", cell
+    #@ print *, "    PROCLIST/TOUCHUP_CELL/SITE", site
 #@
 #@     do proc_group = 1, nr_of_proc_groups
 #@         stored_proc = get_stored_proc(proc_group, site)
+if data.meta.debug > 1:
+    #@ print *, "    PROCLIST/TOUCHUP_CELL/PROC_GROUP", proc_group
+    #@ print *, "    PROCLIST/TOUCHUP_CELL/STORED_PROC", stored_proc
 #@         if(stored_proc>0) then
+if data.meta.debug > 0:
+    #@ print *, "    PROCLIST/TOUCHUP_CELL/DELETE_PROC", stored_proc
 #@             call del_proc(stored_proc, site)
 #@         endif
 #@     end do
 #@
 
-#for lat_int_group, process in lat_int_groups.iteritems():
-#    #@     call add_proc(nli_{lat_int_group}(site), site)
+for lat_int_group, process in lat_int_groups.iteritems():
+    #@     nli = nli_{lat_int_group}(cell)
+    if data.meta.debug > 0:
+        #@ print *, "    PROCLIST/TOUCHUP_CELL/ADD_PROC_GROUP {lat_int_group}", proc_groups({lat_int_group})
+        #@ print *, "    PROCLIST/TOUCHUP_CELL/NLI_{lat_int_group}", nli
+    #@     call add_proc(nli_{lat_int_group}(cell), site)
 #@ end subroutine touchup_cell
 #@
 

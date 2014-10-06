@@ -31,7 +31,11 @@ nr_of_proc_groups = len(lat_int_groups)
 #@ integer(kind=iint), parameter, public :: nr_of_proc_groups = {nr_of_proc_groups}
 proc_id = 0
 proc_groups = []
-for group_id, (key, value) in enumerate(self._get_lat_int_groups().items()):
+for group_id, (key, value) in enumerate(
+                                sorted(
+                                self._get_lat_int_groups().items(),
+                                key=lambda x: x[0]
+                                )):
     gid = group_id + 1
     for process in value:
         proc_groups.append(gid)
