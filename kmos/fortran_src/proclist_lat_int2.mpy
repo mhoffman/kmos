@@ -241,11 +241,12 @@ for lat_int_group, processes in lat_int_groups.iteritems():
                                                  % (len(old_procs), len(new_procs)))
 
                             #@
-                            #@     stored_proc = get_stored_proc({lat_int_group}, {rel_condition_coord})
+                            #@     stored_proc = get_stored_proc({other_lat_int_group}, {rel_condition_coord})
                             if data.meta.debug > 1 :
                                 #@             print *, "PROCLIST/run_proc_{lat_int_group}/COORD {rel_condition_coord}"
                                 #@             print *, "PROCLIST/run_proc_{lat_int_group}/STORED_PROC", stored_proc
                             #@     select case(stored_proc)
+                            #@         case(0) ! nothing stored, nothing to do
                             for old_proc, new_proc in zip(old_procs, new_procs):
                                 old_proc_name = old_proc.name
                                 new_proc_name = new_proc.name
@@ -268,6 +269,8 @@ for lat_int_group, processes in lat_int_groups.iteritems():
             else:
                 # Simple process, treat later
                 pass
+    if data.meta.debug > 1 :
+        #@ print *, "PROCLIST/RUN_PROC_{lat_int_group}/FINISHED"
     #@
     #@ end subroutine run_proc_{lat_int_group}
     #@
