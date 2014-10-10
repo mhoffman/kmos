@@ -18,7 +18,7 @@
 #@ ! along with kmos; if not, write to the Free Software
 #@ ! Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 #@ ! USA
-#@ 
+#@
 #@ !****h* kmos/base
 #@ ! FUNCTION
 #@ !    The base kMC module, which implements the kMC method on a :math:`d = 1`
@@ -33,11 +33,11 @@
 #@ !
 #@ !******
 #@ #include "btree.f90"
-#@ 
+#@
 #@ module base
 #@     use kind_values
 #@     use btree
-#@ 
+#@
 #@     use proclist_constants, only: &
 #@         proc_groups, &
 #@         nr_of_proc, &
@@ -45,12 +45,12 @@
 #@
 #@     !------ No implicit definition of variables !
 #@     implicit none
-#@ 
+#@
 #@     !------ All variables, function and subroutine are private by default
 #@     private
-#@ 
-#@ 
-#@ 
+#@
+#@
+#@
 #@     ! The following subroutines and functions are made public
 #@     public :: add_proc, &
 #@         allocate_system, &
@@ -91,11 +91,11 @@
 #@         update_accum_rate, &
 #@         update_integ_rate, &
 #@         update_clocks
-#@ 
-#@ 
+#@
+#@
 #@     ! Public constants
 #@     integer(kind=iint) :: null_species = -1
-#@ 
+#@
 #@     !---- Allocatable, module wide, variables
 #@     type(binary_tree), dimension(:), allocatable, public :: avail_sites
 #@     !****v* base/avail_sites
@@ -168,7 +168,7 @@
 #@     !   Stores the total number of times each process has been executed
 #@     !   during one simulation.
 #@     !******
-#@ 
+#@
 #@     real(kind=rdouble) :: kmc_time
 #@     !****v* base/kmc_time
 #@     ! FUNCTION
@@ -194,8 +194,8 @@
 #@     ! FUNCTION
 #@     !   The time increment of the current kMC step.
 #@     !******
-#@ 
-#@ 
+#@
+#@
 #@     integer(kind=iint) :: volume
 #@     !****v* base/volume
 #@     ! FUNCTION
@@ -208,11 +208,11 @@
 #@     !   This name should not contain any characters that you don't want to
 #@     !   have in a filename either, i.e. only [A-Za-z0-9\_-].
 #@     !******
-#@ 
+#@
 #@     !****************
 #@ contains
 #@     !****************
-#@ 
+#@
 #@     subroutine del_proc(proc, site)
 #@         !****f* base/del_proc
 #@         ! FUNCTION
@@ -235,7 +235,7 @@
 #@         !******
 #@         integer(kind=iint), intent(in) :: proc, site
 #@         integer(kind=iint) :: deleted_proc, proc_group
-#@ 
+#@
 #@         proc_group = proc_groups(proc)
 if data.meta.debug > 1:
     #@ print *, "BASE/DEL_PROC/proc_nr", proc_group, "site", site
@@ -245,15 +245,15 @@ if data.meta.debug > 1:
 #@         ! Make sure site is in the right range
 #@         ASSERT(site.ge.0,"del_proc: site has to be positive or zero")
 #@         ASSERT(site.le.volume,"base/add_proc: site needs to be in volume")
-#@ 
+#@
 #@         call btree_del(avail_sites(proc_group), site, deleted_proc)
 #@         if (deleted_proc>0)then
 #@             nr_of_sites(deleted_proc) = nr_of_sites(deleted_proc) - 1
 #@         endif
-#@ 
+#@
 #@     end subroutine del_proc
-#@ 
-#@ 
+#@
+#@
 #@     subroutine add_proc(proc, site)
 #@         !****f* base/add_proc
 #@         ! FUNCTION
@@ -268,44 +268,44 @@ if data.meta.debug > 1:
 #@         !******
 #@         integer(kind=iint), intent(in) :: proc, site
 #@         integer(kind=iint) :: proc_group
-#@ 
+#@
 #@         if (proc > 0) then
 #@         proc_group = proc_groups(proc)
 if data.meta.debug > 1 :
     #@ print *, "        BASE/ADD_PROC PROC", proc, "SITE", site
-#@ 
+#@
 #@         ! Make sure proc_nr is in the right range
 #@         ASSERT(proc.ge.0,"base/add_proc: proc has to be positive or zero")
 #@         ASSERT(proc.le.nr_of_proc,"base/add_proc: proc has to be less or equal nr_of_proc.")
-#@ 
+#@
 #@         ! Make sure site is in the right range
 #@         ASSERT(site.ge.0,"base/add_proc: site has to be positive or zero")
 #@         ASSERT(site.le.volume,"base/add_proc: site needs to be in volume")
-#@ 
+#@
 #@         if(proc.gt.0)then ! proc == 0, stands for process (group) did not match all
 #@             ! assert consistency
-#@ 
+#@
 #@             ! increment nr_of_sites(proc)
 #@             nr_of_sites(proc) = nr_of_sites(proc) + 1
 if data.meta.debug > 1 :
     #@ print *, "     BASE/ADD_PROC NR_OF_SITES", nr_of_sites(proc)
-#@ 
+#@
 #@             ! let address of added site point to nr_of_sites(proc)th slot
 #@             call btree_add(avail_sites(proc_group), rates(proc), proc, site)
 #@         endif
-#@ 
+#@
 #@         endif
 #@     end subroutine add_proc
-#@ 
+#@
 #@     subroutine change_proc(proc, new_proc, site)
 #@         integer(kind=iint), intent(in) :: proc, new_proc, site
 #@         integer(kind=iint) :: proc_group
-#@ 
+#@
 #@         proc_group = proc_groups(proc)
-#@ 
-#@ 
+#@
+#@
 #@     end subroutine change_proc
-#@ 
+#@
 if data.meta.debug > 1:
     #@     function get_stored_proc(proc_group, site)
 else:
@@ -326,7 +326,7 @@ else:
 if data.meta.debug > 1 :
     #@ print *, "        BASE/GET_STORED_PROC/PROC_GROUP", proc_group
     #@ print *, "        BASE/GET_STORED_PROC/SITE", site
-#@ 
+#@
 #@         memaddrs = avail_sites(proc_group)%memaddrs(site)
 if data.meta.debug > 1 :
     #@ print *, "        BASE/GET_STORED_PROC/MEMADDRS", memaddrs
@@ -336,12 +336,12 @@ if data.meta.debug > 1 :
 #@         else
 #@             get_stored_proc = 0
 #@         endif
-#@ 
+#@
 if data.meta.debug > 1 :
     #@ print *, "        BASE/GET_STORED_PROC/STORED_PROC", get_stored_proc
-#@ 
+#@
 #@     end function get_stored_proc
-#@ 
+#@
 #@     pure function can_do(proc, site)
 #@         !****f* base/can_do
 #@         ! FUNCTION
@@ -357,14 +357,14 @@ if data.meta.debug > 1 :
 #@         logical :: can_do
 #@         integer(kind=iint), intent(in) :: proc, site
 #@         integer(kind=iint) :: proc_group
-#@ 
+#@
 #@         proc_group = proc_groups(proc)
-#@ 
+#@
 #@         can_do = avail_sites(proc_group)%procs(avail_sites(proc_group)%memaddrs(site)).eq.proc
-#@ 
+#@
 #@     end function can_do
-#@ 
-#@ 
+#@
+#@
 #@     subroutine reset_site(site, old_species)
 #@         !****f* base/reset_site
 #@         ! FUNCTION
@@ -382,11 +382,11 @@ if data.meta.debug > 1 :
 #@         integer(kind=iint), intent(in) :: site, old_species
 #@         !---------------internal variables---------------
 #@         integer(kind=iint) :: proc, proc_group, species
-#@ 
-#@ 
+#@
+#@
 #@     end subroutine reset_site
-#@ 
-#@ 
+#@
+#@
 #@     subroutine reload_system(input_system_name, reloaded)
 #@         !****f* base/reload_system
 #@         ! FUNCTION
@@ -402,20 +402,20 @@ if data.meta.debug > 1 :
 #@         !---------------I/O variables---------------
 #@         character(len=200), intent(in) :: input_system_name
 #@         logical, intent(out) :: reloaded
-#@ 
+#@
 #@         character(len=210) :: filename
 #@         character(len=20) :: label
 #@         character(len=10**6) :: buffer
 #@         integer :: io_state , line, pos, subindex, io
-#@ 
+#@
 #@         integer, parameter :: filehandler = 15
 #@         logical :: file_exists
-#@ 
-#@ 
-#@ 
+#@
+#@
+#@
 #@     end subroutine reload_system
-#@ 
-#@ 
+#@
+#@
 #@     subroutine save_system()
 #@         !****f* base/save_system
 #@         ! FUNCTION
@@ -439,12 +439,12 @@ if data.meta.debug > 1 :
 #@         integer, parameter :: filehandler = 15
 #@         character(len=210) :: filename
 #@         integer(kind=iint) :: i, io_state
-#@ 
+#@
 #@         character(len=10) :: dummy_string
-#@ 
+#@
 #@     end subroutine save_system
-#@ 
-#@ 
+#@
+#@
 #@     subroutine set_rate_const(proc_nr, rate)
 #@         !****f* base/set_rate_const
 #@         ! FUNCTION
@@ -457,16 +457,16 @@ if data.meta.debug > 1 :
 #@         !******
 #@         integer(kind=iint), intent(in) :: proc_nr
 #@         real(kind=rdouble), intent(in) :: rate
-#@ 
+#@
 #@         ! Make sure proc_nr is in the right range
 #@         ASSERT(proc_nr.gt.0,"base/set_rate_const: proc_nr has to be positive")
 #@         !   * the field within the process, but the meaning differs as explained
 #@         !     under 'switch'
 #@         ASSERT(proc_nr.le.nr_of_proc,"base/set_rate_const: proc_nr less or equal nr_of_proc.")
 #@         rates(proc_nr) = rate
-#@ 
+#@
 #@     end subroutine set_rate_const
-#@ 
+#@
 #@     subroutine update_accum_rate()
 #@         !****f* base/update_accum_rate
 #@         ! FUNCTION
@@ -476,21 +476,21 @@ if data.meta.debug > 1 :
 #@         !
 #@         !    ``none``
 #@         !******
-#@ 
+#@
 #@         integer(kind=iint) :: i
-#@ 
+#@
 #@         accum_rates(1)=nr_of_sites(1)*avail_sites(1)%rate_constants(1)
 #@         do i = 2, nr_of_proc_groups
 #@         accum_rates(i)=accum_rates(i-1)+nr_of_sites(i)*avail_sites(i)%rate_constants(1)
 #@         enddo
-#@ 
+#@
 if data.meta.debug > 1:
     #@ print *, "    BASE/UPDATE_ACCUM_RATE/K_TOT", accum_rates(nr_of_proc_groups)
 #@         ASSERT(accum_rates(nr_of_proc_groups).gt.0.,"base/update_accum_rate found &
 #@             accum_rates(nr_of_proc_groups)=0, so no process is available at all")
-#@ 
+#@
 #@     end subroutine update_accum_rate
-#@ 
+#@
 #@     !------ S. Matera 09/18/2012------
 #@     subroutine update_integ_rate()
 #@         !****f* base/update_integ_rate
@@ -501,20 +501,20 @@ if data.meta.debug > 1:
 #@         !
 #@         !    ``none``
 #@         !******
-#@ 
+#@
 #@         integer(kind=iint) :: i
-#@ 
-#@ 
+#@
+#@
 #@         do i = 1, nr_of_proc
 #@         integ_rates(i)=integ_rates(i)+nr_of_sites(i)*rates(i)*kmc_time_step
 #@         enddo
-#@ 
+#@
 #@         ASSERT(accum_rates(nr_of_proc_groups).gt.0.,"base/update_accum_rate found &
 #@             accum_rates(nr_of_proc_groups)=0, so no process is available at all")
-#@ 
+#@
 #@     end subroutine update_integ_rate
 #@     !------ S. Matera 09/18/2012------
-#@ 
+#@
 #@     subroutine allocate_system(input_volume, input_system_name)
 #@         !****f* base/allocate_system
 #@         ! FUNCTION
@@ -531,22 +531,22 @@ if data.meta.debug > 1:
 #@         integer(kind=iint), intent(in) :: input_volume
 #@         integer(kind=iint) :: i
 #@         logical :: system_allocated
-#@ 
+#@
 #@         system_allocated = .false.
-#@ 
-#@ 
+#@
+#@
 #@         ! Make sure we have at least one process
 #@         if(nr_of_proc.le.0)then
 #@             print *,"kmos/base/allocate_system: there needs to be at least one process in a kMC system"
 #@             stop
 #@         endif
-#@ 
+#@
 #@         ! Make sure we have at least one site
 #@         if(input_volume.le.0)then
 #@             print *,"kmos/base/allocate_system: there needs to be at least one site in the system"
 #@             stop
 #@         endif
-#@ 
+#@
 #@         ! Make sure we don't try to allocate twice
 #@         if(allocated(avail_sites))then
 #@             print *,"kmos/base/allocate_system: Tried to allocate avail_sites twice, please deallocate first"
@@ -578,18 +578,18 @@ if data.meta.debug > 1:
 #@             print *,"kmos/base/allocate_system: Tried to allocate procstat twice, please deallocate first"
 #@             system_allocated = .true.
 #@         endif
-#@ 
+#@
 #@         if(.not. system_allocated)then
 #@             ! copy arguments to module variables
 #@             volume = input_volume
 #@             system_name = input_system_name
-#@ 
+#@
 #@             ! Set clocks and step counter to 0
 #@             kmc_time = 0.
 #@             walltime = 0.
 #@             start_time = 0.
 #@             kmc_step = 0
-#@ 
+#@
 #@             ! allocate data structures and initialize with 0
 #@             ! TODO FIXME
 #@             allocate(avail_sites(nr_of_proc_groups))
@@ -601,7 +601,7 @@ if data.meta.debug > 1:
     #@ print *, "BASE/ALLOCATE_SYSTEM/NR_OF_PROC_GROUPS", nr_of_proc_groups
     #@ print *, "BASE/ALLOCATE_SYSTEM/VOLUME", volume
     #@ print *, "BASE/ALLOCATE_SYSTEM/ALLOCATED AVAIL_SITES"
-#@ 
+#@
 #@             allocate(lattice(volume))
 #@             lattice = null_species
 #@             allocate(nr_of_sites(nr_of_proc))
@@ -616,19 +616,19 @@ if data.meta.debug > 1:
 #@             !------ S. Matera 09/18/2012------
 #@             allocate(procstat(nr_of_proc))
 #@             procstat = 0
-#@ 
+#@
 #@         endif
-#@ 
-#@ 
+#@
+#@
 #@     end subroutine allocate_system
-#@ 
-#@ 
+#@
+#@
 #@     subroutine is_allocated(result)
 #@         logical, intent(out) :: result
 #@         result = allocated(avail_sites)
 #@     end subroutine is_allocated
-#@ 
-#@ 
+#@
+#@
 #@     subroutine deallocate_system()
 #@         !****f* base/deallocate_system
 #@         ! FUNCTION
@@ -641,8 +641,8 @@ if data.meta.debug > 1:
 #@         !******
 #@         integer(kind=iint) :: i
 if data.meta.debug > 1:
-    #@ print *,"        BASE/DEALLOCATE_SYSTEM START" 
-#@ 
+    #@ print *,"        BASE/DEALLOCATE_SYSTEM START"
+#@
 #@         if(allocated(avail_sites))then
 #@             do i = 1, nr_of_proc_groups
 if data.meta.debug > 1:
@@ -654,7 +654,7 @@ if data.meta.debug > 1:
 #@             print *,"Warning: avail_sites was not allocated, tried to deallocate."
 #@         endif
 if data.meta.debug > 1:
-    #@ print *,"BASE/DEALLOCATE_SYSTEM AVAIL_SITES DONE" 
+    #@ print *,"BASE/DEALLOCATE_SYSTEM AVAIL_SITES DONE"
 #@         if(allocated(lattice))then
 #@             deallocate(lattice)
 #@         else
@@ -687,12 +687,12 @@ if data.meta.debug > 1:
 #@         else
 #@             print *,"Warning: rates was not procstat, tried to deallocate."
 #@         endif
-#@ 
+#@
 if data.meta.debug > 1:
     #@ print *,"BASE/DEALLOCATE_SYSTEM DONE"
 #@     end subroutine deallocate_system
-#@ 
-#@ 
+#@
+#@
 #@     pure function get_system_name()
 #@         !****f* base/get_system_name
 #@         ! FUNCTION
@@ -704,11 +704,11 @@ if data.meta.debug > 1:
 #@         !******
 #@         !---------------I/O variables---------------
 #@         character(len=200) :: get_system_name
-#@ 
+#@
 #@         get_system_name = system_name
 #@     end function get_system_name
-#@ 
-#@ 
+#@
+#@
 #@     subroutine set_system_name(input_system_name)
 #@         !****f* base/set_system_name
 #@         ! FUNCTION
@@ -720,12 +720,12 @@ if data.meta.debug > 1:
 #@         !    * ``system_name`` Readable string of type character(len=200).
 #@         !******
 #@         character(len=200), intent(in) :: input_system_name
-#@ 
+#@
 #@         system_name = input_system_name
-#@ 
+#@
 #@     end subroutine set_system_name
-#@ 
-#@ 
+#@
+#@
 #@     subroutine set_kmc_time(new_kmc_time)
 #@         !****f* base/set_kmc_time
 #@         ! FUNCTION
@@ -737,12 +737,12 @@ if data.meta.debug > 1:
 #@         !******
 #@         !---------------I/O variables---------------
 #@         real(kind=rdouble), intent(in)  :: new_kmc_time
-#@ 
+#@
 #@         kmc_time = new_kmc_time
-#@ 
+#@
 #@     end subroutine set_kmc_time
-#@ 
-#@ 
+#@
+#@
 #@     subroutine get_kmc_time(return_kmc_time)
 #@         !****f* base/get_kmc_time
 #@         ! FUNCTION
@@ -754,12 +754,12 @@ if data.meta.debug > 1:
 #@         !******
 #@         !---------------I/O variables---------------
 #@         real(kind=rdouble), intent(out)  :: return_kmc_time
-#@ 
+#@
 #@         return_kmc_time = kmc_time
-#@ 
+#@
 #@     end subroutine get_kmc_time
-#@ 
-#@ 
+#@
+#@
 #@     subroutine get_kmc_time_step(return_kmc_time_step)
 #@         !****f* base/get_kmc_time_step
 #@         ! FUNCTION
@@ -771,12 +771,12 @@ if data.meta.debug > 1:
 #@         !******
 #@         !---------------I/O variables---------------
 #@         real(kind=rdouble), intent(out) :: return_kmc_time_step
-#@ 
+#@
 #@         return_kmc_time_step = kmc_time_step
-#@ 
+#@
 #@     end subroutine get_kmc_time_step
-#@ 
-#@ 
+#@
+#@
 #@     subroutine get_procstat(proc, return_procstat)
 #@         !****f* base/get_procstat
 #@         ! FUNCTION
@@ -790,12 +790,12 @@ if data.meta.debug > 1:
 #@         !---------------I/O variables---------------
 #@         integer(kind=iint),intent(in) :: proc
 #@         integer(kind=iint),intent(out) :: return_procstat
-#@ 
+#@
 #@         return_procstat = procstat(proc)
-#@ 
+#@
 #@     end subroutine get_procstat
-#@ 
-#@ 
+#@
+#@
 #@     subroutine get_nrofsites(proc, return_nrofsites)
 #@         !****f* base/get_nrofsites
 #@         ! FUNCTION
@@ -809,11 +809,11 @@ if data.meta.debug > 1:
 #@         !******
 #@         integer(kind=iint), intent(in) :: proc
 #@         integer(kind=iint), intent(out) :: return_nrofsites
-#@ 
+#@
 #@         return_nrofsites = nr_of_sites(proc)
 #@     end subroutine get_nrofsites
-#@ 
-#@ 
+#@
+#@
 #@     subroutine get_avail_site(proc_nr, field, switch, return_avail_site)
 #@         !****f* base/get_avail_site
 #@         ! FUNCTION
@@ -828,16 +828,16 @@ if data.meta.debug > 1:
 #@         !---------------I/O variables---------------
 #@         integer(kind=iint), intent(in) :: proc_nr, field, switch
 #@         integer(kind=rdouble), intent(out) :: return_avail_site
-#@ 
+#@
 #@         if(switch==1)then
 #@             return_avail_site = avail_sites(proc_nr)%procs(field)
 #@         else if(switch==2)then
 #@             return_avail_site = avail_sites(proc_nr)%memaddrs(field)
 #@         endif
-#@ 
+#@
 #@     end subroutine get_avail_site
-#@ 
-#@ 
+#@
+#@
 #@     subroutine get_accum_rate(proc_nr, return_accum_rate)
 #@         !****f* base/get_accum_rate
 #@         ! FUNCTION
@@ -851,15 +851,15 @@ if data.meta.debug > 1:
 #@         !---------------I/O variables---------------
 #@         integer(kind=iint), intent(in), optional :: proc_nr
 #@         real(kind=iint), intent(out) :: return_accum_rate
-#@ 
+#@
 #@         if(.not. present(proc_nr) .or. proc_nr.eq.0) then
 #@             return_accum_rate=accum_rates(nr_of_proc)
 #@         else
 #@             return_accum_rate=accum_rates(proc_nr)
 #@         endif
-#@ 
+#@
 #@     end subroutine get_accum_rate
-#@ 
+#@
 #@     !------ S. Matera 09/18/2012------
 #@     subroutine get_integ_rate(proc_nr, return_integ_rate)
 #@         !****f* base/get_integ_rate
@@ -874,16 +874,16 @@ if data.meta.debug > 1:
 #@         !---------------I/O variables---------------
 #@         integer(kind=iint), intent(in), optional :: proc_nr
 #@         real(kind=iint), intent(out) :: return_integ_rate
-#@ 
+#@
 #@         if(.not. present(proc_nr) .or. proc_nr.eq.0) then
 #@             return_integ_rate=integ_rates(nr_of_proc)
 #@         else
 #@             return_integ_rate=integ_rates(proc_nr)
 #@         endif
-#@ 
+#@
 #@     end subroutine get_integ_rate
 #@     !------ S. Matera 09/18/2012------
-#@ 
+#@
 #@     subroutine get_rate(proc_nr, return_rate)
 #@         !****f* base/get_rate
 #@         ! FUNCTION
@@ -897,12 +897,12 @@ if data.meta.debug > 1:
 #@         !---------------I/O variables---------------
 #@         integer(kind=iint), intent(in) :: proc_nr
 #@         real(kind=rdouble), intent(out) :: return_rate
-#@ 
+#@
 #@         return_rate=rates(proc_nr)
-#@ 
+#@
 #@     end subroutine get_rate
-#@ 
-#@ 
+#@
+#@
 #@     subroutine increment_procstat(proc)
 #@         !****f* base/increment_procstat
 #@         ! FUNCTION
@@ -913,12 +913,12 @@ if data.meta.debug > 1:
 #@         !    * ``proc`` integer representing the process to be increment.
 #@         !******
 #@         integer(kind=iint),intent(in) :: proc
-#@ 
+#@
 #@         procstat(proc) = procstat(proc) + 1
-#@ 
+#@
 #@     end subroutine increment_procstat
-#@ 
-#@ 
+#@
+#@
 #@     subroutine get_walltime(return_walltime)
 #@         !****f* base/get_walltime
 #@         ! FUNCTION
@@ -930,11 +930,11 @@ if data.meta.debug > 1:
 #@         !******
 #@         !---------------I/O variables---------------
 #@         real(kind=rsingle), intent(out) :: return_walltime
-#@ 
+#@
 #@         return_walltime = walltime
-#@ 
+#@
 #@     end subroutine get_walltime
-#@ 
+#@
 #@     subroutine get_volume(return_volume)
 #@         !****f* base/get_kmc_volume
 #@         ! FUNCTION
@@ -946,11 +946,11 @@ if data.meta.debug > 1:
 #@         !******
 #@         !---------------I/O variables---------------
 #@         integer(kind=iint), intent(out) :: return_volume
-#@ 
+#@
 #@         return_volume = volume
-#@ 
+#@
 #@     end subroutine get_volume
-#@ 
+#@
 #@     subroutine get_kmc_step(return_kmc_step)
 #@         !****f* base/get_kmc_step
 #@         ! FUNCTION
@@ -962,12 +962,12 @@ if data.meta.debug > 1:
 #@         !******
 #@         !---------------I/O variables---------------
 #@         integer(kind=iint), intent(out) :: return_kmc_step
-#@ 
+#@
 #@         return_kmc_step = kmc_step
-#@ 
+#@
 #@     end subroutine get_kmc_step
-#@ 
-#@ 
+#@
+#@
 #@     subroutine determine_procsite(ran_proc, ran_site, proc, site)
 #@         !****f* base/determine_procsite
 #@         ! FUNCTION
@@ -988,20 +988,20 @@ if data.meta.debug > 1:
 #@         real(kind=rsingle), intent(in) :: ran_proc, ran_site
 #@         integer(kind=iint), intent(out) :: proc, site
 #@         !---------------internal variables---------------
-#@ 
-#@ 
+#@
+#@
 #@         ASSERT(ran_proc.ge.0,"base/determine_procsite: ran_proc has to be positive")
 #@         ASSERT(ran_proc.le.1,"base/determine_procsite: ran_proc has to be less or equal 1")
 #@         ASSERT(ran_site.ge.0,"base/determine_procsite: ran_site has to be positive")
 #@         ASSERT(ran_site.le.1,"base/determine_procsite: ran_site has to be less or equal 1")
-#@ 
+#@
 #@         ! ran_proc <- [0,1] so we multiply with larger value in accum_rates
 #@         call interval_search_real(accum_rates, ran_proc*accum_rates(nr_of_proc_groups), proc)
-#@ 
+#@
 if data.meta.debug > 1 :
     #@ print *, "BASE/DETERMINE_PROCSITE/RAN_PROC", ran_proc
     #@ print *, "BASE/DETERMINE_PROCSITE/PROC", proc
-#@ 
+#@
 #@         ! the result shall be between 1 and  nrofsite(proc) so we have to add 1 the
 #@         ! scaled random number. But if the random number is closer to 1 than machine
 #@         ! precision, e.g. 0.999999999, we would get nrofsits(proc)+1 so we have to
@@ -1014,16 +1014,16 @@ if data.meta.debug > 1 :
 #@         call btree_pick(avail_sites(proc), ran_site*avail_sites(proc)%rate_constants(1), site)
 if data.meta.debug > 1 :
     #@ print *, "BASE/DETERMINE_PROCSITE/SITE", site
-#@ 
+#@
 #@         ASSERT(nr_of_sites(proc).gt.0,"base/determine_procsite: chosen process is invalid &
 #@             because it has no sites available.")
 #@         ASSERT(site.gt.0,"kmos/base/determine_procsite: tries to return invalid site")
 #@         ASSERT(site.le.volume,"base/determine_procsite: tries to return site larger than volume")
-#@ 
-#@ 
+#@
+#@
 #@     end subroutine determine_procsite
-#@ 
-#@ 
+#@
+#@
 #@     subroutine update_clocks(ran_time)
 #@         !****f* base/update_clocks
 #@         ! FUNCTION
@@ -1035,25 +1035,25 @@ if data.meta.debug > 1 :
 #@         !******
 #@         real(kind=rsingle), intent(in) :: ran_time
 #@         real(kind=rsingle) :: runtime
-#@ 
-#@ 
+#@
+#@
 #@         ! Make sure ran_time is in the right interval
 #@         ASSERT(ran_time.ge.0.,"base/update_clocks: ran_time variable has to be positive.")
 #@         ASSERT(ran_time.le.1.,"base/update_clocks: ran_time variable has to be less than 1.")
-#@ 
+#@
 #@         kmc_time_step = -log(ran_time)/accum_rates(nr_of_proc_groups)
 #@         ! Make sure the difference is not so small, that it is rounded off
 #@         ! ASSERT(kmc_time+kmc_time_step>kmc_time,"base/update_clocks: precision of kmc_time is not sufficient")
-#@ 
+#@
 #@         call CPU_TIME(runtime)
-#@ 
+#@
 #@         ! Make sure we are not dividing by zero
 #@         ASSERT(accum_rates(nr_of_proc_groups).gt.0,"base/update_clocks: total rate was found to be zero")
 #@         kmc_time = kmc_time + kmc_time_step
-#@ 
+#@
 #@         ! Increment kMC steps
 #@         kmc_step = kmc_step + 1
-#@ 
+#@
 #@         ! Walltime is the time of this simulation run plus the walltime
 #@         ! when the simulation was reloaded, so walltime represents the total
 #@         ! walltime across reloads.
@@ -1062,11 +1062,11 @@ if data.meta.debug > 1 :
 #@         !-- 'call update_integ_rate()' directly in do_kmc_step(s)
 #@         ! call update_integ_rate()
 #@         !------ S. Matera 09/18/2012------
-#@ 
-#@ 
+#@
+#@
 #@     end subroutine update_clocks
-#@ 
-#@ 
+#@
+#@
 #@     pure function get_species(site)
 #@         !****f* base/get_species
 #@         ! FUNCTION
@@ -1079,17 +1079,17 @@ if data.meta.debug > 1 :
 #@         !---------------I/O variables---------------
 #@         integer(kind=iint) :: get_species
 #@         integer(kind=iint), intent(in) :: site
-#@ 
+#@
 #@         !! DEBUG
 #@         !print *, site
 #@         !ASSERT(site.ge.1,"kmos/base/get_species was asked for a zero or negative site")
 #@         !ASSERT(site.le.volume,"kmos/base/get_species was asked for a site outside the lattice")
-#@ 
+#@
 #@         get_species = lattice(site)
-#@ 
+#@
 #@     end function get_species
-#@ 
-#@ 
+#@
+#@
 #@     subroutine replace_species(site, old_species, new_species)
 #@         !****f* base/replace_species
 #@         ! FUNCTION
@@ -1104,9 +1104,9 @@ if data.meta.debug > 1 :
 #@         !   * ``new_species`` integer representing the species to be placed
 #@         !******
 #@         integer(kind=iint), intent(in) :: site, old_species, new_species
-#@ 
+#@
 #@         ASSERT(site.le.volume,"kmos/base/replace_species was asked for a site outside the lattice")
-#@ 
+#@
 #@         ! Double-check that we actually remove the atom that we think is there
 #@         if(old_species.ne.lattice(site))then
 #@             print '(a)', "kmos/base/replace_species Tried to remove species from sites which is not there!"
@@ -1121,14 +1121,14 @@ if data.meta.debug > 1 :
 #@             print '(a,i2,a,i2,a,i2,a,i10,a,i10,a)', &
 #@                 "model.post_mortem(err_code=(",old_species,", ",new_species, ", ",  lattice(site), ", ", site, ", ", kmc_step, "))"
 #@             print '(a)', "model.view()"
-#@ 
+#@
 #@             stop
 #@         endif
-#@ 
+#@
 #@         lattice(site) = new_species
 #@     end subroutine replace_species
-#@ 
-#@ 
+#@
+#@
 #@     subroutine interval_search_real(arr, value, return_field)
 #@         !****f* base/interval_search_real
 #@         ! FUNCTION
@@ -1164,14 +1164,14 @@ if data.meta.debug > 1 :
 #@         integer(kind=iint), intent(out) :: return_field
 #@         !---------------internal variables---------------
 #@         integer(kind=iint) :: left, mid, right
-#@ 
+#@
 #@         left = 1
 #@         right = size(arr)
-#@ 
+#@
 #@         binarysearch: do
 #@         ! Determine the middle between left and right by bit shifting
 #@         mid = ISHFT(right+left, -1)
-#@ 
+#@
 #@         ! if left and right overlap, we are done for now
 #@         if(left.ge.right)then
 #@             exit binarysearch
@@ -1185,7 +1185,7 @@ if data.meta.debug > 1 :
 #@         ! So now, we have found a candidate fields, which is great.
 #@         ! We just have to make sure it fullfills all other requirements.
 #@         enddo binarysearch
-#@ 
+#@
 #@         ! If the value turns out to be zero, we do a linear search
 #@         ! to the right until we find a non-zero entry
 #@         if(arr(mid).eq.0.)then
@@ -1207,8 +1207,8 @@ if data.meta.debug > 1 :
 #@             endif
 #@             enddo nonzerosearch
 #@         endif
-#@ 
-#@ 
+#@
+#@
 #@         ! If we are here, the value is non-zero which is great, but we also
 #@         ! have to make sure we return the left-most field if one or more fields
 #@         ! have the same value.
@@ -1223,18 +1223,18 @@ if data.meta.debug > 1 :
 #@             ASSERT(arr(mid).gt.arr(mid-1),"interval_search_real did not return a leftmost")
 #@         endif
 #@         enddo leftmostsearch
-#@ 
-#@ 
+#@
+#@
 #@         ASSERT(mid>0,"Returned index has to be at least 1")
 #@         ASSERT(mid<=size(arr),"Returned index can be at most size(arr)")
 #@         ASSERT(arr(mid).gt.0.,"Value of returned field has to be greater then 0")
 #@         ASSERT(value.le.arr(mid),"interval_search_real has an internal error")
-#@ 
+#@
 #@         return_field = mid
-#@ 
-#@ 
+#@
+#@
 #@     end subroutine interval_search_real
-#@ 
+#@
 #@     subroutine assertion_fail(a, r)
 #@         !****f* base/assertion_fail
 #@         ! FUNCTION
@@ -1256,21 +1256,21 @@ if data.meta.debug > 1 :
 #@             ' walltime: '//trim(wt)// &
 #@             '  kmc_time:'//trim(kt)
 #@         stop
-#@ 
+#@
 #@     end subroutine assertion_fail
-#@ 
+#@
 #@     subroutine set_null_species(input_null_species)
 #@         integer(kind=iint), intent(in) :: input_null_species
-#@ 
+#@
 #@         null_species = input_null_species
-#@ 
+#@
 #@     end subroutine set_null_species
-#@ 
+#@
 #@     subroutine get_null_species(output_null_species)
 #@         integer(kind=iint), intent(out) :: output_null_species
-#@ 
+#@
 #@         output_null_species = null_species
-#@ 
+#@
 #@     end subroutine get_null_species
-#@ 
+#@
 #@ end module base
