@@ -481,7 +481,7 @@ if data.meta.debug > 1 :
 #@
 #@         accum_rates(1)=nr_of_sites(1)*avail_sites(1)%rate_constants(1)
 #@         do i = 2, nr_of_proc_groups
-#@         accum_rates(i)=accum_rates(i-1)+nr_of_sites(i)*avail_sites(i)%rate_constants(1)
+#@         accum_rates(i)=accum_rates(i-1)+avail_sites(i)%rate_constants(1)
 #@         enddo
 #@
 if data.meta.debug > 1:
@@ -999,7 +999,9 @@ if data.meta.debug > 1:
 #@         call interval_search_real(accum_rates, ran_proc*accum_rates(nr_of_proc_groups), proc)
 #@
 if data.meta.debug > 1 :
+    #@ print *, "BASE/DETERMINE_PROCSITE/ACCUM_RATES", accum_rates
     #@ print *, "BASE/DETERMINE_PROCSITE/RAN_PROC", ran_proc
+    #@ print *, "BASE/DETERMINE_PROCSITE/RAN_PROC*K_TOT", ran_proc*accum_rates(nr_of_proc_groups)
     #@ print *, "BASE/DETERMINE_PROCSITE/PROC", proc
 #@
 #@         ! the result shall be between 1 and  nrofsite(proc) so we have to add 1 the
