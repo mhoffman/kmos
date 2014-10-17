@@ -134,8 +134,8 @@ real(kind=rdouble), dimension(:), allocatable :: integ_rates
 !   per unit surface and time.
 !   Let :math:`\mathbf{a}` the integrated rates, :math:`\mathbf{c}` be the
 !   rate constants, :math:`\mathbf{n}_i` the number of available sites
-!   during kMC-time interval i,  :math: `\{\Delta t_i\}` the corresponding
-!   timesteps then :math:`a_{i}(t)` at the time :math: `t=\sum_{i=1}\Delta t_i`
+!   during kMC-time interval i,  :math:`\{\Delta t_i\}` the corresponding
+!   timesteps then :math:`a_{i}(t)` at the time :math:`t=\sum_{i=1}\Delta t_i`
 !   is calculated according to :math:`a_{i}(t)=\sum_{i=1} c_{i} n_{i}\Delta t_i`.
 !
 !******
@@ -822,7 +822,7 @@ subroutine set_system_name(input_system_name)
     !****f* base/set_system_name
     ! FUNCTION
     !    Set the systems name. Useful in conjunction with base.save_system
-    !    to save *.reload files under a different name than the default one.
+    !    to save \*.reload files under a different name than the default one.
     !
     ! ARGUMENTS
     !

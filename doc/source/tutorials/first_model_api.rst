@@ -19,7 +19,7 @@ with your existing models and make little changes here and there.
 Construct the model
 ^^^^^^^^^^^^^^^^^^^
 
-We start by making the necessary import statements (in *python* or better *ipython*)::
+We start by making the necessary import statements (in `*python* <http://python.org>`_ or better `*ipython* <http://ipython.org>`_)::
 
   from kmos.types import *
   from kmos.io import *
@@ -59,7 +59,7 @@ desorption on a single crystal surface you would say ::
                  representation="Atoms('CO',[[0,0,0],[0,0,1.2]])")
 
 where the string passed as `representation` is a string representing
-a CO molecule which can be evaluated in ASE namespace.
+a CO molecule which can be evaluated in `ASE namespace <https://wiki.fysik.dtu.dk/ase/ase/atoms.html>`_.
 
 Once you have all species declared is a good time to think about the geometry.
 To keep it simple we will stick with a simple-cubic lattice in 2D which

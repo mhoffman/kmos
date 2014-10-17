@@ -258,7 +258,7 @@ class ProcListWriter():
             out.write('    calculate_nr2lattice(1) = (nr - 1 - spuck*(system_size(1)*system_size(2)*calculate_nr2lattice(3) &\n'
                 + '        + system_size(1)*calculate_nr2lattice(2))) / spuck\n')
             out.write('    calculate_nr2lattice(4) = nr - spuck*(system_size(1)*system_size(2)*calculate_nr2lattice(3) + &\n'
-                + '        system_size(2)*calculate_nr2lattice(2) + calculate_nr2lattice(1))\n')
+                + '        system_size(1)*calculate_nr2lattice(2) + calculate_nr2lattice(1))\n')
         elif data.meta.model_dimension == 2:
             out.write('    calculate_nr2lattice(3) = 0\n')
             out.write('    calculate_nr2lattice(2) = (nr -1) / (system_size(1)*spuck)\n')
@@ -730,7 +730,7 @@ class ProcListWriter():
         # and calculate the rate constants for the first time
         model_name_line = ('This kMC Model \'%s\' was written by' % data.meta.model_name).ljust(59)
         author_name_line = ('%s (%s)' % (data.meta.author, data.meta.email)).center(60)
-        out.write(('subroutine init(input_system_size, system_name, layer, no_banner)\n\n'
+        out.write(('subroutine init(input_system_size, system_name, layer, seed_in, no_banner)\n\n'
               '!****f* proclist/init\n'
               '! FUNCTION\n'
               '!     Allocates the system and initializes all sites in the given\n'
@@ -743,7 +743,7 @@ class ProcListWriter():
               '!    * ``layer`` initial layer.\n'
               '!    * ``no_banner`` [optional] if True no copyright is issued.\n'
               '!******\n'
-              '    integer(kind=iint), intent(in) :: layer\n'
+              '    integer(kind=iint), intent(in) :: layer, seed_in\n'
               '    integer(kind=iint), dimension(%s), intent(in) :: input_system_size\n\n'
               '    character(len=400), intent(in) :: system_name\n\n'
               '    logical, optional, intent(in) :: no_banner\n\n'
@@ -785,7 +785,7 @@ class ProcListWriter():
         out.write('    call allocate_system(nr_of_proc, input_system_size, system_name)\n')
         if data.meta.debug > 0:
             out.write('print *,"    PROCLIST/INIT/ALLOCATED_LATTICE"\n')
-        out.write('    call initialize_state(layer)\n')
+        out.write('    call initialize_state(layer, seed_in)\n')
         if data.meta.debug > 0:
             out.write('print *,"    PROCLIST/INIT/INITIALIZED_STATE"\n')
         out.write('end subroutine init\n\n')
@@ -793,7 +793,7 @@ class ProcListWriter():
         # initialize the system with the default layer and the default species
         # initialize all book-keeping databases
         # and representation strings for ASE representation
-        out.write('subroutine initialize_state(layer)\n\n'
+        out.write('subroutine initialize_state(layer, seed_in)\n\n'
                   '!****f* proclist/initialize_state\n'
                   '! FUNCTION\n'
                   '!    Initialize all sites and book-keeping array\n'
@@ -803,13 +803,14 @@ class ProcListWriter():
                   '!\n'
                   '!    * ``layer`` integer representing layer\n'
                   '!******\n'
-                  '    integer(kind=iint), intent(in) :: layer\n\n'
+                  '    integer(kind=iint), intent(in) :: layer, seed_in\n\n'
                   '    integer(kind=iint) :: i, j, k, nr\n'
                   '')
         if data.meta.debug > 0:
             out.write('print *,"PROCLIST/INITIALIZE_STATE"\n')
         out.write('    ! initialize random number generator\n'
                   '    allocate(seed_arr(seed_size))\n'
+                  '    seed = seed_in\n'
                   '    seed_arr = seed\n'
                   '    call random_seed(seed_size)\n'
                   '    call random_seed(put=seed_arr)\n'
@@ -1855,6 +1856,8 @@ class ProcListWriter():
         out.write('    #setup_model(model)\n')
         out.write('    pass\n\n')
 
+        out.write('# Default history length in graph\n')
+        out.write('hist_length = 30\n\n')
         # Parameters
         out.write('parameters = {\n')
         for parameter in data.parameter_list:

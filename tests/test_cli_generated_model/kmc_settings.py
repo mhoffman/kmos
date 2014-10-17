@@ -11,6 +11,9 @@ def setup_model(model):
     #setup_model(model)
     pass
 
+# Default history length in graph
+hist_length = 30
+
 parameters = {
     "p_CO":{"value":"0.2", "adjustable":False, "min":"0.0", "max":"0.0","scale":"log"},
     "T":{"value":"500", "adjustable":True, "min":"0.0", "max":"0.0","scale":"linear"},

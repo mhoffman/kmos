@@ -34,6 +34,8 @@ try:
     from ase.gui.view import View
     from ase.gui.status import Status
 except Exception, e:
+    View = type('View', (), {})
+    Status = type('Status', (), {})
     print('Warning: GTK not available. Cannot run graphical front-end')
     print(e)
 

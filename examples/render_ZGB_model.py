@@ -11,9 +11,9 @@ pt.set_meta(author="Ziff,Gulari,Barshad",
             model_name='zgb_model',
             model_dimension=2)
 
-pt.add_species(name='empty')
-pt.add_species(name='CO', representation="Atoms('C')")
-pt.add_species(name='O', representation="Atoms('O')")
+pt.add_species(name='empty', color='#ffffff')
+pt.add_species(name='CO', representation="Atoms('C')", color='#000000')
+pt.add_species(name='O', representation="Atoms('O')", color='#ff0000')
 
 layer = pt.add_layer(name='sc')
 

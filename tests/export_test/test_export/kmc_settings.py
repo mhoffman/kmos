@@ -11,6 +11,9 @@ def setup_model(model):
     #setup_model(model)
     pass
 
+# Default history length in graph
+hist_length = 30
+
 parameters = {
     "A":{"value":"20.e-19", "adjustable":False, "min":"0.0", "max":"0.0","scale":"linear"},
     "E_co_bridge":{"value":".1", "adjustable":False, "min":"0.0", "max":"0.0","scale":"linear"},
