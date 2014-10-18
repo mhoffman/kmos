@@ -987,6 +987,7 @@ if data.meta.debug > 1:
 #@         !---------------I/O variables---------------
 #@         real(kind=rsingle), intent(in) :: ran_proc, ran_site
 #@         integer(kind=iint), intent(out) :: proc, site
+#@         integer(kind=iint) :: proc_group
 #@         !---------------internal variables---------------
 #@
 #@
@@ -996,13 +997,14 @@ if data.meta.debug > 1:
 #@         ASSERT(ran_site.le.1,"base/determine_procsite: ran_site has to be less or equal 1")
 #@
 #@         ! ran_proc <- [0,1] so we multiply with larger value in accum_rates
-#@         call interval_search_real(accum_rates, ran_proc*accum_rates(nr_of_proc_groups), proc)
+#@         call interval_search_real(accum_rates, ran_proc*accum_rates(nr_of_proc_groups), proc_group)
 #@
 if data.meta.debug > 1 :
+    #@ print *, "BASE/DETERMINE_PROCSITE/NR_OF_SITES", nr_of_sites
     #@ print *, "BASE/DETERMINE_PROCSITE/ACCUM_RATES", accum_rates
     #@ print *, "BASE/DETERMINE_PROCSITE/RAN_PROC", ran_proc
     #@ print *, "BASE/DETERMINE_PROCSITE/RAN_PROC*K_TOT", ran_proc*accum_rates(nr_of_proc_groups)
-    #@ print *, "BASE/DETERMINE_PROCSITE/PROC", proc
+    #@ print *, "BASE/DETERMINE_PROCSITE/PROC_GROUP", proc_group
 #@
 #@         ! the result shall be between 1 and  nrofsite(proc) so we have to add 1 the
 #@         ! scaled random number. But if the random number is closer to 1 than machine
@@ -1012,10 +1014,11 @@ if data.meta.debug > 1 :
 #@         !   min(nr_of_sites(proc),int(1+ran_site*(nr_of_sites(proc)))),1)
 if data.meta.debug > 1 :
     #@ print *, "BASE/DETERMINE_PROCSITE/RAN_SITE", ran_site
-    #@ print *, "BASE/DETERMINE_PROCSITE/ACCUM_RATE i", avail_sites(proc)%rate_constants(1)
-#@         call btree_pick(avail_sites(proc), ran_site*avail_sites(proc)%rate_constants(1), site)
+    #@ print *, "BASE/DETERMINE_PROCSITE/ACCUM_RATE i", avail_sites(proc_group)%rate_constants(1)
+#@         call btree_pick(avail_sites(proc_group), ran_site*avail_sites(proc_group)%rate_constants(1), proc, site)
 if data.meta.debug > 1 :
     #@ print *, "BASE/DETERMINE_PROCSITE/SITE", site
+    #@ print *, "BASE/DETERMINE_PROCSITE/PROC", proc
 #@
 #@         ASSERT(nr_of_sites(proc).gt.0,"base/determine_procsite: chosen process is invalid &
 #@             because it has no sites available.")
