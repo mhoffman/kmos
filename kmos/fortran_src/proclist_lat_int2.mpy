@@ -47,8 +47,8 @@ for i in range(len(lat_int_groups)):
 #@ 
 #@     cell = nr2lattice(nr_cell, :) + (/0, 0, 0, -1/)
 if data.meta.debug > 1:
-    #@ print *, "PROCLIST/DO_KMC_STEP/PROC", proc, "NR_CELL", nr_cell
-    #@ print *, "PROCLIST/DO_KMC_STEP/CELL", cell
+    #@ print *, "PROCLIST/RUN_PROC_NR/PROC", proc, "NR_CELL", nr_cell
+    #@ print *, "PROCLIST/RUN_PROC_NR/CELL", cell
 #@     call increment_procstat(proc)
 #@ 
 #@     select case(proc)
@@ -205,10 +205,16 @@ for lat_int_group, processes in lat_int_groups.iteritems():
             for i_other_condition, other_condition in enumerate(other_process.condition_list):
                 if other_condition.coord.name == action.coord.name :
                     rel_condition_coord = (action.coord - other_condition.coord).radd_offset('in_cell')
+                    rel_condition_cell = (action.coord - other_condition.coord).radd_offset('cell')
                     if other_condition.species == old_species and other_condition.species != new_species:
+                        if data.meta.debug > 1:
+                            #@ print *,"PROCLIST/DEL_PROC/PROC {other_lat_int_group}", {rel_condition_coord}
                         #@     call del_proc({other_lat_int_group}, {rel_condition_coord})
                     elif other_condition.species != old_species and other_condition.species == new_species:
-                        #@     call add_proc({other_lat_int_group}, {rel_condition_coord})
+                        if data.meta.debug > 1:
+                            #@ print *,"PROCLIST/ADD_PROC/PROC {other_lat_int_group} {rel_condition_coord}"
+                        #@     !call add_proc({other_lat_int_group}, {rel_condition_coord})
+                        #@     call add_proc(nli_{other_lat_int_group}({rel_condition_cell}), {rel_condition_coord})
                     elif other_condition.species != old_species and other_condition.species != new_species:
                         pass
                     else:
@@ -220,21 +226,31 @@ for lat_int_group, processes in lat_int_groups.iteritems():
                 for i_other_condition, other_condition in enumerate(other_process.bystanders):
                     if other_condition.coord.name == action.coord.name :
                         rel_condition_coord = other_condition.coord.rsub_offset('in_cell')
-                        allowed_species = [(other_process2.bystanders)[i_other_condition].species
-                                           for other_process2 in other_processes]
+                        allowed_species = list(set([(other_process2.bystanders)[i_other_condition].species
+                                           for other_process2 in other_processes]))
+                        #################
                         # four cases
+                        #################
                         if old_species in allowed_species and new_species in allowed_species:
+                            # TODO FIXME: this is not the criterion that is valid here !!!
+                            # Either allowed species are not selected correctly
+                            # or we need to do something completely different here.
                             old_procs = [other_process2 for other_process2 in other_processes
                                          if (other_process2.bystanders)[i_other_condition].species == old_species
-                                                 ]
+                                        ]
+                            not_old_procs = [other_process2 for other_process2 in other_processes
+                                         if (other_process2.bystanders)[i_other_condition].species != old_species
+                                        ]
                             new_procs = []
                             for old_proc in old_procs:
                                 conditions = deepcopy(old_proc.bystanders)
                                 conditions[i_other_condition].species = new_species
-                                new_procs.append([
+                                new_proc_candidates = [
                                     new_proc for new_proc in other_processes if
                                     conditions == (new_proc.bystanders)
-                                ][0])
+                                ]
+                                new_procs.append(new_proc_candidates[0])
+
                             if not len(old_procs) == len(new_procs):
                                 raise Exception(("Number of possible old"
                                                  " and new procs differs: %s vs %s") \
@@ -243,10 +259,15 @@ for lat_int_group, processes in lat_int_groups.iteritems():
                             #@
                             #@     stored_proc = get_stored_proc({other_lat_int_group}, {rel_condition_coord})
                             if data.meta.debug > 1 :
-                                #@             print *, "PROCLIST/run_proc_{lat_int_group}/COORD {rel_condition_coord}"
-                                #@             print *, "PROCLIST/run_proc_{lat_int_group}/STORED_PROC", stored_proc
+                                #@             print *, "        PROCLIST/run_proc_{lat_int_group}/COORD", {rel_condition_coord}
+                                #@             print *, "        PROCLIST/run_proc_{lat_int_group}/STORED_PROC", stored_proc
                             #@     select case(stored_proc)
-                            #@         case(0) ! nothing stored, nothing to do
+                            #@         case(0) ! nothing stored, go figure
+                            ##@             call add_proc(nli_{other_lat_int_group}({rel_condition_cell}), {rel_condition_coord})
+                            not_old_proc_names = _chop_line(', '.join(
+                                not_old_proc.name for not_old_proc in not_old_procs
+                                ).replace('\n', ''), line_length=60)
+                            # #@         case({not_old_proc_names}) ! must be dealt with elsewhere
                             for old_proc, new_proc in zip(old_procs, new_procs):
                                 old_proc_name = old_proc.name
                                 new_proc_name = new_proc.name
@@ -254,15 +275,15 @@ for lat_int_group, processes in lat_int_groups.iteritems():
                                 #@             call change_proc({old_proc_name}, {new_proc_name}, {rel_condition_coord})
                             #@         case default
                             #@             print *, "PROCLIST/run_proc_{lat_int_group}/STORED_PROC", stored_proc
-                            #@             print *, "Should not get there!"
+                            #@             print *, "Should not get there! # {_line_nr}"
                             #@             stop
                             #@     end select
                         elif old_species in allowed_species and new_species not in allowed_species:
                             pass #  disable (more), easy
-                            #@     call del_proc({lat_int_group}, {rel_condition_coord})
+                            #@     call del_proc({other_lat_int_group}, {rel_condition_coord})
                         elif not old_species in allowed_species and new_species in allowed_species:
                             pass #  enable (more), easy
-                            #@     call add_proc(nli_{lat_int_group}({rel_condition_coord}), {rel_condition_coord})
+                            #@     call add_proc(nli_{other_lat_int_group}({rel_condition_cell}), {rel_condition_coord})
                             # FIXME
                         elif not old_species in allowed_species and new_species not in allowed_species:
                             pass #  do nothing, trivial
@@ -274,7 +295,6 @@ for lat_int_group, processes in lat_int_groups.iteritems():
     #@
     #@ end subroutine run_proc_{lat_int_group}
     #@
-
     #@
 
 

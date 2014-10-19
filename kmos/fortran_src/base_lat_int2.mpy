@@ -247,6 +247,8 @@ if data.meta.debug > 1:
 #@         ASSERT(site.le.volume,"base/add_proc: site needs to be in volume")
 #@
 #@         call btree_del(avail_sites(proc_group), site, deleted_proc)
+if data.meta.debug > 1 :
+    #@ print *, "BASE/DEL_PROC/DELETED_PROC", deleted_proc
 #@         if (deleted_proc>0)then
 #@             nr_of_sites(deleted_proc) = nr_of_sites(deleted_proc) - 1
 #@         endif
