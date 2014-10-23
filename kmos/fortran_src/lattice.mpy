@@ -171,7 +171,7 @@ elif data.meta.model_dimension == 1:
 #@     integer(kind=iint) :: volume
 #@
 #@     ! Copy to module wide variable
-if data.meta.debug > 1:
+if data.meta.debug > 2:
     #@ print *,"LATTICE/ALLOCATE_SYSTEM"
 if data.meta.model_dimension == 3:
     #@     system_size = input_system_size
@@ -207,14 +207,14 @@ elif data.meta.model_dimension == 1:
 #@         endif
 #@     end do
 #@
-if data.meta.debug > 1:
+if data.meta.debug > 2:
     #@     print *, "    LATTICE/ALLOCATE_SYSTEM/MAPPING_OK"
 #@     allocate(nr2lattice(1:product(system_size)*spuck,4))
 #@     allocate(lattice2nr(-system_size(1):2*system_size(1)-1, &
 #@         -system_size(2):2*system_size(2)-1, &
 #@         -system_size(3):2*system_size(3)-1, &
 #@          1:spuck))
-if data.meta.debug > 1:
+if data.meta.debug > 2:
     #@     print *, "    LATTICE/ALLOCATE_SYSTEM/ALLOCATED_LOOKUP"
 #@     do check_nr=1, product(system_size)*spuck
 #@         nr2lattice(check_nr, :) = calculate_nr2lattice(check_nr)
@@ -229,7 +229,7 @@ if data.meta.debug > 1:
 #@         end do
 #@     end do
 #@
-if data.meta.debug > 1:
+if data.meta.debug > 2:
     #@     print *, "    LATTICE/ALLOCATE_SYSTEM/FILLED_LOOKUP"
 if code_generator == 'lat_int2':
     #@     call base_allocate_system(volume, system_name)
@@ -276,7 +276,7 @@ for i, (_, _, (x, y, z)) in enumerate(site_params):
 #@ !
 #@ !    ``none``
 #@ !******
-if data.meta.debug > 1:
+if data.meta.debug > 2:
     #@ print *,"    LATTICE/DEALLOCATE_SYSTEM"
 #@     deallocate(lattice2nr)
 #@     deallocate(nr2lattice)
@@ -292,11 +292,11 @@ if data.meta.debug > 1:
 #@
 #@     integer(kind=iint) :: nr
 #@
-if data.meta.debug > 1:
+if data.meta.debug > 2:
     #@ print *,"      LATTICE/ADD_PROC/PROC",proc
     #@ print *,"      LATTICE/ADD_PROC/SITE",site
 #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
-if data.meta.debug > 1:
+if data.meta.debug > 2:
     #@ print *,"      LATTICE/ADD_PROC/SITE_NR",nr
 #@     call base_add_proc(proc, nr)
 #@
@@ -310,11 +310,11 @@ if data.meta.debug > 1:
 #@
 #@     integer(kind=iint) :: nr
 #@
-if data.meta.debug > 1:
+if data.meta.debug > 2:
     #@ print *,"    LATTICE/DEL_PROC/PROC",proc
     #@ print *,"    LATTICE/DEL_PROC/SITE",site
 #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
-if data.meta.debug > 1:
+if data.meta.debug > 2:
     #@ print *,"    LATTICE/DEL_PROC/SITE_NR",nr
 #@     call base_del_proc(proc, nr)
 #@
@@ -329,11 +329,11 @@ if code_generator == 'lat_int2':
     #@
     #@     integer(kind=iint) :: nr
     #@
-    if data.meta.debug > 1:
+    if data.meta.debug > 2:
         #@ print *,"        LATTICE/CHANGE_PROC/PROC",proc
         #@ print *,"        LATTICE/CHANGE_PROC/SITE",site
     #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
-    if data.meta.debug > 1:
+    if data.meta.debug > 2:
         #@ print *,"        LATTICE/CHANGE_PROC/SITE_NR",nr
     #@     call base_change_proc(proc, new_proc, nr)
     #@
@@ -348,12 +348,12 @@ if code_generator == 'lat_int2':
     #@     integer(kind=iint) :: nr, get_stored_proc
     #@
     #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
-    if data.meta.debug > 1:
+    if data.meta.debug > 2:
         #@ print *,"        LATTICE/GET_STORED_PROC/SITE", site
         #@ print *,"        LATTICE/GET_STORED_PROC/SITE_NR",nr
     #@     get_stored_proc = base_get_stored_proc(proc_group, nr)
     #@
-    if data.meta.debug > 1:
+    if data.meta.debug > 2:
         #@ print *,"        LATTICE/GET_STORED_PROC/PROC",get_stored_proc
         #@ print *,"        LATTICE/GET_STORED_PROC/SITE",site
     #@ end function get_stored_proc
