@@ -21,6 +21,12 @@
 #@         self%total_length = 2 ** self%levels
 #@         self%half_length = self%total_length / 2
 #@
+
+if data.meta.debug > 1 :
+    #@ print *, "BTREE/INIT/total_length", self%total_length
+    #@ print *, "BTREE/INIT/half_length", self%half_length
+    #@ print *, "BTREE/INIT/levels", self%levels
+
 #@         allocate(self%rate_constants(self%total_length))
 #@         self%rate_constants = 0.
 #@
@@ -56,6 +62,7 @@
 #@         do n = 0, (self%levels - 1)
 #@         a = 2 ** n
 #@         b = 2 ** (n + 1) - 1
+#@         print *, "a", a, "b", b
 #@         print *, self%rate_constants(a:b)
 #@         enddo
 #@         print *, "SITES", self%sites
@@ -63,6 +70,26 @@
 #@         print *, "PROCS", self%procs
 #@
 #@     end subroutine btree_repr
+#@
+#@
+#@     subroutine btree_replace(self, new_rate, proc, site)
+#@         type(binary_tree) :: self
+#@         real(kind=rdouble), intent(in) :: new_rate
+#@         integer(kind=iint), intent(in) :: proc, site
+#@         integer(kind=iint) :: memaddr
+#@
+#@         memaddr = self%memaddrs(site)
+if data.meta.debug > 1:
+    #@ print *, "BTREE/REPLACE/MEMAD", memaddr
+    #@ print *, "BTREE/REPLACE/NEW_RATE", new_rate
+    #@ print *, "BTREE/REPLACE/PROC", proc
+    #@ print *, "BTREE/REPLACE/SITE", site
+#@         self%rate_constants(memaddr) = new_rate
+#@         self%procs(memaddr - self%half_length + 1) = proc
+#@         ! site stays the same, so does not have to be replaced
+#@         call btree_update(self, memaddr)
+#@
+#@     end subroutine btree_replace
 #@
 #@
 #@     subroutine btree_add(self, rate_constant, proc, site)
@@ -160,28 +187,20 @@ if data.meta.debug > 1:
 #@     end subroutine btree_del
 #@
 #@
-#@     subroutine btree_replace(self, site, new_rate)
-#@         type(binary_tree) :: self
-#@         real(kind=rdouble), intent(in) :: new_rate
-#@         integer(kind=iint), intent(in) :: site
-#@         integer(kind=iint) :: pos
-#@
-#@         pos = self%memaddrs(site)
-#@         self%rate_constants(pos) = new_rate
-#@         call btree_update(self, pos)
-#@
-#@     end subroutine btree_replace
-#@
-#@
 #@     subroutine btree_update(self, pos)
 #@         type(binary_tree) :: self
 #@         integer(kind=iint), intent(in) :: pos
 #@         integer(kind=iint) :: pos_
 #@
+if data.meta.debug > 1:
+    #@ print *, "BTREE/UPDATE/POS", pos
+#@
 #@         pos_ = pos
 #@         do while (pos_ > 1)
 #@         pos_ = pos_ / 2
 #@         self%rate_constants(pos_) = self%rate_constants(2 * pos_) + self%rate_constants(2 * pos_ + 1)
+if data.meta.debug > 1:
+    #@ print *, "BTREE/UPDATE", pos_, "=", 2*pos_, "+", 2*pos_ + 1
 #@
 #@         end do
 #@     end subroutine btree_update
@@ -201,13 +220,15 @@ if data.meta.debug > 1 :
 #@         x_ = x
 #@
 #@         n = 1
-#@         do while (n < self%half_length)
+#@         do while (n < self%half_length - 1)
 #@         if (x_ < self%rate_constants(n)) then
 #@             n = 2 * n
 #@         else
 #@             x_ = x_ - self%rate_constants(n)
 #@             n = 2 * n + 2
 #@         endif
+if data.meta.debug > 1:
+    #@ print  *, "BTREE/PICK/N", n
 #@         enddo
 #@
 #@         if(x_ > self%rate_constants(n))then
@@ -217,7 +238,10 @@ if data.meta.debug > 1 :
 #@         proc = self%procs(1 + n - self%half_length)
 #@         site = self%sites(1 + n - self%half_length)
 if data.meta.debug > 1:
+    #@ print  *, "BTREE/PICK/PROC", site
+    #@ print  *, "BTREE/PICK/SITE", site
     #@ print  *, "BTREE/PICK/N", n
+    #@ print  *, "BTREE/PICK/N - ...", 1 + n - self%half_length
 #@
 #@     end subroutine btree_pick
 #@
