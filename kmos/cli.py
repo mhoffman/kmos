@@ -185,6 +185,10 @@ def get_options(args=None, get_parser=False):
                       default=False,
                       dest='no_optimize',
                       action='store_true')
+    parser.add_option('-o', '--force',
+                      default=False,
+                      dest='force',
+                      action='store_true')
 
     try:
         from numpy.distutils.fcompiler import get_default_fcompiler
@@ -324,8 +328,11 @@ def main(args=None):
             build(options)
             for out in glob('kmc_*'):
                 if os.path.exists('../%s' % out):
-                    overwrite = raw_input(('Should I overwrite existing %s ?'
-                                           '[y/N]  ') % out).lower()
+                    if options.force:
+                        overwrite = 'y'
+                    else:
+                        overwrite = raw_input(('Should I overwrite existing %s ?'
+                                               '[y/N]  ') % out).lower()
                     if overwrite.startswith('y'):
                         os.remove('../%s' % out)
                         shutil.move(out, '..')
