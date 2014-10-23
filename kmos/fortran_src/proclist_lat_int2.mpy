@@ -18,6 +18,7 @@ lat_int_groups = self._get_lat_int_groups()
 #@     get_species
 #@
 #@ use base, only: &
+#@     avail_sites_dump, &
 #@     update_accum_rate, &
 #@     update_integ_rate, &
 #@     determine_procsite, &
@@ -36,6 +37,7 @@ for i in range(len(lat_int_groups)):
 #@ integer(kind=iint), public :: seed ! random seed
 #@ integer(kind=iint), public, dimension(:), allocatable :: seed_arr ! random seed
 #@
+#@ character(len=8), parameter, public :: backend = "lat_int2"
 #@
 #@ contains
 #@
@@ -198,7 +200,17 @@ for lat_int_group, processes in lat_int_groups.iteritems():
             #@ print *, "PROCLIST/RUN_PROC_{lat_int_group}/REL_ACTION_COORD", {rel_action_coord}
             #@ print *, "PROCLIST/RUN_PROC_{lat_int_group}/OLD_SPECIES {old_species}"
             #@ print *, "PROCLIST/RUN_PROC_{lat_int_group}/NEW_SPECIES {new_species}"
-        #@     call replace_species({rel_action_coord}, {old_species}, {new_species})
+        if len(old_species.split(' or ')) > 1 :
+            #@     select case(get_species({rel_action_coord}))
+            for s in old_species.split(' or '):
+                #@         case({s})
+                #@             call replace_species({rel_action_coord}, {s}, {new_species})
+            #@     case default
+            #@         print *, "Found expected species", get_species({rel_action_coord})
+            #@         stop
+            #@     end select
+        else:
+            #@     call replace_species({rel_action_coord}, {old_species}, {new_species})
         for other_lat_int_group, other_processes in lat_int_groups.iteritems():
             other_process = other_processes[0]
 
@@ -213,7 +225,6 @@ for lat_int_group, processes in lat_int_groups.iteritems():
                     elif other_condition.species != old_species and other_condition.species == new_species:
                         if data.meta.debug > 1:
                             #@ print *,"PROCLIST/ADD_PROC/PROC {other_lat_int_group} {rel_condition_coord}"
-                        #@     !call add_proc({other_lat_int_group}, {rel_condition_coord})
                         #@     call add_proc(nli_{other_lat_int_group}({rel_condition_cell}), {rel_condition_coord})
                     elif other_condition.species != old_species and other_condition.species != new_species:
                         pass
@@ -221,11 +232,10 @@ for lat_int_group, processes in lat_int_groups.iteritems():
                         raise Exception('Check for logical error in your model: old_species(%s) vs. new_species(%s), Condition %s' %
                                         (old_species, new_species, other_condition.species))
             if other_process.bystanders : #  process with lateral interaction
-                #@
-                #@     ! bystander updates
                 for i_other_condition, other_condition in enumerate(other_process.bystanders):
                     if other_condition.coord.name == action.coord.name :
                         rel_condition_coord = other_condition.coord.rsub_offset('in_cell')
+                        rel_condition_cell = other_condition.coord.rsub_offset('cell')
                         allowed_species = list(set([(other_process2.bystanders)[i_other_condition].species
                                            for other_process2 in other_processes]))
                         #################
@@ -259,7 +269,7 @@ for lat_int_group, processes in lat_int_groups.iteritems():
                             #@
                             #@     stored_proc = get_stored_proc({other_lat_int_group}, {rel_condition_coord})
                             if data.meta.debug > 1 :
-                                #@             print *, "        PROCLIST/run_proc_{lat_int_group}/COORD", {rel_condition_coord}
+                                #@             print *, "        PROCLIST/run_proc_{lat_int_group}/COORD {rel_condition_coord}"
                                 #@             print *, "        PROCLIST/run_proc_{lat_int_group}/STORED_PROC", stored_proc
                             #@     select case(stored_proc)
                             #@         case(0) ! nothing stored, go figure
@@ -273,8 +283,18 @@ for lat_int_group, processes in lat_int_groups.iteritems():
                                 new_proc_name = new_proc.name
                                 #@         case({old_proc_name})
                                 #@             call change_proc({old_proc_name}, {new_proc_name}, {rel_condition_coord})
+                                if data.meta.debug > 1 :
+                                    #@         print *, "PROCLIST/run_{lat_int_group}/CHANGE {old_proc_name} {new_proc_name}"
+                                    #@         print *, "PROCLIST/run_{lat_int_group}/CHANGE {rel_condition_coord}"
+                                    #@         call avail_sites_dump({other_lat_int_group})
+
                             #@         case default
                             #@             print *, "PROCLIST/run_proc_{lat_int_group}/STORED_PROC", stored_proc
+                            #@             print *, "PROCLIST/run_proc_{lat_int_group}/REPR"
+                            #@             print *, "PROCLIST/run_proc_{lat_int_group}/REL_CONDITION_COORD {rel_condition_coord}"
+                            #@             print *, "PROCLIST/run_proc_{lat_int_group}/NLI", nli_{other_lat_int_group}({rel_condition_cell})
+                            #@     call replace_species({rel_action_coord}, {new_species}, {old_species})
+                            #@             print *, "PROCLIST/run_proc_{lat_int_group}/NLI", nli_{other_lat_int_group}({rel_condition_cell})
                             #@             print *, "Should not get there! # {_line_nr}"
                             #@             stop
                             #@     end select
