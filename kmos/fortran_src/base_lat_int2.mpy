@@ -55,6 +55,7 @@
 #@     public :: add_proc, &
 #@         allocate_system, &
 #@         assertion_fail, &
+#@         avail_sites_dump, &
 #@         can_do, &
 #@         change_proc, &
 #@         deallocate_system, &
@@ -237,7 +238,7 @@
 #@         integer(kind=iint) :: deleted_proc, proc_group
 #@
 #@         proc_group = proc_groups(proc)
-if data.meta.debug > 1:
+if data.meta.debug > 2:
     #@ print *, "BASE/DEL_PROC/proc_nr", proc_group, "site", site
 #@         ! Make sure proc_nr is in the right range
 #@         ASSERT(proc.ge.0,"del_proc: proc has to be positive or zero")
@@ -247,7 +248,7 @@ if data.meta.debug > 1:
 #@         ASSERT(site.le.volume,"base/add_proc: site needs to be in volume")
 #@
 #@         call btree_del(avail_sites(proc_group), site, deleted_proc)
-if data.meta.debug > 1 :
+if data.meta.debug > 2 :
     #@ print *, "BASE/DEL_PROC/DELETED_PROC", deleted_proc
 #@         if (deleted_proc>0)then
 #@             nr_of_sites(deleted_proc) = nr_of_sites(deleted_proc) - 1
@@ -273,7 +274,7 @@ if data.meta.debug > 1 :
 #@
 #@         if (proc > 0) then
 #@         proc_group = proc_groups(proc)
-if data.meta.debug > 1 :
+if data.meta.debug > 2 :
     #@ print *, "        BASE/ADD_PROC PROC", proc, "SITE", site
 #@
 #@         ! Make sure proc_nr is in the right range
@@ -289,7 +290,7 @@ if data.meta.debug > 1 :
 #@
 #@             ! increment nr_of_sites(proc)
 #@             nr_of_sites(proc) = nr_of_sites(proc) + 1
-if data.meta.debug > 1 :
+if data.meta.debug > 2 :
     #@ print *, "     BASE/ADD_PROC NR_OF_SITES", nr_of_sites(proc)
 #@
 #@             ! let address of added site point to nr_of_sites(proc)th slot
@@ -301,14 +302,21 @@ if data.meta.debug > 1 :
 #@
 #@     subroutine change_proc(proc, new_proc, site)
 #@         integer(kind=iint), intent(in) :: proc, new_proc, site
-#@         integer(kind=iint) :: proc_group
+#@         integer(kind=iint) :: old_proc, proc_group
+#@         real(kind=rdouble) :: rate_constant
+#@         
 #@
 #@         proc_group = proc_groups(proc)
+#@         old_proc = get_stored_proc(proc_group, site)
+#@         rate_constant = rates(proc)
 #@
+#@         nr_of_sites(old_proc) = nr_of_sites(old_proc) - 1
+#@         nr_of_sites(new_proc) = nr_of_sites(new_proc) + 1
+#@         call btree_replace(avail_sites(proc_group), rate_constant, new_proc, site)
 #@
 #@     end subroutine change_proc
 #@
-if data.meta.debug > 1:
+if data.meta.debug > 2:
     #@     function get_stored_proc(proc_group, site)
 else:
     #@     pure function get_stored_proc(proc_group, site)
@@ -325,12 +333,12 @@ else:
 #@         integer(kind=iint), intent(in) :: site, proc_group
 #@
 #@         integer(kind=iint) :: get_stored_proc, memaddrs
-if data.meta.debug > 1 :
+if data.meta.debug > 2 :
     #@ print *, "        BASE/GET_STORED_PROC/PROC_GROUP", proc_group
     #@ print *, "        BASE/GET_STORED_PROC/SITE", site
 #@
 #@         memaddrs = avail_sites(proc_group)%memaddrs(site)
-if data.meta.debug > 1 :
+if data.meta.debug > 2 :
     #@ print *, "        BASE/GET_STORED_PROC/MEMADDRS", memaddrs
     #@ call btree_repr(avail_sites(proc_group))
 #@         if (memaddrs > 0)then
@@ -339,10 +347,18 @@ if data.meta.debug > 1 :
 #@             get_stored_proc = 0
 #@         endif
 #@
-if data.meta.debug > 1 :
+if data.meta.debug > 2 :
     #@ print *, "        BASE/GET_STORED_PROC/STORED_PROC", get_stored_proc
 #@
 #@     end function get_stored_proc
+#@
+#@     subroutine avail_sites_dump(proc_group)
+#@
+#@         integer(kind=iint) :: proc_group
+#@         call btree_repr(avail_sites(proc_group))
+#@
+#@     end subroutine avail_sites_dump
+#@
 #@
 #@     pure function can_do(proc, site)
 #@         !****f* base/can_do
@@ -486,7 +502,7 @@ if data.meta.debug > 1 :
 #@         accum_rates(i)=accum_rates(i-1)+avail_sites(i)%rate_constants(1)
 #@         enddo
 #@
-if data.meta.debug > 1:
+if data.meta.debug > 2:
     #@ print *, "    BASE/UPDATE_ACCUM_RATE/K_TOT", accum_rates(nr_of_proc_groups)
 #@         ASSERT(accum_rates(nr_of_proc_groups).gt.0.,"base/update_accum_rate found &
 #@             accum_rates(nr_of_proc_groups)=0, so no process is available at all")
@@ -598,7 +614,7 @@ if data.meta.debug > 1:
 #@             do i = 1, nr_of_proc_groups
 #@                 avail_sites(i) = btree_init(volume)
 #@             enddo
-if data.meta.debug > 1:
+if data.meta.debug > 2:
     #@ print *, "BASE/ALLOCATE_SYSTEM/NR_OF_PROC", nr_of_proc
     #@ print *, "BASE/ALLOCATE_SYSTEM/NR_OF_PROC_GROUPS", nr_of_proc_groups
     #@ print *, "BASE/ALLOCATE_SYSTEM/VOLUME", volume
@@ -642,12 +658,12 @@ if data.meta.debug > 1:
 #@         !    ``none``
 #@         !******
 #@         integer(kind=iint) :: i
-if data.meta.debug > 1:
+if data.meta.debug > 2:
     #@ print *,"        BASE/DEALLOCATE_SYSTEM START"
 #@
 #@         if(allocated(avail_sites))then
 #@             do i = 1, nr_of_proc_groups
-if data.meta.debug > 1:
+if data.meta.debug > 2:
     #@ print *,"        BASE/DEALLOCATE_SYSTEM AVAIL_SITES", i
 #@                 call btree_destroy(avail_sites(i))
 #@             enddo
@@ -655,7 +671,7 @@ if data.meta.debug > 1:
 #@         else
 #@             print *,"Warning: avail_sites was not allocated, tried to deallocate."
 #@         endif
-if data.meta.debug > 1:
+if data.meta.debug > 2:
     #@ print *,"BASE/DEALLOCATE_SYSTEM AVAIL_SITES DONE"
 #@         if(allocated(lattice))then
 #@             deallocate(lattice)
@@ -690,7 +706,7 @@ if data.meta.debug > 1:
 #@             print *,"Warning: rates was not procstat, tried to deallocate."
 #@         endif
 #@
-if data.meta.debug > 1:
+if data.meta.debug > 2:
     #@ print *,"BASE/DEALLOCATE_SYSTEM DONE"
 #@     end subroutine deallocate_system
 #@
@@ -1001,7 +1017,7 @@ if data.meta.debug > 1:
 #@         ! ran_proc <- [0,1] so we multiply with larger value in accum_rates
 #@         call interval_search_real(accum_rates, ran_proc*accum_rates(nr_of_proc_groups), proc_group)
 #@
-if data.meta.debug > 1 :
+if data.meta.debug > 2 :
     #@ print *, "BASE/DETERMINE_PROCSITE/NR_OF_SITES", nr_of_sites
     #@ print *, "BASE/DETERMINE_PROCSITE/ACCUM_RATES", accum_rates
     #@ print *, "BASE/DETERMINE_PROCSITE/RAN_PROC", ran_proc
@@ -1014,11 +1030,11 @@ if data.meta.debug > 1 :
 #@         ! cap it with min(...)
 #@         !site =  avail_sites(proc, &
 #@         !   min(nr_of_sites(proc),int(1+ran_site*(nr_of_sites(proc)))),1)
-if data.meta.debug > 1 :
+if data.meta.debug > 2 :
     #@ print *, "BASE/DETERMINE_PROCSITE/RAN_SITE", ran_site
     #@ print *, "BASE/DETERMINE_PROCSITE/ACCUM_RATE i", avail_sites(proc_group)%rate_constants(1)
 #@         call btree_pick(avail_sites(proc_group), ran_site*avail_sites(proc_group)%rate_constants(1), proc, site)
-if data.meta.debug > 1 :
+if data.meta.debug > 2 :
     #@ print *, "BASE/DETERMINE_PROCSITE/SITE", site
     #@ print *, "BASE/DETERMINE_PROCSITE/PROC", proc
 #@
