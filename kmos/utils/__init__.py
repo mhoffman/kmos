@@ -718,7 +718,7 @@ def evaluate_template(template, escape_python=False, **kwargs):
 
         # second turn literary lines into write statements
         python_lines = ''
-        for line in lines:
+        for _line_nr, line in enumerate(lines):
             if re.match('^\s*%s ' % PREFIX, line):
                 python_lines += line.lstrip()[3:]
             elif re.match('^\s*%s$' % PREFIX, line):
@@ -757,11 +757,10 @@ def evaluate_template(template, escape_python=False, **kwargs):
                                python_lines.split('\n'))]))
             raise
 
-
-
         # second turn literary lines into write statements
         python_lines = ''
         for line in lines:
+            _line_nr = python_lines.count('\n')
             if re.match('\s*%s ' % PREFIX, line):
                 #hack to use LaTeX {} brackets for documentation: ignore each line which contains :math:
                 if ":math:" in line:
@@ -780,7 +779,7 @@ def evaluate_template(template, escape_python=False, **kwargs):
 
         try:
             exec(python_lines)
-        except (SyntaxError, ValueError, IndexError, NameError, KeyError) :
+        except (SyntaxError, ValueError, IndexError, NameError, KeyError, AttributeError) :
             print(''.join([('%05d %s\n' % line)
                            for line in
                            zip(range(len(python_lines.split('\n'))),
