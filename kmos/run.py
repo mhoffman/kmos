@@ -603,7 +603,7 @@ class KMC_Model(Process):
             self.integ_rates[:] = atoms.integ_rates
         # S. Matera 09/25/2012
         self.time = atoms.kmc_time
-        self.steps = atoms.kmc_step
+        self.step = atoms.kmc_step
         self.tof_data = atoms.tof_data
         self.tof_integ = atoms.tof_integ
 
@@ -1370,7 +1370,7 @@ class Model_Parameters(object):
             return res
 
     def string(self, match=None):
-        """Return parameters that match `pattern'
+        """Return parameters that match `pattern' as a string
 
         :param match: fname pattern to filter matching parameter name.
         :type match: str
