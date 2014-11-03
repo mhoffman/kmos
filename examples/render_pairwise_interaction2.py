@@ -58,8 +58,9 @@ coords = pt.lattice.generate_coord_set(size=[2, 2, 2],
 
 # fetch all nearest neighbor coordinates
 nn_coords = [nn_coord for i, nn_coord in enumerate(coords)
-             if 0 < (np.linalg.norm(nn_coord.pos - center.pos)) <= A]
+             if 0 < (np.linalg.norm(nn_coord.pos - center.pos)) <= 3.0*A]
 
+print(len(nn_coords))
 # produce all desorption processes
 # using pair nearest-neighbor
 # interaction
