@@ -580,7 +580,10 @@ class KMC_Model(Process):
         #return lim, f[j]
         return lim2
 
-    def sample_drc(self, n=10000, order=20, perturbation=1.0, debug=False):
+    def sample_drc(self, n=10000, order=None, perturbation=1.0, debug=False):
+
+        if order is None:
+            order = self.drc_order
 
         t0 = self.base.get_kmc_time()
 
@@ -598,8 +601,7 @@ class KMC_Model(Process):
         self.drc_sum_time = self.drc_sum_time+(t1-t0) if hasattr(self, 'drc_sum_time') else (t1-t0)
 
         if not np.isfinite(chi1).all():
-            print("ERROR: precision error in sampled chis")
-            return
+            raise OverflowError("Precision error in sampled chis.")
 
         chi = chi1[:, :, :] / self.drc_sum_time
 
