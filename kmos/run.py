@@ -357,11 +357,11 @@ class KMC_Model(Process):
         proclist.do_drc_steps(n)
         
     def get_chi(self):
-        chi=np.zeros((len(self.tofs),self.proclist.nr_of_proc,self.drc_order),dtype=np.float64)
-        for drc in range(self.drc_order):
+        chi = np.zeros((self.drc_order, self.proclist.nr_of_proc, len(self.tofs)), dtype=np.float64)
+        for drc_order in range(self.drc_order):
             for proc in range(self.proclist.nr_of_proc):
                 for tof in range(len(self.tofs)):
-                    chi[tof][proc][drc] = base.get_chi(drc + 1, proc + 1, tof + 1)
+                    chi[drc_order, proc, tof] = base.get_chi(drc_order + 1, proc + 1, tof + 1)
             
         return chi
 
@@ -372,11 +372,11 @@ class KMC_Model(Process):
             liste[i+1]=tmp
         return(liste)
 
-    def _cont_frac(self,chi):
+    def _cont_frac(self, chi):
 
         if not (all(map(lambda x: x!=0,chi))):
-            print "found zeros in chis:"
-            print chi
+            print("found zeros in chis:")
+            print(chi)
             return
 
 
@@ -519,7 +519,7 @@ class KMC_Model(Process):
         # ISBN-13: 978-0521431088
 
         tiny = 1.e-30  # very small number to have something non-zero
-        eps = 1.e-7  # error tolerating machine precision (single-precision epsilon = 5.96e-8)
+        eps = 1.e-6  # error tolerating machine precision (single-precision epsilon = 5.96e-8)
 
         C = {}
         D = {}
@@ -577,14 +577,10 @@ class KMC_Model(Process):
 
         # return raw limit and safe limit for debugging
         # change to return lim2 later
-        return lim, f[j]
+        #return lim, f[j]
+        return lim2
 
-    def sample_drc(self, process, n=10000, order=20, perturbation=1.0, debug=False):
-
-        if(process < 1 or process > self.proclist.nr_of_proc):
-            print str(process)+" is not a valid process (between 1 and "+str(self.proclist.nr_of_proc)+")"
-            return
-
+    def sample_drc(self, n=10000, order=20, perturbation=1.0, debug=False):
 
         t0 = self.base.get_kmc_time()
 
@@ -593,10 +589,9 @@ class KMC_Model(Process):
         #for i in range(20):
         #    chi0[i] = base.get_chi(i + 1)
 
-        proclist.do_drc_steps(n, process, perturbation)
+        proclist.do_drc_steps(n)
 
-        chi1 = self.get_chi(order=order)
-
+        chi1 = self.get_chi()
 
         t1 = self.base.get_kmc_time()
 
@@ -606,28 +601,23 @@ class KMC_Model(Process):
             print("ERROR: precision error in sampled chis")
             return
 
-        chi = chi1[:, :, 0] / self.drc_sum_time
+        chi = chi1[:, :, :] / self.drc_sum_time
 
-        limit = np.zeros(proclist.nr_of_proc)
+        limit = np.zeros((len(self.tofs), proclist.nr_of_proc))
 
-        for i, chi_i in enumerate(chi.T):
-            limit[i] = self._cont_frac_mlentz(chi_i, debug=debug)[-1]
+        for process in range(proclist.nr_of_proc):
+            for TOF in range(len(self.tofs)):
+                limit[TOF, process] = self._cont_frac_mlentz(chi[:, process, TOF],
+                                                             debug=debug)
 
-            # add contribution from TOF producing step on TOF
-            # TODO: generalize for more than one TOF
-            limit[i] += self.tof_matrix[0, i]*self.base.get_integ_rate(process)/(t1)/self.base.get_rate(process)
+                # add contribution from TOF producing step on TOF
+                # TODO : generalize for more than one TOF
+                # TODO
+                limit[TOF, process] += self.tof_matrix[TOF, process]*self.base.get_integ_rate(process)/(t1)/self.base.get_rate(process)
+                # limit[TOF, process] += self.tof_matrix[TOF, process]*self.base.get_integ_rate(process)/self.drc_sum_time/self.base.get_rate(process)
 
         #print " ".join(map(str,[limit]+chi))
         return limit
-
-    def get_chi(self, order=20):
-        chi1 = np.zeros((order, proclist.nr_of_proc, proclist.nr_of_proc), dtype=np.float64)
-        for k in range(proclist.nr_of_proc):
-            for j in range(proclist.nr_of_proc):
-                for i in range(order):
-                    chi1[i, j, k] = base.get_chi(i + 1, j + 1, k + 1)
-
-        return chi1
 
     def run(self):
         """Runs the model indefinitely. To control the
