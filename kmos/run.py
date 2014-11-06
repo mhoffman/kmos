@@ -114,7 +114,7 @@ class KMC_Model(Process):
                        random_seed=None,
                        cache_file=None,
                        drc_order=20):
-                       
+
         # initialize multiprocessing.Process hooks
         super(KMC_Model, self).__init__()
 
@@ -346,7 +346,7 @@ class KMC_Model(Process):
 
         """
         proclist.do_kmc_steps(n)
-        
+
     def do_drc_steps(self, n=10000):
         """Propagate the model `n` steps and sample DRCs
 
@@ -355,14 +355,14 @@ class KMC_Model(Process):
 
         """
         proclist.do_drc_steps(n)
-        
+
     def get_chi(self):
         chi = np.zeros((self.drc_order, self.proclist.nr_of_proc, len(self.tofs)), dtype=np.float64)
         for drc_order in range(self.drc_order):
             for proc in range(self.proclist.nr_of_proc):
                 for tof in range(len(self.tofs)):
                     chi[drc_order, proc, tof] = base.get_chi(drc_order + 1, proc + 1, tof + 1)
-            
+
         return chi
 
     def _pair_swap(self,liste):
@@ -425,7 +425,7 @@ class KMC_Model(Process):
 
         return lim
 
-    def _cont_frac_mlentz(self, chi, debug=False):
+    def _cont_frac_mlentz(self, chi, debug=False, tiny=None, eps=None):
         """Evaluate a representation of continued fraction
         coefficient. In order to avoid numerical issues (round-off errors)
         in long continued fractions the so-called modified Lentz rule
@@ -438,9 +438,12 @@ class KMC_Model(Process):
         # first convert frequency moments into continued fraction
         # coefficients according to
         # P. Hänggi, F. Roesel, and D. Trautmann
-        # Evaluation of Infinite Series by Use of Continued Fraction Expansions: A Numerical Study 
+        # Evaluation of Infinite Series by Use of Continued Fraction Expansions: A Numerical Study
         # J. Computational Physics 37, 242–258 (1980), p. 244-246
         # http://www.physik.uni-augsburg.de/theo1/hanggi/Papers/24.pdf
+
+        if (chi == 0).any() :
+            raise Exception("found zeros in chis: %s" % chi)
 
         coeff = [0.0] * len(chi)
 
@@ -518,8 +521,10 @@ class KMC_Model(Process):
         # ISBN-10: 0521431085
         # ISBN-13: 978-0521431088
 
-        tiny = 1.e-30  # very small number to have something non-zero
-        eps = 1.e-6  # error tolerating machine precision (single-precision epsilon = 5.96e-8)
+        if tiny is None:
+            tiny = 1.e-30  # very small number to have something non-zero
+        if eps is None:
+            eps = 1.e-6  # error tolerating machine precision (single-precision epsilon = 5.96e-8)
 
         C = {}
         D = {}
@@ -552,9 +557,13 @@ class KMC_Model(Process):
                     needed_order = j
 
                 if debug:
-                    print('delta[j] %s' % delta)
-                    print('f[j] %s' % f)
+                    print('Stopped at delta[j] %s' % delta)
+                    print('Stopped at f[j] %s' % f)
                 break
+            elif debug:
+                print('delta[j] %s' % delta)
+                print('f[j] %s' % f)
+
         else:
             raise UserWarning("Did not sample high enough order %s > eps, j = %s" % (delta[j] - 1, j))
 
@@ -562,11 +571,13 @@ class KMC_Model(Process):
         #print("Coeff %s" % coeff)
         #print("Evenorder %s, coeff[evenorder %s" % (evenorder, coeff[evenorder]))
 
-        for i in range(evenorder - 1, 0, -1):
-            div = 1 if (i % 2 == 0) else -omega
-            lim = coeff[i] / (div + lim)
-            if debug:
-                print(i, lim)
+        #if debug:
+            #print("Evaluating continued fraction")
+        #for i in range(evenorder - 1, 0, -1):
+            #div = 1 if (i % 2 == 0) else -omega
+            #lim = coeff[i] / (div + lim)
+            #if debug:
+                #print("Order {order} value {value}".format(order=i, value=lim))
 
 
 
@@ -580,7 +591,7 @@ class KMC_Model(Process):
         #return lim, f[j]
         return lim2
 
-    def sample_drc(self, n=10000, order=None, perturbation=1.0, debug=False):
+    def sample_drc(self, n=10000, order=None, perturbation=1.0, debug=False, tiny=None, eps=None):
 
         if order is None:
             order = self.drc_order
@@ -609,8 +620,17 @@ class KMC_Model(Process):
 
         for process in range(proclist.nr_of_proc):
             for TOF in range(len(self.tofs)):
-                limit[TOF, process] = self._cont_frac_mlentz(chi[:, process, TOF],
-                                                             debug=debug)
+                try:
+                    limit[TOF, process] = self._cont_frac_mlentz(chi[:, process, TOF],
+                                                             debug=debug, tiny=tiny, eps=eps)
+                except Exception as e:
+                    raise type(e)('{message} happens when evaluating DRC of {proc} ({proc_nr}) on {TOF}'.format(
+                        proc=sorted(self.settings.rate_constants.keys())[process],
+                        proc_nr=process,
+                        TOF=self.tofs[TOF],
+                        message=e.message,
+                        ))
+
 
                 # add contribution from TOF producing step on TOF
                 # TODO : generalize for more than one TOF
