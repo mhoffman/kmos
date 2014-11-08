@@ -78,10 +78,6 @@ except Exception, e:
     """ % e)
 
 
-INTERACTIVE = hasattr(sys, 'ps1') or hasattr(sys, 'ipcompleter')
-INTERACTIVE = True  # Turn it off for now because it doesn work reliably
-
-
 class ProclistProxy(object):
 
     def __dir__(selftr):
@@ -1251,7 +1247,7 @@ class KMC_Model(Process):
                 else:
                     print('%s : %.4e' % (name, 0.))
 
-    def rate_ratios(self):
+    def rate_ratios(self, interactive=False):
         ratios = []
         for i, iname in enumerate(
                         sorted(self.settings.rate_constants.keys())):
@@ -1267,7 +1263,7 @@ class KMC_Model(Process):
         res = ''
         for label, ratio in ratios:
             res += ('%s: %s\n' % (label, ratio))
-        if INTERACTIVE:
+        if interactive:
             print(res)
         else:
             return res
@@ -1364,7 +1360,7 @@ class Model_Parameters(object):
             if match is None or fnmatch(attr, match):
                 res += ('# %s = %s\n'
                       % (attr, settings.parameters[attr]['value']))
-        if INTERACTIVE:
+        if interactive:
             print(res)
         else:
             return res
@@ -1402,7 +1398,7 @@ class Model_Rate_Constants(object):
 
         return res
 
-    def __call__(self, pattern=None):
+    def __call__(self, pattern=None, interactive=False):
         """Return rate constants.
 
         :param pattern: fname pattern to filter matching parameter name.
@@ -1417,7 +1413,7 @@ class Model_Rate_Constants(object):
                                                       settings.parameters)
                 res += ('# %s: %s = %.2e s^{-1}\n' % (proc, rate_expr,
                                                       rate_const))
-        if INTERACTIVE:
+        if interactive:
             print(res)
         else:
             return res
@@ -1444,7 +1440,7 @@ class Model_Rate_Constants(object):
         rate_expr = settings.rate_constants[proc][0]
         return evaluate_rate_expression(rate_expr, settings.parameters)
 
-    def inverse(self):
+    def inverse(self, interactive=False):
         """Return inverse list of rate constants.
 
         """
@@ -1456,7 +1452,7 @@ class Model_Rate_Constants(object):
                                                   settings.parameters)
             res += '# %s: %.2e s^{-1} = %s\n' % (proc, rate_const, rate_expr)
         res += '# ------------------\n'
-        if INTERACTIVE:
+        if interactive:
             print(res)
         else:
             return res
