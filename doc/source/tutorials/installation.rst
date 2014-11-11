@@ -102,6 +102,34 @@ Installation on openSUSE 13.1 Linux
 In order to use the editor GUI you will want to install python-kiwi (not KIWI)
 and right now you can find a recent build `here <https://build.opensuse.org/package/show/home:leopinheiro/python-kiwi>`_ .
 
+Installation on Mac OS X 10.9 or above
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+There is more than one way to get required dependencies. I have tested MacPorts and worked quite well.
+
+#. Get MacPorts
+    Search for MacPorts online, you'll need to install Xcode in the process
+
+#. Install Python, lxml, numpy, ipython, ASE, gcc48. I assume you are using Python 2.7.
+   kmos has not been thoroughly tested with Python 3.X, yet, but should not be too hard.
+    Having MacPorts this can be as simple as ::
+
+        sudo ports install -v py27-ipython
+        sudo port select --set ipython ipython ipython27
+
+        sudo port install gcc48
+        sudo port select --set gcc mp-gcc48 # need to that f2py finds a compiler
+
+        sudo port install py27-readline
+
+        # if you install these package manually, skip pip :-)
+        sudo port install py27-pip
+        sudo port select --set pip pip27
+
+        pip install python-ase --user
+        pip install python-kmos --user
+
+
 Installation on windoze 7
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 In order for kmos to work in a recent windoze we need a
@@ -167,6 +195,7 @@ There are probably a number of small changes you have to make
 which are not described in this document. Please post questions
 and comments in the
 `issues forum <https://github.com/mhoffman/kmos/issues>`_ .
+
 
 
 Installing JANAF Thermochemical Tables
