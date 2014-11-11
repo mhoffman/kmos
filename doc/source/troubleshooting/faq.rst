@@ -11,6 +11,7 @@ What other kMC codes are there?
   - `akmc <http://theory.cm.utexas.edu/vtsttools/akmc/>`_ (G. Henkelman)
   - `Carlos <http://www.win.tue.nl/~johanl/projects/Carlos/>`_ (J. Lukkien)
   - `chimp <http://www.koders.com/cpp/fid7FA324E3E76DB9874158BE3CF722405FA44AECE8.aspx?s=mdef%3Ainsert>`_ (D. Dooling)
+  - `KMCLib <https://github.com/leetmaa/KMCLib>`_ (M. Leetma)
   - `mapkmc <http://www.dion.che.udel.edu/downloads.php>`_ (D. Vlachos)
   - `Monty <http://www.vsc.science.ru.nl/deij/monty.html>`_ (SXM Boerrrigter)
   - `MoCKa <http://www.itcp.kit.edu/deutschmann/288.php>`_ (L. Kunz)
