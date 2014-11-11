@@ -309,7 +309,7 @@ def main(args=None):
                               code_generator=options.backend)
 
         if ((os.name == 'posix'
-           and os.uname()[0] == 'Linux')
+           and os.uname()[0] in ['Linux', 'Darwin'])
            or os.name == 'nt') \
            and not options.source_only:
             os.chdir(export_dir)
