@@ -1365,6 +1365,21 @@ class Model_Parameters(object):
         else:
             return res
 
+    def string(self, match=None):
+        """Return parameters that match `pattern' as a string
+
+        :param match: fname pattern to filter matching parameter name.
+        :type match: str
+
+        """
+        res = ''
+        for attr in sorted(settings.parameters):
+            if match is None or fnmatch(attr, match):
+                res += ('# %s = %s\n'
+                      % (attr, settings.parameters[attr]['value']))
+        return res
+
+
 
 class Model_Rate_Constants(object):
     """Holds all rate constants currently associated with the model.
