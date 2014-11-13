@@ -78,8 +78,12 @@ except Exception, e:
     """ % e)
 
 
-INTERACTIVE = hasattr(sys, 'ps1') or hasattr(sys, 'ipcompleter')
-INTERACTIVE = True  # Turn it off for now because it doesn work reliably
+# Check for interactivity
+# Source http://stackoverflow.com/questions/2356399/tell-if-python-is-in-interactive-mode
+import __main__ as main
+INTERACTIVE = not hasattr(main,'__file__')
+#INTERACTIVE = hasattr(sys, 'ps1') or hasattr(sys, 'ipcompleter')
+#INTERACTIVE = True  # Turn it off for now because it doesn work reliably
 
 
 class ProclistProxy(object):
@@ -1369,20 +1373,15 @@ class Model_Parameters(object):
         else:
             return res
 
-    def string(self, match=None):
-        """Return parameters that match `pattern' as a string
+    def set(self,input_dir):
+        """Set values of parameters using a dictionary.
 
-        :param match: fname pattern to filter matching parameter name.
-        :type match: str
+        :param input_dir: parameter values
+        :type input_dir: dict
 
         """
-        res = ''
-        for attr in sorted(settings.parameters):
-            if match is None or fnmatch(attr, match):
-                res += ('# %s = %s\n'
-                      % (attr, settings.parameters[attr]['value']))
-        return res
-
+        for attr in input_dir.keys():
+            setattr(self,attr,input_dir[attr])
 
 
 class Model_Rate_Constants(object):

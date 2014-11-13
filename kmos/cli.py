@@ -395,8 +395,7 @@ def main(args=None):
     elif args[0] in ['run', 'shell']:
         from sys import path
         path.append(os.path.abspath(os.curdir))
-        from kmos.run import KMC_Model
-
+        import kmos.run
         # useful to have in interactive mode
         import numpy as np
         try:
@@ -405,15 +404,16 @@ def main(args=None):
             plt = None
 
         try:
-            model = KMC_Model(print_rates=False)
+            model = kmos.run.KMC_Model(print_rates=False)
         except:
             print("Warning: could not import kmc_model!"
                   " Please make sure you are in the right directory")
+        setattr(kmos.run,'INTERACTIVE',True)
         sh(banner='Note: model = KMC_Model(print_rates=False)')
         try:
             model.deallocate()
         except:
-            print("Warning: could not deallocate model. Was is allocated?")
+            print("Warning: could not deallocate model. Was it allocated?")
 
     elif args[0] == 'version':
         from kmos import VERSION
