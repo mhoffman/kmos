@@ -700,7 +700,7 @@ class KMC_Model(Process):
 
         # initialize new version of model w/ twice the size in each direction
         self.deallocate()
-        self.settings.simulation_size *= 2
+        self.size *= 2
         self.reset()
 
         # initialize new model w/ copies of current state in each of
@@ -979,7 +979,7 @@ class KMC_Model(Process):
         config = self._get_configuration()
 
         self.deallocate()
-        self.settings.simulation_size /= 2
+        self.size /= 2
         self.reset()
 
         X, Y, Z = self.lattice.system_size
