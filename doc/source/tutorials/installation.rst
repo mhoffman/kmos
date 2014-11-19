@@ -222,9 +222,12 @@ named `__init__.py`, so that python recognizes it as a module ::
     touch __init__.py
 
 Then copy all needed data files from the
-`NIST website <http://kinetics.nist.gov/janaf/Search>`_
+`NIST website <http://kinetics.nist.gov/janaf/>`_
 in the tab-delimited text format
-to the `janaf_data` directory.
+to the `janaf_data` directory. To download the ASCII file,
+search for your molecule. In the results page click on 'view'
+under 'JANAF Table' and click on 'Download table in tab-delimited text format.'
+at the bottom of that page.
 
 
 
