@@ -54,7 +54,7 @@ except:
             touch __init__.py
 
             Then copy all needed data files from the
-            `NIST website <http://kinetics.nist.gov/janaf/Search>`_
+            `NIST website <http://kinetics.nist.gov/janaf/>`_
             in the tab-delimited text format
             to the `janaf_data` directory.""")
 
