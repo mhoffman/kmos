@@ -1288,7 +1288,7 @@ class ProcListWriter():
         out.write('    }\n\n')
 
         # XML
-        out.write('xml = """%s"""\n' % data)
+        #out.write('xml = """%s"""\n' % data)
 
         out.close()
 
@@ -1406,7 +1406,7 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     writer.write_lattice(code_generator=code_generator)
     writer.write_proclist(code_generator=code_generator)
     writer.write_settings()
-    project_tree.validate_model()
+    #project_tree.validate_model()
     return True
 
 
