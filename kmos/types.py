@@ -1068,6 +1068,7 @@ class Project(object):
         print('Statistics\n=============')
         print('Parameters: %s' % len(self.get_parameters()))
         print('Species: %s' % len(self.get_speciess()))
+        print('Sites: %s' %  sum([len(layer.sites) for layer in self.layer_list]))
 
         names = [get_name(x) for x in self.get_processes()]
         names = list(set(names))

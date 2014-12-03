@@ -20,9 +20,9 @@ you plan the model.
 kmos can be invoked directly from the command line in one of the following
 ways::
 
-    kmos [help] (all|benchmark|build|edit|export|export-settings|help|import|rebuild|run|view) [options]
+    kmos [help] (all|benchmark|build|edit|export|help|import|rebuild|run|settings-export|shell|version|view|xml) [options]
 
-or it may be used as an API via the kmos module.
+or it may be used as an API via the *kmos* module.
 
 .. rubric:: Footnotes
 
