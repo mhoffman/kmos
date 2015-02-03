@@ -1711,6 +1711,7 @@ and <classname>.lock should be moved out of the way ::
             # EVALUATE model
             #===========================
             model.do_steps(int(init_steps))
+            model.get_atoms(geometry=False)
             data = model.get_std_sampled_data(samples=samples,
                                               sample_size=int(sample_steps),
                                               tof_method='integ')
