@@ -102,7 +102,7 @@ Installation on openSUSE 13.1 Linux
 In order to use the editor GUI you will want to install python-kiwi (not KIWI)
 and right now you can find a recent build `here <https://build.opensuse.org/package/show/home:leopinheiro/python-kiwi>`_ .
 
-Installation on Mac OS X 10.9 or above
+Installation on Mac OS X 10.10 or above
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 There is more than one way to get required dependencies. I have tested MacPorts and worked quite well.
@@ -121,6 +121,10 @@ There is more than one way to get required dependencies. I have tested MacPorts 
         sudo port select --set gcc mp-gcc48 # need to that f2py finds a compiler
 
         sudo port install py27-readline
+        sudo port install py27-goocanvas
+        sudo port install py27-lxml
+        sudo port install kiwi
+        # possibly more ...
 
         # if you install these package manually, skip pip :-)
         sudo port install py27-pip
