@@ -20,9 +20,9 @@ you plan the model.
 kmos can be invoked directly from the command line in one of the following
 ways::
 
-    kmos [help] (all|benchmark|build|edit|export|export-settings|help|import|rebuild|run|view) [options]
+    kmos [help] (all|benchmark|build|edit|export|help|import|rebuild|run|settings-export|shell|version|view|xml) [options]
 
-or it may be used as an API via the kmos module.
+or it may be used as an API via the *kmos* module.
 
 .. rubric:: Footnotes
 
@@ -50,7 +50,7 @@ or it may be used as an API via the kmos module.
 #import kmos.types
 #import kmos.io
 
-__version__ = "0.3.9"
+__version__ = "0.3.10"
 VERSION = __version__
 
 
