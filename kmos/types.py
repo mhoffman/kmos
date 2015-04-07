@@ -945,9 +945,10 @@ class Project(object):
 
             # check if all lattice have a valid name
             if not variable_regex.match(layer.name):
-                raise UserWarning('Lattice %s is not a valid variable name.\n'
+                raise UserWarning(('Lattice %s is not a valid variable name.\n'
                                   'Only letters, numerals and "_" allowed.\n'
-                                  'First character has to be a letter.\n')
+                                  'First character has to be a letter.\n'.format(
+                                  layer.name)))
 
         # check if the default layer is actually defined
         if len(self.get_layers()) > 1 and \
@@ -987,9 +988,10 @@ class Project(object):
         for species in self.get_speciess():
             # if species names are valid variable names
             if not variable_regex.match(species.name):
-                raise UserWarning('Species %s is not a valid variable name.\n'
+                raise UserWarning(('Species %s is not a valid variable name.\n'
                                   'Only letters, numerals and "_" allowed.\n'
-                                  'First character has to be a letter.\n')
+                                  'First character has to be a letter.\n'.format(
+                                  species.name)))
 
         # check if all species have a unique name
         for x in self.get_speciess():
