@@ -880,10 +880,10 @@ subroutine get_kmc_time_step(return_kmc_time_step)
   !
   ! ARGUMENTS
   !
-  !    * ``return_kmc_step`` writeable real, where the kmc_time_step will be stored.
+  !    * ``return_kmc_step`` writeable integer, where the kmc_time_step will be stored.
   !******
   !---------------I/O variables---------------
-  real(kind=rdouble), intent(out) :: return_kmc_time_step
+  real(kind=ilong), intent(out) :: return_kmc_time_step
 
   return_kmc_time_step = kmc_time_step
 

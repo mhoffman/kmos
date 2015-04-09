@@ -1066,7 +1066,7 @@ subroutine get_kmc_step(return_kmc_step)
     !    * ``kmc_step`` Writeable integer
     !******
     !---------------I/O variables---------------
-    integer(kind=iint), intent(out) :: return_kmc_step
+    integer(kind=ilong), intent(out) :: return_kmc_step
 
     return_kmc_step = kmc_step
 
