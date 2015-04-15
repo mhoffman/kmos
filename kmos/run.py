@@ -1365,6 +1365,16 @@ class Model_Parameters(object):
         else:
             return res
 
+    def set(self,input_dir):
+        """Set values of parameters using a dictionary.
+
+        :param input_dir: parameter values
+        :type input_dir: dict
+
+        """
+        for attr in input_dir.keys():
+            setattr(self,attr,input_dir[attr])
+
 
 class Model_Rate_Constants(object):
     """Holds all rate constants currently associated with the model.
