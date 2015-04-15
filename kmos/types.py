@@ -21,7 +21,8 @@ from kmos.config import APP_ABS_PATH
 
 kmcproject_v0_1_dtd = '/kmc_project_v0.1.dtd'
 kmcproject_v0_2_dtd = '/kmc_project_v0.2.dtd'
-xml_api_version = (0, 2)
+kmcproject_v0_3_dtd = '/kmc_project_v0.3.dtd'
+xml_api_version = (0, 3)
 
 
 class FixedObject(object):
@@ -469,6 +470,8 @@ class Project(object):
         for process in self.get_processes():
             process_elem = ET.SubElement(process_list, 'process')
             process_elem.set('rate_constant', process.rate_constant)
+            if process.otf_rate:
+                process_elem.set('otf_rate',process.otf_rate)
             process_elem.set('name', process.name)
             process_elem.set('enabled', str(process.enabled))
             if process.tof_count:
@@ -487,6 +490,17 @@ class Project(object):
                 action_elem.set('coord_name', action.coord.name)
                 action_elem.set('coord_offset',
                                 ' '.join([str(i) for i in action.coord.offset]))
+            if hasattr(process,'bystander_list'):
+                for bystander in process.bystander_list:
+                    bystander_elem = ET.SubElement(process_elem, 'bystander')
+                    bystander_elem.set('allowed_species', ' '.join(bystander.allowed_species))
+                    bystander_elem.set('coord_layer', bystander.coord.layer)
+                    bystander_elem.set('coord_name', bystander.coord.name)
+                    bystander_elem.set('coord_offset',
+                                    ' '.join([str(i) for i in bystander.coord.offset]))
+                    if bystander.flag:
+                        bystander_elem.set('flag',bystander.flag)
+
         output_list = ET.SubElement(root, 'output_list')
         for output in self.get_outputs():
             if output.output:
@@ -728,6 +742,9 @@ class Project(object):
         #xmlparser = ET.XMLParser(remove_comments=True)
         #! FIXME : automatic removal of comment not supported in
         # stdlib version of ElementTree
+
+        supported_versions = [(0, 2),(0, 3)]
+
         xmlparser = ET.XMLParser()
         try:
             root = ET.parse(filename, parser=xmlparser).getroot()
@@ -741,7 +758,7 @@ class Project(object):
         else:
             self.version = (0, 1)
 
-        if self.version == (0, 1):
+        if not self.version in supported_versions:
             dtd = ET.DTD(APP_ABS_PATH + kmcproject_v0_1_dtd)
             if not dtd.validate(root):
                 print(dtd.error_log.filter_from_errors()[0])
@@ -749,8 +766,13 @@ class Project(object):
             nroot = ET.Element('kmc')
             nroot.set('version', '0.2')
             raise Exception('No legacy support!')
-        elif self.version == (0, 2):
-            dtd = ET.DTD(APP_ABS_PATH + kmcproject_v0_2_dtd)
+        else:
+            if self.version == (0, 2):
+                dtd = ET.DTD(APP_ABS_PATH + kmcproject_v0_2_dtd)
+            elif self.version == (0, 3):
+                dtd = ET.DTD(APP_ABS_PATH + kmcproject_v0_3_dtd)
+            else:
+                raise Exception('xml file version not supported. Is your kmos too old?')
             if not dtd.validate(root):
                 print(dtd.error_log.filter_from_errors()[0])
                 return
@@ -847,6 +869,10 @@ class Project(object):
                             tof_count = process.attrib['tof_count']
                         else:
                             tof_count = None
+                        if 'otf_rate' in process.attrib:
+                            otf_rate = process.attrib['otf_rate']
+                        else:
+                            otf_rate = None
                         if 'enabled' in process.attrib:
                             try:
                                 proc_enabled = bool(
@@ -858,11 +884,11 @@ class Project(object):
                         process_elem = Process(name=name,
                                                rate_constant=rate_constant,
                                                enabled=proc_enabled,
-                                               tof_count=tof_count)
+                                               tof_count=tof_count,
+                                               otf_rate=otf_rate)
                         for sub in process:
-                            if sub.tag == 'action' or sub.tag == 'condition':
-                                species = sub.attrib['species']
-                                implicit = (sub.attrib.get('implicit', '') == 'True')
+                            #if sub.tag == 'action' or sub.tag == 'condition':
+                            if sub.tag in ['action','condition','bystander']:
                                 coord_layer = sub.attrib['coord_layer']
                                 coord_name = sub.attrib['coord_name']
                                 coord_offset = tuple(
@@ -872,15 +898,28 @@ class Project(object):
                                               name=coord_name,
                                               offset=coord_offset,
                                               )
-                                condition_action = \
-                                    ConditionAction(species=species,
-                                                    coord=coord,
-                                                    implicit=implicit)
-                                if sub.tag == 'action':
-                                    process_elem.add_action(condition_action)
-                                elif sub.tag == 'condition':
-                                    process_elem.add_condition(
-                                        condition_action)
+                                if sub.tag == 'bystander':
+                                    allowed_species=sub.attrib['allowed_species'].split()
+                                    if 'flag' in sub.attrib:
+                                        flag=sub.attrib['flag']
+                                        byst =\
+                                        Bystander(allowed_species=allowed_species,
+                                                  coord=coord,flag=flag)
+                                    else:
+                                        byst = Bystander(allowed_species=allowed_species,
+                                                  coord=coord)
+                                    process_elem.add_bystander(byst)
+                                else:
+                                    implicit = (sub.attrib.get('implicit', '') == 'True')
+                                    species = sub.attrib['species']
+                                    condition_action = \
+                                        ConditionAction(species=species,
+                                                        coord=coord,
+                                                        implicit=implicit)
+                                    if sub.tag == 'action':
+                                        process_elem.add_action(condition_action)
+                                    elif sub.tag == 'condition':
+                                        process_elem.add_condition(condition_action)
                         self.add_process(process_elem)
                 elif child.tag == 'species_list':
                     self.species_list.default_species = \
@@ -903,8 +942,8 @@ class Project(object):
                         output_elem = OutputItem(name=item.attrib['item'],
                                                  output=True)
                         self.add_output(output_elem)
-        elif self.version == (0, 3):
-            pass
+#        elif self.version == (0, 3):
+#            pass
             # import new XML definition
             # everything tagged and not Output
 
@@ -1637,10 +1676,14 @@ class Process(FixedObject):
     :type name: str
     :param rate_constant: Expression for rate constant.
     :type rate_constant: str
+    :param otf_rate: Expression used to calculate rate on the fly using bystander's configuration, otf backend only!.
+    :type otf_rate: str
     :param condition_list: List of conditions (class Condition).
     :type condition_list: list.
     :param action_list: List of conditions (class Action).
     :type action_list: list.
+    :param bystander_list: List of bystanders (class Bystander), otf backend only!.
+    :type bystander_list: list.
     :param enabled: Switch this process on or of.
     :type enabled: bool.
     :param chemical_expression: Chemical expression (i.e: A@site1 + B@site2 -> empty@site1 + AB@site2) to generate process from.
@@ -1648,14 +1691,13 @@ class Process(FixedObject):
     :param tof_count: Stoichiometric factor for observable products {'NH3': 1, 'H2Ogas': 2}. Hint: avoid space in keys.
     :type tof_count: dict.
 
-
-
-
     """
     attributes = ['name',
                   'rate_constant',
+                  'otf_rate',
                   'condition_list',
                   'action_list',
+                  'bystander_list',
                   'enabled',
                   'chemical_expression',
                   'tof_count']
@@ -1664,18 +1706,23 @@ class Process(FixedObject):
         FixedObject.__init__(self, **kwargs)
         self.name = kwargs.get('name', '')
         self.rate_constant = kwargs.get('rate_constant', '0.')
+        self.otf_rate = kwargs.get('otf_rate',None)
         self.condition_list = kwargs.get('condition_list', [])
         self.action_list = kwargs.get('action_list', [])
+        self.bystander_list = kwargs.get('bystander_list', [])
         self.tof_count = kwargs.get('tof_count', None)
         self.enabled = kwargs.get('enabled', True)
 
     def __repr__(self):
-        return ('[PROCESS] Name:%s\n'
-                '     Rate: %s\n'
-                'Conditions: %s\n'
-                'Actions: %s') \
-            % (self.name, self.rate_constant,
-               self.condition_list, self.action_list)
+        repr_str = ('[PROCESS] Name:%s\n'
+                   '     Rate: %s\n'
+                   'Conditions: %s\n'
+                   'Actions: %s') \
+                    % (self.name, self.rate_constant,
+                    self.condition_list, self.action_list,)
+        if self.bystander_list:
+            repr_str+='\nBystanders: %s' % self.bystander_list
+        return repr_str
 
     def add_condition(self, condition):
         """Adds a conditions to a process"""
@@ -1684,6 +1731,10 @@ class Process(FixedObject):
     def add_action(self, action):
         """Adds an action to a process"""
         self.action_list.append(action)
+
+    def add_bystander(self, bystander):
+        """Adds a bystander to a process"""
+        self.bystander_list.append(bystander)
 
     def executing_coord(self):
         return sorted(self.action_list,
@@ -1742,11 +1793,11 @@ class LatIntProcess(Process):
 
 
 class Bystander(FixedObject):
-    attributes = ['coord', 'allowed_species', 'counter']
+    attributes = ['coord', 'allowed_species', 'flag']
 
     def __repr__(self):
-        return ("[BYSTANDER] Coord:%s Allowed species: %s, Counter: %s\n" %
-               (self.coord, self.allowed_species, self.counter))
+        return ("[BYSTANDER] Coord:%s Allowed species: (%s)" %
+               (self.coord, ','.join([spec for spec in self.allowed_species])))
 
 
 class ConditionAction(FixedObject):

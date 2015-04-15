@@ -52,7 +52,8 @@ package_data = {'kmos':['fortran_src/*f90',
                         'kmc_editor.glade',
                         'fortran_src/assert.ppc',
                         'kmc_project_v0.1.dtd',
-                        'kmc_project_v0.2.dtd']}
+                        'kmc_project_v0.2.dtd',
+                        'kmc_project_v0.3.dtd']}
 platforms = ['linux', 'windows']
 if os.name == 'nt':
     scripts = [
