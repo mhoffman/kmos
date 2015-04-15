@@ -173,6 +173,22 @@ class ProcListWriter():
             self.write_proclist_lat_int(data, out)
             self.write_proclist_end(out)
 
+        elif code_generator == 'otf':
+            constants_out=open('%s/proclist_constants.f90' % self.dir, 'w')
+            self.write_proclist_constants(data,constants_out,
+                                          close_module=True,
+                                          code_generator=code_generator,
+                                          module_name='proclist_constants')
+            constants_out.close()
+            parameters_out=open('%s/proclist_parameters.f90' % self.dir, 'w')
+            self.write_proclist_parameters(data,constants_out,
+                                           close_module=True,
+                                           code_generator=code_generator,
+                                           module_name='proclist_parameters')
+            parameters_out.close()
+            self.write_proclist_otf(data,out)
+            #self.write_proclist_end()
+
         else:
             raise Exception("Don't know this code generator '%s'" % code_generator)
 
