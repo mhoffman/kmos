@@ -898,7 +898,7 @@ subroutine get_procstat(proc, return_procstat)
     !******
     !---------------I/O variables---------------
     integer(kind=iint),intent(in) :: proc
-    integer(kind=iint),intent(out) :: return_procstat
+    integer(kind=ilong),intent(out) :: return_procstat
 
     return_procstat = procstat(proc)
 
@@ -936,7 +936,7 @@ subroutine get_avail_site(proc_nr, field, switch, return_avail_site)
     !******
     !---------------I/O variables---------------
     integer(kind=iint), intent(in) :: proc_nr, field, switch
-    integer(kind=rdouble), intent(out) :: return_avail_site
+    integer(kind=iint), intent(out) :: return_avail_site
 
     return_avail_site = avail_sites(proc_nr, field, switch)
 
@@ -955,7 +955,7 @@ subroutine get_accum_rate(proc_nr, return_accum_rate)
     !******
     !---------------I/O variables---------------
     integer(kind=iint), intent(in), optional :: proc_nr
-    real(kind=iint), intent(out) :: return_accum_rate
+    real(kind=rdouble), intent(out) :: return_accum_rate
 
     if(.not. present(proc_nr) .or. proc_nr.eq.0) then
       return_accum_rate=accum_rates(nr_of_proc)
@@ -978,7 +978,7 @@ subroutine get_integ_rate(proc_nr, return_integ_rate)
     !******
     !---------------I/O variables---------------
     integer(kind=iint), intent(in), optional :: proc_nr
-    real(kind=iint), intent(out) :: return_integ_rate
+    real(kind=rdouble), intent(out) :: return_integ_rate
 
     if(.not. present(proc_nr) .or. proc_nr.eq.0) then
       return_integ_rate=integ_rates(nr_of_proc)
