@@ -174,6 +174,7 @@ class ProcListWriter():
             self.write_proclist_end(out)
 
         elif code_generator == 'otf':
+            raise NotImplementedError('Sorry, we are not there yet with the otf backend')
             constants_out=open('%s/proclist_constants.f90' % self.dir, 'w')
             self.write_proclist_constants(data,constants_out,
                                           close_module=True,

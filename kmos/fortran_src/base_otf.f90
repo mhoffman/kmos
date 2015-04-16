@@ -1140,29 +1140,22 @@ subroutine determine_procsite(ran_proc, ran_site, proc, site)
   
 
   ! once the process is selected, we need to build the corresponding accum rate
+  ! this is most likely the CPU criticall part of this backend
+  ! optimization work should be conducted here
   accum_rates_proc(1)=rates_matrix(proc,1)
   do i = 2, nr_of_sites(proc)
      accum_rates_proc(i) = accum_rates_proc(i-1) + rates_matrix(proc,i)
   enddo
-
+  
   aux_rand = ran_proc*accum_rates(nr_of_proc) - accum_rates(proc-1)
-
   call interval_search_real(accum_rates_proc(1:nr_of_sites(proc)),aux_rand,site)
   
-  site = avail_sites(proc,site,2)
-  
-  ! the result shall be between 1 and  nrofsite(proc) so we have to add 1 the
-  ! scaled random number. But if the random number is closer to 1 than machine
-  ! precision, e.g. 0.999999999, we would get nrofsits(proc)+1 so we have to
-  ! cap it with min(...)
-  !site =  avail_sites(proc, &
-  !  min(nr_of_sites(proc),int(1+ran_site*(nr_of_sites(proc)))),1)
+  site = avail_sites(proc,site,1)
 
   ASSERT(nr_of_sites(proc).gt.0,"base/determine_procsite: chosen process is invalid &
     because it has no sites available.")
   ASSERT(site.gt.0,"kmos/base/determine_procsite: tries to return invalid site")
   ASSERT(site.le.volume,"base/determine_procsite: tries to return site larger than volume")
-
 
 end subroutine determine_procsite
 
@@ -1279,7 +1272,7 @@ subroutine interval_search_real(arr, value, return_field)
   !   of ascending real numbers and a scalar real and return the key of the
   !   corresponding field, with the following modification :
   !
-  !   * the value of the returned field is equal of larger of the given
+  !   * the value of the returned field is equal or larger than given
   !     value. This is important because the given value is between 0 and the
   !     largest value in the array and otherwise the last field is never
   !     selected.
@@ -1288,11 +1281,11 @@ subroutine interval_search_real(arr, value, return_field)
   !     because having field with identical values means that all field except
   !     the leftmost one do not contain any sites. Refer to
   !     update_accum_rate to understand why.
-  !   * the value of the returned field may no be zero. Therefore the index
+  !   * the value of the returned field may not be zero. Therefore the index
   !     the to be equal or larger than the first non-zero field.
   !
   !   However: as everyone knows the binary search is trickier than it appears
-  !   at first site especially real numbers. So intensive testing is
+  !   at first sight especially real numbers. So intensive testing is
   !   suggested here!
   !
   ! ARGUMENTS
