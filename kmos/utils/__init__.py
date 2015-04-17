@@ -19,6 +19,7 @@
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import with_statement
+import re
 from time import time
 from StringIO import StringIO
 from kmos.utils.ordered_dict import OrderedDict
@@ -69,7 +70,9 @@ end subroutine int_kind
 end module kind
 """
 
+
 class CorrectlyNamed:
+
     """Syntactic Sugar class for use with kiwi, that makes sure that the name
     field of the class has a name field, that always complys with the rules
     for variables.
@@ -112,16 +115,16 @@ def write_py(fileobj, images, **kwargs):
         fileobj.write("    Atoms(symbols='%s',\n"
                       "          pbc=np.%s,\n"
                       "          cell=np.array(\n      %s,\n" % (
-            chemical_formula,
-            repr(image.pbc),
-            repr(image.cell)[6:]))
+                          chemical_formula,
+                          repr(image.pbc),
+                          repr(image.cell)[6:]))
 
         if not scaled_positions:
             fileobj.write("          positions=np.array(\n      %s),\n"
-                % repr(list(image.positions)))
+                          % repr(list(image.positions)))
         else:
             fileobj.write("          scaled_positions=np.array(\n      %s),\n"
-                % repr(list(image.get_scaled_positions().tolist())))
+                          % repr(list(image.get_scaled_positions().tolist())))
         fileobj.write('),\n')
 
     fileobj.write(']')
@@ -142,7 +145,7 @@ def get_ase_constructor(atoms):
     for i, line in enumerate(lines):
         if i >= 5 and i < len(lines) - 1:
             astr += line
-    #astr = astr[:-2]
+    # astr = astr[:-2]
     return astr.strip()
 
 
@@ -238,7 +241,6 @@ def evaluate_kind_values(infile, outfile):
         shutil.copy(infile, outfile)
         return
 
-
     def import_selected_kind():
         """Tries to import the module which provides
         processor dependent kind values. If the module
@@ -264,7 +266,7 @@ def evaluate_kind_values(infile, outfile):
                 sys.argv = (('%s -c --fcompiler=gnu95 --compiler=mingw32'
                              ' -m f2py_selected_kind'
                              ' f2py_selected_kind.f90')
-                             % sys.executable).split()
+                            % sys.executable).split()
                 from numpy import f2py as f2py2e
                 f2py2e.main()
 
@@ -278,8 +280,8 @@ def evaluate_kind_values(infile, outfile):
                 import f2py_selected_kind
             except:
                 raise Exception('Could create selected_kind module\n'
-                + '%s\n' % os.path.abspath(os.curdir)
-                + '%s\n' % os.listdir('.'))
+                                + '%s\n' % os.path.abspath(os.curdir)
+                                + '%s\n' % os.listdir('.'))
         return f2py_selected_kind.kind
 
     def parse_args(args):
@@ -319,9 +321,9 @@ def evaluate_kind_values(infile, outfile):
     outfile = file(outfile, 'w')
     int_pattern = re.compile((r'(?P<before>.*)selected_int_kind'
                               '\((?P<args>.*)\)(?P<after>.*)'),
-                              flags=re.IGNORECASE)
+                             flags=re.IGNORECASE)
     real_pattern = re.compile((r'(?P<before>.*)selected_real_kind'
-                                '\((?P<args>.*)\)(?P<after>.*)'),
+                               '\((?P<args>.*)\)(?P<after>.*)'),
                               flags=re.IGNORECASE)
 
     for line in infile:
@@ -330,15 +332,15 @@ def evaluate_kind_values(infile, outfile):
         if int_match:
             match = int_match.groupdict()
             line = '%s%s%s\n' % (
-                    match['before'],
-                    int_kind(match['args']),
-                    match['after'],)
+                match['before'],
+                int_kind(match['args']),
+                match['after'],)
         elif real_match:
             match = real_match.groupdict()
             line = '%s%s%s\n' % (
-                    match['before'],
-                    real_kind(match['args']),
-                    match['after'],)
+                match['before'],
+                real_kind(match['args']),
+                match['after'],)
         outfile.write(line)
     infile.close()
     outfile.close()
@@ -357,7 +359,7 @@ def build(options):
 
     src_files = ['kind_values_f2py.f90', 'base.f90', 'lattice.f90']
 
-    if isfile('proclist_constants.f90'): #
+    if isfile('proclist_constants.f90'):
         src_files.append('proclist_constants.f90')
     src_files.extend(glob('nli_*.f90'))
     src_files.extend(glob('run_proc_*.f90'))
@@ -503,3 +505,98 @@ def jmolcolor_in_hex(i):
     a = 255
     color = (r << 24) | (g << 16) | (b << 8) | a
     return color
+
+
+def evaluate_template(template, escape_python=False, **kwargs):
+    """Very simple template evaluation function using only exec and str.format()
+
+    There are two flavors of the template language, depending on wether
+    the python parts or the template parts are escaped.
+
+    A template can use the full python syntax. Every line starts with '#@ '
+    is interpreted as a template line. Please use proper indentation before
+    and note the space after '#@'.
+
+    The template lines are converted to TEMPLATE_LINE.format(locals())
+    and thefore every variable in the template line should be escape
+    with {}.
+
+    A valid template could be
+
+    for i in range:
+        #@ Hello World {i}
+
+    """
+    locals().update(kwargs)
+
+    result = ''
+    NEWLINE = '\n'
+    PREFIX = '#@'
+    lines = [line + NEWLINE for line in template.split(NEWLINE)]
+
+    if escape_python:
+        # first just replace verbose lines by pass to check syntax
+        python_lines = ''
+        matched = False
+        for line in lines:
+            if re.match('^\s*%s ?' % PREFIX, line):
+                python_lines += line.lstrip()[3:]
+                matched = True
+            else:
+                python_lines += 'pass # %s' % line.lstrip()
+        # if the tempate didn't contain any meta strings
+        # just return the original
+        if not matched:
+            return template
+        exec(python_lines)
+
+        # second turn literary lines into write statements
+        python_lines = ''
+        for line in lines:
+            if re.match('^\s*%s ' % PREFIX, line):
+                python_lines += line.lstrip()[3:]
+            elif re.match('^\s*%s$' % PREFIX, line):
+                python_lines += '%sresult += "\\n"\n' % (
+                    ' ' * (len(line) - len(line.lstrip())))
+            elif re.match('^$', line):
+                # python_lines += 'result += """\n"""\n'
+                pass
+            else:
+                python_lines += '%sresult += ("""%s""".format(**dict(locals())))\n' \
+                    % (' ' * (len(line.expandtabs(4)) - len(line.lstrip())),  line.lstrip())
+
+        exec(python_lines)
+
+    else:
+        # first just replace verbose lines by pass to check syntax
+        python_lines = ''
+        matched = False
+        for line in lines:
+            if re.match('\s*%s ?' % PREFIX, line):
+                python_lines += '%spass %s' \
+                    % (' ' * (len(line) - len(line.lstrip())),
+                       line.lstrip())
+
+                matched = True
+            else:
+                python_lines += line
+        if not matched:
+            return template
+        exec(python_lines)
+
+        # second turn literary lines into write statements
+        python_lines = ''
+        for line in lines:
+            if re.match('\s*%s ' % PREFIX, line):
+                python_lines += '%sresult += ("""%s""".format(**dict(locals())))\n' \
+                    % (' ' * (len(line) - len(line.lstrip())),
+                       line.lstrip()[3:])
+            elif re.match('\s*%s' % PREFIX, line):
+                python_lines += '%sresult += "\\n"\n' % (
+                    ' ' * (len(line) - len(line.lstrip())))
+            else:
+                python_lines += line
+
+        exec(python_lines)
+
+    return result

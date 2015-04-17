@@ -105,6 +105,8 @@ class ParamSlider(gtk.HScale):
         elif self.scale == 'linear':
             vstr = '%s: %s %s' % (name,
                            self.xmin + value * (self.xmax - self.xmin), unit)
+        else:
+            raise UserWarning("Unexpected scale mode %s" % self.scale)
         return vstr
 
     def value_changed(self, _widget):

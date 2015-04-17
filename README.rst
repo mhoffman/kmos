@@ -17,6 +17,69 @@ You should have received a copy of the GNU General Public License along with
 this program; if not, see `http://www.gnu.org/licenses/ <http://www.gnu.org/licenses/>`_.
 
 
+QUICKSTART
+##########
+
+Prepare a minimal input file with the following content and save it as ``mini_101.ini`` ::
+
+    [Meta]
+    author = Your Name
+    email = you@server.com
+    model_dimension = 2
+    model_name = fcc_100
+
+    [Species empty]
+    color = #FFFFFF
+
+    [Species CO]
+    representation = Atoms("CO", [[0, 0, 0], [0, 0, 1.17]])
+    color = #FF0000
+
+    [Lattice]
+    cell_size = 3.5 3.5 10.0
+
+    [Layer simple_cubic]
+    site hollow = (0.5, 0.5, 0.5)
+    color = #FFFFFF
+
+    [Parameter k_CO_ads]
+    value = 100
+    adjustable = True
+    min = 1
+    max = 1e13
+    scale = log
+
+    [Parameter k_CO_des]
+    value = 100
+    adjustable = True
+    min = 1
+    max = 1e13
+    scale = log
+
+    [Process CO_ads]
+    rate_constant = k_CO_ads
+    conditions = empty@hollow
+    actions = CO@hollow
+    tof_count = {'adsorption':1}
+
+    [Process CO_des]
+    rate_constant = k_CO_des
+    conditions = CO@hollow
+    actions = empty@hollow
+    tof_count = {'desorption':1}
+
+In the same directory run ``kmos export mini_101.ini``. You should now have a folder ``mini_101_local_smart``
+in the same directory. ``cd`` into it and run ``kmos benchmark``. If everything went well you should see something
+like ::
+
+    Using the [local_smart] backend.
+    1000000 steps took 1.51 seconds
+    Or 6.62e+05 steps/s
+
+In the same directory try running ``kmos view`` to watch the model run or fire up ``kmos shell``
+to interact with the model interactively. Explore more commands with ``kmos help`` and please
+refer to the documentation how to build complex model and evaluate them systematically. To test all bells and whistles try ``kmos edit mini_101.ini`` and inspect the model visually.
+
 DOCUMENTATION
 ##############
 
@@ -27,6 +90,8 @@ Please refer to
 * http://kmos.readthedocs.org/
 
 or links therein for tutorials, user guide, reference, and troubleshooting hints.
+
+
 
 
 THANKS
