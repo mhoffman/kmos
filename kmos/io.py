@@ -174,21 +174,31 @@ class ProcListWriter():
             self.write_proclist_end(out)
 
         elif code_generator == 'otf':
-            raise NotImplementedError('Sorry, we are not there yet with the otf backend')
-            constants_out=open('%s/proclist_constants.f90' % self.dir, 'w')
-            self.write_proclist_constants(data,constants_out,
-                                          close_module=True,
-                                          code_generator=code_generator,
-                                          module_name='proclist_constants')
+            #raise NotImplementedError('Sorry, we are not there yet with the otf backend')
+            # write the proclist_constant module from the template
+            with open(os.path.join(os.path.dirname(__file__),
+                                   'fortran_src',
+                                   'proclist_constants_otf.mpy')) as infile:
+                template = infile.read()
+            constants_out = open('%s/proclist_constants.f90' % self.dir, 'w')
+            constants_out.write(evaluate_template(template,
+                                                  self=self,
+                                                  data=data))
             constants_out.close()
-            parameters_out=open('%s/proclist_parameters.f90' % self.dir, 'w')
-            self.write_proclist_parameters(data,constants_out,
-                                           close_module=True,
-                                           code_generator=code_generator,
-                                           module_name='proclist_parameters')
+            with open(os.path.join(os.path.dirname(__file__),
+                                   'fortran_src',
+                                   'proclist_parameters_otf.mpy')) as infile:
+                template = infile.read()
+            parameters_out = open('%s/proclist_parameters.f90' % self.dir, 'w')
+            parameters_out.write(evaluate_template(template,
+                                                  self=self,
+                                                  data=data))
             parameters_out.close()
-            self.write_proclist_otf(data,out)
-            #self.write_proclist_end()
+
+            self.write_proclist_run_proc_nr_otf(data, out)
+            #self.write_proclist_run_proc_name(data,out)
+            #self.write_proclist_rate_proc_name(data,out)
+            self.write_proclist_end(out)
 
         else:
             raise Exception("Don't know this code generator '%s'" % code_generator)
@@ -338,6 +348,44 @@ class ProcListWriter():
                                       action.coord.layer,
                                       action.coord.name,
                                       relative_coord))
+
+            out.write('\n')
+        out.write('    end select\n\n')
+        out.write('end subroutine run_proc_nr\n\n')
+
+
+    def write_proclist_run_proc_nr_otf(self, data, out):
+        # run_proc_nr runs the process selected by determine_procsite
+        # this routine only selects the correct routine from all
+        # of the run_proc_<procname> routines
+
+        out.write('subroutine run_proc_nr(proc, nr_site)\n\n'
+                  '!****f* proclist/run_proc_nr\n'
+                  '! FUNCTION\n'
+                  '!    Runs process ``proc`` on site ``nr_site``.\n'
+                  '!\n'
+                  '! ARGUMENTS\n'
+                  '!\n'
+                  '!    * ``proc`` integer representing the process number\n'
+                  '!    * ``nr_site``  integer representing the site\n'
+                  '!******\n'
+                  '    integer(kind=iint), intent(in) :: proc\n'
+                  '    integer(kind=iint), intent(in) :: nr_site\n\n'
+                  '    integer(kind=iint), dimension(4) :: lsite\n\n'
+                  '    call increment_procstat(proc)\n\n'
+                  '    ! lsite = lattice_site, (vs. scalar site)\n'
+                  '    lsite = nr2lattice(nr_site, :)\n\n'
+                  '    select case(proc)\n')
+        for process in data.process_list:
+            out.write('    case(%s)\n' % process.name)
+
+            if data.meta.debug > 0:
+                out.write(('print *,"PROCLIST/RUN_PROC_NR/NAME","%s"\n'
+                           'print *,"PROCLIST/RUN_PROC_NR/LSITE","lsite"\n'
+                           'print *,"PROCLIST/RUN_PROC_NR/SITE","site"\n')
+                           % process.name)
+            out.write('        call run_proc_%s(%s)\n' % (process.name,
+                                                          relative_coord,))
 
             out.write('\n')
         out.write('    end select\n\n')
