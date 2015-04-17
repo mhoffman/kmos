@@ -78,7 +78,8 @@ for neighbor, name in [(right, 'right'),
                    condition_list=[Condition(coord=coord, species='A'),
                                    Condition(coord=neighbor, species='B')],
                    action_list=[Action(coord=coord, species='empty'),
-                               Action(coord=neighbor, species='empty')],)
+                               Action(coord=neighbor, species='empty')],
+                   tof_count={'TOF':1})
 
 
 pt.export_xml_file('AB_model.xml')
