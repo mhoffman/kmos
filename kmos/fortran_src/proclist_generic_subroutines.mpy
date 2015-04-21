@@ -290,6 +290,13 @@ if code_generator == 'local_smart':
     #@                 end select
 elif code_generator == 'lat_int':
     #@                 call touchup_cell((/i, j, k, 0/))
+elif code_generator == 'otf':
+    #@                 select case(layer)
+    for layer in data.layer_list:
+        #@                 case({layer.name})
+        for site in layer.sites:
+            #@                     call touchup_{layer.name}_{site.name}((/i, j, k, {layer.name}_{site.name}/))
+    #@                 end select
 else:
     raise UserWarning("Don't know this code generator")
 #@             end do

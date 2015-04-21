@@ -24,11 +24,16 @@ import operator
 import shutil
 import os
 import sys
+import copy
+import numpy as np
+
 from pprint import pformat
+
 
 from kmos.types import ConditionAction, SingleLatIntProcess, Coord
 from kmos.config import APP_ABS_PATH
 from kmos.types import cmp_coords
+from kmos.utils import evaluate_template
 
 
 def _casetree_dict(dictionary, indent='', out=None):
@@ -174,7 +179,6 @@ class ProcListWriter():
             self.write_proclist_end(out)
 
         elif code_generator == 'otf':
-            #raise NotImplementedError('Sorry, we are not there yet with the otf backend')
             # write the proclist_constant module from the template
             with open(os.path.join(os.path.dirname(__file__),
                                    'fortran_src',
@@ -183,7 +187,8 @@ class ProcListWriter():
             constants_out = open('%s/proclist_constants.f90' % self.dir, 'w')
             constants_out.write(evaluate_template(template,
                                                   self=self,
-                                                  data=data))
+                                                  data=data,
+                                                  module_name='proclist_constants'))
             constants_out.close()
             with open(os.path.join(os.path.dirname(__file__),
                                    'fortran_src',
@@ -192,12 +197,11 @@ class ProcListWriter():
             parameters_out = open('%s/proclist_parameters.f90' % self.dir, 'w')
             parameters_out.write(evaluate_template(template,
                                                   self=self,
-                                                  data=data))
+                                                  data=data,
+                                                  module_name='proclist_parameter'))
             parameters_out.close()
 
-            self.write_proclist_run_proc_nr_otf(data, out)
-            #self.write_proclist_run_proc_name(data,out)
-            #self.write_proclist_rate_proc_name(data,out)
+            self.write_proclist_otf(data,out)
             self.write_proclist_end(out)
 
         else:
@@ -209,7 +213,6 @@ class ProcListWriter():
                                  code_generator='local_smart',
                                  close_module=False,
                                  module_name='proclist'):
-        from kmos.utils import evaluate_template
 
         with open(os.path.join(os.path.dirname(__file__),
                                'fortran_src',
@@ -384,8 +387,7 @@ class ProcListWriter():
                            'print *,"PROCLIST/RUN_PROC_NR/LSITE","lsite"\n'
                            'print *,"PROCLIST/RUN_PROC_NR/SITE","site"\n')
                            % process.name)
-            out.write('        call run_proc_%s(%s)\n' % (process.name,
-                                                          relative_coord,))
+            out.write('        call run_proc_%s(lsite)\n' % process.name)
 
             out.write('\n')
         out.write('    end select\n\n')
@@ -493,7 +495,7 @@ class ProcListWriter():
 
     def write_proclist_lat_int(self, data, out, debug=False):
         """
-        This a dumber version of the run_proc_nr routine. Though
+        This a dumber version f the run_proc_nr routine. Though
         the source code it generates might be quite a bit smaller.
         On the downside, it might be a little less optimized though
         it is local in a very strict sense. [EXPERIMENTAL/UNFINISHED!!!]
@@ -974,6 +976,306 @@ class ProcListWriter():
                 progress_bar.render(int(50+50*float(lat_int_loop)/len(lat_int_groups)),
                                     'nli_%s' % lat_int_group)
 
+    def write_proclist_otf(self, data, out, debug=False):
+        """
+        Writes the proclist.f90 file for the otf backend
+        """
+        # initialize progress bar
+        if os.name == 'posix':
+            from kmos.utils.progressbar import ProgressBar
+            progress_bar = ProgressBar('blue', width=80)
+            progress_bar.render(10, 'generic part')
+
+        out.write(('module proclist\n'
+                  'use kind_values\n'
+                  'use base, only: &\n'
+                  '    update_accum_rate, &\n'
+                  '    update_integ_rate, &\n'
+                  '    determine_procsite, &\n'
+                  '    update_clocks, &\n'
+                  '    avail_sites, &\n'))
+        if len(data.layer_list) == 1 : # multi-lattice mode
+            out.write('    null_species, &\n')
+        else:
+            out.write('    set_null_species, &\n')
+        out.write('    increment_procstat\n\n'
+                  'use lattice, only: &\n')
+        site_params = []
+        for layer in data.layer_list:
+            out.write('    %s, &\n' % layer.name)
+            for site in layer.sites:
+                site_params.append((site.name, layer.name))
+        for i, (site, layer) in enumerate(site_params):
+            out.write(('    %s_%s, &\n') % (layer, site))
+        out.write('    allocate_system, &\n'
+              '    nr2lattice, &\n'
+              '    lattice2nr, &\n'
+              '    add_proc, &\n'
+              '    can_do, &\n'
+              '    set_rate_const, &\n'
+              '    replace_species, &\n'
+              '    del_proc, &\n'
+              '    reset_site, &\n'
+              '    system_size, &\n'
+              '    spuck, &\n')
+
+        out.write('    get_species\n')
+
+        out.write('\nimplicit none\n')
+
+        representation_length = max([len(species.representation) for species in data.species_list])
+        out.write('integer(kind=iint), parameter, public :: representation_length = %s\n' % representation_length)
+        if os.name == 'posix':
+            out.write('integer(kind=iint), public :: seed_size = 12\n')
+        elif os.name == 'nt':
+            out.write('integer(kind=iint), public :: seed_size = 12\n')
+        else:
+            out.write('integer(kind=iint), public :: seed_size = 8\n')
+        out.write('integer(kind=iint), public :: seed ! random seed\n')
+        out.write('integer(kind=iint), public, dimension(:), allocatable :: seed_arr ! random seed\n')
+        out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_proc = %s\n'\
+            % (len(data.process_list)))
+
+        code_generator='otf'
+        out.write('\ncharacter(len=%s), parameter, public :: backend = "%s"\n'
+                      % (len(code_generator), code_generator))
+        out.write('\ncontains\n\n')
+
+        self.write_proclist_generic_subroutines(data, out, code_generator='otf')
+        # self.write_proclist_touchup(data,out)
+        self.write_proclist_run_proc_nr_otf(data,out)
+        self.write_proclist_run_proc_name_otf(data,out)
+        # self.write_proclist_get_rate_otf(data,out)
+
+        # and we are done!
+        if os.name == 'posix':
+            progress_bar.render(100, 'finished proclist.f90')
+
+
+    def write_proclist_run_proc_name_otf(self,data,out=None,separate_files = False, indent=4):
+        """ This routine implements the routines that execute
+        an specific process.
+        As with the local_smart backend, turning processes off
+        is easy. For turning processes on, we reuse the same logic
+        as in local_smart, but now working on whole processes,
+        rather that with put/take single site routines.
+        Aditionally, this routines must call the get_rate_<procname>
+        routines, defined in the ###other_module###
+        """
+        nprocs = len(data.process_list)
+
+        debug = 2
+
+        if not separate_files:
+            #out.write('! INSERT HEADERS HERE ### TODO\n')
+            pass ## TODO
+        # We should build one of these routines for each process
+        for exec_proc in data.process_list:
+            if separate_files:
+                out = os.open('%s/run_proc_%s.f90' % (self.dir,exec_proc.name),'w')
+                out.write('! INSERT HEADERS HERE ### TODO\n\n')
+                ## TODO
+            routine_name = 'run_proc_%s' % exec_proc.name
+            out.write('\nsubroutine %s(cell)\n\n' %routine_name)
+            out.write('%sinteger(kind=iint), dimension(4), intent(in) :: cell\n' % (' '*indent))
+            inh_procs = [copy.copy([]) for i in xrange(nprocs)]
+            enh_procs = copy.deepcopy(inh_procs)
+            aff_procs = copy.deepcopy(enh_procs)
+            # And look into how each of its actions...
+            for exec_action in exec_proc.action_list:
+                # ... affect each other processes' conditions
+                for ip,proc in enumerate(data.process_list):
+                    for condition in proc.condition_list:
+                        if condition.coord.name == exec_action.coord.name and\
+                          condition.coord.layer == exec_action.coord.layer:
+                            rel_pos = tuple((exec_action.coord - condition.coord).offset) ## Need to check this!!!
+                            if not condition.species == exec_action.species:
+                                inh_procs[ip].append(copy.copy(rel_pos))
+                            else:
+                                enh_procs[ip].append(copy.copy(rel_pos))
+                    # and also the bystanders
+                    for byst in proc.bystander_list:
+                        if condition.coord.name == exec_action.coord.name and\
+                          condition.coord.layer == exec_action.coord.layer:
+                            rel_pos = tuple((exec_action.coord - byst.coord).offset) ## Need to check this!!!
+                            aff_procs[ip].append(copy.copy(rel_pos))
+
+
+            if debug > 0:
+                print('For process: %s' % exec_proc.name)
+                print('No inh procs: %s' % [len(sublist) for sublist in inh_procs])
+                print(inh_procs)
+                print('No enh procs: %s' % [len(sublist) for sublist in enh_procs])
+                print(enh_procs)
+                print('No aff procs; %s' % [len(sublist) for sublist in aff_procs])
+                print(aff_procs)
+                print('  ')
+
+            ## Get rid of repetition
+            for ip in xrange(nprocs):
+                inh_procs[ip] = [rel_pos for rel_pos in set(inh_procs[ip])]
+            for ip in xrange(nprocs):
+                enh_procs[ip] = [rel_pos for rel_pos in set(enh_procs[ip]) if not
+                                 (rel_pos in inh_procs[ip])]
+                aff_procs[ip] = [rel_pos for rel_pos in set(aff_procs[ip]) if not
+                                 (rel_pos in inh_procs[ip])]
+
+
+            if debug > 0:
+                print('AFTER REDUCTION')
+
+                print('For process: %s' % exec_proc.name)
+                print('No inh procs: %s' % [len(sublist) for sublist in inh_procs])
+                print(inh_procs)
+                print('No enh procs: %s' % [len(sublist) for sublist in enh_procs])
+                print(enh_procs)
+                print('No aff procs; %s' % [len(sublist) for sublist in aff_procs])
+                print(aff_procs)
+                print('  ')
+
+
+            ## Write the del_proc calls for all inh_procs
+            out.write('\n! Disable processes\n\n')
+            for ip,sublist in enumerate(inh_procs):
+                for rel_pos in sublist:
+                    out.write('%sif(can_do(%s,cell + (/%s,%s,%s,0/))) then\n' % (' '*indent,data.process_list[ip].name,
+                                                                               rel_pos[0],rel_pos[1],rel_pos[2]))
+                    out.write('%scall del_proc(%s,cell + (/%s,%s,%s,0/))\n' % (' '*2*indent,data.process_list[ip].name,
+                                                                               rel_pos[0],rel_pos[1],rel_pos[2]))
+
+
+            ## Update the lattice!
+            out.write('\n! Update the lattice\n')
+            for exec_action in exec_proc.action_list:
+                # find the corresponding condition
+                matching_conds = [cond for cond in exec_proc.condition_list
+                                  if cond.coord == exec_action.coord]
+                if len(matching_conds)==1:
+                    prev_spec = matching_conds[0].species
+                else:
+                    raise RuntimeError('Found wrong number of matching conditions: %s'
+                                       % len(matching_conds))
+                out.write('%sreplace_species(cell%s,%s,%s)\n' % (' '*indent,exec_action.coord.radd_ff(),
+                                                             exec_action.species,
+                                                             prev_spec))
+
+            ## Write the modification routines for already active processes
+            out.write('\n! Update rate constants\n\n')
+            for ip,sublist in enumerate(aff_procs):
+                for rel_pos in sublist:
+                    out.write('%sif(can_do(%s,(/ %s, %s, %s, 0/))) then\n' % (' '*indent,data.process_list[ip].name,
+                                                                            rel_pos[0], rel_pos[1], rel_pos[2]))
+                    out.write('%scall update_rate(%s,cell + (/ %s, %s, %s, 0/))\n' % (' '*2*indent,data.process_list[ip].name,
+                                                                                  rel_pos[0],rel_pos[1],rel_pos[2]))
+
+            ## Write the update_rate calls for all processes if allowed
+            ## Prepare a flatlist of all processes name, the relative
+            ## coordinate in which to be executed and the list of
+            ## need-to-be-checked conditions in the order
+            ## [ other_conditions, (proc_name, relative_site, True) ]
+            ## to mantain compatibility with older routine
+            enabling_items = []
+            out.write('\n! Enable processes\n\n')
+            for ip,sublist in enumerate(enh_procs):
+                for rel_pos in sublist:
+                    rel_pos_string = 'cell + (/ %s, %s, %s, 0 /)' % (rel_pos[0],rel_pos[1],rel_pos[2])
+                    item2 = (data.process_list[ip].name,rel_pos_string,True)
+                    ## filter out conditions already met
+                    other_conditions = []
+                    for cond in data.process_list[ip].condition_list:
+                        # this probably be incorporated in the part in which we
+                        # eliminated duplicates... must think exactly how
+                        for exec_action in exec_proc.action_list:
+                            if (exec_action.coord.name == cond.coord.name and
+                                exec_action.coord.layer == cond.coord.layer and
+                                rel_pos == tuple((exec_action.coord-cond.coord).offset)):
+                                if not exec_action.species == cond.species:
+                                    raise RuntimeError('Found discrepancy in process selected for enabling!')
+                                else:
+                                    break
+                        else:
+                            relative_coord = Coord(name=cond.coord.name,
+                                                   layer=cond.coord.layer,
+                                                   offset=cond.coord.offset+np.array(rel_pos),
+                                                   )
+                            other_conditions.append(ConditionAction(coord=relative_coord,
+                                                                   species=cond.species))
+                    enabling_items.append([copy.deepcopy(other_conditions),copy.deepcopy(item2)])
+            print('enabling_itmes')
+            print(enabling_items)
+            raise SystemExit()
+
+            self._write_optimal_iftree_otf(enabling_items, indent, out)
+            out.write('\nend subroutine %s\n' % routine_name)
+            if separate_files:
+                out.close()
+
+    def _write_optimal_iftree_otf(self, items, indent, out):
+        # this function is called recursively
+        # so first we define the ANCHORS or SPECIAL CASES
+        # if no conditions are left, enable process immediately
+        # I actually don't know if this tree is optimal
+        # So consider this a heuristic solution which should give
+        # on average better results than the brute force way
+
+        # TODO Must correct site/coord once understood
+
+        for item in filter(lambda x: not x[0], items):
+            # [1][2] field of the item determine if this search is intended for enabling (=True) or
+            # disabling (=False) a process
+            if item[1][2]:
+                out.write('%scall add_proc(%s, %s, get_rate(%s, %s))\n' % (' ' * indent,
+                                                                           item[1][0], item[1][1],
+                                                                           item[1][0], item[1][1]))
+            else:
+                out.write('%scall del_proc(%s, %s)\n' % (' ' * indent, item[1][0], item[1][1]))
+
+        # and only keep those that have conditions
+        items = filter(lambda x: x[0], items)
+        if not items:
+            return
+
+        # now the GENERAL CASE
+        # first find site, that is most sought after
+        most_common_coord = _most_common([y.coord for y in _flatten([x[0] for x in items])])
+
+        # filter out list of uniq answers for this site
+        answers = [y.species for y in filter(lambda x: x.coord == most_common_coord, _flatten([x[0] for x in items]))]
+        uniq_answers = list(set(answers))
+
+        if self.data.meta.debug > 1:
+            out.write('print *,"    LATTICE/GET_SPECIES/VSITE","%s"\n' % most_common_coord)
+            out.write('print *,"    LATTICE/GET_SPECIES/SITE",%s\n' % most_common_coord)
+            out.write('print *,"    LATTICE/GET_SPECIES/SPECIES",get_species(%s)\n' % most_common_coord)
+
+        out.write('%sselect case(get_species(cell%s))\n' % ((indent) * ' ', most_common_coord.radd_ff() ))
+        for answer in uniq_answers:
+            out.write('%scase(%s)\n' % ((indent) * ' ', answer))
+            # this very crazy expression matches at items that contain
+            # a question for the same coordinate and have the same answer here
+            nested_items = filter(
+                lambda x:
+                (most_common_coord in [y.coord for y in x[0]]
+                and answer == filter(lambda y: y.coord == most_common_coord, x[0])[0].species),
+                items)
+            # pruned items are almost identical to nested items, except the have
+            # the one condition removed, that we just met
+            pruned_items = []
+            for nested_item in nested_items:
+                conditions = filter(lambda x: most_common_coord != x.coord, nested_item[0])
+                pruned_items.append((conditions, nested_item[1]))
+#            if len(items) == len(nested_items):
+#                raise RuntimeError('No item pruned\nMostCommCoord %s' % most_common_coord)
+
+            items = filter(lambda x: x not in nested_items, items)
+            self._write_optimal_iftree_otf(pruned_items, indent + 4, out)
+        out.write('%send select\n\n' % (indent * ' ',))
+
+        if items:
+            # if items are left
+            # the RECURSION II
+            self._write_optimal_iftree_otf(items, indent, out)
+
     def write_proclist_put_take(self, data, out):
         """
         HERE comes the bulk part of this code generator:
@@ -1015,7 +1317,7 @@ class ProcListWriter():
                                 out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES","%s"\n'
                                           % data.species_list.default_species)
                                 out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES","%s"\n'
-                                          % species.name)
+                                            % species.name)
                             out.write('    call replace_species(site, %s, %s)\n\n'
                                        % (data.species_list.default_species, species.name))
                         elif op == 'take':
@@ -1389,10 +1691,15 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
                     (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
                     (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
                     ]
-
     elif code_generator == 'lat_int':
         cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
                     (os.path.join('fortran_src', 'base_lat_int.f90'), 'base.f90'),
+                    (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
+                    (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
+                    ]
+    elif code_generator == 'otf':
+        cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
+                    (os.path.join('fortran_src', 'base_otf.f90'), 'base.f90'),
                     (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
                     (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
                     ]
