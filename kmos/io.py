@@ -1064,7 +1064,7 @@ class ProcListWriter():
         """
         nprocs = len(data.process_list)
 
-        debug = 2
+        debug = 0
 
         if not separate_files:
             #out.write('! INSERT HEADERS HERE ### TODO\n')
@@ -1200,10 +1200,7 @@ class ProcListWriter():
                                                    )
                             other_conditions.append(ConditionAction(coord=relative_coord,
                                                                    species=cond.species))
-                    enabling_items.append([copy.deepcopy(other_conditions),copy.deepcopy(item2)])
-            print('enabling_itmes')
-            print(enabling_items)
-            raise SystemExit()
+                    enabling_items.append((copy.deepcopy(other_conditions),copy.deepcopy(item2)))
 
             self._write_optimal_iftree_otf(enabling_items, indent, out)
             out.write('\nend subroutine %s\n' % routine_name)
@@ -1219,6 +1216,10 @@ class ProcListWriter():
         # on average better results than the brute force way
 
         # TODO Must correct site/coord once understood
+
+        # print(' ')
+        # print('ROUTINE GOT CALLED')
+        # print(' ')
 
         for item in filter(lambda x: not x[0], items):
             # [1][2] field of the item determine if this search is intended for enabling (=True) or
@@ -1250,22 +1251,63 @@ class ProcListWriter():
 
         out.write('%sselect case(get_species(cell%s))\n' % ((indent) * ' ', most_common_coord.radd_ff() ))
         for answer in uniq_answers:
+
+            # print(' ')
+            # print('NEW answer = %s' % answer)
+            # print(' ')
+
             out.write('%scase(%s)\n' % ((indent) * ' ', answer))
             # this very crazy expression matches at items that contain
             # a question for the same coordinate and have the same answer here
+
+            # print('Calling nested items with:')
+            # print(items)
+            # print('for most_common_coord: %s' % most_common_coord)
+            # print(' ')
+
             nested_items = filter(
                 lambda x:
                 (most_common_coord in [y.coord for y in x[0]]
                 and answer == filter(lambda y: y.coord == most_common_coord, x[0])[0].species),
                 items)
+
+            # print('nested items resulted in:')
+            # print(nested_items)
+            # print(' ')
+
             # pruned items are almost identical to nested items, except the have
             # the one condition removed, that we just met
             pruned_items = []
             for nested_item in nested_items:
+                # print('nested_item[0]:')
+                # print(nested_item[0])
+                # print('nested_item[0][0].coord, type:')
+                # print('%s     %s' % (nested_item[0][0].coord, type(nested_item[0][0].coord)))
+                # print('most_common_coord, type:')
+                # print('%s     %s' % (most_common_coord, type(most_common_coord)))
+                # print('gleich?')
+                # print(nested_item[0][0].coord == most_common_coord)
+                # print(nested_item[0][0].coord.__eq__(most_common_coord))
+                # print('ungleich?')
+                # print(nested_item[0][0].coord != most_common_coord)
+                # print(nested_item[0][0].coord.__ne__(most_common_coord))
+                # import kmos
+                # print(kmos.__file__)
+
+
                 conditions = filter(lambda x: most_common_coord != x.coord, nested_item[0])
+
+                # print('')
+                # print('conditions:')
+                # print(conditions)
+                # print(' ')
+
                 pruned_items.append((conditions, nested_item[1]))
-#            if len(items) == len(nested_items):
-#                raise RuntimeError('No item pruned\nMostCommCoord %s' % most_common_coord)
+            # if len(items) == len(nested_items):
+            # raise RuntimeError('No item pruned\nMostCommCoord %s' % most_common_coord)
+
+            # print('and pruned items:')
+            # print(pruned_items)
 
             items = filter(lambda x: x not in nested_items, items)
             self._write_optimal_iftree_otf(pruned_items, indent + 4, out)
