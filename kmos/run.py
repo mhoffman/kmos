@@ -67,6 +67,11 @@ except:
     proclist_constants = None
 
 try:
+    from kmc_model import proclist_parameters
+except:
+    proclist_parameters = None
+
+try:
     import kmc_settings as settings
 except Exception, e:
     settings = None
@@ -81,13 +86,17 @@ except Exception, e:
 class ProclistProxy(object):
 
     def __dir__(selftr):
-        return list(set(dir(proclist) + dir(proclist_constants)))
+        return list(set(dir(proclist) +
+                        dir(proclist_constants) +
+                        dir(proclist_parameters)))
 
     def __getattr__(self, attr):
         if attr in dir(proclist):
             return eval('proclist.%s' % attr)
         elif attr in dir(proclist_constants):
             return eval('proclist_constants.%s' % attr)
+        elif attr in dir(proclist_parameters):
+            return eval('proclist_parameters.%s' % attr)
         else:
             raise AttributeError('%s not found' % attr)
 
@@ -1980,6 +1989,13 @@ def set_rate_constants(parameters=None, print_rates=None):
                     % (rate_expr, proc, e))
     if print_rates:
         print('-------------------')
+
+    # update auxiliary params (works for otf backend only)
+    if hasattr(settings,'aux_params'):
+        for param in settings.aux_params:
+            setattr(proclist_parameters,
+                    param.lower(),
+                    evaluate_rate_expression(param))
 
 
 def import_ase():

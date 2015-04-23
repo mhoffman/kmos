@@ -78,7 +78,8 @@ public :: add_proc, &
   get_null_species, &
   update_accum_rate, &
   update_integ_rate, &
-  update_clocks
+  update_clocks, &
+  update_rates_matrix,
 
 
 ! Public constants
@@ -146,6 +147,11 @@ integer(kind=iint), dimension(:), allocatable :: nr_of_sites
 !****v* base/nr_of_sites
 ! FUNCTION
 !   Stores the number of sites available for each process.
+!******
+real(kind=rdouble), dimension(:), allocatable :: rates
+!****v* base/rates
+! FUNCTION
+!   Stores the rate constants for each process in s^-1.
 !******
 real(kind=rdouble), dimension(:,:), allocatable :: rates_matrix
 !****v* base/rates
@@ -318,7 +324,7 @@ subroutine add_proc(proc, site, rate)
     ! update rates_matrix
     rates_matrix(proc,volume+1) = rates_matrix(proc,volume+1)+rate
     rates_matrix(proc,nr_of_sites(proc))=rate
-    
+
   endif
 
 end subroutine add_proc
@@ -326,7 +332,7 @@ end subroutine add_proc
 subroutine update_rates_matrix(proc, site, rate)
   !****f* base/add_proc
   ! FUNCTION
-  !    Updates the rates_matrix. To be used when the state of a bystander has 
+  !    Updates the rates_matrix. To be used when the state of a bystander has
   !    been modified
   !      !
   ! ARGUMENTS
@@ -346,10 +352,11 @@ subroutine update_rates_matrix(proc, site, rate)
 
   memory_address = avail_sites(proc,site,2)
   ! Update total process rate
-  rates_matrix(proc,volume+1) = rates_matrix(proc,volume+1) + rate - rates_matrix(proc,site)
+  rates_matrix(proc,volume+1) = rates_matrix(proc,volume+1) + rate - rates_matrix(proc,memory_address)
   ! Update individual rate
-  rates_matrix(proc,memory_address)
-  
+  rates_matrix(proc,memory_address) = rate
+
+end subroutine update_rates_matrix
 
 pure function can_do(proc, site)
   !****f* base/can_do
@@ -626,6 +633,28 @@ subroutine save_system()
   close(filehandler)
 
 end subroutine save_system
+
+subroutine set_rate_const(proc_nr, rate)
+  !****f* base/set_rate_const
+  ! FUNCTION
+  !  Allows to set the rate constant of the process with the number proc_nr.
+  !
+  ! ARGUMENTS
+  !
+  !  * ``proc_n`` The process number as defined in the corresponding proclist\_ module.
+  !  * ``rate`` the rate in :math:`s^{-1}`
+  !******
+  integer(kind=iint), intent(in) :: proc_nr
+  real(kind=rdouble), intent(in) :: rate
+
+  ! Make sure proc_nr is in the right range
+  ASSERT(proc_nr.gt.0,"base/set_rate_const: proc_nr has to be positive")
+  !   * the field within the process, but the meaning differs as explained
+  !     under 'switch'
+  ASSERT(proc_nr.le.nr_of_proc,"base/set_rate_const: proc_nr less or equal nr_of_proc.")
+  rates(proc_nr) = rate
+
+end subroutine set_rate_const
 
 subroutine update_accum_rate()
   !****f* base/update_accum_rate
@@ -1137,7 +1166,7 @@ subroutine determine_procsite(ran_proc, ran_site, proc, site)
 
   ! ran_proc <- [0,1] so we multiply with larger value in accum_rates
   call interval_search_real(accum_rates, ran_proc*accum_rates(nr_of_proc), proc)
-  
+
 
   ! once the process is selected, we need to build the corresponding accum rate
   ! this is most likely the CPU criticall part of this backend
@@ -1146,10 +1175,10 @@ subroutine determine_procsite(ran_proc, ran_site, proc, site)
   do i = 2, nr_of_sites(proc)
      accum_rates_proc(i) = accum_rates_proc(i-1) + rates_matrix(proc,i)
   enddo
-  
+
   aux_rand = ran_proc*accum_rates(nr_of_proc) - accum_rates(proc-1)
   call interval_search_real(accum_rates_proc(1:nr_of_sites(proc)),aux_rand,site)
-  
+
   site = avail_sites(proc,site,1)
 
   ASSERT(nr_of_sites(proc).gt.0,"base/determine_procsite: chosen process is invalid &

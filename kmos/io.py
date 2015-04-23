@@ -190,17 +190,7 @@ class ProcListWriter():
                                                   data=data,
                                                   module_name='proclist_constants'))
             constants_out.close()
-            # with open(os.path.join(os.path.dirname(__file__),
-            #                        'fortran_src',
-            #                        'proclist_parameters_otf.mpy')) as infile:
-            #     template = infile.read()
             parameters_out = open('%s/proclist_parameters.f90' % self.dir, 'w')
-            # parameters_out.write(evaluate_template(template,
-            #                                       self=self,
-            #                                       data=data,
-            #                                       module_name='proclist_parameter'))
-            # parameters_out.close()
-
             self.write_proclist_parameters_otf(data,parameters_out)
             parameters_out.close()
 
@@ -212,6 +202,75 @@ class ProcListWriter():
 
         out.close()
 
+    def write_proclist_touchup_otf(self, data, out):
+        """
+        The touchup function
+
+        Updates the elementary steps that a cell can do
+        given the current lattice configuration. This has
+        to be run once for every cell to initialize
+        the simulation book-keeping.
+
+        """
+        indent = 4
+        out.write('subroutine touchup_cell(cell)\n')
+        out.write('    integer(kind=iint), intent(in), dimension(4) :: cell\n\n')
+        out.write('    integer(kind=iint), dimension(4) :: site\n\n')
+        out.write('    integer(kind=iint) :: proc_nr\n\n')
+        # First kill all processes from this site that are allowed
+        out.write('    site = cell + (/0, 0, 0, 1/)\n')
+        out.write('    do proc_nr = 1, nr_of_proc\n')
+        out.write('        if(avail_sites(proc_nr, lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then\n')
+        out.write('            call del_proc(proc_nr, site)\n')
+        out.write('        endif\n')
+        out.write('    end do\n\n')
+
+        # Then we need to build the iftree that will update all processes
+        # from this site
+
+        enabling_items = []
+        for process in data.process_list:
+            rel_pos = (0,0,0) # during touchup we only activate procs from current site
+            rel_pos_string = 'cell + (/ %s, %s, %s, 0 /)' % (rel_pos[0],rel_pos[1], rel_pos[2]) # CHECK!!
+            item2 = (process.name,rel_pos_string,True)
+            # coded like this to be parallel to write_proclist_run_proc_name_otf
+            enabling_items.append((copy.deepcopy(process.condition_list),copy.deepcopy(item2)))
+
+        self._write_optimal_iftree_otf(enabling_items, indent, out)
+
+        out.write('\nend subroutine touchup_cell\n')
+
+    def _otf_get_auxilirary_params(self,data):
+        import StringIO
+        import tokenize
+        from kmos import units, rate_aliases
+        units_list = []
+        masses_list = []
+        chempot_list = []
+        for process in data.process_list:
+            exprs = [process.rate_constant,]
+            if process.otf_rate:
+                exprs.append(process.otf_rate)
+            for expr in exprs:
+                for old, new in rate_aliases.iteritems():
+                    expr=expr.replace(old, new)
+                try:
+                    tokenize_input = StringIO.StringIO(expr).readline
+                    tokens = list(tokenize.generate_tokens(tokenize_input))
+                except:
+                    raise Exception('Could not tokenize expression: %s' % expr)
+                for i, token, _, _, _ in tokens:
+                    if token in dir(units):
+                        if token not in units_list:
+                            units_list.append(token)
+                    if token.startswith('m_'):
+                        if token not in masses_list:
+                            masses_list.append(token)
+                    elif token.startswith('mu_'):
+                        if token not in chempot_list:
+                            chempot_list.append(token)
+        return sorted(units_list), sorted(masses_list), sorted(chempot_list)
+
     def write_proclist_parameters_otf(self,data,out):
         '''Writes the proclist_parameters.f90 files
         which implements the module in charge of doing i/o
@@ -221,6 +280,8 @@ class ProcListWriter():
         import tokenize
         import StringIO
         import itertools
+        from kmos import evaluate_rate_expression
+        from kmos import rate_aliases
 
         indent = 4
         # First the GPL message
@@ -249,42 +310,35 @@ class ProcListWriter():
         # beta, mu_* and m_*. beta is easy
 
         out.write('\n! Auxiliary parameters\n')
-        out.write('real(kind=rdouble), public :: beta = 0.0\n')
+        out.write('real(kind=rdouble), public :: beta\n')
 
         # For the chemical potentials  and masses we need to explore all rate expressions
 
         # this code will repeat a lot of the logic on evaluate_rate_expression
         # Can we compress this??
 
-        masses_list = []
-        chempot_list = []
-        for process in data.process_list:
-            try:
-                tokenize_input = StringIO.StringIO(process.rate_constant).readline
-                tokens = list(tokenize.generate_tokens(tokenize_input))
-            except:
-                raise Exception('Could not tokenize expression: %s' % process.rate_constant)
-            for i, token, _, _, _ in tokens:
-                if token.startswith('m_'):
-                    species_name = '_'.join(token.split('_')[1:])
-                    if (token,species_name) not in masses_list:
-                        masses_list.append((token,species_name))
-                elif token.startswith('mu_'):
-                    species_name = '_'.join(token.split('_')[1:])
-                    if (token,species_name) not in chempot_list:
-                        chempot_list.append((token,species_name))
+        units_list, masses_list, chempot_list = self._otf_get_auxilirary_params(data)
 
-        for mass, spec in sorted(masses_list,key=lambda x:x[1]):
+        out.write('! Constants\n')
+        for const in units_list:
+            out.write('real (kind=rdouble), public, parameter :: %s = %.10e\n'
+                      % (const, evaluate_rate_expression(const)))
+
+        out.write('\n! Species masses\n')
+        for mass in masses_list:
             out.write('real (kind=rdouble), public :: %s\n' % mass)
-        for mu, spec in sorted(chempot_list,key=lambda x:x[1]):
+        out.write('\n! Species chemical potentials\n')
+        for mu in chempot_list:
             out.write('real (kind=rdouble), public :: %s\n' % mu)
 
 
         # And then write variables to hold the base_rates for each process
+        out.write('\n! Base rate constants\n')
         for process in data.process_list:
             out.write('real (kind=rdouble), public :: base_rate_%s\n' % process.name)
 
         # And finally, we need to write the subroutines to return each of the rate constants
+        out.write('\ncontains\n')
         out.write('\n! On-the-fly calculators for rate constants\n\n')
         for process in data.process_list:
             out.write('pure function get_rate_%s(cell)\n' % process.name)
@@ -320,9 +374,12 @@ class ProcListWriter():
 
             if process.otf_rate:
                 if not 'base_rate' in process.otf_rate:
-                    print('WARNING: Not base_rate in otf_rate for process %s' % process.name)
+                    raise UserWarning('Not base_rate in otf_rate for process %s' % process.name)
                 new_expr = process.otf_rate.replace('base_rate',
-                                                    'base_rate_%s' % process.name)
+                                                    'rates(%s)' % process.name)
+                for old, new in rate_aliases.iteritems():
+                    new_expr = new_expr.replace(old,new)
+
             else:
                 new_expr = 'base_rate_%s' % process.name
 
@@ -1166,10 +1223,9 @@ class ProcListWriter():
         out.write('\ncontains\n\n')
 
         self.write_proclist_generic_subroutines(data, out, code_generator='otf')
-        # self.write_proclist_touchup(data,out)
+        self.write_proclist_touchup_otf(data,out)
         self.write_proclist_run_proc_nr_otf(data,out)
         self.write_proclist_run_proc_name_otf(data,out)
-        # self.write_proclist_get_rate_otf(data,out)
 
         # and we are done!
         if os.name == 'posix':
@@ -1190,10 +1246,6 @@ class ProcListWriter():
 
         debug = 0
 
-        if not separate_files:
-            #out.write('! INSERT HEADERS HERE ### TODO\n')
-            pass ## TODO
-        # We should build one of these routines for each process
         for exec_proc in data.process_list:
             if separate_files:
                 out = os.open('%s/run_proc_%s.f90' % (self.dir,exec_proc.name),'w')
@@ -1302,7 +1354,7 @@ class ProcListWriter():
             out.write('\n! Enable processes\n\n')
             for ip,sublist in enumerate(enh_procs):
                 for rel_pos in sublist:
-                    rel_pos_string = 'cell + (/ %s, %s, %s, 0 /)' % (rel_pos[0],rel_pos[1],rel_pos[2])
+                    rel_pos_string = 'cell + (/ %s, %s, %s, 0 /)' % (rel_pos[0],rel_pos[1],rel_pos[2]) # CHECK!!
                     item2 = (data.process_list[ip].name,rel_pos_string,True)
                     ## filter out conditions already met
                     other_conditions = []
@@ -1700,7 +1752,7 @@ class ProcListWriter():
             # the RECURSION II
             self._write_optimal_iftree(items, indent, out)
 
-    def write_settings(self):
+    def write_settings(self, code_generator='lat_int'):
         """Write the kmc_settings.py. This contains all parameters, which
         can be changed on the fly and without recompilation of the Fortran 90
         modules.
@@ -1758,6 +1810,16 @@ class ProcListWriter():
                 raise UserWarning('Could not evaluate (%s)\n%s\nProcess: %s'
                                   % (process.rate_constant, e, process.name))
         out.write('    }\n\n')
+
+
+        if code_generator == 'otf':
+            # additional auxiliary variables to be used in the calculation of rate constants
+            # Must explore all rate expressions and otf_rate expressions
+            _ , masses_list, chempot_list = self._otf_get_auxilirary_params(data)
+            out.write('aux_params = [\n')
+            for param in masses_list + chempot_list:
+                out.write('    "%s",\n' % param)
+            out.write('    ]\n\n')
 
         # Site Names
         site_params = self._get_site_params()
@@ -1888,7 +1950,7 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     writer = ProcListWriter(project_tree, export_dir)
     writer.write_lattice()
     writer.write_proclist(code_generator=code_generator)
-    writer.write_settings()
+    writer.write_settings(code_generator=code_generator)
     project_tree.validate_model()
     return True
 
