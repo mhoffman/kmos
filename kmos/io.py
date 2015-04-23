@@ -190,15 +190,18 @@ class ProcListWriter():
                                                   data=data,
                                                   module_name='proclist_constants'))
             constants_out.close()
-            with open(os.path.join(os.path.dirname(__file__),
-                                   'fortran_src',
-                                   'proclist_parameters_otf.mpy')) as infile:
-                template = infile.read()
+            # with open(os.path.join(os.path.dirname(__file__),
+            #                        'fortran_src',
+            #                        'proclist_parameters_otf.mpy')) as infile:
+            #     template = infile.read()
             parameters_out = open('%s/proclist_parameters.f90' % self.dir, 'w')
-            parameters_out.write(evaluate_template(template,
-                                                  self=self,
-                                                  data=data,
-                                                  module_name='proclist_parameter'))
+            # parameters_out.write(evaluate_template(template,
+            #                                       self=self,
+            #                                       data=data,
+            #                                       module_name='proclist_parameter'))
+            # parameters_out.close()
+
+            self.write_proclist_parameters_otf(data,parameters_out)
             parameters_out.close()
 
             self.write_proclist_otf(data,out)
@@ -208,6 +211,127 @@ class ProcListWriter():
             raise Exception("Don't know this code generator '%s'" % code_generator)
 
         out.close()
+
+    def write_proclist_parameters_otf(self,data,out):
+        '''Writes the proclist_parameters.f90 files
+        which implements the module in charge of doing i/o
+        from python evaluated parameters, to fortran and also
+        handles rate constants update at fortran level'''
+
+        import tokenize
+        import StringIO
+        import itertools
+
+        indent = 4
+        # First the GPL message
+        out.write(self._gpl_message())
+
+        out.write('module proclist_parameters\n')
+        out.write('use kind_values\n')
+        out.write('use lattice, only: &\n')
+        site_params = []
+        for layer in data.layer_list:
+            out.write('%s%s, &\n' % (' '*indent,layer.name))
+            for site in layer.sites:
+                site_params.append((site.name,layer.name))
+        for site,layer in site_params:
+            out.write('%s%s_%s, &\n' % (' '*indent,layer,site))
+        out.write('%sget_species\n' % (' '*indent))
+        out.write('\nimplicit none\n')
+
+        # Define variables for the user defined parameteres
+        out.write('! User parameters\n\n')
+        for parameter in sorted(data.parameter_list, key=lambda x: x.name):
+            out.write('real(kind=rdouble), public :: %s = 0.0\n' % parameter.name)
+
+        # Next, we need to put into the fortran module a placeholder for each of the
+        # parameters that kmos.evaluate_rate_expression can replace, namely
+        # beta, mu_* and m_*. beta is easy
+
+        out.write('\n! Auxiliary parameters\n')
+        out.write('real(kind=rdouble), public :: beta = 0.0\n')
+
+        # For the chemical potentials  and masses we need to explore all rate expressions
+
+        # this code will repeat a lot of the logic on evaluate_rate_expression
+        # Can we compress this??
+
+        masses_list = []
+        chempot_list = []
+        for process in data.process_list:
+            try:
+                tokenize_input = StringIO.StringIO(process.rate_constant).readline
+                tokens = list(tokenize.generate_tokens(tokenize_input))
+            except:
+                raise Exception('Could not tokenize expression: %s' % process.rate_constant)
+            for i, token, _, _, _ in tokens:
+                if token.startswith('m_'):
+                    species_name = '_'.join(token.split('_')[1:])
+                    if (token,species_name) not in masses_list:
+                        masses_list.append((token,species_name))
+                elif token.startswith('mu_'):
+                    species_name = '_'.join(token.split('_')[1:])
+                    if (token,species_name) not in chempot_list:
+                        chempot_list.append((token,species_name))
+
+        for mass, spec in sorted(masses_list,key=lambda x:x[1]):
+            out.write('real (kind=rdouble), public :: %s\n' % mass)
+        for mu, spec in sorted(chempot_list,key=lambda x:x[1]):
+            out.write('real (kind=rdouble), public :: %s\n' % mu)
+
+
+        # And then write variables to hold the base_rates for each process
+        for process in data.process_list:
+            out.write('real (kind=rdouble), public :: base_rate_%s\n' % process.name)
+
+        # And finally, we need to write the subroutines to return each of the rate constants
+        out.write('\n! On-the-fly calculators for rate constants\n\n')
+        for process in data.process_list:
+            out.write('pure function get_rate_%s(cell)\n' % process.name)
+            out.write('%sinteger(kind=iint), dimension(4), intent(in) :: cell\n'
+                      % (' '*indent))
+
+            # get all of flags
+            flags = list(set([byst.flag for byst in process.bystander_list]))
+            # and all species
+            specs_dict = {}
+            for byst in process.bystander_list:
+                if hasattr(specs_dict,byst.flag):
+                    if not (sorted(byst.allowed_species) ==
+                            sorted(specs_dict[byst.flag])):
+                        raise RuntimeError('All bystanders sharing a flag must allow same species. proc: %s' % process.name)
+                else:
+                    specs_dict[byst.flag] = byst.allowed_species
+
+            for flag in flags:
+                for spec in specs_dict[flag]:
+                    out.write('%sinteger(kind=iint) :: nr_%s_%s = 0\n' %
+                              (' '*indent,spec,flag))
+            out.write('\n')
+
+            for byst in process.bystander_list:
+                out.write('%sselect case(get_species(cell%s)\n' % (' '*indent,
+                                                                 byst.coord.radd_ff()))
+                for spec in byst.allowed_species:
+                    out.write('%scase(%s)\n' % (' '*2*indent,spec))
+                    out.write('%snr_%s_%s = nr_%s_%s + 1\n' %
+                              (' '*3*indent,spec,byst.flag,spec,byst.flag))
+                out.write('%send select\n' % (' '*indent))
+
+            if process.otf_rate:
+                if not 'base_rate' in process.otf_rate:
+                    print('WARNING: Not base_rate in otf_rate for process %s' % process.name)
+                new_expr = process.otf_rate.replace('base_rate',
+                                                    'base_rate_%s' % process.name)
+            else:
+                new_expr = 'base_rate_%s' % process.name
+
+            out.write('%sget_rate = %s\n' % (' '*indent,new_expr))
+            out.write('\nend function get_rate_%s\n\n' % process.name)
+
+        out.write('\nend module proclist_parameters\n')
+
+
 
     def write_proclist_constants(self, data, out,
                                  code_generator='local_smart',
