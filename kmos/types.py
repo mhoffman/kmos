@@ -1762,6 +1762,16 @@ class SingleLatIntProcess(Process):
                   'chemical_expression',
                   'tof_count']
 
+    def __init__(self, **kwargs):
+        FixedObject.__init__(self, **kwargs)
+        self.name = kwargs.get('name', '')
+        self.rate_constant = kwargs.get('rate_constant', '0.')
+        self.condition_list = kwargs.get('condition_list', [])
+        self.action_list = kwargs.get('action_list', [])
+        self.tof_count = kwargs.get('tof_count', None)
+        self.enabled = kwargs.get('enabled', True)
+
+
     def __repr__(self):
         return ('[PROCESS] Name:%s Rate: %s\n'
                 'Conditions: %s\n'

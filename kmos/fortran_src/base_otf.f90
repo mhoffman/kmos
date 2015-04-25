@@ -79,7 +79,7 @@ public :: add_proc, &
   update_accum_rate, &
   update_integ_rate, &
   update_clocks, &
-  update_rates_matrix,
+  update_rates_matrix
 
 
 ! Public constants
@@ -148,7 +148,7 @@ integer(kind=iint), dimension(:), allocatable :: nr_of_sites
 ! FUNCTION
 !   Stores the number of sites available for each process.
 !******
-real(kind=rdouble), dimension(:), allocatable :: rates
+real(kind=rdouble), dimension(:), allocatable, public :: rates !FIXME
 !****v* base/rates
 ! FUNCTION
 !   Stores the rate constants for each process in s^-1.
@@ -348,7 +348,7 @@ subroutine update_rates_matrix(proc, site, rate)
   ! Make sure the process is allowed
   ASSERT(can_do(proc,site),"base/update_rates_matrix: process needs to be allowed")
   ! Make sure the rate is not negative
-  ASSERT(rate.ge.0,"base/update_rates_matrix: rate can't be negative"
+  ASSERT(rate.ge.0,"base/update_rates_matrix: rate cant be negative")
 
   memory_address = avail_sites(proc,site,2)
   ! Update total process rate

@@ -137,7 +137,7 @@ class ProcListWriter():
         self.data = data
         self.dir = dir
 
-    def write_lattice(self):
+    def write_lattice(self,code_generator='lat_int'):
         from kmos.utils import evaluate_template
 
         with open(os.path.join(os.path.dirname(__file__),
@@ -146,7 +146,7 @@ class ProcListWriter():
             template = infile.read()
 
         with open(os.path.join(self.dir, 'lattice.f90'), 'w') as out:
-            out.write(evaluate_template(template,  self=self, data=self.data))
+            out.write(evaluate_template(template,  self=self, data=self.data,code_generator=code_generator))
 
     def write_proclist(self, smart=True, code_generator='local_smart'):
         """Write the proclist.f90 module, i.e. the rules which make up
@@ -289,6 +289,9 @@ class ProcListWriter():
 
         out.write('module proclist_parameters\n')
         out.write('use kind_values\n')
+        out.write('use base, only: &\n')
+        out.write('%srates\n' % (' '*indent))
+        out.write('use proclist_constants\n')
         out.write('use lattice, only: &\n')
         site_params = []
         for layer in data.layer_list:
@@ -341,7 +344,7 @@ class ProcListWriter():
         out.write('\ncontains\n')
         out.write('\n! On-the-fly calculators for rate constants\n\n')
         for process in data.process_list:
-            out.write('pure function get_rate_%s(cell)\n' % process.name)
+            out.write('function get_rate_%s(cell)\n' % process.name)
             out.write('%sinteger(kind=iint), dimension(4), intent(in) :: cell\n'
                       % (' '*indent))
 
@@ -357,14 +360,21 @@ class ProcListWriter():
                 else:
                     specs_dict[byst.flag] = byst.allowed_species
 
+            nr2zero = ''
             for flag in flags:
                 for spec in specs_dict[flag]:
-                    out.write('%sinteger(kind=iint) :: nr_%s_%s = 0\n' %
+                    out.write('%sinteger(kind=iint) :: nr_%s_%s\n' %
                               (' '*indent,spec,flag))
+                    nr2zero += '%snr_%s_%s = 0\n' % (' '*indent,spec,flag)
             out.write('\n')
 
+            out.write('%sreal(kind=rdouble) :: get_rate_%s\n' % (' '*indent,process.name))
+
+            out.write('\n')
+            out.write(nr2zero)
+
             for byst in process.bystander_list:
-                out.write('%sselect case(get_species(cell%s)\n' % (' '*indent,
+                out.write('%sselect case(get_species(cell%s))\n' % (' '*indent,
                                                                  byst.coord.radd_ff()))
                 for spec in byst.allowed_species:
                     out.write('%scase(%s)\n' % (' '*2*indent,spec))
@@ -383,7 +393,8 @@ class ProcListWriter():
             else:
                 new_expr = 'base_rate_%s' % process.name
 
-            out.write('%sget_rate = %s\n' % (' '*indent,new_expr))
+            out.write('%sget_rate_%s = %s\n' % (' '*indent,process.name,new_expr))
+            out.write('%sreturn\n' % (' '*indent))
             out.write('\nend function get_rate_%s\n\n' % process.name)
 
         out.write('\nend module proclist_parameters\n')
@@ -1201,6 +1212,7 @@ class ProcListWriter():
               '    spuck, &\n')
 
         out.write('    get_species\n')
+        out.write('use proclist_constants\n')
 
         out.write('\nimplicit none\n')
 
@@ -1318,6 +1330,7 @@ class ProcListWriter():
                                                                                rel_pos[0],rel_pos[1],rel_pos[2]))
                     out.write('%scall del_proc(%s,cell + (/%s,%s,%s,0/))\n' % (' '*2*indent,data.process_list[ip].name,
                                                                                rel_pos[0],rel_pos[1],rel_pos[2]))
+                    out.write('%send if' % (' '*indent))
 
 
             ## Update the lattice!
@@ -1331,7 +1344,7 @@ class ProcListWriter():
                 else:
                     raise RuntimeError('Found wrong number of matching conditions: %s'
                                        % len(matching_conds))
-                out.write('%sreplace_species(cell%s,%s,%s)\n' % (' '*indent,exec_action.coord.radd_ff(),
+                out.write('%scall replace_species(cell%s,%s,%s)\n' % (' '*indent,exec_action.coord.radd_ff(),
                                                              exec_action.species,
                                                              prev_spec))
 
@@ -1948,7 +1961,7 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     # SECOND
     # produce those source files that are written on the fly
     writer = ProcListWriter(project_tree, export_dir)
-    writer.write_lattice()
+    writer.write_lattice(code_generator=code_generator)
     writer.write_proclist(code_generator=code_generator)
     writer.write_settings(code_generator=code_generator)
     project_tree.validate_model()

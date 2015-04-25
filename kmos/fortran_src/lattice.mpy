@@ -279,10 +279,18 @@ if data.meta.debug > 1:
 #@ end subroutine deallocate_system
 #@
 
-#@ subroutine add_proc(proc, site)
+if code_generator in ['local_smart','lat_int']:
+    #@ subroutine add_proc(proc, site)
+elif code_generator in ['otf',]:
+    #@ subroutine add_proc(proc, site, rate)
+else:
+    raise UserWarning('Unknown backend')
+
 #@
 #@     integer(kind=iint), intent(in) :: proc
 #@     integer(kind=iint), dimension(4), intent(in) :: site
+if code_generator in ['otf',]:
+    #@    real(kind=rdouble), intent(in) :: rate
 #@
 #@     integer(kind=iint) :: nr
 #@
@@ -292,7 +300,14 @@ if data.meta.debug > 1:
 #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
 if data.meta.debug > 1:
     #@ print *,"    LATTICE/ADD_PROC/SITE_NR",nr
-#@     call base_add_proc(proc, nr)
+
+if code_generator in ['local_smart','lat_int']:
+    #@ call base_add_proc(proc, nr)
+elif code_generator in ['otf',]:
+    #@ call base_add_proc(proc, nr, rate)
+else:
+    raise UserWarning('Unknown backend')
+
 #@
 #@ end subroutine add_proc
 #@
