@@ -231,7 +231,7 @@ class ProcListWriter():
         enabling_items = []
         for process in data.process_list:
             rel_pos = (0,0,0) # during touchup we only activate procs from current site
-            rel_pos_string = 'cell + (/ %s, %s, %s, 0 /)' % (rel_pos[0],rel_pos[1], rel_pos[2]) # CHECK!!
+            rel_pos_string = 'cell + (/ %s, %s, %s, 1 /)' % (rel_pos[0],rel_pos[1], rel_pos[2]) # CHECK!!
             item2 = (process.name,rel_pos_string,True)
             # coded like this to be parallel to write_proclist_run_proc_name_otf
             enabling_items.append((copy.deepcopy(process.condition_list),copy.deepcopy(item2)))
@@ -1376,7 +1376,7 @@ class ProcListWriter():
             out.write('\n! Enable processes\n\n')
             for ip,sublist in enumerate(enh_procs):
                 for rel_pos in sublist:
-                    rel_pos_string = 'cell + (/ %s, %s, %s, 0 /)' % (rel_pos[0],rel_pos[1],rel_pos[2]) # CHECK!!
+                    rel_pos_string = 'cell + (/ %s, %s, %s, 1 /)' % (rel_pos[0],rel_pos[1],rel_pos[2]) # FIXME
                     item2 = (data.process_list[ip].name,rel_pos_string,True)
                     ## filter out conditions already met
                     other_conditions = []
@@ -1444,9 +1444,14 @@ class ProcListWriter():
 
         if self.data.meta.debug > 1:
             out.write('print *,"    LATTICE/GET_SPECIES/VSITE","%s"\n' % most_common_coord)
-            out.write('print *,"    LATTICE/GET_SPECIES/SITE",%s\n' % most_common_coord)
-            out.write('print *,"    LATTICE/GET_SPECIES/SPECIES",get_species(%s)\n' % most_common_coord)
+            out.write('print *,"    LATTICE/GET_SPECIES/SITE","%s"\n' % most_common_coord.radd_ff())
+            out.write('print *,"    LATTICE/GET_SPECIES/SPECIES",get_species(%s)\n' % most_common_coord.radd_ff())
 
+        # rel_coord = 'cell + (/ %s, %s, %s, %s /)' % (most_common_coord.offset[0],
+        #                                              most_common_coord.offset[1],
+        #                                              most_common_coord.offset[2],
+        #                                              most_common_coord.name)
+        # out.write('%sselect case(get_species(%s))\n' % ((indent) * ' ', rel_coord))
         out.write('%sselect case(get_species(cell%s))\n' % ((indent) * ' ', most_common_coord.radd_ff() ))
         for answer in uniq_answers:
 
@@ -1477,35 +1482,9 @@ class ProcListWriter():
             # the one condition removed, that we just met
             pruned_items = []
             for nested_item in nested_items:
-                # print('nested_item[0]:')
-                # print(nested_item[0])
-                # print('nested_item[0][0].coord, type:')
-                # print('%s     %s' % (nested_item[0][0].coord, type(nested_item[0][0].coord)))
-                # print('most_common_coord, type:')
-                # print('%s     %s' % (most_common_coord, type(most_common_coord)))
-                # print('gleich?')
-                # print(nested_item[0][0].coord == most_common_coord)
-                # print(nested_item[0][0].coord.__eq__(most_common_coord))
-                # print('ungleich?')
-                # print(nested_item[0][0].coord != most_common_coord)
-                # print(nested_item[0][0].coord.__ne__(most_common_coord))
-                # import kmos
-                # print(kmos.__file__)
-
 
                 conditions = filter(lambda x: most_common_coord != x.coord, nested_item[0])
-
-                # print('')
-                # print('conditions:')
-                # print(conditions)
-                # print(' ')
-
                 pruned_items.append((conditions, nested_item[1]))
-            # if len(items) == len(nested_items):
-            # raise RuntimeError('No item pruned\nMostCommCoord %s' % most_common_coord)
-
-            # print('and pruned items:')
-            # print(pruned_items)
 
             items = filter(lambda x: x not in nested_items, items)
             self._write_optimal_iftree_otf(pruned_items, indent + 4, out)

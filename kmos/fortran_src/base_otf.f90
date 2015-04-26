@@ -720,6 +720,8 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
 
   system_allocated = .false.
 
+  print *, "BASE/ALLOCATE_SYSTEM : Declared variables"
+
 
   ! Make sure we have at least one process
   if(input_nr_of_proc.le.0)then
@@ -784,22 +786,41 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
     ! allocate data structures and initialize with 0
     allocate(avail_sites(nr_of_proc, volume, 2))
     avail_sites = 0
+    print *, "BASE/ALLOCATE_SYSTEM : Allocated avail_sites"
+
     allocate(lattice(volume))
     lattice = null_species
+    print *, "BASE/ALLOCATE_SYSTEM : Allocated lattice"
+
     allocate(nr_of_sites(nr_of_proc))
     nr_of_sites = 0
+    print *, "BASE/ALLOCATE_SYSTEM : Allocated nr_of_sites"
+
     allocate(rates_matrix(nr_of_proc,volume+1))
+    rates_matrix = 0
+    print *, "BASE/ALLOCATE_SYSTEM : Allocated rates_matrix"
+
+    allocate(rates(nr_of_proc))
     rates = 0
+    print *, "BASE/ALLOCATE_SYSTEM : Allocated rates"
+
     allocate(accum_rates(nr_of_proc))
     accum_rates = 0
+    print *, "BASE/ALLOCATE_SYSTEM : Allocated accum_rates"
+
     allocate(accum_rates_proc(volume))
-    accum_rates = 0
+    accum_rates_proc = 0
+    print *, "BASE/ALLOCATE_SYSTEM : Allocated accum_rates_proc"
+
 !------ S. Matera 09/18/2012------
         allocate(integ_rates(nr_of_proc))
         integ_rates = 0
 !------ S. Matera 09/18/2012------
+    print *, "BASE/ALLOCATE_SYSTEM : Allocated integ_rates"
+
     allocate(procstat(nr_of_proc))
     procstat = 0
+    print *, "BASE/ALLOCATE_SYSTEM : Allocated procstat"
 
   endif
 
@@ -1167,6 +1188,8 @@ subroutine determine_procsite(ran_proc, ran_site, proc, site)
   ! ran_proc <- [0,1] so we multiply with larger value in accum_rates
   call interval_search_real(accum_rates, ran_proc*accum_rates(nr_of_proc), proc)
 
+  print *, "Found proc ",proc ! FIXME
+
 
   ! once the process is selected, we need to build the corresponding accum rate
   ! this is most likely the CPU criticall part of this backend
@@ -1176,8 +1199,12 @@ subroutine determine_procsite(ran_proc, ran_site, proc, site)
      accum_rates_proc(i) = accum_rates_proc(i-1) + rates_matrix(proc,i)
   enddo
 
+  print *, "Accumulated rate for process" !FIXME
+
   aux_rand = ran_proc*accum_rates(nr_of_proc) - accum_rates(proc-1)
   call interval_search_real(accum_rates_proc(1:nr_of_sites(proc)),aux_rand,site)
+
+  print *, "Found site ", site
 
   site = avail_sites(proc,site,1)
 

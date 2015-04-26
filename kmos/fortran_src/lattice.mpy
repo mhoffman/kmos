@@ -292,7 +292,7 @@ else:
 #@     integer(kind=iint), intent(in) :: proc
 #@     integer(kind=iint), dimension(4), intent(in) :: site
 if code_generator in ['otf',]:
-    #@    real(kind=rdouble), intent(in) :: rate
+    #@     real(kind=rdouble), intent(in) :: rate
 #@
 #@     integer(kind=iint) :: nr
 #@

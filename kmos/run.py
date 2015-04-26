@@ -1995,7 +1995,7 @@ def set_rate_constants(parameters=None, print_rates=None):
         for param in settings.aux_params:
             setattr(proclist_parameters,
                     param.lower(),
-                    evaluate_rate_expression(param))
+                    evaluate_rate_expression(param,parameters))
 
 
 def import_ase():
