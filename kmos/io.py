@@ -1209,6 +1209,7 @@ class ProcListWriter():
               '    del_proc, &\n'
               '    reset_site, &\n'
               '    system_size, &\n'
+              '    update_rates_matrix, &\n'
               '    spuck, &\n')
 
         out.write('    get_species\n')
@@ -1355,8 +1356,14 @@ class ProcListWriter():
                 for rel_pos in sublist:
                     out.write('%sif(can_do(%s,(/ %s, %s, %s, 0/))) then\n' % (' '*indent,data.process_list[ip].name,
                                                                             rel_pos[0], rel_pos[1], rel_pos[2]))
-                    out.write('%scall update_rate(%s,cell + (/ %s, %s, %s, 0/))\n' % (' '*2*indent,data.process_list[ip].name,
-                                                                                  rel_pos[0],rel_pos[1],rel_pos[2]))
+                    rel_cell = 'cell + (/ %s, %s, %s, 0/)' % rel_pos
+                    out.write('%scall update_rates_matrix(%s,%s,get_rate_%s(%s))\n' % (
+                        ' '*2*indent,
+                        data.process_list[ip].name,
+                        rel_cell,
+                        data.process_list[ip].name,
+                        rel_cell,
+                        ))
                     out.write('%send if\n' % (' '*indent))
 
             ## Write the update_rate calls for all processes if allowed

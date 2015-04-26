@@ -27,6 +27,8 @@ gpl = self._gpl_message()
 #@     base_allocate_system => allocate_system, &
 #@     base_can_do => can_do, &
 #@     base_del_proc => del_proc, &
+if code_generator in ['otf',]:
+    #@     base_update_rates_matrix => update_rates_matrix, &
 #@     determine_procsite, &
 #@     base_replace_species => replace_species, &
 #@     base_get_species => get_species, &
@@ -311,6 +313,28 @@ else:
 #@
 #@ end subroutine add_proc
 #@
+
+###############################
+if code_generator in ['otf',]:
+    #@ subroutine update_rates_matrix(proc, site, rate)
+    #@     integer(kind=iint), intent(in) :: proc
+    #@     integer(kind=iint), dimension(4), intent(in) :: site
+    #@     real(kind=rdouble), intent(in) :: rate
+    #@     integer(kind=iint) :: nr
+    #@
+    if data.meta.debug > 1:
+        #@ print *,"    LATTICE/ADD_PROC/PROC",proc
+        #@ print *,"    LATTICE/ADD_PROC/SITE",site
+    #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
+    if data.meta.debug > 1:
+        #@ print *,"    LATTICE/ADD_PROC/SITE_NR",nr
+
+    #@     call base_update_rates_matrix(proc, nr, rate)
+    #@
+    #@ end subroutine update_rates_matrix
+elif not code_generator ['local_smart','lat_int']:
+    raise UserWarning('Unknown backend')
+###########################################3
 
 #@ subroutine del_proc(proc, site)
 #@
