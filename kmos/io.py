@@ -335,10 +335,10 @@ class ProcListWriter():
             out.write('real (kind=rdouble), public :: %s\n' % mu)
 
 
-        # And then write variables to hold the base_rates for each process
-        out.write('\n! Base rate constants\n')
-        for process in data.process_list:
-            out.write('real (kind=rdouble), public :: base_rate_%s\n' % process.name)
+        # # And then write variables to hold the base_rates for each process
+        # out.write('\n! Base rate constants\n')
+        # for process in data.process_list:
+        #     out.write('real (kind=rdouble), public :: base_rate_%s\n' % process.name)
 
         # And finally, we need to write the subroutines to return each of the rate constants
         out.write('\ncontains\n')
@@ -391,7 +391,7 @@ class ProcListWriter():
                     new_expr = new_expr.replace(old,new)
 
             else:
-                new_expr = 'base_rate_%s' % process.name
+                new_expr = 'rates(%s)' % process.name
 
             out.write('%sget_rate_%s = %s\n' % (' '*indent,process.name,new_expr))
             out.write('%sreturn\n' % (' '*indent))
@@ -1213,6 +1213,7 @@ class ProcListWriter():
 
         out.write('    get_species\n')
         out.write('use proclist_constants\n')
+        out.write('use proclist_parameters\n')
 
         out.write('\nimplicit none\n')
 
@@ -1330,7 +1331,7 @@ class ProcListWriter():
                                                                                rel_pos[0],rel_pos[1],rel_pos[2]))
                     out.write('%scall del_proc(%s,cell + (/%s,%s,%s,0/))\n' % (' '*2*indent,data.process_list[ip].name,
                                                                                rel_pos[0],rel_pos[1],rel_pos[2]))
-                    out.write('%send if' % (' '*indent))
+                    out.write('%send if\n' % (' '*indent))
 
 
             ## Update the lattice!
@@ -1356,6 +1357,7 @@ class ProcListWriter():
                                                                             rel_pos[0], rel_pos[1], rel_pos[2]))
                     out.write('%scall update_rate(%s,cell + (/ %s, %s, %s, 0/))\n' % (' '*2*indent,data.process_list[ip].name,
                                                                                   rel_pos[0],rel_pos[1],rel_pos[2]))
+                    out.write('%send if\n' % (' '*indent))
 
             ## Write the update_rate calls for all processes if allowed
             ## Prepare a flatlist of all processes name, the relative
@@ -1414,7 +1416,7 @@ class ProcListWriter():
             # [1][2] field of the item determine if this search is intended for enabling (=True) or
             # disabling (=False) a process
             if item[1][2]:
-                out.write('%scall add_proc(%s, %s, get_rate(%s, %s))\n' % (' ' * indent,
+                out.write('%scall add_proc(%s, %s, get_rate_%s(%s))\n' % (' ' * indent,
                                                                            item[1][0], item[1][1],
                                                                            item[1][0], item[1][1]))
             else:
