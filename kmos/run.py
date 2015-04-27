@@ -232,10 +232,12 @@ class KMC_Model(Process):
                     raise
             else:
                 self.species_representation[len(self.species_representation)] = Atoms()
+
         if hasattr(settings, 'species_tags'):
             self.species_tags = settings.species_tags
         else:
             self.species_tags = None
+
 
         if len(settings.lattice_representation):
             if hasattr(settings, 'substrate_layer'):
@@ -252,14 +254,31 @@ class KMC_Model(Process):
                     self.lattice_representation = lattice_representation[0]
         else:
             self.lattice_representation = Atoms()
+        print('Done get representation') # DEBUG FIXME
+
         set_rate_constants(settings.parameters, self.print_rates)
+
+        print('Done set_rate_constants') # DEBUG FIXME
+
         self.base.update_accum_rate()
         # S. matera 09/25/2012
         if hasattr(self.base, 'update_integ_rate'):
             self.base.update_integ_rate()
 
-        if hasattr(self.proclist,'recalculate_rates_matrix'):
-            self.proclist.recalculate_rates_matrix()
+        # # for otf backend only
+        # print('kmos.run : Updating proclist_parameters!')
+        # if hasattr(self.proclist,'recalculate_rates_matrix'):
+        #     for key,entry in settings.parameters.iteritems():
+        #         # print('kmos.run key.lower() : %s' % key.lower())
+        #         # print('kmos.run entry[value] : %s' % entry.value)
+        #         # print('kmos.run result : %s' %
+        #         #       evaluate_rate_expression(entry['value'],settings.parameters))
+
+        #         # setattr(self.proclist,
+        #         #         key.lower(),
+        #         #         evaluate_rate_expression(entry['value'],settings.parameters)
+        #         #         )
+        #     self.proclist.recalculate_rates_matrix()
 
         # load cached configuration if available
         if self.cache_file is not None:
@@ -1993,12 +2012,22 @@ def set_rate_constants(parameters=None, print_rates=None):
     if print_rates:
         print('-------------------')
 
-    # update auxiliary params (works for otf backend only)
-    if hasattr(settings,'aux_params'):
-        for param in settings.aux_params:
-            setattr(proclist_parameters,
-                    param.lower(),
-                    evaluate_rate_expression(param,parameters))
+    # FIXME
+    # update chemical potentials (works for otf backend only)
+    if hasattr(proclist,'update_user_parameter'):
+         for name,entry in settings.parameters.iteritems():
+             proclist.update_user_parameter(
+                 getattr(proclist,name.lower()),
+                 evaluate_rate_expression(str(entry['value']),parameters))
+
+    if hasattr(proclist,'update_chempot'):
+         for chempot in settings.chemical_potentials:
+             proclist.update_chempot(
+                 getattr(proclist,chempot.lower()),
+                 evaluate_rate_expression(chempot,parameters))
+
+    if hasattr(proclist,'recalculate_rates_matrix'):
+         proclist.recalculate_rates_matrix()
 
 
 def import_ase():

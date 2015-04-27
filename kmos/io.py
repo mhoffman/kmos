@@ -301,47 +301,70 @@ class ProcListWriter():
         for site,layer in site_params:
             out.write('%s%s_%s, &\n' % (' '*indent,layer,site))
         out.write('%sget_species\n' % (' '*indent))
-        out.write('\nimplicit none\n')
+        out.write('\nimplicit none\n\n')
+
+
+        units_list, masses_list, chempot_list = self._otf_get_auxilirary_params(data)
+        # out.write('private\n\n')
+        # out.write('public :: update_user_parameter')
+        # if chempot_list:
+        #     out.write(', &\n  update_chempot\n')
+        # else:
+        #     out.write('\n')
 
         # Define variables for the user defined parameteres
-        out.write('! User parameters\n\n')
-        for parameter in sorted(data.parameter_list, key=lambda x: x.name):
-            out.write('real(kind=rdouble), public :: %s = 0.0\n' % parameter.name)
+        out.write('! User parameters\n')
+        for ip,parameter in enumerate(sorted(data.parameter_list, key=lambda x: x.name)):
+            out.write('integer(kind=iint), public :: %s = %s\n' % (parameter.name,(ip+1)))
+        out.write('real(kind=rdouble), public, dimension(%s) :: user_params\n' % len(data.parameter_list))
 
         # Next, we need to put into the fortran module a placeholder for each of the
         # parameters that kmos.evaluate_rate_expression can replace, namely
-        # beta, mu_* and m_*. beta is easy
+        # mu_* and m_*.
 
-        out.write('\n! Auxiliary parameters\n')
-        out.write('real(kind=rdouble), public :: beta\n')
+        # beta is easy
+        # out.write('\n! Auxiliary parameters\n')
+        # out.write('real(kind=rdouble), public :: beta\n')
+
 
         # For the chemical potentials  and masses we need to explore all rate expressions
-
         # this code will repeat a lot of the logic on evaluate_rate_expression
         # Can we compress this??
 
-        units_list, masses_list, chempot_list = self._otf_get_auxilirary_params(data)
-
-        out.write('! Constants\n')
+        out.write('\n! Constants\n')
         for const in units_list:
-            out.write('real (kind=rdouble), public, parameter :: %s = %.10e\n'
+            out.write('real(kind=rdouble), parameter :: %s = %.10e\n'
                       % (const, evaluate_rate_expression(const)))
-
         out.write('\n! Species masses\n')
         for mass in masses_list:
-            out.write('real (kind=rdouble), public :: %s\n' % mass)
-        out.write('\n! Species chemical potentials\n')
-        for mu in chempot_list:
-            out.write('real (kind=rdouble), public :: %s\n' % mu)
+            out.write('real(kind=rdouble), parameter :: %s = %.10e\n'
+                      % (mass,evaluate_rate_expression(mass)))
 
+        # Chemical potentials are different because we need to be able to update them
+        if chempot_list:
+            out.write('\n! Species chemical potentials\n')
+            for iu,mu in enumerate(chempot_list):
+                out.write('integer(kind=iint), public :: %s = %s\n' % (mu,(iu+1)))
+            out.write('real(kind=rdouble), public, dimension(%s) :: chempots\n' % len(chempot_list))
 
-        # # And then write variables to hold the base_rates for each process
-        # out.write('\n! Base rate constants\n')
-        # for process in data.process_list:
-        #     out.write('real (kind=rdouble), public :: base_rate_%s\n' % process.name)
+        # This module contains functions
+        out.write('\ncontains\n')
+
+        # Once this is done, we need to build routines that update user parameters and chempots
+
+        out.write('subroutine update_user_parameter(param,val)\n')
+        out.write('    integer(kind=iint), intent(in) :: param\n')
+        out.write('    real(kind=rdouble), intent(in) :: val\n')
+        out.write('    user_params(param) = val\n')
+        out.write('end subroutine update_user_parameter\n\n')
+
+        out.write('subroutine update_chempot(index,val)\n')
+        out.write('    integer(kind=iint), intent(in) :: index\n')
+        out.write('    real(kind=rdouble), intent(in) :: val\n')
+        out.write('    chempots(index) = val\n')
+        out.write('end subroutine update_chempot\n\n')
 
         # And finally, we need to write the subroutines to return each of the rate constants
-        out.write('\ncontains\n')
         out.write('\n! On-the-fly calculators for rate constants\n\n')
         for process in data.process_list:
             out.write('function get_rate_%s(cell)\n' % process.name)
@@ -382,22 +405,47 @@ class ProcListWriter():
                               (' '*3*indent,spec,byst.flag,spec,byst.flag))
                 out.write('%send select\n' % (' '*indent))
 
-            if process.otf_rate:
-                if not 'base_rate' in process.otf_rate:
-                    raise UserWarning('Not base_rate in otf_rate for process %s' % process.name)
-                new_expr = process.otf_rate.replace('base_rate',
-                                                    'rates(%s)' % process.name)
-                for old, new in rate_aliases.iteritems():
-                    new_expr = new_expr.replace(old,new)
-
-            else:
-                new_expr = 'rates(%s)' % process.name
+            new_expr = self._parse_otf_rate(process.otf_rate,process.name,data)
 
             out.write('%sget_rate_%s = %s\n' % (' '*indent,process.name,new_expr))
             out.write('%sreturn\n' % (' '*indent))
             out.write('\nend function get_rate_%s\n\n' % process.name)
 
         out.write('\nend module proclist_parameters\n')
+
+    def _parse_otf_rate(self,expr,procname,data):
+        import StringIO, tokenize
+        from kmos import units, rate_aliases
+
+        param_names = [param.name for param in data.parameter_list]
+
+        if expr:
+            if not 'base_rate' in expr:
+                raise UserWarning('Not base_rate in otf_rate for process %s' % process.name)
+            # 'base_rate' has special meaning in otf_rate
+            expr = expr.replace('base_rate','rates(%s)' % procname)
+            # And all aliases need to be replaced
+            for old, new in rate_aliases.iteritems():
+                expr = expr.replace(old,new)
+            # Then time to tokenize:
+            try:
+                tokenize_input = StringIO.StringIO(expr).readline
+                tokens = list(tokenize.generate_tokens(tokenize_input))
+            except:
+                raise Exception('kmos.io: Could not tokenize expression: %s' % expr)
+            replaced_tokens = []
+            for i, token, _, _, _ in tokens:
+                if token.startswith('mu_'):
+                    replaced_tokens.append((i,'chempots(%s)' % token))
+                elif token in param_names:
+                    replaced_tokens.append((i,'user_params(%s)' % token))
+                else:
+                    replaced_tokens.append((i,token))
+            new_expr=tokenize.untokenize(replaced_tokens)
+        else:
+            new_expr = 'rates(%s)' % procname
+        return new_expr
+
 
 
 
@@ -1831,11 +1879,12 @@ class ProcListWriter():
         if code_generator == 'otf':
             # additional auxiliary variables to be used in the calculation of rate constants
             # Must explore all rate expressions and otf_rate expressions
-            _ , masses_list, chempot_list = self._otf_get_auxilirary_params(data)
-            out.write('aux_params = [\n')
-            for param in masses_list + chempot_list:
-                out.write('    "%s",\n' % param)
-            out.write('    ]\n\n')
+            _ , _, chempot_list = self._otf_get_auxilirary_params(data)
+            if chempot_list:
+                out.write('chemical_potentials = [\n')
+                for param in chempot_list:
+                    out.write('    "%s",\n' % param)
+                out.write('    ]\n\n')
 
         # Site Names
         site_params = self._get_site_params()
