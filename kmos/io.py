@@ -1443,9 +1443,9 @@ class ProcListWriter():
         uniq_answers = list(set(answers))
 
         if self.data.meta.debug > 1:
-            out.write('print *,"    LATTICE/GET_SPECIES/VSITE","%s"\n' % most_common_coord)
-            out.write('print *,"    LATTICE/GET_SPECIES/SITE","%s"\n' % most_common_coord.radd_ff())
-            out.write('print *,"    LATTICE/GET_SPECIES/SPECIES",get_species(%s)\n' % most_common_coord.radd_ff())
+            out.write('print *,"    IFFTREE/GET_SPECIES/VSITE","%s"\n' % most_common_coord)
+            out.write('print *,"    IFFTREE/GET_SPECIES/SITE","%s"\n' % most_common_coord.radd_ff())
+            # out.write('print *,"    IFFTREE/GET_SPECIES/SPECIES",get_species(cell%s)\n' % most_common_coord.radd_ff())
 
         # rel_coord = 'cell + (/ %s, %s, %s, %s /)' % (most_common_coord.offset[0],
         #                                              most_common_coord.offset[1],

@@ -323,13 +323,16 @@ if code_generator in ['otf',]:
     #@     integer(kind=iint) :: nr
     #@
     if data.meta.debug > 1:
-        #@ print *,"    LATTICE/ADD_PROC/PROC",proc
-        #@ print *,"    LATTICE/ADD_PROC/SITE",site
+        #@ print *,"    LATTICE/UPDATE_RATES_MATRIX/PROC ",proc
+        #@ print *,"    LATTICE/UPDATE_RATES_MATRIX/SITE ",site
+        #@ print *,"    LATTICE/UPDATE_RATES_MATRIX/RATE ",rate
     #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
     if data.meta.debug > 1:
-        #@ print *,"    LATTICE/ADD_PROC/SITE_NR",nr
+        #@ print *,"    LATTICE/UPDATE_RATES_MATRIX/SITE_NR",nr
 
     #@     call base_update_rates_matrix(proc, nr, rate)
+    if data.meta.debug > 1:
+        #@ print *,"    LATTICE/UPDATE_RATES_MATRIX Done base_update_rates_matrix",nr
     #@
     #@ end subroutine update_rates_matrix
 elif not code_generator ['local_smart','lat_int']:
@@ -376,6 +379,12 @@ if data.meta.debug > 1:
 #@     integer(kind=iint) :: nr
 #@
 #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
+if data.meta.debug > 1:
+    #@ 
+    #@    print *,"LATTICE/REPLACE_SPECIES/SITE ",site
+    #@    print *,"LATTICE/REPLACE_SPECIES/SITE_NR ",nr
+    #@    print *,"LATTICE/REPLACE_SPECIES/OLD_SPECIES ",old_species
+    #@    print *,"LATTICE/REPLACE_SPECIES/NEW_SPECIES ",new_species
 #@     call base_replace_species(nr, old_species, new_species)
 #@
 #@ end subroutine replace_species

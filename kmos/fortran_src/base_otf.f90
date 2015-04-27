@@ -248,11 +248,15 @@ subroutine del_proc(proc, site)
   ASSERT(site.ge.0,"add_proc: site has to be positive or zero")
   ASSERT(site.le.volume,"base/add_proc: site needs to be in volume")
 
+  
   if(proc.gt.0)then ! proc == 0, stands for process (group) did not match all
     ! assert consistency
     ASSERT(avail_sites(proc, site, 2) .ne. 0 , "Error: tried to take ability from site that is not there!")
 
+
     memory_address = avail_sites(proc, site, 2)
+    ! DEBUG FIXME
+    print *,"BASE/DEL_PROC/memory_address ", memory_address
     if(memory_address .lt. nr_of_sites(proc))then
       ! check if we are deleting the last field
 
@@ -260,24 +264,36 @@ subroutine del_proc(proc, site)
       avail_sites(proc, memory_address, 1) = avail_sites(proc, nr_of_sites(proc), 1)
       avail_sites(proc, nr_of_sites(proc), 1) = 0
 
+      print *, "BASE/DEL_PROC Updated avail_sites(proc,field,1)"
+
       ! correspondingly update the rates_matrix
 
       rates_matrix(proc,volume+1) = rates_matrix(proc,volume+1) - rates_matrix(proc,memory_address)
       rates_matrix(proc,memory_address) = rates_matrix(proc,nr_of_sites(proc))
       rates_matrix(proc,nr_of_sites(proc)) = 0.0
 
+      print *, "BASE/DEL_PROC : Updated rates_matrix"
+
       ! change address of moved field
       avail_sites(proc, avail_sites(proc, memory_address, 1), 2) = memory_address
+
+      print *, "BASE/DEL_PROC : Updated avail_sites(proc,field,2)"
+
     else ! simply deleted last field
       avail_sites(proc, memory_address , 1) = 0
+      print *, "BASE/DEL_PROC : Updated rates_matrix, easy"
       rates_matrix(proc,volume+1) = rates_matrix(proc,volume+1) - rates_matrix(proc,memory_address)
       rates_matrix(proc,memory_address) = 0.0
+      print *, "BASE/DEL_PROC : Updated rates_matrix, easy"
     endif
     ! delete address of deleted field
     avail_sites(proc, site, 2) = 0
+    print *, "BASE/DEL_PROC : Cleanup avail_sites(proc,field,2)"
+
 
     ! decrement nr_of_sites(proc)
     nr_of_sites(proc) = nr_of_sites(proc) - 1
+    print *, "BASE/DEL_PROC : Updated nr_of_sites"
   endif
 end subroutine del_proc
 
@@ -1025,7 +1041,6 @@ subroutine get_avail_site(proc_nr, field, switch, return_avail_site)
 
 end subroutine get_avail_site
 
-
 subroutine get_accum_rate(proc_nr, return_accum_rate)
   !****f* base/get_accum_rate
   ! FUNCTION
@@ -1298,6 +1313,9 @@ subroutine replace_species(site, old_species, new_species)
   integer(kind=iint), intent(in) :: site, old_species, new_species
 
   ASSERT(site.le.volume,"kmos/base/replace_species was asked for a site outside the lattice")
+
+  print *,"BASE/REPLACE_SPECIES/OLD_SPECIES ", old_species ! DEBUG FIXME
+  print *,"BASE/REPLACE_SPECIES/NEW_SPECIES ", new_species
 
   ! Double-check that we actually remove the atom that we think is there
   if(old_species.ne.lattice(site))then

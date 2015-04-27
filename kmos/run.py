@@ -258,6 +258,9 @@ class KMC_Model(Process):
         if hasattr(self.base, 'update_integ_rate'):
             self.base.update_integ_rate()
 
+        if hasattr(self.proclist,'recalculate_rates_matrix'):
+            self.proclist.recalculate_rates_matrix()
+
         # load cached configuration if available
         if self.cache_file is not None:
             if os.path.exists(self.cache_file):

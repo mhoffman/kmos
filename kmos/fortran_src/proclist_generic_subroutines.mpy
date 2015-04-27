@@ -300,7 +300,27 @@ else:
 #@
 if data.meta.debug > 0:
     #@ print *, "    PROCLIST/INITALIZE_STATE/INITIALIZED_AVAIL_SITES"
-
 #@
 #@ end subroutine initialize_state
 #@
+
+if code_generator in ['otf',]:
+    #@ subroutine recalculate_rates_matrix()
+    #@
+    #@     integer(kind=iint) :: i,j,k
+    #@ 
+    for process in data.process_list:  # FIXME
+        #@     do i=1, system_size(1)
+        #@         do j=1, system_size(2)
+        #@             do k=1, system_size(3)
+        #@                 if(can_do({process.name},(/ i, j, k, 1/))) then
+        #@                     call update_rates_matrix({process.name},(/ i, j, k, 1/),get_rate_{process.name}((/ i, j, k, 0/)))
+        #@                 end if
+        #@             end do
+        #@         end do
+        #@     end do
+        #@     
+    #@
+    #@ end subroutine recalculate_rates_matrix
+
+
