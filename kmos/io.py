@@ -231,8 +231,8 @@ class ProcListWriter():
         enabling_items = []
         for process in data.process_list:
             rel_pos = (0,0,0) # during touchup we only activate procs from current site
-            rel_pos_string = 'cell + (/ %s, %s, %s, 1 /)' % (rel_pos[0],rel_pos[1], rel_pos[2]) # CHECK!!
-            item2 = (process.name,rel_pos_string,True)
+            #rel_pos_string = 'cell + (/ %s, %s, %s, 1 /)' % (rel_pos[0],rel_pos[1], rel_pos[2]) # CHECK!!
+            item2 = (process.name,rel_pos,True)
             # coded like this to be parallel to write_proclist_run_proc_name_otf
             enabling_items.append((copy.deepcopy(process.condition_list),copy.deepcopy(item2)))
 
@@ -576,8 +576,8 @@ class ProcListWriter():
 
             if data.meta.debug > 0:
                 out.write(('print *,"PROCLIST/RUN_PROC_NR/NAME","%s"\n'
-                           'print *,"PROCLIST/RUN_PROC_NR/LSITE","lsite"\n'
-                           'print *,"PROCLIST/RUN_PROC_NR/SITE","site"\n')
+                           'print *,"PROCLIST/RUN_PROC_NR/LSITE",lsite\n'
+                           'print *,"PROCLIST/RUN_PROC_NR/SITE",nr_site\n')
                            % process.name)
             out.write('        call run_proc_%s(lsite)\n' % process.name)
 
@@ -1266,8 +1266,14 @@ class ProcListWriter():
                 out.write('! INSERT HEADERS HERE ### TODO\n\n')
                 ## TODO
             routine_name = 'run_proc_%s' % exec_proc.name
-            out.write('\nsubroutine %s(cell)\n\n' %routine_name)
-            out.write('%sinteger(kind=iint), dimension(4), intent(in) :: cell\n' % (' '*indent))
+            out.write('\nsubroutine %s(site)\n\n' %routine_name)
+            out.write('%sinteger(kind=iint), dimension(4), intent(in) :: site\n' % (' '*indent))
+            out.write('%sinteger(kind=iint), dimension(4) :: cell\n\n' % (' '*indent))
+            out.write('%scell(1) = site(1)\n' % (' '*indent))
+            out.write('%scell(2) = site(2)\n' % (' '*indent))
+            out.write('%scell(3) = site(3)\n' % (' '*indent))
+            out.write('%scell(4) = 0\n\n' % (' '*indent))
+
             inh_procs = [copy.copy([]) for i in xrange(nprocs)]
             enh_procs = copy.deepcopy(inh_procs)
             aff_procs = copy.deepcopy(enh_procs)
@@ -1328,9 +1334,9 @@ class ProcListWriter():
             out.write('\n! Disable processes\n\n')
             for ip,sublist in enumerate(inh_procs):
                 for rel_pos in sublist:
-                    out.write('%sif(can_do(%s,cell + (/%s,%s,%s,0/))) then\n' % (' '*indent,data.process_list[ip].name,
+                    out.write('%sif(can_do(%s,cell + (/ %s, %s, %s, 1/))) then\n' % (' '*indent,data.process_list[ip].name,
                                                                                rel_pos[0],rel_pos[1],rel_pos[2]))
-                    out.write('%scall del_proc(%s,cell + (/%s,%s,%s,0/))\n' % (' '*2*indent,data.process_list[ip].name,
+                    out.write('%scall del_proc(%s,cell + (/ %s, %s, %s, 1/))\n' % (' '*2*indent,data.process_list[ip].name,
                                                                                rel_pos[0],rel_pos[1],rel_pos[2]))
                     out.write('%send if\n' % (' '*indent))
 
@@ -1346,21 +1352,24 @@ class ProcListWriter():
                 else:
                     raise RuntimeError('Found wrong number of matching conditions: %s'
                                        % len(matching_conds))
-                out.write('%scall replace_species(cell%s,%s,%s)\n' % (' '*indent,exec_action.coord.radd_ff(),
-                                                             exec_action.species,
-                                                             prev_spec))
+                out.write('%scall replace_species(cell%s,%s,%s)\n' % (
+                                                             ' '*indent,
+                                                             exec_action.coord.radd_ff(),
+                                                             prev_spec,
+                                                             exec_action.species))
 
             ## Write the modification routines for already active processes
             out.write('\n! Update rate constants\n\n')
             for ip,sublist in enumerate(aff_procs):
                 for rel_pos in sublist:
-                    out.write('%sif(can_do(%s,(/ %s, %s, %s, 0/))) then\n' % (' '*indent,data.process_list[ip].name,
+                    out.write('%sif(can_do(%s,(/ %s, %s, %s, 1/))) then\n' % (' '*indent,data.process_list[ip].name,
                                                                             rel_pos[0], rel_pos[1], rel_pos[2]))
+                    rel_site = 'cell + (/ %s, %s, %s, 1/)' % rel_pos
                     rel_cell = 'cell + (/ %s, %s, %s, 0/)' % rel_pos
                     out.write('%scall update_rates_matrix(%s,%s,get_rate_%s(%s))\n' % (
                         ' '*2*indent,
                         data.process_list[ip].name,
-                        rel_cell,
+                        rel_site,
                         data.process_list[ip].name,
                         rel_cell,
                         ))
@@ -1376,8 +1385,8 @@ class ProcListWriter():
             out.write('\n! Enable processes\n\n')
             for ip,sublist in enumerate(enh_procs):
                 for rel_pos in sublist:
-                    rel_pos_string = 'cell + (/ %s, %s, %s, 1 /)' % (rel_pos[0],rel_pos[1],rel_pos[2]) # FIXME
-                    item2 = (data.process_list[ip].name,rel_pos_string,True)
+                    # rel_pos_string = 'cell + (/ %s, %s, %s, 1 /)' % (rel_pos[0],rel_pos[1],rel_pos[2]) # FIXME
+                    item2 = (data.process_list[ip].name,copy.deepcopy(rel_pos),True)
                     ## filter out conditions already met
                     other_conditions = []
                     for cond in data.process_list[ip].condition_list:
@@ -1423,11 +1432,17 @@ class ProcListWriter():
             # [1][2] field of the item determine if this search is intended for enabling (=True) or
             # disabling (=False) a process
             if item[1][2]:
-                out.write('%scall add_proc(%s, %s, get_rate_%s(%s))\n' % (' ' * indent,
-                                                                           item[1][0], item[1][1],
-                                                                           item[1][0], item[1][1]))
+                rel_cell = 'cell + (/ %s, %s, %s, 0/)' % (item[1][1][0],
+                                                          item[1][1][1],
+                                                          item[1][1][2],)
+                rel_site = 'cell + (/ %s, %s, %s, 1/)' % (item[1][1][0],
+                                                          item[1][1][1],
+                                                          item[1][1][2],)
+                out.write('%scall add_Proc(%s, %s, get_rate_%s(%s))\n' % (' ' * indent,
+                                                                           item[1][0], rel_site,
+                                                                           item[1][0], rel_cell))
             else:
-                out.write('%scall del_proc(%s, %s)\n' % (' ' * indent, item[1][0], item[1][1]))
+                out.write('%scall del_proc(%s, %s)\n' % (' ' * indent, item[1][0], rel_site))
 
         # and only keep those that have conditions
         items = filter(lambda x: x[0], items)
@@ -1443,8 +1458,8 @@ class ProcListWriter():
         uniq_answers = list(set(answers))
 
         if self.data.meta.debug > 1:
-            out.write('print *,"    IFFTREE/GET_SPECIES/VSITE","%s"\n' % most_common_coord)
-            out.write('print *,"    IFFTREE/GET_SPECIES/SITE","%s"\n' % most_common_coord.radd_ff())
+            out.write('print *,"    IFTREE/GET_SPECIES/VSITE","%s"\n' % most_common_coord)
+            out.write('print *,"    IFTREE/GET_SPECIES/SITE","%s"\n' % most_common_coord.radd_ff())
             # out.write('print *,"    IFFTREE/GET_SPECIES/SPECIES",get_species(cell%s)\n' % most_common_coord.radd_ff())
 
         # rel_coord = 'cell + (/ %s, %s, %s, %s /)' % (most_common_coord.offset[0],
