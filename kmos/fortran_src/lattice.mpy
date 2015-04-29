@@ -335,7 +335,7 @@ if code_generator in ['otf',]:
         #@ print *,"    LATTICE/UPDATE_RATES_MATRIX Done base_update_rates_matrix",nr
     #@
     #@ end subroutine update_rates_matrix
-elif not code_generator ['local_smart','lat_int']:
+elif not code_generator in ['local_smart','lat_int']:
     raise UserWarning('Unknown backend')
 ###########################################3
 
@@ -357,7 +357,10 @@ if data.meta.debug > 1:
 #@ end subroutine del_proc
 #@
 
-#@ pure function can_do(proc, site)
+if data.meta.debug > 2:
+    #@ function can_do(proc, site)
+else:
+    #@ pure function can_do(proc,site)
 #@
 #@     logical :: can_do
 #@     integer(kind=iint), intent(in) :: proc
@@ -365,8 +368,14 @@ if data.meta.debug > 1:
 #@
 #@     integer(kind=iint) :: nr
 #@
+if data.meta.debug > 2:
+   #@ print *,"    LATTICE/CAN_DO/PROC ", proc
+   #@ print *,"    LATTICE/CAN_DO/SITE ", site
+
 #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
 #@     can_do = base_can_do(proc, nr)
+if data.meta.debug > 2:
+   #@ print *,"    LATTICE/CAN_DO/ result ", can_do
 #@
 #@ end function can_do
 #@
@@ -380,7 +389,7 @@ if data.meta.debug > 1:
 #@
 #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
 if data.meta.debug > 1:
-    #@ 
+    #@
     #@    print *,"LATTICE/REPLACE_SPECIES/SITE ",site
     #@    print *,"LATTICE/REPLACE_SPECIES/SITE_NR ",nr
     #@    print *,"LATTICE/REPLACE_SPECIES/OLD_SPECIES ",old_species

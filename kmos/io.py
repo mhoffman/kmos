@@ -358,11 +358,12 @@ class ProcListWriter():
         out.write('    user_params(param) = val\n')
         out.write('end subroutine update_user_parameter\n\n')
 
-        out.write('subroutine update_chempot(index,val)\n')
-        out.write('    integer(kind=iint), intent(in) :: index\n')
-        out.write('    real(kind=rdouble), intent(in) :: val\n')
-        out.write('    chempots(index) = val\n')
-        out.write('end subroutine update_chempot\n\n')
+        if chempot_list:
+            out.write('subroutine update_chempot(index,val)\n')
+            out.write('    integer(kind=iint), intent(in) :: index\n')
+            out.write('    real(kind=rdouble), intent(in) :: val\n')
+            out.write('    chempots(index) = val\n')
+            out.write('end subroutine update_chempot\n\n')
 
         # And finally, we need to write the subroutines to return each of the rate constants
         out.write('\n! On-the-fly calculators for rate constants\n\n')
@@ -421,7 +422,7 @@ class ProcListWriter():
 
         if expr:
             if not 'base_rate' in expr:
-                raise UserWarning('Not base_rate in otf_rate for process %s' % process.name)
+                raise UserWarning('Not base_rate in otf_rate for process %s' % procname)
             # 'base_rate' has special meaning in otf_rate
             expr = expr.replace('base_rate','rates(%s)' % procname)
             # And all aliases need to be replaced
@@ -1410,7 +1411,7 @@ class ProcListWriter():
             out.write('\n! Update rate constants\n\n')
             for ip,sublist in enumerate(aff_procs):
                 for rel_pos in sublist:
-                    out.write('%sif(can_do(%s,(/ %s, %s, %s, 1/))) then\n' % (' '*indent,data.process_list[ip].name,
+                    out.write('%sif(can_do(%s,cell + (/ %s, %s, %s, 1/))) then\n' % (' '*indent,data.process_list[ip].name,
                                                                             rel_pos[0], rel_pos[1], rel_pos[2]))
                     rel_site = 'cell + (/ %s, %s, %s, 1/)' % rel_pos
                     rel_cell = 'cell + (/ %s, %s, %s, 0/)' % rel_pos

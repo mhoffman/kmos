@@ -248,52 +248,36 @@ subroutine del_proc(proc, site)
   ASSERT(site.ge.0,"add_proc: site has to be positive or zero")
   ASSERT(site.le.volume,"base/add_proc: site needs to be in volume")
 
-  
+
   if(proc.gt.0)then ! proc == 0, stands for process (group) did not match all
     ! assert consistency
-    ASSERT(avail_sites(proc, site, 2) .ne. 0 , "Error: tried to take ability from site that is not there!")
-
+     ASSERT(avail_sites(proc, site, 2) .ne. 0 , "Error: tried to take ability from site that is not there!")
 
     memory_address = avail_sites(proc, site, 2)
-    ! DEBUG FIXME
-    print *,"BASE/DEL_PROC/memory_address ", memory_address
+    ! print *,"BASE/DEL_PROC/memory_address ", memory_address ! FIXME
     if(memory_address .lt. nr_of_sites(proc))then
       ! check if we are deleting the last field
-
       ! move last field to deleted field
       avail_sites(proc, memory_address, 1) = avail_sites(proc, nr_of_sites(proc), 1)
       avail_sites(proc, nr_of_sites(proc), 1) = 0
 
-      print *, "BASE/DEL_PROC Updated avail_sites(proc,field,1)"
-
       ! correspondingly update the rates_matrix
-
       rates_matrix(proc,volume+1) = rates_matrix(proc,volume+1) - rates_matrix(proc,memory_address)
       rates_matrix(proc,memory_address) = rates_matrix(proc,nr_of_sites(proc))
       rates_matrix(proc,nr_of_sites(proc)) = 0.0
-
-      print *, "BASE/DEL_PROC : Updated rates_matrix"
-
       ! change address of moved field
       avail_sites(proc, avail_sites(proc, memory_address, 1), 2) = memory_address
 
-      print *, "BASE/DEL_PROC : Updated avail_sites(proc,field,2)"
-
     else ! simply deleted last field
       avail_sites(proc, memory_address , 1) = 0
-      print *, "BASE/DEL_PROC : Updated rates_matrix, easy"
       rates_matrix(proc,volume+1) = rates_matrix(proc,volume+1) - rates_matrix(proc,memory_address)
       rates_matrix(proc,memory_address) = 0.0
-      print *, "BASE/DEL_PROC : Updated rates_matrix, easy"
     endif
     ! delete address of deleted field
     avail_sites(proc, site, 2) = 0
-    print *, "BASE/DEL_PROC : Cleanup avail_sites(proc,field,2)"
-
-
     ! decrement nr_of_sites(proc)
     nr_of_sites(proc) = nr_of_sites(proc) - 1
-    print *, "BASE/DEL_PROC : Updated nr_of_sites"
+    ! print *, "BASE/DEL_PROC : Updated nr_of_sites" ! FIXME
   endif
 end subroutine del_proc
 
@@ -366,20 +350,15 @@ subroutine update_rates_matrix(proc, site, rate)
   ! Make sure the rate is not negative
   ASSERT(rate.ge.0,"base/update_rates_matrix: rate cant be negative")
 
-  print *,"BASE/UPDATE_RATES_MATRIX/PROC ",proc !FIXME DEBUG
-  print *,"BASE/UPDATE_RATES_MATRIX/SITE ",site !FIXME DEBUG
-  print *,"BASE/UPDATE_RATES_MATRIX/RATE ",rate !FIXME DEBUG
-  
+  ! print *,"BASE/UPDATE_RATES_MATRIX/PROC ",proc !FIXME DEBUG
+  ! print *,"BASE/UPDATE_RATES_MATRIX/SITE ",site !FIXME DEBUG
+  ! print *,"BASE/UPDATE_RATES_MATRIX/RATE ",rate !FIXME DEBUG
 
   memory_address = avail_sites(proc,site,2)
-  print *,"BASE/UPDATE_RATES_MATRIX/memory_address ",memory_address !FIXME DEBUG
   ! Update total process rate
   rates_matrix(proc,volume+1) = rates_matrix(proc,volume+1) + rate - rates_matrix(proc,memory_address)
-  print *,"BASE/UPDATE_RATES_MATRIX/Updated acumulated rate " !FIXME DEBUG
   ! Update individual rate
   rates_matrix(proc,memory_address) = rate
-  print *,"BASE/UPDATE_RATES_MATRIX/Updated rate " !FIXME DEBUG
-
 
 end subroutine update_rates_matrix
 
@@ -745,9 +724,6 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
 
   system_allocated = .false.
 
-  print *, "BASE/ALLOCATE_SYSTEM : Declared variables"
-
-
   ! Make sure we have at least one process
   if(input_nr_of_proc.le.0)then
     print *,"kmos/base/allocate_system: there needs to be at least one process in a kMC system"
@@ -811,41 +787,41 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
     ! allocate data structures and initialize with 0
     allocate(avail_sites(nr_of_proc, volume, 2))
     avail_sites = 0
-    print *, "BASE/ALLOCATE_SYSTEM : Allocated avail_sites"
+    ! print *, "BASE/ALLOCATE_SYSTEM : Allocated avail_sites"
 
     allocate(lattice(volume))
     lattice = null_species
-    print *, "BASE/ALLOCATE_SYSTEM : Allocated lattice"
+    ! print *, "BASE/ALLOCATE_SYSTEM : Allocated lattice"
 
     allocate(nr_of_sites(nr_of_proc))
     nr_of_sites = 0
-    print *, "BASE/ALLOCATE_SYSTEM : Allocated nr_of_sites"
+    ! print *, "BASE/ALLOCATE_SYSTEM : Allocated nr_of_sites"
 
     allocate(rates_matrix(nr_of_proc,volume+1))
     rates_matrix = 0
-    print *, "BASE/ALLOCATE_SYSTEM : Allocated rates_matrix"
+    ! print *, "BASE/ALLOCATE_SYSTEM : Allocated rates_matrix"
 
     allocate(rates(nr_of_proc))
     rates = 0
-    print *, "BASE/ALLOCATE_SYSTEM : Allocated rates"
+    ! print *, "BASE/ALLOCATE_SYSTEM : Allocated rates"
 
     allocate(accum_rates(nr_of_proc))
     accum_rates = 0
-    print *, "BASE/ALLOCATE_SYSTEM : Allocated accum_rates"
+    ! print *, "BASE/ALLOCATE_SYSTEM : Allocated accum_rates"
 
     allocate(accum_rates_proc(volume))
     accum_rates_proc = 0
-    print *, "BASE/ALLOCATE_SYSTEM : Allocated accum_rates_proc"
+    ! print *, "BASE/ALLOCATE_SYSTEM : Allocated accum_rates_proc"
 
 !------ S. Matera 09/18/2012------
         allocate(integ_rates(nr_of_proc))
         integ_rates = 0
 !------ S. Matera 09/18/2012------
-    print *, "BASE/ALLOCATE_SYSTEM : Allocated integ_rates"
+    ! print *, "BASE/ALLOCATE_SYSTEM : Allocated integ_rates"
 
     allocate(procstat(nr_of_proc))
     procstat = 0
-    print *, "BASE/ALLOCATE_SYSTEM : Allocated procstat"
+    ! print *, "BASE/ALLOCATE_SYSTEM : Allocated procstat"
 
   endif
 
@@ -1062,7 +1038,7 @@ subroutine get_accum_rate(proc_nr, return_accum_rate)
   !******
   !---------------I/O variables---------------
   integer(kind=iint), intent(in), optional :: proc_nr
-  real(kind=iint), intent(out) :: return_accum_rate
+  real(kind=rdouble), intent(out) :: return_accum_rate
 
   if(.not. present(proc_nr) .or. proc_nr.eq.0) then
     return_accum_rate=accum_rates(nr_of_proc)
@@ -1085,7 +1061,7 @@ subroutine get_integ_rate(proc_nr, return_integ_rate)
     !******
     !---------------I/O variables---------------
     integer(kind=iint), intent(in), optional :: proc_nr
-    real(kind=iint), intent(out) :: return_integ_rate
+    real(kind=rdouble), intent(out) :: return_integ_rate
 
     if(.not. present(proc_nr) .or. proc_nr.eq.0) then
       return_integ_rate=integ_rates(nr_of_proc)
@@ -1212,7 +1188,7 @@ subroutine determine_procsite(ran_proc, ran_site, proc, site)
   ! ran_proc <- [0,1] so we multiply with larger value in accum_rates
   call interval_search_real(accum_rates, ran_proc*accum_rates(nr_of_proc), proc)
 
-  print *, "Found proc ",proc ! FIXME
+  !print *, "Found proc ",proc ! FIXME
 
 
   ! once the process is selected, we need to build the corresponding accum rate
@@ -1223,14 +1199,14 @@ subroutine determine_procsite(ran_proc, ran_site, proc, site)
      accum_rates_proc(i) = accum_rates_proc(i-1) + rates_matrix(proc,i)
   enddo
 
-  print *, "Accumulated rate for process" !FIXME
+  ! print *, "Accumulated rate for process" !DEBUG
 
   aux_rand = ran_proc*accum_rates(nr_of_proc) - accum_rates(proc-1)
   call interval_search_real(accum_rates_proc(1:nr_of_sites(proc)),aux_rand,site)
 
-  print *, "Found site ", site
-
   site = avail_sites(proc,site,1) !!! WRONG
+
+  ! print *, "Found site ", site ! DEBUG
 
   ASSERT(nr_of_sites(proc).gt.0,"base/determine_procsite: chosen process is invalid &
     because it has no sites available.")
@@ -1296,8 +1272,6 @@ pure function get_species(site)
   integer(kind=iint) :: get_species
   integer(kind=iint), intent(in) :: site
 
-  !! DEBUG
-  !print *, site
   !ASSERT(site.ge.1,"kmos/base/get_species was asked for a zero or negative site")
   !ASSERT(site.le.volume,"kmos/base/get_species was asked for a site outside the lattice")
 
@@ -1323,8 +1297,8 @@ subroutine replace_species(site, old_species, new_species)
 
   ASSERT(site.le.volume,"kmos/base/replace_species was asked for a site outside the lattice")
 
-  print *,"BASE/REPLACE_SPECIES/OLD_SPECIES ", old_species ! DEBUG FIXME
-  print *,"BASE/REPLACE_SPECIES/NEW_SPECIES ", new_species
+  !print *,"BASE/REPLACE_SPECIES/OLD_SPECIES ", old_species ! DEBUG FIXME
+  !print *,"BASE/REPLACE_SPECIES/NEW_SPECIES ", new_species
 
   ! Double-check that we actually remove the atom that we think is there
   if(old_species.ne.lattice(site))then
