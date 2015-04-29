@@ -493,7 +493,10 @@ def col_str2tuple(hex_string):
     into a tuple of three float between 0 and 1
     """
     import gtk
-    color = gtk.gdk.Color(hex_string)
+    try:
+        color = gtk.gdk.Color(hex_string)
+    except ValueError as e:
+        raise UserWarning('GTK cannot decipher color string {hex_string}: {e}'.format(**locals()))
     return (color.red_float, color.green_float, color.blue_float)
 
 
