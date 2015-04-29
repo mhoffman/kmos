@@ -366,11 +366,20 @@ subroutine update_rates_matrix(proc, site, rate)
   ! Make sure the rate is not negative
   ASSERT(rate.ge.0,"base/update_rates_matrix: rate cant be negative")
 
+  print *,"BASE/UPDATE_RATES_MATRIX/PROC ",proc !FIXME DEBUG
+  print *,"BASE/UPDATE_RATES_MATRIX/SITE ",site !FIXME DEBUG
+  print *,"BASE/UPDATE_RATES_MATRIX/RATE ",rate !FIXME DEBUG
+  
+
   memory_address = avail_sites(proc,site,2)
+  print *,"BASE/UPDATE_RATES_MATRIX/memory_address ",memory_address !FIXME DEBUG
   ! Update total process rate
   rates_matrix(proc,volume+1) = rates_matrix(proc,volume+1) + rate - rates_matrix(proc,memory_address)
+  print *,"BASE/UPDATE_RATES_MATRIX/Updated acumulated rate " !FIXME DEBUG
   ! Update individual rate
   rates_matrix(proc,memory_address) = rate
+  print *,"BASE/UPDATE_RATES_MATRIX/Updated rate " !FIXME DEBUG
+
 
 end subroutine update_rates_matrix
 
@@ -1221,7 +1230,7 @@ subroutine determine_procsite(ran_proc, ran_site, proc, site)
 
   print *, "Found site ", site
 
-  site = avail_sites(proc,site,1)
+  site = avail_sites(proc,site,1) !!! WRONG
 
   ASSERT(nr_of_sites(proc).gt.0,"base/determine_procsite: chosen process is invalid &
     because it has no sites available.")
