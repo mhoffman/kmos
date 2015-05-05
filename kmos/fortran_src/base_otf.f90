@@ -753,6 +753,10 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
     print *,"kmos/base/allocate_system: Tried to allocate rates_matrix twice, please deallocate first"
     system_allocated = .true.
   endif
+  if(allocated(rates))then
+    print *,"kmos/base/allocate_system: Tried to allocate rates twice, please deallocate first"
+    system_allocated = .true.
+  endif
   if(allocated(accum_rates))then
     print *,"kmos/base/allocate_system: Tried to allocate accum_rates twice, please deallocate first"
     system_allocated = .true.
@@ -865,10 +869,20 @@ subroutine deallocate_system()
   else
     print *,"Warning: rates_matrix was not allocated, tried to deallocate."
   endif
+  if(allocated(rates))then
+    deallocate(rates)
+  else
+    print *,"Warning: rates was not allocated, tried to deallocate."
+  endif
   if(allocated(accum_rates))then
     deallocate(accum_rates)
   else
-    print *,"Warning: rates was not allocated, tried to deallocate."
+    print *,"Warning: accum_rates was not allocated, tried to deallocate."
+  endif
+  if(allocated(accum_rates_proc))then
+    deallocate(accum_rates_proc)
+  else
+    print *,"Warning: accum_rates_proc was not allocated, tried to deallocate."
   endif
 !------ S. Matera 09/18/2012------
     if(allocated(integ_rates))then
@@ -1177,7 +1191,7 @@ subroutine determine_procsite(ran_proc, ran_site, proc, site)
   integer(kind=iint), intent(out) :: proc, site
   !---------------internal variables---------------
   integer(kind=iint) :: i
-  real(kind=rsingle) :: aux_rand ! Might not need it later
+  real(kind=rdouble) :: aux_rand ! Might not need it later
 
 
   ASSERT(ran_proc.ge.0,"base/determine_procsite: ran_proc has to be positive")
@@ -1188,7 +1202,7 @@ subroutine determine_procsite(ran_proc, ran_site, proc, site)
   ! ran_proc <- [0,1] so we multiply with larger value in accum_rates
   call interval_search_real(accum_rates, ran_proc*accum_rates(nr_of_proc), proc)
 
-  !print *, "Found proc ",proc ! FIXME
+  ! print *, "BASE/DETERMINE_PROCSITE/Found proc ",proc ! FIXME
 
 
   ! once the process is selected, we need to build the corresponding accum rate
@@ -1199,14 +1213,20 @@ subroutine determine_procsite(ran_proc, ran_site, proc, site)
      accum_rates_proc(i) = accum_rates_proc(i-1) + rates_matrix(proc,i)
   enddo
 
-  ! print *, "Accumulated rate for process" !DEBUG
+  ! print *, "BASE/DETERMINE_PROCSITE/Accumulated rate for process ",accum_rates_proc(nr_of_sites(proc)) !DEBUG
+  ! print *, "BASE/DETERMINE_PROCSITE/According to accum_rates   : ", (accum_rates(proc) - accum_rates(proc-1))
 
-  aux_rand = ran_proc*accum_rates(nr_of_proc) - accum_rates(proc-1)
-  call interval_search_real(accum_rates_proc(1:nr_of_sites(proc)),aux_rand,site)
+  ! aux_rand = ran_proc*accum_rates(nr_of_proc) - accum_rates(proc-1)
 
-  site = avail_sites(proc,site,1) !!! WRONG
+  ! print *, "BASE/DETERMINE_PROCSITE/aux_rand                     ", aux_rand
 
-  ! print *, "Found site ", site ! DEBUG
+  call interval_search_real(accum_rates_proc(1:nr_of_sites(proc)),ran_proc*accum_rates(nr_of_proc)-accum_rates(proc-1),site)
+
+  ! print *, "BASE/DETERMINE_PROCSITE/Found memory_address ", site ! DEBUG
+
+  site = avail_sites(proc,site,1)
+
+  ! print *, "BASE/DETERMINE_PROCSITE/Found site ", site ! DEBUG
 
   ASSERT(nr_of_sites(proc).gt.0,"base/determine_procsite: chosen process is invalid &
     because it has no sites available.")

@@ -603,7 +603,7 @@ class ProcListWriter():
         # this routine only selects the correct routine from all
         # of the run_proc_<procname> routines
 
-        out.write('subroutine run_proc_nr(proc, nr_site)\n\n'
+        out.write('subroutine run_proc_nr(proc, nr_cell)\n\n'
                   '!****f* proclist/run_proc_nr\n'
                   '! FUNCTION\n'
                   '!    Runs process ``proc`` on site ``nr_site``.\n'
@@ -614,11 +614,11 @@ class ProcListWriter():
                   '!    * ``nr_site``  integer representing the site\n'
                   '!******\n'
                   '    integer(kind=iint), intent(in) :: proc\n'
-                  '    integer(kind=iint), intent(in) :: nr_site\n\n'
-                  '    integer(kind=iint), dimension(4) :: lsite\n\n'
+                  '    integer(kind=iint), intent(in) :: nr_cell\n\n'
+                  '    integer(kind=iint), dimension(4) :: cell\n\n'
                   '    call increment_procstat(proc)\n\n'
                   '    ! lsite = lattice_site, (vs. scalar site)\n'
-                  '    lsite = nr2lattice(nr_site, :)\n\n'
+                  '    cell = nr2lattice(nr_cell, :) + (/0, 0, 0, -1/)\n\n'
                   '    select case(proc)\n')
         for process in data.process_list:
             out.write('    case(%s)\n' % process.name)
@@ -628,7 +628,7 @@ class ProcListWriter():
                            'print *,"PROCLIST/RUN_PROC_NR/LSITE",lsite\n'
                            'print *,"PROCLIST/RUN_PROC_NR/SITE",nr_site\n')
                            % process.name)
-            out.write('        call run_proc_%s(lsite)\n' % process.name)
+            out.write('        call run_proc_%s(cell)\n' % process.name)
 
             out.write('\n')
         out.write('    end select\n\n')
@@ -1318,7 +1318,7 @@ class ProcListWriter():
             out.write('\nsubroutine %s(site)\n\n' %routine_name)
             out.write('%sinteger(kind=iint), dimension(4), intent(in) :: site\n' % (' '*indent))
             out.write('%sinteger(kind=iint), dimension(4) :: cell\n\n' % (' '*indent))
-            out.write('%scell(1) = site(1)\n' % (' '*indent))
+            out.write('%scell(1) = site(1)\n' % (' '*indent)) ## FIXME!
             out.write('%scell(2) = site(2)\n' % (' '*indent))
             out.write('%scell(3) = site(3)\n' % (' '*indent))
             out.write('%scell(4) = 0\n\n' % (' '*indent))

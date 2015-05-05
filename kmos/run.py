@@ -254,11 +254,8 @@ class KMC_Model(Process):
                     self.lattice_representation = lattice_representation[0]
         else:
             self.lattice_representation = Atoms()
-        print('Done get representation') # DEBUG FIXME
 
         set_rate_constants(settings.parameters, self.print_rates)
-
-        print('Done set_rate_constants') # DEBUG FIXME
 
         self.base.update_accum_rate()
         # S. matera 09/25/2012
