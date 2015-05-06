@@ -1088,6 +1088,30 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                                   tooltip=tooltip,
                                   )
 
+        # For otf backend only
+        if self.process.bystander_list:
+            for elem in self.process.bystander_list:
+                species_color = '#d3d3d3'
+                pos = [x.pos
+                    for layer in self.project_tree.get_layers()
+                    for x in layer.sites
+                    if x.name == elem.coord.name
+                        ][0]
+
+                center = toscrn(np.inner(pos + elem.coord.offset + center_x, atoms.cell.T))
+                tooltip = 'Bystander: %s@%s.%s.%s' % (elem.allowed_species,
+                                        elem.coord.name,
+                                        tuple(elem.coord.offset),
+                                        elem.coord.layer)  # for tooltip
+                o = goocanvas.Rect(parent=root,
+                                    x=center[0]-0.6*radius,
+                                    y=center[1]-0.6*radius,
+                                    width=1.2*radius,
+                                    height=1.2*radius,
+                                    stroke_color='black',
+                                    fill_color_rgba=eval('0x' + species_color[1:] + 'ff' ),
+                                    tooltip=tooltip,
+                                    )
 
 
 
