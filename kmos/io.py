@@ -1232,6 +1232,7 @@ class ProcListWriter():
                   'use base, only: &\n'
                   '    update_accum_rate, &\n'
                   '    update_integ_rate, &\n'
+                  '    reaccumulate_rates_matrix, &\n'
                   '    determine_procsite, &\n'
                   '    update_clocks, &\n'
                   '    avail_sites, &\n'))

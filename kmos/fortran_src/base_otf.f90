@@ -72,6 +72,7 @@ public :: add_proc, &
   null_species, &
   reload_system, &
   reset_site, &
+  reaccumulate_rates_matrix, &
   save_system, &
   set_rate_const, &
   set_null_species, &
@@ -330,7 +331,7 @@ subroutine add_proc(proc, site, rate)
 end subroutine add_proc
 
 subroutine update_rates_matrix(proc, site, rate)
-  !****f* base/add_proc
+  !****f* base/update_rates_matrix
   ! FUNCTION
   !    Updates the rates_matrix. To be used when the state of a bystander has
   !    been modified
@@ -361,6 +362,29 @@ subroutine update_rates_matrix(proc, site, rate)
   rates_matrix(proc,memory_address) = rate
 
 end subroutine update_rates_matrix
+
+subroutine reaccumulate_rates_matrix()
+  !****f* base/reaccumulate_rates_matrix
+  ! FUNCTION
+  !    Performs a process wide reaccumulation of the values in the rates_matrix.
+  !    To be used when some of the user parameters are updated.
+  !    Expected to aleviate some of the problems arising from floating point errors
+  !******
+  integer(kind=iint) :: proc, memadd
+
+  do proc=1,nr_of_proc
+     rates_matrix(proc,volume+1) = 0.0
+     do memadd=1, volume
+        if(avail_sites(proc,memadd,1).gt.0)then
+           ASSERT(rates_matrix(proc,memadd).gt.0.0,"base/reaccumulate_rates_matrix: found a negative rate value!")
+           rates_matrix(proc,volume+1) = rates_matrix(proc,volume+1) + rates_matrix(proc,memadd)
+        else
+           rates_matrix(proc,memadd) = 0.0
+        endif
+     enddo
+  enddo
+
+end subroutine reaccumulate_rates_matrix
 
 pure function can_do(proc, site)
   !****f* base/can_do

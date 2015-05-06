@@ -308,7 +308,7 @@ if code_generator in ['otf',]:
     #@ subroutine recalculate_rates_matrix()
     #@
     #@     integer(kind=iint) :: i,j,k
-    #@ 
+    #@
     for process in data.process_list:  # FIXME
         #@     do i=1, system_size(1)
         #@         do j=1, system_size(2)
@@ -319,8 +319,7 @@ if code_generator in ['otf',]:
         #@             end do
         #@         end do
         #@     end do
-        #@     
+        #@
     #@
+    #@     call reaccumulate_rates_matrix()
     #@ end subroutine recalculate_rates_matrix
-
-
