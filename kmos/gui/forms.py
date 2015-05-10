@@ -1099,10 +1099,11 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                         ][0]
 
                 center = toscrn(np.inner(pos + elem.coord.offset + center_x, atoms.cell.T))
-                tooltip = 'Bystander: %s@%s.%s.%s' % (elem.allowed_species,
-                                        elem.coord.name,
-                                        tuple(elem.coord.offset),
-                                        elem.coord.layer)  # for tooltip
+                tooltip = 'Bystander (%s): %s@%s.%s.%s' % (elem.flag,
+                                                              elem.allowed_species,
+                                                              elem.coord.name,
+                                                              tuple(elem.coord.offset),
+                                                              elem.coord.layer)  # for tooltip
                 o = goocanvas.Rect(parent=root,
                                     x=center[0]-0.6*radius,
                                     y=center[1]-0.6*radius,
