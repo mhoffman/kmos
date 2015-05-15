@@ -694,11 +694,20 @@ subroutine update_accum_rate()
   !    ``none``
   !******
 
-  integer(kind=iint) :: i
+  integer(kind=iint) :: i, j
 
+  accum_rates(1) = 0.0
+  rates_matrix(1,volume+1) = 0.0
+  do j = 1, nr_of_sites(1)
+     rates_matrix(1,volume+1) = rates_matrix(1,volume+1) + rates_matrix(1,j)
+  enddo
   accum_rates(1)=rates_matrix(1,volume+1)
   do i = 2, nr_of_proc
-    accum_rates(i)=accum_rates(i-1)+rates_matrix(i,volume+1)
+     rates_matrix(i,volume+1) = 0.0
+     do j = 1, nr_of_sites(i)
+        rates_matrix(i,volume+1) = rates_matrix(i,volume+1) + rates_matrix(i,j)
+     enddo
+     accum_rates(i)=accum_rates(i-1)+rates_matrix(i,volume+1)
   enddo
 
   ASSERT(accum_rates(nr_of_proc).gt.0.,"base/update_accum_rate found &
@@ -1244,7 +1253,8 @@ subroutine determine_procsite(ran_proc, ran_site, proc, site)
 
   ! print *, "BASE/DETERMINE_PROCSITE/aux_rand                     ", aux_rand
 
-  call interval_search_real(accum_rates_proc(1:nr_of_sites(proc)),ran_proc*accum_rates(nr_of_proc)-accum_rates(proc-1),site)
+  ! call interval_search_real(accum_rates_proc(1:nr_of_sites(proc)),ran_proc*accum_rates(nr_of_proc)-accum_rates(proc-1),site)
+  call interval_search_real(accum_rates_proc(1:nr_of_sites(proc)),ran_site*accum_rates_proc(nr_of_sites(proc)),site)
 
   ! print *, "BASE/DETERMINE_PROCSITE/Found memory_address ", site ! DEBUG
 
