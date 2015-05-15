@@ -1316,13 +1316,8 @@ class ProcListWriter():
                 out.write('! INSERT HEADERS HERE ### TODO\n\n')
                 ## TODO
             routine_name = 'run_proc_%s' % exec_proc.name
-            out.write('\nsubroutine %s(site)\n\n' %routine_name)
-            out.write('%sinteger(kind=iint), dimension(4), intent(in) :: site\n' % (' '*indent))
-            out.write('%sinteger(kind=iint), dimension(4) :: cell\n\n' % (' '*indent))
-            out.write('%scell(1) = site(1)\n' % (' '*indent)) ## FIXME!
-            out.write('%scell(2) = site(2)\n' % (' '*indent))
-            out.write('%scell(3) = site(3)\n' % (' '*indent))
-            out.write('%scell(4) = 0\n\n' % (' '*indent))
+            out.write('\nsubroutine %s(cell)\n\n' %routine_name)
+            out.write('%sinteger(kind=iint), dimension(4), intent(in) :: cell\n\n' % (' '*indent))
 
             inh_procs = [copy.copy([]) for i in xrange(nprocs)]
             enh_procs = copy.deepcopy(inh_procs)
