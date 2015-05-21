@@ -1304,7 +1304,7 @@ class ProcListWriter():
         as in local_smart, but now working on whole processes,
         rather that with put/take single site routines.
         Aditionally, this routines must call the get_rate_<procname>
-        routines, defined in the ###other_module###
+        routines, which are defined in the proclist_parameters module
         """
         nprocs = len(data.process_list)
 
@@ -1319,6 +1319,9 @@ class ProcListWriter():
             out.write('\nsubroutine %s(cell)\n\n' %routine_name)
             out.write('%sinteger(kind=iint), dimension(4), intent(in) :: cell\n\n' % (' '*indent))
 
+            # We will sort out all processes that are (potentially) influenced
+            # (inhibited, activated or changed rate)
+            # by the executing process
             inh_procs = [copy.copy([]) for i in xrange(nprocs)]
             enh_procs = copy.deepcopy(inh_procs)
             aff_procs = copy.deepcopy(enh_procs)
@@ -1329,17 +1332,20 @@ class ProcListWriter():
                     for condition in proc.condition_list:
                         if condition.coord.name == exec_action.coord.name and\
                           condition.coord.layer == exec_action.coord.layer:
+                            # If any of the target process condition is compatible with
+                            # this action, we need to store the relative position of this
+                            # process with respect to the current process' location
                             rel_pos = tuple((exec_action.coord - condition.coord).offset) ## Need to check this!!!
                             if not condition.species == exec_action.species:
-                                inh_procs[ip].append(copy.copy(rel_pos))
+                                inh_procs[ip].append(copy.deepcopy(rel_pos))
                             else:
-                                enh_procs[ip].append(copy.copy(rel_pos))
-                    # and also the bystanders
+                                enh_procs[ip].append(copy.deepcopy(rel_pos))
+                    # and similarly for the bystanders
                     for byst in proc.bystander_list:
-                        if condition.coord.name == exec_action.coord.name and\
-                          condition.coord.layer == exec_action.coord.layer:
+                        if byst.coord.name == exec_action.coord.name and\
+                          byst.coord.layer == exec_action.coord.layer:
                             rel_pos = tuple((exec_action.coord - byst.coord).offset) ## Need to check this!!!
-                            aff_procs[ip].append(copy.copy(rel_pos))
+                            aff_procs[ip].append(copy.deepcopy(rel_pos))
 
 
             if debug > 0:
@@ -1358,8 +1364,9 @@ class ProcListWriter():
             for ip in xrange(nprocs):
                 enh_procs[ip] = [rel_pos for rel_pos in set(enh_procs[ip]) if not
                                  (rel_pos in inh_procs[ip])]
-                aff_procs[ip] = [rel_pos for rel_pos in set(aff_procs[ip]) if not
-                                 (rel_pos in inh_procs[ip])]
+                aff_procs[ip] = [rel_pos for rel_pos in set(aff_procs[ip])] # DEBUG! FIXME!
+                # aff_procs[ip] = [rel_pos for rel_pos in set(aff_procs[ip]) if not
+                #                  (rel_pos in inh_procs[ip])]
 
 
             if debug > 0:
@@ -1379,10 +1386,12 @@ class ProcListWriter():
             out.write('\n! Disable processes\n\n')
             for ip,sublist in enumerate(inh_procs):
                 for rel_pos in sublist:
-                    out.write('%sif(can_do(%s,cell + (/ %s, %s, %s, 1/))) then\n' % (' '*indent,data.process_list[ip].name,
-                                                                               rel_pos[0],rel_pos[1],rel_pos[2]))
-                    out.write('%scall del_proc(%s,cell + (/ %s, %s, %s, 1/))\n' % (' '*2*indent,data.process_list[ip].name,
-                                                                               rel_pos[0],rel_pos[1],rel_pos[2]))
+                    out.write('%sif(can_do(%s,cell + (/ %s, %s, %s, 1/))) then\n'
+                              % (' '*indent,data.process_list[ip].name,
+                                    rel_pos[0],rel_pos[1],rel_pos[2]))
+                    out.write('%scall del_proc(%s,cell + (/ %s, %s, %s, 1/))\n'
+                              % (' '*2*indent,data.process_list[ip].name,
+                                    rel_pos[0],rel_pos[1],rel_pos[2]))
                     out.write('%send if\n' % (' '*indent))
 
 
@@ -1407,17 +1416,18 @@ class ProcListWriter():
             out.write('\n! Update rate constants\n\n')
             for ip,sublist in enumerate(aff_procs):
                 for rel_pos in sublist:
-                    out.write('%sif(can_do(%s,cell + (/ %s, %s, %s, 1/))) then\n' % (' '*indent,data.process_list[ip].name,
-                                                                            rel_pos[0], rel_pos[1], rel_pos[2]))
+                    out.write('%sif(can_do(%s,cell + (/ %s, %s, %s, 1/))) then\n'
+                              % (' '*indent,data.process_list[ip].name,
+                                rel_pos[0], rel_pos[1], rel_pos[2]))
                     rel_site = 'cell + (/ %s, %s, %s, 1/)' % rel_pos
                     rel_cell = 'cell + (/ %s, %s, %s, 0/)' % rel_pos
-                    out.write('%scall update_rates_matrix(%s,%s,get_rate_%s(%s))\n' % (
-                        ' '*2*indent,
-                        data.process_list[ip].name,
-                        rel_site,
-                        data.process_list[ip].name,
-                        rel_cell,
-                        ))
+                    out.write('%scall update_rates_matrix(%s,%s,get_rate_%s(%s))\n'
+                              % (' '*2*indent,
+                                 data.process_list[ip].name,
+                                 rel_site,
+                                 data.process_list[ip].name,
+                                 rel_cell,
+                                 ))
                     out.write('%send if\n' % (' '*indent))
 
             ## Write the update_rate calls for all processes if allowed
@@ -1483,7 +1493,7 @@ class ProcListWriter():
                 rel_site = 'cell + (/ %s, %s, %s, 1/)' % (item[1][1][0],
                                                           item[1][1][1],
                                                           item[1][1][2],)
-                out.write('%scall add_Proc(%s, %s, get_rate_%s(%s))\n' % (' ' * indent,
+                out.write('%scall add_proc(%s, %s, get_rate_%s(%s))\n' % (' ' * indent,
                                                                            item[1][0], rel_site,
                                                                            item[1][0], rel_cell))
             else:
