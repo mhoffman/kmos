@@ -1335,7 +1335,7 @@ class ProcListWriter():
                             # If any of the target process condition is compatible with
                             # this action, we need to store the relative position of this
                             # process with respect to the current process' location
-                            rel_pos = tuple((exec_action.coord - condition.coord).offset) ## Need to check this!!!
+                            rel_pos = tuple((exec_action.coord - condition.coord).offset)
                             if not condition.species == exec_action.species:
                                 inh_procs[ip].append(copy.deepcopy(rel_pos))
                             else:
@@ -1344,7 +1344,7 @@ class ProcListWriter():
                     for byst in proc.bystander_list:
                         if byst.coord.name == exec_action.coord.name and\
                           byst.coord.layer == exec_action.coord.layer:
-                            rel_pos = tuple((exec_action.coord - byst.coord).offset) ## Need to check this!!!
+                            rel_pos = tuple((exec_action.coord - byst.coord).offset)
                             aff_procs[ip].append(copy.deepcopy(rel_pos))
 
 
@@ -1364,9 +1364,8 @@ class ProcListWriter():
             for ip in xrange(nprocs):
                 enh_procs[ip] = [rel_pos for rel_pos in set(enh_procs[ip]) if not
                                  (rel_pos in inh_procs[ip])]
-                aff_procs[ip] = [rel_pos for rel_pos in set(aff_procs[ip])] # DEBUG! FIXME!
-                # aff_procs[ip] = [rel_pos for rel_pos in set(aff_procs[ip]) if not
-                #                  (rel_pos in inh_procs[ip])]
+                aff_procs[ip] = [rel_pos for rel_pos in set(aff_procs[ip]) if not
+                                  (rel_pos in inh_procs[ip])]
 
 
             if debug > 0:
