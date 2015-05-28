@@ -322,11 +322,6 @@ class ProcListWriter():
         # parameters that kmos.evaluate_rate_expression can replace, namely
         # mu_* and m_*.
 
-        # beta is easy
-        # out.write('\n! Auxiliary parameters\n')
-        # out.write('real(kind=rdouble), public :: beta\n')
-
-
         # For the chemical potentials  and masses we need to explore all rate expressions
         # this code will repeat a lot of the logic on evaluate_rate_expression
         # Can we compress this??
@@ -420,6 +415,8 @@ class ProcListWriter():
 
         param_names = [param.name for param in data.parameter_list]
 
+        MAXLEN = 65 # Maximun line length
+
         if expr:
             if not 'base_rate' in expr:
                 raise UserWarning('Not base_rate in otf_rate for process %s' % procname)
@@ -435,6 +432,8 @@ class ProcListWriter():
             except:
                 raise Exception('kmos.io: Could not tokenize expression: %s' % expr)
             replaced_tokens = []
+            split_expression = ''
+            currl=0
             for i, token, _, _, _ in tokens:
                 if token.startswith('mu_'):
                     replaced_tokens.append((i,'chempots(%s)' % token))
@@ -442,7 +441,15 @@ class ProcListWriter():
                     replaced_tokens.append((i,'user_params(%s)' % token))
                 else:
                     replaced_tokens.append((i,token))
-            new_expr=tokenize.untokenize(replaced_tokens)
+                if currl+len(replaced_tokens[-1][1])<MAXLEN:
+                    split_expression+=replaced_tokens[-1][1]
+                    currl += len(replaced_tokens[-1][1])
+                else:
+                    split_expression+='&\n    &{}'.format(
+                        replaced_tokens[-1][1])
+                    currl=len(replaced_tokens[-1][1])
+            # new_expr=tokenize.untokenize(replaced_tokens)
+            new_expr=split_expression
         else:
             new_expr = 'rates(%s)' % procname
         return new_expr
