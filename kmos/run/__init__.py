@@ -44,6 +44,7 @@ from copy import deepcopy
 from fnmatch import fnmatch
 from kmos import evaluate_rate_expression
 from kmos.utils import OrderedDict
+import kmos.run.png
 from math import log
 from multiprocessing import Process
 import numpy as np
@@ -80,6 +81,7 @@ except Exception, e:
 
 INTERACTIVE = hasattr(sys, 'ps1') or hasattr(sys, 'ipcompleter')
 INTERACTIVE = True  # Turn it off for now because it doesn work reliably
+
 
 
 class ProclistProxy(object):
@@ -402,6 +404,7 @@ class KMC_Model(Process):
                     prefix='movie',
                     rotation='15z,-70x',
                     suffix='png',
+                    verbose=False,
                     **kwargs):
         """Export series of snapshots of model instance to an image
         file in the current directory which allows for easy post-processing
@@ -443,12 +446,17 @@ class KMC_Model(Process):
 
         from ase.io import write
         for i in xrange(frames):
-            atoms = self.get_atoms()
-            write('%s_%06i.%s' % (prefix, i, suffix),
-                  atoms,
-                  show_unit_cell=True,
-                  rotation=rotation,
-                  **kwargs)
+            atoms = self.get_atoms(reset_time_overrun=False)
+            filename = '{prefix:s}_{i:06d}.{suffix:s}'.format(**locals())
+            #write('%s_%06i.%s' % (prefix, i, suffix),
+                  #atoms,
+                  #show_unit_cell=True,
+                  #rotation=rotation,
+                  #**kwargs)
+
+            writer = kmos.run.png.MyPNG(atoms, show_unit_cell=True, scale=20, model=self, **kwargs).write(filename, resolution=150)
+            if verbose:
+                print('Wrote {filename}'.format(**locals()))
             self.do_steps(skip)
 
     def show(self, *args, **kwargs):
@@ -463,7 +471,7 @@ class KMC_Model(Process):
         from kmos import view
         view.main(self)
 
-    def get_atoms(self, geometry=True, tag=None):
+    def get_atoms(self, geometry=True, tag=None, reset_time_overrun=False):
         """Return an ASE Atoms object with additional
         information such as coverage and Turn-over-frequencies
         attached.
@@ -576,7 +584,7 @@ class KMC_Model(Process):
             # if we haven't done any steps, return the last TOF again
             atoms.tof_data = self.tof_data if hasattr(self, 'tof_data') else np.zeros_like(self.tof_matrix[:, 0])
             atoms.tof_integ = self.tof_integ  if hasattr(self, 'tof_integ') else np.zeros_like(self.tof_matrix[:, 0])
-        elif delta_t == 0. and atoms.kmc_time > 0:
+        elif delta_t == 0. and atoms.kmc_time > 0 and reset_time_overrun :
             print(
                 "Warning: numerical precision too low, to resolve time-steps")
             print('         Will reset kMC time to 0s.')
@@ -665,8 +673,7 @@ class KMC_Model(Process):
         # sample over trajectory
         for sample in xrange(samples):
             self.do_steps(sample_size)
-            atoms = self.get_atoms(geometry=False)
-
+            atoms = self.get_atoms(geometry=False, reset_time_overrun=False)
             delta_ts.append(atoms.delta_t)
 
             occs.append(list(atoms.occupation.flatten()))
