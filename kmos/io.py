@@ -401,15 +401,16 @@ class ProcListWriter():
                               (' '*3*indent,spec,byst.flag,spec,byst.flag))
                 out.write('%send select\n' % (' '*indent))
 
-            new_expr = self._parse_otf_rate(process.otf_rate,process.name,data)
+            new_expr = self._parse_otf_rate(process.otf_rate,process.name,data,indent=indent)
 
-            out.write('%sget_rate_%s = %s\n' % (' '*indent,process.name,new_expr))
+            out.write('%sget_rate_%s =&\n' % (' '*indent,process.name))
+            out.write('%s&%s\n' % (' '*indent,new_expr))
             out.write('%sreturn\n' % (' '*indent))
             out.write('\nend function get_rate_%s\n\n' % process.name)
 
         out.write('\nend module proclist_parameters\n')
 
-    def _parse_otf_rate(self,expr,procname,data):
+    def _parse_otf_rate(self,expr,procname,data,indent=4):
         import StringIO, tokenize
         from kmos import units, rate_aliases
 
@@ -445,8 +446,8 @@ class ProcListWriter():
                     split_expression+=replaced_tokens[-1][1]
                     currl += len(replaced_tokens[-1][1])
                 else:
-                    split_expression+='&\n    &{}'.format(
-                        replaced_tokens[-1][1])
+                    split_expression+='&\n{0}&{1}'.format(
+                        ' '*indent,replaced_tokens[-1][1])
                     currl=len(replaced_tokens[-1][1])
             # new_expr=tokenize.untokenize(replaced_tokens)
             new_expr=split_expression
