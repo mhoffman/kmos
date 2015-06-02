@@ -1080,6 +1080,23 @@ class Project(object):
                 if len([y for y in process.action_list if x == y]) > 1:
                     raise UserWarning('%s of process %s is not unique!' %
                                       (x, process.name))
+
+        # check if bystanders for each process are unique and
+        # do not coincide with conditions or actions
+        for process in self.get_processes():
+            for x in process.bystander_list:
+                if len([y for y in process.bystander_list
+                        if x.coord == y.coord]) > 1:
+                    raise UserWarning(('Found more than one bystander for %s\n'
+                                       % x.coord)
+                                      ('on process %s' % process.name))
+                if len([y for y in process.condition_list if x.coord == y.coord]) > 0:
+                    raise UserWarning('Process %s has both a condition and a bystander\n'
+                                      'on %s!' % (process.name,x.coord))
+                if len([y for y in process.action_list if x.coord == y.coord]) > 0:
+                    raise UserWarning('Process %s has an action and a bystander\n on %s!' %
+                                      (process.name,x.coord))
+
         # check if all processes have a rate expression
         for x in self.get_processes():
             if not x.rate_constant:
@@ -1088,6 +1105,7 @@ class Project(object):
         # check if all rate expressions are valid
         # check if all species used in condition_action are defined
         # after stripping ^ and $ operators
+        # check if all species used in bystander are defined
         species_names = [x.name for x in self.get_speciess()]
         for x in self.get_processes():
             for y in x.condition_list + x.action_list:
@@ -1099,6 +1117,17 @@ class Project(object):
                         raise UserWarning(('Species %s used by %s in process %s'
                                            'is not defined') %
                                           (y.species, y, x.name))
+            if hasattr(x,'bystander_list'):
+                for y in x.bystander_list:
+                    stripped_speciess = [
+                        species.replace('$', '').replace('^', '').strip()
+                        for species in y.allowed_species]
+                    for stripped_species in stripped_speciess:
+                        if not stripped_species in species_names:
+                            raise UserWarning(
+                                ('Species %s used by %s\n'
+                                 ' in process %s is not defined') %
+                                 (stripped_species, y, x.name))
 
         # check if all sites in processes are defined: actions, conditions
         return True
