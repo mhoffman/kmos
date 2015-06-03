@@ -146,3 +146,15 @@ All of this comes togueder in the process definition::
 		 rate_constant=rate_constant,
 		 otf_rate=otf_rate)
   pt.add_process(proc)
+
+Known Issues
+^^^^^^^^^^^^
+1. Non-optimal updates to rates_matrix.
+     The current implementation of
+     the backend is still non-optimal and can lead to considerable
+     decrease in speed for larger systems. This will be corrected once
+     more tests are conducted.
+
+2. Process name length limit
+     f2py will crash during compilation if a process has a name lager
+     than approx. 20 characters.
