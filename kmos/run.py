@@ -1125,7 +1125,7 @@ class KMC_Model(Process):
         for x in range(self.lattice.system_size[0]):
             for y in range(self.lattice.system_size[1]):
                 for z in range(self.lattice.system_size[2]):
-                    if self.get_backend() == 'lat_int':
+                    if self.get_backend() in ['lat_int','otf']:
                         eval('self.proclist.touchup_cell([%i, %i, %i, 0])'
                             % (x, y, z))
                     else:
