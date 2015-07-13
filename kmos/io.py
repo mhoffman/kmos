@@ -387,6 +387,17 @@ class ProcListWriter():
                     nr2zero += '%snr_%s_%s = 0\n' % (' '*indent,spec,flag)
             out.write('\n')
 
+            # parse the otf_rate expression to get auxiliary variables
+            new_expr, aux_vars = self._parse_otf_rate(process.otf_rate,
+                                                      process.name,
+                                                      data,
+                                                      indent=indent)
+            for aux_var in aux_vars:
+                out.write('%sreal(kind=rdouble) :: %s\n' %
+                          (' '*indent,aux_var))
+            out.write('\n')
+
+
             out.write('%sreal(kind=rdouble) :: get_rate_%s\n' % (' '*indent,process.name))
 
             out.write('\n')
@@ -401,16 +412,45 @@ class ProcListWriter():
                               (' '*3*indent,spec,byst.flag,spec,byst.flag))
                 out.write('%send select\n' % (' '*indent))
 
-            new_expr = self._parse_otf_rate(process.otf_rate,process.name,data,indent=indent)
 
-            out.write('%sget_rate_%s =&\n' % (' '*indent,process.name))
-            out.write('%s&%s\n' % (' '*indent,new_expr))
+            out.write('{}\n'.format(new_expr))
             out.write('%sreturn\n' % (' '*indent))
             out.write('\nend function get_rate_%s\n\n' % process.name)
 
         out.write('\nend module proclist_parameters\n')
 
+
     def _parse_otf_rate(self,expr,procname,data,indent=4):
+
+        aux_vars = []
+
+        if expr:
+            if not 'base_rate' in expr:
+                raise UserWarning('Not base_rate in otf_rate for process %s' % procname)
+
+            # rate_lines = expr.splitlines()
+            rate_lines = expr.split('\\n')
+            print(len(rate_lines))
+            print(expr)
+            if len(rate_lines) == 1 and not ('=' in rate_lines[0]):
+                rate_lines[0] = 'otf_rate =' + rate_lines[0]
+            if not 'otf_rate' in expr:
+                raise ValueError('Found a multiline otf_rate expression'
+                                 " without 'otf_rate' on it")
+            final_expr = ''
+            for rate_line in rate_lines:
+                aux_vars.append(rate_line.split('=')[0].strip())
+                final_expr += '{}{}\n'.format(
+                    ' '*indent,
+                    self._parse_otf_rate_line(
+                        rate_line,procname,data,indent=indent)
+                    )
+        else:
+            final_expr = '{0}get_rate_{1} = rates({1})'.format(' '*indent, procname)
+
+        return final_expr, aux_vars[:-1]
+
+    def _parse_otf_rate_line(self,expr,procname,data,indent=4):
         import StringIO, tokenize
         from kmos import units, rate_aliases
 
@@ -418,45 +458,39 @@ class ProcListWriter():
 
         MAXLEN = 65 # Maximun line length
 
-        if expr:
-            if not 'base_rate' in expr:
-                raise UserWarning('Not base_rate in otf_rate for process %s' % procname)
-            # 'base_rate' has special meaning in otf_rate
-            expr = expr.replace('base_rate','rates(%s)' % procname)
-            # And all aliases need to be replaced
-            for old, new in rate_aliases.iteritems():
-                expr = expr.replace(old,new)
-            # Then time to tokenize:
-            try:
-                tokenize_input = StringIO.StringIO(expr).readline
-                tokens = list(tokenize.generate_tokens(tokenize_input))
-            except:
-                raise Exception('kmos.io: Could not tokenize expression: %s' % expr)
-            replaced_tokens = []
-            split_expression = ''
-            currl=0
-            for i, token, _, _, _ in tokens:
-                if token.startswith('mu_'):
-                    replaced_tokens.append((i,'chempots(%s)' % token))
-                elif token in param_names:
-                    replaced_tokens.append((i,'user_params(%s)' % token))
-                else:
-                    replaced_tokens.append((i,token))
-                if currl+len(replaced_tokens[-1][1])<MAXLEN:
-                    split_expression+=replaced_tokens[-1][1]
-                    currl += len(replaced_tokens[-1][1])
-                else:
-                    split_expression+='&\n{0}&{1}'.format(
-                        ' '*indent,replaced_tokens[-1][1])
-                    currl=len(replaced_tokens[-1][1])
-            # new_expr=tokenize.untokenize(replaced_tokens)
-            new_expr=split_expression
-        else:
-            new_expr = 'rates(%s)' % procname
-        return new_expr
+        # 'base_rate' has special meaning in otf_rate
+        expr = expr.replace('base_rate','rates(%s)' % procname)
+        # so does 'otf_rate'
+        expr = expr.replace('otf_rate','get_rate_{}'.format(procname))
 
+        # And all aliases need to be replaced
+        for old, new in rate_aliases.iteritems():
+            expr = expr.replace(old,new)
 
-
+        # Then time to tokenize:
+        try:
+            tokenize_input = StringIO.StringIO(expr).readline
+            tokens = list(tokenize.generate_tokens(tokenize_input))
+        except:
+            raise Exception('kmos.io: Could not tokenize expression: %s' % expr)
+        replaced_tokens = []
+        split_expression = ''
+        currl=0
+        for i, token, _, _, _ in tokens:
+            if token.startswith('mu_'):
+                replaced_tokens.append((i,'chempots(%s)' % token))
+            elif token in param_names:
+                replaced_tokens.append((i,'user_params(%s)' % token))
+            else:
+                replaced_tokens.append((i,token))
+            if currl+len(replaced_tokens[-1][1])<MAXLEN:
+                split_expression+=replaced_tokens[-1][1]
+                currl += len(replaced_tokens[-1][1])
+            else:
+                split_expression+='&\n{0}&{1}'.format(
+                    ' '*indent,replaced_tokens[-1][1])
+                currl=len(replaced_tokens[-1][1])
+        return split_expression
 
     def write_proclist_constants(self, data, out,
                                  code_generator='local_smart',
