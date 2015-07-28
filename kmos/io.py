@@ -305,12 +305,6 @@ class ProcListWriter():
 
 
         units_list, masses_list, chempot_list = self._otf_get_auxilirary_params(data)
-        # out.write('private\n\n')
-        # out.write('public :: update_user_parameter')
-        # if chempot_list:
-        #     out.write(', &\n  update_chempot\n')
-        # else:
-        #     out.write('\n')
 
         # Define variables for the user defined parameteres
         out.write('! User parameters\n')
@@ -379,19 +373,26 @@ class ProcListWriter():
                 else:
                     specs_dict[byst.flag] = byst.allowed_species
 
+
+            # parse the otf_rate expression to get auxiliary variables
+            new_expr, aux_vars, nr_vars = self._parse_otf_rate(process.otf_rate,
+                                                      process.name,
+                                                      data,
+                                                      indent=indent)
+
             nr2zero = ''
             for flag in flags:
                 for spec in specs_dict[flag]:
                     out.write('%sinteger(kind=iint) :: nr_%s_%s\n' %
                               (' '*indent,spec,flag))
                     nr2zero += '%snr_%s_%s = 0\n' % (' '*indent,spec,flag)
-            out.write('\n')
+            for nr_var in nr_vars:
+                if not nr_var in nr2zero:
+                    out.write('{}integer(kind=iint) :: {}\n'.format(' '*indent,nr_var))
+                    nr2zero += '{}{} = 0\n'.format(' '*indent,nr_var)
 
-            # parse the otf_rate expression to get auxiliary variables
-            new_expr, aux_vars = self._parse_otf_rate(process.otf_rate,
-                                                      process.name,
-                                                      data,
-                                                      indent=indent)
+            out.write('\n')
+            out.write('! Local auxiliary variables\n')
             for aux_var in aux_vars:
                 out.write('%sreal(kind=rdouble) :: %s\n' %
                           (' '*indent,aux_var))
@@ -402,6 +403,7 @@ class ProcListWriter():
 
             out.write('\n')
             out.write(nr2zero)
+            out.write('\n')
 
             for byst in process.bystander_list:
                 out.write('%sselect case(get_species(cell%s))\n' % (' '*indent,
@@ -421,42 +423,66 @@ class ProcListWriter():
 
 
     def _parse_otf_rate(self,expr,procname,data,indent=4):
+        """
+        Parses the otf_rate expression and returns the expression to be inserted
+        into the associated ``get_rate'' subroutine.
+        Additionally collects locally defined variables and the full set of used
+        nr_<species>_<flag> variables in order to include them in the variable
+        declarations in those functions
+        """
 
         aux_vars = []
+        nr_vars = []
 
         if expr:
             if not 'base_rate' in expr:
                 raise UserWarning('Not base_rate in otf_rate for process %s' % procname)
 
             # rate_lines = expr.splitlines()
-            rate_lines = expr.split('\\n')
-            print(len(rate_lines))
-            print(expr)
-            if len(rate_lines) == 1 and not ('=' in rate_lines[0]):
-                rate_lines[0] = 'otf_rate =' + rate_lines[0]
-            if not 'otf_rate' in expr:
+            rate_lines = expr.split('\\n') # FIXME still bound by explicit '\n' due to xml parser
+            if len(rate_lines) == 1:
+                if not ('=' in rate_lines[0]):
+                    rate_lines[0] = 'otf_rate =' + rate_lines[0]
+                elif 'otf_rate' not in rate_lines[0]:
+                    raise ValueError('Bad expression for single line otf rate\n' +
+                                     '{}\n'.format(rate_lines[0]) +
+                                     " must assign value to 'otf_rate'")
+            elif not 'otf_rate' in expr:
                 raise ValueError('Found a multiline otf_rate expression'
                                  " without 'otf_rate' on it")
             final_expr = ''
             for rate_line in rate_lines:
-                aux_vars.append(rate_line.split('=')[0].strip())
+                if '=' in rate_line:
+                    # We found a line that assigns a new variable
+                    aux_var = rate_line.split('=')[0].strip()
+                    if (not aux_var == 'otf_rate' and
+                        not aux_var.startswith('nr_')):
+                        aux_vars.append(aux_var)
+
+                parsed_line, nr_vars_line = self._parse_otf_rate_line(
+                    rate_line,procname,data,indent=indent)
                 final_expr += '{}{}\n'.format(
-                    ' '*indent,
-                    self._parse_otf_rate_line(
-                        rate_line,procname,data,indent=indent)
-                    )
+                    ' '*indent,parsed_line)
+                nr_vars.extend(nr_vars_line)
         else:
             final_expr = '{0}get_rate_{1} = rates({1})'.format(' '*indent, procname)
 
-        return final_expr, aux_vars[:-1]
+        return final_expr, aux_vars[:-1], list(set(nr_vars))
 
     def _parse_otf_rate_line(self,expr,procname,data,indent=4):
+        """
+        Parses an individual line of the otf_rate
+        returning the processed line and a list of the
+        nr_<species>_<flag> encountered
+        """
         import StringIO, tokenize
         from kmos import units, rate_aliases
 
         param_names = [param.name for param in data.parameter_list]
 
         MAXLEN = 65 # Maximun line length
+
+        nr_vars = []
 
         # 'base_rate' has special meaning in otf_rate
         expr = expr.replace('base_rate','rates(%s)' % procname)
@@ -477,6 +503,8 @@ class ProcListWriter():
         split_expression = ''
         currl=0
         for i, token, _, _, _ in tokens:
+            if token.startswith('nr_'):
+                nr_vars.append(token)
             if token.startswith('mu_'):
                 replaced_tokens.append((i,'chempots(%s)' % token))
             elif token in param_names:
@@ -490,7 +518,7 @@ class ProcListWriter():
                 split_expression+='&\n{0}&{1}'.format(
                     ' '*indent,replaced_tokens[-1][1])
                 currl=len(replaced_tokens[-1][1])
-        return split_expression
+        return split_expression, list(set(nr_vars))
 
     def write_proclist_constants(self, data, out,
                                  code_generator='local_smart',
