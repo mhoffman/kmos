@@ -202,334 +202,6 @@ class ProcListWriter():
 
         out.close()
 
-    def write_proclist_touchup_otf(self, data, out):
-        """
-        The touchup function
-
-        Updates the elementary steps that a cell can do
-        given the current lattice configuration. This has
-        to be run once for every cell to initialize
-        the simulation book-keeping.
-
-        """
-        indent = 4
-        out.write('subroutine touchup_cell(cell)\n')
-        out.write('    integer(kind=iint), intent(in), dimension(4) :: cell\n\n')
-        out.write('    integer(kind=iint), dimension(4) :: site\n\n')
-        out.write('    integer(kind=iint) :: proc_nr\n\n')
-        # First kill all processes from this site that are allowed
-        out.write('    site = cell + (/0, 0, 0, 1/)\n')
-        out.write('    do proc_nr = 1, nr_of_proc\n')
-        out.write('        if(avail_sites(proc_nr, lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then\n')
-        out.write('            call del_proc(proc_nr, site)\n')
-        out.write('        endif\n')
-        out.write('    end do\n\n')
-
-        # Then we need to build the iftree that will update all processes
-        # from this site
-
-        enabling_items = []
-        for process in data.process_list:
-            rel_pos = (0,0,0) # during touchup we only activate procs from current site
-            #rel_pos_string = 'cell + (/ %s, %s, %s, 1 /)' % (rel_pos[0],rel_pos[1], rel_pos[2]) # CHECK!!
-            item2 = (process.name,rel_pos,True)
-            # coded like this to be parallel to write_proclist_run_proc_name_otf
-            enabling_items.append((copy.deepcopy(process.condition_list),copy.deepcopy(item2)))
-
-        self._write_optimal_iftree_otf(enabling_items, indent, out)
-
-        out.write('\nend subroutine touchup_cell\n')
-
-    def _otf_get_auxilirary_params(self,data):
-        import StringIO
-        import tokenize
-        from kmos import units, rate_aliases
-        units_list = []
-        masses_list = []
-        chempot_list = []
-        for process in data.process_list:
-            exprs = [process.rate_constant,]
-            if process.otf_rate:
-                exprs.append(process.otf_rate)
-            for expr in exprs:
-                for old, new in rate_aliases.iteritems():
-                    expr=expr.replace(old, new)
-                try:
-                    tokenize_input = StringIO.StringIO(expr).readline
-                    tokens = list(tokenize.generate_tokens(tokenize_input))
-                except:
-                    raise Exception('Could not tokenize expression: %s' % expr)
-                for i, token, _, _, _ in tokens:
-                    if token in dir(units):
-                        if token not in units_list:
-                            units_list.append(token)
-                    if token.startswith('m_'):
-                        if token not in masses_list:
-                            masses_list.append(token)
-                    elif token.startswith('mu_'):
-                        if token not in chempot_list:
-                            chempot_list.append(token)
-        return sorted(units_list), sorted(masses_list), sorted(chempot_list)
-
-    def write_proclist_parameters_otf(self,data,out):
-        '''Writes the proclist_parameters.f90 files
-        which implements the module in charge of doing i/o
-        from python evaluated parameters, to fortran and also
-        handles rate constants update at fortran level'''
-
-        import tokenize
-        import StringIO
-        import itertools
-        from kmos import evaluate_rate_expression
-        from kmos import rate_aliases
-
-        indent = 4
-        # First the GPL message
-        # TODO Does this really belong here?
-        out.write(self._gpl_message())
-
-        out.write('module proclist_parameters\n')
-        out.write('use kind_values\n')
-        out.write('use base, only: &\n')
-        out.write('%srates\n' % (' '*indent))
-        out.write('use proclist_constants\n')
-        out.write('use lattice, only: &\n')
-        site_params = []
-        for layer in data.layer_list:
-            out.write('%s%s, &\n' % (' '*indent,layer.name))
-            for site in layer.sites:
-                site_params.append((site.name,layer.name))
-        for site,layer in site_params:
-            out.write('%s%s_%s, &\n' % (' '*indent,layer,site))
-        out.write('%sget_species\n' % (' '*indent))
-        out.write('\nimplicit none\n\n')
-
-
-        units_list, masses_list, chempot_list = self._otf_get_auxilirary_params(data)
-
-        # Define variables for the user defined parameteres
-        out.write('! User parameters\n')
-        for ip,parameter in enumerate(sorted(data.parameter_list, key=lambda x: x.name)):
-            out.write('integer(kind=iint), public :: %s = %s\n' % (parameter.name,(ip+1)))
-        out.write('real(kind=rdouble), public, dimension(%s) :: userpar\n' % len(data.parameter_list))
-
-        # Next, we need to put into the fortran module a placeholder for each of the
-        # parameters that kmos.evaluate_rate_expression can replace, namely
-        # mu_* and m_*.
-
-        # For the chemical potentials  and masses we need to explore all rate expressions
-        # this code will repeat a lot of the logic on evaluate_rate_expression
-        # Can we compress this??
-
-        out.write('\n! Constants\n')
-        for const in units_list:
-            out.write('real(kind=rdouble), parameter :: %s = %.10e\n'
-                      % (const, evaluate_rate_expression(const)))
-        out.write('\n! Species masses\n')
-        for mass in masses_list:
-            out.write('real(kind=rdouble), parameter :: %s = %.10e\n'
-                      % (mass,evaluate_rate_expression(mass)))
-
-        # Chemical potentials are different because we need to be able to update them
-        if chempot_list:
-            out.write('\n! Species chemical potentials\n')
-            for iu,mu in enumerate(chempot_list):
-                out.write('integer(kind=iint), public :: %s = %s\n' % (mu,(iu+1)))
-            out.write('real(kind=rdouble), public, dimension(%s) :: chempots\n' % len(chempot_list))
-
-        # This module contains functions
-        out.write('\ncontains\n')
-
-        # Once this is done, we need to build routines that update user parameters and chempots
-
-        out.write('subroutine update_user_parameter(param,val)\n')
-        out.write('    integer(kind=iint), intent(in) :: param\n')
-        out.write('    real(kind=rdouble), intent(in) :: val\n')
-        out.write('    userpar(param) = val\n')
-        out.write('end subroutine update_user_parameter\n\n')
-
-        if chempot_list:
-            out.write('subroutine update_chempot(index,val)\n')
-            out.write('    integer(kind=iint), intent(in) :: index\n')
-            out.write('    real(kind=rdouble), intent(in) :: val\n')
-            out.write('    chempots(index) = val\n')
-            out.write('end subroutine update_chempot\n\n')
-
-        # And finally, we need to write the subroutines to return each of the rate constants
-        out.write('\n! On-the-fly calculators for rate constants\n\n')
-        for process in data.process_list:
-            out.write('function get_rate_%s(cell)\n' % process.name)
-            out.write('%sinteger(kind=iint), dimension(4), intent(in) :: cell\n'
-                      % (' '*indent))
-
-            # get all of flags
-            flags = list(set([byst.flag for byst in process.bystander_list]))
-            # and all species
-            specs_dict = {}
-            for byst in process.bystander_list:
-                if hasattr(specs_dict,byst.flag):
-                    if not (sorted(byst.allowed_species) ==
-                            sorted(specs_dict[byst.flag])):
-                        raise RuntimeError('All bystanders sharing a flag must allow same species. proc: %s' % process.name)
-                else:
-                    specs_dict[byst.flag] = byst.allowed_species
-
-
-            # parse the otf_rate expression to get auxiliary variables
-            new_expr, aux_vars, nr_vars = self._parse_otf_rate(process.otf_rate,
-                                                      process.name,
-                                                      data,
-                                                      indent=indent)
-
-            nr2zero = ''
-            for flag in flags:
-                for spec in specs_dict[flag]:
-                    out.write('%sinteger(kind=iint) :: nr_%s_%s\n' %
-                              (' '*indent,spec,flag))
-                    nr2zero += '%snr_%s_%s = 0\n' % (' '*indent,spec,flag)
-            for nr_var in nr_vars:
-                if not nr_var in nr2zero:
-                    out.write('{}integer(kind=iint) :: {}\n'.format(' '*indent,nr_var))
-                    nr2zero += '{}{} = 0\n'.format(' '*indent,nr_var)
-
-            out.write('\n')
-            out.write('! Local auxiliary variables\n')
-            for aux_var in aux_vars:
-                out.write('%sreal(kind=rdouble) :: %s\n' %
-                          (' '*indent,aux_var))
-            out.write('\n')
-
-
-            out.write('%sreal(kind=rdouble) :: get_rate_%s\n' % (' '*indent,process.name))
-
-            out.write('\n')
-            out.write(nr2zero)
-            out.write('\n')
-
-            for byst in process.bystander_list:
-                out.write('%sselect case(get_species(cell%s))\n' % (' '*indent,
-                                                                 byst.coord.radd_ff()))
-                for spec in byst.allowed_species:
-                    out.write('%scase(%s)\n' % (' '*2*indent,spec))
-                    out.write('%snr_%s_%s = nr_%s_%s + 1\n' %
-                              (' '*3*indent,spec,byst.flag,spec,byst.flag))
-                out.write('%send select\n' % (' '*indent))
-            out.write('\n')
-
-            out.write('{}\n'.format(new_expr))
-            out.write('%sreturn\n' % (' '*indent))
-            out.write('\nend function get_rate_%s\n\n' % process.name)
-
-        out.write('\nend module proclist_parameters\n')
-
-
-    def _parse_otf_rate(self,expr,procname,data,indent=4):
-        """
-        Parses the otf_rate expression and returns the expression to be inserted
-        into the associated ``get_rate'' subroutine.
-        Additionally collects locally defined variables and the full set of used
-        nr_<species>_<flag> variables in order to include them in the variable
-        declarations in those functions
-        """
-
-        aux_vars = []
-        nr_vars = []
-
-        if expr:
-            if not 'base_rate' in expr:
-                raise UserWarning('Not base_rate in otf_rate for process %s' % procname)
-
-            # rate_lines = expr.splitlines()
-            rate_lines = expr.split('\\n') # FIXME still bound by explicit '\n' due to xml parser
-            if len(rate_lines) == 1:
-                if not ('=' in rate_lines[0]):
-                    rate_lines[0] = 'otf_rate =' + rate_lines[0]
-                elif 'otf_rate' not in rate_lines[0]:
-                    raise ValueError('Bad expression for single line otf rate\n' +
-                                     '{}\n'.format(rate_lines[0]) +
-                                     " must assign value to 'otf_rate'")
-            elif not 'otf_rate' in expr:
-                raise ValueError('Found a multiline otf_rate expression'
-                                 " without 'otf_rate' on it")
-            final_expr = ''
-            for rate_line in rate_lines:
-                if '=' in rate_line:
-                    # We found a line that assigns a new variable
-                    aux_var = rate_line.split('=')[0].strip()
-                    if (not aux_var == 'otf_rate' and
-                        not aux_var.startswith('nr_') and
-                        not aux_var in aux_vars):
-                        aux_vars.append(aux_var)
-
-                parsed_line, nr_vars_line = self._parse_otf_rate_line(
-                    rate_line,procname,data,indent=indent)
-                final_expr += '{}{}\n'.format(
-                    ' '*indent,parsed_line)
-                nr_vars.extend(nr_vars_line)
-        else:
-            final_expr = '{0}get_rate_{1} = rates({1})'.format(' '*indent, procname)
-
-        return final_expr, aux_vars, list(set(nr_vars))
-
-    def _parse_otf_rate_line(self,expr,procname,data,indent=4):
-        """
-        Parses an individual line of the otf_rate
-        returning the processed line and a list of the
-        nr_<species>_<flag> encountered
-        """
-        import StringIO, tokenize
-        from kmos import units, rate_aliases
-
-        param_names = [param.name for param in data.parameter_list]
-
-        MAXLEN = 65 # Maximun line length
-
-        nr_vars = []
-
-        # 'base_rate' has special meaning in otf_rate
-        expr = expr.replace('base_rate','rates(%s)' % procname)
-        # so does 'otf_rate'
-        expr = expr.replace('otf_rate','get_rate_{}'.format(procname))
-
-        # And all aliases need to be replaced
-        for old, new in rate_aliases.iteritems():
-            expr = expr.replace(old,new)
-
-        # Then time to tokenize:
-        try:
-            tokenize_input = StringIO.StringIO(expr).readline
-            tokens = list(tokenize.generate_tokens(tokenize_input))
-        except:
-            raise Exception('kmos.io: Could not tokenize expression: %s' % expr)
-        replaced_tokens = []
-        split_expression = ''
-        currl=0
-        for i, token, _, _, _ in tokens:
-            if token.startswith('nr_'):
-                nr_vars.append(token)
-            if token.startswith('mu_'):
-                replaced_tokens.append((i,'chempots(%s)' % token))
-            elif token in param_names:
-                replaced_tokens.append((i,'userpar(%s)' % token))
-            else:
-                replaced_tokens.append((i,token))
-            # Make code a bit better looking
-            if (replaced_tokens[-1][1] in
-                ['(','gt','lt','eq','ge','le','{','[','.']):
-                # DEBUG
-                # print('Skipping space for {}'.format(replaced_tokens[-1][1]))
-                toadd = replaced_tokens[-1][1]
-            else:
-                toadd = '{0} '.format(replaced_tokens[-1][1])
-            if (currl+len(toadd))<MAXLEN:
-                split_expression+=toadd
-                currl += len(toadd)
-            else:
-                split_expression+='&\n{0}&{1} '.format(
-                    ' '*indent,toadd)
-                currl=len(toadd)
-        return split_expression, list(set(nr_vars))
-
     def write_proclist_constants(self, data, out,
                                  code_generator='local_smart',
                                  close_module=False,
@@ -672,43 +344,6 @@ class ProcListWriter():
                                       action.coord.layer,
                                       action.coord.name,
                                       relative_coord))
-
-            out.write('\n')
-        out.write('    end select\n\n')
-        out.write('end subroutine run_proc_nr\n\n')
-
-
-    def write_proclist_run_proc_nr_otf(self, data, out):
-        # run_proc_nr runs the process selected by determine_procsite
-        # this routine only selects the correct routine from all
-        # of the run_proc_<procname> routines
-
-        out.write('subroutine run_proc_nr(proc, nr_cell)\n\n'
-                  '!****f* proclist/run_proc_nr\n'
-                  '! FUNCTION\n'
-                  '!    Runs process ``proc`` on site ``nr_site``.\n'
-                  '!\n'
-                  '! ARGUMENTS\n'
-                  '!\n'
-                  '!    * ``proc`` integer representing the process number\n'
-                  '!    * ``nr_site``  integer representing the site\n'
-                  '!******\n'
-                  '    integer(kind=iint), intent(in) :: proc\n'
-                  '    integer(kind=iint), intent(in) :: nr_cell\n\n'
-                  '    integer(kind=iint), dimension(4) :: cell\n\n'
-                  '    call increment_procstat(proc)\n\n'
-                  '    ! lsite = lattice_site, (vs. scalar site)\n'
-                  '    cell = nr2lattice(nr_cell, :) + (/0, 0, 0, -1/)\n\n'
-                  '    select case(proc)\n')
-        for process in data.process_list:
-            out.write('    case(%s)\n' % process.name)
-
-            if data.meta.debug > 0:
-                out.write(('print *,"PROCLIST/RUN_PROC_NR/NAME","%s"\n'
-                           'print *,"PROCLIST/RUN_PROC_NR/LSITE",lsite\n'
-                           'print *,"PROCLIST/RUN_PROC_NR/SITE",nr_site\n')
-                           % process.name)
-            out.write('        call run_proc_%s(cell)\n' % process.name)
 
             out.write('\n')
         out.write('    end select\n\n')
@@ -1297,6 +932,628 @@ class ProcListWriter():
                 progress_bar.render(int(50+50*float(lat_int_loop)/len(lat_int_groups)),
                                     'nli_%s' % lat_int_group)
 
+    def write_proclist_put_take(self, data, out):
+        """
+        HERE comes the bulk part of this code generator:
+        the put/take/create/annihilation functions
+        encode what all the processes we defined mean in terms
+        updates for the geometry and the list of available processes
+
+        The updates that disable available process are pretty easy
+        and flat so they cannot be optimized much.
+        The updates enabling processes are more sophisticasted: most
+        processes have more than one condition. So enabling one condition
+        of a processes is not enough. We need to check if all the other
+        conditions are met after this update as well. All these checks
+        typically involve many repetitive questions, i.e. we will
+        inquire the lattice many times about the same site.
+        To mend this we first collect all processes that could be enabled
+        and then use a heuristic algorithm (any theoretical computer scientist
+        knows how to improve on this?) to construct an improved if-tree
+        """
+        for species in data.species_list:
+            if species.name == data.species_list.default_species:
+                continue  # don't put/take 'empty'
+            # iterate over all layers, sites, operations, process, and conditions ...
+            for layer in data.layer_list:
+                for site in layer.sites:
+                    for op in ['put', 'take']:
+                        enabled_procs = []
+                        disabled_procs = []
+                        # op = operation
+                        routine_name = '%s_%s_%s_%s' % (op, species.name, layer.name, site.name)
+                        out.write('subroutine %s(site)\n\n' % routine_name)
+                        out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
+                        if data.meta.debug > 0:
+                            out.write('print *,"PROCLIST/%s/SITE",site\n' % (routine_name.upper(), ))
+                        out.write('    ! update lattice\n')
+                        if op == 'put':
+                            if data.meta.debug > 0:
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/SITE",site\n')
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES","%s"\n'
+                                          % data.species_list.default_species)
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES","%s"\n'
+                                            % species.name)
+                            out.write('    call replace_species(site, %s, %s)\n\n'
+                                       % (data.species_list.default_species, species.name))
+                        elif op == 'take':
+                            if data.meta.debug > 0:
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/SITE",site\n')
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES","%s"\n'
+                                          % species.name)
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES","%s"\n'
+                                          % data.species_list.default_species)
+                            out.write('    call replace_species(site, %s, %s)\n\n' %
+                                      (species.name, data.species_list.default_species))
+                        for process in data.process_list:
+                            for condition in process.condition_list:
+                                if site.name == condition.coord.name and \
+                                   layer.name == condition.coord.layer:
+                                    # first let's check if we could be enabling any site
+                                    # this can be the case if we put down a particle, and
+                                    # it is the right one, or if we lift one up and the process
+                                    # needs an empty site
+                                    if op == 'put' \
+                                        and  species.name == condition.species \
+                                        or op == 'take' \
+                                        and condition.species == data.species_list.default_species:
+
+                                        # filter out the current condition, because we know we set it to true
+                                        # right now
+                                        other_conditions = filter(lambda x: x.coord != condition.coord, process.condition_list)
+                                        # note how '-' operation is defined for Coord class !
+                                        # we change the coordinate part to already point at
+                                        # the right relative site
+                                        other_conditions = [ConditionAction(
+                                                species=other_condition.species,
+                                                coord=('site%s' % (other_condition.coord - condition.coord).radd_ff())) for
+                                                other_condition in other_conditions]
+                                        enabled_procs.append((other_conditions, (process.name, 'site%s' % (process.executing_coord() - condition.coord).radd_ff(), True)))
+                                    # and we disable something whenever we put something down, and the process
+                                    # needs an empty site here or if we take something and the process needs
+                                    # something else
+                                    elif op == 'put' \
+                                        and condition.species == data.species_list.default_species \
+                                        or op == 'take' \
+                                        and species.name == condition.species:
+                                            coord = process.executing_coord() - condition.coord
+                                            disabled_procs.append((process, coord))
+                        # updating disabled procs is easy to do efficiently
+                        # because we don't ask any questions twice, so we do it immediately
+                        if disabled_procs:
+                            out.write('    ! disable affected processes\n')
+                            for process, coord in disabled_procs:
+                                if data.meta.debug > 1:
+                                    out.write('print *,"    LATTICE/CAN_DO/PROC",%s\n' % process.name)
+                                    out.write('print *,"    LATTICE/CAN_DO/VSITE","site%s"\n' % (coord).radd_ff())
+                                    out.write('print *,"    LATTICE/CAN_DO/SITE",site%s\n' % (coord).radd_ff())
+                                #out.write(('    if(can_do(%(proc)s, site%(coord)s))then\n'
+                                out.write(('    if(avail_sites(%(proc)s, lattice2nr(%(unpacked)s), 2).ne.0)then\n'
+                                + '        call del_proc(%(proc)s, site%(coord)s)\n'
+                                + '    endif\n\n') % {'coord': (coord).radd_ff(),
+                                                      'proc': process.name,
+                                                      'unpacked': coord.site_offset_unpacked()})
+
+                        # updating enabled procs is not so simply, because meeting one condition
+                        # is not enough. We need to know if all other conditions are met as well
+                        # so we collect  all questions first and build a tree, where the most
+                        # frequent questions are closer to the top
+                        if enabled_procs:
+                            out.write('    ! enable affected processes\n')
+
+                            self._write_optimal_iftree(items=enabled_procs, indent=4, out=out)
+                        out.write('\nend subroutine %s\n\n' % routine_name)
+
+    def write_proclist_touchup(self, data, out):
+        for layer in data.layer_list:
+            for site in layer.sites:
+                routine_name = 'touchup_%s_%s' % (layer.name, site.name)
+                out.write('subroutine %s(site)\n\n' % routine_name)
+                out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
+                # First remove all process from this site
+                for process in data.process_list:
+                    out.write('    if (can_do(%s, site)) then\n' % process.name)
+                    out.write('        call del_proc(%s, site)\n' % process.name)
+                    out.write('    endif\n')
+                # Then add all available one
+                items = []
+                for process in data.process_list:
+                    executing_coord = process.executing_coord()
+                    if executing_coord.layer == layer.name \
+                        and executing_coord.name == site.name:
+                        condition_list = [ConditionAction(
+                            species=condition.species,
+                            coord='site%s' % (condition.coord - executing_coord).radd_ff(),
+                            ) for condition in process.condition_list]
+                        items.append((condition_list, (process.name, 'site', True)))
+
+                self._write_optimal_iftree(items=items, indent=4, out=out)
+                out.write('end subroutine %s\n\n' % routine_name)
+
+    def write_proclist_multilattice(self, data, out):
+        if len(data.layer_list) > 1:
+            # where are in multi-lattice mode
+            for layer in data.layer_list:
+                for site in layer.sites:
+                    for special_op in ['create', 'annihilate']:
+                        enabled_procs = []
+                        disabled_procs = []
+                        routine_name = '%s_%s_%s' % (special_op, layer.name, site.name)
+                        out.write('subroutine %s(site, species)\n\n' % routine_name)
+                        out.write('    integer(kind=iint), intent(in) :: species\n')
+                        out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
+                        out.write('    ! update lattice\n')
+                        if data.meta.debug > 0:
+                            out.write('print *,"PROCLIST/%s/SITE",site\n' % (routine_name.upper(), ))
+                        if special_op == 'create':
+                            if data.meta.debug > 0:
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/SITE",site\n')
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES","null_species"\n')
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES",species\n')
+                            out.write('    call replace_species(site, null_species, species)\n\n')
+                        elif special_op == 'annihilate':
+                            if data.meta.debug > 0:
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/SITE",site\n')
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES",species\n')
+                                out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES","null_species"\n')
+                            out.write('    call replace_species(site, species, null_species)\n\n')
+
+                        for process in data.process_list:
+                            for condition in filter(lambda condition: condition.coord.name == site.name and
+                                                                      condition.coord.layer == layer.name,
+                                                                      process.condition_list):
+                                if special_op == 'create':
+                                    other_conditions = [ConditionAction(
+                                            species=other_condition.species,
+                                            coord=('site%s' % (other_condition.coord - condition.coord).radd_ff()))
+                                            for other_condition in process.condition_list]
+                                    enabled_procs.append((other_conditions, (process.name,
+                                        'site%s' % (process.executing_coord()
+                                        - condition.coord).radd_ff(), True)))
+                                elif special_op == 'annihilate':
+                                    coord = process.executing_coord() - condition.coord
+                                    disabled_procs.append((process, coord))
+                        if disabled_procs:
+                            out.write('    ! disable affected processes\n')
+                            for process, coord in disabled_procs:
+                                if data.meta.debug > 1:
+                                    out.write('print *,"    LATTICE/CAN_DO/PROC",%s\n' % process.name)
+                                    out.write('print *,"    LATTICE/CAN_DO/VSITE","site%s"\n' % (coord).radd_ff())
+                                    out.write('print *,"    LATTICE/CAN_DO/SITE",site%s\n' % (coord).radd_ff())
+                                out.write(('    if(can_do(%(proc)s, site%(coord)s))then\n'
+                                + '        call del_proc(%(proc)s, site%(coord)s)\n'
+                                + '    endif\n\n') % {'coord': (coord).radd_ff(), 'proc': process.name})
+                        if enabled_procs:
+                            out.write('    ! enable affected processes\n')
+                            self._write_optimal_iftree(items=enabled_procs, indent=4, out=out)
+                        out.write('\nend subroutine %s\n\n' % routine_name)
+
+    def write_proclist_end(self, out):
+        out.write('end module proclist\n')
+
+    def _write_optimal_iftree(self, items, indent, out):
+        # this function is called recursively
+        # so first we define the ANCHORS or SPECIAL CASES
+        # if no conditions are left, enable process immediately
+        # I actually don't know if this tree is optimal
+        # So consider this a heuristic solution which should give
+        # on average better results than the brute force way
+
+        for item in filter(lambda x: not x[0], items):
+            # [1][2] field of the item determine if this search is intended for enabling (=True) or
+            # disabling (=False) a process
+            if item[1][2]:
+                out.write('%scall add_proc(%s, %s)\n' % (' ' * indent, item[1][0], item[1][1]))
+            else:
+                out.write('%scall del_proc(%s, %s)\n' % (' ' * indent, item[1][0], item[1][1]))
+
+        # and only keep those that have conditions
+        items = filter(lambda x: x[0], items)
+        if not items:
+            return
+
+        # now the GENERAL CASE
+        # first find site, that is most sought after
+        most_common_coord = _most_common([y.coord for y in _flatten([x[0] for x in items])])
+
+        # filter out list of uniq answers for this site
+        answers = [y.species for y in filter(lambda x: x.coord == most_common_coord, _flatten([x[0] for x in items]))]
+        uniq_answers = list(set(answers))
+
+        if self.data.meta.debug > 1:
+            out.write('print *,"    LATTICE/GET_SPECIES/VSITE","%s"\n' % most_common_coord)
+            out.write('print *,"    LATTICE/GET_SPECIES/SITE",%s\n' % most_common_coord)
+            out.write('print *,"    LATTICE/GET_SPECIES/SPECIES",get_species(%s)\n' % most_common_coord)
+
+        out.write('%sselect case(get_species(%s))\n' % ((indent) * ' ', most_common_coord))
+        for answer in uniq_answers:
+            out.write('%scase(%s)\n' % ((indent) * ' ', answer))
+            # this very crazy expression matches at items that contain
+            # a question for the same coordinate and have the same answer here
+            nested_items = filter(
+                lambda x: (most_common_coord in [y.coord for y in x[0]]
+                and answer == filter(lambda y: y.coord == most_common_coord, x[0])[0].species),
+                items)
+            # pruned items are almost identical to nested items, except the have
+            # the one condition removed, that we just met
+            pruned_items = []
+            for nested_item in nested_items:
+                conditions = filter(lambda x: most_common_coord != x.coord, nested_item[0])
+                pruned_items.append((conditions, nested_item[1]))
+
+            items = filter(lambda x: x not in nested_items, items)
+            self._write_optimal_iftree(pruned_items, indent + 4, out)
+        out.write('%send select\n\n' % (indent * ' ',))
+
+        if items:
+            # if items are left
+            # the RECURSION II
+            self._write_optimal_iftree(items, indent, out)
+
+    def write_proclist_touchup_otf(self, data, out):
+        """
+        The touchup function
+
+        Updates the elementary steps that a cell can do
+        given the current lattice configuration. This has
+        to be run once for every cell to initialize
+        the simulation book-keeping.
+
+        """
+        indent = 4
+        out.write('subroutine touchup_cell(cell)\n')
+        out.write('    integer(kind=iint), intent(in), dimension(4) :: cell\n\n')
+        out.write('    integer(kind=iint), dimension(4) :: site\n\n')
+        out.write('    integer(kind=iint) :: proc_nr\n\n')
+        # First kill all processes from this site that are allowed
+        out.write('    site = cell + (/0, 0, 0, 1/)\n')
+        out.write('    do proc_nr = 1, nr_of_proc\n')
+        out.write('        if(avail_sites(proc_nr, lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then\n')
+        out.write('            call del_proc(proc_nr, site)\n')
+        out.write('        endif\n')
+        out.write('    end do\n\n')
+
+        # Then we need to build the iftree that will update all processes
+        # from this site
+
+        enabling_items = []
+        for process in data.process_list:
+            rel_pos = (0,0,0) # during touchup we only activate procs from current site
+            #rel_pos_string = 'cell + (/ %s, %s, %s, 1 /)' % (rel_pos[0],rel_pos[1], rel_pos[2]) # CHECK!!
+            item2 = (process.name,rel_pos,True)
+            # coded like this to be parallel to write_proclist_run_proc_name_otf
+            enabling_items.append((copy.deepcopy(process.condition_list),copy.deepcopy(item2)))
+
+        self._write_optimal_iftree_otf(enabling_items, indent, out)
+
+        out.write('\nend subroutine touchup_cell\n')
+
+    def _otf_get_auxilirary_params(self,data):
+        import StringIO
+        import tokenize
+        from kmos import units, rate_aliases
+        units_list = []
+        masses_list = []
+        chempot_list = []
+        for process in data.process_list:
+            exprs = [process.rate_constant,]
+            if process.otf_rate:
+                exprs.append(process.otf_rate)
+            for expr in exprs:
+                for old, new in rate_aliases.iteritems():
+                    expr=expr.replace(old, new)
+                try:
+                    tokenize_input = StringIO.StringIO(expr).readline
+                    tokens = list(tokenize.generate_tokens(tokenize_input))
+                except:
+                    raise Exception('Could not tokenize expression: %s' % expr)
+                for i, token, _, _, _ in tokens:
+                    if token in dir(units):
+                        if token not in units_list:
+                            units_list.append(token)
+                    if token.startswith('m_'):
+                        if token not in masses_list:
+                            masses_list.append(token)
+                    elif token.startswith('mu_'):
+                        if token not in chempot_list:
+                            chempot_list.append(token)
+        return sorted(units_list), sorted(masses_list), sorted(chempot_list)
+
+    def write_proclist_parameters_otf(self,data,out):
+        '''Writes the proclist_parameters.f90 files
+        which implements the module in charge of doing i/o
+        from python evaluated parameters, to fortran and also
+        handles rate constants update at fortran level'''
+
+        import tokenize
+        import StringIO
+        import itertools
+        from kmos import evaluate_rate_expression
+        from kmos import rate_aliases
+
+        indent = 4
+        # First the GPL message
+        # TODO Does this really belong here?
+        out.write(self._gpl_message())
+
+        out.write('module proclist_parameters\n')
+        out.write('use kind_values\n')
+        out.write('use base, only: &\n')
+        out.write('%srates\n' % (' '*indent))
+        out.write('use proclist_constants\n')
+        out.write('use lattice, only: &\n')
+        site_params = []
+        for layer in data.layer_list:
+            out.write('%s%s, &\n' % (' '*indent,layer.name))
+            for site in layer.sites:
+                site_params.append((site.name,layer.name))
+        for site,layer in site_params:
+            out.write('%s%s_%s, &\n' % (' '*indent,layer,site))
+        out.write('%sget_species\n' % (' '*indent))
+        out.write('\nimplicit none\n\n')
+
+
+        units_list, masses_list, chempot_list = self._otf_get_auxilirary_params(data)
+
+        # Define variables for the user defined parameteres
+        out.write('! User parameters\n')
+        for ip,parameter in enumerate(sorted(data.parameter_list, key=lambda x: x.name)):
+            out.write('integer(kind=iint), public :: %s = %s\n' % (parameter.name,(ip+1)))
+        out.write('real(kind=rdouble), public, dimension(%s) :: userpar\n' % len(data.parameter_list))
+
+        # Next, we need to put into the fortran module a placeholder for each of the
+        # parameters that kmos.evaluate_rate_expression can replace, namely
+        # mu_* and m_*.
+
+        # For the chemical potentials  and masses we need to explore all rate expressions
+        # this code will repeat a lot of the logic on evaluate_rate_expression
+        # Can we compress this??
+
+        out.write('\n! Constants\n')
+        for const in units_list:
+            out.write('real(kind=rdouble), parameter :: %s = %.10e\n'
+                      % (const, evaluate_rate_expression(const)))
+        out.write('\n! Species masses\n')
+        for mass in masses_list:
+            out.write('real(kind=rdouble), parameter :: %s = %.10e\n'
+                      % (mass,evaluate_rate_expression(mass)))
+
+        # Chemical potentials are different because we need to be able to update them
+        if chempot_list:
+            out.write('\n! Species chemical potentials\n')
+            for iu,mu in enumerate(chempot_list):
+                out.write('integer(kind=iint), public :: %s = %s\n' % (mu,(iu+1)))
+            out.write('real(kind=rdouble), public, dimension(%s) :: chempots\n' % len(chempot_list))
+
+        # This module contains functions
+        out.write('\ncontains\n')
+
+        # Once this is done, we need to build routines that update user parameters and chempots
+
+        out.write('subroutine update_user_parameter(param,val)\n')
+        out.write('    integer(kind=iint), intent(in) :: param\n')
+        out.write('    real(kind=rdouble), intent(in) :: val\n')
+        out.write('    userpar(param) = val\n')
+        out.write('end subroutine update_user_parameter\n\n')
+
+        if chempot_list:
+            out.write('subroutine update_chempot(index,val)\n')
+            out.write('    integer(kind=iint), intent(in) :: index\n')
+            out.write('    real(kind=rdouble), intent(in) :: val\n')
+            out.write('    chempots(index) = val\n')
+            out.write('end subroutine update_chempot\n\n')
+
+        # And finally, we need to write the subroutines to return each of the rate constants
+        out.write('\n! On-the-fly calculators for rate constants\n\n')
+        for process in data.process_list:
+            out.write('function get_rate_%s(cell)\n' % process.name)
+            out.write('%sinteger(kind=iint), dimension(4), intent(in) :: cell\n'
+                      % (' '*indent))
+
+            # get all of flags
+            flags = list(set([byst.flag for byst in process.bystander_list]))
+            # and all species
+            specs_dict = {}
+            for byst in process.bystander_list:
+                if hasattr(specs_dict,byst.flag):
+                    if not (sorted(byst.allowed_species) ==
+                            sorted(specs_dict[byst.flag])):
+                        raise RuntimeError('All bystanders sharing a flag must allow same species. proc: %s' % process.name)
+                else:
+                    specs_dict[byst.flag] = byst.allowed_species
+
+
+            # parse the otf_rate expression to get auxiliary variables
+            new_expr, aux_vars, nr_vars = self._parse_otf_rate(process.otf_rate,
+                                                      process.name,
+                                                      data,
+                                                      indent=indent)
+
+            nr2zero = ''
+            for flag in flags:
+                for spec in specs_dict[flag]:
+                    out.write('%sinteger(kind=iint) :: nr_%s_%s\n' %
+                              (' '*indent,spec,flag))
+                    nr2zero += '%snr_%s_%s = 0\n' % (' '*indent,spec,flag)
+            for nr_var in nr_vars:
+                if not nr_var in nr2zero:
+                    out.write('{}integer(kind=iint) :: {}\n'.format(' '*indent,nr_var))
+                    nr2zero += '{}{} = 0\n'.format(' '*indent,nr_var)
+
+            out.write('\n')
+            out.write('! Local auxiliary variables\n')
+            for aux_var in aux_vars:
+                out.write('%sreal(kind=rdouble) :: %s\n' %
+                          (' '*indent,aux_var))
+            out.write('\n')
+
+
+            out.write('%sreal(kind=rdouble) :: get_rate_%s\n' % (' '*indent,process.name))
+
+            out.write('\n')
+            out.write(nr2zero)
+            out.write('\n')
+
+            for byst in process.bystander_list:
+                out.write('%sselect case(get_species(cell%s))\n' % (' '*indent,
+                                                                 byst.coord.radd_ff()))
+                for spec in byst.allowed_species:
+                    out.write('%scase(%s)\n' % (' '*2*indent,spec))
+                    out.write('%snr_%s_%s = nr_%s_%s + 1\n' %
+                              (' '*3*indent,spec,byst.flag,spec,byst.flag))
+                out.write('%send select\n' % (' '*indent))
+            out.write('\n')
+
+            out.write('{}\n'.format(new_expr))
+            out.write('%sreturn\n' % (' '*indent))
+            out.write('\nend function get_rate_%s\n\n' % process.name)
+
+        out.write('\nend module proclist_parameters\n')
+
+
+    def _parse_otf_rate(self,expr,procname,data,indent=4):
+        """
+        Parses the otf_rate expression and returns the expression to be inserted
+        into the associated ``get_rate'' subroutine.
+        Additionally collects locally defined variables and the full set of used
+        nr_<species>_<flag> variables in order to include them in the variable
+        declarations in those functions
+        """
+
+        aux_vars = []
+        nr_vars = []
+
+        if expr:
+            if not 'base_rate' in expr:
+                raise UserWarning('Not base_rate in otf_rate for process %s' % procname)
+
+            # rate_lines = expr.splitlines()
+            rate_lines = expr.split('\\n') # FIXME still bound by explicit '\n' due to xml parser
+            if len(rate_lines) == 1:
+                if not ('=' in rate_lines[0]):
+                    rate_lines[0] = 'otf_rate =' + rate_lines[0]
+                elif 'otf_rate' not in rate_lines[0]:
+                    raise ValueError('Bad expression for single line otf rate\n' +
+                                     '{}\n'.format(rate_lines[0]) +
+                                     " must assign value to 'otf_rate'")
+            elif not 'otf_rate' in expr:
+                raise ValueError('Found a multiline otf_rate expression'
+                                 " without 'otf_rate' on it")
+            final_expr = ''
+            for rate_line in rate_lines:
+                if '=' in rate_line:
+                    # We found a line that assigns a new variable
+                    aux_var = rate_line.split('=')[0].strip()
+                    if (not aux_var == 'otf_rate' and
+                        not aux_var.startswith('nr_') and
+                        not aux_var in aux_vars):
+                        aux_vars.append(aux_var)
+
+                parsed_line, nr_vars_line = self._parse_otf_rate_line(
+                    rate_line,procname,data,indent=indent)
+                final_expr += '{}{}\n'.format(
+                    ' '*indent,parsed_line)
+                nr_vars.extend(nr_vars_line)
+        else:
+            final_expr = '{0}get_rate_{1} = rates({1})'.format(' '*indent, procname)
+
+        return final_expr, aux_vars, list(set(nr_vars))
+
+    def _parse_otf_rate_line(self,expr,procname,data,indent=4):
+        """
+        Parses an individual line of the otf_rate
+        returning the processed line and a list of the
+        nr_<species>_<flag> encountered
+        """
+        import StringIO, tokenize
+        from kmos import units, rate_aliases
+
+        param_names = [param.name for param in data.parameter_list]
+
+        MAXLEN = 65 # Maximun line length
+
+        nr_vars = []
+
+        # 'base_rate' has special meaning in otf_rate
+        expr = expr.replace('base_rate','rates(%s)' % procname)
+        # so does 'otf_rate'
+        expr = expr.replace('otf_rate','get_rate_{}'.format(procname))
+
+        # And all aliases need to be replaced
+        for old, new in rate_aliases.iteritems():
+            expr = expr.replace(old,new)
+
+        # Then time to tokenize:
+        try:
+            tokenize_input = StringIO.StringIO(expr).readline
+            tokens = list(tokenize.generate_tokens(tokenize_input))
+        except:
+            raise Exception('kmos.io: Could not tokenize expression: %s' % expr)
+        replaced_tokens = []
+        split_expression = ''
+        currl=0
+        for i, token, _, _, _ in tokens:
+            if token.startswith('nr_'):
+                nr_vars.append(token)
+            if token.startswith('mu_'):
+                replaced_tokens.append((i,'chempots(%s)' % token))
+            elif token in param_names:
+                replaced_tokens.append((i,'userpar(%s)' % token))
+            else:
+                replaced_tokens.append((i,token))
+            # Make code a bit better looking
+            if (replaced_tokens[-1][1] in
+                ['(','gt','lt','eq','ge','le','{','[','.']):
+                # DEBUG
+                # print('Skipping space for {}'.format(replaced_tokens[-1][1]))
+                toadd = replaced_tokens[-1][1]
+            else:
+                toadd = '{0} '.format(replaced_tokens[-1][1])
+            if (currl+len(toadd))<MAXLEN:
+                split_expression+=toadd
+                currl += len(toadd)
+            else:
+                split_expression+='&\n{0}&{1} '.format(
+                    ' '*indent,toadd)
+                currl=len(toadd)
+        return split_expression, list(set(nr_vars))
+
+    def write_proclist_run_proc_nr_otf(self, data, out):
+        # run_proc_nr runs the process selected by determine_procsite
+        # this routine only selects the correct routine from all
+        # of the run_proc_<procname> routines
+
+        out.write('subroutine run_proc_nr(proc, nr_cell)\n\n'
+                  '!****f* proclist/run_proc_nr\n'
+                  '! FUNCTION\n'
+                  '!    Runs process ``proc`` on site ``nr_site``.\n'
+                  '!\n'
+                  '! ARGUMENTS\n'
+                  '!\n'
+                  '!    * ``proc`` integer representing the process number\n'
+                  '!    * ``nr_site``  integer representing the site\n'
+                  '!******\n'
+                  '    integer(kind=iint), intent(in) :: proc\n'
+                  '    integer(kind=iint), intent(in) :: nr_cell\n\n'
+                  '    integer(kind=iint), dimension(4) :: cell\n\n'
+                  '    call increment_procstat(proc)\n\n'
+                  '    ! lsite = lattice_site, (vs. scalar site)\n'
+                  '    cell = nr2lattice(nr_cell, :) + (/0, 0, 0, -1/)\n\n'
+                  '    select case(proc)\n')
+        for process in data.process_list:
+            out.write('    case(%s)\n' % process.name)
+
+            if data.meta.debug > 0:
+                out.write(('print *,"PROCLIST/RUN_PROC_NR/NAME","%s"\n'
+                           'print *,"PROCLIST/RUN_PROC_NR/LSITE",lsite\n'
+                           'print *,"PROCLIST/RUN_PROC_NR/SITE",nr_site\n')
+                           % process.name)
+            out.write('        call run_proc_%s(cell)\n' % process.name)
+
+            out.write('\n')
+        out.write('    end select\n\n')
+        out.write('end subroutine run_proc_nr\n\n')
+
     def write_proclist_otf(self, data, out, debug=False):
         """
         Writes the proclist.f90 file for the otf backend
@@ -1643,264 +1900,6 @@ class ProcListWriter():
             # if items are left
             # the RECURSION II
             self._write_optimal_iftree_otf(items, indent, out)
-
-    def write_proclist_put_take(self, data, out):
-        """
-        HERE comes the bulk part of this code generator:
-        the put/take/create/annihilation functions
-        encode what all the processes we defined mean in terms
-        updates for the geometry and the list of available processes
-
-        The updates that disable available process are pretty easy
-        and flat so they cannot be optimized much.
-        The updates enabling processes are more sophisticasted: most
-        processes have more than one condition. So enabling one condition
-        of a processes is not enough. We need to check if all the other
-        conditions are met after this update as well. All these checks
-        typically involve many repetitive questions, i.e. we will
-        inquire the lattice many times about the same site.
-        To mend this we first collect all processes that could be enabled
-        and then use a heuristic algorithm (any theoretical computer scientist
-        knows how to improve on this?) to construct an improved if-tree
-        """
-        for species in data.species_list:
-            if species.name == data.species_list.default_species:
-                continue  # don't put/take 'empty'
-            # iterate over all layers, sites, operations, process, and conditions ...
-            for layer in data.layer_list:
-                for site in layer.sites:
-                    for op in ['put', 'take']:
-                        enabled_procs = []
-                        disabled_procs = []
-                        # op = operation
-                        routine_name = '%s_%s_%s_%s' % (op, species.name, layer.name, site.name)
-                        out.write('subroutine %s(site)\n\n' % routine_name)
-                        out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
-                        if data.meta.debug > 0:
-                            out.write('print *,"PROCLIST/%s/SITE",site\n' % (routine_name.upper(), ))
-                        out.write('    ! update lattice\n')
-                        if op == 'put':
-                            if data.meta.debug > 0:
-                                out.write('print *,"    LATTICE/REPLACE_SPECIES/SITE",site\n')
-                                out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES","%s"\n'
-                                          % data.species_list.default_species)
-                                out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES","%s"\n'
-                                            % species.name)
-                            out.write('    call replace_species(site, %s, %s)\n\n'
-                                       % (data.species_list.default_species, species.name))
-                        elif op == 'take':
-                            if data.meta.debug > 0:
-                                out.write('print *,"    LATTICE/REPLACE_SPECIES/SITE",site\n')
-                                out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES","%s"\n'
-                                          % species.name)
-                                out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES","%s"\n'
-                                          % data.species_list.default_species)
-                            out.write('    call replace_species(site, %s, %s)\n\n' %
-                                      (species.name, data.species_list.default_species))
-                        for process in data.process_list:
-                            for condition in process.condition_list:
-                                if site.name == condition.coord.name and \
-                                   layer.name == condition.coord.layer:
-                                    # first let's check if we could be enabling any site
-                                    # this can be the case if we put down a particle, and
-                                    # it is the right one, or if we lift one up and the process
-                                    # needs an empty site
-                                    if op == 'put' \
-                                        and  species.name == condition.species \
-                                        or op == 'take' \
-                                        and condition.species == data.species_list.default_species:
-
-                                        # filter out the current condition, because we know we set it to true
-                                        # right now
-                                        other_conditions = filter(lambda x: x.coord != condition.coord, process.condition_list)
-                                        # note how '-' operation is defined for Coord class !
-                                        # we change the coordinate part to already point at
-                                        # the right relative site
-                                        other_conditions = [ConditionAction(
-                                                species=other_condition.species,
-                                                coord=('site%s' % (other_condition.coord - condition.coord).radd_ff())) for
-                                                other_condition in other_conditions]
-                                        enabled_procs.append((other_conditions, (process.name, 'site%s' % (process.executing_coord() - condition.coord).radd_ff(), True)))
-                                    # and we disable something whenever we put something down, and the process
-                                    # needs an empty site here or if we take something and the process needs
-                                    # something else
-                                    elif op == 'put' \
-                                        and condition.species == data.species_list.default_species \
-                                        or op == 'take' \
-                                        and species.name == condition.species:
-                                            coord = process.executing_coord() - condition.coord
-                                            disabled_procs.append((process, coord))
-                        # updating disabled procs is easy to do efficiently
-                        # because we don't ask any questions twice, so we do it immediately
-                        if disabled_procs:
-                            out.write('    ! disable affected processes\n')
-                            for process, coord in disabled_procs:
-                                if data.meta.debug > 1:
-                                    out.write('print *,"    LATTICE/CAN_DO/PROC",%s\n' % process.name)
-                                    out.write('print *,"    LATTICE/CAN_DO/VSITE","site%s"\n' % (coord).radd_ff())
-                                    out.write('print *,"    LATTICE/CAN_DO/SITE",site%s\n' % (coord).radd_ff())
-                                #out.write(('    if(can_do(%(proc)s, site%(coord)s))then\n'
-                                out.write(('    if(avail_sites(%(proc)s, lattice2nr(%(unpacked)s), 2).ne.0)then\n'
-                                + '        call del_proc(%(proc)s, site%(coord)s)\n'
-                                + '    endif\n\n') % {'coord': (coord).radd_ff(),
-                                                      'proc': process.name,
-                                                      'unpacked': coord.site_offset_unpacked()})
-
-                        # updating enabled procs is not so simply, because meeting one condition
-                        # is not enough. We need to know if all other conditions are met as well
-                        # so we collect  all questions first and build a tree, where the most
-                        # frequent questions are closer to the top
-                        if enabled_procs:
-                            out.write('    ! enable affected processes\n')
-
-                            self._write_optimal_iftree(items=enabled_procs, indent=4, out=out)
-                        out.write('\nend subroutine %s\n\n' % routine_name)
-
-    def write_proclist_touchup(self, data, out):
-        for layer in data.layer_list:
-            for site in layer.sites:
-                routine_name = 'touchup_%s_%s' % (layer.name, site.name)
-                out.write('subroutine %s(site)\n\n' % routine_name)
-                out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
-                # First remove all process from this site
-                for process in data.process_list:
-                    out.write('    if (can_do(%s, site)) then\n' % process.name)
-                    out.write('        call del_proc(%s, site)\n' % process.name)
-                    out.write('    endif\n')
-                # Then add all available one
-                items = []
-                for process in data.process_list:
-                    executing_coord = process.executing_coord()
-                    if executing_coord.layer == layer.name \
-                        and executing_coord.name == site.name:
-                        condition_list = [ConditionAction(
-                            species=condition.species,
-                            coord='site%s' % (condition.coord - executing_coord).radd_ff(),
-                            ) for condition in process.condition_list]
-                        items.append((condition_list, (process.name, 'site', True)))
-
-                self._write_optimal_iftree(items=items, indent=4, out=out)
-                out.write('end subroutine %s\n\n' % routine_name)
-
-    def write_proclist_multilattice(self, data, out):
-        if len(data.layer_list) > 1:
-            # where are in multi-lattice mode
-            for layer in data.layer_list:
-                for site in layer.sites:
-                    for special_op in ['create', 'annihilate']:
-                        enabled_procs = []
-                        disabled_procs = []
-                        routine_name = '%s_%s_%s' % (special_op, layer.name, site.name)
-                        out.write('subroutine %s(site, species)\n\n' % routine_name)
-                        out.write('    integer(kind=iint), intent(in) :: species\n')
-                        out.write('    integer(kind=iint), dimension(4), intent(in) :: site\n\n')
-                        out.write('    ! update lattice\n')
-                        if data.meta.debug > 0:
-                            out.write('print *,"PROCLIST/%s/SITE",site\n' % (routine_name.upper(), ))
-                        if special_op == 'create':
-                            if data.meta.debug > 0:
-                                out.write('print *,"    LATTICE/REPLACE_SPECIES/SITE",site\n')
-                                out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES","null_species"\n')
-                                out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES",species\n')
-                            out.write('    call replace_species(site, null_species, species)\n\n')
-                        elif special_op == 'annihilate':
-                            if data.meta.debug > 0:
-                                out.write('print *,"    LATTICE/REPLACE_SPECIES/SITE",site\n')
-                                out.write('print *,"    LATTICE/REPLACE_SPECIES/OLD_SPECIES",species\n')
-                                out.write('print *,"    LATTICE/REPLACE_SPECIES/NEW_SPECIES","null_species"\n')
-                            out.write('    call replace_species(site, species, null_species)\n\n')
-
-                        for process in data.process_list:
-                            for condition in filter(lambda condition: condition.coord.name == site.name and
-                                                                      condition.coord.layer == layer.name,
-                                                                      process.condition_list):
-                                if special_op == 'create':
-                                    other_conditions = [ConditionAction(
-                                            species=other_condition.species,
-                                            coord=('site%s' % (other_condition.coord - condition.coord).radd_ff()))
-                                            for other_condition in process.condition_list]
-                                    enabled_procs.append((other_conditions, (process.name,
-                                        'site%s' % (process.executing_coord()
-                                        - condition.coord).radd_ff(), True)))
-                                elif special_op == 'annihilate':
-                                    coord = process.executing_coord() - condition.coord
-                                    disabled_procs.append((process, coord))
-                        if disabled_procs:
-                            out.write('    ! disable affected processes\n')
-                            for process, coord in disabled_procs:
-                                if data.meta.debug > 1:
-                                    out.write('print *,"    LATTICE/CAN_DO/PROC",%s\n' % process.name)
-                                    out.write('print *,"    LATTICE/CAN_DO/VSITE","site%s"\n' % (coord).radd_ff())
-                                    out.write('print *,"    LATTICE/CAN_DO/SITE",site%s\n' % (coord).radd_ff())
-                                out.write(('    if(can_do(%(proc)s, site%(coord)s))then\n'
-                                + '        call del_proc(%(proc)s, site%(coord)s)\n'
-                                + '    endif\n\n') % {'coord': (coord).radd_ff(), 'proc': process.name})
-                        if enabled_procs:
-                            out.write('    ! enable affected processes\n')
-                            self._write_optimal_iftree(items=enabled_procs, indent=4, out=out)
-                        out.write('\nend subroutine %s\n\n' % routine_name)
-
-    def write_proclist_end(self, out):
-        out.write('end module proclist\n')
-
-    def _write_optimal_iftree(self, items, indent, out):
-        # this function is called recursively
-        # so first we define the ANCHORS or SPECIAL CASES
-        # if no conditions are left, enable process immediately
-        # I actually don't know if this tree is optimal
-        # So consider this a heuristic solution which should give
-        # on average better results than the brute force way
-
-        for item in filter(lambda x: not x[0], items):
-            # [1][2] field of the item determine if this search is intended for enabling (=True) or
-            # disabling (=False) a process
-            if item[1][2]:
-                out.write('%scall add_proc(%s, %s)\n' % (' ' * indent, item[1][0], item[1][1]))
-            else:
-                out.write('%scall del_proc(%s, %s)\n' % (' ' * indent, item[1][0], item[1][1]))
-
-        # and only keep those that have conditions
-        items = filter(lambda x: x[0], items)
-        if not items:
-            return
-
-        # now the GENERAL CASE
-        # first find site, that is most sought after
-        most_common_coord = _most_common([y.coord for y in _flatten([x[0] for x in items])])
-
-        # filter out list of uniq answers for this site
-        answers = [y.species for y in filter(lambda x: x.coord == most_common_coord, _flatten([x[0] for x in items]))]
-        uniq_answers = list(set(answers))
-
-        if self.data.meta.debug > 1:
-            out.write('print *,"    LATTICE/GET_SPECIES/VSITE","%s"\n' % most_common_coord)
-            out.write('print *,"    LATTICE/GET_SPECIES/SITE",%s\n' % most_common_coord)
-            out.write('print *,"    LATTICE/GET_SPECIES/SPECIES",get_species(%s)\n' % most_common_coord)
-
-        out.write('%sselect case(get_species(%s))\n' % ((indent) * ' ', most_common_coord))
-        for answer in uniq_answers:
-            out.write('%scase(%s)\n' % ((indent) * ' ', answer))
-            # this very crazy expression matches at items that contain
-            # a question for the same coordinate and have the same answer here
-            nested_items = filter(
-                lambda x: (most_common_coord in [y.coord for y in x[0]]
-                and answer == filter(lambda y: y.coord == most_common_coord, x[0])[0].species),
-                items)
-            # pruned items are almost identical to nested items, except the have
-            # the one condition removed, that we just met
-            pruned_items = []
-            for nested_item in nested_items:
-                conditions = filter(lambda x: most_common_coord != x.coord, nested_item[0])
-                pruned_items.append((conditions, nested_item[1]))
-
-            items = filter(lambda x: x not in nested_items, items)
-            self._write_optimal_iftree(pruned_items, indent + 4, out)
-        out.write('%send select\n\n' % (indent * ' ',))
-
-        if items:
-            # if items are left
-            # the RECURSION II
-            self._write_optimal_iftree(items, indent, out)
 
     def write_settings(self, code_generator='lat_int'):
         """Write the kmc_settings.py. This contains all parameters, which
