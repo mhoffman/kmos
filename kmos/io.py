@@ -285,6 +285,7 @@ class ProcListWriter():
 
         indent = 4
         # First the GPL message
+        # TODO Does this really belong here?
         out.write(self._gpl_message())
 
         out.write('module proclist_parameters\n')
@@ -310,7 +311,7 @@ class ProcListWriter():
         out.write('! User parameters\n')
         for ip,parameter in enumerate(sorted(data.parameter_list, key=lambda x: x.name)):
             out.write('integer(kind=iint), public :: %s = %s\n' % (parameter.name,(ip+1)))
-        out.write('real(kind=rdouble), public, dimension(%s) :: user_params\n' % len(data.parameter_list))
+        out.write('real(kind=rdouble), public, dimension(%s) :: userpar\n' % len(data.parameter_list))
 
         # Next, we need to put into the fortran module a placeholder for each of the
         # parameters that kmos.evaluate_rate_expression can replace, namely
@@ -344,7 +345,7 @@ class ProcListWriter():
         out.write('subroutine update_user_parameter(param,val)\n')
         out.write('    integer(kind=iint), intent(in) :: param\n')
         out.write('    real(kind=rdouble), intent(in) :: val\n')
-        out.write('    user_params(param) = val\n')
+        out.write('    userpar(param) = val\n')
         out.write('end subroutine update_user_parameter\n\n')
 
         if chempot_list:
@@ -413,7 +414,7 @@ class ProcListWriter():
                     out.write('%snr_%s_%s = nr_%s_%s + 1\n' %
                               (' '*3*indent,spec,byst.flag,spec,byst.flag))
                 out.write('%send select\n' % (' '*indent))
-
+            out.write('\n')
 
             out.write('{}\n'.format(new_expr))
             out.write('%sreturn\n' % (' '*indent))
@@ -456,7 +457,8 @@ class ProcListWriter():
                     # We found a line that assigns a new variable
                     aux_var = rate_line.split('=')[0].strip()
                     if (not aux_var == 'otf_rate' and
-                        not aux_var.startswith('nr_')):
+                        not aux_var.startswith('nr_') and
+                        not aux_var in aux_vars):
                         aux_vars.append(aux_var)
 
                 parsed_line, nr_vars_line = self._parse_otf_rate_line(
@@ -467,7 +469,7 @@ class ProcListWriter():
         else:
             final_expr = '{0}get_rate_{1} = rates({1})'.format(' '*indent, procname)
 
-        return final_expr, aux_vars[:-1], list(set(nr_vars))
+        return final_expr, aux_vars, list(set(nr_vars))
 
     def _parse_otf_rate_line(self,expr,procname,data,indent=4):
         """
@@ -508,16 +510,24 @@ class ProcListWriter():
             if token.startswith('mu_'):
                 replaced_tokens.append((i,'chempots(%s)' % token))
             elif token in param_names:
-                replaced_tokens.append((i,'user_params(%s)' % token))
+                replaced_tokens.append((i,'userpar(%s)' % token))
             else:
                 replaced_tokens.append((i,token))
-            if currl+len(replaced_tokens[-1][1])<MAXLEN:
-                split_expression+=replaced_tokens[-1][1]
-                currl += len(replaced_tokens[-1][1])
+            # Make code a bit better looking
+            if (replaced_tokens[-1][1] in
+                ['(','gt','lt','eq','ge','le','{','[','.']):
+                # DEBUG
+                # print('Skipping space for {}'.format(replaced_tokens[-1][1]))
+                toadd = replaced_tokens[-1][1]
             else:
-                split_expression+='&\n{0}&{1}'.format(
-                    ' '*indent,replaced_tokens[-1][1])
-                currl=len(replaced_tokens[-1][1])
+                toadd = '{0} '.format(replaced_tokens[-1][1])
+            if (currl+len(toadd))<MAXLEN:
+                split_expression+=toadd
+                currl += len(toadd)
+            else:
+                split_expression+='&\n{0}&{1} '.format(
+                    ' '*indent,toadd)
+                currl=len(toadd)
         return split_expression, list(set(nr_vars))
 
     def write_proclist_constants(self, data, out,
