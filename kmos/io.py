@@ -1300,24 +1300,32 @@ class ProcListWriter():
                                                       data,
                                                       indent=indent)
 
-            nr2zero = ''
             for flag in flags:
                 for spec in specs_dict[flag]:
-                    out.write('%sinteger(kind=iint) :: nr_%s_%s\n' %
-                              (' '*indent,spec,flag))
-                    nr2zero += '%snr_%s_%s = 0\n' % (' '*indent,spec,flag)
+                    nr_var = 'nr_{0}_{1}'.format(spec,flag)
+                    if nr_var not in nr_vars:
+                        nr_vars.append(nr_var)
+            nr_vars = sorted(nr_vars,
+                key = lambda x: (x.split('_')[2],x.split('_')[1]))
+
+            nr2zero = ''
+            # for flag in flags:
+            #     for spec in specs_dict[flag]:
+            #         out.write('%sinteger(kind=iint) :: nr_%s_%s\n' %
+            #                   (' '*indent,spec,flag))
+            #         nr2zero += '%snr_%s_%s = 0\n' % (' '*indent,spec,flag)
             for nr_var in nr_vars:
-                if not nr_var in nr2zero:
-                    out.write('{}integer(kind=iint) :: {}\n'.format(' '*indent,nr_var))
-                    nr2zero += '{}{} = 0\n'.format(' '*indent,nr_var)
+                # if not nr_var in nr2zero:
+                out.write('{}integer(kind=iint) :: {}\n'.format(' '*indent,nr_var))
+                nr2zero += '{}{} = 0\n'.format(' '*indent,nr_var)
 
             out.write('\n')
-            out.write('! Local auxiliary variables\n')
-            for aux_var in aux_vars:
-                out.write('%sreal(kind=rdouble) :: %s\n' %
-                          (' '*indent,aux_var))
-            out.write('\n')
-
+            if aux_vars:
+                out.write('! Local auxiliary variables\n')
+                for aux_var in aux_vars:
+                    out.write('%sreal(kind=rdouble) :: %s\n' %
+                              (' '*indent,aux_var))
+                out.write('\n')
 
             out.write('%sreal(kind=rdouble) :: get_rate_%s\n' % (' '*indent,process.name))
 
