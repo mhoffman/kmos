@@ -1274,12 +1274,15 @@ class ProcListWriter():
             out.write('    chempots(index) = val\n')
             out.write('end subroutine update_chempot\n\n')
 
+        # out.write('\n! On-the-fly calculators for rate constants\n\n')
+
+        out.write('\nend module proclist_parameters\n')
+        # out.close()
+
         # And finally, we need to write the subroutines to return each of the rate constants
-        out.write('\n! On-the-fly calculators for rate constants\n\n')
-        for process in data.process_list:
-            out.write('function get_rate_%s(cell)\n' % process.name)
-            out.write('%sinteger(kind=iint), dimension(4), intent(in) :: cell\n'
-                      % (' '*indent))
+
+        for iproc, process in enumerate(data.get_processes()):
+            # Open a new file for each get_rate_<procname> and rate_<procname> routine
 
             # get all of flags
             flags = list(set([byst.flag for byst in process.bystander_list]))
@@ -1299,7 +1302,6 @@ class ProcListWriter():
                                                       process.name,
                                                       data,
                                                       indent=indent)
-
             for flag in flags:
                 for spec in specs_dict[flag]:
                     nr_var = 'nr_{0}_{1}'.format(spec,flag)
@@ -1307,85 +1309,93 @@ class ProcListWriter():
                         nr_vars.append(nr_var)
             nr_vars = sorted(nr_vars,
                 key = lambda x: (x.split('_')[2],x.split('_')[1]))
+            nnr_vars = len(nr_vars)
 
-            nr2zero = ''
-            # for flag in flags:
-            #     for spec in specs_dict[flag]:
-            #         out.write('%sinteger(kind=iint) :: nr_%s_%s\n' %
-            #                   (' '*indent,spec,flag))
-            #         nr2zero += '%snr_%s_%s = 0\n' % (' '*indent,spec,flag)
-            for nr_var in nr_vars:
-                # if not nr_var in nr2zero:
-                out.write('{}integer(kind=iint) :: {}\n'.format(' '*indent,nr_var))
-                nr2zero += '{}{} = 0\n'.format(' '*indent,nr_var)
+            out2 = open('{0}/get_rate_{1:04d}.f90'.format(self.dir,iproc+1),'w')
+            out2.write('module get_rate_{0:04d}\n\n'.format(iproc+1))
+            out2.write('! Calculate rates for process {0}\n'.format(process.name))
+            out2.write('use kind_values\n')
+            out2.write('use lattice\n')
+            out2.write('use proclist_constants\n')
+            out2.write('use proclist_parameters\n')
+            out2.write('implicit none\n')
+            out2.write('contains\n')
 
-            out.write('\n')
-            if aux_vars:
-                out.write('! Local auxiliary variables\n')
-                for aux_var in aux_vars:
-                    out.write('%sreal(kind=rdouble) :: %s\n' %
-                              (' '*indent,aux_var))
-                out.write('\n')
+            out2.write('\nfunction get_rate_{0}(cell)\n'.format(process.name))
+            out2.write('%sinteger(kind=iint), dimension(4), intent(in) :: cell\n'
+                       % (' '*indent))
+            if nr_vars:
+                out2.write(
+                    '{0}integer(kind=iint), dimension({1}) :: nr_vars\n'.format(
+                    ' '*indent,
+                    len(nr_vars),))
 
-            out.write('%sreal(kind=rdouble) :: get_rate_%s\n' % (' '*indent,process.name))
+            out2.write('{0}real(kind=rdouble) :: get_rate_{1}\n'.format(' '*indent,process.name))
+            out2.write('\n')
 
-            out.write('\n')
-            out.write(nr2zero)
-            out.write('\n')
+            if nr_vars:
+                out2.write('{0}nr_vars(:) = 0\n'.format(' '*indent))
 
             for byst in process.bystander_list:
-                out.write('%sselect case(get_species(cell%s))\n' % (' '*indent,
+                out2.write('%sselect case(get_species(cell%s))\n' % (' '*indent,
                                                                  byst.coord.radd_ff()))
                 for spec in byst.allowed_species:
-                    out.write('%scase(%s)\n' % (' '*2*indent,spec))
-                    out.write('%snr_%s_%s = nr_%s_%s + 1\n' %
-                              (' '*3*indent,spec,byst.flag,spec,byst.flag))
-                out.write('%send select\n' % (' '*indent))
-            out.write('\n')
+                    out2.write('%scase(%s)\n' % (' '*2*indent,spec))
+                    out2.write('{0:s}nr_vars({1:d}) = nr_vars({1:d}) + 1\n'.format(
+                        ' '*3*indent,
+                        nr_vars.index('nr_{0}_{1}'.format(spec,byst.flag))+1
+                        ))
+                    # out2.write('%snr_%s_%s = nr_%s_%s + 1\n' %
+                    #           (' '*3*indent,spec,byst.flag,spec,byst.flag))
+                out2.write('%send select\n' % (' '*indent))
+            out2.write('\n')
+            if nr_vars:
+                out2.write(
+                   '{0}get_rate_{1} = rate_{1}(nr_vars)\n'.format(
+                                                              ' '*indent,
+                                                              process.name))
+            else:
+                out2.write(
+                   '{0}get_rate_{1} = rate_{1}()\n'.format(
+                                                              ' '*indent,
+                                                              process.name))
 
-            out.write('{}\n'.format(new_expr))
-            out.write('%sreturn\n' % (' '*indent))
-            out.write('\nend function get_rate_%s\n\n' % process.name)
+            out2.write('{0}return\n'.format(' '*indent))
+            out2.write('\nend function get_rate_{0}\n\n'.format(process.name))
+            ####
 
-        out.write('\nend module proclist_parameters\n')
+            if nr_vars:
+                out2.write('function rate_{0}(nr_vars)\n\n'.format(process.name))
+                out2.write(
+                '{0}integer(kind=iint), dimension({1}), intent(in) :: nr_vars\n'\
+                .format(' '*indent, len(nr_vars)))
+            else:
+                out2.write('function rate_{0}()\n\n'.format(process.name))
 
-    def write_proclist_touchup_otf(self, data, out):
-        """
-        The touchup function
+            out2.write('\n')
+            if aux_vars:
+                out2.write('! Process specific auxiliary variables\n')
+                for aux_var in aux_vars:
+                    out2.write('%sreal(kind=rdouble) :: %s\n' %
+                              (' '*indent,aux_var))
+                out2.write('\n')
 
-        Updates the elementary steps that a cell can do
-        given the current lattice configuration. This has
-        to be run once for every cell to initialize
-        the simulation book-keeping.
+            out2.write('{0}real(kind=rdouble) :: rate_{1}\n'.format(
+                ' '*indent,process.name))
 
-        """
-        indent = 4
-        out.write('subroutine touchup_cell(cell)\n')
-        out.write('    integer(kind=iint), intent(in), dimension(4) :: cell\n\n')
-        out.write('    integer(kind=iint), dimension(4) :: site\n\n')
-        out.write('    integer(kind=iint) :: proc_nr\n\n')
-        # First kill all processes from this site that are allowed
-        out.write('    site = cell + (/0, 0, 0, 1/)\n')
-        out.write('    do proc_nr = 1, nr_of_proc\n')
-        out.write('        if(avail_sites(proc_nr, lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then\n')
-        out.write('            call del_proc(proc_nr, site)\n')
-        out.write('        endif\n')
-        out.write('    end do\n\n')
+            # Update the value of the rate expression to account for the nr_var array
+            for iv, nr_var in enumerate(nr_vars):
+                new_expr = new_expr.replace(nr_var,
+                                            'nr_vars({0:d})'.format(iv+1))
+            ## TODO Merge this into the parser function
+            new_expr = new_expr.replace('get_rate_{0}'.format(process.name),
+                                        'rate_{0}'.format(process.name))
 
-        # Then we need to build the iftree that will update all processes
-        # from this site
-
-        enabling_items = []
-        for process in data.process_list:
-            rel_pos = (0,0,0) # during touchup we only activate procs from current site
-            #rel_pos_string = 'cell + (/ %s, %s, %s, 1 /)' % (rel_pos[0],rel_pos[1], rel_pos[2]) # CHECK!!
-            item2 = (process.name,rel_pos,True)
-            # coded like this to be parallel to write_proclist_run_proc_name_otf
-            enabling_items.append((copy.deepcopy(process.condition_list),copy.deepcopy(item2)))
-
-        self._write_optimal_iftree_otf(enabling_items, indent, out)
-
-        out.write('\nend subroutine touchup_cell\n')
+            out2.write('{0}\n'.format(new_expr))
+            out2.write('%sreturn\n' % (' '*indent))
+            out2.write('\nend function rate_{0}\n\n'.format(process.name))
+            out2.write('\nend module get_rate_{0:04d}\n'.format(iproc+1))
+            out2.close()
 
     def _otf_get_auxilirary_params(self,data):
         import StringIO
@@ -1525,43 +1535,7 @@ class ProcListWriter():
                 currl=len(toadd)
         return split_expression, list(set(nr_vars))
 
-    def write_proclist_run_proc_nr_otf(self, data, out):
-        # run_proc_nr runs the process selected by determine_procsite
-        # this routine only selects the correct routine from all
-        # of the run_proc_<procname> routines
-
-        out.write('subroutine run_proc_nr(proc, nr_cell)\n\n'
-                  '!****f* proclist/run_proc_nr\n'
-                  '! FUNCTION\n'
-                  '!    Runs process ``proc`` on site ``nr_site``.\n'
-                  '!\n'
-                  '! ARGUMENTS\n'
-                  '!\n'
-                  '!    * ``proc`` integer representing the process number\n'
-                  '!    * ``nr_site``  integer representing the site\n'
-                  '!******\n'
-                  '    integer(kind=iint), intent(in) :: proc\n'
-                  '    integer(kind=iint), intent(in) :: nr_cell\n\n'
-                  '    integer(kind=iint), dimension(4) :: cell\n\n'
-                  '    call increment_procstat(proc)\n\n'
-                  '    ! lsite = lattice_site, (vs. scalar site)\n'
-                  '    cell = nr2lattice(nr_cell, :) + (/0, 0, 0, -1/)\n\n'
-                  '    select case(proc)\n')
-        for process in data.process_list:
-            out.write('    case(%s)\n' % process.name)
-
-            if data.meta.debug > 0:
-                out.write(('print *,"PROCLIST/RUN_PROC_NR/NAME","%s"\n'
-                           'print *,"PROCLIST/RUN_PROC_NR/LSITE",lsite\n'
-                           'print *,"PROCLIST/RUN_PROC_NR/SITE",nr_site\n')
-                           % process.name)
-            out.write('        call run_proc_%s(cell)\n' % process.name)
-
-            out.write('\n')
-        out.write('    end select\n\n')
-        out.write('end subroutine run_proc_nr\n\n')
-
-    def write_proclist_otf(self, data, out, debug=False):
+    def write_proclist_otf(self, data, out, separate_files = True, debug=False):
         """
         Writes the proclist.f90 file for the otf backend
         """
@@ -1609,6 +1583,10 @@ class ProcListWriter():
         out.write('    get_species\n')
         out.write('use proclist_constants\n')
         out.write('use proclist_parameters\n')
+        if separate_files:
+            for i in range(len(data.process_list)):
+                out.write('use run_proc_{0:04d}; use get_rate_{0:04d}\n'.format(
+                    i+1))
 
         out.write('\nimplicit none\n')
 
@@ -1633,12 +1611,85 @@ class ProcListWriter():
         self.write_proclist_generic_subroutines(data, out, code_generator='otf')
         self.write_proclist_touchup_otf(data,out)
         self.write_proclist_run_proc_nr_otf(data,out)
-        self.write_proclist_run_proc_name_otf(data,out)
+        self.write_proclist_run_proc_name_otf(data,out,separate_files=separate_files)
 
         # and we are done!
         if os.name == 'posix':
             progress_bar.render(100, 'finished proclist.f90')
 
+    def write_proclist_touchup_otf(self, data, out):
+        """
+        The touchup function
+
+        Updates the elementary steps that a cell can do
+        given the current lattice configuration. This has
+        to be run once for every cell to initialize
+        the simulation book-keeping.
+
+        """
+        indent = 4
+        out.write('subroutine touchup_cell(cell)\n')
+        out.write('    integer(kind=iint), intent(in), dimension(4) :: cell\n\n')
+        out.write('    integer(kind=iint), dimension(4) :: site\n\n')
+        out.write('    integer(kind=iint) :: proc_nr\n\n')
+        # First kill all processes from this site that are allowed
+        out.write('    site = cell + (/0, 0, 0, 1/)\n')
+        out.write('    do proc_nr = 1, nr_of_proc\n')
+        out.write('        if(avail_sites(proc_nr, lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then\n')
+        out.write('            call del_proc(proc_nr, site)\n')
+        out.write('        endif\n')
+        out.write('    end do\n\n')
+
+        # Then we need to build the iftree that will update all processes
+        # from this site
+
+        enabling_items = []
+        for process in data.process_list:
+            rel_pos = (0,0,0) # during touchup we only activate procs from current site
+            #rel_pos_string = 'cell + (/ %s, %s, %s, 1 /)' % (rel_pos[0],rel_pos[1], rel_pos[2]) # CHECK!!
+            item2 = (process.name,rel_pos,True)
+            # coded like this to be parallel to write_proclist_run_proc_name_otf
+            enabling_items.append((copy.deepcopy(process.condition_list),copy.deepcopy(item2)))
+
+        self._write_optimal_iftree_otf(enabling_items, indent, out)
+
+        out.write('\nend subroutine touchup_cell\n')
+
+    def write_proclist_run_proc_nr_otf(self, data, out):
+        # run_proc_nr runs the process selected by determine_procsite
+        # this routine only selects the correct routine from all
+        # of the run_proc_<procname> routines
+
+        out.write('subroutine run_proc_nr(proc, nr_cell)\n\n'
+                  '!****f* proclist/run_proc_nr\n'
+                  '! FUNCTION\n'
+                  '!    Runs process ``proc`` on site ``nr_site``.\n'
+                  '!\n'
+                  '! ARGUMENTS\n'
+                  '!\n'
+                  '!    * ``proc`` integer representing the process number\n'
+                  '!    * ``nr_site``  integer representing the site\n'
+                  '!******\n'
+                  '    integer(kind=iint), intent(in) :: proc\n'
+                  '    integer(kind=iint), intent(in) :: nr_cell\n\n'
+                  '    integer(kind=iint), dimension(4) :: cell\n\n'
+                  '    call increment_procstat(proc)\n\n'
+                  '    ! lsite = lattice_site, (vs. scalar site)\n'
+                  '    cell = nr2lattice(nr_cell, :) + (/0, 0, 0, -1/)\n\n'
+                  '    select case(proc)\n')
+        for process in data.process_list:
+            out.write('    case(%s)\n' % process.name)
+
+            if data.meta.debug > 0:
+                out.write(('print *,"PROCLIST/RUN_PROC_NR/NAME","%s"\n'
+                           'print *,"PROCLIST/RUN_PROC_NR/LSITE",lsite\n'
+                           'print *,"PROCLIST/RUN_PROC_NR/SITE",nr_site\n')
+                           % process.name)
+            out.write('        call run_proc_%s(cell)\n' % process.name)
+
+            out.write('\n')
+        out.write('    end select\n\n')
+        out.write('end subroutine run_proc_nr\n\n')
 
     def write_proclist_run_proc_name_otf(self,data,out=None,separate_files = False, indent=4):
         """ This routine implements the routines that execute
@@ -1651,17 +1702,28 @@ class ProcListWriter():
         routines, which are defined in the proclist_parameters module
         """
         nprocs = len(data.process_list)
+        process_list = data.get_processes()
 
         debug = 0
 
-        for exec_proc in data.process_list:
+        for iproc, exec_proc in enumerate(data.get_processes()):
             if separate_files:
-                out = os.open('%s/run_proc_%s.f90' % (self.dir,exec_proc.name),'w')
-                out.write('! INSERT HEADERS HERE ### TODO\n\n')
-                ## TODO
+                out2 = open('{0}/run_proc_{1:04d}.f90'.format(self.dir,iproc+1),'w')
+                out2.write('module run_proc_{0:04d}\n\n'.format(iproc+1))
+                out2.write('use kind_values\n')
+                out2.write('use lattice\n')
+                for i in xrange(nprocs):
+                    out2.write('use get_rate_{0:04d}\n'.format(i+1))
+                ## TODO Finish with use statments
+
+                out2.write('\nimplicit none\n')
+                out2.write('contains\n')
+            else:
+                out2 = out
+
             routine_name = 'run_proc_%s' % exec_proc.name
-            out.write('\nsubroutine %s(cell)\n\n' %routine_name)
-            out.write('%sinteger(kind=iint), dimension(4), intent(in) :: cell\n\n' % (' '*indent))
+            out2.write('\nsubroutine %s(cell)\n\n' %routine_name)
+            out2.write('%sinteger(kind=iint), dimension(4), intent(in) :: cell\n\n' % (' '*indent))
 
             # We will sort out all processes that are (potentially) influenced
             # (inhibited, activated or changed rate)
@@ -1672,7 +1734,7 @@ class ProcListWriter():
             # And look into how each of its actions...
             for exec_action in exec_proc.action_list:
                 # ... affect each other processes' conditions
-                for ip,proc in enumerate(data.process_list):
+                for ip,proc in enumerate(process_list):
                     for condition in proc.condition_list:
                         if condition.coord.name == exec_action.coord.name and\
                           condition.coord.layer == exec_action.coord.layer:
@@ -1726,20 +1788,20 @@ class ProcListWriter():
 
 
             ## Write the del_proc calls for all inh_procs
-            out.write('\n! Disable processes\n\n')
+            out2.write('\n! Disable processes\n\n')
             for ip,sublist in enumerate(inh_procs):
                 for rel_pos in sublist:
-                    out.write('%sif(can_do(%s,cell + (/ %s, %s, %s, 1/))) then\n'
-                              % (' '*indent,data.process_list[ip].name,
+                    out2.write('%sif(can_do(%s,cell + (/ %s, %s, %s, 1/))) then\n'
+                              % (' '*indent,process_list[ip].name,
                                     rel_pos[0],rel_pos[1],rel_pos[2]))
-                    out.write('%scall del_proc(%s,cell + (/ %s, %s, %s, 1/))\n'
-                              % (' '*2*indent,data.process_list[ip].name,
+                    out2.write('%scall del_proc(%s,cell + (/ %s, %s, %s, 1/))\n'
+                              % (' '*2*indent,process_list[ip].name,
                                     rel_pos[0],rel_pos[1],rel_pos[2]))
-                    out.write('%send if\n' % (' '*indent))
+                    out2.write('%send if\n' % (' '*indent))
 
 
             ## Update the lattice!
-            out.write('\n! Update the lattice\n')
+            out2.write('\n! Update the lattice\n')
             for exec_action in exec_proc.action_list:
                 # find the corresponding condition
                 matching_conds = [cond for cond in exec_proc.condition_list
@@ -1749,29 +1811,30 @@ class ProcListWriter():
                 else:
                     raise RuntimeError('Found wrong number of matching conditions: %s'
                                        % len(matching_conds))
-                out.write('%scall replace_species(cell%s,%s,%s)\n' % (
+                out2.write('%scall replace_species(cell%s,%s,%s)\n' % (
                                                              ' '*indent,
                                                              exec_action.coord.radd_ff(),
                                                              prev_spec,
                                                              exec_action.species))
 
             ## Write the modification routines for already active processes
-            out.write('\n! Update rate constants\n\n')
+            out2.write('\n! Update rate constants\n\n')
             for ip,sublist in enumerate(aff_procs):
                 for rel_pos in sublist:
-                    out.write('%sif(can_do(%s,cell + (/ %s, %s, %s, 1/))) then\n'
-                              % (' '*indent,data.process_list[ip].name,
+                    out2.write('%sif(can_do(%s,cell + (/ %s, %s, %s, 1/))) then\n'
+                              % (' '*indent,process_list[ip].name,
                                 rel_pos[0], rel_pos[1], rel_pos[2]))
                     rel_site = 'cell + (/ %s, %s, %s, 1/)' % rel_pos
                     rel_cell = 'cell + (/ %s, %s, %s, 0/)' % rel_pos
-                    out.write('%scall update_rates_matrix(%s,%s,get_rate_%s(%s))\n'
-                              % (' '*2*indent,
-                                 data.process_list[ip].name,
+                    out2.write(
+                      '{0}call update_rates_matrix({1},{2},get_rate_{3}({4}))\n'\
+                      .format(' '*2*indent,
+                                 process_list[ip].name,
                                  rel_site,
-                                 data.process_list[ip].name,
+                                 process_list[ip].name,
                                  rel_cell,
                                  ))
-                    out.write('%send if\n' % (' '*indent))
+                    out2.write('%send if\n' % (' '*indent))
 
             ## Write the update_rate calls for all processes if allowed
             ## Prepare a flatlist of all processes name, the relative
@@ -1780,14 +1843,14 @@ class ProcListWriter():
             ## [ other_conditions, (proc_name, relative_site, True) ]
             ## to mantain compatibility with older routine
             enabling_items = []
-            out.write('\n! Enable processes\n\n')
+            out2.write('\n! Enable processes\n\n')
             for ip,sublist in enumerate(enh_procs):
                 for rel_pos in sublist:
                     # rel_pos_string = 'cell + (/ %s, %s, %s, 1 /)' % (rel_pos[0],rel_pos[1],rel_pos[2]) # FIXME
-                    item2 = (data.process_list[ip].name,copy.deepcopy(rel_pos),True)
+                    item2 = (process_list[ip].name,copy.deepcopy(rel_pos),True)
                     ## filter out conditions already met
                     other_conditions = []
-                    for cond in data.process_list[ip].condition_list:
+                    for cond in process_list[ip].condition_list:
                         # this probably be incorporated in the part in which we
                         # eliminated duplicates... must think exactly how
                         for exec_action in exec_proc.action_list:
@@ -1807,10 +1870,11 @@ class ProcListWriter():
                                                                    species=cond.species))
                     enabling_items.append((copy.deepcopy(other_conditions),copy.deepcopy(item2)))
 
-            self._write_optimal_iftree_otf(enabling_items, indent, out)
-            out.write('\nend subroutine %s\n' % routine_name)
+            self._write_optimal_iftree_otf(enabling_items, indent, out2)
+            out2.write('\nend subroutine %s\n' % routine_name)
             if separate_files:
-                out.close()
+                out2.write('\nend module run_proc_{0:04d}\n'.format(iproc+1))
+                out2.close()
 
     def _write_optimal_iftree_otf(self, items, indent, out):
         # this function is called recursively
