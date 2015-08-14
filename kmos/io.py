@@ -1190,75 +1190,6 @@ class ProcListWriter():
             # the RECURSION II
             self._write_optimal_iftree(items, indent, out)
 
-    def write_proclist_touchup_otf(self, data, out):
-        """
-        The touchup function
-
-        Updates the elementary steps that a cell can do
-        given the current lattice configuration. This has
-        to be run once for every cell to initialize
-        the simulation book-keeping.
-
-        """
-        indent = 4
-        out.write('subroutine touchup_cell(cell)\n')
-        out.write('    integer(kind=iint), intent(in), dimension(4) :: cell\n\n')
-        out.write('    integer(kind=iint), dimension(4) :: site\n\n')
-        out.write('    integer(kind=iint) :: proc_nr\n\n')
-        # First kill all processes from this site that are allowed
-        out.write('    site = cell + (/0, 0, 0, 1/)\n')
-        out.write('    do proc_nr = 1, nr_of_proc\n')
-        out.write('        if(avail_sites(proc_nr, lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then\n')
-        out.write('            call del_proc(proc_nr, site)\n')
-        out.write('        endif\n')
-        out.write('    end do\n\n')
-
-        # Then we need to build the iftree that will update all processes
-        # from this site
-
-        enabling_items = []
-        for process in data.process_list:
-            rel_pos = (0,0,0) # during touchup we only activate procs from current site
-            #rel_pos_string = 'cell + (/ %s, %s, %s, 1 /)' % (rel_pos[0],rel_pos[1], rel_pos[2]) # CHECK!!
-            item2 = (process.name,rel_pos,True)
-            # coded like this to be parallel to write_proclist_run_proc_name_otf
-            enabling_items.append((copy.deepcopy(process.condition_list),copy.deepcopy(item2)))
-
-        self._write_optimal_iftree_otf(enabling_items, indent, out)
-
-        out.write('\nend subroutine touchup_cell\n')
-
-    def _otf_get_auxilirary_params(self,data):
-        import StringIO
-        import tokenize
-        from kmos import units, rate_aliases
-        units_list = []
-        masses_list = []
-        chempot_list = []
-        for process in data.process_list:
-            exprs = [process.rate_constant,]
-            if process.otf_rate:
-                exprs.append(process.otf_rate)
-            for expr in exprs:
-                for old, new in rate_aliases.iteritems():
-                    expr=expr.replace(old, new)
-                try:
-                    tokenize_input = StringIO.StringIO(expr).readline
-                    tokens = list(tokenize.generate_tokens(tokenize_input))
-                except:
-                    raise Exception('Could not tokenize expression: %s' % expr)
-                for i, token, _, _, _ in tokens:
-                    if token in dir(units):
-                        if token not in units_list:
-                            units_list.append(token)
-                    if token.startswith('m_'):
-                        if token not in masses_list:
-                            masses_list.append(token)
-                    elif token.startswith('mu_'):
-                        if token not in chempot_list:
-                            chempot_list.append(token)
-        return sorted(units_list), sorted(masses_list), sorted(chempot_list)
-
     def write_proclist_parameters_otf(self,data,out):
         '''Writes the proclist_parameters.f90 files
         which implements the module in charge of doing i/o
@@ -1410,6 +1341,74 @@ class ProcListWriter():
 
         out.write('\nend module proclist_parameters\n')
 
+    def write_proclist_touchup_otf(self, data, out):
+        """
+        The touchup function
+
+        Updates the elementary steps that a cell can do
+        given the current lattice configuration. This has
+        to be run once for every cell to initialize
+        the simulation book-keeping.
+
+        """
+        indent = 4
+        out.write('subroutine touchup_cell(cell)\n')
+        out.write('    integer(kind=iint), intent(in), dimension(4) :: cell\n\n')
+        out.write('    integer(kind=iint), dimension(4) :: site\n\n')
+        out.write('    integer(kind=iint) :: proc_nr\n\n')
+        # First kill all processes from this site that are allowed
+        out.write('    site = cell + (/0, 0, 0, 1/)\n')
+        out.write('    do proc_nr = 1, nr_of_proc\n')
+        out.write('        if(avail_sites(proc_nr, lattice2nr(site(1), site(2), site(3), site(4)) , 2).ne.0)then\n')
+        out.write('            call del_proc(proc_nr, site)\n')
+        out.write('        endif\n')
+        out.write('    end do\n\n')
+
+        # Then we need to build the iftree that will update all processes
+        # from this site
+
+        enabling_items = []
+        for process in data.process_list:
+            rel_pos = (0,0,0) # during touchup we only activate procs from current site
+            #rel_pos_string = 'cell + (/ %s, %s, %s, 1 /)' % (rel_pos[0],rel_pos[1], rel_pos[2]) # CHECK!!
+            item2 = (process.name,rel_pos,True)
+            # coded like this to be parallel to write_proclist_run_proc_name_otf
+            enabling_items.append((copy.deepcopy(process.condition_list),copy.deepcopy(item2)))
+
+        self._write_optimal_iftree_otf(enabling_items, indent, out)
+
+        out.write('\nend subroutine touchup_cell\n')
+
+    def _otf_get_auxilirary_params(self,data):
+        import StringIO
+        import tokenize
+        from kmos import units, rate_aliases
+        units_list = []
+        masses_list = []
+        chempot_list = []
+        for process in data.process_list:
+            exprs = [process.rate_constant,]
+            if process.otf_rate:
+                exprs.append(process.otf_rate)
+            for expr in exprs:
+                for old, new in rate_aliases.iteritems():
+                    expr=expr.replace(old, new)
+                try:
+                    tokenize_input = StringIO.StringIO(expr).readline
+                    tokens = list(tokenize.generate_tokens(tokenize_input))
+                except:
+                    raise Exception('Could not tokenize expression: %s' % expr)
+                for i, token, _, _, _ in tokens:
+                    if token in dir(units):
+                        if token not in units_list:
+                            units_list.append(token)
+                    if token.startswith('m_'):
+                        if token not in masses_list:
+                            masses_list.append(token)
+                    elif token.startswith('mu_'):
+                        if token not in chempot_list:
+                            chempot_list.append(token)
+        return sorted(units_list), sorted(masses_list), sorted(chempot_list)
 
     def _parse_otf_rate(self,expr,procname,data,indent=4):
         """
