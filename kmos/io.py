@@ -179,6 +179,8 @@ class ProcListWriter():
             self.write_proclist_end(out)
 
         elif code_generator == 'otf':
+            self.separate_proclist = True
+            self.separate_proclist_parameters = False
             # write the proclist_constant module from the template
             with open(os.path.join(os.path.dirname(__file__),
                                    'fortran_src',
@@ -191,7 +193,10 @@ class ProcListWriter():
                                                   module_name='proclist_constants'))
             constants_out.close()
             parameters_out = open('%s/proclist_parameters.f90' % self.dir, 'w')
-            self.write_proclist_parameters_otf(data,parameters_out)
+            self.write_proclist_parameters_otf(
+                data,
+                parameters_out,
+                separate_files = self.separate_proclist_parameters)
             parameters_out.close()
 
             self.write_proclist_otf(data,out)
@@ -1190,7 +1195,7 @@ class ProcListWriter():
             # the RECURSION II
             self._write_optimal_iftree(items, indent, out)
 
-    def write_proclist_parameters_otf(self,data,out):
+    def write_proclist_parameters_otf(self,data,out,separate_files = False):
         '''Writes the proclist_parameters.f90 files
         which implements the module in charge of doing i/o
         from python evaluated parameters, to fortran and also
@@ -1256,27 +1261,34 @@ class ProcListWriter():
                 out.write('integer(kind=iint), public :: %s = %s\n' % (mu,(iu+1)))
             out.write('real(kind=rdouble), public, dimension(%s) :: chempots\n' % len(chempot_list))
 
-        # This module contains functions
-        out.write('\ncontains\n')
+
+        after_contains = ''
 
         # Once this is done, we need to build routines that update user parameters and chempots
 
-        out.write('subroutine update_user_parameter(param,val)\n')
-        out.write('    integer(kind=iint), intent(in) :: param\n')
-        out.write('    real(kind=rdouble), intent(in) :: val\n')
-        out.write('    userpar(param) = val\n')
-        out.write('end subroutine update_user_parameter\n\n')
+        after_contains = after_contains + ('subroutine update_user_parameter(param,val)\n')
+        after_contains = after_contains + ('    integer(kind=iint), intent(in) :: param\n')
+        after_contains = after_contains + ('    real(kind=rdouble), intent(in) :: val\n')
+        after_contains = after_contains + ('    userpar(param) = val\n')
+        after_contains = after_contains + ('end subroutine update_user_parameter\n\n')
 
         if chempot_list:
-            out.write('subroutine update_chempot(index,val)\n')
-            out.write('    integer(kind=iint), intent(in) :: index\n')
-            out.write('    real(kind=rdouble), intent(in) :: val\n')
-            out.write('    chempots(index) = val\n')
-            out.write('end subroutine update_chempot\n\n')
+            after_contains = after_contains + ('subroutine update_chempot(index,val)\n')
+            after_contains = after_contains + ('    integer(kind=iint), intent(in) :: index\n')
+            after_contains = after_contains + ('    real(kind=rdouble), intent(in) :: val\n')
+            after_contains = after_contains + ('    chempots(index) = val\n')
+            after_contains = after_contains + ('end subroutine update_chempot\n\n')
 
         # out.write('\n! On-the-fly calculators for rate constants\n\n')
 
-        out.write('\nend module proclist_parameters\n')
+        if separate_files:
+            out.write('\ncontains\n')
+            out.write(after_contains)
+            out.write('\nend module proclist_parameters\n')
+            after_contains2 = ''
+        else:
+            out2 = out
+            after_contains2 = after_contains
         # out.close()
 
         # And finally, we need to write the subroutines to return each of the rate constants
@@ -1311,76 +1323,86 @@ class ProcListWriter():
                 key = lambda x: (x.split('_')[2],x.split('_')[1]))
             nnr_vars = len(nr_vars)
 
-            out2 = open('{0}/get_rate_{1:04d}.f90'.format(self.dir,iproc+1),'w')
-            out2.write('module get_rate_{0:04d}\n\n'.format(iproc+1))
-            out2.write('! Calculate rates for process {0}\n'.format(process.name))
-            out2.write('use kind_values\n')
-            out2.write('use lattice\n')
-            out2.write('use proclist_constants\n')
-            out2.write('use proclist_parameters\n')
-            out2.write('implicit none\n')
-            out2.write('contains\n')
+            if separate_files:
+                out2 = open('{0}/get_rate_{1:04d}.f90'.format(self.dir,iproc+1),'w')
+                out2.write('module get_rate_{0:04d}\n'.format(iproc+1))
+                out2.write('\n! Calculate rates for process {0}\n'.format(process.name))
+                out2.write('use kind_values\n')
+                out2.write('use lattice\n')
+                out2.write('use proclist_constants\n')
+                out2.write('use proclist_parameters\n')
+                out2.write('implicit none\n')
+                out2.write('contains\n')
 
-            out2.write('\nfunction get_rate_{0}(cell)\n'.format(process.name))
-            out2.write('%sinteger(kind=iint), dimension(4), intent(in) :: cell\n'
+            nr_vars_str_len = len(' '.join(nr_vars))
+
+            nr_vars_print = ' &\n    &'.join(nr_vars)
+
+            out2.write('character(len={0}), parameter, public :: byst_{1} = "{2}"\n'.format(
+                nr_vars_str_len,
+                process.name,
+                nr_vars_print))
+
+            after_contains2 = after_contains2 +('\nfunction get_rate_{0}(cell)\n'.format(process.name))
+            after_contains2 = after_contains2 +('%sinteger(kind=iint), dimension(4), intent(in) :: cell\n'
                        % (' '*indent))
             if nr_vars:
-                out2.write(
+                after_contains2 = after_contains2 +(
                     '{0}integer(kind=iint), dimension({1}) :: nr_vars\n'.format(
                     ' '*indent,
                     len(nr_vars),))
 
-            out2.write('{0}real(kind=rdouble) :: get_rate_{1}\n'.format(' '*indent,process.name))
-            out2.write('\n')
+            after_contains2 = after_contains2 +('{0}real(kind=rdouble) :: get_rate_{1}\n'.format(' '*indent,process.name))
+            after_contains2 = after_contains2 +('\n')
 
             if nr_vars:
-                out2.write('{0}nr_vars(:) = 0\n'.format(' '*indent))
+                after_contains2 = after_contains2 +('{0}nr_vars(:) = 0\n'.format(' '*indent))
 
             for byst in process.bystander_list:
-                out2.write('%sselect case(get_species(cell%s))\n' % (' '*indent,
+                after_contains2 = after_contains2 +('%sselect case(get_species(cell%s))\n' % (' '*indent,
                                                                  byst.coord.radd_ff()))
                 for spec in byst.allowed_species:
-                    out2.write('%scase(%s)\n' % (' '*2*indent,spec))
-                    out2.write('{0:s}nr_vars({1:d}) = nr_vars({1:d}) + 1\n'.format(
+                    after_contains2 = after_contains2 +('%scase(%s)\n' % (' '*2*indent,spec))
+                    after_contains2 = after_contains2 +('{0:s}nr_vars({1:d}) = nr_vars({1:d}) + 1\n'.format(
                         ' '*3*indent,
                         nr_vars.index('nr_{0}_{1}'.format(spec,byst.flag))+1
                         ))
-                    # out2.write('%snr_%s_%s = nr_%s_%s + 1\n' %
+                    # after_contains2 = after_contains2 +('%snr_%s_%s = nr_%s_%s + 1\n' %
                     #           (' '*3*indent,spec,byst.flag,spec,byst.flag))
-                out2.write('%send select\n' % (' '*indent))
-            out2.write('\n')
+                after_contains2 = after_contains2 +('%send select\n' % (' '*indent))
+            after_contains2 = after_contains2 +('\n')
             if nr_vars:
-                out2.write(
+                after_contains2 = after_contains2 +(
                    '{0}get_rate_{1} = rate_{1}(nr_vars)\n'.format(
                                                               ' '*indent,
                                                               process.name))
             else:
-                out2.write(
+                after_contains2 = after_contains2 +(
                    '{0}get_rate_{1} = rate_{1}()\n'.format(
                                                               ' '*indent,
                                                               process.name))
 
-            out2.write('{0}return\n'.format(' '*indent))
-            out2.write('\nend function get_rate_{0}\n\n'.format(process.name))
+            after_contains2 = after_contains2 +('{0}return\n'.format(' '*indent))
+            after_contains2 = after_contains2 +('\nend function get_rate_{0}\n\n'.format(process.name))
             ####
 
             if nr_vars:
-                out2.write('function rate_{0}(nr_vars)\n\n'.format(process.name))
-                out2.write(
+                after_contains2 = after_contains2 +('function rate_{0}(nr_vars)\n\n'.format(process.name))
+                after_contains2 = after_contains2 +(
                 '{0}integer(kind=iint), dimension({1}), intent(in) :: nr_vars\n'\
                 .format(' '*indent, len(nr_vars)))
             else:
-                out2.write('function rate_{0}()\n\n'.format(process.name))
+                after_contains2 = after_contains2 +('function rate_{0}()\n\n'.format(process.name))
 
-            out2.write('\n')
+            after_contains2 = after_contains2 +('\n')
             if aux_vars:
-                out2.write('! Process specific auxiliary variables\n')
+                after_contains2 = after_contains2 +('! Process specific auxiliary variables\n')
                 for aux_var in aux_vars:
-                    out2.write('%sreal(kind=rdouble) :: %s\n' %
+                    after_contains2 = after_contains2 +('%sreal(kind=rdouble) :: %s\n' %
                               (' '*indent,aux_var))
-                out2.write('\n')
+                after_contains2 = after_contains2 +('\n')
 
-            out2.write('{0}real(kind=rdouble) :: rate_{1}\n'.format(
+            after_contains2 = after_contains2 +('{0}real(kind=rdouble) :: rate_{1}\n'.format(
                 ' '*indent,process.name))
 
             # Update the value of the rate expression to account for the nr_var array
@@ -1391,11 +1413,22 @@ class ProcListWriter():
             new_expr = new_expr.replace('get_rate_{0}'.format(process.name),
                                         'rate_{0}'.format(process.name))
 
-            out2.write('{0}\n'.format(new_expr))
-            out2.write('%sreturn\n' % (' '*indent))
-            out2.write('\nend function rate_{0}\n\n'.format(process.name))
-            out2.write('\nend module get_rate_{0:04d}\n'.format(iproc+1))
-            out2.close()
+            after_contains2 = after_contains2 +('{0}\n'.format(new_expr))
+            after_contains2 = after_contains2 +('%sreturn\n' % (' '*indent))
+            after_contains2 = after_contains2 +('\nend function rate_{0}\n\n'.format(process.name))
+
+            if separate_files:
+                out2.write('\ncontains\n')
+                out2.write(after_contains2)
+                out2.write('\nend module get_rate_{0:04d}\n'.format(iproc+1))
+                out2.close()
+                after_contains2 = ''
+
+        if not separate_files:
+            out.write('\ncontains\n')
+            out.write(after_contains2)
+            out.write('\nend module proclist_parameters\n')
+
 
     def _otf_get_auxilirary_params(self,data):
         import StringIO
@@ -1583,9 +1616,13 @@ class ProcListWriter():
         out.write('    get_species\n')
         out.write('use proclist_constants\n')
         out.write('use proclist_parameters\n')
-        if separate_files:
+        if separate_files and self.separate_proclist_parameters:
             for i in range(len(data.process_list)):
                 out.write('use run_proc_{0:04d}; use get_rate_{0:04d}\n'.format(
+                    i+1))
+        elif separate_files:
+            for i in range(len(data.process_list)):
+                out.write('use run_proc_{0:04d}\n'.format(
                     i+1))
 
         out.write('\nimplicit none\n')
@@ -1712,8 +1749,10 @@ class ProcListWriter():
                 out2.write('module run_proc_{0:04d}\n\n'.format(iproc+1))
                 out2.write('use kind_values\n')
                 out2.write('use lattice\n')
-                for i in xrange(nprocs):
-                    out2.write('use get_rate_{0:04d}\n'.format(i+1))
+                out2.write('use proclist_parameters\n')
+                if self.separate_proclist_parameters:
+                    for i in xrange(nprocs):
+                        out2.write('use get_rate_{0:04d}\n'.format(i+1))
                 ## TODO Finish with use statments
 
                 out2.write('\nimplicit none\n')
