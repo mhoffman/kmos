@@ -132,7 +132,10 @@ class KMC_Model(Process):
         self.banner = banner
         self.print_rates = print_rates
         self.parameters = Model_Parameters(self.print_rates)
-        self.rate_constants = Model_Rate_Constants()
+        if proclist_parameters is None:
+            self.rate_constants = Model_Rate_Constants()
+        else:
+            self.rate_constants = Model_Rate_Constants_OTF()
 
         if random_seed is not None:
             settings.random_seed = random_seed
@@ -1513,6 +1516,56 @@ class Model_Rate_Constants(object):
         for i, proc in enumerate(sorted(settings.rate_constants.keys())):
             if pattern is None or fnmatch(proc, pattern):
                 base.set_rate_const(i + 1, rate_constant)
+
+class Model_Rate_Constants_OTF(Model_Rate_Constants):
+    """
+    A subclass of Model_Rate_Constants to be used with the
+    otf backend
+    """
+    def __call__(self, pattern=None, interactive=False, **kwargs):
+        """ Return rate constants
+
+        Can be called with key word arguments of the form
+        nr_<species>_<flag>, to calculate the rate for
+        the appropiate value of the chemical environment
+        """
+        res = ''
+        for i, proc in enumerate(sorted(settings.rate_constants.keys())):
+            if pattern is None or fnmatch(proc,pattern):
+                res += ('# %s: %.2e s^{-1}\n' % (proc,
+                                                 self._rate(proc,**kwargs)))
+
+        if interactive:
+            print(res)
+        else:
+            return res
+
+    def _rate(self,procname,**kwargs):
+        nr_vars = ''.join(getattr(proclist_parameters,
+                                  'byst_{}'.format(procname.lower()))
+                          ).split()
+        input_array = np.zeros([len(nr_vars)],int)
+        for nr_var, value in kwargs.iteritems():
+            if nr_var in nr_vars:
+                input_array[nr_vars.index(nr_var)] = int(value)
+
+        return getattr(proclist_parameters,
+                       'rate_{}'.format(procname.lower()))(input_array)
+
+    def bystanders(self, pattern=None, interactive=True):
+        """ Print the bystanders defined for processes"""
+
+        res = ''
+        for i, proc in enumerate(sorted(settings.rate_constants.keys())):
+            if pattern is None or fnmatch(proc,pattern):
+                bysts = ''.join(getattr(proclist_parameters,
+                                        'byst_{}'.format(proc.lower())))
+                res += ('# %s: %s\n' % (proc,
+                                        bysts))
+        if interactive:
+            print(res)
+        else:
+            return res
 
 
 class ModelParameter(object):
