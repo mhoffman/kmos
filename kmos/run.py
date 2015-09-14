@@ -1525,7 +1525,7 @@ class Model_Rate_Constants_OTF(Model_Rate_Constants):
     def __call__(self, pattern=None, interactive=False, **kwargs):
         """ Return rate constants
 
-        Can be called with key word arguments of the form
+        Can be called with keyword arguments of the form
         nr_<species>_<flag>, to calculate the rate for
         the appropiate value of the chemical environment
         """
@@ -1544,13 +1544,17 @@ class Model_Rate_Constants_OTF(Model_Rate_Constants):
         nr_vars = ''.join(getattr(proclist_parameters,
                                   'byst_{}'.format(procname.lower()))
                           ).split()
-        input_array = np.zeros([len(nr_vars)],int)
-        for nr_var, value in kwargs.iteritems():
-            if nr_var in nr_vars:
-                input_array[nr_vars.index(nr_var)] = int(value)
+        if nr_vars:
+            input_array = np.zeros([len(nr_vars)],int)
+            for nr_var, value in kwargs.iteritems():
+                if nr_var in nr_vars:
+                    input_array[nr_vars.index(nr_var)] = int(value)
 
-        return getattr(proclist_parameters,
-                       'rate_{}'.format(procname.lower()))(input_array)
+            return getattr(proclist_parameters,
+                           'rate_{}'.format(procname.lower()))(input_array)
+        else:
+            return getattr(proclist_parameters,
+                           'rate_{}'.format(procname.lower()))()
 
     def bystanders(self, pattern=None, interactive=True):
         """ Print the bystanders defined for processes"""
