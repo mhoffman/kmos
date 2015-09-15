@@ -1297,16 +1297,18 @@ class ProcListWriter():
             # Open a new file for each get_rate_<procname> and rate_<procname> routine
 
             # get all of flags
-            flags = list(set([byst.flag for byst in process.bystander_list]))
-            # and all species
+            flags = []
             specs_dict = {}
             for byst in process.bystander_list:
-                if hasattr(specs_dict,byst.flag):
-                    if not (sorted(byst.allowed_species) ==
-                            sorted(specs_dict[byst.flag])):
-                        raise RuntimeError('All bystanders sharing a flag must allow same species. proc: %s' % process.name)
-                else:
-                    specs_dict[byst.flag] = byst.allowed_species
+                for flg in byst.flag.split():
+                    if specs_dict.has_key(flg):
+                        specs_dict[flg].extend(byst.allowed_species)
+                    else:
+                        specs_dict[flg] = copy.deepcopy(byst.allowed_species)
+                    flags.append(flg)
+            flags = sorted(list(set(flags)))
+            for flg,spclist in specs_dict.iteritems():
+                specs_dict[flg] = sorted(spclist)
 
 
             # parse the otf_rate expression to get auxiliary variables
@@ -1363,12 +1365,11 @@ class ProcListWriter():
                                                                  byst.coord.radd_ff()))
                 for spec in byst.allowed_species:
                     after_contains2 = after_contains2 +('%scase(%s)\n' % (' '*2*indent,spec))
-                    after_contains2 = after_contains2 +('{0:s}nr_vars({1:d}) = nr_vars({1:d}) + 1\n'.format(
-                        ' '*3*indent,
-                        nr_vars.index('nr_{0}_{1}'.format(spec,byst.flag))+1
-                        ))
-                    # after_contains2 = after_contains2 +('%snr_%s_%s = nr_%s_%s + 1\n' %
-                    #           (' '*3*indent,spec,byst.flag,spec,byst.flag))
+                    for flg in byst.flag.split():
+                        nrv_indx = nr_vars.index('nr_{0}_{1}'.format(spec,flg))+1
+                        after_contains2 = after_contains2 +\
+                          '{0:s}nr_vars({1:d}) = nr_vars({1:d}) + 1\n'.format(
+                                       ' '*3*indent, nrv_indx,)
                 after_contains2 = after_contains2 +('%send select\n' % (' '*indent))
             after_contains2 = after_contains2 +('\n')
             if nr_vars:

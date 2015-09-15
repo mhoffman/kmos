@@ -1088,7 +1088,7 @@ class Project(object):
                 if len([y for y in process.bystander_list
                         if x.coord == y.coord]) > 1:
                     raise UserWarning(('Found more than one bystander for %s\n'
-                                       % x.coord)
+                                       % x.coord)+
                                       ('on process %s' % process.name))
                 if len([y for y in process.condition_list if x.coord == y.coord]) > 0:
                     raise UserWarning('Process %s has both a condition and a bystander\n'
