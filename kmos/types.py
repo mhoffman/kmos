@@ -1035,15 +1035,15 @@ class Project(object):
         # check if conditions for each process are unique
         for process in self.get_processes():
             for x in process.condition_list:
-                if len([y for y in process.condition_list if x == y]) > 1:
-                    raise UserWarning('%s of process %s is not unique!\n\n%s' %
-                                      (x, process.name, process))
+                if len([y for y in process.condition_list if x.coord == y.coord ]) > 1:
+                    raise UserWarning(('Found repeated condition for coord %s\n' % x.coord) +
+                                      ('on process %s!\n\n' %  process.name))
         # check if actions for each process are unique
         for process in self.get_processes():
             for x in process.action_list:
-                if len([y for y in process.action_list if x == y]) > 1:
-                    raise UserWarning('%s of process %s is not unique!' %
-                                      (x, process.name))
+                if len([y for y in process.action_list if x.coord == y.coord]) > 1:
+                    raise UserWarning(('Found repeated action for coord %s\n' % x.coord) +
+                                      ('on process %s!\n\n' % process.name))
         # check if all processes have a rate expression
         for x in self.get_processes():
             if not x.rate_constant:
