@@ -1477,6 +1477,11 @@ class Coord(FixedObject):
                                      tuple(self.offset),
                                      self.layer)
 
+    def _get_genstring(self):
+        return '%s.%s.%s' % (self.name,
+                             tuple(self.offset),
+                             self.layer)
+
     def eq_mod_offset(self, other):
         """Compares wether to coordinates are the same up to (modulo)
         a cell offset.

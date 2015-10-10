@@ -1010,7 +1010,10 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 for site in sites:
                     X, Y = toscrn(x*atoms.cell[0]
                                   + y*atoms.cell[1]
-                                  + np.inner(atoms.cell.T, site.pos))
+                                  + atoms.cell[0] * site.pos[0]
+                                  + atoms.cell[1] * site.pos[1]
+                                  #+ np.inner(atoms.cell.T, site.pos)
+                                  )
                     tooltip = '%s.(%s, %s, 0).%s' % (site.name,
                                                      x-1, y-1,
                                                      self.project_tree.get_layers()[0].name
@@ -1050,7 +1053,12 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                       ][0]
             species_color = [x.color for x in self.project_tree.get_speciess()
                              if x.name == elem.species.split(' or ')[0]][0]
-            center = toscrn(np.inner(atoms.cell, pos) + elem.coord.offset[0] * atoms.cell[0] + elem.coord.offset[1] * atoms.cell[1] + offset)
+            center = toscrn(pos[0] * atoms.cell[0]
+                            + pos[1] * atoms.cell[1]
+                            #np.inner(atoms.cell, pos)
+                            + elem.coord.offset[0] * atoms.cell[0]
+                            + elem.coord.offset[1] * atoms.cell[1]
+                            + offset)
 
             tooltip = 'Condition: %s@%s.%s.%s' % (elem.species,
                                        elem.coord.name,
@@ -1077,7 +1085,11 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                    if x.name == elem.coord.name
                       ][0]
 
-            center = toscrn(np.inner(atoms.cell, pos) + elem.coord.offset[0] * atoms.cell[0] + elem.coord.offset[1] * atoms.cell[1] + offset)
+            center = toscrn(pos[0] * atoms.cell[0]
+                            + pos[1] * atoms.cell[1]
+                            + elem.coord.offset[0] * atoms.cell[0]
+                            + elem.coord.offset[1] * atoms.cell[1]
+                            + offset)
 
             tooltip = 'Action: %s@%s.%s.%s' % (elem.species,
                                        elem.coord.name,
