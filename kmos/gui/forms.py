@@ -959,7 +959,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             return (scale * coord[0] + offset[0],
                     screen_size[1] - (scale * coord[1] + offset[1]))
 
-        zoom = 3
+        # automatically determine zoom from process list
+        zoom = 2 * self.process._get_max_d() + 3
 
         center_x = zoom / 2
         center_y = zoom / 2
@@ -1027,6 +1028,8 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                                           )
 
         # draw reservoir circles
+        offset = np.array([1, 1, 0])
+        offset = atoms.cell[0] * center_x + atoms.cell[1] * center_y
         for k, species in enumerate(self.project_tree.get_speciess()):
             color = col_str2tuple(species.color)
             o = goocanvas.Ellipse(parent=root,
@@ -1047,12 +1050,13 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                       ][0]
             species_color = [x.color for x in self.project_tree.get_speciess()
                              if x.name == elem.species.split(' or ')[0]][0]
-            center = toscrn(np.inner(pos + elem.coord.offset + center_x, atoms.cell.T))
+            center = toscrn(np.inner(atoms.cell, pos) + elem.coord.offset[0] * atoms.cell[0] + elem.coord.offset[1] * atoms.cell[1] + offset)
 
             tooltip = 'Condition: %s@%s.%s.%s' % (elem.species,
                                        elem.coord.name,
                                        tuple(elem.coord.offset),
-                                       elem.coord.layer)  # for tooltip
+                                       elem.coord.layer,
+                                       )  # for tooltip
             o = goocanvas.Ellipse(parent=root,
                                   center_x=center[0],
                                   center_y=center[1],
@@ -1073,11 +1077,13 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                    if x.name == elem.coord.name
                       ][0]
 
-            center = toscrn(np.inner(pos + elem.coord.offset + center_x, atoms.cell.T))
+            center = toscrn(np.inner(atoms.cell, pos) + elem.coord.offset[0] * atoms.cell[0] + elem.coord.offset[1] * atoms.cell[1] + offset)
+
             tooltip = 'Action: %s@%s.%s.%s' % (elem.species,
                                        elem.coord.name,
                                        tuple(elem.coord.offset),
                                        elem.coord.layer)  # for tooltip
+
             o = goocanvas.Ellipse(parent=root,
                                   center_x=center[0],
                                   center_y=center[1],
@@ -1087,9 +1093,6 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                                   fill_color_rgba=eval('0x' + species_color[1:] + 'ff' ),
                                   tooltip=tooltip,
                                   )
-
-
-
 
     def _get_atoms(self, layer_nr=0):
         if self.project_tree.lattice.representation:
