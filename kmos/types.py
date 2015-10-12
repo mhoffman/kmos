@@ -733,12 +733,15 @@ class Project(object):
         #! FIXME : automatic removal of comment not supported in
         # stdlib version of ElementTree
         xmlparser = ET.XMLParser()
-        try:
-            root = ET.parse(filename, parser=xmlparser).getroot()
-        except:
-            raise Exception(('Could not parse file %s. Are you sure this'
-                             ' a kmos project file?\n')
-                            % os.path.abspath(filename))
+        if os.path.exists(filename):
+            try:
+                root = ET.parse(filename, parser=xmlparser).getroot()
+            except:
+                raise Exception(('Could not parse file %s. Are you sure this'
+                                 ' is a kmos project file?\n')
+                                % os.path.abspath(filename))
+        else:
+            raise IOError('File not found: %s' % os.path.abspath(filename))
 
         if 'version' in root.attrib:
             self.version = eval(root.attrib['version'])
