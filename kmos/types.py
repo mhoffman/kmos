@@ -303,6 +303,9 @@ class Project(object):
         return prettify_xml(self._get_etree_xml())
 
     def _get_ini_string(self):
+        """Return representation of model as can be written into a *.ini File.
+
+        """
         from ConfigParser import ConfigParser
         from StringIO import StringIO
 
@@ -494,11 +497,11 @@ class Project(object):
                 output_elem.set('item', output.name)
         return root
 
-    def save(self, filename=None):
+    def save(self, filename=None, validate=True):
         if filename is None:
             filename = self.filename
         if filename.endswith('.xml'):
-            self.export_xml_file(filename)
+            self.export_xml_file(filename, validate=validate)
         elif filename.endswith('.ini'):
             with open(filename, 'w') as outfile:
                 outfile.write(self._get_ini_string())
@@ -506,12 +509,13 @@ class Project(object):
             raise UserWarning('Cannot export to file suffix %s' %
                   os.path.splitext(filename)[-1])
 
-    def export_xml_file(self, filename):
+    def export_xml_file(self, filename, validate=True):
         f = file(filename, 'w')
         f.write(str(self))
         f.close()
 
-        self.validate_model()
+        if validate:
+            self.validate_model()
 
     def import_file(self, filename):
         if filename.endswith('.ini'):
