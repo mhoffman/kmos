@@ -4,48 +4,52 @@ The otf Backend
   NOTICE: The otf backend is still on an EXPERIMENTAL state and not
   ready for production.
 
-As described in kmos_speed.rst, default kmos backends (local_smart and
+
+As described in ":ref:`o1-backend`" the
+default kmos backends (local_smart and
 lat_int) produce code which executes in time O(1) with the system size
 (total number of sites in the lattice). This is achieved through some
-bookeeping overhead, in particular storing every rate constant
+book-keeping overhead, in particular storing every rate constant
 beforehand in an array. For some particular class of problems,
-i.e. those in which extended lateral interactions are taken into
-account, this implies that some elementary processes need te be
+*i.e.* those in which extended lateral interactions are taken into
+account. This implies that some elementary processes need to be
 included multiple times in the model definition (to account for the
-effect of the lattice configuration in the rate constants).
+effect of the surrounding lattice configuration on the rate constants).
 Depending on the amount of sites taken in account and the number of
 different species that participate, the number of repetitions can
-easily reach several tousands or more. This leads to two undesired
-effects: First the amount of memory required by the bookeeping
+easily reach several thousands or more. This leads to two undesired
+effects: First the amount of memory required by the book-keeping
 structures (which is proportional to the number of processes) could
-quckly be larger than your system has available. Second, the kmos
+quickly be larger than your system has available. Second, the kmos
 algorithm is O(1) in system size, but O(N) in number of processes,
 which eventually leads to a slow down for more complex systems.
 
 The otf backend was developed with these setbacks in mind. otf stands
-for _o_n _t_he _f_ly, because rate constants of processes affected by
+for On The Fly, because rate constants of processes affected by
 lateral interactions are calculated at runtime, according to user
 specifications.
+
   NOTE: Up to now only a limited type of lateral interactions are
   supported at the moment, but the developement of additional ones
-  should be easied within the framework of the otf backend.
+  should be easy within the framework of the otf backend.
+
 In this new backend, kmos is not able to generate O(1) code in the
 system size, but now each process corresponds to a full group of
 processes from the traditional backends. For this reason, the otf
-bakend is been buil to deal with simulations in which
-multisite/mulspecies lateral interactions are included and in which
+bakend is been built to deal with simulations in which
+multisite/multispecies lateral interactions are included and in which
 the system size is not too large.
 
-  TODO: Put numbers to when_to_use_otf(volume,nr_of_procs)
+  TODO: Put numbers to when_to_use_otf(volume, nr_of_procs)
 
 Reference
 ^^^^^^^^^
 
 Here we will detail how to set up a kmc model for the otf kmos
 backend. It will be assumed that the reader is familiar with
-first_model_api.srt, and focus will be in the differences between the
+Tutorial ":ref:`api-tutorial`" and focus will be in the differences between the
 traditional backends (local_smart and lat_int) and otf.  Most of the model
-elements (Project, ConditionAction, Species,Parameter) work exactly
+elements (Project, ConditionAction, Species, Parameter) work exactly
 the same in the new backend.
 
 The Process object, is the one whose usage is most distinct, as
@@ -111,12 +115,13 @@ will affect CO desorption rate::
 
 as with traditional backends. With the otf backend however, we do not need
 to account for all possible combinations (and thus we do not need
-the itertools module). In this case, desoprtion only has one condition
+the itertools module). In this case, desorption only has one condition
 and one action::
   conditions = [Condition(species='CO',coord=center)]
   actions = [Action(species='empty',cood=center)]
 
 And we use the coordinates we picked to generate some bystanders::
+
   bystander_list = [Bystander(coord=coord,
                             allowed_species=['CO',],
                             flag='1nn') for coord in nn_coords]
@@ -139,7 +144,8 @@ given the amount of CO around in our bystanders. For this we simply
 define::
   otf_rate = 'base_rate*exp(beta*nr_CO_1nn*E_CO_nn*eV)'
 
-All of this comes togueder in the process definition::
+All of this comes together in the process definition::
+
   proc = Process(name='CO_desorption',
                  conditions=conditions,
 		 actions=actions,
@@ -151,25 +157,26 @@ All of this comes togueder in the process definition::
 Advanced OTF rate expressions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 In the example above, the otf_rate variable for the processes included only a single
-expression that defined the rate taking into account the values of the nr_<species>_<flag>
+expression that defined the rate taking into account the values of the ``nr_<species>_<flag>``
 variables. For more complex lateral interaction models, this can become cumbersome.
 Alternatively, users can define otf_rate expressions that span several expressions/lines.
 Lets assume we are dealing with a model similar to the one above, but now include an additional
-species, O, and the corresponding lateral interaction energy E_CO_O between these two.
+species, O, and the corresponding lateral interaction energy ``E_CO_O`` between these two.
 Similarly to the previous example, the rate would be given by::
   rate_constant = 'p_COgas*A*bar/sqrt(2*m_CO*umass/beta)'/
                   '*exp(beta*(E_CO+%s*E_CO_nn+%s*E_CO_O-mu_COgas)*eV)' % (N_CO,N_O)
 
-where N_O is the number of nearest-neighbour O. This rate expresion is still fairly simple and the
+where ``N_O`` is the number of nearest-neighbour O. This rate expresion is still fairly simple and the
 previously described methdod would work by doing::
   otf_rate = 'base_rate*exp(beta*(nr_CO_1nn*E_CO_nn+nr_O_1nn*E_CO_O)*eV)'
 
 However, equivalently (and maybe more easy to read) we could define::
+
   otf_rate = 'Vint = nr_CO_1nn*E_CO_nn+nr_O_1nn*E_CO_O\\n'
   otf_rate += 'otf_rate = base_rate*exp(beta*Vint*eV)'
 
-in which we have defined an auxiliary variable 'Vint'. Behind the scene, these lines are included
-in the source code automatically generated by kmos. Notice the inclusion of explicit \\n characters.
+in which we have defined an auxiliary variable ``Vint``. Behind the scenes, these lines are included
+in the source code automatically generated by kmos. Notice the inclusion of explicit ``\\n`` characters.
 This is necessary because we want the line breaks to be explicitely stored as '\n' in the .xml file for export
 (spaces are reformated by the xml export engine). Additionaly, when we want to include more than one line of
 code in otf_rate, we additionally need to include a line that states 'otf_rate = ...' in order for kmos
@@ -177,17 +184,20 @@ to know how to calculate the rate.
 
 Running otf-kmos models
 ^^^^^^^^^^^^^^^^^^^
+
 Once the otf model has been defined, the model can be run in a fashion very similar to the default kmos backends most of the differences arise from the
+
+.. todo:: The rest of this sentence seems to have gotten lost somehow.
 
 
 Known Issues
 ^^^^^^^^^^^^
-1. Non-optimal updates to rates_matrix.
-     The current implementation of the backend is still non-optimal and
-     can lead to considerable decrease in speed for larger systems sizes
-     (scaling O(N_sites)). This will be improved (O(log(N_sites))) once
-     more tests are conducted.
+#. Non-optimal updates to rates_matrix.
+       The current implementation of the backend is still non-optimal and
+       can lead to considerable decrease in speed for larger systems sizes
+       (scaling ``O(N_sites)``). This will be improved (``O(log(N_sites))``) once
+       more tests are conducted.
 
-2. Process name length limit
-     f2py will crash during compilation if a process has a name lager
-     than approx. 20 characters.
+#. Process name length limit
+       f2py will crash during compilation if a process has a name lager
+       than approx. 20 characters.
