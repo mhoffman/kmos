@@ -1031,7 +1031,8 @@ class KMC_Model(Process):
         return ProcInt(proc), SiteInt(site)
 
     def get_avail(self, arg):
-        """Return available (enabled) processes or sites
+        """Return available (enabled) processes or sites. If the argument is a sequence it is interpreted as a site (x, y, z, n).
+        If it is an integer it is interpreted as a process.
            :param arg: type or process to query
            :type arg: int or [int]
 
