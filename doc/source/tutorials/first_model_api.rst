@@ -157,6 +157,8 @@ rate constant. Written down in code this looks as follows ::
                  actions=[Action(coord=coord, species='CO')],
                  rate_constant='p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)')
 
+.. warning:: In order to ensure correct functioning of the kmos kMC solver every action should have a corresponding condition for the same coordinate.
+
 Now you might wonder, how come we can simply use m_CO and beta and such.
 Well, that is because the evaluator will to some trickery to resolve such
 terms. So beta will be first be translated into 1/(kboltzmann*T) and as
