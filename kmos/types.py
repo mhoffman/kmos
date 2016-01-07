@@ -304,6 +304,9 @@ class Project(object):
         return prettify_xml(self._get_etree_xml())
 
     def _get_ini_string(self):
+        """Return representation of model as can be written into a *.ini File.
+
+        """
         from ConfigParser import ConfigParser
         from StringIO import StringIO
 
@@ -508,11 +511,11 @@ class Project(object):
                 output_elem.set('item', output.name)
         return root
 
-    def save(self, filename=None):
+    def save(self, filename=None, validate=True):
         if filename is None:
             filename = self.filename
         if filename.endswith('.xml'):
-            self.export_xml_file(filename)
+            self.export_xml_file(filename, validate=validate)
         elif filename.endswith('.ini'):
             with open(filename, 'w') as outfile:
                 outfile.write(self._get_ini_string())
@@ -520,12 +523,13 @@ class Project(object):
             raise UserWarning('Cannot export to file suffix %s' %
                   os.path.splitext(filename)[-1])
 
-    def export_xml_file(self, filename):
+    def export_xml_file(self, filename, validate=True):
         f = file(filename, 'w')
         f.write(str(self))
         f.close()
 
-        self.validate_model()
+        if validate:
+            self.validate_model()
 
     def import_file(self, filename):
         if filename.endswith('.ini'):
@@ -746,12 +750,15 @@ class Project(object):
         supported_versions = [(0, 2),(0, 3)]
 
         xmlparser = ET.XMLParser()
-        try:
-            root = ET.parse(filename, parser=xmlparser).getroot()
-        except:
-            raise Exception(('Could not parse file %s. Are you sure this'
-                             ' a kmos project file?\n')
-                            % os.path.abspath(filename))
+        if os.path.exists(filename):
+            try:
+                root = ET.parse(filename, parser=xmlparser).getroot()
+            except:
+                raise Exception(('Could not parse file %s. Are you sure this'
+                                 ' is a kmos project file?\n')
+                                % os.path.abspath(filename))
+        else:
+            raise IOError('File not found: %s' % os.path.abspath(filename))
 
         if 'version' in root.attrib:
             self.version = eval(root.attrib['version'])
@@ -1776,6 +1783,14 @@ class Process(FixedObject):
 
     def get_info(self):
         return self.rate_constant
+
+    def _get_max_d(self):
+        max_d = 0
+        for condition in self.condition_list + self.action_list :
+            d = max(np.abs(condition.coord.offset))
+            if d > max_d :
+                max_d = d
+        return max_d
 
     def evaluate_rate_expression(self, parameters={}):
         import kmos.evaluate_rate_expression
