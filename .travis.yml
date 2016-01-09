@@ -24,7 +24,7 @@ before_install:
   - sudo apt-get install python-gtk2 -y
   - sudo apt-get install python-lxml -y
   - sudo apt-get install python-pygoocanvas -y
-  - sudo apt-get install python-kiwi -y
+  #- sudo apt-get install python-kiwi -y
   - wget http://http.us.debian.org/debian/pool/main/g/gazpacho/gazpacho_0.7.2-3_all.deb
   - sudo dpkg -i gazpacho_0.7.2-3_all.deb
   ## PyGobject
@@ -51,6 +51,7 @@ before_install:
 install:
   #- pip install lxml
   - pip install python-ase
+  - pip install kiwi-gtk
   - python setup.py install #install kmos
  
 script:
