@@ -232,10 +232,11 @@ subroutine do_kmc_steps(n)
 !
 !    ``n`` : Number of steps to run
 !******
-    integer(kind=iint), intent(in) :: n
+    integer(kind=ilong), intent(in) :: n
 
+    integer(kind=ilong) :: i
     real(kind=rsingle) :: ran_proc, ran_time, ran_site
-    integer(kind=iint) :: nr_site, proc_nr, i
+    integer(kind=iint) :: nr_site, proc_nr
 
     do i = 1, n
     call random_number(ran_time)
