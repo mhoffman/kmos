@@ -25,7 +25,8 @@ before_install:
   - sudo apt-get install python-lxml -y
   - sudo apt-get install python-pygoocanvas -y
   - sudo apt-get install python-kiwi -y
-  - apt-cache search gazpacho
+  - wget http://http.us.debian.org/debian/pool/main/g/gazpacho/gazpacho_0.7.2-3_all.deb
+  - sudo dpkg -i gazpacho_0.7.2-3_all.deb
   ## PyGobject
   #- wget http://ftp.gnome.org/pub/GNOME/sources/pygobject/2.28/pygobject-2.28.6.tar.bz2
   #- tar xf pygobject-2.28.6.tar.bz2
