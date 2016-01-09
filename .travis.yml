@@ -52,8 +52,7 @@ install:
   - python setup.py install #install kmos
  
 script:
-    - dpkg-query -L python-gtk2
-    - dpkg-query -L python-gobject-2
+    - dpkg-query -L python-kiwi
     - export PYTHONPATH=/usr/lib/python2.7/dist-packages/:${PYTHONPATH}
     - python -c "import sys; import pprint; pprint.pprint(sys.path)"
     - nosetests
