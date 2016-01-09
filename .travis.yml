@@ -6,6 +6,8 @@ cache:
     - apt
     - pip
 
+sudo: required
+
 # Setup anaconda
 before_install:
   ## install numpy python environment
