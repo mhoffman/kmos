@@ -4,17 +4,17 @@ python:
 
 # Setup anaconda
 before_install:
-  # install numpy python environment
-  - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
-  - chmod +x miniconda.sh
-  - ./miniconda.sh -b
-  - export PATH=/home/travis/miniconda2/bin:$PATH
-  - conda update --yes conda
-  - conda create --yes -n condaenv python=$TRAVIS_PYTHON_VERSION
-  - conda install --yes -n condaenv pip
-  - source activate condaenv
+  ## install numpy python environment
+  #- wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+  #- chmod +x miniconda.sh
+  #- ./miniconda.sh -b
+  #- export PATH=/home/travis/miniconda2/bin:$PATH
+  #- conda update --yes conda
+  #- conda create --yes -n condaenv python=$TRAVIS_PYTHON_VERSION
+  #- conda install --yes -n condaenv pip
+  #- source activate condaenv
   - sudo apt-get update -q
-  - sudo apt-get install python-gtk2 -y
+  - sudo apt-get install python-gtk2 python-lxml -y
   ## PyGobject
   #- wget http://ftp.gnome.org/pub/GNOME/sources/pygobject/2.28/pygobject-2.28.6.tar.bz2
   #- tar xf pygobject-2.28.6.tar.bz2
@@ -39,8 +39,7 @@ install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose
   #- pip install mpmath
   - pip install python-ase
-  - pip install lxml
-  - python setup.py install #install catmap
+  - python setup.py install #install kmos
  
 script:
     - nosetests
