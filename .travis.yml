@@ -4,6 +4,7 @@ python:
 
 # Setup anaconda
 before_install:
+  # install numpy python environment
   - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
   - chmod +x miniconda.sh
   - ./miniconda.sh -b
@@ -12,6 +13,14 @@ before_install:
   - conda create --yes -n condaenv python=$TRAVIS_PYTHON_VERSION
   - conda install --yes -n condaenv pip
   - source activate condaenv
+  # install pygtk 
+  - wget http://ftp.gnome.org/pub/GNOME/sources/pygtk/2.24/pygtk-2.24.0.tar.bz2
+  - tar xf pygtk-2.24.0.tar.bz2
+  - cd pygtk-2.24.0
+  - export PKG_CONFIG_PATH=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION/lib/pkgconfig
+  - ./configure --prefix=/home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION/
+  - make
+  - make install
   # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
   - sudo rm -rf /dev/shm
   - sudo ln -s /run/shm /dev/shm
