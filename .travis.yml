@@ -4,6 +4,7 @@ python:
 
 cache:
     - apt
+    - pip
 
 # Setup anaconda
 before_install:
