@@ -53,6 +53,7 @@ install:
  
 script:
     - dpkg-query -L python-kiwi
+    - export PYTHONPATH=/usr/share/pyshared/:${PYTHONPATH}
     - export PYTHONPATH=/usr/lib/python2.7/dist-packages/:${PYTHONPATH}
     - python -c "import sys; import pprint; pprint.pprint(sys.path)"
     - nosetests
