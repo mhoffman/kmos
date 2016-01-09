@@ -85,7 +85,7 @@ class ModelBuilder(object):
 
     def set_lattice(self):
         # Lattice / Layer
-        #self.atoms = ase.io.castep.read_seed('substrate_2layers')
+        self.atoms = ase.io.read('substrate_2layers.traj')
         cell = tuple(self.atoms.cell.diagonal())
 
         self.pt.layer_list.default_layer = DEFAULT_LAYER
