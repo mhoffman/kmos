@@ -58,4 +58,5 @@ script:
     - export PYTHONPATH=/usr/share/pyshared/:${PYTHONPATH}
     - export PYTHONPATH=/usr/lib/python2.7/dist-packages/:${PYTHONPATH}
     - python -c "import sys; import pprint; pprint.pprint(sys.path)"
+    - python -c 'import pprint; import kiwi.ui.gazpacholoader; pprint.pprint(dir(kiwi.ui.gazpacholoader))'
     - nosetests
