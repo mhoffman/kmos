@@ -19,8 +19,8 @@ before_install:
 install:
   #- pip install lxml
   - pip install python-ase
-  - pip install kiwi-gtk
-  - pip show kiwi-gtk
+  #- pip install kiwi-gtk
+  #- pip show kiwi-gtk
   - wget http://http.us.debian.org/debian/pool/main/g/gazpacho/gazpacho_0.7.2-3_all.deb
   - sudo dpkg -i gazpacho_0.7.2-3_all.deb
   - python setup.py install #install kmos
