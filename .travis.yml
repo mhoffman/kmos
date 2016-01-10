@@ -8,6 +8,9 @@ cache:
 
 sudo: required
 
+virtualenv:
+  system_site_packages: true
+
 # Setup anaconda
 before_install:
     # setup system for GUI testing
@@ -21,6 +24,7 @@ before_install:
   - sudo apt-get install python-lxml -y
   - sudo apt-get install python-pygoocanvas -y
   - sudo apt-get install python-kiwi -y
+  - sudo apt-get install python-cairo
 install:
   #- pip install lxml
   - pip install python-ase
