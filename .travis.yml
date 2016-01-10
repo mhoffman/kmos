@@ -24,6 +24,9 @@ install:
   - wget http://http.us.debian.org/debian/pool/main/g/gazpacho/gazpacho_0.7.2-3_all.deb
   - sudo dpkg -c gazpacho_0.7.2-3_all.deb
   - sudo dpkg -i gazpacho_0.7.2-3_all.deb
+  - sudo mkdir tmp
+  - sudo dpkg-deb -x  gazpacho_0.7.2-3_all.deb tmp
+  - sudo tree tmp
   - dpkg-query -L gazpacho
   - python setup.py install #install kmos
  
