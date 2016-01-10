@@ -28,9 +28,9 @@ install:
  
 script:
     - dpkg-query -L python-kiwi
+    - export PYTHONPATH=/home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages:${PYTHONPATH}
     - export PYTHONPATH=/usr/lib/python2.7/dist-packages/:${PYTHONPATH}
     - export PYTHONPATH=/usr/share/pyshared/:${PYTHONPATH}
-    #- export PYTHONPATH=/home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages:${PYTHONPATH}
     - python -c "import sys; import pprint; pprint.pprint(sys.path)"
     - python -c 'import pprint; import kiwi.ui.gazpacholoader; pprint.pprint(dir(kiwi.ui.gazpacholoader))'
     - nosetests
