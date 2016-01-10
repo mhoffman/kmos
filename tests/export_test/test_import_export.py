@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+
+import matplotlib
+matplotlib.use('Agg')
+
 import os, sys
 import os.path, shutil
 import filecmp
