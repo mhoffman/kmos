@@ -3,7 +3,7 @@ import os, sys
 import os.path, shutil
 import filecmp
 from glob import glob
-import gazpacho.load.loader
+import gazpacho.loader.loader
 
 def test_import_export():
 
