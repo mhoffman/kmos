@@ -26,7 +26,8 @@ install:
   - sudo dpkg -i gazpacho_0.7.2-3_all.deb
   - sudo mkdir tmp
   - sudo dpkg-deb -x  gazpacho_0.7.2-3_all.deb tmp
-  - sudo tree tmp
+  #- sudo tree tmp
+  - sudo cp -r tmp/usr/share/pyshared/gazpacho/ /home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages
   - dpkg-query -L gazpacho
   - python setup.py install #install kmos
  
