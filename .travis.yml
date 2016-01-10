@@ -19,8 +19,8 @@ before_install:
 install:
   #- pip install lxml
   - pip install python-ase
-  - pip install kiwi-gtk
-  - pip show kiwi-gtk
+  #- pip install kiwi-gtk
+  #- pip show kiwi-gtk
   - wget http://http.us.debian.org/debian/pool/main/g/gazpacho/gazpacho_0.7.2-3_all.deb
   - sudo dpkg -i gazpacho_0.7.2-3_all.deb
   - dpkg-query -L gazpacho
@@ -30,7 +30,7 @@ script:
     - dpkg-query -L python-kiwi
     - export PYTHONPATH=/usr/share/pyshared/:${PYTHONPATH}
     - export PYTHONPATH=/usr/lib/python2.7/dist-packages/:${PYTHONPATH}
-    - export PYTHONPATH=/home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages:${PYTHONPATH} # pip packages to here
+    - export PYTHONPATH=/home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages:${PYTHONPATH} # pip packages go here
     - python -c "import sys; import pprint; pprint.pprint(sys.path)"
     - python -c 'import pprint; import kiwi.ui.gazpacholoader; pprint.pprint(dir(kiwi.ui.gazpacholoader))'
     - nosetests
