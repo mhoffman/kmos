@@ -27,7 +27,7 @@ install:
   - sudo mkdir tmp
   - sudo dpkg-deb -x  gazpacho_0.7.2-3_all.deb tmp
   #- sudo tree tmp
-  - sudo cp -r tmp/usr/share/pyshared/gazpacho/ /home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages
+  - sudo cp -rv tmp/usr/share/pyshared/gazpacho/ /home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages
   - ls -R tmp | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
   - ls -R  /home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
   - dpkg-query -L gazpacho
@@ -39,5 +39,5 @@ script:
     - export PYTHONPATH=/usr/lib/python2.7/dist-packages/:${PYTHONPATH}
     - export PYTHONPATH=/home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages:${PYTHONPATH} # pip packages go here
     - python -c "import sys; import pprint; pprint.pprint(sys.path)"
-    - python -c 'import pprint; import kiwi.ui.gazpacholoader; pprint.pprint(dir(kiwi.ui.gazpacholoader))'
+    - python -c 'import pprint; import gazpacho.loader.loader; import kiwi.ui.gazpacholoader; pprint.pprint(dir(kiwi.ui.gazpacholoader))'
     - nosetests
