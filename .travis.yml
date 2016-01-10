@@ -22,6 +22,7 @@ install:
   #- pip install kiwi-gtk
   #- pip show kiwi-gtk
   - wget http://http.us.debian.org/debian/pool/main/g/gazpacho/gazpacho_0.7.2-3_all.deb
+  - sudo dpkg -c gazpacho_0.7.2-3_all.deb
   - sudo dpkg -i gazpacho_0.7.2-3_all.deb
   - dpkg-query -L gazpacho
   - python setup.py install #install kmos
