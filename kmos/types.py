@@ -1181,6 +1181,9 @@ class Coord(FixedObject):
         return ((self.layer, self.name) == \
                (other.layer, other.name)) and (self.offset == other.offset).all()
 
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def __hash__(self):
         return hash(self.__repr__())
 
@@ -1452,6 +1455,9 @@ class ConditionAction(FixedObject):
 
     def __eq__(self, other):
         return self.__repr__() == other.__repr__()
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def __repr__(self):
         return ("[COND_ACT] Species: %s Coord:%s%s\n" %

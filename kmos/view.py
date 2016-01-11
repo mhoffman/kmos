@@ -260,6 +260,8 @@ class KMC_ViewBox(threading.Thread, View, Status, FakeUI):
             occupation_plot.set_xdata(self.times)
             occupation_plot.set_ydata(
                             [occ[i] for occ in self.occupation_hist])
+        max_occ = max(occ[i] for occ in self.occupation_hist)
+        self.occupation_diagram.set_ylim([0, max(1, max_occ)])
         self.occupation_diagram.set_xlim([self.times[0], self.times[-1]])
 
         self.data_plot.canvas.draw_idle()

@@ -1,3 +1,9 @@
+.. image:: https://travis-ci.org/mhoffman/kmos.png?branch=master  
+    :target: https://travis-ci.org/mhoffman/kmos
+.. image:: https://img.shields.io/badge/license-GPLv3-brightgreen.svg?style=flat-square)
+    :target COPYING
+
+
 kmos: kMC modelling on steroids
 =====================================
 *a vigorous attempt to make lattice kinetic Monte Carlo modelling more accessible.*
