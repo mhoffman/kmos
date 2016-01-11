@@ -1,8 +1,10 @@
 #!/usr/bin/env python
+
 import os, sys
 import os.path, shutil
 import filecmp
 from glob import glob
+import gazpacho.loader.loader
 
 def test_import_export():
 
@@ -111,7 +113,7 @@ def test_import_export_pdopd_lat_int():
 
     os.chdir(cwd)
 
-def test_compare_import_variants():
+def off_compare_import_variants():
     import kmos.gui
     import kmos.types
 
