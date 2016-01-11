@@ -135,10 +135,11 @@ subroutine do_kmc_steps(n)
 !
 !    ``n`` : Number of steps to run
 !******
-    integer(kind=iint), intent(in) :: n
+    integer(kind=ilong), intent(in) :: n
 
+    integer(kind=ilong) :: i
     real(kind=rsingle) :: ran_proc, ran_time, ran_site
-    integer(kind=iint) :: nr_site, proc_nr, i
+    integer(kind=iint) :: nr_site, proc_nr
 
     do i = 1, n
     call random_number(ran_time)
@@ -279,15 +280,10 @@ subroutine init(input_system_size, system_name, layer, seed_in, no_banner)
         print *, "| PURPOSE. See the GNU General Public License for more       |"
         print *, "| details.                                                   |"
         print *, "|                                                            |"
-        print *, "| If using kmos for a publication, attribution is            |"
-        print *, "| greatly appreciated.                                       |"
-        print *, "| Hoffmann, M. J., Matera, S., & Reuter, K. (2014).          |"
-        print *, "| kmos: A lattice kinetic Monte Carlo framework.             |"
-        print *, "| Computer Physics Communications, 185(7), 2138-2150.        |"
-        print *, "|                                                            |"
-        print *, "| Development http://mhoffman.github.org/kmos                |"
-        print *, "| Documentation http://kmos.readthedocs.org                  |"
-        print *, "| Reference http://dx.doi.org/10.1016/j.cpc.2014.04.003      |"
+        print *, "| I appreciate, but do not require, attribution.             |"
+        print *, "| An attribution usually includes the program name           |"
+        print *, "| author, and URL. For example:                              |"
+        print *, "| kmos by Max J. Hoffmann, (http://mhoffman.github.com/kmos) |"
         print *, "|                                                            |"
         print *, "+------------------------------------------------------------+"
         print *, ""
