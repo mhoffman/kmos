@@ -30,17 +30,17 @@ install:
   - pip install python-ase
   #- pip install kiwi-gtk
   #- pip show kiwi-gtk
-  #- wget http://http.us.debian.org/debian/pool/main/g/gazpacho/gazpacho_0.7.2-3_all.deb
-  #- sudo dpkg -c gazpacho_0.7.2-3_all.deb
-  #- sudo dpkg -i gazpacho_0.7.2-3_all.deb
-  #- sudo mkdir tmp
-  #- sudo dpkg-deb -x  gazpacho_0.7.2-3_all.deb tmp
-  ##- sudo tree tmp
-  #- sudo touch tmp/usr/share/pyshared/gazpacho/loader/__init__.py
-  #- sudo cp -rv tmp/usr/share/pyshared/gazpacho/ /home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages
-  #- ls -R tmp | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
-  #- ls -R  /home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
-  #- dpkg-query -L gazpacho
+  - wget http://http.us.debian.org/debian/pool/main/g/gazpacho/gazpacho_0.7.2-3_all.deb
+  - sudo dpkg -c gazpacho_0.7.2-3_all.deb
+  - sudo dpkg -i gazpacho_0.7.2-3_all.deb
+  - sudo mkdir tmp
+  - sudo dpkg-deb -x  gazpacho_0.7.2-3_all.deb tmp
+  #- sudo tree tmp
+  - sudo touch tmp/usr/share/pyshared/gazpacho/loader/__init__.py
+  - sudo cp -rv tmp/usr/share/pyshared/gazpacho/ /home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages
+  - ls -R tmp | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
+  - ls -R  /home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
+  - dpkg-query -L gazpacho
   - python setup.py install #install kmos
  
 script:
