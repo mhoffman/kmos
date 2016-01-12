@@ -304,9 +304,9 @@ if data.meta.debug > 1:
     #@ print *,"    LATTICE/ADD_PROC/SITE_NR",nr
 
 if code_generator in ['local_smart','lat_int']:
-    #@ call base_add_proc(proc, nr)
+    #@     call base_add_proc(proc, nr)
 elif code_generator in ['otf',]:
-    #@ call base_add_proc(proc, nr, rate)
+    #@     call base_add_proc(proc, nr, rate)
 else:
     raise UserWarning('Unknown backend')
 
@@ -360,7 +360,7 @@ if data.meta.debug > 1:
 if data.meta.debug > 2:
     #@ function can_do(proc, site)
 else:
-    #@ pure function can_do(proc,site)
+    #@ pure function can_do(proc, site)
 #@
 #@     logical :: can_do
 #@     integer(kind=iint), intent(in) :: proc
