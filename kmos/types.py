@@ -10,8 +10,13 @@ from fnmatch import fnmatch
 # numpy
 import numpy as np
 
+
+
 # XML handling
-from lxml import etree as ET
+try:
+    from lxml import etree as ET
+except:
+    ET = None
 #Need to pretty print XML
 from xml.dom import minidom
 
