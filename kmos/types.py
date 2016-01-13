@@ -300,7 +300,11 @@ class Project(object):
         layer.add_site(**kwargs)
 
     def __repr__(self):
-        return self._get_xml_string()
+        try:
+            return self._get_xml_string()
+        except (TypeError, AttributeError) :
+        #except Exception as e :
+            return self._get_ini_string()
 
     def _get_xml_string(self):
         """Produces an XML representation of the project data
