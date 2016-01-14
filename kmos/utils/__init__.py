@@ -94,6 +94,8 @@ def write_py(fileobj, images, **kwargs):
     """Write a ASE atoms construction string for `images`
        into `fileobj`.
     """
+    import numpy as np
+
     if isinstance(fileobj, str):
         fileobj = open(fileobj, 'w')
 
@@ -124,7 +126,8 @@ def write_py(fileobj, images, **kwargs):
                           % repr(list(image.positions)))
         else:
             fileobj.write("          scaled_positions=np.array(\n      %s),\n"
-                          % repr(list(image.get_scaled_positions().tolist())))
+                          % repr(list((np.around(image.get_scaled_positions(), decimals=7)).tolist())))
+        print(image.get_scaled_positions())
         fileobj.write('),\n')
 
     fileobj.write(']')
@@ -133,6 +136,7 @@ def write_py(fileobj, images, **kwargs):
 def get_ase_constructor(atoms):
     """Return the ASE constructor string for `atoms`."""
     if isinstance(atoms, basestring):
+        #return atoms
         atoms = eval(atoms)
     if type(atoms) is list:
         atoms = atoms[0]
