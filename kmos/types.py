@@ -1290,12 +1290,13 @@ class LayerList(FixedObject, list):
         else:
             self.__dict__[key] = value
 
-    def generate_coord_set(self, size=[1, 1, 1], layer_name='default'):
+    def generate_coord_set(self, size=[1, 1, 1], layer_name='default', site_name=None):
         """Generates a set of coordinates around unit cell of any
         desired size. By default it includes exactly all sites in
         the unit cell. By setting size=[2,1,1] one gets an additional
         set in the positive and negative x-direction.
         """
+
 
         def drange(n):
             return range(1 - n, n)
@@ -1306,13 +1307,24 @@ class LayerList(FixedObject, list):
         else:
             raise UserWarning('No Layer named %s found.' % layer_name)
 
-        return [
-            self.generate_coord('%s.(%s, %s, %s).%s' % (site.name, i, j, k,
-                                                        layer_name))
-            for i in drange(size[0])
-            for j in drange(size[1])
-            for k in drange(size[2])
-            for site in layer.sites]
+        if site_name is not None and not site_name in [x.name for x in layer.sites]:
+            raise UserWarning('Layer {layer_name} has no site named {site_name}. Please check spelling and try again.'.format(**locals()))
+
+        if site_name is None :
+            return [
+                self.generate_coord('%s.(%s, %s, %s).%s' % (site.name, i, j, k,
+                                                            layer_name))
+                for i in drange(size[0])
+                for j in drange(size[1])
+                for k in drange(size[2])
+                for site in layer.sites]
+        else: #
+            return [
+                self.generate_coord('%s.(%s, %s, %s).%s' % (site_name, i, j, k,
+                                                            layer_name))
+                for i in drange(size[0])
+                for j in drange(size[1])
+                for k in drange(size[2])]
 
     def generate_coord(self, terms):
         """Expecting something of the form site_name.offset.layer
