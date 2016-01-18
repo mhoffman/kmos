@@ -1307,7 +1307,7 @@ class LayerList(FixedObject, list):
         else:
             raise UserWarning('No Layer named %s found.' % layer_name)
 
-        if site_name is not None and not site_name in [x.name for x in layer.sites]:
+        if site_name is not None and not site_name in ['_'.join(x.name.split('_')[:-1]) for x in layer.sites]:
             raise UserWarning('Layer {layer_name} has no site named {site_name}. Please check spelling and try again.'.format(**locals()))
 
         if site_name is None :
@@ -1319,12 +1319,15 @@ class LayerList(FixedObject, list):
                 for k in drange(size[2])
                 for site in layer.sites]
         else: #
+            selected_site_names = [site.name for site in layer.sites if '_'.join(site.name.split('_')[:-1]) == site_name]
             return [
-                self.generate_coord('%s.(%s, %s, %s).%s' % (site_name, i, j, k,
+                self.generate_coord('%s.(%s, %s, %s).%s' % (site, i, j, k,
                                                             layer_name))
                 for i in drange(size[0])
                 for j in drange(size[1])
-                for k in drange(size[2])]
+                for k in drange(size[2])
+                for site in selected_site_names
+                ]
 
     def generate_coord(self, terms):
         """Expecting something of the form site_name.offset.layer
