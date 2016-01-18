@@ -57,6 +57,11 @@ or just ::
 Now an instantiated und configured model has mainly two functions: run
 kMC steps and report its current configuration.
 
+.. _analyzing_current_state:
+
+Analyzing Current State
+======================
+
 To analyze the current state you may use ::
 
   atoms = model.get_atoms()

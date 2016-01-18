@@ -1,0 +1,53 @@
+language: python
+python:
+  - 2.7
+
+cache:
+    - apt
+    - pip
+
+sudo: required
+
+virtualenv:
+  system_site_packages: true
+
+# Setup anaconda
+before_install:
+    # setup system for GUI testing
+  - export DISPLAY=:99.
+  - sh -e /etc/init.d/xvfb start
+  - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16
+  # install apt packages
+  - sudo apt-get update -q
+  - sudo apt-get install python-gobject-2 -y
+  - sudo apt-get install python-gtk2 -y
+  - sudo apt-get install python-lxml -y
+  - sudo apt-get install python-pygoocanvas -y
+  - sudo apt-get install python-kiwi -y
+  - sudo apt-get install python-cairo
+install:
+  #- pip install lxml
+  - pip install python-ase
+  #- pip install kiwi-gtk
+  #- pip show kiwi-gtk
+  - wget http://http.us.debian.org/debian/pool/main/g/gazpacho/gazpacho_0.7.2-3_all.deb
+  - sudo dpkg -c gazpacho_0.7.2-3_all.deb
+  - sudo dpkg -i gazpacho_0.7.2-3_all.deb
+  - sudo mkdir tmp
+  - sudo dpkg-deb -x  gazpacho_0.7.2-3_all.deb tmp
+  #- sudo tree tmp
+  - sudo touch tmp/usr/share/pyshared/gazpacho/loader/__init__.py
+  - sudo cp -rv tmp/usr/share/pyshared/gazpacho/ /home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages
+  - ls -R tmp | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
+  - ls -R  /home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
+  - dpkg-query -L gazpacho
+  - python setup.py install #install kmos
+ 
+script:
+    - dpkg-query -L python-kiwi
+    - export PYTHONPATH=/usr/share/pyshared/:${PYTHONPATH}
+    - export PYTHONPATH=/usr/lib/python2.7/dist-packages/:${PYTHONPATH}
+    - export PYTHONPATH=/home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages:${PYTHONPATH} # pip packages go here
+    - python -c "import sys; import pprint; pprint.pprint(sys.path)"
+    #- python -c 'import pprint; import gazpacho; print(gazpacho.__file__); import gazpacho.loader.loader; import kiwi.ui.gazpacholoader; pprint.pprint(dir(kiwi.ui.gazpacholoader))'
+    - nosetests
