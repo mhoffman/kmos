@@ -124,6 +124,81 @@ def evaluate_rate_expression(rate_expr, parameters={}):
                     print('No JANAF table assigned for %s' % species_name)
                     print('Setting chemical potential to zero')
                     replaced_tokens.append((i, '0'))
+
+            elif token.startswith('GibbsGas_'):
+                #evaluate gas phase gibbs free energy using ase thermochemistry module,
+                #experimental data from NIST CCCBDB, the electronic energy 
+                #and current temperature and partial pressure
+                from kmos import species
+                species_name = '_'.join(token.split('_')[1:])
+                if species_name in dir(species):
+                    if not 'T' in parameters:
+                        raise Exception('Need "T" in parameters to evaluate gas phase gibbs free energy.')
+
+                    if not ('p_%s' % species_name) in parameters:
+                        raise Exception('Need "p_%s" in parameters to evaluate gas phase gibbs free energy.' % species_name)
+
+                    replaced_tokens.append((i, 'species.%s.GibbsGas(%s,%s,%s)' % (
+                                   species_name,
+                                   parameters['E_'+species_name]['value'],
+                                   parameters['T']['value'],
+                                   parameters['p_%s' % species_name]['value'],
+                                   )))
+                else:
+                    print('No NIST data assigned for %s' % species_name)
+                    print('Setting chemical potential to zero')
+                    replaced_tokens.append((i, '0'))
+
+                #gibbs=eval(replaced_tokens[-1][-1])
+                #print species_name+': %.3f'%gibbs
+
+            elif token.startswith('GibbsAds_'):
+                #evaluate gibbs free energy of adsorbate using ase thermochemistry module,
+                #calculated frequencies and electronic energy and current temperature
+                from kmos import species
+                species_name = '_'.join(token.split('_')[1:])
+                if not 'T' in parameters:
+                    raise Exception('Need "T" in parameters to evaluate adsorbate gibbs free energy.')
+                energy=parameters['E_'+species_name]['value']
+                try:
+                    eval(energy)
+                except:
+                    try:
+                        replaced_tokens2=[]
+                        input = StringIO.StringIO(energy).readline
+                        tokens2 = list(tokenize.generate_tokens(input))
+                    except:
+                        raise Exception('Could not tokenize expression: %s' % input)
+                    for j, token2, _, _, _ in tokens2:
+                        if token2 in parameters:
+                            parameter_str = str(parameters[token2]['value'])
+                            try:
+                                eval(parameter_str)
+                                replaced_tokens2.append((j, parameter_str))
+                            except:
+                                try:
+                                    input = StringIO.StringIO(parameter_str).readline
+                                    tokens3 = list(tokenize.generate_tokens(input))
+                                except:
+                                    raise Exception('Could not tokenize expression: %s' % input)
+                                for k, token3, _, _, _ in tokens3:
+                                    if token3 in parameters:
+                                        parameter_str = str(parameters[token3]['value'])
+                                        replaced_tokens2.append((k, parameter_str))
+                                    else:
+                                        replaced_tokens2.append((k, token3))
+                        else:
+                            replaced_tokens2.append((j, token2))
+                    energy = tokenize.untokenize(replaced_tokens2)
+                replaced_tokens.append((i, 'species.GibbsAds(%s,%s,%s)' % (
+                               energy,
+                               parameters['f_'+species_name]['value'],
+                               parameters['T']['value'],
+                               )))
+
+                #gibbs=eval(replaced_tokens[-1][-1])
+                #print species_name+': %.3f'%gibbs
+
             elif token in parameters:
                 parameter_str = str(parameters[token]['value'])
                 # replace units used in parameters
