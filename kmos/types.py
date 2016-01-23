@@ -391,7 +391,13 @@ class Project(object):
             section_name = 'Process %s' % process.name
             config.add_section(section_name)
             config.set(section_name, 'rate_constant', process.rate_constant)
+            config.set(section_name, 'otf_rate', process.otf_rate)
             config.set(section_name, 'enabled', str(process.enabled))
+            if process.bystander_list:
+                bystanders = [bystander._shorthand() for bystander in process.bystander_list]
+                print(process.name)
+                print(bystanders)
+                config.set(section_name, 'bystanders', ' + '.join(bystanders))
             if process.tof_count:
                 config.set(section_name, 'tof_count', str(process.tof_count))
             conditions = [condition._shorthand() for condition in process.condition_list]
@@ -724,6 +730,32 @@ class Project(object):
                         coord=Coord(name=name,
                                     offset=offset,
                                     layer=layer)))
+
+
+                if 'bystanders' in config.options(section):
+                    for bystander in [x.strip() for x in config.get(section, 'bystanders').split('+')]:
+                        allowed_species, coord = bystander.split('@')
+                        allowed_species = eval(allowed_species)
+
+                        coord, flag = coord.split('|')
+                        coord = coord.split('.')
+                        if len(coord) == 3:
+                            name, offset, layer = coord
+                            offset = eval(offset)
+                        elif len(coord) == 2:
+                            name, offset = coord
+                            offset = eval(offset)
+                            layer = [x.split()[-1] for x in config.sections() if x.startswith('Layer')][0]
+                        else:
+                            name = coord[0]
+                            offset = (0, 0, 0)
+                            layer = [x.split()[-1] for x in config.sections() if x.startswith('Layer')][0]
+
+                        process.add_bystander(Bystander(
+                            allowed_species=allowed_species,
+                            coord=Coord(name=name,
+                                        offset=offset,
+                                        layer=layer)))
 
             elif section == 'SpeciesList':
                 self.species_list.default_species = \
@@ -1878,10 +1910,24 @@ class LatIntProcess(Process):
 class Bystander(FixedObject):
     attributes = ['coord', 'allowed_species', 'flag']
 
+    def __init__(self, **kwargs):
+        kwargs['flag'] = kwargs.get('flag', '')
+        FixedObject.__init__(self, **kwargs)
+
     def __repr__(self):
         return ("[BYSTANDER] Coord:%s Allowed species: (%s)" %
                (self.coord, ','.join([spec for spec in self.allowed_species])))
 
+    def _shorthand(self):
+        if self.coord.offset.any():
+            return '%s@%s.%s|%s' % (self.allowed_species,
+                                 self.coord.name,
+                                 tuple(self.coord.offset),
+                                 self.flag)
+        else:
+            return '%s@%s|%s' % (self.allowed_species,
+                              self.coord.name,
+                              self.flag)
 
 class ConditionAction(FixedObject):
     """Represents either a condition or an action. Since both
