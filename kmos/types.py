@@ -10,8 +10,13 @@ from fnmatch import fnmatch
 # numpy
 import numpy as np
 
+
+
 # XML handling
-from lxml import etree as ET
+try:
+    from lxml import etree as ET
+except:
+    ET = None
 #Need to pretty print XML
 from xml.dom import minidom
 
@@ -296,7 +301,11 @@ class Project(object):
         layer.add_site(**kwargs)
 
     def __repr__(self):
-        return self._get_xml_string()
+        try:
+            return self._get_xml_string()
+        except (TypeError, AttributeError) :
+        #except Exception as e :
+            return self._get_ini_string()
 
     def _get_xml_string(self):
         """Produces an XML representation of the project data
@@ -1349,12 +1358,13 @@ class LayerList(FixedObject, list):
         else:
             self.__dict__[key] = value
 
-    def generate_coord_set(self, size=[1, 1, 1], layer_name='default'):
+    def generate_coord_set(self, size=[1, 1, 1], layer_name='default', site_name=None):
         """Generates a set of coordinates around unit cell of any
         desired size. By default it includes exactly all sites in
         the unit cell. By setting size=[2,1,1] one gets an additional
         set in the positive and negative x-direction.
         """
+
 
         def drange(n):
             return range(1 - n, n)
@@ -1365,13 +1375,27 @@ class LayerList(FixedObject, list):
         else:
             raise UserWarning('No Layer named %s found.' % layer_name)
 
-        return [
-            self.generate_coord('%s.(%s, %s, %s).%s' % (site.name, i, j, k,
-                                                        layer_name))
-            for i in drange(size[0])
-            for j in drange(size[1])
-            for k in drange(size[2])
-            for site in layer.sites]
+        if site_name is not None and not site_name in ['_'.join(x.name.split('_')[:-1]) for x in layer.sites]:
+            raise UserWarning('Layer {layer_name} has no site named {site_name}. Please check spelling and try again.'.format(**locals()))
+
+        if site_name is None :
+            return [
+                self.generate_coord('%s.(%s, %s, %s).%s' % (site.name, i, j, k,
+                                                            layer_name))
+                for i in drange(size[0])
+                for j in drange(size[1])
+                for k in drange(size[2])
+                for site in layer.sites]
+        else: #
+            selected_site_names = [site.name for site in layer.sites if '_'.join(site.name.split('_')[:-1]) == site_name]
+            return [
+                self.generate_coord('%s.(%s, %s, %s).%s' % (site, i, j, k,
+                                                            layer_name))
+                for i in drange(size[0])
+                for j in drange(size[1])
+                for k in drange(size[2])
+                for site in selected_site_names
+                ]
 
     def generate_coord(self, terms):
         """Expecting something of the form site_name.offset.layer
