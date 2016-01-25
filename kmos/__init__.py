@@ -53,6 +53,121 @@ or it may be used as an API via the kmos module.
 __version__ = "0.3.16"
 VERSION = __version__
 
+def evaluate_param_expression(param, parameters={}):
+    import tokenize
+    import StringIO
+    import math
+    from kmos import units
+
+    # convert parameters to dict if passed as list of Parameters()
+    if type(parameters) is list:
+        param_dict = {}
+        for parameter in parameters:
+            param_dict[parameter.name] = {'value': parameter.value}
+        parameters = param_dict
+
+    parameter_str = str(parameters[param]['value'])
+
+    # replace some aliases
+    parameter_str = parameter_str.replace('beta', '(1./(kboltzmann*T))')
+    # replace units used in parameters
+    for unit in units.keys:
+        parameter_str = parameter_str.replace(
+                        unit, '%s' % eval('units.%s' % unit))
+    try:
+        return eval(parameter_str)
+    except:
+        try:
+            replaced_tokens=[]
+            input = StringIO.StringIO(parameter_str).readline
+            tokens = list(tokenize.generate_tokens(input))
+        except:
+            raise Exception('Could not tokenize expression: %s' % input)
+        for i, token, _, _, _ in tokens:
+            if token in ['sqrt', 'exp', 'sin', 'cos', 'pi', 'pow', 'log']:
+                replaced_tokens.append((i, 'math.' + token))
+            elif token.startswith('GibbsGas_'):
+                #evaluate gas phase gibbs free energy using ase thermochemistry module,
+                #experimental data from NIST CCCBDB, the electronic energy 
+                #and current temperature and partial pressure
+                from kmos import species
+                species_name = '_'.join(token.split('_')[1:])
+                if species_name in dir(species):
+                    if not 'T' in parameters:
+                        raise Exception('Need "T" in parameters to evaluate gas phase gibbs free energy.')
+
+                    if not ('p_%s' % species_name) in parameters:
+                        raise Exception('Need "p_%s" in parameters to evaluate gas phase gibbs free energy.' % species_name)
+
+                    replaced_tokens.append((i, 'species.%s.GibbsGas(%s,%s,%s)' % (
+                                species_name,
+                                parameters['E_'+species_name]['value'],
+                                parameters['T']['value'],
+                                parameters['p_%s' % species_name]['value'],
+                                )))
+                else:
+                    print('No NIST data assigned for %s' % species_name)
+                    print('Setting chemical potential to zero')
+                    replaced_tokens.append((i, '0'))
+
+                #gibbs=eval(replaced_tokens2[-1][-1])
+                #print species_name+': %.3f'%gibbs
+
+            elif token.startswith('GibbsAds_'):
+                #evaluate gibbs free energy of adsorbate using ase thermochemistry module,
+                #calculated frequencies and electronic energy and current temperature
+                from kmos import species
+                species_name = '_'.join(token.split('_')[1:])
+                if not 'T' in parameters:
+                    raise Exception('Need "T" in parameters to evaluate adsorbate gibbs free energy.')
+                energy=parameters['E_'+species_name]['value']
+                try:
+                    eval(energy)
+                except:
+                    try:
+                        replaced_tokens2=[]
+                        input = StringIO.StringIO(energy).readline
+                        tokens2 = list(tokenize.generate_tokens(input))
+                    except:
+                        raise Exception('Could not tokenize expression: %s' % input)
+                    for j, token2, _, _, _ in tokens2:
+                        if token2 in parameters:
+                            parameter_str2 = str(parameters[token2]['value'])
+                            try:
+                                eval(parameter_str2)
+                                replaced_tokens2.append((j, parameter_str2))
+                            except:
+                                try:
+                                    input = StringIO.StringIO(parameter_str2).readline
+                                    tokens3 = list(tokenize.generate_tokens(input))
+                                except:
+                                    raise Exception('Could not tokenize expression: %s' % input)
+                                for k, token3, _, _, _ in tokens3:
+                                    if token3 in parameters:
+                                        parameter_str3 = str(parameters[token3]['value'])
+                                        replaced_tokens2.append((k, parameter_str3))
+                                    else:
+                                        replaced_tokens2.append((k, token3))
+                        else:
+                            replaced_tokens2.append((j, token2))
+                    energy = tokenize.untokenize(replaced_tokens2)
+                replaced_tokens.append((i, 'species.GibbsAds(%s,%s,%s)' % (
+                            energy,
+                            parameters['f_'+species_name]['value'],
+                            parameters['T']['value'],
+                            )))
+
+                #gibbs=eval(replaced_tokens2[-1][-1])
+                #print species_name+': %.3f'%gibbs
+
+            elif token in parameters:
+                replaced_tokens.append((i, str(parameters[token]['value'])))
+            else:
+                replaced_tokens.append((i, token))
+        parameter_str = tokenize.untokenize(replaced_tokens)
+        return eval(parameter_str)
+        #print parameter_str
+        #print token+': %.7f'%eval(parameter_str)
 
 def evaluate_rate_expression(rate_expr, parameters={}):
     """Evaluates an expression for a typical kMC rate constant.
