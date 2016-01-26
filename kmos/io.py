@@ -1471,6 +1471,8 @@ class ProcListWriter():
         declarations in those functions
         """
 
+        import re
+
         aux_vars = []
         nr_vars = []
 
@@ -1479,7 +1481,8 @@ class ProcListWriter():
                 raise UserWarning('Not base_rate in otf_rate for process %s' % procname)
 
             # rate_lines = expr.splitlines()
-            rate_lines = expr.split('\\n') # FIXME still bound by explicit '\n' due to xml parser
+            #rate_lines = expr.split('\\n') # FIXME still bound by explicit '\n' due to xml parser
+            rate_lines = re.split('\n|\\n', expr)
             if len(rate_lines) == 1:
                 if not ('=' in rate_lines[0]):
                     rate_lines[0] = 'otf_rate =' + rate_lines[0]
