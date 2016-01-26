@@ -361,11 +361,11 @@ def build(options):
 
     if isfile('proclist_constants.f90'):
         src_files.append('proclist_constants.f90')
-    if isfile('proclist_parameters.f90'):
-        src_files.append('proclist_parameters.f90')
+    if isfile('proclist_pars.f90'):
+        src_files.append('proclist_pars.f90')
 
     src_files.extend(glob('nli_*.f90'))
-    src_files.extend(glob('get_rate_*.f90'))
+    # src_files.extend(glob('get_rate_*.f90'))
     src_files.extend(glob('run_proc_*.f90'))
     src_files.append('proclist.f90')
 

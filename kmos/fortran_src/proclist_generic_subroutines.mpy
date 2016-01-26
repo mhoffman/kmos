@@ -314,7 +314,7 @@ if code_generator in ['otf',]:
         #@         do j=1, system_size(2)
         #@             do k=1, system_size(3)
         #@                 if(can_do({process.name},(/ i, j, k, 1/))) then
-        #@                     call update_rates_matrix({process.name},(/ i, j, k, 1/),get_rate_{process.name}((/ i, j, k, 0/)))
+        #@                     call update_rates_matrix({process.name},(/ i, j, k, 1/),gr_{process.name}((/ i, j, k, 0/)))
         #@                 end if
         #@             end do
         #@         end do

@@ -68,9 +68,9 @@ except:
     proclist_constants = None
 
 try:
-    from kmc_model import proclist_parameters
+    from kmc_model import proclist_pars
 except:
-    proclist_parameters = None
+    proclist_pars = None
 
 try:
     import kmc_settings as settings
@@ -94,15 +94,15 @@ class ProclistProxy(object):
     def __dir__(selftr):
         return list(set(dir(proclist) +
                         dir(proclist_constants) +
-                        dir(proclist_parameters)))
+                        dir(proclist_pars)))
 
     def __getattr__(self, attr):
         if attr in dir(proclist):
             return eval('proclist.%s' % attr)
         elif attr in dir(proclist_constants):
             return eval('proclist_constants.%s' % attr)
-        elif attr in dir(proclist_parameters):
-            return eval('proclist_parameters.%s' % attr)
+        elif attr in dir(proclist_pars):
+            return eval('proclist_pars.%s' % attr)
         else:
             raise AttributeError('%s not found' % attr)
 
@@ -138,7 +138,7 @@ class KMC_Model(Process):
         self.banner = banner
         self.print_rates = print_rates
         self.parameters = Model_Parameters(self.print_rates)
-        if proclist_parameters is None:
+        if proclist_pars is None:
             self.rate_constants = Model_Rate_Constants()
         else:
             self.rate_constants = Model_Rate_Constants_OTF()
@@ -272,7 +272,7 @@ class KMC_Model(Process):
             self.base.update_integ_rate()
 
         # # for otf backend only
-        # print('kmos.run : Updating proclist_parameters!')
+        # print('kmos.run : Updating proclist_pars!')
         # if hasattr(self.proclist,'recalculate_rates_matrix'):
         #     for key,entry in settings.parameters.iteritems():
         #         # print('kmos.run key.lower() : %s' % key.lower())
@@ -1553,7 +1553,7 @@ class Model_Rate_Constants_OTF(Model_Rate_Constants):
             return res
 
     def _rate(self,procname,**kwargs):
-        nr_vars = ''.join(getattr(proclist_parameters,
+        nr_vars = ''.join(getattr(proclist_pars,
                                   'byst_{}'.format(procname.lower()))
                           ).split()
         if nr_vars:
@@ -1562,10 +1562,10 @@ class Model_Rate_Constants_OTF(Model_Rate_Constants):
                 if nr_var in nr_vars:
                     input_array[nr_vars.index(nr_var)] = int(value)
 
-            return getattr(proclist_parameters,
+            return getattr(proclist_pars,
                            'rate_{}'.format(procname.lower()))(input_array)
         else:
-            return getattr(proclist_parameters,
+            return getattr(proclist_pars,
                            'rate_{}'.format(procname.lower()))()
 
     def bystanders(self, pattern=None, interactive=True):
@@ -1574,7 +1574,7 @@ class Model_Rate_Constants_OTF(Model_Rate_Constants):
         res = ''
         for i, proc in enumerate(sorted(settings.rate_constants.keys())):
             if pattern is None or fnmatch(proc,pattern):
-                bysts = ''.join(getattr(proclist_parameters,
+                bysts = ''.join(getattr(proclist_pars,
                                         'byst_{}'.format(proc.lower())))
                 res += ('# %s: %s\n' % (proc,
                                         bysts))

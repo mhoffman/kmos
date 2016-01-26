@@ -180,7 +180,7 @@ class ProcListWriter():
 
         elif code_generator == 'otf':
             self.separate_proclist = True
-            self.separate_proclist_parameters = False
+            self.separate_proclist_pars = False
             # write the proclist_constant module from the template
             with open(os.path.join(os.path.dirname(__file__),
                                    'fortran_src',
@@ -192,11 +192,11 @@ class ProcListWriter():
                                                   data=data,
                                                   module_name='proclist_constants'))
             constants_out.close()
-            parameters_out = open('%s/proclist_parameters.f90' % self.dir, 'w')
-            self.write_proclist_parameters_otf(
+            parameters_out = open('%s/proclist_pars.f90' % self.dir, 'w')
+            self.write_proclist_pars_otf(
                 data,
                 parameters_out,
-                separate_files = self.separate_proclist_parameters)
+                separate_files = self.separate_proclist_pars)
             parameters_out.close()
 
             self.write_proclist_otf(data,out)
@@ -1195,8 +1195,8 @@ class ProcListWriter():
             # the RECURSION II
             self._write_optimal_iftree(items, indent, out)
 
-    def write_proclist_parameters_otf(self,data,out,separate_files = False):
-        '''Writes the proclist_parameters.f90 files
+    def write_proclist_pars_otf(self,data,out,separate_files = False):
+        '''Writes the proclist_pars.f90 files
         which implements the module in charge of doing i/o
         from python evaluated parameters, to fortran and also
         handles rate constants update at fortran level'''
@@ -1212,7 +1212,7 @@ class ProcListWriter():
         # TODO Does this really belong here?
         out.write(self._gpl_message())
 
-        out.write('module proclist_parameters\n')
+        out.write('module proclist_pars\n')
         out.write('use kind_values\n')
         out.write('use base, only: &\n')
         out.write('%srates\n' % (' '*indent))
@@ -1284,7 +1284,7 @@ class ProcListWriter():
         if separate_files:
             out.write('\ncontains\n')
             out.write(after_contains)
-            out.write('\nend module proclist_parameters\n')
+            out.write('\nend module proclist_pars\n')
             after_contains2 = ''
         else:
             out2 = out
@@ -1294,7 +1294,7 @@ class ProcListWriter():
         # And finally, we need to write the subroutines to return each of the rate constants
 
         for iproc, process in enumerate(data.get_processes()):
-            # Open a new file for each get_rate_<procname> and rate_<procname> routine
+            # Open a new file for each gr_<procname> and rate_<procname> routine
 
             # get all of flags
             flags = []
@@ -1326,13 +1326,13 @@ class ProcListWriter():
             nnr_vars = len(nr_vars)
 
             if separate_files:
-                out2 = open('{0}/get_rate_{1:04d}.f90'.format(self.dir,iproc+1),'w')
-                out2.write('module get_rate_{0:04d}\n'.format(iproc+1))
+                out2 = open('{0}/gr_{1:04d}.f90'.format(self.dir,iproc+1),'w')
+                out2.write('module gr_{0:04d}\n'.format(iproc+1))
                 out2.write('\n! Calculate rates for process {0}\n'.format(process.name))
                 out2.write('use kind_values\n')
                 out2.write('use lattice\n')
                 out2.write('use proclist_constants\n')
-                out2.write('use proclist_parameters\n')
+                out2.write('use proclist_pars\n')
                 out2.write('implicit none\n')
                 out2.write('contains\n')
 
@@ -1345,7 +1345,7 @@ class ProcListWriter():
                 process.name,
                 nr_vars_print))
 
-            after_contains2 = after_contains2 +('\nfunction get_rate_{0}(cell)\n'.format(process.name))
+            after_contains2 = after_contains2 +('\nfunction gr_{0}(cell)\n'.format(process.name))
             after_contains2 = after_contains2 +('%sinteger(kind=iint), dimension(4), intent(in) :: cell\n'
                        % (' '*indent))
             if nr_vars:
@@ -1354,7 +1354,7 @@ class ProcListWriter():
                     ' '*indent,
                     len(nr_vars),))
 
-            after_contains2 = after_contains2 +('{0}real(kind=rdouble) :: get_rate_{1}\n'.format(' '*indent,process.name))
+            after_contains2 = after_contains2 +('{0}real(kind=rdouble) :: gr_{1}\n'.format(' '*indent,process.name))
             after_contains2 = after_contains2 +('\n')
 
             if nr_vars:
@@ -1374,17 +1374,17 @@ class ProcListWriter():
             after_contains2 = after_contains2 +('\n')
             if nr_vars:
                 after_contains2 = after_contains2 +(
-                   '{0}get_rate_{1} = rate_{1}(nr_vars)\n'.format(
+                   '{0}gr_{1} = rate_{1}(nr_vars)\n'.format(
                                                               ' '*indent,
                                                               process.name))
             else:
                 after_contains2 = after_contains2 +(
-                   '{0}get_rate_{1} = rate_{1}()\n'.format(
+                   '{0}gr_{1} = rate_{1}()\n'.format(
                                                               ' '*indent,
                                                               process.name))
 
             after_contains2 = after_contains2 +('{0}return\n'.format(' '*indent))
-            after_contains2 = after_contains2 +('\nend function get_rate_{0}\n\n'.format(process.name))
+            after_contains2 = after_contains2 +('\nend function gr_{0}\n\n'.format(process.name))
             ####
 
             if nr_vars:
@@ -1411,7 +1411,7 @@ class ProcListWriter():
                 new_expr = new_expr.replace(nr_var,
                                             'nr_vars({0:d})'.format(iv+1))
             ## TODO Merge this into the parser function
-            new_expr = new_expr.replace('get_rate_{0}'.format(process.name),
+            new_expr = new_expr.replace('gr_{0}'.format(process.name),
                                         'rate_{0}'.format(process.name))
 
             after_contains2 = after_contains2 +('{0}\n'.format(new_expr))
@@ -1421,14 +1421,14 @@ class ProcListWriter():
             if separate_files:
                 out2.write('\ncontains\n')
                 out2.write(after_contains2)
-                out2.write('\nend module get_rate_{0:04d}\n'.format(iproc+1))
+                out2.write('\nend module gr_{0:04d}\n'.format(iproc+1))
                 out2.close()
                 after_contains2 = ''
 
         if not separate_files:
             out.write('\ncontains\n')
             out.write(after_contains2)
-            out.write('\nend module proclist_parameters\n')
+            out.write('\nend module proclist_pars\n')
 
 
     def _otf_get_auxilirary_params(self,data):
@@ -1506,7 +1506,7 @@ class ProcListWriter():
                     ' '*indent,parsed_line)
                 nr_vars.extend(nr_vars_line)
         else:
-            final_expr = '{0}get_rate_{1} = rates({1})'.format(' '*indent, procname)
+            final_expr = '{0}gr_{1} = rates({1})'.format(' '*indent, procname)
 
         return final_expr, aux_vars, list(set(nr_vars))
 
@@ -1528,7 +1528,7 @@ class ProcListWriter():
         # 'base_rate' has special meaning in otf_rate
         expr = expr.replace('base_rate','rates(%s)' % procname)
         # so does 'otf_rate'
-        expr = expr.replace('otf_rate','get_rate_{}'.format(procname))
+        expr = expr.replace('otf_rate','gr_{}'.format(procname))
 
         # And all aliases need to be replaced
         for old, new in rate_aliases.iteritems():
@@ -1616,10 +1616,10 @@ class ProcListWriter():
 
         out.write('    get_species\n')
         out.write('use proclist_constants\n')
-        out.write('use proclist_parameters\n')
-        if separate_files and self.separate_proclist_parameters:
+        out.write('use proclist_pars\n')
+        if separate_files and self.separate_proclist_pars:
             for i in range(len(data.process_list)):
-                out.write('use run_proc_{0:04d}; use get_rate_{0:04d}\n'.format(
+                out.write('use run_proc_{0:04d}; use gr_{0:04d}\n'.format(
                     i+1))
         elif separate_files:
             for i in range(len(data.process_list)):
@@ -1736,8 +1736,8 @@ class ProcListWriter():
         is easy. For turning processes on, we reuse the same logic
         as in local_smart, but now working on whole processes,
         rather that with put/take single site routines.
-        Aditionally, this routines must call the get_rate_<procname>
-        routines, which are defined in the proclist_parameters module
+        Aditionally, this routines must call the gr_<procname>
+        routines, which are defined in the proclist_pars module
         """
         nprocs = len(data.process_list)
         process_list = data.get_processes()
@@ -1750,10 +1750,10 @@ class ProcListWriter():
                 out2.write('module run_proc_{0:04d}\n\n'.format(iproc+1))
                 out2.write('use kind_values\n')
                 out2.write('use lattice\n')
-                out2.write('use proclist_parameters\n')
-                if self.separate_proclist_parameters:
+                out2.write('use proclist_pars\n')
+                if self.separate_proclist_pars:
                     for i in xrange(nprocs):
-                        out2.write('use get_rate_{0:04d}\n'.format(i+1))
+                        out2.write('use gr_{0:04d}\n'.format(i+1))
                 ## TODO Finish with use statments
 
                 out2.write('\nimplicit none\n')
@@ -1867,7 +1867,7 @@ class ProcListWriter():
                     rel_site = 'cell + (/ %s, %s, %s, 1/)' % rel_pos
                     rel_cell = 'cell + (/ %s, %s, %s, 0/)' % rel_pos
                     out2.write(
-                      '{0}call update_rates_matrix({1},{2},get_rate_{3}({4}))\n'\
+                      '{0}call update_rates_matrix({1},{2},gr_{3}({4}))\n'\
                       .format(' '*2*indent,
                                  process_list[ip].name,
                                  rel_site,
@@ -1940,7 +1940,7 @@ class ProcListWriter():
                 rel_site = 'cell + (/ %s, %s, %s, 1/)' % (item[1][1][0],
                                                           item[1][1][1],
                                                           item[1][1][2],)
-                out.write('%scall add_proc(%s, %s, get_rate_%s(%s))\n' % (' ' * indent,
+                out.write('%scall add_proc(%s, %s, gr_%s(%s))\n' % (' ' * indent,
                                                                            item[1][0], rel_site,
                                                                            item[1][0], rel_cell))
             else:
