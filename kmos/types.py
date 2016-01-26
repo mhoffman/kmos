@@ -683,6 +683,11 @@ class Project(object):
                 options = config.options(section)
                 name = section.split()[-1]
                 rate_constant = config.get(section, 'rate_constant')
+                if 'otf_rate' in options:
+                    otf_rate = config.get(section, 'otf_rate')
+                else:
+                    otf_rate = None
+
                 if 'tof_count' in options:
                     tof_count = config.get(section, 'tof_count')
                 else:
@@ -696,6 +701,7 @@ class Project(object):
                 process = self.add_process(Process(name=name,
                                                    rate_constant=rate_constant,
                                                    tof_count=tof_count,
+                                                   otf_rate=otf_rate,
                                                    enabled=enabled))
 
                 for action in [x.strip() for x in config.get(section, 'actions').split('+')]:
