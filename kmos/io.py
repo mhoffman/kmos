@@ -1477,8 +1477,8 @@ class ProcListWriter():
         nr_vars = []
 
         if expr:
-            if not 'base_rate' in expr:
-                raise UserWarning('Not base_rate in otf_rate for process %s' % procname)
+            # if not 'base_rate' in expr:
+            #     raise UserWarning('Not base_rate in otf_rate for process %s' % procname)
 
             # rate_lines = expr.splitlines()
             #rate_lines = expr.split('\\n') # FIXME still bound by explicit '\n' due to xml parser
