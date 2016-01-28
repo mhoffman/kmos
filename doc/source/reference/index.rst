@@ -147,6 +147,9 @@ kmos.cli
 .. automodule:: kmos.cli
    :members:
 
+Utils
+======
+
 kmos.utils
 ^^^^^^^^^^
 
