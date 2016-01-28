@@ -539,7 +539,7 @@ def evaluate_param_expression(param, parameters={}):
                 replaced_tokens.append((i, 'math.' + token))
             elif token.startswith('GibbsGas_'):
                 #evaluate gas phase gibbs free energy using ase thermochemistry module,
-                #experimental data from NIST CCCBDB, the electronic energy 
+                #experimental data from NIST CCCBDB, the electronic energy
                 #and current temperature and partial pressure
                 from kmos import species
                 species_name = '_'.join(token.split('_')[1:])
@@ -622,12 +622,33 @@ def evaluate_param_expression(param, parameters={}):
 
 def evaluate_rate_expression(rate_expr, parameters={}):
     """Evaluates an expression for a typical kMC rate constant.
-     External parameters can be passed in as dictionary, like the
+    This expression can be any python expression returning a number (most likely you will want a float).
+    Standard functions like sin(x), cos(x), pi, pow(x,y ), log(x, [base]) are evaluated using
+    the builtin math module.
+
+    `beta` is an shorthand for 1/(kboltzmann*T) and requires the present of a temperature parameter `T`.
+
+    Short-hands for common conversion factor (bar, c, hbar, h, hbar, e, eV, angstrom, umass) are evaluated
+    as defined in `kmos.units`.
+
+    The short-hand `m_CO` is substituted by the atomic weight in atomic mass units `u`.
+
+    The short-hand `p_<species>` is interpreted as the gas-phase pressure of the corresponding species
+    which can be used in other functions.
+
+    The short-hand `mu_<species>` is interpreted as the gas-phase chemical potential in eV which
+    kmos attempts to evaluate using a linear interpolation of the corresponding JANAF gas phase chemical
+    table (if installed).
+
+     Additional external parameters can be passed in as dictionary, like the
      following:
+
         parameters = {'p_CO':{'value':1},
                       'T':{'value':1}}
 
+
      or as a list of parameters:
+
         parameters = [Parameter(), ... ]
      """
     import tokenize
@@ -693,7 +714,7 @@ def evaluate_rate_expression(rate_expr, parameters={}):
 
             elif token.startswith('GibbsGas_'):
                 #evaluate gas phase gibbs free energy using ase thermochemistry module,
-                #experimental data from NIST CCCBDB, the electronic energy 
+                #experimental data from NIST CCCBDB, the electronic energy
                 #and current temperature and partial pressure
                 from kmos import species
                 species_name = '_'.join(token.split('_')[1:])
@@ -788,7 +809,7 @@ def evaluate_rate_expression(rate_expr, parameters={}):
                             replaced_tokens2.append((i, 'math.' + token2))
                         elif token2.startswith('GibbsGas_'):
                             #evaluate gas phase gibbs free energy using ase thermochemistry module,
-                            #experimental data from NIST CCCBDB, the electronic energy 
+                            #experimental data from NIST CCCBDB, the electronic energy
                             #and current temperature and partial pressure
                             from kmos import species
                             species_name = '_'.join(token2.split('_')[1:])
