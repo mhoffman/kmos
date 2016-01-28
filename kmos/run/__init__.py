@@ -42,9 +42,7 @@ __all__ = ['base', 'lattice', 'proclist', 'KMC_Model']
 from ase.atoms import Atoms
 from copy import deepcopy
 from fnmatch import fnmatch
-from kmos import evaluate_rate_expression
-from kmos import evaluate_param_expression
-from kmos.utils import OrderedDict
+import kmos.utils
 import kmos.run.png
 from math import log
 from multiprocessing import Process
@@ -282,7 +280,7 @@ class KMC_Model(Process):
 
     def get_param_value(self,param):
         """Return the evaluated value of a parameter"""
-        return evaluate_param_expression(param, settings.parameters)
+        return kmos.utils.evaluate_param_expression(param, settings.parameters)
 
     def get_occupation_header(self):
         """Return the names of the fields returned by
@@ -1423,7 +1421,7 @@ class Model_Rate_Constants(object):
         for i, proc in enumerate(sorted(settings.rate_constants.keys())):
             if pattern is None or fnmatch(proc, pattern):
                 rate_expr = settings.rate_constants[proc][0]
-                rate_const = evaluate_rate_expression(rate_expr,
+                rate_const = kmos.utils.evaluate_rate_expression(rate_expr,
                                                       settings.parameters)
                 res += ('# %s: %s = %.2e s^{-1}\n' % (proc, rate_expr,
                                                       rate_const))
@@ -1452,7 +1450,7 @@ class Model_Rate_Constants(object):
         :type proc: str
         """
         rate_expr = settings.rate_constants[proc][0]
-        return evaluate_rate_expression(rate_expr, settings.parameters)
+        return kmos.utils.evaluate_rate_expression(rate_expr, settings.parameters)
 
     def inverse(self):
         """Return inverse list of rate constants.
@@ -1462,7 +1460,7 @@ class Model_Rate_Constants(object):
         res += '# ------------------\n'
         for proc in sorted(settings.rate_constants):
             rate_expr = settings.rate_constants[proc][0]
-            rate_const = evaluate_rate_expression(rate_expr,
+            rate_const = kmos.utils.evaluate_rate_expression(rate_expr,
                                                   settings.parameters)
             res += '# %s: %.2e s^{-1} = %s\n' % (proc, rate_const, rate_expr)
         res += '# ------------------\n'
@@ -1490,7 +1488,7 @@ class Model_Rate_Constants(object):
         if parameters is None:
             parameters = settings.parameters
         if type(rate_constant) is str:
-            rate_constant = evaluate_rate_expression(rate_constant,
+            rate_constant = kmos.utils.evaluate_rate_expression(rate_constant,
                                                      parameters)
         try:
             rate_constant = float(rate_constant)
@@ -1595,7 +1593,7 @@ class _ModelRunner(type):
     def __new__(cls, name, bases, dct):
         obj = super(_ModelRunner, cls).__new__(cls, name, bases, dct)
         obj.runner_name = name
-        obj.parameters = OrderedDict()
+        obj.parameters = kmos.utils.OrderedDict()
         for key, item in dct.items():
             if key == '__module__':
                 pass
@@ -1977,7 +1975,7 @@ def set_rate_constants(parameters=None, print_rates=None):
         print('-------------------')
     for proc in sorted(settings.rate_constants):
         rate_expr = settings.rate_constants[proc][0]
-        rate_const = evaluate_rate_expression(rate_expr, parameters)
+        rate_const = kmos.utils.evaluate_rate_expression(rate_expr, parameters)
 
         if rate_const < 0.:
             raise UserWarning('%s = %s: Negative rate-constants do no make sense'
