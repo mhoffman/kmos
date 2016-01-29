@@ -531,6 +531,33 @@ class Project(object):
                 output_elem.set('item', output.name)
         return root
 
+    def shorten_names(self, max_length=15):
+        if max_length < 5 :
+            raise UserWarning("Max variable length has to be at least 5.")
+        if max_length < 0 :
+            max_length > 9999
+
+        import pprint
+        digits = 4
+        abbreviation_map = {}
+        fullform_map = {}
+        stub_map = {}
+
+        for process in self.process_list:
+            if len(process.name) > max_length - digits:
+                long_name = process.name
+                stub = process.name[:max_length - digits]
+                short_number = len(stub_map.get(stub, []))
+                short_name = '{stub}{short_number:04d}'.format(**locals())
+                stub_map.setdefault(stub, []).append((short_name, long_name))
+                abbreviation_map[short_name] = long_name
+                fullform_map[long_name] = short_name
+
+                process.name = short_name
+
+        with open('abbreviations_{self.meta.model_name}.dat'.format(**locals()), 'w') as outfile:
+            outfile.write(pprint.pformat(stub_map))
+
     def save(self, filename=None, validate=True):
         if filename is None:
             filename = self.filename

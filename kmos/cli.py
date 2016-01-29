@@ -186,6 +186,11 @@ def get_options(args=None, get_parser=False):
                       default=False,
                       action='store_true')
 
+    parser.add_option('-l', '--variable-length',
+                      dest='variable_length',
+                      default=15,
+                      type='int')
+
     try:
         from numpy.distutils.fcompiler import get_default_fcompiler
         from numpy.distutils import log
@@ -308,6 +313,8 @@ def main(args=None):
 
         project = kmos.types.Project()
         project.import_file(xml_file)
+
+        project.shorten_names(max_length=options.variable_length)
 
         kmos.io.export_source(project,
                               export_dir,
