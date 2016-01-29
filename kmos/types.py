@@ -778,6 +778,7 @@ class Project(object):
 
                         process.add_bystander(Bystander(
                             allowed_species=allowed_species,
+                            flag=flag,
                             coord=Coord(name=name,
                                         offset=offset,
                                         layer=layer)))
