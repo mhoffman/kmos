@@ -20,12 +20,13 @@ before_install:
   - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16
   # install apt packages
   - sudo apt-get update -q
+  - sudo apt-get install gfortran -y
   - sudo apt-get install python-gobject-2 -y
   - sudo apt-get install python-gtk2 -y
   - sudo apt-get install python-lxml -y
   - sudo apt-get install python-pygoocanvas -y
   - sudo apt-get install python-kiwi -y
-  - sudo apt-get install python-cairo
+  - sudo apt-get install python-cairo -y
 install:
   - pip install python-ase
   - wget http://http.us.debian.org/debian/pool/main/g/gazpacho/gazpacho_0.7.2-3_all.deb
