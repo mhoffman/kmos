@@ -188,7 +188,7 @@ def get_options(args=None, get_parser=False):
 
     parser.add_option('-l', '--variable-length',
                       dest='variable_length',
-                      default=15,
+                      default=95,
                       type='int')
 
     try:
