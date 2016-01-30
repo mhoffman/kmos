@@ -887,7 +887,10 @@ class KMC_Model(Process):
             if nrofsites:
                 rate = self.base.get_rate(i + 1)
                 prod = nrofsites * rate
-                accum_rate += prod
+                if self.get_backend() in ['otf',]:
+                    accum_rate += rate
+                else:
+                    accum_rate += prod
                 entries.append((nrofsites, rate, prod, process_name))
 
         # reorder
@@ -912,13 +915,24 @@ class KMC_Model(Process):
         res = ''
         total_contribution = 0
         res += ('+' + 118 * '-' + '+' + '\n')
-        res += '|{0:<118s}|\n'.format('(cumulative)    nrofsites * rate_constant'
-                                      '    = rate            [name]')
+        if self.get_backend() in ['otf']:
+            res += '|{0:<118s}|\n'.format('(cumulative)    nrofsites,  rate         '
+                                          '                      [name]')
+        else:
+            res += '|{0:<118s}|\n'.format('(cumulative)    nrofsites * rate_constant'
+                                          '    = rate            [name]')
+
         res += ('+' + 118 * '-' + '+' + '\n')
         for entry in entries:
-            total_contribution += float(entry[2])
+            if self.get_backend() in ['otf']:
+                total_contribution += float(entry[1])
+            else:
+                total_contribution += float(entry[2])
             percent = '(%8.4f %%)' % (total_contribution * 100 / accum_rate)
-            entry = '% 12i * % 8.4e s^-1 = %8.4e s^-1 [%s]' % entry
+            if self.get_backend() in ['otf']:
+                entry = '{0: 12d},  {1: 8.4e} s^-1              [{3:s}]'.format(*entry)
+            else:
+                entry = '% 12i * % 8.4e s^-1 = %8.4e s^-1 [%s]' % entry
             res += '|{0:<118s}|\n'.format('%s %s' % (percent, entry))
 
         res += ('+' + 118 * '-' + '+' + '\n')
