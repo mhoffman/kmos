@@ -1130,10 +1130,15 @@ subroutine get_rate(proc_nr, site_nr, return_rate)
   !    * ``return_rate`` writeable real, where the requested rate will be stored.
   !******
   !---------------I/O variables---------------
-  integer(kind=iint), intent(in) :: proc_nr, site_nr
+  integer(kind=iint), intent(in) :: proc_nr
+  integer(kind=iint), intent(in), optional :: site_nr
   real(kind=rdouble), intent(out) :: return_rate
 
-  return_rate=rates_matrix(proc_nr,site_nr)
+  if(present(site_nr))then
+    return_rate=rates_matrix(proc_nr,site_nr)
+  else
+    return_rate=sum(rates_matrix(proc_nr, :))
+  endif
 
 end subroutine get_rate
 
