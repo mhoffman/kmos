@@ -712,6 +712,8 @@ class Project(object):
                 rate_constant = config.get(section, 'rate_constant')
                 if 'otf_rate' in options:
                     otf_rate = config.get(section, 'otf_rate')
+                    if otf_rate.strip() == 'None':
+                        otf_rate = None
                 else:
                     otf_rate = None
 
