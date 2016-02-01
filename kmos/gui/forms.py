@@ -1015,7 +1015,7 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                                   #+ np.inner(atoms.cell.T, site.pos)
                                   )
                     tooltip = '%s.(%s, %s, 0).%s' % (site.name,
-                                                     x-1, y-1,
+                                                     x-center_x, y-center_y,
                                                      self.project_tree.get_layers()[0].name
                                                      )
 
