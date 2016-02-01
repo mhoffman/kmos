@@ -1272,6 +1272,12 @@ class ProcListWriter():
         after_contains = after_contains + ('    userpar(param) = val\n')
         after_contains = after_contains + ('end subroutine update_user_parameter\n\n')
 
+        after_contains = after_contains + ('subroutine get_user_parameter(param,val)\n')
+        after_contains = after_contains + ('    integer(kind=iint), intent(in) :: param\n')
+        after_contains = after_contains + ('    real(kind=rdouble), intent(out) :: val\n')
+        after_contains = after_contains + ('    val = userpar(param)\n')
+        after_contains = after_contains + ('end subroutine get_user_parameter\n\n')
+
         if chempot_list:
             after_contains = after_contains + ('subroutine update_chempot(index,val)\n')
             after_contains = after_contains + ('    integer(kind=iint), intent(in) :: index\n')
