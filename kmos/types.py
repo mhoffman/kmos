@@ -1699,6 +1699,12 @@ class Coord(FixedObject):
     def __hash__(self):
         return hash(self.__repr__())
 
+    def __cmp__(self, other):
+        return cmp(
+            (self.layer, tuple(self.offset), self.name),
+            (other.layer, tuple(other.offset), other.name)
+        )
+
     def __sub__(a, b):
         """When subtracting two lattice coordinates from each other,
         i.e. a-b, we want to keep the name and layer from a, and just
