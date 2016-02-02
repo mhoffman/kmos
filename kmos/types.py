@@ -1922,7 +1922,7 @@ class Process(FixedObject):
 
     def _get_max_d(self):
         max_d = 0
-        for condition in self.condition_list + self.action_list:
+        for condition in self.condition_list + self.action_list + self.bystander_list :
             d = max(np.abs(condition.coord.offset))
             if d > max_d:
                 max_d = d
