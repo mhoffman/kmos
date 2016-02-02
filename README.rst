@@ -2,6 +2,8 @@
     :target: https://travis-ci.org/mhoffman/kmos
 .. image:: https://img.shields.io/badge/license-GPLv3-brightgreen.svg?style=flat-square)
     :target COPYING
+.. image:: https://readthedocs.org/projects/kmos/badge/?version=latest
+    :target http://kmos.readthedocs.org/en/latest/
 
 
 kmos: kMC modelling on steroids
