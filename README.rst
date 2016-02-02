@@ -3,7 +3,8 @@
 .. image:: https://img.shields.io/badge/license-GPLv3-brightgreen.svg?style=flat-square)
     :target COPYING
 .. image:: https://readthedocs.org/projects/kmos/badge/?version=latest
-    :target http://kmos.readthedocs.org/en/latest/
+    :target: http://kmos.readthedocs.org/en/latest/?badge=latest
+    :alt: Documentation Status
 
 
 kmos: kMC modelling on steroids
