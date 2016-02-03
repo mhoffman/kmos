@@ -44,6 +44,7 @@ from copy import deepcopy
 from fnmatch import fnmatch
 from kmos import evaluate_rate_expression
 from kmos.utils import OrderedDict
+import kmos.utils.progressbar
 import kmos.run.png
 from math import log
 from multiprocessing import Process
@@ -701,6 +702,8 @@ class KMC_Model(Process):
         t0 = self.base.get_kmc_time()
         step0 = self.base.get_kmc_step()
 
+        progress_bar = kmos.utils.progressbar.ProgressBar()
+
         # sample over trajectory
         for sample in xrange(samples):
             self.do_steps(sample_size/samples)
@@ -714,6 +717,8 @@ class KMC_Model(Process):
                 tofs.append(atoms.tof_integ.flatten())
             else:
                 raise NotImplementedError('Working on it ..')
+
+            progress_bar.render(1+int(float(sample)/samples*100), 'Sampling')
 
         # calculate time averages
         occs_mean = np.average(occs, axis=0, weights=delta_ts)
