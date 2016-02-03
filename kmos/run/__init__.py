@@ -647,9 +647,9 @@ class KMC_Model(Process):
 
         In each case check carefully that the observable is sampled good enough!
 
-        :param samples: Number of batches to average over.
+        :param samples: Number of batches to average coverages over.
         :type sample: int
-        :param sample_size: Number of kMC steps per batch.
+        :param sample_size: Number of kMC steps in total.
         :type sample_size: int
         :param tof_method: Method of how to sample TOFs.
                            Possible values are procrates or integ.
@@ -672,7 +672,7 @@ class KMC_Model(Process):
 
         # sample over trajectory
         for sample in xrange(samples):
-            self.do_steps(sample_size)
+            self.do_steps(sample_size/samples)
             atoms = self.get_atoms(geometry=False, reset_time_overrun=False)
             delta_ts.append(atoms.delta_t)
 
