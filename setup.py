@@ -44,6 +44,7 @@ name='python-kmos'
 packages = [
            'kmos',
            'kmos.utils',
+           'kmos.run',
            'kmos.gui',
            ]
 package_dir = {'kmos':'kmos'}

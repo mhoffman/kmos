@@ -94,6 +94,8 @@ def write_py(fileobj, images, **kwargs):
     """Write a ASE atoms construction string for `images`
        into `fileobj`.
     """
+    import numpy as np
+
     if isinstance(fileobj, str):
         fileobj = open(fileobj, 'w')
 
@@ -124,7 +126,8 @@ def write_py(fileobj, images, **kwargs):
                           % repr(list(image.positions)))
         else:
             fileobj.write("          scaled_positions=np.array(\n      %s),\n"
-                          % repr(list(image.get_scaled_positions().tolist())))
+                          % repr(list((np.around(image.get_scaled_positions(), decimals=7)).tolist())))
+        print(image.get_scaled_positions())
         fileobj.write('),\n')
 
     fileobj.write(']')
@@ -133,6 +136,7 @@ def write_py(fileobj, images, **kwargs):
 def get_ase_constructor(atoms):
     """Return the ASE constructor string for `atoms`."""
     if isinstance(atoms, basestring):
+        #return atoms
         atoms = eval(atoms)
     if type(atoms) is list:
         atoms = atoms[0]
@@ -493,7 +497,10 @@ def col_str2tuple(hex_string):
     into a tuple of three float between 0 and 1
     """
     import gtk
-    color = gtk.gdk.Color(hex_string)
+    try:
+        color = gtk.gdk.Color(hex_string)
+    except ValueError as e:
+        raise UserWarning('GTK cannot decipher color string {hex_string}: {e}'.format(**locals()))
     return (color.red_float, color.green_float, color.blue_float)
 
 

@@ -16,7 +16,8 @@ What other kMC codes are there?
   - `Monty <http://www.vsc.science.ru.nl/deij/monty.html>`_ (SXM Boerrrigter)
   - `MoCKa <http://www.itcp.kit.edu/deutschmann/288.php>`_ (L. Kunz)
   - `NASCAM <http://www.fundp.ac.be/sciences/physique/larn/NASCAM-Homepage>`_ (S. Lucas)
-  - `Spparks <http://www.cs.sandia.gov/~sjplimp/spparks/doc/Manual.html>`_ (S. Plimpton):
+  - `Spparks <http://www.cs.sandia.gov/~sjplimp/spparks/doc/Manual.html>`_ (S. Plimpton)
+  - `Zacros <http://zacros.org/>`_ (M. Stamatakis)
 
   Though The Google might find you some more.
   Please drop me a line if you find any information

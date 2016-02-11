@@ -10,8 +10,13 @@ from fnmatch import fnmatch
 # numpy
 import numpy as np
 
+
+
 # XML handling
-from lxml import etree as ET
+try:
+    from lxml import etree as ET
+except:
+    ET = None
 #Need to pretty print XML
 from xml.dom import minidom
 
@@ -295,7 +300,11 @@ class Project(object):
         layer.add_site(**kwargs)
 
     def __repr__(self):
-        return self._get_xml_string()
+        try:
+            return self._get_xml_string()
+        except (TypeError, AttributeError) :
+        #except Exception as e :
+            return self._get_ini_string()
 
     def _get_xml_string(self):
         """Produces an XML representation of the project data
@@ -303,6 +312,9 @@ class Project(object):
         return prettify_xml(self._get_etree_xml())
 
     def _get_ini_string(self):
+        """Return representation of model as can be written into a *.ini File.
+
+        """
         from ConfigParser import ConfigParser
         from StringIO import StringIO
 
@@ -494,11 +506,11 @@ class Project(object):
                 output_elem.set('item', output.name)
         return root
 
-    def save(self, filename=None):
+    def save(self, filename=None, validate=True):
         if filename is None:
             filename = self.filename
         if filename.endswith('.xml'):
-            self.export_xml_file(filename)
+            self.export_xml_file(filename, validate=validate)
         elif filename.endswith('.ini'):
             with open(filename, 'w') as outfile:
                 outfile.write(self._get_ini_string())
@@ -506,12 +518,13 @@ class Project(object):
             raise UserWarning('Cannot export to file suffix %s' %
                   os.path.splitext(filename)[-1])
 
-    def export_xml_file(self, filename):
+    def export_xml_file(self, filename, validate=True):
         f = file(filename, 'w')
         f.write(str(self))
         f.close()
 
-        self.validate_model()
+        if validate:
+            self.validate_model()
 
     def import_file(self, filename):
         if filename.endswith('.ini'):
@@ -729,12 +742,15 @@ class Project(object):
         #! FIXME : automatic removal of comment not supported in
         # stdlib version of ElementTree
         xmlparser = ET.XMLParser()
-        try:
-            root = ET.parse(filename, parser=xmlparser).getroot()
-        except:
-            raise Exception(('Could not parse file %s. Are you sure this'
-                             ' a kmos project file?\n')
-                            % os.path.abspath(filename))
+        if os.path.exists(filename):
+            try:
+                root = ET.parse(filename, parser=xmlparser).getroot()
+            except:
+                raise Exception(('Could not parse file %s. Are you sure this'
+                                 ' is a kmos project file?\n')
+                                % os.path.abspath(filename))
+        else:
+            raise IOError('File not found: %s' % os.path.abspath(filename))
 
         if 'version' in root.attrib:
             self.version = eval(root.attrib['version'])
@@ -945,9 +961,10 @@ class Project(object):
 
             # check if all lattice have a valid name
             if not variable_regex.match(layer.name):
-                raise UserWarning('Lattice %s is not a valid variable name.\n'
+                raise UserWarning(('Lattice %s is not a valid variable name.\n'
                                   'Only letters, numerals and "_" allowed.\n'
-                                  'First character has to be a letter.\n')
+                                  'First character has to be a letter.\n'.format(
+                                  layer.name)))
 
         # check if the default layer is actually defined
         if len(self.get_layers()) > 1 and \
@@ -987,9 +1004,10 @@ class Project(object):
         for species in self.get_speciess():
             # if species names are valid variable names
             if not variable_regex.match(species.name):
-                raise UserWarning('Species %s is not a valid variable name.\n'
+                raise UserWarning(('Species %s is not a valid variable name.\n'
                                   'Only letters, numerals and "_" allowed.\n'
-                                  'First character has to be a letter.\n')
+                                  'First character has to be a letter.\n'.format(
+                                  species.name)))
 
         # check if all species have a unique name
         for x in self.get_speciess():
@@ -1272,12 +1290,13 @@ class LayerList(FixedObject, list):
         else:
             self.__dict__[key] = value
 
-    def generate_coord_set(self, size=[1, 1, 1], layer_name='default'):
+    def generate_coord_set(self, size=[1, 1, 1], layer_name='default', site_name=None):
         """Generates a set of coordinates around unit cell of any
         desired size. By default it includes exactly all sites in
         the unit cell. By setting size=[2,1,1] one gets an additional
         set in the positive and negative x-direction.
         """
+
 
         def drange(n):
             return range(1 - n, n)
@@ -1288,13 +1307,27 @@ class LayerList(FixedObject, list):
         else:
             raise UserWarning('No Layer named %s found.' % layer_name)
 
-        return [
-            self.generate_coord('%s.(%s, %s, %s).%s' % (site.name, i, j, k,
-                                                        layer_name))
-            for i in drange(size[0])
-            for j in drange(size[1])
-            for k in drange(size[2])
-            for site in layer.sites]
+        if site_name is not None and not site_name in ['_'.join(x.name.split('_')[:-1]) for x in layer.sites]:
+            raise UserWarning('Layer {layer_name} has no site named {site_name}. Please check spelling and try again.'.format(**locals()))
+
+        if site_name is None :
+            return [
+                self.generate_coord('%s.(%s, %s, %s).%s' % (site.name, i, j, k,
+                                                            layer_name))
+                for i in drange(size[0])
+                for j in drange(size[1])
+                for k in drange(size[2])
+                for site in layer.sites]
+        else: #
+            selected_site_names = [site.name for site in layer.sites if '_'.join(site.name.split('_')[:-1]) == site_name]
+            return [
+                self.generate_coord('%s.(%s, %s, %s).%s' % (site, i, j, k,
+                                                            layer_name))
+                for i in drange(size[0])
+                for j in drange(size[1])
+                for k in drange(size[2])
+                for site in selected_site_names
+                ]
 
     def generate_coord(self, terms):
         """Expecting something of the form site_name.offset.layer
@@ -1475,6 +1508,11 @@ class Coord(FixedObject):
                                      tuple(self.offset),
                                      self.layer)
 
+    def _get_genstring(self):
+        return '%s.%s.%s' % (self.name,
+                             tuple(self.offset),
+                             self.layer)
+
     def eq_mod_offset(self, other):
         """Compares wether to coordinates are the same up to (modulo)
         a cell offset.
@@ -1484,6 +1522,9 @@ class Coord(FixedObject):
     def __eq__(self, other):
         return ((self.layer, self.name) ==
                (other.layer, other.name)) and (self.offset == other.offset).all()
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def __hash__(self):
         return hash(self.__repr__())
@@ -1687,6 +1728,14 @@ class Process(FixedObject):
     def get_info(self):
         return self.rate_constant
 
+    def _get_max_d(self):
+        max_d = 0
+        for condition in self.condition_list + self.action_list :
+            d = max(np.abs(condition.coord.offset))
+            if d > max_d :
+                max_d = d
+        return max_d
+
     def evaluate_rate_expression(self, parameters={}):
         import kmos.evaluate_rate_expression
         return kmos.evaluate_rate_expression(self.rate_constant, parameters)
@@ -1766,6 +1815,9 @@ class ConditionAction(FixedObject):
 
     def __eq__(self, other):
         return self.__repr__() == other.__repr__()
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def __repr__(self):
         return ("[COND_ACT] Species: %s Coord:%s%s\n" %
