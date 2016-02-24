@@ -319,6 +319,7 @@ class Project(object):
         from StringIO import StringIO
 
         config = ConfigParser()
+        config.optionxform = str
         # Meta
         config.add_section('Meta')
         config.set('Meta', 'author', self.meta.author)
