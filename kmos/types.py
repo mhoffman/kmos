@@ -653,6 +653,7 @@ class Project(object):
                 rate_constant = config.get(section, 'rate_constant')
                 if 'tof_count' in options:
                     tof_count = config.get(section, 'tof_count')
+                    if not tof_count: tof_count = {}
                 else:
                     tof_count = None
 
