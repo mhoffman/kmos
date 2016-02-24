@@ -635,8 +635,8 @@ class Project(object):
             elif section.startswith('Parameter '):
                 options = config.options(section)
                 name = section.split()[-1]
-                min = config.getfloat(section, 'min') if 'min' in options else None
-                max = config.getfloat(section, 'max') if 'max' in options else None
+                min = config.getfloat(section, 'min') if 'min' in options else 0.
+                max = config.getfloat(section, 'max') if 'max' in options else 0.
                 value = config.get(section, 'value') if 'value' in options else None
                 scale = config.get(section, 'scale') if 'scale' in options else 'linear'
                 adjustable = config.getboolean(section, 'adjustable') if 'adjustable' in options else None
