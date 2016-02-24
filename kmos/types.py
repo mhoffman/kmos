@@ -543,6 +543,7 @@ class Project(object):
         from StringIO import StringIO
 
         config = ConfigParser()
+        config.optionxform = str
         if type(filename) is str:
             with open(filename) as infile:
                 inputtxt = infile.read()
