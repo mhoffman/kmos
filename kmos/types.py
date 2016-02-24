@@ -320,6 +320,7 @@ class Project(object):
         from StringIO import StringIO
 
         config = ConfigParser()
+        config.optionxform = str
         # Meta
         config.add_section('Meta')
         config.set('Meta', 'author', self.meta.author)
@@ -596,6 +597,7 @@ class Project(object):
         from StringIO import StringIO
 
         config = ConfigParser()
+        config.optionxform = str
         if type(filename) is str:
             with open(filename) as infile:
                 inputtxt = infile.read()
@@ -689,16 +691,11 @@ class Project(object):
             elif section.startswith('Parameter '):
                 options = config.options(section)
                 name = section.split()[-1]
-                min = config.getfloat(
-                    section, 'min') if 'min' in options else None
-                max = config.getfloat(
-                    section, 'max') if 'max' in options else None
-                value = config.get(
-                    section, 'value') if 'value' in options else None
-                scale = config.get(
-                    section, 'scale') if 'scale' in options else 'linear'
-                adjustable = config.getboolean(
-                    section, 'adjustable') if 'adjustable' in options else None
+                min = config.getfloat(section, 'min') if 'min' in options else 0.
+                max = config.getfloat(section, 'max') if 'max' in options else 0.
+                value = config.get(section, 'value') if 'value' in options else None
+                scale = config.get(section, 'scale') if 'scale' in options else 'linear'
+                adjustable = config.getboolean(section, 'adjustable') if 'adjustable' in options else None
                 self.add_parameter(Parameter(name=name,
                                              value=value,
                                              min=min,
@@ -719,6 +716,7 @@ class Project(object):
 
                 if 'tof_count' in options:
                     tof_count = config.get(section, 'tof_count')
+                    if not tof_count: tof_count = {}
                 else:
                     tof_count = None
 
