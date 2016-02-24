@@ -178,10 +178,12 @@ def get_options(args=None, get_parser=False):
                       default=False,
                       dest='debug',
                       action='store_true')
+
     parser.add_option('-n', '--no-compiler-optimization',
                       default=False,
                       dest='no_optimize',
                       action='store_true')
+
     parser.add_option('-o', '--overwrite',
                       default=False,
                       action='store_true')
@@ -190,6 +192,10 @@ def get_options(args=None, get_parser=False):
                       dest='variable_length',
                       default=95,
                       type='int')
+
+    parser.add_option('-c', '--catmap',
+                      default=False,
+                      action='store_true')
 
     try:
         from numpy.distutils.fcompiler import get_default_fcompiler
@@ -247,7 +253,7 @@ def main(args=None):
 
     options, args, parser = get_options(args, get_parser=True)
 
-    global model, pt, np
+    global model, pt, np, cm_model
 
     if not args[0] in usage.keys():
         args[0] = match_keys(args[0], usage, parser)
@@ -420,12 +426,21 @@ def main(args=None):
         except:
             plt = None
 
+        if options.catmap:
+            import catmap
+            import catmap.cli.kmc_runner
+            seed = catmap.cli.kmc_runner.get_seed_from_path('.')
+            cm_model = catmap.ReactionModel(setup_file='{seed}.mkm'.format(**locals()))
+            catmap_message = '\nSide-loaded catmap_model {seed}.mkm into cm_model = ReactionModel(setup_file="{seed}.mkm")'.format(**locals())
+        else:
+            catmap_message = ''
+
         try:
             model = KMC_Model(print_rates=False)
         except:
             print("Warning: could not import kmc_model!"
                   " Please make sure you are in the right directory")
-        sh(banner='Note: model = KMC_Model(print_rates=False)')
+        sh(banner='Note: model = KMC_Model(print_rates=False){catmap_message}'.format(**locals()))
         try:
             model.deallocate()
         except:
