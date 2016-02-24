@@ -623,7 +623,7 @@ class KMC_Model(Process):
 
         """
 
-        std_header = ('#%s %s %s kmc_time kmc_steps\n'
+        std_header = ('#%s %s %s kmc_time simulated_time kmc_steps\n'
                   % (self.get_param_header(),
                      self.get_tof_header(),
                      self.get_occupation_header()))
@@ -667,6 +667,7 @@ class KMC_Model(Process):
         occs = []
         tofs = []
         delta_ts = []
+        step_ts = []
         t0 = self.base.get_kmc_time()
         step0 = self.base.get_kmc_step()
 
@@ -675,6 +676,7 @@ class KMC_Model(Process):
             self.do_steps(sample_size/samples)
             atoms = self.get_atoms(geometry=False, reset_time_overrun=False)
             delta_ts.append(atoms.delta_t)
+            step_ts.append(self.base.get_kmc_time_step())
 
             occs.append(list(atoms.occupation.flatten()))
             if tof_method == 'procrates':
@@ -685,9 +687,10 @@ class KMC_Model(Process):
                 raise NotImplementedError('Working on it ..')
 
         # calculate time averages
-        occs_mean = np.average(occs, axis=0, weights=delta_ts)
+        occs_mean = np.average(occs, axis=0, weights=step_ts)
         tof_mean = np.average(tofs, axis=0, weights=delta_ts)
         total_time = self.base.get_kmc_time() - t0
+        simulated_time = self.base.get_kmc_time()
         total_steps = self.base.get_kmc_step() - step0
 
         #return tofs, delta_ts
@@ -697,6 +700,7 @@ class KMC_Model(Process):
                         + list(tof_mean.flatten())
                         + list(occs_mean.flatten())
                         + [total_time,
+                           simulated_time,
                            total_steps])
         return ((' '.join(['%.5e'] * len(outdata)) + '\n') % outdata)
 
