@@ -476,7 +476,10 @@ class KMC_Model(Process):
 
         """
 
-        from ase.io import write
+        import ase.io
+        import ase.data.colors
+        jmol_colors = ase.data.colors.jmol_colors
+
         for i in xrange(frames):
             atoms = self.get_atoms(reset_time_overrun=False)
             filename = '{prefix:s}_{i:06d}.{suffix:s}'.format(**locals())
@@ -486,7 +489,46 @@ class KMC_Model(Process):
                   #rotation=rotation,
                   #**kwargs)
 
-            writer = kmos.run.png.MyPNG(atoms, show_unit_cell=True, scale=20, model=self, **kwargs).write(filename, resolution=150)
+            if suffix == 'png':
+                writer = kmos.run.png.MyPNG(atoms, show_unit_cell=True, scale=20, model=self, **kwargs).write(filename, resolution=150)
+            elif suffix == 'pov':
+                rescale = 0.5
+                radii_dict2 = {'Ni':0.9*rescale,
+                             'O': 1.0*rescale,
+                             'H': 0.5*rescale}
+
+                radii2 = []
+                water_radii_dict2 = {'O':1.0*rescale, 'H': 0.5*rescale, 'Ni':0.9*rescale}
+                colors = []
+                colors2 = []
+                for atom in atoms:
+                     radii2+=[water_radii_dict2[atom.symbol]]
+                     colors+=[(jmol_colors[atom.number][0],jmol_colors[atom.number][1],jmol_colors[atom.number][2],0.00,0.00)]
+                     colors2+=[(jmol_colors[atom.number][0],jmol_colors[atom.number][1],jmol_colors[atom.number][2])]
+
+                BA = []
+                distances = atoms.get_all_distances()
+                for i, j in zip(*np.where(distances<2.2)):
+                    if distances[i, j] < 0.1 :
+                        continue
+                    if not (atoms[i].symbol=='H' or atoms[j].symbol=='H') :
+                        BA += [[i, j]]
+                    elif distances[i, j] < 1.5:
+                        BA += [[i, j]]
+
+                ase.io.write(filename, atoms, run_povray=False,display=False,pause=False,
+                             #rotation='-90x,30y',
+                             #rotation='-90x,30y',
+                             show_unit_cell=1,
+                             #bbox=(-7,17,0,20),
+                             #bbox=(-8,12,8,28),
+                             bbox=(-(3.0*20 + 2) ,-2,7*20,5.5*20),
+                             textures=['ase3' for atom in atoms],
+                             canvas_height=500,
+                             camera_type='orthographic',
+                             bondatoms=BA,
+                             radii=radii2,
+                             colors=colors2)
             if verbose:
                 print('Wrote {filename}'.format(**locals()))
             self.do_steps(skip)
