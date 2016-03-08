@@ -709,7 +709,7 @@ class KMC_Model(Process):
             return dict(zip(header, outdata))
 
         else:
-            raise UserWarnining(
+            raise UserWarning(
                 "Output format {output} not defined. I only know 'str' and 'dict'")
 
     def double(self):
