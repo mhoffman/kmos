@@ -629,7 +629,7 @@ class KMC_Model(Process):
                      self.get_occupation_header()))
         return std_header
 
-    def get_std_sampled_data(self, samples, sample_size, tof_method='integ'):
+    def get_std_sampled_data(self, samples, sample_size, tof_method='integ', output='str'):
         """Sample an average model and return TOFs and coverages
         in a standardized format :
 
@@ -702,7 +702,15 @@ class KMC_Model(Process):
                         + [total_time,
                            simulated_time,
                            total_steps])
-        return ((' '.join(['%.5e'] * len(outdata)) + '\n') % outdata)
+        if output == 'str':
+            return ((' '.join(['%.5e'] * len(outdata)) + '\n') % outdata)
+        elif output == 'dict':
+            header = self.get_std_header()[1:].split()
+            return dict(zip(header, outdata))
+
+        else:
+            raise UserWarnining(
+                "Output format {output} not defined. I only know 'str' and 'dict'")
 
     def double(self):
         """
