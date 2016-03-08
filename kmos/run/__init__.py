@@ -684,7 +684,7 @@ class KMC_Model(Process):
             elif tof_method == 'integ':
                 tofs.append(atoms.tof_integ.flatten())
             else:
-                raise NotImplementedError('Working on it ..')
+                raise NotImplementedError('tof_method="{tof_method}" not supported. Can be either procrates or integ.'.format(**locals()))
 
         # calculate time averages
         occs_mean = np.average(occs, axis=0, weights=step_ts)
@@ -707,7 +707,6 @@ class KMC_Model(Process):
         elif output == 'dict':
             header = self.get_std_header()[1:].split()
             return dict(zip(header, outdata))
-
         else:
             raise UserWarning(
                 "Output format {output} not defined. I only know 'str' and 'dict'")
