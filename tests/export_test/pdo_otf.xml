@@ -1,0 +1,358 @@
+<?xml version="1.0" ?>
+<kmc version="(0, 3)">
+    <meta author="Juan M. Lorenzi" debug="0" email="jmlorenzi@gmail.com" model_dimension="2" model_name="CO_oxidation_pdo_sqrt5"/>
+    <species_list default_species="empty">
+        <species color="#0000ff" name="CO" representation="Atoms('N',[[0.,0.,0.]])" tags=""/>
+        <species color="#ff0000" name="O" representation="Atoms('O',[[0.,0.,0.]])" tags=""/>
+        <species color="#ffffff" name="empty" representation="" tags=""/>
+    </species_list>
+    <parameter_list>
+        <parameter adjustable="False" max="0.0" min="0.0" name="A" scale="linear" value="18.9151*angstrom**2"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_CO_bridge" scale="linear" value="-1.40"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_CO_diff_bridge_bridge" scale="linear" value="0.4"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_CO_diff_bridge_hollow" scale="linear" value="0.3"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_CO_diff_hollow_bridge" scale="linear" value="0.3"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_CO_diff_hollow_hollow" scale="linear" value="0.6"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_CO_hollow" scale="linear" value="-1.92"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_O2_ads_bridge_bridge" scale="linear" value="1.9"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_O2_ads_bridge_hollow" scale="linear" value="0.0"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_O2_ads_hollow_bridge" scale="linear" value="0.0"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_O2_ads_hollow_hollow" scale="linear" value="0.0"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_O_bridge" scale="linear" value="-0.51"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_O_diff_bridge_bridge" scale="linear" value="1.2"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_O_diff_bridge_hollow" scale="linear" value="0.1"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_O_diff_hollow_bridge" scale="linear" value="0.1"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_O_diff_hollow_hollow" scale="linear" value="1.4"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_O_hollow" scale="linear" value="-1.95"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_react_O_CO_bridge_bridge" scale="linear" value="1.0"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_react_O_CO_bridge_hollow" scale="linear" value="0.5"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_react_O_CO_hollow_bridge" scale="linear" value="0.9"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="E_react_O_CO_hollow_hollow" scale="linear" value="1.6"/>
+        <parameter adjustable="True" max="1000" min="100" name="T" scale="linear" value="400"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="V_CO_CO_bridge_bridge" scale="linear" value="0.08"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="V_CO_CO_bridge_hollow" scale="linear" value="0.14"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="V_CO_CO_hollow_bridge" scale="linear" value="0.14"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="V_CO_CO_hollow_hollow" scale="linear" value="0.13"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="V_CO_O_bridge_bridge" scale="linear" value="0.06"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="V_CO_O_bridge_hollow" scale="linear" value="0.12"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="V_CO_O_hollow_bridge" scale="linear" value="0.13"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="V_CO_O_hollow_hollow" scale="linear" value="0.11"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="V_O_CO_bridge_bridge" scale="linear" value="0.06"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="V_O_CO_bridge_hollow" scale="linear" value="0.13"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="V_O_CO_hollow_bridge" scale="linear" value="0.12"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="V_O_CO_hollow_hollow" scale="linear" value="0.11"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="V_O_O_bridge_bridge" scale="linear" value="0.08"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="V_O_O_bridge_hollow" scale="linear" value="0.08"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="V_O_O_hollow_bridge" scale="linear" value="0.08"/>
+        <parameter adjustable="False" max="0.0" min="0.0" name="V_O_O_hollow_hollow" scale="linear" value="0.07"/>
+        <parameter adjustable="True" max="100.0" min="1e-13" name="p_COgas" scale="log" value="1.0"/>
+        <parameter adjustable="True" max="100.0" min="1e-13" name="p_O2gas" scale="log" value="1.0"/>
+    </parameter_list>
+    <lattice cell_size="3.07531502451 0.0 0.0 0.0 6.15063004903 0.0 0.0 0.0 4.0" default_layer="pdo" representation="" substrate_layer="pdo">
+        <layer color="#ffffff" name="pdo">
+            <site default_species="default_species" pos="0.0 0.5 0.75" tags="" type="bridge"/>
+            <site default_species="default_species" pos="0.5 0.75 0.75" tags="" type="hollow"/>
+        </layer>
+    </lattice>
+    <process_list>
+        <process enabled="True" name="CO_ads_bridge" rate_constant="p_COgas*bar*A/2/sqrt(2*pi*umass*m_CO/beta)">
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="CO_ads_hollow" rate_constant="p_COgas*bar*A/2/sqrt(2*pi*umass*m_CO/beta)">
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="CO"/>
+        </process>
+        <process enabled="True" name="CO_des_bridge" otf_rate="base_rate*exp(beta*2*(nr_CO_bridge*V_CO_CO_bridge_bridge+nr_O_bridge*V_CO_O_bridge_bridge+nr_CO_hollow*V_CO_CO_bridge_hollow+nr_O_hollow*V_CO_O_bridge_hollow)*eV)" rate_constant="p_COgas*bar*A/2/sqrt(2*pi*umass*m_CO/beta)*exp(beta*(E_CO_bridge-mu_COgas)*eV)">
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="CO"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="-1 0 0" flag="bridge"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" flag="hollow"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" flag="hollow"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" flag="bridge"/>
+        </process>
+        <process enabled="True" name="CO_des_hollow" otf_rate="base_rate*exp(beta*2*(nr_CO_bridge*V_CO_CO_hollow_bridge+nr_O_bridge*V_CO_O_hollow_bridge+nr_CO_hollow*V_CO_CO_hollow_hollow+nr_O_hollow*V_CO_O_hollow_hollow)*eV)" rate_constant="p_COgas*bar*A/2/sqrt(2*pi*umass*m_CO/beta)*exp(beta*(E_CO_hollow-mu_COgas)*eV)">
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="CO"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" flag="hollow"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" flag="bridge"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" flag="bridge"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" flag="hollow"/>
+        </process>
+        <process enabled="True" name="CO_diff_bridge_bridge_l" otf_rate="base_rate*exp(-beta*2*(max(0.0,nr_CO_bridge2*V_CO_CO_bridge_bridge+nr_CO_hollow2*V_CO_CO_bridge_hollow+nr_O_bridge2*V_CO_O_bridge_bridge+nr_O_hollow2*V_CO_O_bridge_hollow-(nr_CO_bridge1*V_CO_CO_bridge_bridge+nr_CO_hollow1*V_CO_CO_bridge_hollow+nr_O_bridge1*V_CO_O_bridge_bridge+nr_O_hollow1*V_CO_O_bridge_hollow)))*eV)" rate_constant="1/(beta*h)*exp(-beta*E_CO_diff_bridge_bridge*eV)">
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="-1 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="-1 0 0" species="CO"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="-2 0 0" flag="bridge2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" flag="bridge1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-2 0 0" flag="hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" flag="hollow1"/>
+        </process>
+        <process enabled="True" name="CO_diff_bridge_bridge_r" otf_rate="base_rate*exp(-beta*2*(max(0.0,nr_CO_bridge2*V_CO_CO_bridge_bridge+nr_CO_hollow2*V_CO_CO_bridge_hollow+nr_O_bridge2*V_CO_O_bridge_bridge+nr_O_hollow2*V_CO_O_bridge_hollow-(nr_CO_bridge1*V_CO_CO_bridge_bridge+nr_CO_hollow1*V_CO_CO_bridge_hollow+nr_O_bridge1*V_CO_O_bridge_bridge+nr_O_hollow1*V_CO_O_bridge_hollow)))*eV)" rate_constant="1/(beta*h)*exp(-beta*E_CO_diff_bridge_bridge*eV)">
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" species="CO"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" flag="hollow1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="-1 0 0" flag="bridge1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" flag="hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="2 0 0" flag="bridge2"/>
+        </process>
+        <process enabled="True" name="CO_diff_bridge_hollow" otf_rate="base_rate*exp(-beta*2*(max(0.0,nr_CO_bridge2*V_CO_CO_hollow_bridge+nr_CO_hollow2*V_CO_CO_hollow_hollow+nr_O_bridge2*V_CO_O_hollow_bridge+nr_O_hollow2*V_CO_O_hollow_hollow-(nr_CO_bridge1*V_CO_CO_bridge_bridge+nr_CO_hollow1*V_CO_CO_bridge_hollow+nr_O_bridge1*V_CO_O_bridge_bridge+nr_O_hollow1*V_CO_O_bridge_hollow)))*eV)" rate_constant="1/(beta*h)*exp(-beta*E_CO_diff_bridge_hollow*eV)">
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="CO"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" flag="hollow1 hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="-1 0 0" flag="bridge1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" flag="bridge1 bridge2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" flag="hollow2"/>
+        </process>
+        <process enabled="True" name="CO_diff_bridge_hollow_l" otf_rate="base_rate*exp(-beta*2*(max(0.0,nr_CO_bridge2*V_CO_CO_hollow_bridge+nr_CO_hollow2*V_CO_CO_hollow_hollow+nr_O_bridge2*V_CO_O_hollow_bridge+nr_O_hollow2*V_CO_O_hollow_hollow-(nr_CO_bridge1*V_CO_CO_bridge_bridge+nr_CO_hollow1*V_CO_CO_bridge_hollow+nr_O_bridge1*V_CO_O_bridge_bridge+nr_O_hollow1*V_CO_O_bridge_hollow)))*eV)" rate_constant="1/(beta*h)*exp(-beta*E_CO_diff_bridge_hollow*eV)">
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" species="CO"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="-1 0 0" flag="bridge1 bridge2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" flag="bridge1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-2 0 0" flag="hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" flag="hollow1 hollow2"/>
+        </process>
+        <process enabled="True" name="CO_diff_hollow_bridge" otf_rate="base_rate*exp(-beta*2*(max(0.0,nr_CO_bridge2*V_CO_CO_bridge_bridge+nr_CO_hollow2*V_CO_CO_bridge_hollow+nr_O_bridge2*V_CO_O_bridge_bridge+nr_O_hollow2*V_CO_O_bridge_hollow-(nr_CO_bridge1*V_CO_CO_hollow_bridge+nr_CO_hollow1*V_CO_CO_hollow_hollow+nr_O_bridge1*V_CO_O_hollow_bridge+nr_O_hollow1*V_CO_O_hollow_hollow)))*eV)" rate_constant="1/(beta*h)*exp(-beta*E_CO_diff_hollow_bridge*eV)">
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="CO"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" flag="hollow1 hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="-1 0 0" flag="bridge2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" flag="bridge1 bridge2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" flag="hollow1"/>
+        </process>
+        <process enabled="True" name="CO_diff_hollow_bridge_r" otf_rate="base_rate*exp(-beta*2*(max(0.0,nr_CO_bridge2*V_CO_CO_bridge_bridge+nr_CO_hollow2*V_CO_CO_bridge_hollow+nr_O_bridge2*V_CO_O_bridge_bridge+nr_O_hollow2*V_CO_O_bridge_hollow-(nr_CO_bridge1*V_CO_CO_hollow_bridge+nr_CO_hollow1*V_CO_CO_hollow_hollow+nr_O_bridge1*V_CO_O_hollow_bridge+nr_O_hollow1*V_CO_O_hollow_hollow)))*eV)" rate_constant="1/(beta*h)*exp(-beta*E_CO_diff_hollow_bridge*eV)">
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" species="CO"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" flag="hollow1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" flag="bridge1 bridge2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" flag="hollow1 hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="2 0 0" flag="bridge2"/>
+        </process>
+        <process enabled="True" name="CO_diff_hollow_hollow_l" otf_rate="base_rate*exp(-beta*2*(max(0.0,nr_CO_bridge2*V_CO_CO_hollow_bridge+nr_CO_hollow2*V_CO_CO_hollow_hollow+nr_O_bridge2*V_CO_O_hollow_bridge+nr_O_hollow2*V_CO_O_hollow_hollow-(nr_CO_bridge1*V_CO_CO_hollow_bridge+nr_CO_hollow1*V_CO_CO_hollow_hollow+nr_O_bridge1*V_CO_O_hollow_bridge+nr_O_hollow1*V_CO_O_hollow_hollow)))*eV)" rate_constant="1/(beta*h)*exp(-beta*E_CO_diff_hollow_hollow*eV)">
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" species="CO"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="-1 0 0" flag="bridge2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" flag="bridge1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-2 0 0" flag="hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" flag="hollow1"/>
+        </process>
+        <process enabled="True" name="CO_diff_hollow_hollow_r" otf_rate="base_rate*exp(-beta*2*(max(0.0,nr_CO_bridge2*V_CO_CO_hollow_bridge+nr_CO_hollow2*V_CO_CO_hollow_hollow+nr_O_bridge2*V_CO_O_hollow_bridge+nr_O_hollow2*V_CO_O_hollow_hollow-(nr_CO_bridge1*V_CO_CO_hollow_bridge+nr_CO_hollow1*V_CO_CO_hollow_hollow+nr_O_bridge1*V_CO_O_hollow_bridge+nr_O_hollow1*V_CO_O_hollow_hollow)))*eV)" rate_constant="1/(beta*h)*exp(-beta*E_CO_diff_hollow_hollow*eV)">
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="CO"/>
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" species="CO"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" flag="hollow1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" flag="bridge1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="2 0 0" flag="hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="2 0 0" flag="bridge2"/>
+        </process>
+        <process enabled="True" name="CO_oxi_bridge_bridge_l" rate_constant="1/(beta*h)*exp(-beta*E_react_O_CO_bridge_bridge*eV)" tof_count="{'CO_oxidation': 1}">
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="O"/>
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="-1 0 0" species="CO"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="-1 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_oxi_bridge_bridge_r" rate_constant="1/(beta*h)*exp(-beta*E_react_O_CO_bridge_bridge*eV)" tof_count="{'CO_oxidation': 1}">
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="O"/>
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" species="CO"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_oxi_bridge_hollow" rate_constant="1/(beta*h)*exp(-beta*E_react_O_CO_bridge_hollow*eV)" tof_count="{'CO_oxidation': 1}">
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="O"/>
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="CO"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_oxi_bridge_hollow_l" rate_constant="1/(beta*h)*exp(-beta*E_react_O_CO_bridge_hollow*eV)" tof_count="{'CO_oxidation': 1}">
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="O"/>
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" species="CO"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_oxi_hollow_bridge" rate_constant="1/(beta*h)*exp(-beta*E_react_O_CO_hollow_bridge*eV)" tof_count="{'CO_oxidation': 1}">
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="O"/>
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="CO"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_oxi_hollow_bridge_r" rate_constant="1/(beta*h)*exp(-beta*E_react_O_CO_hollow_bridge*eV)" tof_count="{'CO_oxidation': 1}">
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="O"/>
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" species="CO"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_oxi_hollow_hollow_l" rate_constant="1/(beta*h)*exp(-beta*E_react_O_CO_hollow_hollow*eV)" tof_count="{'CO_oxidation': 1}">
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="O"/>
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" species="CO"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="CO_oxi_hollow_hollow_r" rate_constant="1/(beta*h)*exp(-beta*E_react_O_CO_hollow_hollow*eV)" tof_count="{'CO_oxidation': 1}">
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="O"/>
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" species="CO"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="O2_ads_bridge_bridge" rate_constant="p_O2gas*bar*A/4/sqrt(2*pi*m_O2*umass/beta)*exp(-beta*E_O2_ads_bridge_bridge*eV)">
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="O"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" species="O"/>
+        </process>
+        <process enabled="True" name="O2_ads_bridge_hollow" rate_constant="p_O2gas*bar*A/4/sqrt(2*pi*m_O2*umass/beta)*exp(-beta*E_O2_ads_bridge_hollow*eV)">
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="O"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="O"/>
+        </process>
+        <process enabled="True" name="O2_ads_hollow_bridge" rate_constant="p_O2gas*bar*A/4/sqrt(2*pi*m_O2*umass/beta)*exp(-beta*E_O2_ads_hollow_bridge*eV)">
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="O"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" species="O"/>
+        </process>
+        <process enabled="True" name="O2_ads_hollow_hollow" rate_constant="p_O2gas*bar*A/4/sqrt(2*pi*m_O2*umass/beta)*exp(-beta*E_O2_ads_hollow_hollow*eV)">
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="O"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" species="O"/>
+        </process>
+        <process enabled="True" name="O2_des_bridge_bridge_r" otf_rate="base_rate*exp(beta*2*(nr_CO_bridge1*V_O_CO_bridge_bridge+nr_CO_bridge2*V_O_CO_bridge_bridge+nr_CO_hollow1*V_O_CO_bridge_hollow+nr_CO_hollow2*V_O_CO_bridge_hollow+nr_O_bridge1*V_O_O_bridge_bridge+nr_O_bridge2*V_O_O_bridge_bridge+nr_O_hollow1*V_O_O_bridge_hollow+nr_O_hollow2*V_O_O_bridge_hollow)*eV)" rate_constant="p_O2gas*bar*A/4/sqrt(2*pi*m_O2*umass/beta)*exp(beta*(-E_O2_ads_bridge_bridge+E_O_bridge+E_O_bridge+2*V_O_O_bridge_bridge-mu_O2gas)*eV)">
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="O"/>
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" species="O"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" species="empty"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" flag="hollow1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" flag="hollow1 hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" flag="hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="-1 0 0" flag="bridge1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="2 0 0" flag="bridge2"/>
+        </process>
+        <process enabled="True" name="O2_des_bridge_hollow" otf_rate="base_rate*exp(beta*2*(nr_CO_bridge1*V_O_CO_bridge_bridge+nr_CO_bridge2*V_O_CO_hollow_bridge+nr_CO_hollow1*V_O_CO_bridge_hollow+nr_CO_hollow2*V_O_CO_hollow_hollow+nr_O_bridge1*V_O_O_bridge_bridge+nr_O_bridge2*V_O_O_hollow_bridge+nr_O_hollow1*V_O_O_bridge_hollow+nr_O_hollow2*V_O_O_hollow_hollow)*eV)" rate_constant="p_O2gas*bar*A/4/sqrt(2*pi*m_O2*umass/beta)*exp(beta*(-E_O2_ads_bridge_hollow+E_O_bridge+E_O_hollow+2*V_O_O_bridge_hollow-mu_O2gas)*eV)">
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="O"/>
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="O"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" flag="bridge1 bridge2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" flag="hollow1 hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" flag="hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="-1 0 0" flag="bridge1"/>
+        </process>
+        <process enabled="True" name="O2_des_hollow_bridge_r" otf_rate="base_rate*exp(beta*2*(nr_CO_bridge1*V_O_CO_hollow_bridge+nr_CO_bridge2*V_O_CO_bridge_bridge+nr_CO_hollow1*V_O_CO_hollow_hollow+nr_CO_hollow2*V_O_CO_bridge_hollow+nr_O_bridge1*V_O_O_hollow_bridge+nr_O_bridge2*V_O_O_bridge_bridge+nr_O_hollow1*V_O_O_hollow_hollow+nr_O_hollow2*V_O_O_bridge_hollow)*eV)" rate_constant="p_O2gas*bar*A/4/sqrt(2*pi*m_O2*umass/beta)*exp(beta*(-E_O2_ads_hollow_bridge+E_O_hollow+E_O_bridge+2*V_O_O_hollow_bridge-mu_O2gas)*eV)">
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="O"/>
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" species="O"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" species="empty"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" flag="bridge1 bridge2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" flag="hollow1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" flag="hollow1 hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="2 0 0" flag="bridge2"/>
+        </process>
+        <process enabled="True" name="O2_des_hollow_hollow_r" otf_rate="base_rate*exp(beta*2*(nr_CO_bridge1*V_O_CO_hollow_bridge+nr_CO_bridge2*V_O_CO_hollow_bridge+nr_CO_hollow1*V_O_CO_hollow_hollow+nr_CO_hollow2*V_O_CO_hollow_hollow+nr_O_bridge1*V_O_O_hollow_bridge+nr_O_bridge2*V_O_O_hollow_bridge+nr_O_hollow1*V_O_O_hollow_hollow+nr_O_hollow2*V_O_O_hollow_hollow)*eV)" rate_constant="p_O2gas*bar*A/4/sqrt(2*pi*m_O2*umass/beta)*exp(beta*(-E_O2_ads_hollow_hollow+E_O_hollow+E_O_hollow+2*V_O_O_hollow_hollow-mu_O2gas)*eV)">
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="O"/>
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" species="O"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" species="empty"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" flag="bridge1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" flag="bridge1 bridge2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="2 0 0" flag="hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" flag="hollow1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="2 0 0" flag="bridge2"/>
+        </process>
+        <process enabled="True" name="O_diff_bridge_bridge_l" otf_rate="base_rate*exp(-beta*2*(max(0.0,nr_CO_bridge2*V_O_CO_bridge_bridge+nr_CO_hollow2*V_O_CO_bridge_hollow+nr_O_bridge2*V_O_O_bridge_bridge+nr_O_hollow2*V_O_O_bridge_hollow-(nr_CO_bridge1*V_O_CO_bridge_bridge+nr_CO_hollow1*V_O_CO_bridge_hollow+nr_O_bridge1*V_O_O_bridge_bridge+nr_O_hollow1*V_O_O_bridge_hollow)))*eV)" rate_constant="1/(beta*h)*exp(-beta*E_O_diff_bridge_bridge*eV)">
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="O"/>
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="-1 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="-1 0 0" species="O"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="-2 0 0" flag="bridge2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" flag="bridge1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-2 0 0" flag="hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" flag="hollow1"/>
+        </process>
+        <process enabled="True" name="O_diff_bridge_bridge_r" otf_rate="base_rate*exp(-beta*2*(max(0.0,nr_CO_bridge2*V_O_CO_bridge_bridge+nr_CO_hollow2*V_O_CO_bridge_hollow+nr_O_bridge2*V_O_O_bridge_bridge+nr_O_hollow2*V_O_O_bridge_hollow-(nr_CO_bridge1*V_O_CO_bridge_bridge+nr_CO_hollow1*V_O_CO_bridge_hollow+nr_O_bridge1*V_O_O_bridge_bridge+nr_O_hollow1*V_O_O_bridge_hollow)))*eV)" rate_constant="1/(beta*h)*exp(-beta*E_O_diff_bridge_bridge*eV)">
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="O"/>
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" species="O"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" flag="hollow1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="-1 0 0" flag="bridge1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" flag="hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="2 0 0" flag="bridge2"/>
+        </process>
+        <process enabled="True" name="O_diff_bridge_hollow" otf_rate="base_rate*exp(-beta*2*(max(0.0,nr_CO_bridge2*V_O_CO_hollow_bridge+nr_CO_hollow2*V_O_CO_hollow_hollow+nr_O_bridge2*V_O_O_hollow_bridge+nr_O_hollow2*V_O_O_hollow_hollow-(nr_CO_bridge1*V_O_CO_bridge_bridge+nr_CO_hollow1*V_O_CO_bridge_hollow+nr_O_bridge1*V_O_O_bridge_bridge+nr_O_hollow1*V_O_O_bridge_hollow)))*eV)" rate_constant="1/(beta*h)*exp(-beta*E_O_diff_bridge_hollow*eV)">
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="O"/>
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="O"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" flag="hollow1 hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="-1 0 0" flag="bridge1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" flag="bridge1 bridge2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" flag="hollow2"/>
+        </process>
+        <process enabled="True" name="O_diff_bridge_hollow_l" otf_rate="base_rate*exp(-beta*2*(max(0.0,nr_CO_bridge2*V_O_CO_hollow_bridge+nr_CO_hollow2*V_O_CO_hollow_hollow+nr_O_bridge2*V_O_O_hollow_bridge+nr_O_hollow2*V_O_O_hollow_hollow-(nr_CO_bridge1*V_O_CO_bridge_bridge+nr_CO_hollow1*V_O_CO_bridge_hollow+nr_O_bridge1*V_O_O_bridge_bridge+nr_O_hollow1*V_O_O_bridge_hollow)))*eV)" rate_constant="1/(beta*h)*exp(-beta*E_O_diff_bridge_hollow*eV)">
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="O"/>
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" species="O"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="-1 0 0" flag="bridge1 bridge2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" flag="bridge1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-2 0 0" flag="hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" flag="hollow1 hollow2"/>
+        </process>
+        <process enabled="True" name="O_diff_hollow_bridge" otf_rate="base_rate*exp(-beta*2*(max(0.0,nr_CO_bridge2*V_O_CO_bridge_bridge+nr_CO_hollow2*V_O_CO_bridge_hollow+nr_O_bridge2*V_O_O_bridge_bridge+nr_O_hollow2*V_O_O_bridge_hollow-(nr_CO_bridge1*V_O_CO_hollow_bridge+nr_CO_hollow1*V_O_CO_hollow_hollow+nr_O_bridge1*V_O_O_hollow_bridge+nr_O_hollow1*V_O_O_hollow_hollow)))*eV)" rate_constant="1/(beta*h)*exp(-beta*E_O_diff_hollow_bridge*eV)">
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="O"/>
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" species="O"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" flag="hollow1 hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="-1 0 0" flag="bridge2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" flag="bridge1 bridge2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" flag="hollow1"/>
+        </process>
+        <process enabled="True" name="O_diff_hollow_bridge_r" otf_rate="base_rate*exp(-beta*2*(max(0.0,nr_CO_bridge2*V_O_CO_bridge_bridge+nr_CO_hollow2*V_O_CO_bridge_hollow+nr_O_bridge2*V_O_O_bridge_bridge+nr_O_hollow2*V_O_O_bridge_hollow-(nr_CO_bridge1*V_O_CO_hollow_bridge+nr_CO_hollow1*V_O_CO_hollow_hollow+nr_O_bridge1*V_O_O_hollow_bridge+nr_O_hollow1*V_O_O_hollow_hollow)))*eV)" rate_constant="1/(beta*h)*exp(-beta*E_O_diff_hollow_bridge*eV)">
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="O"/>
+            <condition coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" species="O"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" flag="hollow1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" flag="bridge1 bridge2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" flag="hollow1 hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="2 0 0" flag="bridge2"/>
+        </process>
+        <process enabled="True" name="O_diff_hollow_hollow_l" otf_rate="base_rate*exp(-beta*2*(max(0.0,nr_CO_bridge2*V_O_CO_hollow_bridge+nr_CO_hollow2*V_O_CO_hollow_hollow+nr_O_bridge2*V_O_O_hollow_bridge+nr_O_hollow2*V_O_O_hollow_hollow-(nr_CO_bridge1*V_O_CO_hollow_bridge+nr_CO_hollow1*V_O_CO_hollow_hollow+nr_O_bridge1*V_O_O_hollow_bridge+nr_O_hollow1*V_O_O_hollow_hollow)))*eV)" rate_constant="1/(beta*h)*exp(-beta*E_O_diff_hollow_hollow*eV)">
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="O"/>
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" species="O"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="-1 0 0" flag="bridge2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="1 0 0" flag="bridge1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-2 0 0" flag="hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" flag="hollow1"/>
+        </process>
+        <process enabled="True" name="O_diff_hollow_hollow_r" otf_rate="base_rate*exp(-beta*2*(max(0.0,nr_CO_bridge2*V_O_CO_hollow_bridge+nr_CO_hollow2*V_O_CO_hollow_hollow+nr_O_bridge2*V_O_O_hollow_bridge+nr_O_hollow2*V_O_O_hollow_hollow-(nr_CO_bridge1*V_O_CO_hollow_bridge+nr_CO_hollow1*V_O_CO_hollow_hollow+nr_O_bridge1*V_O_O_hollow_bridge+nr_O_hollow1*V_O_O_hollow_hollow)))*eV)" rate_constant="1/(beta*h)*exp(-beta*E_O_diff_hollow_hollow*eV)">
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="O"/>
+            <condition coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="pdo" coord_name="hollow" coord_offset="1 0 0" species="O"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="-1 0 0" flag="hollow1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="0 0 0" flag="bridge1"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="hollow" coord_offset="2 0 0" flag="hollow2"/>
+            <bystander allowed_species="CO O" coord_layer="pdo" coord_name="bridge" coord_offset="2 0 0" flag="bridge2"/>
+        </process>
+    </process_list>
+    <output_list/>
+</kmc>
