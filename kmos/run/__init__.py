@@ -2156,7 +2156,11 @@ def set_rate_constants(parameters=None, print_rates=None):
          for name,entry in settings.parameters.iteritems():
              proclist.update_user_parameter(
                  getattr(proclist,name.lower()),
-                 evaluate_rate_expression(str(entry['value']),parameters))
+                 evaluate_rate_expression(
+                 # FIXME Take first item of lists
+                 # to support for deprecated 'lattice_size' parameter
+                     str(entry['value']).split(' ')[0],
+                                          parameters))
 
     if hasattr(proclist,'update_chempot'):
          for chempot in settings.chemical_potentials:
