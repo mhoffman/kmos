@@ -60,6 +60,35 @@ def test_import_export_lat_int():
 
     os.chdir(cwd)
 
+def test_import_export_pdo_otf():
+
+    import kmos.types
+    import kmos.io
+    import kmos
+
+    cwd = os.path.abspath(os.curdir)
+    os.chdir(os.path.abspath(os.path.dirname(__file__)))
+
+    TEST_DIR = 'test_export_pdo_otf'
+    REFERENCE_DIR = 'reference_export_pdo_otf'
+    #if os.path.exists(TEST_DIR):
+        #shutil.rmtree(TEST_DIR)
+
+    print(sys.path)
+    print(kmos.__file__)
+
+    pt = kmos.types.Project()
+    pt.import_xml_file('pdo_otf.xml')
+    kmos.io.export_source(pt, TEST_DIR, code_generator='otf')
+    for filename in ['base', 'lattice', 'proclist','proclist_pars','proclist_constants'] \
+        + [os.path.basename(os.path.splitext(x)[0]) for x in glob(os.path.join(TEST_DIR, 'run_proc*.f90'))]:
+        print(filename)
+        assert filecmp.cmp(os.path.join(REFERENCE_DIR, '%s.f90' % filename),
+                          os.path.join(TEST_DIR, '%s.f90' % filename)),\
+             '%s changed.' % filename
+    os.chdir(cwd)
+
+
 def test_import_export_pdopd_local_smart():
 
     import kmos.types
