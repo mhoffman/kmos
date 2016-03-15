@@ -1687,7 +1687,9 @@ class ProcListWriter():
             #rel_pos_string = 'cell + (/ %s, %s, %s, 1 /)' % (rel_pos[0],rel_pos[1], rel_pos[2]) # CHECK!!
             item2 = (process.name,rel_pos,True)
             # coded like this to be parallel to write_proclist_run_proc_name_otf
-            enabling_items.append((copy.deepcopy(process.condition_list),copy.deepcopy(item2)))
+            enabling_items.append((
+                copy.deepcopy(process.condition_list),
+                copy.deepcopy(item2)))
 
         self._write_optimal_iftree_otf(enabling_items, indent, out)
 
