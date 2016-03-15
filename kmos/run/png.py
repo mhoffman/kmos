@@ -4,6 +4,7 @@ from ase.data.colors import jmol_colors
 from ase.data import covalent_radii
 from ase.utils import rotate
 from math import sqrt
+import numpy as np
 
 class MyPNG(PNG):
     def __init__(self, atoms,
@@ -173,6 +174,6 @@ class MyPNG(PNG):
             else:
                 x = renderer._renderer.buffer_rgba()
                 _png.write_png(renderer._renderer.buffer_rgba(),
-                               renderer.width, renderer.height,
+                               #renderer.width, renderer.height,
                                self.filename, resolution)
 
