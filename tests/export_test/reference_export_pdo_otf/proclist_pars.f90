@@ -280,6 +280,12 @@ subroutine update_user_parameter(param,val)
     userpar(param) = val
 end subroutine update_user_parameter
 
+subroutine get_user_parameter(param,val)
+    integer(kind=iint), intent(in) :: param
+    real(kind=rdouble), intent(out) :: val
+    val = userpar(param)
+end subroutine get_user_parameter
+
 subroutine update_chempot(index,val)
     integer(kind=iint), intent(in) :: index
     real(kind=rdouble), intent(in) :: val
