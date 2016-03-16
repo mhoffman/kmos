@@ -28,8 +28,8 @@ before_install:
   - sudo apt-get install python-kiwi -y
   - sudo apt-get install python-cairo -y
 install:
-  - pip install --upgrade pip # let updated pip first
-  - pip install python-ase
+  - sudo pip install --upgrade pip
+  - pip install ase
   - wget https://gist.github.com/mhoffman/d2a9466c22f33a9e046b/raw/4c73c5029f3c01e656f161c7459f720aff331705/gazpacho_0.7.2-3_all.deb
   - sudo dpkg -i gazpacho_0.7.2-3_all.deb
   - sudo mkdir tmp
