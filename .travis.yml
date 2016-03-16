@@ -26,6 +26,7 @@ before_install:
   - sudo apt-get install python-kiwi -y
   - sudo apt-get install python-cairo
 install:
+  - pip install --upgrade pip
   - pip install python-ase
   - wget http://http.us.debian.org/debian/pool/main/g/gazpacho/gazpacho_0.7.2-3_all.deb
   - sudo dpkg -i gazpacho_0.7.2-3_all.deb
