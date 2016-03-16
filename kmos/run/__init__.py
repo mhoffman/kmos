@@ -44,7 +44,11 @@ from copy import deepcopy
 from fnmatch import fnmatch
 from kmos import evaluate_rate_expression
 from kmos.utils import OrderedDict
-import kmos.run.png
+try:
+    import kmos.run.png
+except:
+    kmos.run.png = None
+
 from math import log
 from multiprocessing import Process
 import numpy as np
