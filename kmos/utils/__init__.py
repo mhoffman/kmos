@@ -282,10 +282,11 @@ def evaluate_kind_values(infile, outfile):
                         extra_args='--fcompiler=%s' % fcompiler)
             try:
                 import f2py_selected_kind
-            except:
-                raise Exception('Could create selected_kind module\n'
+            except Exception as e:
+                raise Exception('Could not create selected_kind module\n'
                                 + '%s\n' % os.path.abspath(os.curdir)
-                                + '%s\n' % os.listdir('.'))
+                                + '%s\n' % os.listdir('.')
+                                + '%s\n' % e)
         return f2py_selected_kind.kind
 
     def parse_args(args):
