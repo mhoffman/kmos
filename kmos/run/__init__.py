@@ -44,7 +44,11 @@ from copy import deepcopy
 from fnmatch import fnmatch
 from kmos import evaluate_rate_expression
 from kmos.utils import OrderedDict
-import kmos.run.png
+try:
+    import kmos.run.png
+except:
+    kmos.run.png = None
+
 from math import log
 from multiprocessing import Process
 import numpy as np
@@ -454,7 +458,10 @@ class KMC_Model(Process):
                   #rotation=rotation,
                   #**kwargs)
 
-            writer = kmos.run.png.MyPNG(atoms, show_unit_cell=True, scale=20, model=self, **kwargs).write(filename, resolution=150)
+            if suffix == 'traj':
+                write(filename, atoms)
+            else:
+                writer = kmos.run.png.MyPNG(atoms, show_unit_cell=True, scale=20, model=self, **kwargs).write(filename, resolution=150)
             if verbose:
                 print('Wrote {filename}'.format(**locals()))
             self.do_steps(skip)
