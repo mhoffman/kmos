@@ -87,5 +87,5 @@ def main():
 
 if __name__ == '__main__':
     pt = main()
-    pt.export_xml_file('AB_model.xml')
+    pt.save('AB_model.ini')
 
