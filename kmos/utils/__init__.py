@@ -94,6 +94,8 @@ def write_py(fileobj, images, **kwargs):
     """Write a ASE atoms construction string for `images`
        into `fileobj`.
     """
+    import numpy as np
+
     if isinstance(fileobj, str):
         fileobj = open(fileobj, 'w')
 
@@ -124,7 +126,8 @@ def write_py(fileobj, images, **kwargs):
                           % repr(list(image.positions)))
         else:
             fileobj.write("          scaled_positions=np.array(\n      %s),\n"
-                          % repr(list(image.get_scaled_positions().tolist())))
+                          % repr(list((np.around(image.get_scaled_positions(), decimals=7)).tolist())))
+        print(image.get_scaled_positions())
         fileobj.write('),\n')
 
     fileobj.write(']')
@@ -133,6 +136,7 @@ def write_py(fileobj, images, **kwargs):
 def get_ase_constructor(atoms):
     """Return the ASE constructor string for `atoms`."""
     if isinstance(atoms, basestring):
+        #return atoms
         atoms = eval(atoms)
     if type(atoms) is list:
         atoms = atoms[0]
@@ -278,10 +282,11 @@ def evaluate_kind_values(infile, outfile):
                         extra_args='--fcompiler=%s' % fcompiler)
             try:
                 import f2py_selected_kind
-            except:
-                raise Exception('Could create selected_kind module\n'
+            except Exception as e:
+                raise Exception('Could not create selected_kind module\n'
                                 + '%s\n' % os.path.abspath(os.curdir)
-                                + '%s\n' % os.listdir('.'))
+                                + '%s\n' % os.listdir('.')
+                                + '%s\n' % e)
         return f2py_selected_kind.kind
 
     def parse_args(args):
@@ -373,14 +378,16 @@ def build(options):
 
     if options.no_optimize:
         extra_flags['gfortran'] = ('-ffree-line-length-none -ffree-form'
-                                   ' -xf95-cpp-input -Wall -fimplicit-none')
+                                   ' -xf95-cpp-input -Wall -fimplicit-none'
+                                   ' -time  -fmax-identifier-length=63 ')
         extra_flags['gnu95'] = extra_flags['gfortran']
         extra_flags['intel'] = '-fpp -Wall -I/opt/intel/fc/10.1.018/lib'
         extra_flags['intelem'] = '-fpp -Wall'
 
     else:
         extra_flags['gfortran'] = ('-ffree-line-length-none -ffree-form'
-                                   ' -xf95-cpp-input -Wall -O3 -fimplicit-none')
+                                   ' -xf95-cpp-input -Wall -O3 -fimplicit-none'
+                                   ' -time -fmax-identifier-length=63 ')
         extra_flags['gnu95'] = extra_flags['gfortran']
         extra_flags['intel'] = '-fast -fpp -Wall -I/opt/intel/fc/10.1.018/lib'
         extra_flags['intelem'] = '-fast -fpp -Wall'

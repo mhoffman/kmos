@@ -44,7 +44,13 @@ from copy import deepcopy
 from fnmatch import fnmatch
 from kmos import evaluate_rate_expression
 from kmos.utils import OrderedDict
+import kmos.utils.progressbar
 import kmos.run.png
+try:
+    import kmos.run.png
+except:
+    kmos.run.png = None
+
 from math import log
 from multiprocessing import Process
 import numpy as np
@@ -475,7 +481,10 @@ class KMC_Model(Process):
 
         """
 
-        from ase.io import write
+        import ase.io
+        import ase.data.colors
+        jmol_colors = ase.data.colors.jmol_colors
+
         for i in xrange(frames):
             atoms = self.get_atoms(reset_time_overrun=False)
             filename = '{prefix:s}_{i:06d}.{suffix:s}'.format(**locals())
@@ -485,7 +494,51 @@ class KMC_Model(Process):
                   #rotation=rotation,
                   #**kwargs)
 
-            writer = kmos.run.png.MyPNG(atoms, show_unit_cell=True, scale=20, model=self, **kwargs).write(filename, resolution=150)
+            if suffix == 'png':
+                writer = kmos.run.png.MyPNG(atoms, show_unit_cell=True, scale=20, model=self, **kwargs).write(filename, resolution=150)
+            elif suffix == 'pov':
+                rescale = 0.5
+                radii_dict2 = {'Ni':0.9*rescale,
+                             'O': 1.0*rescale,
+                             'H': 0.5*rescale}
+
+                radii2 = []
+                water_radii_dict2 = {'O':1.0*rescale, 'H': 0.5*rescale, 'Ni':0.9*rescale}
+                colors = []
+                colors2 = []
+                for atom in atoms:
+                     radii2+=[water_radii_dict2[atom.symbol]]
+                     colors+=[(jmol_colors[atom.number][0],jmol_colors[atom.number][1],jmol_colors[atom.number][2],0.00,0.00)]
+                     colors2+=[(jmol_colors[atom.number][0],jmol_colors[atom.number][1],jmol_colors[atom.number][2])]
+
+                BA = []
+                distances = atoms.get_all_distances()
+                for i, j in zip(*np.where(distances<2.2)):
+                    if distances[i, j] < 0.1 :
+                        continue
+                    if not (atoms[i].symbol=='H' or atoms[j].symbol=='H') :
+                        BA += [[i, j]]
+                    elif distances[i, j] < 1.5:
+                        BA += [[i, j]]
+
+                ase.io.write(filename, atoms, run_povray=False,display=False,pause=False,
+                             #rotation='-90x,30y',
+                             #rotation='-90x,30y',
+                             show_unit_cell=1,
+                             #bbox=(-7,17,0,20),
+                             #bbox=(-8,12,8,28),
+                             bbox=(-(3.0*20 + 2) ,-2,7*20,5.5*20),
+                             textures=['ase3' for atom in atoms],
+                             canvas_height=500,
+                             camera_type='orthographic',
+                             bondatoms=BA,
+                             radii=radii2,
+                             colors=colors2)
+            elif suffix == 'traj':
+                write(filename, atoms)
+            else:
+                writer = kmos.run.png.MyPNG(atoms, show_unit_cell=True, scale=20, model=self, **kwargs).write(filename, resolution=150)
+
             if verbose:
                 print('Wrote {filename}'.format(**locals()))
             self.do_steps(skip)
@@ -654,13 +707,13 @@ class KMC_Model(Process):
 
         """
 
-        std_header = ('#%s %s %s kmc_time kmc_steps\n'
+        std_header = ('#%s %s %s kmc_time simulated_time kmc_steps\n'
                   % (self.get_param_header(),
                      self.get_tof_header(),
                      self.get_occupation_header()))
         return std_header
 
-    def get_std_sampled_data(self, samples, sample_size, tof_method='integ'):
+    def get_std_sampled_data(self, samples, sample_size, tof_method='integ', output='str', show_progress=False):
         """Sample an average model and return TOFs and coverages
         in a standardized format :
 
@@ -678,9 +731,9 @@ class KMC_Model(Process):
 
         In each case check carefully that the observable is sampled good enough!
 
-        :param samples: Number of batches to average over.
+        :param samples: Number of batches to average coverages over.
         :type sample: int
-        :param sample_size: Number of kMC steps per batch.
+        :param sample_size: Number of kMC steps in total.
         :type sample_size: int
         :param tof_method: Method of how to sample TOFs.
                            Possible values are procrates or integ.
@@ -698,14 +751,19 @@ class KMC_Model(Process):
         occs = []
         tofs = []
         delta_ts = []
+        step_ts = []
         t0 = self.base.get_kmc_time()
         step0 = self.base.get_kmc_step()
 
+        if show_progress:
+            progress_bar = kmos.utils.progressbar.ProgressBar()
+
         # sample over trajectory
         for sample in xrange(samples):
-            self.do_steps(sample_size)
+            self.do_steps(sample_size/samples)
             atoms = self.get_atoms(geometry=False, reset_time_overrun=False)
             delta_ts.append(atoms.delta_t)
+            step_ts.append(self.base.get_kmc_time_step())
 
             occs.append(list(atoms.occupation.flatten()))
             if tof_method == 'procrates':
@@ -713,12 +771,16 @@ class KMC_Model(Process):
             elif tof_method == 'integ':
                 tofs.append(atoms.tof_integ.flatten())
             else:
-                raise NotImplementedError('Working on it ..')
+                raise NotImplementedError('tof_method="{tof_method}" not supported. Can be either procrates or integ.'.format(**locals()))
+
+            if show_progress:
+                progress_bar.render(1+int(float(sample)/samples*100), 'Sampling')
 
         # calculate time averages
-        occs_mean = np.average(occs, axis=0, weights=delta_ts)
+        occs_mean = np.average(occs, axis=0, weights=step_ts)
         tof_mean = np.average(tofs, axis=0, weights=delta_ts)
         total_time = self.base.get_kmc_time() - t0
+        simulated_time = self.base.get_kmc_time()
         total_steps = self.base.get_kmc_step() - step0
 
         #return tofs, delta_ts
@@ -728,8 +790,16 @@ class KMC_Model(Process):
                         + list(tof_mean.flatten())
                         + list(occs_mean.flatten())
                         + [total_time,
+                           simulated_time,
                            total_steps])
-        return ((' '.join(['%.5e'] * len(outdata)) + '\n') % outdata)
+        if output == 'str':
+            return ((' '.join(['%.5e'] * len(outdata)) + '\n') % outdata)
+        elif output == 'dict':
+            header = self.get_std_header()[1:].split()
+            return dict(zip(header, outdata))
+        else:
+            raise UserWarning(
+                "Output format {output} not defined. I only know 'str' and 'dict'")
 
     def double(self):
         """
@@ -887,7 +957,10 @@ class KMC_Model(Process):
             if nrofsites:
                 rate = self.base.get_rate(i + 1)
                 prod = nrofsites * rate
-                accum_rate += prod
+                if self.get_backend() in ['otf',]:
+                    accum_rate += rate
+                else:
+                    accum_rate += prod
                 entries.append((nrofsites, rate, prod, process_name))
 
         # reorder
@@ -912,13 +985,24 @@ class KMC_Model(Process):
         res = ''
         total_contribution = 0
         res += ('+' + 118 * '-' + '+' + '\n')
-        res += '|{0:<118s}|\n'.format('(cumulative)    nrofsites * rate_constant'
-                                      '    = rate            [name]')
+        if self.get_backend() in ['otf']:
+            res += '|{0:<118s}|\n'.format('(cumulative)    nrofsites,  rate         '
+                                          '                      [name]')
+        else:
+            res += '|{0:<118s}|\n'.format('(cumulative)    nrofsites * rate_constant'
+                                          '    = rate            [name]')
+
         res += ('+' + 118 * '-' + '+' + '\n')
         for entry in entries:
-            total_contribution += float(entry[2])
+            if self.get_backend() in ['otf']:
+                total_contribution += float(entry[1])
+            else:
+                total_contribution += float(entry[2])
             percent = '(%8.4f %%)' % (total_contribution * 100 / accum_rate)
-            entry = '% 12i * % 8.4e s^-1 = %8.4e s^-1 [%s]' % entry
+            if self.get_backend() in ['otf']:
+                entry = '{0: 12d},  {1: 8.4e} s^-1              [{3:s}]'.format(*entry)
+            else:
+                entry = '% 12i * % 8.4e s^-1 = %8.4e s^-1 [%s]' % entry
             res += '|{0:<118s}|\n'.format('%s %s' % (percent, entry))
 
         res += ('+' + 118 * '-' + '+' + '\n')

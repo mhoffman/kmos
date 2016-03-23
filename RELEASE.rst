@@ -5,7 +5,8 @@ RELEASE NOTES
 develop
 =======
 
-New input file format for models.
+Break out lxml as hard dependency
+New input file format for models (akin to .ini format)
 Introduced new templating format to make kmos/io.py cleaner.
 
 0.3.7-0.3.9
