@@ -46,6 +46,11 @@ from kmos import evaluate_rate_expression
 from kmos.utils import OrderedDict
 import kmos.utils.progressbar
 import kmos.run.png
+try:
+    import kmos.run.png
+except:
+    kmos.run.png = None
+
 from math import log
 from multiprocessing import Process
 import numpy as np
@@ -529,6 +534,11 @@ class KMC_Model(Process):
                              bondatoms=BA,
                              radii=radii2,
                              colors=colors2)
+            elif suffix == 'traj':
+                write(filename, atoms)
+            else:
+                writer = kmos.run.png.MyPNG(atoms, show_unit_cell=True, scale=20, model=self, **kwargs).write(filename, resolution=150)
+
             if verbose:
                 print('Wrote {filename}'.format(**locals()))
             self.do_steps(skip)
@@ -703,7 +713,7 @@ class KMC_Model(Process):
                      self.get_occupation_header()))
         return std_header
 
-    def get_std_sampled_data(self, samples, sample_size, tof_method='integ', output='str'):
+    def get_std_sampled_data(self, samples, sample_size, tof_method='integ', output='str', show_progress=False):
         """Sample an average model and return TOFs and coverages
         in a standardized format :
 
@@ -745,7 +755,8 @@ class KMC_Model(Process):
         t0 = self.base.get_kmc_time()
         step0 = self.base.get_kmc_step()
 
-        progress_bar = kmos.utils.progressbar.ProgressBar()
+        if show_progress:
+            progress_bar = kmos.utils.progressbar.ProgressBar()
 
         # sample over trajectory
         for sample in xrange(samples):
@@ -762,7 +773,8 @@ class KMC_Model(Process):
             else:
                 raise NotImplementedError('tof_method="{tof_method}" not supported. Can be either procrates or integ.'.format(**locals()))
 
-            progress_bar.render(1+int(float(sample)/samples*100), 'Sampling')
+            if show_progress:
+                progress_bar.render(1+int(float(sample)/samples*100), 'Sampling')
 
         # calculate time averages
         occs_mean = np.average(occs, axis=0, weights=step_ts)
