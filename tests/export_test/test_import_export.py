@@ -144,7 +144,7 @@ def test_import_export_pdopd_lat_int():
 
     os.chdir(cwd)
 
-def test_import_export_pdo_otf():
+def test_import_export_intZGB_otf():
 
     import kmos.types
     import kmos.io
@@ -153,8 +153,8 @@ def test_import_export_pdo_otf():
     cwd = os.path.abspath(os.curdir)
     os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
-    TEST_DIR = 'test_export_pdo_otf'
-    REFERENCE_DIR = 'reference_export_pdo_otf'
+    TEST_DIR = 'test_export_intZGB_otf'
+    REFERENCE_DIR = 'reference_export_intZGB_otf'
     #if os.path.exists(TEST_DIR):
         #shutil.rmtree(TEST_DIR)
 
@@ -162,7 +162,7 @@ def test_import_export_pdo_otf():
     print(kmos.__file__)
 
     pt = kmos.types.Project()
-    pt.import_xml_file('pdo_otf.xml')
+    pt.import_xml_file('intZGB_otf.xml')
     kmos.io.export_source(pt, TEST_DIR, code_generator='otf')
     for filename in ['base', 'lattice', 'proclist','proclist_pars','proclist_constants'] \
         + [os.path.basename(os.path.splitext(x)[0]) for x in glob(os.path.join(TEST_DIR, 'run_proc*.f90'))]:

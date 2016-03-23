@@ -68,19 +68,18 @@ integer(kind=iint), parameter, public :: nr_of_layers = 1
  ! Layer constants
 
 integer(kind=iint), parameter, public :: model_dimension = 2
-integer(kind=iint), parameter, public :: pdo = 0
-integer(kind=iint), public :: default_layer = pdo
-integer(kind=iint), public :: substrate_layer = pdo
+integer(kind=iint), parameter, public :: square = 0
+integer(kind=iint), public :: default_layer = square
+integer(kind=iint), public :: substrate_layer = square
 
  ! Site constants
 
 real(kind=rsingle), dimension(3,3), public :: unit_cell_size = 0.
-real(kind=rsingle), dimension(2, 3), public :: site_positions
-integer(kind=iint), parameter, public :: pdo_bridge = 1
-integer(kind=iint), parameter, public :: pdo_hollow = 2
+real(kind=rsingle), dimension(1, 3), public :: site_positions
+integer(kind=iint), parameter, public :: square_default = 1
 
  ! spuck = Sites Per Unit Cell Konstant
-integer(kind=iint), parameter, public :: spuck = 2
+integer(kind=iint), parameter, public :: spuck = 1
  ! lookup tables
 integer(kind=iint), dimension(:, :), allocatable, public :: nr2lattice
 integer(kind=iint), dimension(:,:,:,:), allocatable, public :: lattice2nr
@@ -202,17 +201,16 @@ subroutine allocate_system(nr_of_proc, input_system_size, system_name)
 
     call base_allocate_system(nr_of_proc, volume, system_name)
 
-    unit_cell_size(1, 1) = 3.07531502451
+    unit_cell_size(1, 1) = 3.0
     unit_cell_size(1, 2) = 0.0
     unit_cell_size(1, 3) = 0.0
     unit_cell_size(2, 1) = 0.0
-    unit_cell_size(2, 2) = 6.15063004903
+    unit_cell_size(2, 2) = 3.0
     unit_cell_size(2, 3) = 0.0
     unit_cell_size(3, 1) = 0.0
     unit_cell_size(3, 2) = 0.0
-    unit_cell_size(3, 3) = 4.0
-    site_positions(1,:) = (/0.0, 0.5, 0.75/)
-    site_positions(2,:) = (/0.5, 0.75, 0.75/)
+    unit_cell_size(3, 3) = 3.0
+    site_positions(1,:) = (/0.5, 0.5, 0.5/)
 end subroutine allocate_system
 
 subroutine deallocate_system()
