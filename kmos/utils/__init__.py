@@ -607,3 +607,7 @@ def evaluate_template(template, escape_python=False, **kwargs):
         exec(python_lines)
 
     return result
+
+class Struct:
+    def __init__(self, **entries):
+        self.__dict__.update(entries)

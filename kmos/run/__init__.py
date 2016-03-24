@@ -593,8 +593,9 @@ class KMC_Model(Process):
             atoms.tof_integ = self.tof_integ  if hasattr(self, 'tof_integ') else np.zeros_like(self.tof_matrix[:, 0])
         elif delta_t == 0. and atoms.kmc_time > 0 and reset_time_overrun :
             print(
-                "Warning: numerical precision too low, to resolve time-steps")
-            print('         Will reset kMC time to 0s.')
+                'Warning: numerical precision too low, to resolve time-steps'
+                '         Will reset kMC time to 0s.'
+                '         TOFs are set to 0 for this batch. Please ignore these.')
             base.set_kmc_time(0.0)
             atoms.tof_data = np.zeros_like(self.tof_matrix[:, 0])
             atoms.tof_integ = np.zeros_like(self.tof_matrix[:, 0])
@@ -636,7 +637,7 @@ class KMC_Model(Process):
                      self.get_occupation_header()))
         return std_header
 
-    def get_std_sampled_data(self, samples, sample_size, tof_method='integ', output='str'):
+    def get_std_sampled_data(self, samples, sample_size, tof_method='integ', output='str', reset_time_overrun=False):
         """Sample an average model and return TOFs and coverages
         in a standardized format :
 
@@ -681,7 +682,7 @@ class KMC_Model(Process):
         # sample over trajectory
         for sample in xrange(samples):
             self.do_steps(sample_size/samples)
-            atoms = self.get_atoms(geometry=False, reset_time_overrun=False)
+            atoms = self.get_atoms(geometry=False, reset_time_overrun=reset_time_overrun)
             delta_ts.append(atoms.delta_t)
             step_ts.append(self.base.get_kmc_time_step())
 
@@ -695,7 +696,12 @@ class KMC_Model(Process):
 
         # calculate time averages
         occs_mean = np.average(occs, axis=0, weights=step_ts)
-        tof_mean = np.average(tofs, axis=0, weights=delta_ts)
+        try:
+            tof_mean = np.average(tofs, axis=0, weights=delta_ts)
+        except ZeroDivisionError:
+            print(tofs)
+            print(delta_ts)
+            raise
         total_time = self.base.get_kmc_time() - t0
         simulated_time = self.base.get_kmc_time()
         total_steps = self.base.get_kmc_step() - step0

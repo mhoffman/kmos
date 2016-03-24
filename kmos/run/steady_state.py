@@ -13,11 +13,13 @@ Hoad, Kathryn, Stewart Robinson, and Ruth Davies. “Automating Warm-up Length E
 Rossetti, M. D., Zhe Li, and Peng Qu. “Exploring Exponentially Weighted Moving Average Control Charts to Determine the Warm-up Period.” In Simulation Conference, 2005 Proceedings of the Winter, 10 pp. – , 2005. doi:10.1109/WSC.2005.1574321.
 
 """
-
 # import the necessary python modules
-import numpy as np
 import pprint
 import itertools
+import os
+import glob
+
+import numpy as np
 
 
 # Calculate the LCL, and UCL according to expontially weighted moving
@@ -89,7 +91,10 @@ def get_scrap_fraction(y, L, alpha, warm_up):
     if (y[0] == y).all():
         return 0.
     D = np.array([p2d(y, cutoff, L, alpha) for cutoff in range(len(y))])
-    return (np.argmax(D[warm_up:]) + warm_up) / float(len(y))
+    if len(D[warm_up:])> 0:
+        return (np.argmax(D[warm_up:])) / float(len(y[warm_up:]))
+    else:
+        return 1.
 
 
 def plot_normal(y, n=-1, *args, **kwargs):
@@ -115,11 +120,13 @@ def make_ewma_plots(data, L, alpha, bias_threshold, seed):
             mu0, lcl, ucl = lcl_ucl(y, cutoff0, L, alpha)
             D = np.array([p2d(y, cutoff, L, alpha) for cutoff in range(len(y))])
             plot_normal(ewma_alpha(y, alpha), label='EWMA')
-            plt.plot(y / ewma_alpha(y, alpha), label="signal")
+            y_final = y[-1]
+            plt.plot(y / ewma_alpha(y, alpha), label="signal {y_final}".format(**locals()))
             plot_normal(mu0, label='mean'.format(**locals()))
             plot_normal(lcl, n=0, label='LCL@{cutoff0}'.format(**locals()))
             plot_normal(ucl, n=0, label='UCL@{cutoff0}'.format(**locals()))
             plt.plot(D, 'k-', label='p2d')
+            plt.text(len(D), .5, str(y[-1]))
             plt.text(np.argmax(D), .5, str(np.argmax(D)))
             legend = plt.legend()
             legend.get_frame().set_alpha(0.5)
@@ -131,6 +138,7 @@ def sample_steady_state(model, batch_size=1000000,
                         alpha=0.05,
                         bias_threshold=0.15,
                         tof_method='integ',
+                        start_batch=0,
                         warm_up=20,
                         check_frequency=10,
                         show_progress=True,
@@ -145,8 +153,8 @@ def sample_steady_state(model, batch_size=1000000,
         In Simulation Conference, 2005 Proceedings of the Winter, 10
         pp. – , 2005. doi:10.1109/WSC.2005.1574321.
 
-        Define $L$  and $\alpha$ as in source as method parameters. Source
-        suggesst ($L=3$, $\alpha=0.05$). Thorough tests showed that for $L=3$
+        Define $L$  and $\\alpha$ as in source as method parameters. Source
+        suggesst ($L=3$, $\\alpha=0.05$). Thorough tests showed that for $L=3$
         can fail to give accurate estimate if the statistical noise on the
         function is extremely small ($0<0.01$) because the $3\sigma$ environment
         was estimated too narrow. It was therefore decided that $L=4$ give more
@@ -179,19 +187,29 @@ def sample_steady_state(model, batch_size=1000000,
         import kmos.utils.progressbar
         progress_bar = kmos.utils.progressbar.ProgressBar()
 
-    for batch in itertools.count():
-        data = model.get_std_sampled_data(
-            100, batch_size, tof_method=tof_method, output='dict')
+    for batch in itertools.count(start_batch):
+        try:
+            data = model.get_std_sampled_data(
+                100, batch_size, tof_method=tof_method, output='dict', reset_time_overrun=True
+                )
+        except ZeroDivisionError:
+            print("Warning: encountered zero-division error at batch {batch}".format(**locals()))
+            model.print_accum_rate_summation()
+            model.print_coverages()
+            model.print_procstat()
+            data = {}
+            raise
 
         for key, data_point in data.items():
             hist.setdefault(key, []).append(data_point)
 
         max_scrap = 0.
         critical_key = ''
-        if batch < warm_up:
+        if batch < warm_up + start_batch:
+            wstart = warm_up + start_batch
             if show_progress:
                 progress_bar.render(
-                    int(0), "Warm-up phase {batch}/{warm_up}".format(**locals()))
+                    int(0), "Warm-up phase {batch}/{wstart}".format(**locals()))
 
         else:
             if batch % check_frequency == 0:
@@ -199,7 +217,7 @@ def sample_steady_state(model, batch_size=1000000,
                     if 'time' in key or 'step' in key:
                         continue
                     scrap_fraction = get_scrap_fraction(
-                        np.array(y), L, alpha, warm_up)
+                        np.array(y), L, alpha, warm_up + start_batch)
                     if scrap_fraction > max_scrap:
                         max_scrap = scrap_fraction
                         critical_key = key
@@ -207,16 +225,19 @@ def sample_steady_state(model, batch_size=1000000,
                     1 - max_scrap) / (1 - bias_threshold) * 100.
 
                 if make_plots and batch % 100 == 0:
+                    # remove existing EWMA plots to reduce hard-drive space
+                    map(os.remove, glob.glob("{seed}_*.png".format(**locals())))
                     make_ewma_plots(
                         hist, L, alpha, bias_threshold, seed="{seed}_{batch}".format(**locals()))
                 if show_progress:
                     progress_bar.render(int(
                         completed_percent), "Limited by {critical_key:40s} ({batch})".format(**locals()))
 
-                if completed_percent >= 100 and batch >= warm_up:
+                if completed_percent >= 100 and batch >= warm_up + start_batch :
                     if show_progress:
                         print("Done after {batch} batches!".format(**locals()))
                     if make_plots:
+                        map(os.remove, glob.glob("{seed}_*.png".format(**locals())))
                         make_ewma_plots(
                             hist, L, alpha, bias_threshold, seed="{seed}_final".format(**locals()))
                     break
@@ -227,16 +248,68 @@ def sample_steady_state(model, batch_size=1000000,
 
     data = {}
     for key, values in hist.items():
+        if len(values) == 0 :
+            continue
         if 'time' in key:
             data[key] = values[-1]
         elif 'step' in key:
             data[key] = sum(values)
         else:
             data[key] = np.average(values, weights=hist['kmc_time'])
+
     if output == 'dict':
         return data
     elif output == 'str':
         return ' '.join(format(data[key.replace('#', '')], '.5e') for key in model.get_std_header().split()) + '\n'
+    elif output == 'both':
+        data_str = ' '.join(format(data[key.replace('#', '')], '.5e') for key in model.get_std_header().split()) + '\n'
+        return data, data_str
+
+
+def find_pairs(project):
+    """Find pairs of elementary processes that are reverse processes with respect
+    to each others from a kmos.types.Project
+
+    """
+    pairs = []
+    for p1 in sorted(project.process_list):
+        for p2 in sorted(project.process_list):
+            if p1.condition_list == p2.action_list and p2.condition_list == p1.action_list:
+                if not (p1, p2) in pairs and not (p2, p1) in pairs:
+                    pairs.append((p1, p2))
+    return pairs
+
+def report_equilibration(model):
+    """Iterate over pairs of reverse proceses and print
+        rate1 * rho1 / rate2 * rho2
+
+      for each.
+    """
+    import kmos.types
+    import StringIO
+
+    project = kmos.types.Project()
+    project.import_ini_file(StringIO.StringIO(model.settings.xml))
+    pairs = find_pairs(project)
+
+    atoms = model.get_atoms(geometry=False)
+
+    procstat = dict(zip(sorted(model.settings.rate_constants), atoms.procstat))
+    rate_constants = dict(zip(sorted(model.settings.rate_constants), (model.base.get_rate(i+1) for i in range(len(procstat)))))
+
+    report = ''
+    data = []
+    for pair in pairs:
+        pn1, pn2 = pair[0].name, pair[1].name
+        left = procstat[pn1] * rate_constants[pn1]
+        right = procstat[pn2] * rate_constants[pn2]
+        ratio = abs(left/right - 1.)
+        report += ('{pn1} : {pn2} => {left:.2f}/{right:.2f} = {ratio:.4e}\n'.format(**locals()))
+        data.append([
+            ratio, pn1, pn2
+        ])
+    return report, data
+
 
 if __name__ == '__main__':
     import kmos.run
@@ -245,4 +318,3 @@ if __name__ == '__main__':
             model, 100000, tof_method='integ', show_progress=True, make_plots=True)
     print(model.get_std_header())
     print(hist)
-
