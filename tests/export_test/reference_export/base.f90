@@ -57,6 +57,8 @@ public :: add_proc, &
     get_kmc_step, &
     get_kmc_time, &
     set_kmc_time, &
+    set_kmc_step, &
+    set_procstat, &
     set_system_name, &
     get_kmc_time_step, &
     get_nrofsites, &
@@ -886,6 +888,25 @@ subroutine get_kmc_time_step(return_kmc_time_step)
 end subroutine get_kmc_time_step
 
 
+subroutine set_procstat(proc, new_procstat)
+    !****f* base/set_procstat
+    ! FUNCTION
+    !    Set process counter for process proc as integer.
+    !
+    ! ARGUMENTS
+    !
+    !    * ``proc`` integer representing the requested process.
+    !    * ``return_procstat`` writeable integer, where the process counter will be stored.
+    !******
+    !---------------I/O variables---------------
+    integer(kind=iint),intent(in) :: proc
+    integer(kind=ilong),intent(in) :: new_procstat
+
+    procstat(proc) = new_procstat
+
+end subroutine set_procstat
+
+
 subroutine get_procstat(proc, return_procstat)
     !****f* base/get_procstat
     ! FUNCTION
@@ -1055,6 +1076,23 @@ subroutine get_volume(return_volume)
     return_volume = volume
 
 end subroutine get_volume
+
+subroutine set_kmc_step(new_kmc_step)
+    !****f* base/set_kmc_step
+    ! FUNCTION
+    !    Set the current kmc_step
+    !
+    ! ARGUMENTS
+    !
+    !    * ``kmc_step`` Readable integer
+    !******
+    !---------------I/O variables---------------
+    integer(kind=ilong), intent(in) :: new_kmc_step
+
+    kmc_step = new_kmc_step
+
+end subroutine set_kmc_step
+
 
 subroutine get_kmc_step(return_kmc_step)
     !****f* base/get_kmc_step
