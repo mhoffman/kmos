@@ -26,7 +26,7 @@ def test_import_export():
         print(filename)
         assert filecmp.cmp(os.path.join(REFERENCE_DIR, '%s.f90' % filename),
                           os.path.join(TEST_DIR, '%s.f90' % filename)),\
-             '%s changed.' % filename
+             '{TEST_DIR}/{filename}.f90 changed against {REFERENCE_DIR}/{filename}.f90.'.format(**locals())
 
     os.chdir(cwd)
 
@@ -56,7 +56,7 @@ def test_import_export_lat_int():
         print(filename)
         assert filecmp.cmp(os.path.join(REFERENCE_DIR, '%s.f90' % filename),
                           os.path.join(TEST_DIR, '%s.f90' % filename)),\
-             '%s changed.' % filename
+             '{TEST_DIR}/{filename}.f90 changed against {REFERENCE_DIR}/{filename}.f90.'.format(**locals())
 
     os.chdir(cwd)
 
@@ -80,7 +80,7 @@ def test_import_export_pdopd_local_smart():
         print(filename)
         assert filecmp.cmp(os.path.join(REFERENCE_DIR, '%s.f90' % filename),
                           os.path.join(TEST_DIR, '%s.f90' % filename)),\
-             '%s changed.' % filename
+             '{TEST_DIR}/{filename}.f90 changed against {REFERENCE_DIR}/{filename}.f90.'.format(**locals())
 
     os.chdir(cwd)
 def test_import_export_pdopd_lat_int():
@@ -109,7 +109,7 @@ def test_import_export_pdopd_lat_int():
         print(filename)
         assert filecmp.cmp(os.path.join(REFERENCE_DIR, '%s.f90' % filename),
                           os.path.join(TEST_DIR, '%s.f90' % filename)),\
-             '%s changed.' % filename
+             '{TEST_DIR}/{filename}.f90 changed against {REFERENCE_DIR}/{filename}.f90.'.format(**locals())
 
     os.chdir(cwd)
 
