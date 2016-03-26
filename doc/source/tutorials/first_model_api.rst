@@ -198,7 +198,7 @@ In order to add processes on more than one site possible spanning across unit
 cells, there is a shorthand as well. The full-fledged syntax for each
 coordinate is ::
 
-  name.offset.lattice
+  "<site-name>.<offset>.<lattice>"
 
 check :ref:`manual_coord_generation` for details.
 
