@@ -190,7 +190,7 @@ def sample_steady_state(model, batch_size=1000000,
     for batch in itertools.count(start_batch):
         try:
             data = model.get_std_sampled_data(
-                100, batch_size, tof_method=tof_method, output='dict', reset_time_overrun=True
+                100, batch_size, tof_method=tof_method, output='dict', reset_time_overrun=False
                 )
         except ZeroDivisionError:
             print("Warning: encountered zero-division error at batch {batch}".format(**locals()))
@@ -252,6 +252,7 @@ def sample_steady_state(model, batch_size=1000000,
             continue
         if 'time' in key:
             data[key] = values[-1]
+            data['debug_{key}'.format(**locals())] = values
         elif 'step' in key:
             data[key] = sum(values)
         else:
@@ -289,7 +290,11 @@ def report_equilibration(model):
     import StringIO
 
     project = kmos.types.Project()
-    project.import_ini_file(StringIO.StringIO(model.settings.xml))
+    if model.settings.xml.strip().startswith('<?xml'):
+        project.import_xml_file(model.settings.xml, string=True)
+    else:
+        project.import_ini_file(StringIO.StringIO(model.settings.xml))
+
     pairs = find_pairs(project)
 
     atoms = model.get_atoms(geometry=False)
