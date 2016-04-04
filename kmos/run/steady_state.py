@@ -112,6 +112,7 @@ def make_ewma_plots(data, L, alpha, bias_threshold, seed):
     Most for debugging purposes if the EWMA based steady-state analysis makes was sensible.
     """
     from matplotlib import pyplot as plt
+
     for key, y in data.items():
         if not 'time' in key or 'step' in key:
             y = np.array(y)
@@ -140,6 +141,7 @@ def sample_steady_state(model, batch_size=1000000,
                         tof_method='integ',
                         start_batch=0,
                         warm_up=20,
+                        increase_batch_attempts=2,
                         check_frequency=10,
                         show_progress=True,
                         make_plots=False,
@@ -183,6 +185,8 @@ def sample_steady_state(model, batch_size=1000000,
     """
     hist = {}
 
+    batch_doubling = 0
+
     if show_progress:
         import kmos.utils.progressbar
         progress_bar = kmos.utils.progressbar.ProgressBar()
@@ -193,12 +197,23 @@ def sample_steady_state(model, batch_size=1000000,
                 100, batch_size, tof_method=tof_method, output='dict', reset_time_overrun=False
                 )
         except ZeroDivisionError:
-            print("Warning: encountered zero-division error at batch {batch}".format(**locals()))
+            print("Warning: encountered zero-division error at batch {batch} (size {batch_size:.2e}). Will double batch-size and retry.".format(**locals()))
             model.print_accum_rate_summation()
             model.print_coverages()
             model.print_procstat()
             data = {}
-            raise
+            batch_size *= 2
+
+            if batch_doubling >= increase_batch_attempts:
+                print("Doubled batch-size {increase_batch_attempts} times, giving up".format(**locals()))
+                if output == 'dict':
+                    return {}
+                elif output == 'str':
+                    return ''
+                elif output == 'both':
+                    return {}, ''
+            batch_doubling += 1
+            continue
 
         for key, data_point in data.items():
             hist.setdefault(key, []).append(data_point)
@@ -252,7 +267,7 @@ def sample_steady_state(model, batch_size=1000000,
             continue
         if 'time' in key:
             data[key] = values[-1]
-            data['debug_{key}'.format(**locals())] = values
+            #data['debug_{key}'.format(**locals())] = values
         elif 'step' in key:
             data[key] = sum(values)
         else:
@@ -306,8 +321,8 @@ def report_equilibration(model):
     data = []
     for pair in pairs:
         pn1, pn2 = pair[0].name, pair[1].name
-        left = procstat[pn1] * rate_constants[pn1]
-        right = procstat[pn2] * rate_constants[pn2]
+        left = procstat[pn1] #* rate_constants[pn1]
+        right = procstat[pn2] # * rate_constants[pn2]
         ratio = abs(left/right - 1.)
         report += ('{pn1} : {pn2} => {left:.2f}/{right:.2f} = {ratio:.4e}\n'.format(**locals()))
         data.append([
