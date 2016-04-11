@@ -438,19 +438,23 @@ def build(options):
         non_serial_src_files.extend(glob.glob('nli_*.o'))
         non_serial_src_files.extend(glob.glob('run_proc*.o'))
 
-        frun_only = functools.partial(run_only, 'f2py ' + (' '.join(call)))
-        frun_only(' '.join(non_serial_src_files))
+        run_f2py(call + non_serial_src_files)
 
     else:
-        call += src_files
+
         print(call)
-        from copy import deepcopy
-        true_argv = deepcopy(sys.argv)  # save for later
-        from numpy import f2py
-        sys.argv = call
-        f2py.main()
-        sys.argv = true_argv
-        print(call)
+        run_f2py(call + src_files)
+
+
+def run_f2py(call):
+    from copy import deepcopy
+    import sys
+    true_argv = deepcopy(sys.argv)  # save for later
+    from numpy import f2py
+    sys.argv = call
+    f2py.main()
+    sys.argv = true_argv
+    print(call)
 
 
 def run_only(call, filename):
