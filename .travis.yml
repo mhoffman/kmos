@@ -47,4 +47,5 @@ script:
     - export PYTHONPATH=/home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages:${PYTHONPATH} # pip packages go here
     - export F2PY_FCOMPILER=gfortran
     - python -c "import sys; import pprint; pprint.pprint(sys.path)"
+    - python -c 'import multiprocessing; print("Counting {} CPUs.".format(multiprocessing.cpu_count()))'
     - nosetests
