@@ -45,5 +45,6 @@ script:
     - export PYTHONPATH=/usr/share/pyshared/:${PYTHONPATH}
     - export PYTHONPATH=/usr/lib/python2.7/dist-packages/:${PYTHONPATH}
     - export PYTHONPATH=/home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages:${PYTHONPATH} # pip packages go here
+    - export F2PY_FCOMPILER=gfortran
     - python -c "import sys; import pprint; pprint.pprint(sys.path)"
     - nosetests
