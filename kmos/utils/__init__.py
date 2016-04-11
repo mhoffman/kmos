@@ -376,17 +376,18 @@ def build(options):
 
     if options.no_optimize:
         extra_flags['gfortran'] = ('-ffree-line-length-none -ffree-form'
-                                   ' -xf95-cpp-input -Wall -fimplicit-none')
+                                   ' -xf95-cpp-input -Wall -fimplicit-none'
+                                   ' -fPIC')
         extra_flags['gnu95'] = extra_flags['gfortran']
-        extra_flags['intel'] = '-fpp -Wall -I/opt/intel/fc/10.1.018/lib'
-        extra_flags['intelem'] = '-fpp -Wall'
+        extra_flags['intel'] = '-fpp -Wall -I/opt/intel/fc/10.1.018/lib -fPIC'
+        extra_flags['intelem'] = '-fpp -Wall -fPIC'
 
     else:
-        extra_flags['gfortran'] = ('-ffree-line-length-none -ffree-form'
+        extra_flags['gfortran'] = ('-ffree-line-length-none -ffree-form -fPIC'
                                    ' -xf95-cpp-input -Wall -O3 -fimplicit-none')
         extra_flags['gnu95'] = extra_flags['gfortran']
-        extra_flags['intel'] = '-fast -fpp -Wall -I/opt/intel/fc/10.1.018/lib'
-        extra_flags['intelem'] = '-fast -fpp -Wall'
+        extra_flags['intel'] = '-fast -fpp -Wall -I/opt/intel/fc/10.1.018/lib -fPIC'
+        extra_flags['intelem'] = '-fast -fpp -Wall -fPIC'
 
     # FIXME
     extra_libs = ''
