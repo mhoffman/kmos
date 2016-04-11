@@ -423,6 +423,7 @@ def build(options):
     call.append('-m')
     call.append(module_name)
     #call.extend(['--build-dir', build_dir])
+    call.append('-I.')
 
     parallel_compilation = True
     if parallel_compilation:
