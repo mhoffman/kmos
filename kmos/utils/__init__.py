@@ -24,6 +24,11 @@ from time import time
 from StringIO import StringIO
 from kmos.utils.ordered_dict import OrderedDict
 
+import functools
+import tempfile
+import glob
+import multiprocessing
+
 ValidationError = UserWarning
 try:
     from kiwi.datatypes import ValidationError
@@ -184,7 +189,6 @@ def download(project):
     import zipfile
     import tempfile
     from os.path import join, basename
-    from glob import glob
     from kmos.io import import_xml, export_source
 
     # return HTTP download response (e.g. via django)
@@ -210,7 +214,7 @@ def download(project):
 
     # add kMC project sources
     export_source(project, srcdir)
-    for srcfile in glob(join(srcdir, '*')):
+    for srcfile in glob.glob(join(srcdir, '*')):
         zfile.write(srcfile, join('src', basename(srcfile)))
 
     # add standalone kmos program
@@ -359,14 +363,13 @@ def build(options):
     from os.path import isfile
     import os
     import sys
-    from glob import glob
 
     src_files = ['kind_values_f2py.f90', 'base.f90', 'lattice.f90']
 
     if isfile('proclist_constants.f90'):
         src_files.append('proclist_constants.f90')
-    src_files.extend(glob('nli_*.f90'))
-    src_files.extend(glob('run_proc_*.f90'))
+    src_files.extend(glob.glob('nli_*.f90'))
+    src_files.extend(glob.glob('run_proc_*.f90'))
     src_files.append('proclist.f90')
 
     extra_flags = {}
@@ -412,20 +415,48 @@ def build(options):
         call.append('%s' % ccompiler)
     extra_flags = extra_flags.get(options.fcompiler, '')
 
+    build_dir = tempfile.mkdtemp()
+
     if options.debug:
         extra_flags += ' -DDEBUG'
     call.append('--f90flags="%s"' % extra_flags)
     call.append('-m')
     call.append(module_name)
-    call += src_files
+    call.extend(['--build-dir', build_dir])
 
-    print(call)
-    from copy import deepcopy
-    true_argv = deepcopy(sys.argv)  # save for later
-    from numpy import f2py
-    sys.argv = call
-    f2py.main()
-    sys.argv = true_argv
+    parallel_compilation = True
+    if parallel_compilation:
+        pool = multiprocessing.Pool(multiprocessing.cpu_count())
+
+        frun_only = functools.partial(run_only, '{options.fcompiler} -c {extra_flags}'.format(**locals()))
+
+        map(frun_only, [src_file for src_file in src_files if not src_file.startswith('nli_') and not src_file.startswith('run_proc_') and not src_file == 'proclist.f90'])
+        pool.map(frun_only, [src_file for src_file in src_files if src_file.startswith('nli_')])
+        pool.map(frun_only, [src_file for src_file in src_files if src_file.startswith('run_proc_')])
+
+        non_serial_src_files = [src_file for src_file in src_files if not src_file.startswith('nli_') and not src_file.startswith('run_proc_')]
+        non_serial_src_files.extend(glob.glob('nli_*.o'))
+        non_serial_src_files.extend(glob.glob('run_proc*.o'))
+
+        frun_only = functools.partial(run_only, 'f2py ' + (' '.join(call)))
+        frun_only(' '.join(non_serial_src_files))
+
+    else:
+        call += src_files
+        print(call)
+        from copy import deepcopy
+        true_argv = deepcopy(sys.argv)  # save for later
+        from numpy import f2py
+        sys.argv = call
+        f2py.main()
+        sys.argv = true_argv
+        print(call)
+
+
+def run_only(call, filename):
+    import os
+    os.system("{call} {filename}".format(**locals()))
+    print("{call} {filename}".format(**locals()))
 
 
 def T_grid(T_min, T_max, n):
