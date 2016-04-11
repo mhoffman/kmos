@@ -428,7 +428,9 @@ def build(options):
 
     parallel_compilation = True
     if parallel_compilation:
-        pool = multiprocessing.Pool(multiprocessing.cpu_count())
+        cpu_count = multiprocessing.cpu_count()
+        pool = multiprocessing.Pool(cpu_count)
+        print("Parallelizing compilation over {cpu_count} CPUs.".format(**locals()))
 
         frun_only = functools.partial(run_only, '{options.fcompiler} -c {extra_flags}'.format(**locals()))
 
