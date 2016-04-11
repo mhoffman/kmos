@@ -422,7 +422,7 @@ def build(options):
     call.append('--f90flags="%s"' % extra_flags)
     call.append('-m')
     call.append(module_name)
-    call.extend(['--build-dir', build_dir])
+    #call.extend(['--build-dir', build_dir])
 
     parallel_compilation = True
     if parallel_compilation:
