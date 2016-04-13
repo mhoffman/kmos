@@ -379,7 +379,10 @@ def main(args=None):
         if not len(args) >= 2:
             raise UserWarning('XML file name expected.')
         pt = kmos.io.import_xml_file(args[1])
-        sh(banner='Note: pt = kmos.io.import_xml(\'%s\')' % args[1])
+        if len(args) == 2:
+            sh(banner='Note: pt = kmos.io.import_xml(\'%s\')' % args[1])
+        elif len(args) == 3: # if optional 3rd argument is given, store model there and exit
+            pt.save(args[2])
 
     elif args[0] == 'rebuild':
         from time import sleep
