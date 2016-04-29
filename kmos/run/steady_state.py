@@ -146,7 +146,9 @@ def sample_steady_state(model, batch_size=1000000,
                         show_progress=True,
                         make_plots=False,
                         output='str',
-                        seed='EWMA',):
+                        seed='EWMA',
+                        renormalizations=None
+                        log_filename=None):
     """
         Run kMC model and continuously deploy steady-state detection to ensure that an initial bias does not enter the data.
         The steady-state detection is based on
@@ -194,10 +196,10 @@ def sample_steady_state(model, batch_size=1000000,
     for batch in itertools.count(start_batch):
         try:
             data = model.get_std_sampled_data(
-                100, batch_size, tof_method=tof_method, output='dict', reset_time_overrun=False
+                100, batch_size, tof_method=tof_method, output='dict', reset_time_overrun=False,
                 )
         except ZeroDivisionError:
-            print("Warning: encountered zero-division error at batch {batch} (size {batch_size:.2e}). Will double batch-size and retry.".format(**locals()))
+            _tee("Warning: encountered zero-division error at batch {batch} (size {batch_size:.2e}). Will double batch-size and retry.".format(**locals()), log_filename)
             model.print_accum_rate_summation()
             model.print_coverages()
             model.print_procstat()
@@ -205,13 +207,13 @@ def sample_steady_state(model, batch_size=1000000,
             batch_size *= 2
 
             if batch_doubling >= increase_batch_attempts:
-                print("Doubled batch-size {increase_batch_attempts} times, giving up".format(**locals()))
+                _tee("Doubled batch-size {increase_batch_attempts} times, giving up".format(**locals()), log_filename)
                 if output == 'dict':
                     return {}
                 elif output == 'str':
-                    return ''
+                    return '\n'
                 elif output == 'both':
-                    return {}, ''
+                    return {}, '\n'
             batch_doubling += 1
             continue
 
@@ -250,12 +252,15 @@ def sample_steady_state(model, batch_size=1000000,
 
                 if completed_percent >= 100 and batch >= warm_up + start_batch :
                     if show_progress:
-                        print("Done after {batch} batches!".format(**locals()))
+                        _tee("Done after {batch} batches!".format(**locals()), log_filename)
                     if make_plots:
                         map(os.remove, glob.glob("{seed}_*.png".format(**locals())))
                         make_ewma_plots(
                             hist, L, alpha, bias_threshold, seed="{seed}_final".format(**locals()))
                     break
+
+    if show_progress:
+        progress_bar.clear()
 
     steady_state_start = int(batch * bias_threshold)
     for key, value in hist.items():
@@ -280,6 +285,17 @@ def sample_steady_state(model, batch_size=1000000,
     elif output == 'both':
         data_str = ' '.join(format(data[key.replace('#', '')], '.5e') for key in model.get_std_header().split()) + '\n'
         return data, data_str
+
+def _tee(string, filename=None, mode='a'):
+    print(string)
+    if filename is not None:
+        with open(filename, mode) as outfile:
+            outfile.write(string + '\n')
+
+
+
+def _dict_to_str(data, header):
+    return ' '.join(format(data[key.replace('#', '')], '.5e') for key in header.split()) + '\n'
 
 
 def find_pairs(project):
