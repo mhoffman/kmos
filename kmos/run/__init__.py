@@ -331,14 +331,24 @@ class KMC_Model(Process):
         else:
             print("Model is not allocated.")
 
-    def do_steps(self, n=10000):
+    def do_steps(self, n=10000, progress=False):
         """Propagate the model `n` steps.
 
         :param n: Number of steps to run (Default: 10000)
         :type n: int
 
         """
-        proclist.do_kmc_steps(n)
+        if not progress :
+            proclist.do_kmc_steps(n)
+        else:
+            import kmos.utils.progressbar
+
+            progress_bar = kmos.utils.progressbar.ProgressBar()
+            for i in range(100):
+                proclist.do_kmc_steps(n/100)
+                progress_bar.render(i+1)
+            progress_bar.clear()
+
 
     def run(self):
         """Runs the model indefinitely. To control the
