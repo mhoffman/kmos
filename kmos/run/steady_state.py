@@ -349,9 +349,10 @@ def report_equilibration(model):
         left = procstat[pn1] #* rate_constants[pn1]
         right = procstat[pn2] # * rate_constants[pn2]
         ratio = abs(left/right - 1.)
+        left_right_sum = left + right
         report += ('{pn1} : {pn2} => {left:.2f}/{right:.2f} = {ratio:.4e}\n'.format(**locals()))
         data.append([
-            ratio, pn1, pn2
+            ratio, pn1, pn2, left_right_sum
         ])
     return report, data
 
