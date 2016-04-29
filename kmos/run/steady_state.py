@@ -187,6 +187,12 @@ def sample_steady_state(model, batch_size=1000000,
     """
     hist = {}
 
+    # Temporarily change TOF matrix to reflect slowing down of fast processes
+    renormalizations = np.ones([model.proclist.nr_of_proc]) if renormalizations == None else renormalizations
+    tof_matrix0 = model.tof_matrix.copy()
+    model.tof_matrix *= renormalizations
+
+
     batch_doubling = 0
 
     if show_progress:
@@ -277,6 +283,9 @@ def sample_steady_state(model, batch_size=1000000,
             data[key] = sum(values)
         else:
             data[key] = np.average(values, weights=hist['kmc_time'])
+
+    # Change TOF matrix back to original value
+    model.tof_matrix = tof_matrix0
 
     if output == 'dict':
         return data
