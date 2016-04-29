@@ -735,25 +735,28 @@ class Project(object):
                                  tags=tags))
 
 
-    def import_xml_file(self, filename):
+    def import_xml_file(self, filename, string=False):
         """Takes a filename, validates the content against kmc_project.dtd
         and import all fields into the current project tree
         """
         # TODO: catch XML version first and convert if necessary
-        self.filename = filename
-        #xmlparser = ET.XMLParser(remove_comments=True)
-        #! FIXME : automatic removal of comment not supported in
-        # stdlib version of ElementTree
-        xmlparser = ET.XMLParser()
-        if os.path.exists(filename):
-            try:
-                root = ET.parse(filename, parser=xmlparser).getroot()
-            except:
-                raise Exception(('Could not parse file %s. Are you sure this'
-                                 ' is a kmos project file?\n')
-                                % os.path.abspath(filename))
+        if string:
+            root = ET.fromstring(filename)
         else:
-            raise IOError('File not found: %s' % os.path.abspath(filename))
+            self.filename = filename
+            #xmlparser = ET.XMLParser(remove_comments=True)
+            #! FIXME : automatic removal of comment not supported in
+            # stdlib version of ElementTree
+            xmlparser = ET.XMLParser()
+            if os.path.exists(filename):
+                try:
+                    root = ET.parse(filename, parser=xmlparser).getroot()
+                except:
+                    raise Exception(('Could not parse file %s. Are you sure this'
+                                     ' is a kmos project file?\n')
+                                    % os.path.abspath(filename))
+            else:
+                raise IOError('File not found: %s' % os.path.abspath(filename))
 
         if 'version' in root.attrib:
             self.version = eval(root.attrib['version'])
