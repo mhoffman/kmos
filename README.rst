@@ -116,3 +116,8 @@ FILES
 |     ├── kmos.bat
 |     ├── kmos-build-standalone
 |     └── kmos-install-dependencies-ubuntu
+
+
+.. image:: https://badges.gitter.im/mhoffman/kmos.svg
+   :alt: Join the chat at https://gitter.im/mhoffman/kmos
+   :target: https://gitter.im/mhoffman/kmos?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
