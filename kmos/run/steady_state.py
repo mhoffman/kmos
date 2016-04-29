@@ -147,7 +147,7 @@ def sample_steady_state(model, batch_size=1000000,
                         make_plots=False,
                         output='str',
                         seed='EWMA',
-                        renormalizations=None
+                        renormalizations=None,
                         log_filename=None):
     """
         Run kMC model and continuously deploy steady-state detection to ensure that an initial bias does not enter the data.
