@@ -15,6 +15,7 @@ virtualenv:
 
 # Setup anaconda
 before_install:
+  - pip install .
     # setup system for GUI testing
   - export DISPLAY=:99.
   - sh -e /etc/init.d/xvfb start
