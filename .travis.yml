@@ -1,29 +1,16 @@
 language: python
 python:
-  - 2.6
   - 2.7
-addons:
-  apt:
-    packages:
-      - build-essential
-      - autoconf
-      - automake
-      - libtool
-      - libreadline6-dev
-      - python-all-dev
-      - python-numpy
 
+cache:
+    apt: true
+    pip: true
+    custom_install : true
 
-#cache:
-    #apt: true
-    #pip: true
-    #custom_install : true
-
-sudo: false
+sudo: required
 
 virtualenv:
   system_site_packages: true
-
 
 # Setup anaconda
 before_install:
@@ -31,16 +18,6 @@ before_install:
   - export DISPLAY=:99.
   - sh -e /etc/init.d/xvfb start
   - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16
-
-install:
-  - pip install .
-  - sudo pip install --upgrade pip
-  - pip install ase
-  - wget https://gist.github.com/mhoffman/d2a9466c22f33a9e046b/raw/4c73c5029f3c01e656f161c7459f720aff331705/gazpacho_0.7.2-3_all.deb
-  - sudo dpkg -i gazpacho_0.7.2-3_all.deb
-  - sudo mkdir tmp
-  - sudo dpkg-deb -x  gazpacho_0.7.2-3_all.deb tmp
-
   # install apt packages
   - sudo apt-get update -q
   - sudo apt-get install gfortran -y
@@ -50,8 +27,13 @@ install:
   - sudo apt-get install python-pygoocanvas -y
   - sudo apt-get install python-kiwi -y
   - sudo apt-get install python-cairo -y
-
-
+install:
+  - sudo pip install --upgrade pip
+  - pip install ase
+  - wget https://gist.github.com/mhoffman/d2a9466c22f33a9e046b/raw/4c73c5029f3c01e656f161c7459f720aff331705/gazpacho_0.7.2-3_all.deb
+  - sudo dpkg -i gazpacho_0.7.2-3_all.deb
+  - sudo mkdir tmp
+  - sudo dpkg-deb -x  gazpacho_0.7.2-3_all.deb tmp
   #- sudo tree tmp
   - sudo touch tmp/usr/share/pyshared/gazpacho/loader/__init__.py
   - sudo cp -rv tmp/usr/share/pyshared/gazpacho/ /home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages
