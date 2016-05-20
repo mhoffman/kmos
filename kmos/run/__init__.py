@@ -858,7 +858,7 @@ class KMC_Model(Process):
                 res += ('|{0:<%ss}|\n' % width).format('%9.2f %% %12s     %s' % (100 * float(printed_steps) / nsteps, procstat, name))
 
         res += ('+' + width * '-' + '+' + '\n')
-        res += ('   Total steps %s' % nsteps)
+        res += ('   Total steps %s\n' % nsteps)
 
         if to_stdout:
             print(res)
