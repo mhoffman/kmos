@@ -59,7 +59,7 @@ desorption on a single crystal surface you would say ::
                  representation="Atoms('CO',[[0,0,0],[0,0,1.2]])")
 
 where the string passed as `representation` is a string representing
-a CO molecule which can be evaluated in `ASE namespace <https://wiki.fysik.dtu.dk/ase/ase/atoms.html>`_.
+a CO molecule which can be evaluated in `ASE namespace <https://gitlab.com/ase/ase/repository/archive.zip?ref=master>`_.
 
 Once you have all species declared is a good time to think about the geometry.
 To keep it simple we will stick with a simple-cubic lattice in 2D which
