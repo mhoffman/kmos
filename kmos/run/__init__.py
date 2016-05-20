@@ -865,6 +865,40 @@ class KMC_Model(Process):
         else:
             return res
 
+    def print_state_summary(self, order='-rate', to_stdout=True, show=False, print_parameters=False):
+        """Show summary of current model state by showing
+            - parameters (external, optional)
+            - number of times each elementary process has been executed
+            - coverage
+            - kmc step and kmc time
+            - fire up ASE window with current lattice configuration
+
+        """
+        if print_parameters:
+            self.print_adjustable_parameters(to_stdout=to_stdout)
+        self.print_procstat(to_stdout=to_stdout)
+        self.print_accum_rate_summation(order=order, to_stdout=to_stdout)
+        self.print_coverages(to_stdout=to_stdout)
+        self.print_kmc_state(to_stdout=to_stdout)
+
+        if show:
+            self.show()
+
+    def print_kmc_state(self, to_stdout=True):
+        """Shows current kmc step and kmc time.
+        """
+        kmc_steps = self.base.get_kmc_step()
+        kmc_time = self.base.get_kmc_time()
+        data_line = '| kmc time {kmc_time:10.5g} | kmc steps {kmc_steps:18d} |'.format(**locals())
+        print('-' * len(data_line))
+        print(data_line)
+        print('-' * len(data_line))
+
+        if to_stdout:
+            print(res)
+        else:
+            return res
+
     def print_accum_rate_summation(self, order='-rate', to_stdout=True):
         """Shows rate individual processes contribute to the total rate
 
