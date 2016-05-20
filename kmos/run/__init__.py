@@ -892,12 +892,25 @@ class KMC_Model(Process):
             - fire up ASE window with current lattice configuration
 
         """
+        res = ''
         if print_parameters:
-            self.print_adjustable_parameters(to_stdout=to_stdout)
-        self.print_procstat(to_stdout=to_stdout)
-        self.print_accum_rate_summation(order=order, to_stdout=to_stdout)
-        self.print_coverages(to_stdout=to_stdout)
-        self.print_kmc_state(to_stdout=to_stdout)
+            res += 'Parameters\n'
+            self.print_adjustable_parameters(to_stdout=False)
+        res += 'Rate Constants\n'
+        res += self.rate_constants()
+        res += 'Procstat\n'
+        res += self.print_procstat(to_stdout=False)
+        res += 'Accumulated rates\n'
+        res += self.print_accum_rate_summation(order=order, to_stdout=False)
+        res += 'Coverages\n'
+        res += self.print_coverages(to_stdout=False)
+        res += 'kMC state\n'
+        res += self.print_kmc_state(to_stdout=False)
+
+        if to_stdout:
+            print(res)
+        else:
+            return res
 
         if show:
             self.show()
@@ -907,13 +920,13 @@ class KMC_Model(Process):
         """
         kmc_steps = self.base.get_kmc_step()
         kmc_time = self.base.get_kmc_time()
-        data_line = '| kmc time {kmc_time:10.5g} | kmc steps {kmc_steps:18d} |'.format(**locals())
-        print('-' * len(data_line))
-        print(data_line)
-        print('-' * len(data_line))
+        data_line = '| kmc time {kmc_time:10.5g} | kmc steps {kmc_steps:18d} |\n'.format(**locals())
+        res = ('-' * len(data_line)) + '\n'
+        res += data_line
+        res += ('-' * len(data_line)) + '\n'
 
         if to_stdout:
-            print(res)
+            print(res.strip())
         else:
             return res
 
