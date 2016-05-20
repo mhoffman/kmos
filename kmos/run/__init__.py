@@ -879,7 +879,7 @@ class KMC_Model(Process):
             res += 'Parameters\n'
             self.print_adjustable_parameters(to_stdout=False)
         res += 'Rate Constants\n'
-        res += self.rate_constants()
+        res += self.rate_constants(model=self)
         res += 'Procstat\n'
         res += self.print_procstat(to_stdout=False)
         res += 'Accumulated rates\n'
@@ -1485,19 +1485,24 @@ class Model_Rate_Constants(object):
 
         return res
 
-    def __call__(self, pattern=None, interactive=False):
+    def __call__(self, pattern=None, interactive=False, model=None):
         """Return rate constants.
 
         :param pattern: fname pattern to filter matching parameter name.
         :type pattern: str
+        :param model: runtime instance of kMC to extract rate constants from (optional)
+        :type model: kmos Model
 
         """
         res = ''
         for i, proc in enumerate(sorted(settings.rate_constants.keys())):
             if pattern is None or fnmatch(proc, pattern):
                 rate_expr = settings.rate_constants[proc][0]
-                rate_const = evaluate_rate_expression(rate_expr,
-                                                      settings.parameters)
+                if model is None:
+                    rate_const = evaluate_rate_expression(rate_expr,
+                                                          settings.parameters)
+                else:
+                    rate_const = model.base.get_rate(i+1)
                 res += ('# %s: %s = %.2e s^{-1}\n' % (proc, rate_expr,
                                                       rate_const))
         if interactive:
