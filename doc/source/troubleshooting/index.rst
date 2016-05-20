@@ -8,27 +8,6 @@ I found a bug or have a feature request. How can I get in touch ?
     or via twitter @maxjhoffmann
 
 
-After I run kmos using the GUI, where can I find the output?
-    See next question.
-
-
-After I execute model.do_steps using the API, where can I find the output?
-    Simply running the model does not produce any output. kmos keeps
-    track of all events internally but expects the user to
-    explicitly ask for output after (any number of) steps have
-    been executed. The standard way of doing this is calling the get_atoms
-    method, as explained in :ref:`analyzing_current_state`.
-    Alternatively, for cases in which steady state values are
-    needed, you can try running ::
-      data = model.get_std_sampled_data(N,n)
-    which will execute N runs of n kmc steps each and return
-    a string consisting of the average values of each coverage and each
-    turn over frequency, separated by spaces.
-    A helper string with the list of all the names of all
-    these values can be obtained with::
-      headers = model.get_std_header()
-
-
 My rate constant expression doesn't work. How can I debug it?
     When initializing the model, the backend uses
     `kmos.evaluate_rate_expression`. So you can try ::
@@ -88,7 +67,7 @@ Running a model it sometimes prints `Warning: numerical precision too low, to re
 
   Otherwise it could mean that your rate constants vary over
   12 or more orders of magnitude. If this is the case one needs
-  to wonder whether non-coarse grained kMC is actually the right
+  to wonder whether non-coarse graind kMC is actually the right
   approach for the system. On the hand because the selection of
   the next process will no longer be reliable and second because
   reasonable sampling of all involved process may no longer happen.

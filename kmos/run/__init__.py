@@ -47,6 +47,12 @@ from kmos.utils import OrderedDict
 try:
     import kmos.run.png
 except:
+    # quickly create a mock-class
+    class Struct:
+        def __init__(self, **entries):
+            self.__dict__.update(entries)
+    kmos = Struct()
+    kmos.run = Struct()
     kmos.run.png = None
 
 from math import log

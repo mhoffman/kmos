@@ -45,10 +45,10 @@ atomic simulation environment (ASE) is currently to ::
   sudo apt-get update
   sudo apt-get install python-ase
 
-Or go to their `website <https://wiki.fysik.dtu.dk/ase/download.html>`_
+Or go to their `website <https://gitlab.com/ase/ase/repository/archive.zip?ref=master>`_
 to fetch the latest version.
 
-Unfortunately Debian/Ubuntu have discontinued maintaining the gazpacho package which I find very unfortunate since it eased gtk GUI building a lot and I haven't found a simple transition path (simple as in one reliable conversion script and two changed import lines) towards gtkbuilder. Therefore for the moment I can only suggest to fetch the latest old package from e.g. `Debian Packages <https://packages.debian.org/de/squeeze/all/gazpacho/download>`_ and install it manually with ::
+Unfortunately Debian/Ubuntu have discontinued maintaining the gazpacho package which I find very unfortunate since it eased gtk GUI building a lot and I haven't found a simple transition path (simple as in one reliable conversion script and two changed import lines) towards gtkbuilder. Therefore for the moment I can only suggest to fetch the latest old package from e.g. `here <https://gist.github.com/mhoffman/d2a9466c22f33a9e046b/raw/4c73c5029f3c01e656f161c7459f720aff331705/gazpacho_0.7.2-3_all.deb>`_ and install it manually with ::
 
     sudo dpkg -i gazpacho_*.deb
 
@@ -89,7 +89,7 @@ run ::
   python setup.py install
 
 In the same vein you can install ASE. Download a recent version
-from the `DTU website <https://wiki.fysik.dtu.dk/ase/download.html>`_
+from the `GitLab website <https://gitlab.com/ase/ase/repository/archive.zip?ref=master>`_
 unzip it and install it with ::
 
   python setup.py install
@@ -156,7 +156,7 @@ number of programs.
 
 #.  **MinGW**
     provides free Fortran and C compilers and can be obtained from the
-    `sourceforge's MinGW site <http://sourceforge.net/projects/mingw/>`_ .
+    `sourceforge's MinGW site <https://sourceforge.net/projects/mingw/>`_ .
     Make sure you make a tick for the Fortran and the C compiler.
 
 #. **pyGTK**
@@ -173,7 +173,7 @@ number of programs.
 #. **ASE**
    is needed for the representation of atoms in the frontend. So
    download the latest from the
-   `DTU website <https://wiki.fysik.dtu.dk/ase/>`_
+   `GitLab website <https://gitlab.com/ase/ase/repository/archive.zip?ref=master>`_
    and install it. This has to be installed using e.g. the powershell.
    So after unpacking it, fire up the powershell, cd to the directory
    and run ::
