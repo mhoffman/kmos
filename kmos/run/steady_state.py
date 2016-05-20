@@ -114,7 +114,7 @@ def make_ewma_plots(data, L, alpha, bias_threshold, seed):
     from matplotlib import pyplot as plt
 
     for key, y in data.items():
-        if not 'time' in key or 'step' in key:
+        if not ('time' in key or 'step' in key or 'forward' in key or 'reverse' in key or 'T' == key) :
             y = np.array(y)
             plt.clf()
             cutoff0 = int(bias_threshold * len(y))
@@ -135,13 +135,14 @@ def make_ewma_plots(data, L, alpha, bias_threshold, seed):
 
 
 def sample_steady_state(model, batch_size=1000000,
-                        L=4,
+                        L=6,
                         alpha=0.05,
                         bias_threshold=0.15,
                         tof_method='integ',
                         start_batch=0,
                         warm_up=20,
-                        increase_batch_attempts=2,
+                        sub_batches=100,
+                        increase_batch_attempts=4,
                         check_frequency=10,
                         show_progress=True,
                         make_plots=False,
@@ -186,6 +187,7 @@ def sample_steady_state(model, batch_size=1000000,
             :type check_frequency: int
     """
     hist = {}
+    procstat_hist = {}
 
     # Temporarily change TOF matrix to reflect slowing down of fast processes
     renormalizations = np.ones([model.proclist.nr_of_proc]) if renormalizations == None else renormalizations
@@ -202,17 +204,22 @@ def sample_steady_state(model, batch_size=1000000,
     for batch in itertools.count(start_batch):
         try:
             data = model.get_std_sampled_data(
-                100, batch_size, tof_method=tof_method, output='dict', reset_time_overrun=False,
+                sub_batches, batch_size, tof_method=tof_method, output='dict', reset_time_overrun=False,
                 )
         except ZeroDivisionError:
+            import sys
+            import traceback
+            exc_type, exc_value, exc_traceback = sys.exc_info()
             _tee("Warning: encountered zero-division error at batch {batch} (size {batch_size:.2e}). Will double batch-size and retry.".format(**locals()), log_filename)
+            for item in  traceback.format_tb(exc_traceback):
+                _tee(str(item), log_filename)
             model.print_accum_rate_summation()
             model.print_coverages()
             model.print_procstat()
             data = {}
             batch_size *= 2
 
-            if batch_doubling >= increase_batch_attempts:
+            if batch_doubling >= increase_batch_attempts :
                 _tee("Doubled batch-size {increase_batch_attempts} times, giving up".format(**locals()), log_filename)
                 if output == 'dict':
                     return {}
@@ -226,6 +233,9 @@ def sample_steady_state(model, batch_size=1000000,
         for key, data_point in data.items():
             hist.setdefault(key, []).append(data_point)
 
+        for proc_nr in range(model.proclist.nr_of_proc) :
+            procstat_hist.setdefault(proc_nr, []).append(model.base.get_procstat(proc_nr + 1))
+
         max_scrap = 0.
         critical_key = ''
         if batch < warm_up + start_batch:
@@ -237,8 +247,15 @@ def sample_steady_state(model, batch_size=1000000,
         else:
             if batch % check_frequency == 0:
                 for key, y in hist.items():
-                    if 'time' in key or 'step' in key:
+                    if 'time' in key or 'step' in key or 'forward' in key or 'reverse' in key:
                         continue
+                    if not '_2_' in key:
+                        continue # skip coverages for now, only look at rates
+
+                    procstat_sum = sum([model.base.get_procstat(_i+1) for (_i, _m) in enumerate(model.tof_matrix[model.tofs.index(key)]) if _m > 0])
+                    if procstat_sum < 10000 :
+                        continue
+
                     scrap_fraction = get_scrap_fraction(
                         np.array(y), L, alpha, warm_up + start_batch)
                     if scrap_fraction > max_scrap:
@@ -269,8 +286,20 @@ def sample_steady_state(model, batch_size=1000000,
         progress_bar.clear()
 
     steady_state_start = int(batch * bias_threshold)
+
+    steady_state_procstat = np.array([
+        procstat_hist[i][-1] - procstat_hist[i][steady_state_start] for i in range(model.proclist.nr_of_proc)
+    ])
+    steady_state_rates = np.dot(tof_matrix0, steady_state_procstat) \
+        / (hist['simulated_time'][-1] - hist['simulated_time'][steady_state_start]) \
+        / model.lattice.system_size.prod()
+    steady_state_rates_dict = {}
+    for i, _proc_name in enumerate(model.tofs):
+        steady_state_rates_dict[_proc_name] = steady_state_rates[i]
+
     for key, value in hist.items():
         hist[key] = np.array(value[steady_state_start:])
+
 
     data = {}
     for key, values in hist.items():
@@ -282,10 +311,17 @@ def sample_steady_state(model, batch_size=1000000,
         elif 'step' in key:
             data[key] = sum(values)
         else:
-            data[key] = np.average(values, weights=hist['kmc_time'])
+            if sum(hist['kmc_time']) == 0.:
+                data[key] = 0.
+            else:
+                data[key] = np.average(values, weights=hist['kmc_time'])
+
 
     # Change TOF matrix back to original value
     model.tof_matrix = tof_matrix0
+
+    #data['steady_state_rates'] = steady_state_rates_dict
+    data.update(steady_state_rates_dict)
 
     if output == 'dict':
         return data
