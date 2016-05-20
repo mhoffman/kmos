@@ -331,14 +331,24 @@ class KMC_Model(Process):
         else:
             print("Model is not allocated.")
 
-    def do_steps(self, n=10000):
+    def do_steps(self, n=10000, progress=False):
         """Propagate the model `n` steps.
 
         :param n: Number of steps to run (Default: 10000)
         :type n: int
 
         """
-        proclist.do_kmc_steps(n)
+        if not progress :
+            proclist.do_kmc_steps(n)
+        else:
+            import kmos.utils.progressbar
+
+            progress_bar = kmos.utils.progressbar.ProgressBar()
+            for i in range(100):
+                proclist.do_kmc_steps(n/100)
+                progress_bar.render(i+1)
+            progress_bar.clear()
+
 
     def run(self):
         """Runs the model indefinitely. To control the
@@ -867,6 +877,40 @@ class KMC_Model(Process):
 
         res += ('+' + width * '-' + '+' + '\n')
         res += ('   Total steps %s' % nsteps)
+
+        if to_stdout:
+            print(res)
+        else:
+            return res
+
+    def print_state_summary(self, order='-rate', to_stdout=True, show=False, print_parameters=False):
+        """Show summary of current model state by showing
+            - parameters (external, optional)
+            - number of times each elementary process has been executed
+            - coverage
+            - kmc step and kmc time
+            - fire up ASE window with current lattice configuration
+
+        """
+        if print_parameters:
+            self.print_adjustable_parameters(to_stdout=to_stdout)
+        self.print_procstat(to_stdout=to_stdout)
+        self.print_accum_rate_summation(order=order, to_stdout=to_stdout)
+        self.print_coverages(to_stdout=to_stdout)
+        self.print_kmc_state(to_stdout=to_stdout)
+
+        if show:
+            self.show()
+
+    def print_kmc_state(self, to_stdout=True):
+        """Shows current kmc step and kmc time.
+        """
+        kmc_steps = self.base.get_kmc_step()
+        kmc_time = self.base.get_kmc_time()
+        data_line = '| kmc time {kmc_time:10.5g} | kmc steps {kmc_steps:18d} |'.format(**locals())
+        print('-' * len(data_line))
+        print(data_line)
+        print('-' * len(data_line))
 
         if to_stdout:
             print(res)

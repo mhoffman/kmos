@@ -1313,8 +1313,8 @@ class LayerList(FixedObject, list):
         else:
             raise UserWarning('No Layer named %s found.' % layer_name)
 
-        if site_name is not None and not site_name in ['_'.join(x.name.split('_')[:-1]) for x in layer.sites]:
-            raise UserWarning('Layer {layer_name} has no site named {site_name}. Please check spelling and try again.'.format(**locals()))
+        if site_name is not None and not any(map(lambda x: re.search(site_name, x), ['_'.join(x.name.split('_')) for x in layer.sites])):
+            raise UserWarning('Layer {layer_name} has no site matching {site_name}. Please check spelling and try again.'.format(**locals()))
 
         if site_name is None :
             return [
@@ -1325,7 +1325,8 @@ class LayerList(FixedObject, list):
                 for k in drange(size[2])
                 for site in layer.sites]
         else: #
-            selected_site_names = [site.name for site in layer.sites if '_'.join(site.name.split('_')[:-1]) == site_name]
+            #selected_site_names = [site.name for site in layer.sites if '_'.join(site.name.split('_')[:-1]) == site_name]
+            selected_site_names = [site.name for site in layer.sites if re.search(site_name, '_'.join(site.name.split('_')[:]))]
             return [
                 self.generate_coord('%s.(%s, %s, %s).%s' % (site, i, j, k,
                                                             layer_name))
