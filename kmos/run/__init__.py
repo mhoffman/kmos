@@ -601,14 +601,18 @@ class KMC_Model(Process):
             atoms.tof_integ = np.zeros_like(self.tof_matrix[:, 0])
 
         else:
-            atoms.tof_data = np.dot(self.tof_matrix,
-                            (atoms.procstat - self.procstat) / delta_t / size)
-            # S. Matera 09/25/2012
-            if hasattr(self.base, 'get_integ_rate'):
-                atoms.tof_integ = np.dot(self.tof_matrix,
-                                (atoms.integ_rates - self.integ_rates)
-                                / delta_t / size)
-            # S. Matera 09/25/2012
+            if delta_t > 0:
+                atoms.tof_data = np.dot(self.tof_matrix,
+                                (atoms.procstat - self.procstat) / delta_t / size)
+                # S. Matera 09/25/2012
+                if hasattr(self.base, 'get_integ_rate'):
+                    atoms.tof_integ = np.dot(self.tof_matrix,
+                                    (atoms.integ_rates - self.integ_rates)
+                                    / delta_t / size)
+                # S. Matera 09/25/2012
+            else:
+                atoms.tof_data = np.dot(self.tof_matrix, np.zeros_like(atoms.integ_rates))
+                atoms.tof_integ = np.dot(self.tof_matrix, np.zeros_like(atoms.integ_rates))
 
         atoms.delta_t = delta_t
 
@@ -695,12 +699,20 @@ class KMC_Model(Process):
                 raise NotImplementedError('tof_method="{tof_method}" not supported. Can be either procrates or integ.'.format(**locals()))
 
         # calculate time averages
-        occs_mean = np.average(occs, axis=0, weights=step_ts)
+        if sum(step_ts) == 0.:
+            occs_mean = np.zeros_like(occs[0])
+        else:
+            occs_mean = np.average(occs, axis=0, weights=step_ts)
         try:
-            tof_mean = np.average(tofs, axis=0, weights=delta_ts)
+            if sum(delta_ts) == 0.:
+                tof_mean = np.zeros_like(tofs[0])
+            else:
+                tof_mean = np.average(tofs, axis=0, weights=delta_ts)
         except ZeroDivisionError:
             print(tofs)
             print(delta_ts)
+            print(len(tofs))
+            print(len(tofs[0]))
             raise
         total_time = self.base.get_kmc_time() - t0
         simulated_time = self.base.get_kmc_time()
