@@ -115,7 +115,7 @@ There is more than one way to get required dependencies. I have tested MacPorts 
     Having MacPorts this can be as simple as ::
 
         sudo port install -v py27-ipython
-        sudo port select --set ipython ipython27
+        sudo port select --set ipython py27-ipython
 
         sudo port install gcc48
         sudo port select --set gcc mp-gcc48 # need to that f2py finds a compiler
