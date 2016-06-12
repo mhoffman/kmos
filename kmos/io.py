@@ -132,7 +132,9 @@ class ProcListWriter():
         self.data = data
         self.dir = dir
 
-    def write_template(self, filename):
+    def write_template(self, filename, target=None):
+        if target is None:
+            target = filename
         from kmos.utils import evaluate_template
 
         with open(os.path.join(os.path.dirname(__file__),
@@ -140,7 +142,7 @@ class ProcListWriter():
                                '{filename}.mpy'.format(**locals()))) as infile:
             template = infile.read()
 
-        with open(os.path.join(self.dir, '{filename}.f90'.format(**locals())), 'w') as out:
+        with open(os.path.join(self.dir, '{target}.f90'.format(**locals())), 'w') as out:
             out.write(evaluate_template(template,  self=self, data=self.data))
 
     def write_proclist(self, smart=True, code_generator='local_smart'):
@@ -1320,7 +1322,6 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     # each file is tuple (source, target)
     if code_generator == 'local_smart':
         cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
-                    (os.path.join('fortran_src', 'base.f90'), 'base.f90'),
                     (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
                     (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
                     ]
@@ -1348,6 +1349,8 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     # SECOND
     # produce those source files that are written on the fly
     writer = ProcListWriter(project_tree, export_dir)
+    if code_generator == 'local_smart':
+        writer.write_template(filename='base')
     writer.write_template(filename='lattice')
     writer.write_proclist(code_generator=code_generator)
     writer.write_settings()
