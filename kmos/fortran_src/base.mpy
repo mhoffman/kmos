@@ -184,8 +184,13 @@
 #@ ! FUNCTION
 #@ !   The time increment of the current kMC step.
 #@ !******
+site_params = self._get_site_params()
+len_site_params = len(site_params)
+len_site_params_m1 = len_site_params - 1
+nr_of_species = len(data.species_list)
+nr_of_species_m1 =  nr_of_species - 1
 #@ 
-#@ 
+#@ integer(kind=iint), dimension({len_site_params}, 0:{nr_of_species_m1}), public :: coverage = 0
 #@ 
 #@ !--- Local copies of variables
 #@ integer(kind=iint) :: nr_of_proc

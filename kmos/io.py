@@ -1328,7 +1328,7 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
 
     elif code_generator == 'lat_int':
         cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
-                    (os.path.join('fortran_src', 'base_lat_int.f90'), 'base.f90'),
+                    #(os.path.join('fortran_src', 'base_lat_int.f90'), 'base.f90'),
                     (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
                     (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
                     ]
@@ -1351,6 +1351,9 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     writer = ProcListWriter(project_tree, export_dir)
     if code_generator == 'local_smart':
         writer.write_template(filename='base')
+    elif code_generator == 'lat_int':
+        writer.write_template(filename='base_lat_int', target='base')
+
     writer.write_template(filename='lattice')
     writer.write_proclist(code_generator=code_generator)
     writer.write_settings()

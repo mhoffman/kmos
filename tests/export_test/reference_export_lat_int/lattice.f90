@@ -36,6 +36,7 @@ use kind_values
 use base, only: &
     assertion_fail, &
     base_deallocate_system => deallocate_system, &
+    coverage, &
     get_kmc_step, &
     get_kmc_time, &
     get_kmc_time_step, &
@@ -54,6 +55,7 @@ use base, only: &
     save_system, &
     assertion_fail, &
     set_rate_const, &
+    null_species, &
     update_accum_rate, &
     update_clocks
 
@@ -276,9 +278,24 @@ subroutine replace_species(site,  old_species, new_species)
 
     nr = lattice2nr(site(1), site(2), site(3), site(4))
     call base_replace_species(nr, old_species, new_species)
+    if(old_species.ne.null_species)then
+        coverage(site(4), old_species) = coverage(site(4), old_species) - 1
+    endif
+
+    if(new_species.ne.null_species)then
+        coverage(site(4), new_species) = coverage(site(4), new_species) + 1
+    endif
 
 end subroutine replace_species
 
+subroutine get_coverage(site, species, out_coverage)
+
+    integer(kind=iint), intent(in) :: site, species
+    integer(kind=iint), intent(out) :: out_coverage
+
+    out_coverage = coverage(site, species)
+
+end subroutine get_coverage
 pure function get_species(site)
 
     integer(kind=iint) :: get_species
