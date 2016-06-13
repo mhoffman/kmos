@@ -185,7 +185,7 @@ real(kind=rdouble) :: kmc_time_step
 !   The time increment of the current kMC step.
 !******
 
-
+integer(kind=iint), dimension(2, 0:2), public :: coverage = 0
 
 !--- Local copies of variables
 integer(kind=iint) :: nr_of_proc
