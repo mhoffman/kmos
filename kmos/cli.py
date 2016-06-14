@@ -168,6 +168,11 @@ def get_options(args=None, get_parser=False):
     parser.add_option('-b', '--backend',
                       dest='backend',
                       default='local_smart')
+    parser.add_option('-a', '--avoid-default-state',
+                      dest='avoid_default_state',
+                      action='store_true',
+                      default=False,
+                      )
 
     parser.add_option('-v', '--steps-per-frame',
                       dest='steps_per_frame',
@@ -322,7 +327,7 @@ def main(args=None):
 
         kmos.io.export_source(project,
                               export_dir,
-                              code_generator=options.backend)
+                              options=options)
 
         if ((os.name == 'posix'
            and os.uname()[0] in ['Linux', 'Darwin'])
