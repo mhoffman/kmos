@@ -16,8 +16,9 @@ from the top project directory ::
 
   nosetests
 
-Furthermore run ::
 
-  pep8 <filename>
+To make testing and comparison even easier it would be helpful if you
+create an account with `Travis CI <https://travis-ci.org/>`_ and run your
+commits through the test suite.
 
-Thank you.
+Have a look at Google's Python `style guide <https://google.github.io/styleguide/pyguide.html>`_ as far as style questions go.
