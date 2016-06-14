@@ -56,6 +56,16 @@ except:
     kmos.run.png = None
 
 from math import log
+try:
+    import kmos.run.png
+except:
+   # quickly create a mock-class
+   class Struct:
+       def __init__(self, **entries):
+           self.__dict__.update(entries)
+   kmos = Struct()
+   kmos.run = Struct()
+   kmos.run.png = None
 from multiprocessing import Process
 import numpy as np
 import os
@@ -929,7 +939,7 @@ class KMC_Model(Process):
         The optional argument order can be one of: name, rate, rate_constant,
         nrofsites. You precede each keyword with a '-', to show in decreasing
         order.
-        Default: '-rate'.
+        Default: '-rate'. Possible values are rate, rate_constant, name, nrofsites .
 
         """
         accum_rate = 0.
