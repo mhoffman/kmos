@@ -132,16 +132,18 @@ class ProcListWriter():
         self.data = data
         self.dir = dir
 
-    def write_lattice(self):
+    def write_template(self, filename, target=None, options=None):
+        if target is None:
+            target = filename
         from kmos.utils import evaluate_template
 
         with open(os.path.join(os.path.dirname(__file__),
                                'fortran_src',
-                               'lattice.mpy')) as infile:
+                               '{filename}.mpy'.format(**locals()))) as infile:
             template = infile.read()
 
-        with open(os.path.join(self.dir, 'lattice.f90'), 'w') as out:
-            out.write(evaluate_template(template,  self=self, data=self.data))
+        with open(os.path.join(self.dir, '{target}.f90'.format(**locals())), 'w') as out:
+            out.write(evaluate_template(template,  self=self, data=self.data, options=options))
 
     def write_proclist(self, smart=True, code_generator='local_smart'):
         """Write the proclist.f90 module, i.e. the rules which make up
@@ -1298,7 +1300,7 @@ class ProcListWriter():
         return out
 
 
-def export_source(project_tree, export_dir=None, code_generator='local_smart'):
+def export_source(project_tree, export_dir=None, code_generator=None, options=None, ):
     """Export a kmos project into Fortran 90 code that can be readily
     compiled using f2py.  The model contained in project_tree
     will be stored under the directory export_dir. export_dir will
@@ -1309,6 +1311,13 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     In order to generate different *backend* solvers, additional candidates
     of this methods could be implemented.
     """
+
+    if code_generator is None:
+        if options is not None:
+            code_generator = options.backend
+        else:
+            code_generator = 'local_smart'
+
     if export_dir is None:
         export_dir = project_tree.meta.model_name
 
@@ -1320,14 +1329,12 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     # each file is tuple (source, target)
     if code_generator == 'local_smart':
         cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
-                    (os.path.join('fortran_src', 'base.f90'), 'base.f90'),
                     (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
                     (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
                     ]
 
     elif code_generator == 'lat_int':
         cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
-                    (os.path.join('fortran_src', 'base_lat_int.f90'), 'base.f90'),
                     (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
                     (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
                     ]
@@ -1348,7 +1355,12 @@ def export_source(project_tree, export_dir=None, code_generator='local_smart'):
     # SECOND
     # produce those source files that are written on the fly
     writer = ProcListWriter(project_tree, export_dir)
-    writer.write_lattice()
+    if code_generator == 'local_smart':
+        writer.write_template(filename='base', options=options)
+    elif code_generator == 'lat_int':
+        writer.write_template(filename='base_lat_int', target='base', options=options)
+
+    writer.write_template(filename='lattice', options=options)
     writer.write_proclist(code_generator=code_generator)
     writer.write_settings()
     project_tree.validate_model()
