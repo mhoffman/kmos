@@ -356,7 +356,7 @@ def find_pairs(project):
                     pairs.append((p1, p2))
     return pairs
 
-def report_equilibration(model):
+def report_equilibration(model, skip_diffusion=False):
     """Iterate over pairs of reverse proceses and print
         rate1 * rho1 / rate2 * rho2
 
@@ -381,6 +381,12 @@ def report_equilibration(model):
     report = ''
     data = []
     for pair in pairs:
+        #if 'mft' in pair[0].name or 'mft' in pair[1].name:
+            #continue
+        if skip_diffusion:
+            # skip diffusion processes in equilibration report
+            if pair[0].rate_constant.startswith('diff') or pair[1].rate_constant.startswith('diff'):
+                continue
         pn1, pn2 = pair[0].name, pair[1].name
         left = procstat[pn1] #* rate_constants[pn1]
         right = procstat[pn2] # * rate_constants[pn2]
@@ -388,7 +394,7 @@ def report_equilibration(model):
         left_right_sum = left + right
         report += ('{pn1} : {pn2} => {left:.2f}/{right:.2f} = {ratio:.4e}\n'.format(**locals()))
         data.append([
-            ratio, pn1, pn2, left_right_sum
+            ratio, pn1, pn2, left_right_sum, pair
         ])
     return report, data
 
