@@ -63,6 +63,7 @@ import random
 import sys
 try:
     from kmc_model import base, lattice, proclist
+    import kmc_model
 except Exception, e:
     base = lattice = proclist = None
     print("""Error: %s
@@ -167,6 +168,10 @@ class KMC_Model(Process):
         self.lattice = lattice
         self.proclist = ProclistProxy()
         self.settings = settings
+        if hasattr(kmc_model, 'base_acf'):
+            self.base_acf = kmc_model.base_acf
+        if hasattr(kmc_model, 'proclist_acf'):
+            self.proclist_acf = kmc_model.proclist_acf
 
         if hasattr(self.base, 'null_species'):
             self.null_species = self.base.null_species
