@@ -179,6 +179,72 @@ class ProcListWriter():
             raise Exception("Don't know this code generator '%s'" % code_generator)
 
         out.close()
+    
+    def write_proclist_acf(self, smart=True, code_generator='local_smart'):
+        """Write the proclist.f90 module, i.e. the rules which make up
+        the kMC process list.
+        """
+        # make long lines a little shorter
+        data = self.data
+
+        # write header section and module imports
+        out = open('%s/proclist_acf.f90' % self.dir, 'w')
+        out.write(('module proclist_acf\n'
+                  'use kind_values\n'
+                  'use base, only: &\n'
+                  '    update_accum_rate, &\n'
+                  '    update_integ_rate, &\n'
+                  '    determine_procsite, &\n'
+                  '    update_clocks, &\n'
+                  '    avail_sites, &\n'
+                  '    null_species, &\n'
+                  '    inrecment_procstat\n\n'
+                  'use base_acf, only: &\n'
+                  '    assign_particle_id, &\n'
+                  '    update_id_arr, &\n'
+                  '    update_displacement, &\n'                             
+                  '    update_config_bin, &\n'
+                  '    update_buffer_acf, &\n'
+                  '    update_property_and_buffer_acf, &\n'
+                  '    drain_process, &\n'
+                  '    source_process, &\n'
+                  '    update_after_wrap_acf\n\n'
+                  'use lattice\n\n'
+                  'use proclist\n' ))
+        
+
+        out.write('\nimplicit none\n')
+
+        out.write('\n\ncontains\n\n')
+
+
+        if code_generator == 'local_smart':
+           # self.write_proclist_generic_part(data, out, code_generator=code_generator)
+           # self.write_proclist_run_proc_nr_smart(data, out)
+           # self.write_proclist_put_take(data, out)
+           # self.write_proclist_touchup(data, out)
+           # self.write_proclist_multilattice(data, out)
+           # self.write_proclist_end(out)
+           self.write_proclist_get_diff_sites_acf_smart(data,out)
+           self.write_proclist_acf_end(out)
+
+        elif code_generator == 'lat_int':
+            constants_out = open('%s/proclist_constants.f90' % self.dir, 'w')
+            self.write_proclist_constants(data,
+                                          constants_out,
+                                          close_module=True,
+                                          code_generator=code_generator,
+                                          module_name='proclist_constants',
+                                          )
+            constants_out.close()
+            self.write_proclist_lat_int(data, out)
+            self.write_proclist_end(out)
+
+        else:
+            raise Exception("Don't know this code generator '%s'" % code_generator)
+
+        out.close()
+ 
 
     def write_proclist_constants(self, data, out,
                                  code_generator='local_smart',
@@ -328,6 +394,118 @@ class ProcListWriter():
         out.write('    end select\n\n')
         out.write('end subroutine run_proc_nr\n\n')
 
+    def write_proclist_get_diff_sites_acf_smart(self, data, out):
+        # run_proc_nr runs the process selected by determine_procsite
+        # for sake of simplicity each process is formulated in terms
+        # of take and put operations. This is due to the fact that
+        # in surface science type of models the default species,
+        # i.e. 'empty' has a special meaning. So instead of just
+        # 'setting' new species, which would be more general
+        # we say we 'take' and 'put' atoms. So a take is equivalent
+        # to a set_empty.
+        # While this looks more readable on paper, I am not sure
+        # if this make code maintainability a lot worse. So this
+        # should probably change.
+
+        out.write('subroutine get_diff_sites_acf(proc,nr_site,init_site,fin_site)\n\n'
+                  '!****f* proclist/get_diff_sites_acf\n'
+                  '! FUNCTION\n'
+                  '!    get_diff_sites_acf gives the site ``init_site``, which is occupied by the particle before the diffusion process \n'
+                  '!    and also the site ``fin_site`` after the diffusion process.\n'
+                  '!\n'
+                  '! ARGUMENTS\n'
+                  '!\n'
+                  '!    * ``proc`` integer representing the process number\n'
+                  '!    * ``nr_site``  integer representing the site\n'
+                  '!    * ``init_site`` integer representing the site, which is occupied by the particle before the diffusion process takes place\n'
+                  '!    * ``fin_site`` integer representing the site, which is occupied by the particle after the diffusion process\n'
+                  '!******\n'
+                  '    integer(kind=iint), intent(in) :: proc\n'
+                  '    integer(kind=iint), intent(in) :: nr_site\n'
+                  '    integer(kind=iint), intent(out) :: init_site, fin_site\n\n'
+                  '    integer(kind=iint), dimension(4) :: lsite\n'
+                  '    integer(kind=iint), dimension(4) :: lsite_new\n'
+                  '    integer(kind=iint), dimension(4) :: lsite_old\n'
+                  '    integer(kind=iint) :: exit_site, entry_site\n\n'
+                  '    lsite = nr2lattice(nr_site, :)\n\n'
+                  '    select case(proc)\n')
+        for process in data.process_list:
+            out.write('    case(%s)\n' % process.name)
+            if data.meta.debug > 0:
+                out.write(('print *,"PROCLIST/RUN_PROC_NR/NAME","%s"\n'
+                           'print *,"PROCLIST/RUN_PROC_NR/LSITE","lsite"\n'
+                           'print *,"PROCLIST/RUN_PROC_NR/SITE","site"\n')
+                           % process.name)
+            for action in process.action_list:
+                if action.coord == process.executing_coord():
+                    relative_coord = 'lsite'
+                else:
+                    relative_coord = 'lsite%s' % (action.coord - process.executing_coord()).radd_ff()
+
+                try:
+                    previous_species = filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list)[0].species
+                except:
+                    UserWarning("""Process %s seems to be ill-defined.
+                                   Every action needs a corresponding condition
+                                   for the same site.""" % process.name)
+
+                if action.species[0] == '^':
+                    if data.meta.debug > 0:
+                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","create %s_%s"\n'
+                                   % (action.coord.layer,
+                                      action.coord.name))
+                    out.write('        call create_%s_%s(%s, %s)\n'
+                               % (action.coord.layer,
+                                  action.coord.name,
+                                  relative_coord,
+                                  action.species[1:]))
+                elif action.species[0] == '$':
+                    if data.meta.debug > 0:
+                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","annihilate %s_%s"\n'
+                                   % (action.coord.layer,
+                                      action.coord.name))
+                    out.write('        call annihilate_%s_%s(%s, %s)\n'
+                               % (action.coord.layer,
+                                  action.coord.name,
+                                  relative_coord,
+                                  action.species[1:]))
+                elif action.species == data.species_list.default_species \
+                and not action.species == previous_species:
+                    if data.meta.debug > 0:
+                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","take %s_%s %s"\n'
+                                   % (action.coord.layer,
+                                      action.coord.name,
+                                      previous_species))
+                    out.write('        init_site = lattice2nr(%s)\n'
+                               % (relative_coord))
+                else:
+                    if not previous_species == action.species:
+                        if not previous_species == data.species_list.default_species:
+                            if data.meta.debug > 0:
+                                out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","take %s_%s %s"\n'
+                                           % (action.coord.layer,
+                                              action.coord.name,
+                                              previous_species))
+                            out.write('        call take_%s_%s_%s(%s)\n'
+                                       % (previous_species,
+                                          action.coord.layer,
+                                          action.coord.name,
+                                          relative_coord))
+                        if data.meta.debug > 0:
+                            out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","put %s_%s %s"\n'
+                                      % (action.coord.layer,
+                                         action.coord.name,
+                                         action.species))
+                        out.write('        call put_%s_%s_%s(%s)\n'
+                                   % (action.species,
+                                      action.coord.layer,
+                                      action.coord.name,
+                                      relative_coord))
+
+            out.write('\n')
+        out.write('    end select\n\n')
+        out.write('end subroutine get_diff_sites_acf\n\n')
+    
     def _db_print(self, line, debug=False):
         """Write out debugging statement if requested."""
         if debug:
@@ -1109,6 +1287,11 @@ class ProcListWriter():
 
     def write_proclist_end(self, out):
         out.write('end module proclist\n')
+   
+    
+    def write_proclist_acf_end(self, out):
+        out.write('end module proclist_acf\n')
+
 
     def _write_optimal_iftree(self, items, indent, out):
         # this function is called recursively
@@ -1331,6 +1514,7 @@ def export_source(project_tree, export_dir=None, code_generator=None, options=No
         cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
                     (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
                     (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
+                    (os.path.join('fortran_src', 'base_acf.f90'), 'base_acf.f90'),
                     ]
 
     elif code_generator == 'lat_int':
@@ -1362,6 +1546,7 @@ def export_source(project_tree, export_dir=None, code_generator=None, options=No
 
     writer.write_template(filename='lattice', options=options)
     writer.write_proclist(code_generator=code_generator)
+    writer.write_proclist_acf(code_generator=code_generator)
     writer.write_settings()
     project_tree.validate_model()
     return True

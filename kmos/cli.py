@@ -201,7 +201,13 @@ def get_options(args=None, get_parser=False):
     parser.add_option('-c', '--catmap',
                       default=False,
                       action='store_true')
-
+    
+    parser.add_option('--acf',
+                      dest='acf',
+                      action='store_true',
+                      default=False,
+                      )
+   
     try:
         from numpy.distutils.fcompiler import get_default_fcompiler
         from numpy.distutils import log
