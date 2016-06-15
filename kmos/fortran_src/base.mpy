@@ -626,6 +626,14 @@ if options is None or options.avoid_default_state == False:
     #@         accum_rates(i)=accum_rates(i-1)+nr_of_sites(i)*rates(i)
     #@     enddo
 else:
+    nr_default_species = sorted([x.name for x in data.species_list]).index(data.species_list.default_species)
+    #@     integer(kind=iint) :: default_coverage, active_volume
+    #@     default_coverage = sum(coverage(:, {nr_default_species}))
+    #@     active_volume = volume
+    for i, species_name in enumerate(sorted([x.name for x in data.species_list])):
+        if species_name.endswith('_'):
+            #@     active_volume = active_volume - sum(coverage(:, {i})) ! {species_name}
+    ##@     print *, "Default Coverage", default_coverage
     #@     i = 0
     #@     do
     #@         i = i + 1
@@ -636,7 +644,6 @@ else:
     #@         endif
     # sort processes into 'empty-site-creating ones'
     # skip over those that lead directly to empty states
-    nr_default_species = sorted([x.name for x in data.species_list]).index(data.species_list.default_species)
     default_species = data.species_list.default_species
     #@        ! {nr_default_species} = default_species = {default_species}
     process_names = sorted([process.name for process in data.process_list])
@@ -647,12 +654,18 @@ else:
     ##@     ! {default_species_creating_processes}
     #@        if(.false.)then
     for default_creating in default_species_creating_processes:
-        if default_creating <= 0:
+        if default_creating < 0:
             continue
-        for process in default_species_creating_processes[default_creating]:
-            process_i = process_names.index(process) + 1
-            #@        else if(sum(coverage(:, {nr_default_species})).eq.(volume - {default_creating}).and.(i.eq.{process_i}))then
-            #@            ! {process}
+        elif default_creating == 0:
+            for process in default_species_creating_processes[default_creating]:
+                process_i = process_names.index(process) + 1
+                #@        else if(default_coverage.eq.(active_volume - 1).and.(i.eq.{process_i}))then
+                #@            ! single particle diffusion {process}
+        else:
+            for process in default_species_creating_processes[default_creating]:
+                process_i = process_names.index(process) + 1
+                #@        else if(default_coverage.eq.(active_volume - {default_creating}).and.(i.eq.{process_i}))then
+                #@            ! {process}
     #@        else
     #@            accum_rates(i) = accum_rates(i) + nr_of_sites(i)*rates(i)
     #@        endif
