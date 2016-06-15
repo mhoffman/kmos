@@ -361,14 +361,18 @@ def build(options):
     import sys
     from glob import glob
 
-    src_files = ['kind_values_f2py.f90', 'base.f90','base_acf.f90','lattice.f90']
-
+    src_files = ['kind_values_f2py.f90', 'base.f90']
+    
+    if isfile('base_acf.f90'):
+        src_files.append('base_acf.f90')
+    src_files.append('lattice.f90')
     if isfile('proclist_constants.f90'):
         src_files.append('proclist_constants.f90')
     src_files.extend(glob('nli_*.f90'))
     src_files.extend(glob('run_proc_*.f90'))
     src_files.append('proclist.f90')
-    src_files.append('proclist_acf.f90')
+    if isfile('proclist_acf.f90'):
+        src_files.append('proclist_acf.f90')
 
     extra_flags = {}
 
