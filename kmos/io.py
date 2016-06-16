@@ -198,7 +198,7 @@ class ProcListWriter():
                   '    update_clocks, &\n'
                   '    avail_sites, &\n'
                   '    null_species, &\n'
-                  '    inrecment_procstat\n\n'
+                  '    increment_procstat\n\n'
                   'use base_acf, only: &\n'
                   '    assign_particle_id, &\n'
                   '    update_id_arr, &\n'
@@ -408,7 +408,7 @@ class ProcListWriter():
         # should probably change.
 
         out.write('subroutine get_diff_sites_acf(proc,nr_site,init_site,fin_site)\n\n'
-                  '!****f* proclist/get_diff_sites_acf\n'
+                  '!****f* proclist_acf/get_diff_sites_acf\n'
                   '! FUNCTION\n'
                   '!    get_diff_sites_acf gives the site ``init_site``, which is occupied by the particle before the diffusion process \n'
                   '!    and also the site ``fin_site`` after the diffusion process.\n'
@@ -476,8 +476,10 @@ class ProcListWriter():
                                    % (action.coord.layer,
                                       action.coord.name,
                                       previous_species))
-                    out.write('        init_site = lattice2nr(%s)\n'
+                    out.write('        lsite_old = (%s)\n'
                                % (relative_coord))
+                    out.write('        init_site = lattice2nr(lsite_old(1),lsite_old(2),lsite_old(3),lsite_old(4))\n'
+                               )
                 else:
                     if not previous_species == action.species:
                         if not previous_species == data.species_list.default_species:
@@ -496,11 +498,11 @@ class ProcListWriter():
                                       % (action.coord.layer,
                                          action.coord.name,
                                          action.species))
-                        out.write('        call put_%s_%s_%s(%s)\n'
-                                   % (action.species,
-                                      action.coord.layer,
-                                      action.coord.name,
-                                      relative_coord))
+                        out.write('        lsite_new = (%s)\n'
+                                   % (relative_coord))
+                        out.write('        fin_site = lattice2nr(lsite_new(1),lsite_new(2),lsite_new(3),lsite_new(4))\n'
+                               )
+
 
             out.write('\n')
         out.write('    end select\n\n')
