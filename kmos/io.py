@@ -523,7 +523,10 @@ class ProcListWriter():
                                       previous_species))
                     
                     
-                    out.write('        exit_site = lattice2nr(lsite(1),lsite(2),lsite(3),lsite(4))\n'
+                    out.write('        lsite_old = (%s)\n'
+                               % (relative_coord))
+
+                    out.write('        exit_site = lattice2nr(lsite_old(1),lsite_old(2),lsite_old(3),lsite_old(4))\n'
                                )
                     out.write('        call drain_process(exit_site,init_site,fin_site)\n'
                                )
@@ -558,7 +561,9 @@ class ProcListWriter():
                                          % (action.coord.layer,
                                             action.coord.name,
                                             action.species))
-                           out.write('        entry_site = lattice2nr(lsite(1),lsite(2),lsite(3),lsite(4))\n'
+                           out.write('        lsite_new = (%s)\n'
+                                      % (relative_coord))
+                           out.write('        entry_site = lattice2nr(lsite_new(1),lsite_new(2),lsite_new(3),lsite_new(4))\n'
                                   )
                            out.write('        call source_process(entry_site,init_site,fin_site)\n'
                                   )
