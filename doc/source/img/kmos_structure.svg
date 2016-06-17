@@ -13,7 +13,7 @@
    height="600"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.4 r9939"
+   inkscape:version="0.91 r13725"
    sodipodi:docname="kmos_structure.svg"
    inkscape:export-filename="/home/juanm/work/presentations/ICTP2016/ictp2016_intro2kmos/pics/kmos_structure.png"
    inkscape:export-xdpi="200"
@@ -210,9 +210,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.98994949"
-     inkscape:cx="514.52545"
-     inkscape:cy="432.17636"
+     inkscape:zoom="1.9356494"
+     inkscape:cx="578.35886"
+     inkscape:cy="258.6702"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -221,11 +221,11 @@
      inkscape:snap-global="false"
      inkscape:snap-bbox="true"
      inkscape:snap-midpoints="true"
-     inkscape:window-width="1920"
-     inkscape:window-height="1028"
-     inkscape:window-x="1366"
-     inkscape:window-y="0"
-     inkscape:window-maximized="1" />
+     inkscape:window-width="2560"
+     inkscape:window-height="1391"
+     inkscape:window-x="0"
+     inkscape:window-y="23"
+     inkscape:window-maximized="0" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -234,7 +234,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -243,14 +243,6 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(0,-452.36218)">
-    <rect
-       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
-       id="rect3790"
-       width="542.14288"
-       height="330"
-       x="-939.28571"
-       y="112.36217"
-       ry="18.571428" />
     <rect
        style="fill:#ffad69;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect2985-3"
@@ -697,5 +689,16 @@
            x="67.85714"
            y="90.219322" /></flowRegion><flowPara
          id="flowPara3761-5-6-9-0-6"
-         style="font-size:15px">load</flowPara></flowRoot>  </g>
+         style="font-size:15px">load</flowPara></flowRoot>    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:15.6775589px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="829.8186"
+       y="474.15131"
+       id="text3477"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3479"
+         x="829.8186"
+         y="474.15131">(C) Juan Manuel Lorenzi</tspan></text>
+  </g>
 </svg>
