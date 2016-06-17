@@ -225,6 +225,7 @@ class ProcListWriter():
            # self.write_proclist_touchup(data, out)
            # self.write_proclist_multilattice(data, out)
            # self.write_proclist_end(out)
+           self.write_proclist_generic_subroutines_acf(data, out, code_generator=code_generator)
            self.write_proclist_get_diff_sites_acf_smart(data,out)
            self.write_proclist_acf_end(out)
 
@@ -283,6 +284,22 @@ class ProcListWriter():
                                     data=data,
                                     code_generator=code_generator,
                                     ))
+
+    def write_proclist_generic_subroutines_acf(self, data, out, code_generator='local_smart'):
+        from kmos.utils import evaluate_template
+
+        with open(os.path.join(os.path.dirname(__file__),
+                               'fortran_src',
+                               'proclist_generic_subroutines_acf.mpy')) as infile:
+            template = infile.read()
+
+        out.write(evaluate_template(template,
+                                    self=self,
+                                    data=data,
+                                    code_generator=code_generator,
+                                    ))
+
+
 
     def write_proclist_run_proc_nr_smart(self, data, out):
         # run_proc_nr runs the process selected by determine_procsite
@@ -431,11 +448,28 @@ class ProcListWriter():
                   '    select case(proc)\n')
         for process in data.process_list:
             out.write('    case(%s)\n' % process.name)
+            source_species = 0
             if data.meta.debug > 0:
                 out.write(('print *,"PROCLIST/RUN_PROC_NR/NAME","%s"\n'
                            'print *,"PROCLIST/RUN_PROC_NR/LSITE","lsite"\n'
                            'print *,"PROCLIST/RUN_PROC_NR/SITE","site"\n')
                            % process.name)
+            for action in process.action_list:
+                
+                    
+                
+                    
+
+                try:
+                    previous_species = filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list)[0].species
+                except:
+                    UserWarning("""Process %s seems to be ill-defined.
+                                   Every action needs a corresponding condition
+                                   for the same site.""" % process.name)
+                if action.species == previous_species:
+                   source_species = action.species
+                               
+ 
             for action in process.action_list:
                 if action.coord == process.executing_coord():
                     relative_coord = 'lsite'
@@ -470,7 +504,7 @@ class ProcListWriter():
                                   relative_coord,
                                   action.species[1:]))
                 elif action.species == data.species_list.default_species \
-                and not action.species == previous_species:
+                and not action.species == previous_species and source_species == 0:
                     if data.meta.debug > 0:
                         out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","take %s_%s %s"\n'
                                    % (action.coord.layer,
@@ -480,6 +514,21 @@ class ProcListWriter():
                                % (relative_coord))
                     out.write('        init_site = lattice2nr(lsite_old(1),lsite_old(2),lsite_old(3),lsite_old(4))\n'
                                )
+                elif action.species == data.species_list.default_species \
+                and not action.species == previous_species and not source_species == 0:
+                    if data.meta.debug > 0:
+                        out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","take %s_%s %s"\n'
+                                   % (action.coord.layer,
+                                      action.coord.name,
+                                      previous_species))
+                    
+                    
+                    out.write('        exit_site = lattice2nr(lsite(1),lsite(2),lsite(3),lsite(4))\n'
+                               )
+                    out.write('        call drain_process(exit_site,init_site,fin_site)\n'
+                               )
+
+
                 else:
                     if not previous_species == action.species:
                         if not previous_species == data.species_list.default_species:
@@ -493,15 +542,30 @@ class ProcListWriter():
                                           action.coord.layer,
                                           action.coord.name,
                                           relative_coord))
-                        if data.meta.debug > 0:
-                            out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","put %s_%s %s"\n'
-                                      % (action.coord.layer,
-                                         action.coord.name,
-                                         action.species))
-                        out.write('        lsite_new = (%s)\n'
-                                   % (relative_coord))
-                        out.write('        fin_site = lattice2nr(lsite_new(1),lsite_new(2),lsite_new(3),lsite_new(4))\n'
-                               )
+                        if source_species == 0: 
+                           if data.meta.debug > 0:
+                               out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","put %s_%s %s"\n'
+                                         % (action.coord.layer,
+                                            action.coord.name,
+                                            action.species))
+                           out.write('        lsite_new = (%s)\n'
+                                      % (relative_coord))
+                           out.write('        fin_site = lattice2nr(lsite_new(1),lsite_new(2),lsite_new(3),lsite_new(4))\n'
+                                  )
+                        if not source_species == 0: 
+                           if data.meta.debug > 0:
+                               out.write('print *,"PROCLIST/RUN_PROC_NR/ACTION","put %s_%s %s"\n'
+                                         % (action.coord.layer,
+                                            action.coord.name,
+                                            action.species))
+                           out.write('        entry_site = lattice2nr(lsite(1),lsite(2),lsite(3),lsite(4))\n'
+                                  )
+                           out.write('        call source_process(entry_site,init_site,fin_site)\n'
+                                  )
+
+
+
+
 
 
             out.write('\n')

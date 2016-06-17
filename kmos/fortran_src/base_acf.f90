@@ -576,7 +576,7 @@ subroutine get_config_bin_acf(return_config_bin)
 !******
 !---------------I/O variables---------------
 
-real(kind=rdouble), dimension(34*3), intent(out) :: return_config_bin
+real(kind=rdouble), dimension(34), intent(out) :: return_config_bin
 
 
 
