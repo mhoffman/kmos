@@ -1585,7 +1585,6 @@ def export_source(project_tree, export_dir=None, code_generator=None, options=No
         cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
                     (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
                     (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
-                    (os.path.join('fortran_src', 'base_acf.f90'), 'base_acf.f90'),
                     ]
 
     elif code_generator == 'lat_int':
@@ -1614,10 +1613,13 @@ def export_source(project_tree, export_dir=None, code_generator=None, options=No
         writer.write_template(filename='base', options=options)
     elif code_generator == 'lat_int':
         writer.write_template(filename='base_lat_int', target='base', options=options)
-
+     
+    if options.acf:
+        writer.write_template(filename='base_acf', options=options)      
     writer.write_template(filename='lattice', options=options)
     writer.write_proclist(code_generator=code_generator)
-    writer.write_proclist_acf(code_generator=code_generator)
+    if options.acf:
+       writer.write_proclist_acf(code_generator=code_generator) 
     writer.write_settings()
     project_tree.validate_model()
     return True
