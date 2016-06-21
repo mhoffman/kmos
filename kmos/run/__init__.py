@@ -44,6 +44,7 @@ from copy import deepcopy
 from fnmatch import fnmatch
 from kmos import evaluate_rate_expression
 from kmos.utils import OrderedDict
+import kmos.run.acf
 try:
     import kmos.run.png
 except:
@@ -469,7 +470,32 @@ class KMC_Model(Process):
         :param skip: Number of kMC steps between frames (Default: 1).
         :type skip: int
         :param prefix: Prefix for filename (Default: movie).
-        :type prefix: str
+        :type 
+#@ !------ A. Garhammer 2015------
+#@ !subroutine update_clocks_acf(ran_time)
+#@ !****f* base/update_clocks_acf
+#@ ! FUNCTION
+#@ !    Updates walltime, kmc_step, kmc_step_acf, time_intervalls and kmc_time.
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    * ``ran_time`` Random real number :math:`\in [0,1]`
+#@ !******
+#@ !real(kind=rsingle), intent(in) :: ran_time
+#@ !real(kind=rsingle) :: runtime
+#@ 
+#@ 
+#@ ! Make sure ran_time is in the right interval
+#@ !ASSERT(ran_time.ge.0.,"base/update_clocks: ran_time variable has to be positive.")
+#@ !ASSERT(ran_time.le.1.,"base/update_clocks: ran_time variable has to be less than 1.")
+#@ 
+#@ !kmc_time_step = -log(ran_time)/accum_rates(nr_of_proc)
+#@ ! Make sure the difference is not so small, that it is rounded off
+#@ ! ASSERT(kmc_time+kmc_time_step>kmc_time,"base/update_clocks: precision of kmc_time is not sufficient")
+#@ 
+#@ !call CPU_TIME(runtime)
+#@ 
+#@ ! Make sure we are not dividing by zeroprefix: str
         :param rotation: Angle from which movie is recorded
                          (only useful if suffix is png).
                          String to be interpreted by ASE (Default: '15x,-70x')

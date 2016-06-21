@@ -39,173 +39,125 @@
 #@ 
 #@ !------ No implicit definition of variables !
 #@ implicit none
-#@ 
-#@ !!------ All variables, function and subroutine are private by default
-#@ !private
-#@ !
-#@ !
-#@ !
-#@ !! The following subroutines and functions are made public
-#@ !public :: deallocate_acf, &
-#@ !deallocate_property_acf, &
-#@ !get_property_acf, &
-#@ !get_id_arr, &
-#@ !get_trajectory, &
-#@ !assign_particle_id, &
-#@ !update_id_arr, &
-#@ !set_property_acf, &
-#@ !set_types, &
-#@ !set_product_property, &
-#@ !update_trajectory, &
-#@ !calc_nr_of_ions, &
-#@ !initialize_acf, &
-#@ !initialize_mean_squared_displacement, &
-#@ !get_nr_of_ions, &
-#@ !allocate_acf, &
-#@ !get_displacement, &
-#@ !update_displacement, &
-#@ !calc_mean_squared_disp, &
-#@ !allocate_config_bin_acf, &
-#@ !get_config_bin_acf, &
-#@ !calc_acf, &
-#@ !get_site_arr,&
-#@ !get_product_property, &
-#@ !get_types, &
-#@ !get_property_o, &
-#@ !get_buffer_acf, &
-#@ !update_property_and_buffer_acf, &
-#@ !update_config_bin, &
-#@ !update_buffer_acf, &
-#@ !get_counter_write_in_bin, &
-#@ !drain_process, &
-#@ !source_process, &
-#@ !update_after_wrap_acf, &
-#@ !allocate_trajectory, &
-#@ !update_nr_of_ions_before_kmc_step_acf
-#@ 
-#@ 
-#@ 
-#@ 
-#@ 
-#@ 
+#@  
 #@ 
 #@ !------ A. Garhammer 2015------
 #@ integer(kind=iint), dimension(:), allocatable :: id_arr
-#@ !****v* base/id_arr
+#@ !****v* base_acf/id_arr
 #@ ! FUNCTION
 #@ !   Stores id of the particle, which occupies the nr_of_sites.
 #@ !******
 #@ !------ A. Garhammer 2016------
 #@ integer(kind=iint), dimension(:), allocatable :: site_arr
-#@ !****v* base/site_arr
+#@ !****v* base_acf/site_arr
 #@ ! FUNCTION
 #@ !   Stores site number, for every particle_id.
 #@ !******
 #@ !------ A. Garhammer 2016------
 #@ real(kind=rdouble), dimension(:,:), allocatable :: displacement
-#@ !****v* base/displacement
+#@ !****v* base_acf/displacement
 #@ ! FUNCTION
 #@ !   Stores the displacement for each particle.
 #@ !******
 #@ !------ A. Garhammer 2015------
 #@ integer(kind=iint), dimension(:), allocatable :: property_acf
-#@ !****v* base/property_acf
+#@ !****v* base_acf/property_acf
 #@ ! FUNCTION
-#@ !   Stores the property of each site.
+#@ !   Stores type_index for the corresponding property of each site.
 #@ !******
 #@ !------ A. Garhammer 2015------
 #@ integer(kind=iint), dimension(:), allocatable :: property_o
-#@ !****v* base/property_o
+#@ !****v* base_acf/property_o
 #@ ! FUNCTION
-#@ !   Stores the property of each site.
+#@ !   Stores for each particle the initial property between two decorrelation times.
 #@ !******
 #@ !------ A. Garhammer 2016------
 #@ real(kind=rdouble), dimension(:), allocatable :: types
-#@ !****v* base/types
+#@ !****v* base_acf/types
 #@ ! FUNCTION
-#@ !   Stores the trajectory (property for every kmc step) for each particle.
+#@ !   Stores all possible properties.
 #@ !******
 #@ !------ A. Garhammer 2016------
 #@ real(kind=rdouble), dimension(:, :), allocatable :: product_property
-#@ !****v* base/product_property
+#@ !****v* base_acf/product_property
 #@ ! FUNCTION
-#@ !   Stores the trajectory (property for every kmc step) for each particle.
+#@ !   Stores all possible combinations between two properties.
 #@ !******
 #@ !------ A. Garhammer 2015------
 #@ integer(kind=iint), dimension(:, :), allocatable :: trajectory
-#@ !****v* base/trajectory
+#@ !****v* base_acf/trajectory
 #@ ! FUNCTION
 #@ !   Stores the trajectory (property for every kmc step) for each particle.
 #@ !******
 #@ !------ A. Garhammer 2016------
 #@ real(kind = rdouble), dimension(:), allocatable :: buffer_acf
-#@ !****v* base/config_bin
+#@ !****v* base_acf/buffer_acf
 #@ ! FUNCTION
-#@ !   Stores the property average over all particles and all wraps for every bin.
+#@ !   Stores the product between the initial property_o and the current property of each particle.
 #@ !******
 #@ !------ A. Garhammer 2016------
 #@ real(kind = rdouble), dimension(:), allocatable :: config_bin
-#@ !****v* base/config_bin
+#@ !****v* base_acf/config_bin
 #@ ! FUNCTION
 #@ !   Stores the property average over all particles and all wraps for every bin.
 #@ !******
 #@ !------ A. Garhammer 2016------
-#@ real(kind = rdouble), dimension(:), allocatable :: counter_write_in_bin
-#@ !****v* base/config_bin
+#@ integer(kind = iint), dimension(:), allocatable :: counter_write_in_bin
+#@ !****v* base_acf/counter_write_in_bin
 #@ ! FUNCTION
-#@ !   Stores the property average over all particles and all wraps for every bin.
+#@ !   Stores number of contributions to a bin.
 #@ !******
 #@ !------ A. Garhammer 2015------
 #@ integer(kind = iint) :: nr_of_ions
-#@ !****v* base/nr_of_ions
+#@ !****v* base_acf/nr_of_ions
 #@ ! FUNCTION
 #@ !   Stores the number of ions in the lattice.
 #@ !******
 #@ !------ A. Garhammer 2016------
 #@ integer(kind = iint) :: nr_of_ions_before_kmc_step_acf
-#@ !****v* base/nr_of_ions
+#@ !****v* base_acf/nr_of_ions_before_kmc_step_acf
 #@ ! FUNCTION
-#@ !   Stores the number of ions in the lattice.
+#@ !   Stores the number of ions which contributes to the ACF.
 #@ !******
 #@ !------ A. Garhammer 2016------
 #@ integer(kind = iint) :: bin_index
-#@ !****v* base/bin_index
+#@ !****v* base_acf/bin_index
 #@ ! FUNCTION
 #@ !   Index of bin which is needed for the calculation of the ACF.
 #@ !******
 #@ !------ A. Garhammer 2016------
 #@ integer(kind = iint) :: nr_of_bins
-#@ !****v* base/nr_of_bins
+#@ !****v* base_acf/nr_of_bins
 #@ ! FUNCTION
-#@ !   Number of bins which is given by the user for the calculation of the ACF.
+#@ !   Number of bins for the calculation of the ACF.
 #@ !******
 #@ !------ A. Garhammer 2016------
 #@ real(kind=rdouble) :: t_bin
-#@ !****v* base/t_bin
+#@ !****v* base_acf/t_bin
 #@ ! FUNCTION
 #@ !   Bin size in s.
 #@ !******
 #@ !------ A. Garhammer 2016------
 #@ real(kind=rdouble) :: t_f
-#@ !****v* base/kmc_time
+#@ !****v* base_acf/t_f
 #@ ! FUNCTION
-#@ !   Decay time of the ACF in s, which is given by the user.
+#@ !   Decorrelation time of the ACF in s, which is given by the user.
 #@ !******
 #@ !------ A. Garhammer 2016------
 #@ real(kind=rdouble) :: t_o
-#@ !****v* base/t_o
+#@ !****v* base_acf/t_o
 #@ ! FUNCTION
-#@ !  Sum of decay times in seconds.
+#@ !  Stores the starting time after the decorrelation of one cycle was reached.
 #@ !******
 #@ !------ A. Garhammer 2016------
 #@ integer(kind=iint) :: wrap_count
-#@ !****v* base/wrap_count
+#@ !****v* base_acf/wrap_count
 #@ ! FUNCTION
 #@ !  Number of wraps for the time average of every bin.
 #@ !******
 #@ !------ A. Garhammer 2015------
 #@ integer(kind=ilong) :: kmc_step_acf
-#@ !****v* base/kmc_step_acf
+#@ !****v* base_acf/kmc_step_acf
 #@ ! FUNCTION
 #@ !   Number of kMC steps executed for the calculation of acf.
 #@ !******
@@ -217,9 +169,9 @@
 #@ 
 #@ !------ A. Garhammer 2015------
 #@ subroutine calc_nr_of_ions(trace_species)
-#@ !****f* base/calc_nr_of_ions
+#@ !****f* base_acf/calc_nr_of_ions
 #@ ! FUNCTION
-#@ !    Calculate the number of ions.
+#@ !    Calculates the number of ions.
 #@ !
 #@ ! ARGUMENTS
 #@ !
@@ -244,13 +196,14 @@
 #@ end subroutine calc_nr_of_ions
 #@ 
 #@ subroutine update_nr_of_ions_before_kmc_step_acf()
-#@ !****f* base/calc_nr_of_ions
+#@ !****f* base_acf/update_nr_of_ions_before_kmc_step_acf
 #@ ! FUNCTION
-#@ !    Calculate the number of ions.
+#@ !    
 #@ !
 #@ ! ARGUMENTS
+#@ !    * ``none``
 #@ !
-#@ !    * ``trace_species`` positive integer number that represents the species which is traced.
+#@ !   
 #@ !******
 #@ !---------------I/O variables---------------
 #@ 
@@ -262,7 +215,7 @@
 #@ 
 #@ !------ A. Garhammer 2015------
 #@ subroutine get_nr_of_ions(return_nr_of_ions)
-#@ !****f* base/get_nr_of_ions
+#@ !****f* base_acf/get_nr_of_ions
 #@ ! FUNCTION
 #@ !    Returns current number of ions of the trace_species as iint integer as defined in kind_values.f90.
 #@ !
@@ -282,20 +235,15 @@
 #@ 
 #@ !------ A. Garhammer 2015------
 #@ subroutine initialize_acf(trace_species)
-#@ !****f* base/initialize_acf
+#@ !****f* base_acf/initialize_acf
 #@ ! FUNCTION
 #@ !    initialize_acf allocates and initializes the arrays for calculating the autocorrelation function (ACF).
 #@ !    The subroutine assigns each particle (trace_species) an id for the initial state and saves this id in id_arr.
-#@ !    Additionally, the trajectory array and the config array with corresponding properties are updated.
-#@ !    The user must specify the number of steps and the species to be used for calculating the ACF.
-#@ !    Furthermore, the user can decide whether the trajectory is to be recorded (traj_on = ``True``) during the calculation of the ACF or not (traj_on = ``False``).
 #@ !    The user have to call this subroutine, before the kmc run can start to calculate the ACF
 #@ !
 #@ ! ARGUMENTS
 #@ !
-#@ !    * ``nr_of_steps`` writeable integer, where the number of kmc steps for the calculation of the acf will be stored.
 #@ !    * ``trace_species`` positive integer number that represents the species which is traced.
-#@ !    * ``traj_on`` writeable boolean, which turn on or off the recording of the trajectory.
 #@ !******
 #@ !---------------I/O variables---------------
 #@ integer(kind = iint) :: k, i, volume, species
@@ -329,7 +277,7 @@
 #@ 
 #@ !------ A. Garhammer 2016------
 #@ subroutine initialize_mean_squared_displacement(trace_species)
-#@ !****f* base/initialize_mean_squared_displacement
+#@ !****f* base_acf/initialize_mean_squared_displacement
 #@ ! FUNCTION
 #@ !    initialize_mean_squared_displacement allocates and initializes the arrays for calculating the mean squared displacement.
 #@ !    The subroutine assigns each particle (trace_species) an id for the initial state and saves this id in id_arr.
@@ -380,80 +328,35 @@
 #@ 
 #@ end subroutine initialize_mean_squared_displacement
 #@ 
-#@ !------ A. Garhammer 2015------
-#@ subroutine deallocate_acf()
-#@ !****f* base/deallocate_acf
-#@ ! FUNCTION
-#@ !    Deallocate all allocatable arrays: id_arr, time_intervalls,
-#@ !    trajectory.
-#@ !
-#@ ! ARGUMENTS
-#@ !
-#@ !    ``none``
-#@ !******
-#@ if(allocated(id_arr))then
-#@ deallocate(id_arr)
-#@ else
-#@ print *,"Warning: id_arr was not allocated, tried to deallocate."
-#@ endif
-#@ if(allocated(trajectory))then
-#@ deallocate(trajectory)
-#@ else
-#@ print *,"Warning: trajectroy was not allocated, tried to deallocate."
-#@ endif
-#@ 
-#@ 
-#@ end subroutine deallocate_acf
-#@ 
-#@ 
-#@ !------ A. Garhammer 2015------
-#@ !subroutine get_lattice(return_lattice)
-#@ !****f* base/get_lattice
-#@ ! FUNCTION
-#@ !    Returns the current lattice.
-#@ !
-#@ ! ARGUMENTS
-#@ !
-#@ !    * ``return_lattice`` writeable 1 dimensonal array, where the current lattice will be stored.
-#@ !******
-#@ !---------------I/O variables---------------
-#@ 
-#@ 
-#@ !integer(kind=iint), dimension(5),  intent(out) :: return_lattice
-#@ 
-#@ !return_lattice = lattice
-#@ 
-#@ !end subroutine get_lattice
 #@ 
 #@ !------ A. Garhammer 2016------
-#@ subroutine get_displacement(return_displacement)
-#@ !****f* base/get_property
+#@ subroutine get_displacement(particle_id,return_displacement)
+#@ !****f* base_acf/get_displacement
 #@ ! FUNCTION
-#@ !    Returns the displacement vector.
+#@ !    Returns displacement for a particle.
 #@ !
 #@ ! ARGUMENTS
 #@ !
-#@ !    * ``return_displacement`` writeable (nr_of_ions,3) dimensonal array, where the displacement of each particle will be stored.
+#@ !    * ``return_displacement`` writeable 3 dimensonal array, where the displacement of a particle will be stored.
 #@ !******
 #@ !---------------I/O variables---------------
 #@ 
+#@ integer(kind=iint), intent(in) :: particle_id
+#@ real(kind=rdouble), dimension(3),  intent(out) :: return_displacement
 #@ 
-#@ real(kind=rdouble), dimension(2,3),  intent(out) :: return_displacement
-#@ 
-#@ return_displacement = displacement
+#@ return_displacement = displacement(particle_id,:)
 #@ 
 #@ end subroutine get_displacement
 #@ 
 #@ !------ A. Garhammer 2015------
 #@ subroutine allocate_acf(nr_of_types)
-#@ !****f* base/allocate_property_acf
+#@ !****f* base_acf/allocate_acf
 #@ ! FUNCTION
-#@ !    Allocates the property vector, which we need for the calculation of the ACF and intializes it with zero.
-#@ !    The user have to call this subroutine, before the subroutines def_property_acf, initialize_acf and allocate_config_bin_acf can be called.
+#@ !    Allocates the complete arrays for the calculation of the ACF.
 #@ !
 #@ ! ARGUMENTS
 #@ !
-#@ !    * ``none``
+#@ !    * ``nr_of_types`` positive integer that represents the number of different types of properties
 #@ !******
 #@ !---------------I/O variables---------------
 #@ 
@@ -489,14 +392,13 @@
 #@ 
 #@ !------ A. Garhammer 2016------
 #@ subroutine allocate_trajectory(nr_of_steps)
-#@ !****f* base/allocate_property_acf
+#@ !****f* base_acf/allocate_trajectory
 #@ ! FUNCTION
-#@ !    Allocates the property vector, which we need for the calculation of the ACF and intializes it with zero.
-#@ !    The user have to call this subroutine, before the subroutines def_property_acf, initialize_acf and allocate_config_bin_acf can be called.
+#@ !    Allocates and intializes the trajecotry array.
 #@ !
 #@ ! ARGUMENTS
 #@ !
-#@ !    * ``none``
+#@ !    * ``nr_of_steps`` positive integer that represents the number of steps, for which the trajectory should be recorded.
 #@ !******
 #@ !---------------I/O variables---------------
 #@ integer(kind = iint), intent(in) :: nr_of_steps
@@ -515,7 +417,7 @@
 #@ 
 #@ !------ A. Garhammer 2016------
 #@ subroutine allocate_config_bin_acf(t_bin_arg,t_f_arg,safety_factor_arg,extended_nr_of_bins_arg)
-#@ !****f* base/allocate_config_bin_acf
+#@ !****f* base_acf/allocate_config_bin_acf
 #@ ! FUNCTION
 #@ !    allocate_config_bin_acf allocates and initializes the arrays and the variables for the on the fly calculation of the autocorrelation function (ACF).
 #@ !    The user must specify the number of bins and the decay time to be used for calculating the ACF.
@@ -566,13 +468,14 @@
 #@ 
 #@ !------ A. Garhammer 2016------
 #@ subroutine get_config_bin_acf(bin_index,return_config_bin)
-#@ !****f* base/get_config_bin_acf
+#@ !****f* base_acf/get_config_bin_acf
 #@ ! FUNCTION
-#@ !    Returns the config_bin_acf array.
+#@ !    Returns an entry of the config_bin array.
 #@ !
 #@ ! ARGUMENTS
 #@ !
-#@ !    * ``return_config_bin`` writeable 1 dimensonal array, where the property average over all particles and all wraps for every bin will be stored.
+#@ !    * ``bin_index`` positive integer that represents the bin index.
+#@ !    * ``return_config_bin`` writeable real, in which the entry of a bin is stored .
 #@ !******
 #@ !---------------I/O variables---------------
 #@ 
@@ -587,13 +490,14 @@
 #@ 
 #@ !------ A. Garhammer 2016------
 #@ subroutine get_counter_write_in_bin(bin_index,return_counter_write_in_bin)
-#@ !****f* base/get_config_bin_acf
+#@ !****f* base_acf/get_counter_write_in_bin
 #@ ! FUNCTION
-#@ !    Returns the config_bin_acf array.
+#@ !    Returns an entry of the config_bin_acf array.
 #@ !
 #@ ! ARGUMENTS
 #@ !
-#@ !    * ``return_config_bin`` writeable 1 dimensonal array, where the property average over all particles and all wraps for every bin will be stored.
+#@ !    * ``bin_index`` positive integer that represents the bin index.
+#@ !    * ``return_counter_write_in_bin`` writeable integer, in which the number contributions of one bin is stored .
 #@ !******
 #@ !---------------I/O variables---------------
 #@ 
@@ -605,28 +509,14 @@
 #@ 
 #@ return_counter_write_in_bin = counter_write_in_bin(bin_index)
 #@ 
-#@ end subroutine get_counter_write_in_bin
-#@ 
-#@ 
-#@ 
-#@ !------ A. Garhammer 2015------
-#@ subroutine deallocate_property_acf()
-#@ 
-#@ if(allocated(property_acf))then
-#@ deallocate(property_acf)
-#@ else
-#@ print *,"Warning: property_acf was not allocated, tried to deallocate."
-#@ endif
-#@ 
-#@ end subroutine deallocate_property_acf
-#@ 
+#@ end subroutine get_counter_write_in_bin 
 #@ 
 #@ 
 #@ !------ A. Garhammer 2015------
 #@ subroutine set_property_acf(site_nr_acf,input_property_acf)
-#@ !****f* base/def_property_acf
+#@ !****f* base_acf/set_property_acf
 #@ ! FUNCTION
-#@ !    def_property_acf defines the property of each site for the calculation of ACF.
+#@ !    set_property_acf sets the property of each site for the calculation of ACF.
 #@ !    The properties will be stored in property_acf.
 #@ !    The properties are defined by the user.
 #@ !    The user have to call this subroutine, before the subroutines initialize_acf and allocate_config_bin_acf can be called.
@@ -648,7 +538,7 @@
 #@ 
 #@ !------ A. Garhammer 2015------
 #@ subroutine set_types(type_index,input_property)
-#@ !****f* base/def_property_acf
+#@ !****f* base_acf/set_types
 #@ ! FUNCTION
 #@ !    def_property_acf defines the property of each site for the calculation of ACF.
 #@ !    The properties will be stored in property_acf.
@@ -673,7 +563,7 @@
 #@ 
 #@ !------ A. Garhammer 2016------
 #@ subroutine set_product_property(type_index_o,type_index,input_product_property)
-#@ !****f* base/def_property_acf
+#@ !****f* base_acf/set_product_property
 #@ ! FUNCTION
 #@ !    def_property_acf defines the property of each site for the calculation of ACF.
 #@ !    The properties will be stored in property_acf.
@@ -699,7 +589,7 @@
 #@ 
 #@ !------ A. Garhammer 2015------
 #@ subroutine get_property_acf(site,return_property_acf)
-#@ !****f* base_acf/get_property
+#@ !****f* base_acf/get_property_acf
 #@ ! FUNCTION
 #@ !    Returns the property vector.
 #@ !
@@ -743,7 +633,7 @@
 #@ 
 #@ !------ A. Garhammer 2016------
 #@ subroutine get_product_property(type_index_o,type_index,return_product_property)
-#@ !****f* base/get_product_property
+#@ !****f* base_acf/get_product_property
 #@ ! FUNCTION
 #@ !    Returns the property vector.
 #@ !
@@ -785,7 +675,7 @@
 #@ 
 #@ !------ A. Garhammer 2016------
 #@ subroutine get_buffer_acf(particle_id,return_buffer_acf)
-#@ !****f* base/get_property
+#@ !****f* base_acf/get_buffer_acf
 #@ ! FUNCTION
 #@ !    Returns the property vector.
 #@ !
@@ -895,7 +785,7 @@
 #@ 
 #@ !------ A. Garhammer 2015------
 #@ subroutine assign_particle_id(init_site,particle_id)
-#@ !****f* base/assign_particle_id
+#@ !****f* base_acf/assign_particle_id
 #@ ! FUNCTION
 #@ !    assign_particle_id gives the id of the particle which jumps, in one kmc step.
 #@ !
@@ -919,7 +809,7 @@
 #@ 
 #@ !------ A. Garhammer 2016------
 #@ subroutine update_displacement(particle_id,displace_coord)
-#@ !****f* base/update_displacement
+#@ !****f* base_acf/update_displacement
 #@ ! FUNCTION
 #@ !    update_displacement updates the displacement of the particle, which jumps, in one kmc step.
 #@ !
@@ -940,7 +830,7 @@
 #@ 
 #@ !------ A. Garhammer 2016------
 #@ subroutine calc_mean_squared_disp(mean_squared_disp)
-#@ !****f* base/calc_mean_squared_disp
+#@ !****f* base_acf/calc_mean_squared_disp
 #@ ! FUNCTION
 #@ !   calc_mean_squared_disp calculates the mean squared displacement after a kmc run.
 #@ !   The user have to call this subroutine after the kmc run, to get the mean squared displacement.
@@ -992,7 +882,7 @@
 #@ 
 #@ !------ A. Garhammer 2015------
 #@ subroutine update_id_arr(particle_id,init_site,fin_site)
-#@ !****f* base/update_id_arr
+#@ !****f* base_acf/update_id_arr
 #@ ! FUNCTION
 #@ !    update_id_arr updates id_arr after one kmc step.
 #@ !    The id of the particle, which jumps, is stored in the entry of id_arr which corresponds to the site, which is occupied     after the jump.
@@ -1018,7 +908,7 @@
 #@ 
 #@ !------ A. Garhammer 2016------
 #@ subroutine drain_process(exit_site, init_site, fin_site)
-#@ !****f* base/update_id_arr
+#@ !****f* base_acf/drain_process
 #@ ! FUNCTION
 #@ !    update_id_arr updates id_arr after one kmc step.
 #@ !    The id of the particle, which jumps, is stored in the entry of id_arr which corresponds to the site, which is occupied after the jump.
@@ -1057,7 +947,7 @@
 #@ 
 #@ !------ A. Garhammer 2016------
 #@ subroutine source_process(entry_site, init_site, fin_site)
-#@ !****f* base/update_id_arr
+#@ !****f* base_acf/source_process
 #@ ! FUNCTION
 #@ !    update_id_arr updates id_arr after one kmc step.
 #@ !    The id of the particle, which jumps, is stored in the entry of id_arr which corresponds to the site, which is occupied     after the jump.
@@ -1087,7 +977,7 @@
 #@ 
 #@ !------ A. Garhammer 2016------
 #@ subroutine update_buffer_acf(particle_id)
-#@ !****f* base/update_id_arr
+#@ !****f* base_acf/update_buffer_acf
 #@ ! FUNCTION
 #@ !    update_id_arr updates id_arr after one kmc step.
 #@ !    The id of the particle, which jumps, is stored in the entry of id_arr which corresponds to the site, which is occupied     after the jump.
@@ -1113,7 +1003,7 @@
 #@ 
 #@ !------ A. Garhammer 2016------
 #@ subroutine update_property_and_buffer_acf()
-#@ !****f* base/update_id_arr
+#@ !****f* base_acf/update_property_and_buffer_acf
 #@ ! FUNCTION
 #@ !    update_id_arr updates id_arr after one kmc step.
 #@ !    The id of the particle, which jumps, is stored in the entry of id_arr which corresponds to the site, which is occupied     after the jump.
@@ -1142,7 +1032,7 @@
 #@ 
 #@ !------ A. Garhammer 2016------
 #@ subroutine update_config_bin()
-#@ !****f* base/update_id_arr
+#@ !****f* base_acf/update_config_bin
 #@ ! FUNCTION
 #@ !    update_id_arr updates id_arr after one kmc step.
 #@ !    The id of the particle, which jumps, is stored in the entry of id_arr which corresponds to the site, which is occupied     after the jump.
@@ -1199,7 +1089,7 @@
 #@ end subroutine update_config_bin
 #@ 
 #@ subroutine update_after_wrap_acf()
-#@ !****f* base/update_id_arr
+#@ !****f* base_acf/update_after_wrap_acf
 #@ ! FUNCTION
 #@ !    update_id_arr updates id_arr after one kmc step.
 #@ !    The id of the particle, which jumps, is stored in the entry of id_arr which corresponds to the site, which is occupied     after the jump.
@@ -1225,54 +1115,12 @@
 #@ call update_nr_of_ions_before_kmc_step_acf()
 #@ end if
 #@ 
-#@ end subroutine update_after_wrap_acf
-#@ 
-#@ !------ A. Garhammer 2015------
-#@ !subroutine update_clocks_acf(ran_time)
-#@ !****f* base/update_clocks_acf
-#@ ! FUNCTION
-#@ !    Updates walltime, kmc_step, kmc_step_acf, time_intervalls and kmc_time.
-#@ !
-#@ ! ARGUMENTS
-#@ !
-#@ !    * ``ran_time`` Random real number :math:`\in [0,1]`
-#@ !******
-#@ !real(kind=rsingle), intent(in) :: ran_time
-#@ !real(kind=rsingle) :: runtime
-#@ 
-#@ 
-#@ ! Make sure ran_time is in the right interval
-#@ !ASSERT(ran_time.ge.0.,"base/update_clocks: ran_time variable has to be positive.")
-#@ !ASSERT(ran_time.le.1.,"base/update_clocks: ran_time variable has to be less than 1.")
-#@ 
-#@ !kmc_time_step = -log(ran_time)/accum_rates(nr_of_proc)
-#@ ! Make sure the difference is not so small, that it is rounded off
-#@ ! ASSERT(kmc_time+kmc_time_step>kmc_time,"base/update_clocks: precision of kmc_time is not sufficient")
-#@ 
-#@ !call CPU_TIME(runtime)
-#@ 
-#@ ! Make sure we are not dividing by zero
-#@ !ASSERT(accum_rates(nr_of_proc).gt.0,"base/update_clocks: total rate was found to be zero")
-#@ !kmc_time = kmc_time + kmc_time_step
-#@ !kmc_time_acf = kmc_time_acf + kmc_time_step
-#@ ! Increment kMC steps
-#@ !kmc_step = kmc_step + 1
-#@ !kmc_step_acf = kmc_step_acf + 1
-#@ 
-#@ 
-#@ ! Walltime is the time of this simulation run plus the walltime
-#@ ! when the simulation was reloaded, so walltime represents the total
-#@ ! walltime across reloads.
-#@ !walltime = start_time + runtime
-#@ !------ S. Matera 09/18/2012------
-#@ !-- 'call update_integ_rate()' is now directly called in do_kmc_step(s)
-#@ !call update_integ_rate()
-#@ !------ S. Matera 09/18/2012------
-#@ !end subroutine update_clocks_acf
+#@ end subroutine update_after_wrap_acf 
+#@
 #@ 
 #@ !------ A. Garhammer 2015------
 #@ !subroutine get_kmc_step_acf(return_kmc_step_acf)
-#@ !****f* base/get_kmc_step_acf
+#@ !****f* base_acf/get_kmc_step_acf
 #@ ! FUNCTION
 #@ !    Return the current kmc_step_acf
 #@ !
