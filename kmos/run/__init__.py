@@ -231,9 +231,10 @@ class KMC_Model(Process):
 
         # prepare procstat
         self.procstat = np.zeros((proclist.nr_of_proc), dtype=np.int64)
-         # prepare integ_rates (S.Matera 09/25/2012)
+        # prepare integ_rates (S.Matera 09/25/2012)
         self.integ_rates = np.zeros((proclist.nr_of_proc, ))
         self.time = 0.
+        self.integ_coverage = np.zeros((lattice.spuck, proclist.nr_of_species))
         self.steps = 0
 
         self.species_representation = {}
@@ -609,6 +610,11 @@ class KMC_Model(Process):
             for i in range(proclist.nr_of_proc):
                     atoms.integ_rates[i] = base.get_integ_rate(i + 1)
         # S. Matera 09/25/2012
+        if hasattr(self.base, 'get_integ_coverage'):
+            atoms.integ_coverage = np.zeros((lattice.spuck, proclist.nr_of_species))
+            for i in range(lattice.spuck):
+                for j in range(proclist.nr_of_species):
+                    atoms.integ_coverage[i, j] = base.get_integ_coverage(i + 1, j)
         delta_t = (atoms.kmc_time - self.time)
         delta_steps = atoms.kmc_step - self.steps
         atoms.delta_t = delta_t
@@ -636,6 +642,9 @@ class KMC_Model(Process):
                                     (atoms.integ_rates - self.integ_rates)
                                     / delta_t / size)
                 # S. Matera 09/25/2012
+                if hasattr(self.base, 'get_integ_coverage'):
+                    atoms.occupation_integ = (atoms.integ_coverage - self.integ_coverage).T / delta_t / size
+
             else:
                 atoms.tof_data = np.dot(self.tof_matrix, np.zeros_like(atoms.integ_rates))
                 atoms.tof_integ = np.dot(self.tof_matrix, np.zeros_like(atoms.integ_rates))
@@ -647,6 +656,8 @@ class KMC_Model(Process):
         # S. Matera 09/25/2012
         if hasattr(self.base, 'get_integ_rate'):
             self.integ_rates[:] = atoms.integ_rates
+        if hasattr(self.base, 'get_integ_coverage'):
+            self.integ_coverage[:] = atoms.integ_coverage
         # S. Matera 09/25/2012
         self.time = atoms.kmc_time
         self.step = atoms.kmc_step

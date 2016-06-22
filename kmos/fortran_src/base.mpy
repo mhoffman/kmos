@@ -53,6 +53,7 @@
 #@     replace_species, &
 #@     get_accum_rate, &
 #@     get_integ_rate, &
+#@     get_integ_coverage, &
 #@     get_avail_site, &
 #@     get_kmc_step, &
 #@     get_kmc_time, &
@@ -191,6 +192,7 @@ nr_of_species = len(data.species_list)
 nr_of_species_m1 =  nr_of_species - 1
 #@
 #@ integer(kind=iint), dimension({len_site_params}, 0:{nr_of_species_m1}), public :: coverage = 0
+#@ real(kind=rdouble), dimension({len_site_params}, 0:{nr_of_species_m1}), public :: integ_coverage = 0.
 #@
 #@ !--- Local copies of variables
 #@ integer(kind=iint) :: nr_of_proc
@@ -628,11 +630,26 @@ if options is None or options.avoid_default_state == False:
 else:
     nr_default_species = sorted([x.name for x in data.species_list]).index(data.species_list.default_species)
     #@     integer(kind=iint) :: default_coverage, active_volume
+    for species in data.species_list:
+        if not species.name.endswith('_') and not species.name == data.species_list.default_species:
+            nr_species = sorted([x.name for x in data.species_list]).index(species.name)
+            #@     integer(kind=iint) :: {species.name}_coverage
+    #@
+    #@
     #@     default_coverage = sum(coverage(:, {nr_default_species}))
+    active_species = []
+    for species in data.species_list:
+        if not species.name.endswith('_') and not species.name == data.species_list.default_species:
+            nr_species = sorted([x.name for x in data.species_list]).index(species.name)
+            #@     {species.name}_coverage = sum(coverage(:, {nr_species}))
+            active_species.append(species.name)
+    #@     ! active_species = {active_species}
+    #@
     #@     active_volume = volume
     for i, species_name in enumerate(sorted([x.name for x in data.species_list])):
         if species_name.endswith('_'):
             #@     active_volume = active_volume - sum(coverage(:, {i})) ! {species_name}
+    #@
     ##@     print *, "Default Coverage", default_coverage
     #@     i = 0
     #@     do
@@ -648,9 +665,16 @@ else:
     #@        ! {nr_default_species} = default_species = {default_species}
     process_names = sorted([process.name for process in data.process_list])
     default_species_creating_processes = {}
+    removing_species = {}
     for process in data.process_list:
         n = [x.species for x in process.action_list].count(default_species) - [x.species for x in process.condition_list].count(default_species)
         default_species_creating_processes.setdefault(n, []).append(process.name)
+        for species_name in active_species:
+            n_change = [x.species for x in process.action_list].count(species_name) - [x.species for x in process.condition_list].count(species_name)
+            if n_change < 0:
+                removing_species.setdefault(process.name, {})[species_name] = - n_change
+
+    #@     ! removing_species = {removing_species}
     ##@     ! {default_species_creating_processes}
     #@        if(.false.)then
     for default_creating in default_species_creating_processes:
@@ -664,7 +688,11 @@ else:
         else:
             for process in default_species_creating_processes[default_creating]:
                 process_i = process_names.index(process) + 1
-                #@        else if(default_coverage.eq.(active_volume - {default_creating}).and.(i.eq.{process_i}))then
+                #@        else if(default_coverage.ge.(active_volume - {default_creating} - 1).and.(i.eq.{process_i}) \\
+                for species_name in removing_species.get(process, {}):
+                    #@         .and.{species_name}_coverage .le.1 \\
+                #@        )then
+                # Rational: subtract '1' to ensure that at least 2 particles are present on the surface at any time.
                 #@            ! {process}
     #@        else
     #@            accum_rates(i) = accum_rates(i) + nr_of_sites(i)*rates(i)
@@ -689,7 +717,7 @@ else:
 #@     !    ``none``
 #@     !******
 #@
-#@     integer(kind=iint) :: i
+#@     integer(kind=iint) :: i, j
 #@
 #@
 #@     do i = 1, nr_of_proc
@@ -698,6 +726,12 @@ else:
 #@
 #@     ASSERT(accum_rates(nr_of_proc).gt.0.,"base/update_accum_rate found" // &
 #@         "accum_rates(nr_of_proc)=0, so no process is available at all")
+#@
+#@     do i = 1, {len_site_params}
+#@         do j = 0, {nr_of_species_m1}
+#@             integ_coverage(i, j) = integ_coverage(i, j) + coverage(i, j) * kmc_time_step
+#@         enddo
+#@     enddo
 #@
 #@ end subroutine update_integ_rate
 #@ !------ S. Matera 09/18/2012------
@@ -1063,6 +1097,26 @@ else:
 #@
 #@ end subroutine get_integ_rate
 #@ !------ S. Matera 09/18/2012------
+#@
+#@ subroutine get_integ_coverage(site, species, return_integ_coverage)
+#@     !****f* base/get_integ_coverage
+#@     ! FUNCTION
+#@     !    Return integrated coverage at a given site and species.
+#@     !
+#@     ! ARGUMENTS
+#@     !
+#@     !    * ``site`` integer representing the requested site.
+#@     !    * ``species`` integer representing the requested species.
+#@     !    * ``return_integ_coverage`` writeable real, where the requested integrated coverage will be stored.
+#@     !******
+#@     !---------------I/O variables---------------
+#@     integer(kind=iint), intent(in) :: site, species
+#@     real(kind=rdouble), intent(out) :: return_integ_coverage
+#@
+#@     return_integ_coverage = integ_coverage(site, species)
+#@
+#@ end subroutine get_integ_coverage
+#@
 #@
 #@ subroutine get_rate(proc_nr, return_rate)
 #@     !****f* base/get_rate
