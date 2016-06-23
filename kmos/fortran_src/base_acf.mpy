@@ -107,6 +107,12 @@
 #@ ! FUNCTION
 #@ !   Stores number of contributions to a bin.
 #@ !******
+#@ !------ A. Garhammer 2016------
+#@ integer(kind = iint) :: nr_of_types
+#@ !****v* base_acf/nr_of_types
+#@ ! FUNCTION
+#@ !   Stores number of different types of porperties.
+#@ !******
 #@ !------ A. Garhammer 2015------
 #@ integer(kind = iint) :: nr_of_ions
 #@ !****v* base_acf/nr_of_ions
@@ -124,6 +130,12 @@
 #@ !****v* base_acf/bin_index
 #@ ! FUNCTION
 #@ !   Index of bin which is needed for the calculation of the ACF.
+#@ !******
+#@ !------ A. Garhammer 2016------
+#@ integer(kind = iint) :: extended_nr_of_bins
+#@ !****v* base_acf/extended_nr_of_bins
+#@ ! FUNCTION
+#@ !   Number of bins after the multiplication with safety factor.
 #@ !******
 #@ !------ A. Garhammer 2016------
 #@ integer(kind = iint) :: nr_of_bins
@@ -349,21 +361,22 @@
 #@ end subroutine get_displacement
 #@ 
 #@ !------ A. Garhammer 2015------
-#@ subroutine allocate_acf(nr_of_types)
+#@ subroutine allocate_tracing_arr(nr_of_types_arg)
 #@ !****f* base_acf/allocate_acf
 #@ ! FUNCTION
 #@ !    Allocates the complete arrays for the calculation of the ACF.
 #@ !
 #@ ! ARGUMENTS
 #@ !
-#@ !    * ``nr_of_types`` positive integer that represents the number of different types of properties
+#@ !    * ``nr_of_types_arg`` positive integer that represents the number of different types of properties
 #@ !******
 #@ !---------------I/O variables---------------
 #@ 
-#@ integer(kind = iint), intent(in) :: nr_of_types
+#@ integer(kind = iint), intent(in) :: nr_of_types_arg
 #@ integer(kind = iint) :: volume
 #@ 
 #@ call get_volume(volume)
+#@ nr_of_types = nr_of_types_arg
 #@ 
 #@ allocate(types(nr_of_types))
 #@ types = 0
@@ -371,7 +384,7 @@
 #@ allocate(property_acf(0:volume))
 #@ property_acf = 0
 #@ 
-#@ allocate(property_o(volume))
+#@ allocate(property_o(0:volume))
 #@ property_o = 0
 #@ 
 #@ allocate(product_property(0:nr_of_types,0:nr_of_types))
@@ -388,7 +401,7 @@
 #@ 
 #@ 
 #@ 
-#@ end subroutine allocate_acf
+#@ end subroutine allocate_tracing_arr
 #@ 
 #@ !------ A. Garhammer 2016------
 #@ subroutine allocate_trajectory(nr_of_steps)
@@ -416,7 +429,7 @@
 #@ end subroutine allocate_trajectory
 #@ 
 #@ !------ A. Garhammer 2016------
-#@ subroutine allocate_config_bin_acf(t_bin_arg,t_f_arg,safety_factor_arg,extended_nr_of_bins_arg)
+#@ subroutine allocate_config_bin_acf(t_bin_arg,t_f_arg,safety_factor_t_f_arg,extending_factor_arg)
 #@ !****f* base_acf/allocate_config_bin_acf
 #@ ! FUNCTION
 #@ !    allocate_config_bin_acf allocates and initializes the arrays and the variables for the on the fly calculation of the autocorrelation function (ACF).
@@ -431,33 +444,32 @@
 #@ !---------------I/O variables---------------
 #@ real(kind = rdouble), intent(in) :: t_bin_arg
 #@ real(kind = rdouble), intent(in) :: t_f_arg
-#@ integer(kind = iint), intent(in), optional :: safety_factor_arg, extended_nr_of_bins_arg
-#@ integer(kind = iint) :: safety_factor, extended_nr_of_bins
+#@ integer(kind = iint), intent(in), optional :: safety_factor_t_f_arg, extending_factor_arg
+#@ integer(kind = iint) :: safety_factor_t_f, extending_factor
 #@ real(kind = rdouble) :: kmc_time
 #@ 
 #@ call get_kmc_time(kmc_time)
 #@ 
 #@ 
-#@ if(.not. present(safety_factor_arg) .or. safety_factor_arg.eq.0)then
-#@ safety_factor = 2
+#@ if(.not. present(safety_factor_t_f_arg) .or. safety_factor_t_f_arg.eq.0)then
+#@ safety_factor_t_f = 2
 #@ else
-#@ safety_factor = safety_factor_arg
+#@ safety_factor_t_f = safety_factor_t_f_arg
 #@ end if
 #@ 
-#@ if(.not. present(extended_nr_of_bins_arg) .or. extended_nr_of_bins_arg.eq.0)then
-#@ extended_nr_of_bins = 2
+#@ if(.not. present(extending_factor_arg) .or. extending_factor_arg.eq.0)then
+#@ extending_factor = 2
 #@ else
-#@ extended_nr_of_bins = extended_nr_of_bins_arg
+#@ extending_factor = extending_factor_arg
 #@ end if
-#@ print *, extended_nr_of_bins , present(extended_nr_of_bins_arg)
-#@ t_f = t_f_arg * safety_factor
+#@ t_f = t_f_arg * safety_factor_t_f
 #@ t_bin = t_bin_arg
 #@ nr_of_bins = int(t_f/t_bin + 1)
+#@ extended_nr_of_bins = nr_of_bins * extending_factor
 #@ t_f = nr_of_bins * t_bin
-#@ print *, t_f, t_bin, nr_of_bins
-#@ allocate(config_bin(nr_of_bins * extended_nr_of_bins))
+#@ allocate(config_bin(extended_nr_of_bins))
 #@ config_bin = 0
-#@ allocate(counter_write_in_bin(nr_of_bins * extended_nr_of_bins))
+#@ allocate(counter_write_in_bin(extended_nr_of_bins))
 #@ counter_write_in_bin = 0
 #@ bin_index = 0
 #@ wrap_count = 0
@@ -903,6 +915,7 @@
 #@ id_arr(init_site) = 0
 #@ id_arr(fin_site) = particle_id
 #@ site_arr(particle_id) = fin_site
+#@ site_arr(0) = 0
 #@ 
 #@ end subroutine update_id_arr
 #@ 
@@ -927,13 +940,15 @@
 #@ integer(kind = iint), intent(out) :: init_site, fin_site
 #@ 
 #@ 
-#@ nr_of_ions_before_kmc_step_acf = nr_of_ions - 1
 #@ particle_id = id_arr(exit_site)
 #@ site_arr(particle_id) = site_arr(nr_of_ions)
-#@ 
+#@  
 #@ id_arr(site_arr(particle_id)) = particle_id
 #@ site_arr(nr_of_ions) = 0
 #@ id_arr(exit_site) = 0
+#@ if( property_o(particle_id).ne.0 )then
+#@    nr_of_ions_before_kmc_step_acf = nr_of_ions_before_kmc_step_acf - 1 
+#@ endif
 #@ property_o(particle_id) = property_o(nr_of_ions)
 #@ property_o(nr_of_ions) = 0
 #@ init_site = site_arr(particle_id)
