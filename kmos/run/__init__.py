@@ -44,6 +44,8 @@ from copy import deepcopy
 from fnmatch import fnmatch
 from kmos import evaluate_rate_expression
 from kmos.utils import OrderedDict
+import kmos.utils.progressbar
+import kmos.run.png
 try:
     import kmos.run.png
 except:
@@ -88,6 +90,11 @@ except:
     proclist_constants = None
 
 try:
+    from kmc_model import proclist_pars
+except:
+    proclist_pars = None
+
+try:
     import kmc_settings as settings
 except Exception, e:
     settings = None
@@ -107,13 +114,17 @@ INTERACTIVE = True  # Turn it off for now because it doesn work reliably
 class ProclistProxy(object):
 
     def __dir__(selftr):
-        return list(set(dir(proclist) + dir(proclist_constants)))
+        return list(set(dir(proclist) +
+                        dir(proclist_constants) +
+                        dir(proclist_pars)))
 
     def __getattr__(self, attr):
         if attr in dir(proclist):
             return eval('proclist.%s' % attr)
         elif attr in dir(proclist_constants):
             return eval('proclist_constants.%s' % attr)
+        elif attr in dir(proclist_pars):
+            return eval('proclist_pars.%s' % attr)
         else:
             raise AttributeError('%s not found' % attr)
 
@@ -149,7 +160,10 @@ class KMC_Model(Process):
         self.banner = banner
         self.print_rates = print_rates
         self.parameters = Model_Parameters(self.print_rates)
-        self.rate_constants = Model_Rate_Constants()
+        if proclist_pars is None:
+            self.rate_constants = Model_Rate_Constants()
+        else:
+            self.rate_constants = Model_Rate_Constants_OTF()
 
         if random_seed is not None:
             settings.random_seed = random_seed
@@ -249,10 +263,12 @@ class KMC_Model(Process):
                     raise
             else:
                 self.species_representation[len(self.species_representation)] = Atoms()
+
         if hasattr(settings, 'species_tags'):
             self.species_tags = settings.species_tags
         else:
             self.species_tags = None
+
 
         if len(settings.lattice_representation):
             if hasattr(settings, 'substrate_layer'):
@@ -269,11 +285,28 @@ class KMC_Model(Process):
                     self.lattice_representation = lattice_representation[0]
         else:
             self.lattice_representation = Atoms()
+
         set_rate_constants(settings.parameters, self.print_rates)
+
         self.base.update_accum_rate()
         # S. matera 09/25/2012
         if hasattr(self.base, 'update_integ_rate'):
             self.base.update_integ_rate()
+
+        # # for otf backend only
+        # print('kmos.run : Updating proclist_pars!')
+        # if hasattr(self.proclist,'recalculate_rates_matrix'):
+        #     for key,entry in settings.parameters.iteritems():
+        #         # print('kmos.run key.lower() : %s' % key.lower())
+        #         # print('kmos.run entry[value] : %s' % entry.value)
+        #         # print('kmos.run result : %s' %
+        #         #       evaluate_rate_expression(entry['value'],settings.parameters))
+
+        #         # setattr(self.proclist,
+        #         #         key.lower(),
+        #         #         evaluate_rate_expression(entry['value'],settings.parameters)
+        #         #         )
+        #     self.proclist.recalculate_rates_matrix()
 
         # load cached configuration if available
         if self.cache_file is not None:
@@ -474,7 +507,10 @@ class KMC_Model(Process):
 
         """
 
-        from ase.io import write
+        import ase.io
+        import ase.data.colors
+        jmol_colors = ase.data.colors.jmol_colors
+
         for i in xrange(frames):
             atoms = self.get_atoms(reset_time_overrun=False)
             filename = '{prefix:s}_{i:06d}.{suffix:s}'.format(**locals())
@@ -484,10 +520,51 @@ class KMC_Model(Process):
                   #rotation=rotation,
                   #**kwargs)
 
-            if suffix == 'traj':
+            if suffix == 'png':
+                writer = kmos.run.png.MyPNG(atoms, show_unit_cell=True, scale=20, model=self, **kwargs).write(filename, resolution=150)
+            elif suffix == 'pov':
+                rescale = 0.5
+                radii_dict2 = {'Ni':0.9*rescale,
+                             'O': 1.0*rescale,
+                             'H': 0.5*rescale}
+
+                radii2 = []
+                water_radii_dict2 = {'O':1.0*rescale, 'H': 0.5*rescale, 'Ni':0.9*rescale}
+                colors = []
+                colors2 = []
+                for atom in atoms:
+                     radii2+=[water_radii_dict2[atom.symbol]]
+                     colors+=[(jmol_colors[atom.number][0],jmol_colors[atom.number][1],jmol_colors[atom.number][2],0.00,0.00)]
+                     colors2+=[(jmol_colors[atom.number][0],jmol_colors[atom.number][1],jmol_colors[atom.number][2])]
+
+                BA = []
+                distances = atoms.get_all_distances()
+                for i, j in zip(*np.where(distances<2.2)):
+                    if distances[i, j] < 0.1 :
+                        continue
+                    if not (atoms[i].symbol=='H' or atoms[j].symbol=='H') :
+                        BA += [[i, j]]
+                    elif distances[i, j] < 1.5:
+                        BA += [[i, j]]
+
+                ase.io.write(filename, atoms, run_povray=False,display=False,pause=False,
+                             #rotation='-90x,30y',
+                             #rotation='-90x,30y',
+                             show_unit_cell=1,
+                             #bbox=(-7,17,0,20),
+                             #bbox=(-8,12,8,28),
+                             bbox=(-(3.0*20 + 2) ,-2,7*20,5.5*20),
+                             textures=['ase3' for atom in atoms],
+                             canvas_height=500,
+                             camera_type='orthographic',
+                             bondatoms=BA,
+                             radii=radii2,
+                             colors=colors2)
+            elif suffix == 'traj':
                 write(filename, atoms)
             else:
                 writer = kmos.run.png.MyPNG(atoms, show_unit_cell=True, scale=20, model=self, **kwargs).write(filename, resolution=150)
+
             if verbose:
                 print('Wrote {filename}'.format(**locals()))
             self.do_steps(skip)
@@ -667,7 +744,7 @@ class KMC_Model(Process):
                      self.get_occupation_header()))
         return std_header
 
-    def get_std_sampled_data(self, samples, sample_size, tof_method='integ', output='str', reset_time_overrun=False):
+    def get_std_sampled_data(self, samples, sample_size, tof_method='integ', output='str', reset_time_overrun=False, show_progress=False):
         """Sample an average model and return TOFs and coverages
         in a standardized format :
 
@@ -709,6 +786,9 @@ class KMC_Model(Process):
         t0 = self.base.get_kmc_time()
         step0 = self.base.get_kmc_step()
 
+        if show_progress:
+            progress_bar = kmos.utils.progressbar.ProgressBar()
+
         # sample over trajectory
         for sample in xrange(samples):
             self.do_steps(sample_size/samples)
@@ -723,6 +803,9 @@ class KMC_Model(Process):
                 tofs.append(atoms.tof_integ.flatten())
             else:
                 raise NotImplementedError('tof_method="{tof_method}" not supported. Can be either procrates or integ.'.format(**locals()))
+
+            if show_progress:
+                progress_bar.render(1+int(float(sample)/samples*100), 'Sampling')
 
         # calculate time averages
         if sum(step_ts) == 0.:
@@ -965,7 +1048,10 @@ class KMC_Model(Process):
             if nrofsites:
                 rate = self.base.get_rate(i + 1)
                 prod = nrofsites * rate
-                accum_rate += prod
+                if self.get_backend() in ['otf',]:
+                    accum_rate += rate
+                else:
+                    accum_rate += prod
                 entries.append((nrofsites, rate, prod, process_name))
 
         # reorder
@@ -990,13 +1076,24 @@ class KMC_Model(Process):
         res = ''
         total_contribution = 0
         res += ('+' + 118 * '-' + '+' + '\n')
-        res += '|{0:<118s}|\n'.format('(cumulative)    nrofsites * rate_constant'
-                                      '    = rate            [name]')
+        if self.get_backend() in ['otf']:
+            res += '|{0:<118s}|\n'.format('(cumulative)    nrofsites,  rate         '
+                                          '                      [name]')
+        else:
+            res += '|{0:<118s}|\n'.format('(cumulative)    nrofsites * rate_constant'
+                                          '    = rate            [name]')
+
         res += ('+' + 118 * '-' + '+' + '\n')
         for entry in entries:
-            total_contribution += float(entry[2])
+            if self.get_backend() in ['otf']:
+                total_contribution += float(entry[1])
+            else:
+                total_contribution += float(entry[2])
             percent = '(%8.4f %%)' % (total_contribution * 100 / accum_rate)
-            entry = '% 12i * % 8.4e s^-1 = %8.4e s^-1 [%s]' % entry
+            if self.get_backend() in ['otf']:
+                entry = '{0: 12d},  {1: 8.4e} s^-1              [{3:s}]'.format(*entry)
+            else:
+                entry = '% 12i * % 8.4e s^-1 = %8.4e s^-1 [%s]' % entry
             res += '|{0:<118s}|\n'.format('%s %s' % (percent, entry))
 
         res += ('+' + 118 * '-' + '+' + '\n')
@@ -1218,7 +1315,7 @@ class KMC_Model(Process):
         for x in range(self.lattice.system_size[0]):
             for y in range(self.lattice.system_size[1]):
                 for z in range(self.lattice.system_size[2]):
-                    if self.get_backend() == 'lat_int':
+                    if self.get_backend() in ['lat_int','otf']:
                         eval('self.proclist.touchup_cell([%i, %i, %i, 0])'
                             % (x, y, z))
                     else:
@@ -1611,6 +1708,60 @@ class Model_Rate_Constants(object):
         for i, proc in enumerate(sorted(settings.rate_constants.keys())):
             if pattern is None or fnmatch(proc, pattern):
                 base.set_rate_const(i + 1, rate_constant)
+
+class Model_Rate_Constants_OTF(Model_Rate_Constants):
+    """
+    A subclass of Model_Rate_Constants to be used with the
+    otf backend
+    """
+    def __call__(self, pattern=None, interactive=False, **kwargs):
+        """ Return rate constants
+
+        Can be called with keyword arguments of the form
+        nr_<species>_<flag>, to calculate the rate for
+        the appropiate value of the chemical environment
+        """
+        res = ''
+        for i, proc in enumerate(sorted(settings.rate_constants.keys())):
+            if pattern is None or fnmatch(proc,pattern):
+                res += ('# %s: %.2e s^{-1}\n' % (proc,
+                                                 self._rate(proc,**kwargs)))
+
+        if interactive:
+            print(res)
+        else:
+            return res
+
+    def _rate(self,procname,**kwargs):
+        nr_vars = ''.join(getattr(proclist_pars,
+                                  'byst_{}'.format(procname.lower()))
+                          ).split()
+        if nr_vars:
+            input_array = np.zeros([len(nr_vars)],int)
+            for nr_var, value in kwargs.iteritems():
+                if nr_var in nr_vars:
+                    input_array[nr_vars.index(nr_var)] = int(value)
+
+            return getattr(proclist_pars,
+                           'rate_{}'.format(procname.lower()))(input_array)
+        else:
+            return getattr(proclist_pars,
+                           'rate_{}'.format(procname.lower()))()
+
+    def bystanders(self, pattern=None, interactive=True):
+        """ Print the bystanders defined for processes"""
+
+        res = ''
+        for i, proc in enumerate(sorted(settings.rate_constants.keys())):
+            if pattern is None or fnmatch(proc,pattern):
+                bysts = ''.join(getattr(proclist_pars,
+                                        'byst_{}'.format(proc.lower())))
+                res += ('# %s: %s\n' % (proc,
+                                        bysts))
+        if interactive:
+            print(res)
+        else:
+            return res
 
 
 class ModelParameter(object):
@@ -2106,6 +2257,27 @@ def set_rate_constants(parameters=None, print_rates=None):
                     % (rate_expr, proc, e))
     if print_rates:
         print('-------------------')
+
+    # FIXME
+    # update chemical potentials (works for otf backend only)
+    if hasattr(proclist,'update_user_parameter'):
+         for name,entry in settings.parameters.iteritems():
+             proclist.update_user_parameter(
+                 getattr(proclist,name.lower()),
+                 evaluate_rate_expression(
+                 # FIXME Take first item of lists
+                 # to support for deprecated 'lattice_size' parameter
+                     str(entry['value']).split(' ')[0],
+                                          parameters))
+
+    if hasattr(proclist,'update_chempot'):
+         for chempot in settings.chemical_potentials:
+             proclist.update_chempot(
+                 getattr(proclist,chempot.lower()),
+                 evaluate_rate_expression(chempot,parameters))
+
+    if hasattr(proclist,'recalculate_rates_matrix'):
+         proclist.recalculate_rates_matrix()
 
 
 def import_ase():
