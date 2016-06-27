@@ -173,6 +173,12 @@
 #@ ! FUNCTION
 #@ !   Number of kMC steps executed for the calculation of acf.
 #@ !******
+#@ !------ A. Garhammer 2015------
+#@ integer(kind=iint) :: nr_of_steps
+#@ !****v* base_acf/nr_of_steps
+#@ ! FUNCTION
+#@ !   Number of kMC steps for which the trajectory is recorded.
+#@ !******
 #@ 
 #@ 
 #@ !****************
@@ -319,7 +325,7 @@
 #@ 
 #@ 
 #@ 
-#@ allocate(displacement(nr_of_ions, 3))
+#@ allocate(displacement(0:nr_of_ions, 3))
 #@ displacement = 0
 #@ 
 #@ 
@@ -404,25 +410,25 @@
 #@ end subroutine allocate_tracing_arr
 #@ 
 #@ !------ A. Garhammer 2016------
-#@ subroutine allocate_trajectory(nr_of_steps)
+#@ subroutine allocate_trajectory(nr_of_steps_arg)
 #@ !****f* base_acf/allocate_trajectory
 #@ ! FUNCTION
 #@ !    Allocates and intializes the trajecotry array.
 #@ !
 #@ ! ARGUMENTS
 #@ !
-#@ !    * ``nr_of_steps`` positive integer that represents the number of steps, for which the trajectory should be recorded.
+#@ !    * ``None``.
 #@ !******
 #@ !---------------I/O variables---------------
-#@ integer(kind = iint), intent(in) :: nr_of_steps
-#@ integer(kind = iint) :: i, volume
+#@ integer(kind = iint), intent(in) :: nr_of_steps_arg
+#@ integer(kind = iint) :: i
 #@ 
-#@ call get_volume(volume)
+#@ nr_of_steps = nr_of_steps_arg 
 #@ 
-#@ allocate(trajectory(volume, nr_of_steps + 1))
+#@ allocate(trajectory(0:nr_of_ions, nr_of_steps + 1))
 #@ trajectory = 0
 #@ 
-#@ do i = 1 , volume
+#@ do i = 1 , nr_of_ions
 #@ trajectory(i,1) = property_acf(site_arr(i))
 #@ enddo
 #@ 
@@ -785,7 +791,7 @@
 #@ !******
 #@ !---------------I/O variables---------------
 #@ integer(kind = iint), intent(in) :: particle_id
-#@ integer(kind = iint), intent(in) :: kmc_step_acf
+#@ integer(kind = ilong), intent(in) :: kmc_step_acf
 #@ 
 #@ 
 #@ trajectory(:,kmc_step_acf+1) = trajectory(:,kmc_step_acf)
@@ -1132,9 +1138,27 @@
 #@ 
 #@ end subroutine update_after_wrap_acf 
 #@
+#@
+#@ !------ A. Garhammer 2015------
+#@ subroutine update_kmc_step_acf()
+#@ !****f* base_acf/update_kmc_step_acf
+#@ ! FUNCTION
+#@ !    Updates kmc_step_acf
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    * ``None`` Writeable integer
+#@ !******
+#@ !---------------I/O variables---------------
+#@ 
+#@ 
+#@ kmc_step_acf = kmc_step_acf + 1
+#@ 
+#@ end subroutine update_kmc_step_acf
+#@
 #@ 
 #@ !------ A. Garhammer 2015------
-#@ !subroutine get_kmc_step_acf(return_kmc_step_acf)
+#@ subroutine get_kmc_step_acf(return_kmc_step_acf)
 #@ !****f* base_acf/get_kmc_step_acf
 #@ ! FUNCTION
 #@ !    Return the current kmc_step_acf
@@ -1144,11 +1168,11 @@
 #@ !    * ``kmc_step_acf`` Writeable integer
 #@ !******
 #@ !---------------I/O variables---------------
-#@ !integer(kind=iint), intent(out) :: return_kmc_step_acf
+#@ integer(kind=ilong), intent(out) :: return_kmc_step_acf
 #@ 
-#@ !return_kmc_step_acf = kmc_step_acf
+#@ return_kmc_step_acf = kmc_step_acf
 #@ 
-#@ !end subroutine get_kmc_step_acf
+#@ end subroutine get_kmc_step_acf
 #@ 
 #@ 
 #@ 

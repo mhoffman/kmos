@@ -62,9 +62,26 @@ def get_product_property():
             product_property[0,i,j] = kmc_model.base_acf.get_product_property(i + 1, j + 1)
     return product_property
 
+def get_trajectory():
+    trajectory = np.zeros((1,kmc_model.base_acf.nr_of_ions,kmc_model.base_acf.nr_of_steps + 1))
+    for i in range(kmc_model.base_acf.nr_of_ions):
+        for j in range(kmc_model.base_acf.nr_of_steps + 1):
+            trajectory[0,i,j] = kmc_model.base_acf.get_trajectory(i + 1, j + 1)
+    return trajectory
+
+def get_displacement():
+    displacement = np.zeros((1,kmc_model.base_acf.nr_of_ions,3))
+    for i in range(kmc_model.base_acf.nr_of_ions):
+           displacement[0,i] = kmc_model.base_acf.get_displacement(i + 1)
+    return displacement
+
 def allocate_acf(nr_of_types,t_bin,t_f,safety_factor=None,extending_factor=None):
     kmc_model.base_acf.allocate_tracing_arr(nr_of_types)
     kmc_model.base_acf.allocate_config_bin_acf(t_bin,t_f,safety_factor,extending_factor)
+
+def allocate_trajectory(nr_of_steps):
+    kmc_model.base_acf.allocate_trajectory(nr_of_steps)
+    
     
 def set_types_acf(site_property):
     types = get_types_acf()
@@ -79,17 +96,31 @@ def calc_product_property():
         for j in range(kmc_model.base_acf.nr_of_types):
             kmc_model.base_acf.set_product_property(i + 1,j + 1,types[i]*types[j])
 
-def do_kmc_steps_acf(n):
-    kmc_model.proclist_acf.do_kmc_steps_acf(n)
+def do_kmc_steps_acf(n,traj_on = False):
+    kmc_model.proclist_acf.do_kmc_steps_acf(n,traj_on)
+
+def do_kmc_steps_displacement(n,traj_on = False):
+    kmc_model.proclist_acf.do_kmc_steps_displacement(n,traj_on)
 
 def initialize_acf(species):
     trace_species = getattr(kmc_model.proclist,species.lower())
     kmc_model.base_acf.initialize_acf(trace_species)
-     
+
+def initialize_msd(species):
+    trace_species = getattr(kmc_model.proclist,species.lower())
+    kmc_model.base_acf.initialize_mean_squared_displacement(trace_species)    
+
+def calc_msd():
+    msd =  kmc_model.base_acf.calc_mean_squared_disp()
+    return msd
 
 def set_property_acf(layer_site_name,property_type):
     for i in range((kmc_model.base.get_volume())): 
-        if i + 1 % kmc_model.lattice.spuck == getattr(kmc_model.lattice,layer_site_name.lower()):
+       if ((i + 1) % kmc_model.lattice.spuck) + kmc_model.lattice.spuck == getattr(kmc_model.lattice,layer_site_name.lower()):
+           print i + 1
+           kmc_model.base_acf.set_property_acf(i + 1,property_type)
+       if (i + 1) % kmc_model.lattice.spuck == getattr(kmc_model.lattice,layer_site_name.lower()):
+           print i + 1
            kmc_model.base_acf.set_property_acf(i + 1,property_type)
 
 def get_acf(normalization = False):
