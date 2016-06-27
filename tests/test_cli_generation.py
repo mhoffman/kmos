@@ -58,10 +58,13 @@ def generate_model():
 
 def test_model_generation_and_export():
     from kmos.io import export_source
+    import kmos.cli
+
+    options, _ = kmos.cli.get_options('help')
     model = generate_model()
     cwd = os.path.abspath(os.curdir)
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    assert export_source(model)
+    assert export_source(model, options=options)
     os.chdir(cwd)
 
 if __name__ == '__main__':
