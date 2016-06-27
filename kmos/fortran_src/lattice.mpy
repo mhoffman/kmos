@@ -27,6 +27,8 @@ gpl = self._gpl_message()
 #@     base_allocate_system => allocate_system, &
 #@     base_can_do => can_do, &
 #@     base_del_proc => del_proc, &
+if options.backend in ['otf',]:
+    #@     base_update_rates_matrix => update_rates_matrix, &
 #@     determine_procsite, &
 #@     base_replace_species => replace_species, &
 #@     base_get_species => get_species, &
@@ -279,10 +281,18 @@ if data.meta.debug > 1:
 #@ end subroutine deallocate_system
 #@
 
-#@ subroutine add_proc(proc, site)
+if options.backend in ['local_smart','lat_int']:
+    #@ subroutine add_proc(proc, site)
+elif options.backend in ['otf',]:
+    #@ subroutine add_proc(proc, site, rate)
+else:
+    raise UserWarning('Unknown backend')
+
 #@
 #@     integer(kind=iint), intent(in) :: proc
 #@     integer(kind=iint), dimension(4), intent(in) :: site
+if options.backend in ['otf',]:
+    #@     real(kind=rdouble), intent(in) :: rate
 #@
 #@     integer(kind=iint) :: nr
 #@
@@ -292,10 +302,42 @@ if data.meta.debug > 1:
 #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
 if data.meta.debug > 1:
     #@ print *,"    LATTICE/ADD_PROC/SITE_NR",nr
-#@     call base_add_proc(proc, nr)
+
+if options.backend in ['local_smart','lat_int']:
+    #@     call base_add_proc(proc, nr)
+elif options.backend in ['otf',]:
+    #@     call base_add_proc(proc, nr, rate)
+else:
+    raise UserWarning('Unknown backend')
+
 #@
 #@ end subroutine add_proc
 #@
+
+###############################
+if options.backend in ['otf',]:
+    #@ subroutine update_rates_matrix(proc, site, rate)
+    #@     integer(kind=iint), intent(in) :: proc
+    #@     integer(kind=iint), dimension(4), intent(in) :: site
+    #@     real(kind=rdouble), intent(in) :: rate
+    #@     integer(kind=iint) :: nr
+    #@
+    if data.meta.debug > 1:
+        #@ print *,"    LATTICE/UPDATE_RATES_MATRIX/PROC ",proc
+        #@ print *,"    LATTICE/UPDATE_RATES_MATRIX/SITE ",site
+        #@ print *,"    LATTICE/UPDATE_RATES_MATRIX/RATE ",rate
+    #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
+    if data.meta.debug > 1:
+        #@ print *,"    LATTICE/UPDATE_RATES_MATRIX/SITE_NR",nr
+
+    #@     call base_update_rates_matrix(proc, nr, rate)
+    if data.meta.debug > 1:
+        #@ print *,"    LATTICE/UPDATE_RATES_MATRIX Done base_update_rates_matrix",nr
+    #@
+    #@ end subroutine update_rates_matrix
+elif not options.backend in ['local_smart','lat_int']:
+    raise UserWarning('Unknown backend')
+###########################################3
 
 #@ subroutine del_proc(proc, site)
 #@
@@ -315,7 +357,10 @@ if data.meta.debug > 1:
 #@ end subroutine del_proc
 #@
 
-#@ pure function can_do(proc, site)
+if data.meta.debug > 2:
+    #@ function can_do(proc, site)
+else:
+    #@ pure function can_do(proc, site)
 #@
 #@     logical :: can_do
 #@     integer(kind=iint), intent(in) :: proc
@@ -323,8 +368,14 @@ if data.meta.debug > 1:
 #@
 #@     integer(kind=iint) :: nr
 #@
+if data.meta.debug > 2:
+   #@ print *,"    LATTICE/CAN_DO/PROC ", proc
+   #@ print *,"    LATTICE/CAN_DO/SITE ", site
+
 #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
 #@     can_do = base_can_do(proc, nr)
+if data.meta.debug > 2:
+   #@ print *,"    LATTICE/CAN_DO/ result ", can_do
 #@
 #@ end function can_do
 #@
@@ -337,6 +388,12 @@ if data.meta.debug > 1:
 #@     integer(kind=iint) :: nr
 #@
 #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
+if data.meta.debug > 1:
+    #@
+    #@    print *,"LATTICE/REPLACE_SPECIES/SITE ",site
+    #@    print *,"LATTICE/REPLACE_SPECIES/SITE_NR ",nr
+    #@    print *,"LATTICE/REPLACE_SPECIES/OLD_SPECIES ",old_species
+    #@    print *,"LATTICE/REPLACE_SPECIES/NEW_SPECIES ",new_species
 #@     call base_replace_species(nr, old_species, new_species)
 #@
 #@ end subroutine replace_species

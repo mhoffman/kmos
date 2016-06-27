@@ -16,6 +16,7 @@ kmos.
   workflows
   data_models
   kmos_speed
+  otf_backend
   proc_syntax
   coord_syntax
 

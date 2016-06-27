@@ -1,5 +1,13 @@
+# Bit compiled files
 *.pyc
+
 tags
 dist
 MANIFEST
 /build
+
+# emacs backup files
+*~
+
+# Ignore test export folders
+tests/export_test/test_export*
