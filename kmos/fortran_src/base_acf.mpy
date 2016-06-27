@@ -162,7 +162,7 @@
 #@ !  Stores the starting time after the decorrelation of one cycle was reached.
 #@ !******
 #@ !------ A. Garhammer 2016------
-#@ integer(kind=iint) :: wrap_count
+#@ real(kind=rdouble) :: wrap_count
 #@ !****v* base_acf/wrap_count
 #@ ! FUNCTION
 #@ !  Number of wraps for the time average of every bin.
@@ -179,7 +179,13 @@
 #@ ! FUNCTION
 #@ !   Number of kMC steps for which the trajectory is recorded.
 #@ !******
-#@ 
+#@ !------ A. Garhammer 2016------
+#@ real(kind=rdouble) :: nr_of_annhilations
+#@ !****v* base_acf/nr_of_annhilations
+#@ ! FUNCTION
+#@ !   Number of annhilations.
+#@ !******
+#@
 #@ 
 #@ !****************
 #@ contains
@@ -429,7 +435,7 @@
 #@ trajectory = 0
 #@ 
 #@ do i = 1 , nr_of_ions
-#@ trajectory(i,1) = property_acf(site_arr(i))
+#@ trajectory(i,1) = site_arr(i)
 #@ enddo
 #@ 
 #@ end subroutine allocate_trajectory
@@ -479,9 +485,22 @@
 #@ counter_write_in_bin = 0
 #@ bin_index = 0
 #@ wrap_count = 0
+#@ nr_of_annhilations = 0
 #@ t_o = kmc_time
 #@ 
-#@ 
+#@ print *, "+------------------------------------------------------------+"
+#@ print *, "|Decorrelation time|", t_f, "s"
+#@ print *, "+------------------------------------------------------------+"
+#@ print *, "|Number of bins for ACF|", nr_of_bins
+#@ print *, "+------------------------------------------------------------+"
+#@ print *, "|Total number of bins|", extended_nr_of_bins
+#@ print *, "+------------------------------------------------------------+"
+#@ print *, "|Safety factor decorrelation time|", safety_factor_t_f
+#@ print *, "+------------------------------------------------------------+"
+#@ print *, "|Extending factor number of bins|", extending_factor
+#@ print *, "+------------------------------------------------------------+"
+#@
+#@
 #@ end subroutine allocate_config_bin_acf
 #@ 
 #@ !------ A. Garhammer 2016------
@@ -795,7 +814,7 @@
 #@ 
 #@ 
 #@ trajectory(:,kmc_step_acf+1) = trajectory(:,kmc_step_acf)
-#@ trajectory(particle_id,kmc_step_acf+1) = property_acf(site_arr(particle_id))
+#@ trajectory(particle_id,kmc_step_acf+1) = site_arr(particle_id)
 #@ 
 #@ 
 #@ end subroutine update_trajectory
@@ -962,7 +981,7 @@
 #@ buffer_acf(particle_id) = buffer_acf(nr_of_ions)
 #@ buffer_acf(nr_of_ions) = 0
 #@ nr_of_ions = nr_of_ions - 1
-#@ 
+#@ nr_of_annhilations = nr_of_annhilations + 1
 #@ 
 #@ end subroutine drain_process
 #@ 

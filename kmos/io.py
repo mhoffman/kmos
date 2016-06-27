@@ -212,6 +212,8 @@ class ProcListWriter():
                   '    get_kmc_step_acf, &\n'
                   '    update_trajectory, &\n'
                   '    update_displacement, &\n'
+                  '    nr_of_annhilations, &\n'
+                  '    wrap_count, &\n'
                   '    update_after_wrap_acf\n\n'
                   'use lattice\n\n'
                   'use proclist\n' ))
