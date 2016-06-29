@@ -8,15 +8,15 @@ What other kMC codes are there?
   that are in some form released on the intertubes are
   with no claim of completeness :
 
-  - `akmc <http://theory.cm.utexas.edu/vtsttools/akmc/>`_ (G. Henkelman)
+  - `akmc <http://theory.cm.utexas.edu/eon/akmc.html>`_ (G. Henkelman)
   - `Carlos <http://www.win.tue.nl/~johanl/projects/Carlos/>`_ (J. Lukkien)
   - `chimp <http://www.koders.com/cpp/fid7FA324E3E76DB9874158BE3CF722405FA44AECE8.aspx?s=mdef%3Ainsert>`_ (D. Dooling)
   - `KMCLib <https://github.com/leetmaa/KMCLib>`_ (M. Leetma)
-  - `mapkmc <http://www.dion.che.udel.edu/downloads.php>`_ (D. Vlachos)
+  - `Graph Theoretical KMC Code <http://dion.che.udel.edu/downloads/>`_ (D. Vlachos)
   - `Monty <http://www.vsc.science.ru.nl/deij/monty.html>`_ (SXM Boerrrigter)
   - `MoCKa <http://www.itcp.kit.edu/deutschmann/288.php>`_ (L. Kunz)
-  - `NASCAM <http://www.fundp.ac.be/sciences/physique/larn/NASCAM-Homepage>`_ (S. Lucas)
-  - `Spparks <http://www.cs.sandia.gov/~sjplimp/spparks/doc/Manual.html>`_ (S. Plimpton)
+  - `NASCAM <https://www.unamur.be/sciences/physique/pmr/telechargement/logiciels/nascam>`_ (S. Lucas)
+  - `Spparks <http://spparks.sandia.gov/doc/Manual.html>`_ (S. Plimpton)
   - `Zacros <http://zacros.org/>`_ (M. Stamatakis)
 
   Though The Google might find you some more.

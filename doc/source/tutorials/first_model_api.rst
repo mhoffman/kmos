@@ -59,7 +59,7 @@ desorption on a single crystal surface you would say ::
                  representation="Atoms('CO',[[0,0,0],[0,0,1.2]])")
 
 where the string passed as `representation` is a string representing
-a CO molecule which can be evaluated in `ASE namespace <https://wiki.fysik.dtu.dk/ase/ase/atoms.html>`_.
+a CO molecule which can be evaluated in `ASE namespace <https://gitlab.com/ase/ase/repository/archive.zip?ref=master>`_.
 
 Once you have all species declared is a good time to think about the geometry.
 To keep it simple we will stick with a simple-cubic lattice in 2D which
@@ -157,12 +157,16 @@ rate constant. Written down in code this looks as follows ::
                  actions=[Action(coord=coord, species='CO')],
                  rate_constant='p_CO*bar*A/sqrt(2*pi*umass*m_CO/beta)')
 
+
+
+.. note:: In order to ensure correct functioning of the kmos kMC solver every action should have a corresponding condition for the same coordinate.
+
 Now you might wonder, how come we can simply use m_CO and beta and such.
 Well, that is because the evaluator will to some trickery to resolve such
 terms. So beta will be first be translated into 1/(kboltzmann*T) and as
 long as you have set a parameter `T` before, this will go through. Same
 is true for m_CO, here the atomic masses are looked up and added. Note
-that we need conversion factors of bar and umass.
+that we need conversion factors of `bar` and `umass`.
 
 Then the desorption process is almost the same, except the reverse::
 
@@ -194,7 +198,7 @@ In order to add processes on more than one site possible spanning across unit
 cells, there is a shorthand as well. The full-fledged syntax for each
 coordinate is ::
 
-  name.offset.lattice
+  "<site-name>.<offset>.<lattice>"
 
 check :ref:`manual_coord_generation` for details.
 

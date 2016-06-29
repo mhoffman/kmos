@@ -158,7 +158,7 @@ and outlook I recommend the one by Reuter [7]_ .
        `link <http://apps.nrbook.com/c/index.html>`_
 
 .. [4] Voter, Arthur F. “Introduction to the Kinetic Monte Carlo Method.” In Radiation Effects in Solids, 1–23, 2007. http://dx.doi.org/10.1007/978-1-4020-5295-8_1.
-       `link <http://www.ipam.ucla.edu/publications/matut/matut_5898_preprint.pdf>`_
+       `link <http://public.lanl.gov/afv/Voter2007-KMCchapter.pdf>`_
 
 .. [5] Fichthorn, Kristen A., and W. H. Weinberg. “Theoretical Foundations of Dynamical Monte Carlo Simulations.” The Journal of Chemical Physics 95, no. 2 (July 15, 1991): 1090–1096.
        `link <http://jcp.aip.org/resource/1/jcpsa6/v95/i2/p1090_s1>`_
