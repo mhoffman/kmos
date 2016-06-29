@@ -1,0 +1,434 @@
+gpl = self._gpl_message()
+#@ {gpl}!****h* kmos/lattice
+#@ ! FUNCTION
+#@ !    Implements the mappings between the real space lattice
+#@ !    and the 1-D lattice, which kmos/base operates on.
+#@ !    Furthermore replicates all geometry specific functions of kmos/base
+#@ !    in terms of lattice coordinates.
+#@ !    Using this module each site can be addressed with 4-tuple
+#@ !    ``(i, j, k, n)`` where ``i, j, k`` define the unit cell and
+#@ !    ``n`` the site within the unit cell.
+#@ !
+#@ !******
+#@
+#@
+#@ module lattice
+#@ use kind_values
+#@ use base, only: &
+#@     assertion_fail, &
+#@     base_deallocate_system => deallocate_system, &
+#@     get_kmc_step, &
+#@     get_kmc_time, &
+#@     get_kmc_time_step, &
+#@     get_rate, &
+#@     increment_procstat, &
+#@     base_add_proc => add_proc, &
+#@     base_reset_site => reset_site, &
+#@     base_allocate_system => allocate_system, &
+#@     base_can_do => can_do, &
+#@     base_del_proc => del_proc, &
+if options.backend in ['otf',]:
+    #@     base_update_rates_matrix => update_rates_matrix, &
+#@     determine_procsite, &
+#@     base_replace_species => replace_species, &
+#@     base_get_species => get_species, &
+#@     base_get_volume => get_volume, &
+#@     reload_system => reload_system, &
+#@     save_system, &
+#@     assertion_fail, &
+#@     set_rate_const, &
+#@     update_accum_rate, &
+#@     update_clocks
+#@
+#@
+#@
+#@ implicit none
+#@
+#@ integer(kind=iint), dimension(3), public :: system_size
+len_layer_list = len(data.layer_list)
+#@ integer(kind=iint), parameter, public :: nr_of_layers = {len_layer_list}
+#@
+#@  ! Layer constants
+#@
+#@ integer(kind=iint), parameter, public :: model_dimension = {data.meta.model_dimension}
+for i, layer in enumerate(data.layer_list):
+    #@ integer(kind=iint), parameter, public :: {layer.name} = {i}
+#@ integer(kind=iint), public :: default_layer = {data.layer_list.default_layer}
+#@ integer(kind=iint), public :: substrate_layer = {data.layer_list.default_layer}
+#@
+#@  ! Site constants
+#@
+#@ real(kind=rsingle), dimension(3,3), public :: unit_cell_size = 0.
+site_params = self._get_site_params()
+len_site_params = len(site_params)
+#@ real(kind=rsingle), dimension({len_site_params}, 3), public :: site_positions
+for i, (site, layer, _) in enumerate(site_params):
+    ip1 = i + 1
+    #@ integer(kind=iint), parameter, public :: {layer}_{site} = {ip1}
+#@
+#@  ! spuck = Sites Per Unit Cell Konstant
+#@ integer(kind=iint), parameter, public :: spuck = {len_site_params}
+#@  ! lookup tables
+#@ integer(kind=iint), dimension(:, :), allocatable, public :: nr2lattice
+#@ integer(kind=iint), dimension(:,:,:,:), allocatable, public :: lattice2nr
+#@
+#@
+#@
+#@ contains
+#@
+
+# define the lattice mapping from the (multi-) lattice to a single lattice in 1D
+# and back. These mapping are the central piece of the lattice module and are used
+# by most of the other functions
+# For reasons of performance (modulo operation is usually considered expensive)
+# we write slightly different versions for d=1,2,3
+# where the lower dimension version simply ignore some fields
+
+#@ pure function calculate_lattice2nr(site)
+#@
+#@ !****f* lattice/calculate_lattice2nr
+#@ ! FUNCTION
+#@ !    Maps all lattice coordinates onto a continuous
+#@ !    set of integer :math:`\\in [1,volume]`
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    - ``site`` integer array of size (4) a lattice coordinate
+#@ !******
+#@     integer(kind=iint), dimension(4), intent(in) :: site
+#@     integer(kind=iint) :: calculate_lattice2nr
+#@
+#@     ! site = (x,y,z,local_index)
+if data.meta.model_dimension == 1:
+    #@     calculate_lattice2nr = spuck*(modulo(site(1), system_size(1)))+site(4)
+elif data.meta.model_dimension == 2:
+    #@     calculate_lattice2nr = spuck*(&
+    #@       modulo(site(1), system_size(1))&
+    #@       + system_size(1)*modulo(site(2), system_size(2)))&
+    #@       + site(4)
+elif data.meta.model_dimension == 3:
+    #@     calculate_lattice2nr = spuck*(&
+    #@       modulo(site(1), system_size(1))&
+    #@       + system_size(1)*modulo(site(2), system_size(2))&
+    #@       + system_size(1)*system_size(2)*modulo(site(3), system_size(3)))&
+    #@       + site(4)
+#@
+#@ end function calculate_lattice2nr
+#@
+#@ pure function calculate_nr2lattice(nr)
+#@
+#@ !****f* lattice/calculate_nr2lattice
+#@ ! FUNCTION
+#@ !    Maps a continuous set of
+#@ !    of integers :math:`\\in [1,volume]` to a
+#@ !    4-tuple representing a lattice coordinate
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    - ``nr`` integer representing the site index
+#@ !******
+#@     integer(kind=iint), intent(in) :: nr
+#@     integer(kind=iint), dimension(4) :: calculate_nr2lattice
+#@
+if data.meta.model_dimension == 3:
+    #@     calculate_nr2lattice(3) = (nr - 1) /  (system_size(1)*system_size(2)*spuck)
+    #@     calculate_nr2lattice(2) = (nr - 1 - system_size(1)*system_size(2)*spuck*calculate_nr2lattice(3)) / (system_size(1)*spuck)
+    #@     calculate_nr2lattice(1) = (nr - 1 - spuck*(system_size(1)*system_size(2)*calculate_nr2lattice(3) &
+    #@         + system_size(1)*calculate_nr2lattice(2))) / spuck
+    #@     calculate_nr2lattice(4) = nr - spuck*(system_size(1)*system_size(2)*calculate_nr2lattice(3) + &
+    #@         system_size(1)*calculate_nr2lattice(2) + calculate_nr2lattice(1))
+elif data.meta.model_dimension == 2:
+    #@     calculate_nr2lattice(3) = 0
+    #@     calculate_nr2lattice(2) = (nr -1) / (system_size(1)*spuck)
+    #@     calculate_nr2lattice(1) = (nr - 1 - spuck*system_size(1)*calculate_nr2lattice(2)) / spuck
+    #@     calculate_nr2lattice(4) = nr - spuck*(system_size(1)*calculate_nr2lattice(2) + calculate_nr2lattice(1))
+elif data.meta.model_dimension == 1:
+    #@     calculate_nr2lattice(3) = 0
+    #@     calculate_nr2lattice(2) = 0
+    #@     calculate_nr2lattice(1) = (nr - 1) / spuck
+    #@     calculate_nr2lattice(4) = nr - spuck*calculate_nr2lattice(1)
+#@
+#@ end function calculate_nr2lattice
+#@
+#@ subroutine allocate_system(nr_of_proc, input_system_size, system_name)
+#@
+#@ !****f* lattice/allocate_system
+#@ ! FUNCTION
+#@ !    Allocates system, fills mapping cache, and
+#@ !    checks whether mapping is consistent
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    ``none``
+#@ !******
+#@     integer(kind=iint), intent(in) :: nr_of_proc
+#@     integer(kind=iint), dimension({data.meta.model_dimension}), intent(in) :: input_system_size
+#@     character(len=200), intent(in) :: system_name
+#@
+#@     integer(kind=iint) :: i, j, k, nr
+#@     integer(kind=iint) :: check_nr
+#@     integer(kind=iint) :: volume
+#@
+#@     ! Copy to module wide variable
+if data.meta.debug > 1:
+    #@ print *,"LATTICE/ALLOCATE_SYSTEM"
+if data.meta.model_dimension == 3:
+    #@     system_size = input_system_size
+elif data.meta.model_dimension == 2:
+    #@     system_size = (/input_system_size(1), input_system_size(2), 1/)
+elif data.meta.model_dimension == 1:
+    #@     system_size = (/input_system_size(1), 1, 1/)
+#@     volume = system_size(1)*system_size(2)*system_size(3)*spuck
+#@     ! Let\'s check if the works correctly, first
+#@     ! and if so populate lookup tables
+#@     do k = 0, system_size(3)-1
+#@         do j = 0, system_size(2)-1
+#@             do i = 0, system_size(1)-1
+#@                 do nr = 1, spuck
+#@                     if(.not.all((/i,j,k,nr/).eq. &
+#@                     calculate_nr2lattice(calculate_lattice2nr((/i,j,k,nr/)))))then
+#@                         print *,"Error in Mapping:"
+#@                         print *, (/i,j,k,nr/), "was mapped on", calculate_lattice2nr((/i,j,k,nr/))
+#@                         print *, "but that was mapped on", calculate_nr2lattice(calculate_lattice2nr((/i,j,k,nr/)))
+#@                         stop
+#@                     endif
+#@                 end do
+#@             end do
+#@         end do
+#@     end do
+#@
+#@     do check_nr=1, product(system_size)*spuck
+#@         if(.not.check_nr.eq.calculate_lattice2nr(calculate_nr2lattice(check_nr)))then
+#@             print *, "ERROR in Mapping:", check_nr
+#@             print *, "was mapped on", calculate_nr2lattice(check_nr)
+#@             print *, "but that was mapped on",calculate_lattice2nr(calculate_nr2lattice(check_nr))
+#@             stop
+#@         endif
+#@     end do
+#@
+if data.meta.debug > 1:
+    #@     print *, "    LATTICE/ALLOCATE_SYSTEM/MAPPING_OK"
+#@     allocate(nr2lattice(1:product(system_size)*spuck,4))
+#@     allocate(lattice2nr(-system_size(1):2*system_size(1)-1, &
+#@         -system_size(2):2*system_size(2)-1, &
+#@         -system_size(3):2*system_size(3)-1, &
+#@          1:spuck))
+if data.meta.debug > 1:
+    #@     print *, "    LATTICE/ALLOCATE_SYSTEM/ALLOCATED_LOOKUP"
+#@     do check_nr=1, product(system_size)*spuck
+#@         nr2lattice(check_nr, :) = calculate_nr2lattice(check_nr)
+#@     end do
+#@     do k = -system_size(3), 2*system_size(3)-1
+#@         do j = -system_size(2), 2*system_size(2)-1
+#@             do i = -system_size(1), 2*system_size(1)-1
+#@                 do nr = 1, spuck
+#@                     lattice2nr(i, j, k, nr) = calculate_lattice2nr((/i, j, k, nr/))
+#@                 end do
+#@             end do
+#@         end do
+#@     end do
+#@
+if data.meta.debug > 1:
+    #@     print *, "    LATTICE/ALLOCATE_SYSTEM/FILLED_LOOKUP"
+#@     call base_allocate_system(nr_of_proc, volume, system_name)
+#@
+cell_00 = data.layer_list.cell[0, 0]
+cell_01 = data.layer_list.cell[0, 1]
+cell_02 = data.layer_list.cell[0, 2]
+#@     unit_cell_size(1, 1) = {cell_00}
+#@     unit_cell_size(1, 2) = {cell_01}
+#@     unit_cell_size(1, 3) = {cell_02}
+#
+cell_10 = data.layer_list.cell[1, 0]
+cell_11 = data.layer_list.cell[1, 1]
+cell_12 = data.layer_list.cell[1, 2]
+#@     unit_cell_size(2, 1) = {cell_10}
+#@     unit_cell_size(2, 2) = {cell_11}
+#@     unit_cell_size(2, 3) = {cell_12}
+#
+cell_20 = data.layer_list.cell[2, 0]
+cell_21 = data.layer_list.cell[2, 1]
+cell_22 = data.layer_list.cell[2, 2]
+#@     unit_cell_size(3, 1) = {cell_20}
+#@     unit_cell_size(3, 2) = {cell_21}
+#@     unit_cell_size(3, 3) = {cell_22}
+for i, (_, _, (x, y, z)) in enumerate(site_params):
+            ip1 = i + 1
+            #@     site_positions({ip1},:) = (/{x}, {y}, {z}/)
+#@ end subroutine allocate_system
+#@
+
+# all subroutines below simply replicate the base module version
+# in terms of lattice coordinates. Could be stored in fixed template
+# but are kept here for completeness and readability
+
+#@ subroutine deallocate_system()
+#@
+#@ !****f* lattice/deallocate_system
+#@ ! FUNCTION
+#@ !    Deallocates system including mapping cache.
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    ``none``
+#@ !******
+if data.meta.debug > 1:
+    #@ print *,"    LATTICE/DEALLOCATE_SYSTEM"
+#@     deallocate(lattice2nr)
+#@     deallocate(nr2lattice)
+#@     call base_deallocate_system()
+#@
+#@ end subroutine deallocate_system
+#@
+
+if options.backend in ['local_smart','lat_int']:
+    #@ subroutine add_proc(proc, site)
+elif options.backend in ['otf',]:
+    #@ subroutine add_proc(proc, site, rate)
+else:
+    raise UserWarning('Unknown backend')
+
+#@
+#@     integer(kind=iint), intent(in) :: proc
+#@     integer(kind=iint), dimension(4), intent(in) :: site
+if options.backend in ['otf',]:
+    #@     real(kind=rdouble), intent(in) :: rate
+#@
+#@     integer(kind=iint) :: nr
+#@
+if data.meta.debug > 1:
+    #@ print *,"    LATTICE/ADD_PROC/PROC",proc
+    #@ print *,"    LATTICE/ADD_PROC/SITE",site
+#@     nr = lattice2nr(site(1), site(2), site(3), site(4))
+if data.meta.debug > 1:
+    #@ print *,"    LATTICE/ADD_PROC/SITE_NR",nr
+
+if options.backend in ['local_smart','lat_int']:
+    #@     call base_add_proc(proc, nr)
+elif options.backend in ['otf',]:
+    #@     call base_add_proc(proc, nr, rate)
+else:
+    raise UserWarning('Unknown backend')
+
+#@
+#@ end subroutine add_proc
+#@
+
+###############################
+if options.backend in ['otf',]:
+    #@ subroutine update_rates_matrix(proc, site, rate)
+    #@     integer(kind=iint), intent(in) :: proc
+    #@     integer(kind=iint), dimension(4), intent(in) :: site
+    #@     real(kind=rdouble), intent(in) :: rate
+    #@     integer(kind=iint) :: nr
+    #@
+    if data.meta.debug > 1:
+        #@ print *,"    LATTICE/UPDATE_RATES_MATRIX/PROC ",proc
+        #@ print *,"    LATTICE/UPDATE_RATES_MATRIX/SITE ",site
+        #@ print *,"    LATTICE/UPDATE_RATES_MATRIX/RATE ",rate
+    #@     nr = lattice2nr(site(1), site(2), site(3), site(4))
+    if data.meta.debug > 1:
+        #@ print *,"    LATTICE/UPDATE_RATES_MATRIX/SITE_NR",nr
+
+    #@     call base_update_rates_matrix(proc, nr, rate)
+    if data.meta.debug > 1:
+        #@ print *,"    LATTICE/UPDATE_RATES_MATRIX Done base_update_rates_matrix",nr
+    #@
+    #@ end subroutine update_rates_matrix
+elif not options.backend in ['local_smart','lat_int']:
+    raise UserWarning('Unknown backend')
+###########################################3
+
+#@ subroutine del_proc(proc, site)
+#@
+#@     integer(kind=iint), intent(in) :: proc
+#@     integer(kind=iint), dimension(4), intent(in) :: site
+#@
+#@     integer(kind=iint) :: nr
+#@
+if data.meta.debug > 1:
+    #@ print *,"    LATTICE/DEL_PROC/PROC",proc
+    #@ print *,"    LATTICE/DEL_PROC/SITE",site
+#@     nr = lattice2nr(site(1), site(2), site(3), site(4))
+if data.meta.debug > 1:
+    #@ print *,"    LATTICE/DEL_PROC/SITE_NR",nr
+#@     call base_del_proc(proc, nr)
+#@
+#@ end subroutine del_proc
+#@
+
+if data.meta.debug > 2:
+    #@ function can_do(proc, site)
+else:
+    #@ pure function can_do(proc, site)
+#@
+#@     logical :: can_do
+#@     integer(kind=iint), intent(in) :: proc
+#@     integer(kind=iint), dimension(4), intent(in) :: site
+#@
+#@     integer(kind=iint) :: nr
+#@
+if data.meta.debug > 2:
+   #@ print *,"    LATTICE/CAN_DO/PROC ", proc
+   #@ print *,"    LATTICE/CAN_DO/SITE ", site
+
+#@     nr = lattice2nr(site(1), site(2), site(3), site(4))
+#@     can_do = base_can_do(proc, nr)
+if data.meta.debug > 2:
+   #@ print *,"    LATTICE/CAN_DO/ result ", can_do
+#@
+#@ end function can_do
+#@
+
+#@ subroutine replace_species(site,  old_species, new_species)
+#@
+#@     integer(kind=iint), dimension(4), intent(in) ::site
+#@     integer(kind=iint), intent(in) :: old_species, new_species
+#@
+#@     integer(kind=iint) :: nr
+#@
+#@     nr = lattice2nr(site(1), site(2), site(3), site(4))
+if data.meta.debug > 1:
+    #@
+    #@    print *,"LATTICE/REPLACE_SPECIES/SITE ",site
+    #@    print *,"LATTICE/REPLACE_SPECIES/SITE_NR ",nr
+    #@    print *,"LATTICE/REPLACE_SPECIES/OLD_SPECIES ",old_species
+    #@    print *,"LATTICE/REPLACE_SPECIES/NEW_SPECIES ",new_species
+#@     call base_replace_species(nr, old_species, new_species)
+#@
+#@ end subroutine replace_species
+#@
+
+if data.meta.debug > 0:
+    #@ function get_species(site)
+    #@
+else:
+    #@ pure function get_species(site)
+    #@
+#@     integer(kind=iint) :: get_species
+#@     integer(kind=iint), dimension(4), intent(in) :: site
+#@     integer(kind=iint) :: nr
+#@
+#@     nr = lattice2nr(site(1), site(2), site(3), site(4))
+#@     get_species = base_get_species(nr)
+#@
+
+if data.meta.debug > 3:
+    #@ print *, "    LATTICE/GET_SPECIES/SITE", site
+    #@ print *, "    LATTICE/GET_SPECIES/SPECIES", get_species
+#@ end function get_species
+#@
+
+#@ subroutine reset_site(site, old_species)
+#@
+#@     integer(kind=iint), dimension(4), intent(in) :: site
+#@     integer(kind=iint), intent(in) :: old_species
+#@
+#@     integer(kind=iint) :: nr
+#@
+#@     nr = lattice2nr(site(1), site(2), site(3), site(4))
+#@     call base_reset_site(nr, old_species)
+#@
+#@ end subroutine reset_site
+#@
+#@ end module lattice

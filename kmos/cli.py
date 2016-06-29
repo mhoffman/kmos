@@ -168,6 +168,11 @@ def get_options(args=None, get_parser=False):
     parser.add_option('-b', '--backend',
                       dest='backend',
                       default='local_smart')
+    parser.add_option('-a', '--avoid-default-state',
+                      dest='avoid_default_state',
+                      action='store_true',
+                      default=False,
+                      )
 
     parser.add_option('-v', '--steps-per-frame',
                       dest='steps_per_frame',
@@ -178,9 +183,23 @@ def get_options(args=None, get_parser=False):
                       default=False,
                       dest='debug',
                       action='store_true')
+
     parser.add_option('-n', '--no-compiler-optimization',
                       default=False,
                       dest='no_optimize',
+                      action='store_true')
+
+    parser.add_option('-o', '--overwrite',
+                      default=False,
+                      action='store_true')
+
+    parser.add_option('-l', '--variable-length',
+                      dest='variable_length',
+                      default=95,
+                      type='int')
+
+    parser.add_option('-c', '--catmap',
+                      default=False,
                       action='store_true')
 
     try:
@@ -239,6 +258,8 @@ def main(args=None):
 
     options, args, parser = get_options(args, get_parser=True)
 
+    global model, pt, np, cm_model
+
     if not args[0] in usage.keys():
         args[0] = match_keys(args[0], usage, parser)
 
@@ -274,14 +295,14 @@ def main(args=None):
         if len(args) < 2:
             parser.error('XML file and export path expected.')
         if len(args) < 3:
-            out_dir = os.path.splitext(args[1])[0]
+            out_dir = '%s_%s' % (os.path.splitext(args[1])[0], options.backend)
             print('No export path provided. Exporting to %s' % out_dir)
             args.append(out_dir)
 
         xml_file = args[1]
         export_dir = args[2]
         project = kmos.types.Project()
-        project.import_xml_file(xml_file)
+        project.import_file(xml_file)
 
         writer = ProcListWriter(project, export_dir)
         writer.write_settings()
@@ -302,11 +323,13 @@ def main(args=None):
         export_dir = os.path.join(args[2], 'src')
 
         project = kmos.types.Project()
-        project.import_xml_file(xml_file)
+        project.import_file(xml_file)
+
+        project.shorten_names(max_length=options.variable_length)
 
         kmos.io.export_source(project,
                               export_dir,
-                              code_generator=options.backend)
+                              options=options)
 
         if ((os.name == 'posix'
            and os.uname()[0] in ['Linux', 'Darwin'])
@@ -315,18 +338,24 @@ def main(args=None):
             os.chdir(export_dir)
             build(options)
             for out in glob('kmc_*'):
-                if os.path.exists('../%s' % out):
-                    overwrite = raw_input(('Should I overwrite existing %s ?'
-                                           '[y/N]  ') % out).lower()
-                    if overwrite.startswith('y'):
+                if os.path.exists('../%s' % out) :
+                    if options.overwrite :
+                        overwrite = 'y'
+                    else:
+                        overwrite = raw_input(('Should I overwrite existing %s ?'
+                                               '[y/N]  ') % out).lower()
+                    if overwrite.startswith('y') :
+                        print('Overwriting {out}'.format(**locals()))
                         os.remove('../%s' % out)
                         shutil.move(out, '..')
+                    else :
+                        print('Skipping {out}'.format(**locals()))
                 else:
                     shutil.move(out, '..')
 
     elif args[0] == 'settings-export':
         import kmos.io
-        pt = kmos.io.import_xml_file(args[1])
+        pt = kmos.io.import_file(args[1])
         if len(args) < 3:
             out_dir = os.path.splitext(args[1])[0]
             print('No export path provided. Exporting kmc_settings.py to %s'
@@ -356,9 +385,11 @@ def main(args=None):
         import kmos.io
         if not len(args) >= 2:
             raise UserWarning('XML file name expected.')
-        global pt
         pt = kmos.io.import_xml_file(args[1])
-        sh(banner='Note: pt = kmos.io.import_xml(\'%s\')' % args[1])
+        if len(args) == 2:
+            sh(banner='Note: pt = kmos.io.import_xml(\'%s\')' % args[1])
+        elif len(args) == 3: # if optional 3rd argument is given, store model there and exit
+            pt.save(args[2])
 
     elif args[0] == 'rebuild':
         from time import sleep
@@ -403,13 +434,21 @@ def main(args=None):
         except:
             plt = None
 
+        if options.catmap:
+            import catmap
+            import catmap.cli.kmc_runner
+            seed = catmap.cli.kmc_runner.get_seed_from_path('.')
+            cm_model = catmap.ReactionModel(setup_file='{seed}.mkm'.format(**locals()))
+            catmap_message = '\nSide-loaded catmap_model {seed}.mkm into cm_model = ReactionModel(setup_file="{seed}.mkm")'.format(**locals())
+        else:
+            catmap_message = ''
+
         try:
             model = KMC_Model(print_rates=False)
         except:
             print("Warning: could not import kmc_model!"
                   " Please make sure you are in the right directory")
-        global model, np
-        sh(banner='Note: model = KMC_Model(print_rates=False)')
+        sh(banner='Note: model = KMC_Model(print_rates=False){catmap_message}'.format(**locals()))
         try:
             model.deallocate()
         except:

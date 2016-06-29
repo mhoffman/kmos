@@ -72,13 +72,15 @@ public :: add_proc, &
   null_species, &
   reload_system, &
   reset_site, &
+  reaccumulate_rates_matrix, &
   save_system, &
   set_rate_const, &
   set_null_species, &
   get_null_species, &
   update_accum_rate, &
   update_integ_rate, &
-  update_clocks
+  update_clocks, &
+  update_rates_matrix
 
 
 ! Public constants
@@ -117,13 +119,15 @@ integer(kind=iint), dimension(:), allocatable :: lattice
 real(kind=rdouble), dimension(:), allocatable :: accum_rates
 !****v* base/accum_rates
 ! FUNCTION
-!   Stores the accumulated rate constant multiplied with the number
-!   of sites available for that process to be used by determine_procsite.
-!   Let :math:`\mathbf{c}` be the rate constants :math:`\mathbf{n}`
-!   the number of available sites, and :math:`\mathbf{a}`
-!   the accumulated rates, then :math:`a_{i}`
-!   is calculated according to :math:`a_{i}=\sum_{j=1}^{i} c_{j} n_{j}`.
-!
+!   Stores the accumulated rate constant up to a given process number
+!   taking into account all sites in which it is possible.
+!   ###
+!******
+real(kind=rdouble), dimension(:), allocatable :: accum_rates_proc
+!****v* base/accum_rates_proc
+! FUNCTION
+!   Used to store the accumulated rate associated to each process
+!   ###
 !******
 !------ S. Matera 09/18/2012------
 real(kind=rdouble), dimension(:), allocatable :: integ_rates
@@ -145,10 +149,16 @@ integer(kind=iint), dimension(:), allocatable :: nr_of_sites
 ! FUNCTION
 !   Stores the number of sites available for each process.
 !******
-real(kind=rdouble), dimension(:), allocatable :: rates
+real(kind=rdouble), dimension(:), allocatable, public :: rates !FIXME
 !****v* base/rates
 ! FUNCTION
 !   Stores the rate constants for each process in s^-1.
+!******
+real(kind=rdouble), dimension(:,:), allocatable :: rates_matrix
+!****v* base/rates
+! FUNCTION
+!   Stores the rate constants for each currently possible process
+!   ordered as avail_sites(:,:,1).
 !******
 integer(kind=ilong), dimension(:), allocatable :: procstat
 !****v* base/procstat
@@ -239,35 +249,41 @@ subroutine del_proc(proc, site)
   ASSERT(site.ge.0,"add_proc: site has to be positive or zero")
   ASSERT(site.le.volume,"base/add_proc: site needs to be in volume")
 
+
   if(proc.gt.0)then ! proc == 0, stands for process (group) did not match all
     ! assert consistency
-    ASSERT(avail_sites(proc, site, 2) .ne. 0 , "Error: tried to take ability from site that is not there!")
+     ASSERT(avail_sites(proc, site, 2) .ne. 0 , "Error: tried to take ability from site that is not there!")
 
     memory_address = avail_sites(proc, site, 2)
+    ! print *,"BASE/DEL_PROC/memory_address ", memory_address ! FIXME
     if(memory_address .lt. nr_of_sites(proc))then
       ! check if we are deleting the last field
-
       ! move last field to deleted field
       avail_sites(proc, memory_address, 1) = avail_sites(proc, nr_of_sites(proc), 1)
       avail_sites(proc, nr_of_sites(proc), 1) = 0
 
+      ! correspondingly update the rates_matrix
+      rates_matrix(proc,volume+1) = rates_matrix(proc,volume+1) - rates_matrix(proc,memory_address)
+      rates_matrix(proc,memory_address) = rates_matrix(proc,nr_of_sites(proc))
+      rates_matrix(proc,nr_of_sites(proc)) = 0.0
       ! change address of moved field
       avail_sites(proc, avail_sites(proc, memory_address, 1), 2) = memory_address
+
     else ! simply deleted last field
       avail_sites(proc, memory_address , 1) = 0
+      rates_matrix(proc,volume+1) = rates_matrix(proc,volume+1) - rates_matrix(proc,memory_address)
+      rates_matrix(proc,memory_address) = 0.0
     endif
     ! delete address of deleted field
     avail_sites(proc, site, 2) = 0
-
-
-
     ! decrement nr_of_sites(proc)
     nr_of_sites(proc) = nr_of_sites(proc) - 1
+    ! print *, "BASE/DEL_PROC : Updated nr_of_sites" ! FIXME
   endif
 end subroutine del_proc
 
 
-subroutine add_proc(proc, site)
+subroutine add_proc(proc, site, rate)
   !****f* base/add_proc
   ! FUNCTION
   !    The main idea of this subroutine is described in del_proc. Adding one
@@ -280,6 +296,7 @@ subroutine add_proc(proc, site)
   !    * ``site`` positive integer number that represents the site to be manipulated
   !******
   integer(kind=iint), intent(in) :: proc, site
+  real(kind=rdouble), intent(in) :: rate
 
   ! Make sure proc_nr is in the right range
   ASSERT(proc.ge.0,"base/add_proc: proc has to be positive or zero")
@@ -288,6 +305,9 @@ subroutine add_proc(proc, site)
   ! Make sure site is in the right range
   ASSERT(site.ge.0,"base/add_proc: site has to be positive or zero")
   ASSERT(site.le.volume,"base/add_proc: site needs to be in volume")
+
+  ! Make sure rate is positive
+  ASSERT(rate.ge.0,"base/add_proc: rate has to be positive or zero")
 
   if(proc.gt.0)then ! proc == 0, stands for process (group) did not match all
     ! assert consistency
@@ -301,9 +321,70 @@ subroutine add_proc(proc, site)
 
     ! let address of added site point to nr_of_sites(proc)th slot
     avail_sites(proc, site, 2) = nr_of_sites(proc)
+
+    ! update rates_matrix
+    rates_matrix(proc,volume+1) = rates_matrix(proc,volume+1)+rate
+    rates_matrix(proc,nr_of_sites(proc))=rate
+
   endif
 
 end subroutine add_proc
+
+subroutine update_rates_matrix(proc, site, rate)
+  !****f* base/update_rates_matrix
+  ! FUNCTION
+  !    Updates the rates_matrix. To be used when the state of a bystander has
+  !    been modified
+  !      !
+  ! ARGUMENTS
+  !
+  !    * ``proc`` positive integer number that represents the process whose rate is changed.
+  !    * ``site`` positive integer number that represents the site for the process
+  !    * ``rate`` positive real number that represents the updated rate
+  !******
+  integer(kind=iint), intent(in) :: proc, site
+  real(kind=rdouble), intent(in) :: rate
+  integer(kind=iint) :: memory_address
+
+  ! Make sure the process is allowed
+  ASSERT(can_do(proc,site),"base/update_rates_matrix: process needs to be allowed")
+  ! Make sure the rate is not negative
+  ASSERT(rate.ge.0,"base/update_rates_matrix: rate cant be negative")
+
+  ! print *,"BASE/UPDATE_RATES_MATRIX/PROC ",proc !FIXME DEBUG
+  ! print *,"BASE/UPDATE_RATES_MATRIX/SITE ",site !FIXME DEBUG
+  ! print *,"BASE/UPDATE_RATES_MATRIX/RATE ",rate !FIXME DEBUG
+
+  memory_address = avail_sites(proc,site,2)
+  ! Update total process rate
+  rates_matrix(proc,volume+1) = rates_matrix(proc,volume+1) + rate - rates_matrix(proc,memory_address)
+  ! Update individual rate
+  rates_matrix(proc,memory_address) = rate
+
+end subroutine update_rates_matrix
+
+subroutine reaccumulate_rates_matrix()
+  !****f* base/reaccumulate_rates_matrix
+  ! FUNCTION
+  !    Performs a process wide reaccumulation of the values in the rates_matrix.
+  !    To be used when some of the user parameters are updated.
+  !    Expected to aleviate some of the problems arising from floating point errors
+  !******
+  integer(kind=iint) :: proc, memadd
+
+  do proc=1,nr_of_proc
+     rates_matrix(proc,volume+1) = 0.0
+     do memadd=1, volume
+        if(avail_sites(proc,memadd,1).gt.0)then
+           ASSERT(rates_matrix(proc,memadd).gt.0.0,"base/reaccumulate_rates_matrix: found a negative rate value!")
+           rates_matrix(proc,volume+1) = rates_matrix(proc,volume+1) + rates_matrix(proc,memadd)
+        else
+           rates_matrix(proc,memadd) = 0.0
+        endif
+     enddo
+  enddo
+
+end subroutine reaccumulate_rates_matrix
 
 pure function can_do(proc, site)
   !****f* base/can_do
@@ -581,7 +662,6 @@ subroutine save_system()
 
 end subroutine save_system
 
-
 subroutine set_rate_const(proc_nr, rate)
   !****f* base/set_rate_const
   ! FUNCTION
@@ -614,11 +694,20 @@ subroutine update_accum_rate()
   !    ``none``
   !******
 
-  integer(kind=iint) :: i
+  integer(kind=iint) :: i, j
 
-  accum_rates(1)=nr_of_sites(1)*rates(1)
+  accum_rates(1) = 0.0
+  rates_matrix(1,volume+1) = 0.0
+  do j = 1, nr_of_sites(1)
+     rates_matrix(1,volume+1) = rates_matrix(1,volume+1) + rates_matrix(1,j)
+  enddo
+  accum_rates(1)=rates_matrix(1,volume+1)
   do i = 2, nr_of_proc
-    accum_rates(i)=accum_rates(i-1)+nr_of_sites(i)*rates(i)
+     rates_matrix(i,volume+1) = 0.0
+     do j = 1, nr_of_sites(i)
+        rates_matrix(i,volume+1) = rates_matrix(i,volume+1) + rates_matrix(i,j)
+     enddo
+     accum_rates(i)=accum_rates(i-1)+rates_matrix(i,volume+1)
   enddo
 
   ASSERT(accum_rates(nr_of_proc).gt.0.,"base/update_accum_rate found &
@@ -641,7 +730,7 @@ subroutine update_integ_rate()
 
 
     do i = 1, nr_of_proc
-        integ_rates(i)=integ_rates(i)+nr_of_sites(i)*rates(i)*kmc_time_step
+        integ_rates(i)=integ_rates(i)+rates_matrix(i,volume+1)*kmc_time_step
     enddo
 
     ASSERT(accum_rates(nr_of_proc).gt.0.,"base/update_accum_rate found"// &
@@ -668,7 +757,6 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
 
   system_allocated = .false.
 
-
   ! Make sure we have at least one process
   if(input_nr_of_proc.le.0)then
     print *,"kmos/base/allocate_system: there needs to be at least one process in a kMC system"
@@ -694,12 +782,20 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
     print *,"kmos/base/allocate_system: Tried to allocate nr_of_sites twice, please deallocate first"
     system_allocated = .true.
   endif
+  if(allocated(rates_matrix))then
+    print *,"kmos/base/allocate_system: Tried to allocate rates_matrix twice, please deallocate first"
+    system_allocated = .true.
+  endif
   if(allocated(rates))then
     print *,"kmos/base/allocate_system: Tried to allocate rates twice, please deallocate first"
     system_allocated = .true.
   endif
   if(allocated(accum_rates))then
     print *,"kmos/base/allocate_system: Tried to allocate accum_rates twice, please deallocate first"
+    system_allocated = .true.
+  endif
+  if(allocated(accum_rates_proc))then
+    print *,"kmos/base/allocate_system: Tried to allocate accum_rates_proc twice, please deallocate first"
     system_allocated = .true.
   endif
 !------ S. Matera 09/18/2012------
@@ -728,20 +824,41 @@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
     ! allocate data structures and initialize with 0
     allocate(avail_sites(nr_of_proc, volume, 2))
     avail_sites = 0
+    ! print *, "BASE/ALLOCATE_SYSTEM : Allocated avail_sites"
+
     allocate(lattice(volume))
     lattice = null_species
+    ! print *, "BASE/ALLOCATE_SYSTEM : Allocated lattice"
+
     allocate(nr_of_sites(nr_of_proc))
     nr_of_sites = 0
+    ! print *, "BASE/ALLOCATE_SYSTEM : Allocated nr_of_sites"
+
+    allocate(rates_matrix(nr_of_proc,volume+1))
+    rates_matrix = 0
+    ! print *, "BASE/ALLOCATE_SYSTEM : Allocated rates_matrix"
+
     allocate(rates(nr_of_proc))
     rates = 0
+    ! print *, "BASE/ALLOCATE_SYSTEM : Allocated rates"
+
     allocate(accum_rates(nr_of_proc))
     accum_rates = 0
+    ! print *, "BASE/ALLOCATE_SYSTEM : Allocated accum_rates"
+
+    allocate(accum_rates_proc(volume))
+    accum_rates_proc = 0
+    ! print *, "BASE/ALLOCATE_SYSTEM : Allocated accum_rates_proc"
+
 !------ S. Matera 09/18/2012------
         allocate(integ_rates(nr_of_proc))
         integ_rates = 0
 !------ S. Matera 09/18/2012------
+    ! print *, "BASE/ALLOCATE_SYSTEM : Allocated integ_rates"
+
     allocate(procstat(nr_of_proc))
     procstat = 0
+    ! print *, "BASE/ALLOCATE_SYSTEM : Allocated procstat"
 
   endif
 
@@ -780,6 +897,11 @@ subroutine deallocate_system()
   else
     print *,"Warning: nr_of_sites was not allocated, tried to deallocate."
   endif
+  if(allocated(rates_matrix))then
+    deallocate(rates_matrix)
+  else
+    print *,"Warning: rates_matrix was not allocated, tried to deallocate."
+  endif
   if(allocated(rates))then
     deallocate(rates)
   else
@@ -788,7 +910,12 @@ subroutine deallocate_system()
   if(allocated(accum_rates))then
     deallocate(accum_rates)
   else
-    print *,"Warning: rates was not allocated, tried to deallocate."
+    print *,"Warning: accum_rates was not allocated, tried to deallocate."
+  endif
+  if(allocated(accum_rates_proc))then
+    deallocate(accum_rates_proc)
+  else
+    print *,"Warning: accum_rates_proc was not allocated, tried to deallocate."
   endif
 !------ S. Matera 09/18/2012------
     if(allocated(integ_rates))then
@@ -946,7 +1073,6 @@ subroutine get_avail_site(proc_nr, field, switch, return_avail_site)
 
 end subroutine get_avail_site
 
-
 subroutine get_accum_rate(proc_nr, return_accum_rate)
   !****f* base/get_accum_rate
   ! FUNCTION
@@ -993,7 +1119,7 @@ subroutine get_integ_rate(proc_nr, return_integ_rate)
 end subroutine get_integ_rate
 !------ S. Matera 09/18/2012------
 
-subroutine get_rate(proc_nr, return_rate)
+subroutine get_rate(proc_nr, site_nr, return_rate)
   !****f* base/get_rate
   ! FUNCTION
   !    Return rate of given process.
@@ -1005,9 +1131,17 @@ subroutine get_rate(proc_nr, return_rate)
   !******
   !---------------I/O variables---------------
   integer(kind=iint), intent(in) :: proc_nr
+  integer(kind=iint), intent(in), optional :: site_nr
+  !f2py integer intent(in), optional :: site_nr = -1
+  ! special directive for f2py wrapper, making -1 default
+  ! in case of non-presence
   real(kind=rdouble), intent(out) :: return_rate
 
-  return_rate=rates(proc_nr)
+  if(site_nr.ne.-1)then
+    return_rate=rates_matrix(proc_nr, site_nr)
+  else
+    return_rate=rates_matrix(proc_nr, volume+1)
+  endif
 
 end subroutine get_rate
 
@@ -1097,6 +1231,8 @@ subroutine determine_procsite(ran_proc, ran_site, proc, site)
   real(kind=rsingle), intent(in) :: ran_proc, ran_site
   integer(kind=iint), intent(out) :: proc, site
   !---------------internal variables---------------
+  integer(kind=iint) :: i
+  real(kind=rdouble) :: aux_rand ! Might not need it later
 
 
   ASSERT(ran_proc.ge.0,"base/determine_procsite: ran_proc has to be positive")
@@ -1107,20 +1243,37 @@ subroutine determine_procsite(ran_proc, ran_site, proc, site)
   ! ran_proc <- [0,1] so we multiply with larger value in accum_rates
   call interval_search_real(accum_rates, ran_proc*accum_rates(nr_of_proc), proc)
 
+  ! print *, "BASE/DETERMINE_PROCSITE/Found proc ",proc ! FIXME
 
-  ! the result shall be between 1 and  nrofsite(proc) so we have to add 1 the
-  ! scaled random number. But if the random number is closer to 1 than machine
-  ! precision, e.g. 0.999999999, we would get nrofsits(proc)+1 so we have to
-  ! cap it with min(...)
-  site =  avail_sites(proc, &
-    min(nr_of_sites(proc),int(1+ran_site*(nr_of_sites(proc)))),1)
 
+  ! once the process is selected, we need to build the corresponding accum rate
+  ! this is most likely the CPU criticall part of this backend
+  ! optimization work should be conducted here
+  accum_rates_proc(1)=rates_matrix(proc,1)
+  do i = 2, nr_of_sites(proc)
+     accum_rates_proc(i) = accum_rates_proc(i-1) + rates_matrix(proc,i)
+  enddo
+
+  ! print *, "BASE/DETERMINE_PROCSITE/Accumulated rate for process ",accum_rates_proc(nr_of_sites(proc)) !DEBUG
+  ! print *, "BASE/DETERMINE_PROCSITE/According to accum_rates   : ", (accum_rates(proc) - accum_rates(proc-1))
+
+  ! aux_rand = ran_proc*accum_rates(nr_of_proc) - accum_rates(proc-1)
+
+  ! print *, "BASE/DETERMINE_PROCSITE/aux_rand                     ", aux_rand
+
+  ! call interval_search_real(accum_rates_proc(1:nr_of_sites(proc)),ran_proc*accum_rates(nr_of_proc)-accum_rates(proc-1),site)
+  call interval_search_real(accum_rates_proc(1:nr_of_sites(proc)),ran_site*accum_rates_proc(nr_of_sites(proc)),site)
+
+  ! print *, "BASE/DETERMINE_PROCSITE/Found memory_address ", site ! DEBUG
+
+  site = avail_sites(proc,site,1)
+
+  ! print *, "BASE/DETERMINE_PROCSITE/Found site ", site ! DEBUG
 
   ASSERT(nr_of_sites(proc).gt.0,"base/determine_procsite: chosen process is invalid &
     because it has no sites available.")
   ASSERT(site.gt.0,"kmos/base/determine_procsite: tries to return invalid site")
   ASSERT(site.le.volume,"base/determine_procsite: tries to return site larger than volume")
-
 
 end subroutine determine_procsite
 
@@ -1181,8 +1334,6 @@ pure function get_species(site)
   integer(kind=iint) :: get_species
   integer(kind=iint), intent(in) :: site
 
-  !! DEBUG
-  !print *, site
   !ASSERT(site.ge.1,"kmos/base/get_species was asked for a zero or negative site")
   !ASSERT(site.le.volume,"kmos/base/get_species was asked for a site outside the lattice")
 
@@ -1207,6 +1358,9 @@ subroutine replace_species(site, old_species, new_species)
   integer(kind=iint), intent(in) :: site, old_species, new_species
 
   ASSERT(site.le.volume,"kmos/base/replace_species was asked for a site outside the lattice")
+
+  !print *,"BASE/REPLACE_SPECIES/OLD_SPECIES ", old_species ! DEBUG FIXME
+  !print *,"BASE/REPLACE_SPECIES/NEW_SPECIES ", new_species
 
   ! Double-check that we actually remove the atom that we think is there
   if(old_species.ne.lattice(site))then
@@ -1237,7 +1391,7 @@ subroutine interval_search_real(arr, value, return_field)
   !   of ascending real numbers and a scalar real and return the key of the
   !   corresponding field, with the following modification :
   !
-  !   * the value of the returned field is equal of larger of the given
+  !   * the value of the returned field is equal or larger than given
   !     value. This is important because the given value is between 0 and the
   !     largest value in the array and otherwise the last field is never
   !     selected.
@@ -1246,11 +1400,11 @@ subroutine interval_search_real(arr, value, return_field)
   !     because having field with identical values means that all field except
   !     the leftmost one do not contain any sites. Refer to
   !     update_accum_rate to understand why.
-  !   * the value of the returned field may no be zero. Therefore the index
+  !   * the value of the returned field may not be zero. Therefore the index
   !     the to be equal or larger than the first non-zero field.
   !
   !   However: as everyone knows the binary search is trickier than it appears
-  !   at first site especially real numbers. So intensive testing is
+  !   at first sight especially real numbers. So intensive testing is
   !   suggested here!
   !
   ! ARGUMENTS

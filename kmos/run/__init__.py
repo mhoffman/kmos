@@ -44,6 +44,19 @@ from copy import deepcopy
 from fnmatch import fnmatch
 from kmos import evaluate_rate_expression
 from kmos.utils import OrderedDict
+import kmos.utils.progressbar
+import kmos.run.png
+try:
+    import kmos.run.png
+except:
+    # quickly create a mock-class
+    class Struct:
+        def __init__(self, **entries):
+            self.__dict__.update(entries)
+    kmos = Struct()
+    kmos.run = Struct()
+    kmos.run.png = None
+
 from math import log
 try:
     import kmos.run.png
@@ -77,6 +90,11 @@ except:
     proclist_constants = None
 
 try:
+    from kmc_model import proclist_pars
+except:
+    proclist_pars = None
+
+try:
     import kmc_settings as settings
 except Exception, e:
     settings = None
@@ -96,13 +114,17 @@ INTERACTIVE = True  # Turn it off for now because it doesn work reliably
 class ProclistProxy(object):
 
     def __dir__(selftr):
-        return list(set(dir(proclist) + dir(proclist_constants)))
+        return list(set(dir(proclist) +
+                        dir(proclist_constants) +
+                        dir(proclist_pars)))
 
     def __getattr__(self, attr):
         if attr in dir(proclist):
             return eval('proclist.%s' % attr)
         elif attr in dir(proclist_constants):
             return eval('proclist_constants.%s' % attr)
+        elif attr in dir(proclist_pars):
+            return eval('proclist_pars.%s' % attr)
         else:
             raise AttributeError('%s not found' % attr)
 
@@ -138,7 +160,10 @@ class KMC_Model(Process):
         self.banner = banner
         self.print_rates = print_rates
         self.parameters = Model_Parameters(self.print_rates)
-        self.rate_constants = Model_Rate_Constants()
+        if proclist_pars is None:
+            self.rate_constants = Model_Rate_Constants()
+        else:
+            self.rate_constants = Model_Rate_Constants_OTF()
 
         if random_seed is not None:
             settings.random_seed = random_seed
@@ -238,10 +263,12 @@ class KMC_Model(Process):
                     raise
             else:
                 self.species_representation[len(self.species_representation)] = Atoms()
+
         if hasattr(settings, 'species_tags'):
             self.species_tags = settings.species_tags
         else:
             self.species_tags = None
+
 
         if len(settings.lattice_representation):
             if hasattr(settings, 'substrate_layer'):
@@ -258,11 +285,28 @@ class KMC_Model(Process):
                     self.lattice_representation = lattice_representation[0]
         else:
             self.lattice_representation = Atoms()
+
         set_rate_constants(settings.parameters, self.print_rates)
+
         self.base.update_accum_rate()
         # S. matera 09/25/2012
         if hasattr(self.base, 'update_integ_rate'):
             self.base.update_integ_rate()
+
+        # # for otf backend only
+        # print('kmos.run : Updating proclist_pars!')
+        # if hasattr(self.proclist,'recalculate_rates_matrix'):
+        #     for key,entry in settings.parameters.iteritems():
+        #         # print('kmos.run key.lower() : %s' % key.lower())
+        #         # print('kmos.run entry[value] : %s' % entry.value)
+        #         # print('kmos.run result : %s' %
+        #         #       evaluate_rate_expression(entry['value'],settings.parameters))
+
+        #         # setattr(self.proclist,
+        #         #         key.lower(),
+        #         #         evaluate_rate_expression(entry['value'],settings.parameters)
+        #         #         )
+        #     self.proclist.recalculate_rates_matrix()
 
         # load cached configuration if available
         if self.cache_file is not None:
@@ -336,14 +380,24 @@ class KMC_Model(Process):
         else:
             print("Model is not allocated.")
 
-    def do_steps(self, n=10000):
+    def do_steps(self, n=10000, progress=False):
         """Propagate the model `n` steps.
 
         :param n: Number of steps to run (Default: 10000)
         :type n: int
 
         """
-        proclist.do_kmc_steps(n)
+        if not progress :
+            proclist.do_kmc_steps(n)
+        else:
+            import kmos.utils.progressbar
+
+            progress_bar = kmos.utils.progressbar.ProgressBar()
+            for i in range(100):
+                proclist.do_kmc_steps(n/100)
+                progress_bar.render(i+1)
+            progress_bar.clear()
+
 
     def run(self):
         """Runs the model indefinitely. To control the
@@ -453,7 +507,10 @@ class KMC_Model(Process):
 
         """
 
-        from ase.io import write
+        import ase.io
+        import ase.data.colors
+        jmol_colors = ase.data.colors.jmol_colors
+
         for i in xrange(frames):
             atoms = self.get_atoms(reset_time_overrun=False)
             filename = '{prefix:s}_{i:06d}.{suffix:s}'.format(**locals())
@@ -463,7 +520,51 @@ class KMC_Model(Process):
                   #rotation=rotation,
                   #**kwargs)
 
-            writer = kmos.run.png.MyPNG(atoms, show_unit_cell=True, scale=20, model=self, **kwargs).write(filename, resolution=150)
+            if suffix == 'png':
+                writer = kmos.run.png.MyPNG(atoms, show_unit_cell=True, scale=20, model=self, **kwargs).write(filename, resolution=150)
+            elif suffix == 'pov':
+                rescale = 0.5
+                radii_dict2 = {'Ni':0.9*rescale,
+                             'O': 1.0*rescale,
+                             'H': 0.5*rescale}
+
+                radii2 = []
+                water_radii_dict2 = {'O':1.0*rescale, 'H': 0.5*rescale, 'Ni':0.9*rescale}
+                colors = []
+                colors2 = []
+                for atom in atoms:
+                     radii2+=[water_radii_dict2[atom.symbol]]
+                     colors+=[(jmol_colors[atom.number][0],jmol_colors[atom.number][1],jmol_colors[atom.number][2],0.00,0.00)]
+                     colors2+=[(jmol_colors[atom.number][0],jmol_colors[atom.number][1],jmol_colors[atom.number][2])]
+
+                BA = []
+                distances = atoms.get_all_distances()
+                for i, j in zip(*np.where(distances<2.2)):
+                    if distances[i, j] < 0.1 :
+                        continue
+                    if not (atoms[i].symbol=='H' or atoms[j].symbol=='H') :
+                        BA += [[i, j]]
+                    elif distances[i, j] < 1.5:
+                        BA += [[i, j]]
+
+                ase.io.write(filename, atoms, run_povray=False,display=False,pause=False,
+                             #rotation='-90x,30y',
+                             #rotation='-90x,30y',
+                             show_unit_cell=1,
+                             #bbox=(-7,17,0,20),
+                             #bbox=(-8,12,8,28),
+                             bbox=(-(3.0*20 + 2) ,-2,7*20,5.5*20),
+                             textures=['ase3' for atom in atoms],
+                             canvas_height=500,
+                             camera_type='orthographic',
+                             bondatoms=BA,
+                             radii=radii2,
+                             colors=colors2)
+            elif suffix == 'traj':
+                write(filename, atoms)
+            else:
+                writer = kmos.run.png.MyPNG(atoms, show_unit_cell=True, scale=20, model=self, **kwargs).write(filename, resolution=150)
+
             if verbose:
                 print('Wrote {filename}'.format(**locals()))
             self.do_steps(skip)
@@ -632,13 +733,13 @@ class KMC_Model(Process):
 
         """
 
-        std_header = ('#%s %s %s kmc_time kmc_steps\n'
+        std_header = ('#%s %s %s kmc_time simulated_time kmc_steps\n'
                   % (self.get_param_header(),
                      self.get_tof_header(),
                      self.get_occupation_header()))
         return std_header
 
-    def get_std_sampled_data(self, samples, sample_size, tof_method='integ'):
+    def get_std_sampled_data(self, samples, sample_size, tof_method='integ', output='str', show_progress=False):
         """Sample an average model and return TOFs and coverages
         in a standardized format :
 
@@ -656,9 +757,9 @@ class KMC_Model(Process):
 
         In each case check carefully that the observable is sampled good enough!
 
-        :param samples: Number of batches to average over.
+        :param samples: Number of batches to average coverages over.
         :type sample: int
-        :param sample_size: Number of kMC steps per batch.
+        :param sample_size: Number of kMC steps in total.
         :type sample_size: int
         :param tof_method: Method of how to sample TOFs.
                            Possible values are procrates or integ.
@@ -676,14 +777,22 @@ class KMC_Model(Process):
         occs = []
         tofs = []
         delta_ts = []
+        step_ts = []
         t0 = self.base.get_kmc_time()
         step0 = self.base.get_kmc_step()
 
+        if show_progress:
+            progress_bar = kmos.utils.progressbar.ProgressBar()
+
+        # reset sampling starting point
+        _ = self.get_atoms(geometry = False, reset_time_overrun = False)
+
         # sample over trajectory
         for sample in xrange(samples):
-            self.do_steps(sample_size)
+            self.do_steps(sample_size/samples)
             atoms = self.get_atoms(geometry=False, reset_time_overrun=False)
             delta_ts.append(atoms.delta_t)
+            step_ts.append(self.base.get_kmc_time_step())
 
             occs.append(list(atoms.occupation.flatten()))
             if tof_method == 'procrates':
@@ -691,12 +800,16 @@ class KMC_Model(Process):
             elif tof_method == 'integ':
                 tofs.append(atoms.tof_integ.flatten())
             else:
-                raise NotImplementedError('Working on it ..')
+                raise NotImplementedError('tof_method="{tof_method}" not supported. Can be either procrates or integ.'.format(**locals()))
+
+            if show_progress:
+                progress_bar.render(1+int(float(sample)/samples*100), 'Sampling')
 
         # calculate time averages
-        occs_mean = np.average(occs, axis=0, weights=delta_ts)
+        occs_mean = np.average(occs, axis=0, weights=step_ts)
         tof_mean = np.average(tofs, axis=0, weights=delta_ts)
         total_time = self.base.get_kmc_time() - t0
+        simulated_time = self.base.get_kmc_time()
         total_steps = self.base.get_kmc_step() - step0
 
         #return tofs, delta_ts
@@ -706,8 +819,16 @@ class KMC_Model(Process):
                         + list(tof_mean.flatten())
                         + list(occs_mean.flatten())
                         + [total_time,
+                           simulated_time,
                            total_steps])
-        return ((' '.join(['%.5e'] * len(outdata)) + '\n') % outdata)
+        if output == 'str':
+            return ((' '.join(['%.5e'] * len(outdata)) + '\n') % outdata)
+        elif output == 'dict':
+            header = self.get_std_header()[1:].split()
+            return dict(zip(header, outdata))
+        else:
+            raise UserWarning(
+                "Output format {output} not defined. I only know 'str' and 'dict'")
 
     def double(self):
         """
@@ -720,7 +841,7 @@ class KMC_Model(Process):
 
         # initialize new version of model w/ twice the size in each direction
         self.deallocate()
-        self.settings.simulation_size *= 2
+        self.size *= 2
         self.reset()
 
         # initialize new model w/ copies of current state in each of
@@ -830,6 +951,8 @@ class KMC_Model(Process):
         res = ''
         printed_steps = 0
         res += ('+' + width * '-' + '+' + '\n')
+        res += ('| {0:<%ss}|\n' % (width-1)).format('%9s %12s  %s' % ('rel. contrib.', 'procstat', 'process name'))
+        res += ('+' + width * '-' + '+' + '\n')
         for entry in entries:
             procstat, name = entry
             printed_steps += procstat
@@ -837,10 +960,57 @@ class KMC_Model(Process):
                 res += ('|{0:<%ss}|\n' % width).format('%9.2f %% %12s     %s' % (100 * float(printed_steps) / nsteps, procstat, name))
 
         res += ('+' + width * '-' + '+' + '\n')
-        res += ('   Total steps %s' % nsteps)
+        res += ('   Total steps %s\n' % nsteps)
 
         if to_stdout:
             print(res)
+        else:
+            return res
+
+    def print_state_summary(self, order='-rate', to_stdout=True, show=False, print_parameters=False):
+        """Show summary of current model state by showing
+            - parameters (external, optional)
+            - number of times each elementary process has been executed
+            - coverage
+            - kmc step and kmc time
+            - fire up ASE window with current lattice configuration
+
+        """
+        res = ''
+        if print_parameters:
+            res += 'Parameters\n'
+            self.print_adjustable_parameters(to_stdout=False)
+        res += 'Rate Constants\n'
+        res += self.rate_constants(model=self)
+        res += 'Procstat\n'
+        res += self.print_procstat(to_stdout=False)
+        res += 'Accumulated rates\n'
+        res += self.print_accum_rate_summation(order=order, to_stdout=False)
+        res += 'Coverages\n'
+        res += self.print_coverages(to_stdout=False)
+        res += 'kMC state\n'
+        res += self.print_kmc_state(to_stdout=False)
+
+        if to_stdout:
+            print(res)
+        else:
+            return res
+
+        if show:
+            self.show()
+
+    def print_kmc_state(self, to_stdout=True):
+        """Shows current kmc step and kmc time.
+        """
+        kmc_steps = self.base.get_kmc_step()
+        kmc_time = self.base.get_kmc_time()
+        data_line = '| kmc time {kmc_time:10.5g} | kmc steps {kmc_steps:18d} |\n'.format(**locals())
+        res = ('-' * len(data_line)) + '\n'
+        res += data_line
+        res += ('-' * len(data_line)) + '\n'
+
+        if to_stdout:
+            print(res.strip())
         else:
             return res
 
@@ -863,7 +1033,10 @@ class KMC_Model(Process):
             if nrofsites:
                 rate = self.base.get_rate(i + 1)
                 prod = nrofsites * rate
-                accum_rate += prod
+                if self.get_backend() in ['otf',]:
+                    accum_rate += rate
+                else:
+                    accum_rate += prod
                 entries.append((nrofsites, rate, prod, process_name))
 
         # reorder
@@ -888,13 +1061,24 @@ class KMC_Model(Process):
         res = ''
         total_contribution = 0
         res += ('+' + 118 * '-' + '+' + '\n')
-        res += '|{0:<118s}|\n'.format('(cumulative)    nrofsites * rate_constant'
-                                      '    = rate            [name]')
+        if self.get_backend() in ['otf']:
+            res += '|{0:<118s}|\n'.format('(cumulative)    nrofsites,  rate         '
+                                          '                      [name]')
+        else:
+            res += '|{0:<118s}|\n'.format('(cumulative)    nrofsites * rate_constant'
+                                          '    = rate            [name]')
+
         res += ('+' + 118 * '-' + '+' + '\n')
         for entry in entries:
-            total_contribution += float(entry[2])
+            if self.get_backend() in ['otf']:
+                total_contribution += float(entry[1])
+            else:
+                total_contribution += float(entry[2])
             percent = '(%8.4f %%)' % (total_contribution * 100 / accum_rate)
-            entry = '% 12i * % 8.4e s^-1 = %8.4e s^-1 [%s]' % entry
+            if self.get_backend() in ['otf']:
+                entry = '{0: 12d},  {1: 8.4e} s^-1              [{3:s}]'.format(*entry)
+            else:
+                entry = '% 12i * % 8.4e s^-1 = %8.4e s^-1 [%s]' % entry
             res += '|{0:<118s}|\n'.format('%s %s' % (percent, entry))
 
         res += ('+' + 118 * '-' + '+' + '\n')
@@ -997,7 +1181,7 @@ class KMC_Model(Process):
         config = self._get_configuration()
 
         self.deallocate()
-        self.settings.simulation_size /= 2
+        self.size /= 2
         self.reset()
 
         X, Y, Z = self.lattice.system_size
@@ -1038,7 +1222,8 @@ class KMC_Model(Process):
         return ProcInt(proc), SiteInt(site)
 
     def get_avail(self, arg):
-        """Return available (enabled) processes or sites
+        """Return available (enabled) processes or sites. If the argument is a sequence it is interpreted as a site (x, y, z, n).
+        If it is an integer it is interpreted as a process.
            :param arg: type or process to query
            :type arg: int or [int]
 
@@ -1115,7 +1300,7 @@ class KMC_Model(Process):
         for x in range(self.lattice.system_size[0]):
             for y in range(self.lattice.system_size[1]):
                 for z in range(self.lattice.system_size[2]):
-                    if self.get_backend() == 'lat_int':
+                    if self.get_backend() in ['lat_int','otf']:
                         eval('self.proclist.touchup_cell([%i, %i, %i, 0])'
                             % (x, y, z))
                     else:
@@ -1265,7 +1450,7 @@ class KMC_Model(Process):
                 else:
                     print('%s : %.4e' % (name, 0.))
 
-    def rate_ratios(self):
+    def rate_ratios(self, interactive=False):
         ratios = []
         for i, iname in enumerate(
                         sorted(self.settings.rate_constants.keys())):
@@ -1281,7 +1466,7 @@ class KMC_Model(Process):
         res = ''
         for label, ratio in ratios:
             res += ('%s: %s\n' % (label, ratio))
-        if INTERACTIVE:
+        if interactive:
             print(res)
         else:
             return res
@@ -1378,7 +1563,7 @@ class Model_Parameters(object):
             if match is None or fnmatch(attr, match):
                 res += ('# %s = %s\n'
                       % (attr, settings.parameters[attr]['value']))
-        if INTERACTIVE:
+        if interactive:
             print(res)
         else:
             return res
@@ -1416,22 +1601,27 @@ class Model_Rate_Constants(object):
 
         return res
 
-    def __call__(self, pattern=None):
+    def __call__(self, pattern=None, interactive=False, model=None):
         """Return rate constants.
 
         :param pattern: fname pattern to filter matching parameter name.
         :type pattern: str
+        :param model: runtime instance of kMC to extract rate constants from (optional)
+        :type model: kmos Model
 
         """
         res = ''
         for i, proc in enumerate(sorted(settings.rate_constants.keys())):
             if pattern is None or fnmatch(proc, pattern):
                 rate_expr = settings.rate_constants[proc][0]
-                rate_const = evaluate_rate_expression(rate_expr,
-                                                      settings.parameters)
+                if model is None:
+                    rate_const = evaluate_rate_expression(rate_expr,
+                                                          settings.parameters)
+                else:
+                    rate_const = model.base.get_rate(i+1)
                 res += ('# %s: %s = %.2e s^{-1}\n' % (proc, rate_expr,
                                                       rate_const))
-        if INTERACTIVE:
+        if interactive:
             print(res)
         else:
             return res
@@ -1458,7 +1648,7 @@ class Model_Rate_Constants(object):
         rate_expr = settings.rate_constants[proc][0]
         return evaluate_rate_expression(rate_expr, settings.parameters)
 
-    def inverse(self):
+    def inverse(self, interactive=False):
         """Return inverse list of rate constants.
 
         """
@@ -1470,7 +1660,7 @@ class Model_Rate_Constants(object):
                                                   settings.parameters)
             res += '# %s: %.2e s^{-1} = %s\n' % (proc, rate_const, rate_expr)
         res += '# ------------------\n'
-        if INTERACTIVE:
+        if interactive:
             print(res)
         else:
             return res
@@ -1503,6 +1693,60 @@ class Model_Rate_Constants(object):
         for i, proc in enumerate(sorted(settings.rate_constants.keys())):
             if pattern is None or fnmatch(proc, pattern):
                 base.set_rate_const(i + 1, rate_constant)
+
+class Model_Rate_Constants_OTF(Model_Rate_Constants):
+    """
+    A subclass of Model_Rate_Constants to be used with the
+    otf backend
+    """
+    def __call__(self, pattern=None, interactive=False, **kwargs):
+        """ Return rate constants
+
+        Can be called with keyword arguments of the form
+        nr_<species>_<flag>, to calculate the rate for
+        the appropiate value of the chemical environment
+        """
+        res = ''
+        for i, proc in enumerate(sorted(settings.rate_constants.keys())):
+            if pattern is None or fnmatch(proc,pattern):
+                res += ('# %s: %.2e s^{-1}\n' % (proc,
+                                                 self._rate(proc,**kwargs)))
+
+        if interactive:
+            print(res)
+        else:
+            return res
+
+    def _rate(self,procname,**kwargs):
+        nr_vars = ''.join(getattr(proclist_pars,
+                                  'byst_{}'.format(procname.lower()))
+                          ).split()
+        if nr_vars:
+            input_array = np.zeros([len(nr_vars)],int)
+            for nr_var, value in kwargs.iteritems():
+                if nr_var in nr_vars:
+                    input_array[nr_vars.index(nr_var)] = int(value)
+
+            return getattr(proclist_pars,
+                           'rate_{}'.format(procname.lower()))(input_array)
+        else:
+            return getattr(proclist_pars,
+                           'rate_{}'.format(procname.lower()))()
+
+    def bystanders(self, pattern=None, interactive=True):
+        """ Print the bystanders defined for processes"""
+
+        res = ''
+        for i, proc in enumerate(sorted(settings.rate_constants.keys())):
+            if pattern is None or fnmatch(proc,pattern):
+                bysts = ''.join(getattr(proclist_pars,
+                                        'byst_{}'.format(proc.lower())))
+                res += ('# %s: %s\n' % (proc,
+                                        bysts))
+        if interactive:
+            print(res)
+        else:
+            return res
 
 
 class ModelParameter(object):
@@ -1998,6 +2242,27 @@ def set_rate_constants(parameters=None, print_rates=None):
                     % (rate_expr, proc, e))
     if print_rates:
         print('-------------------')
+
+    # FIXME
+    # update chemical potentials (works for otf backend only)
+    if hasattr(proclist,'update_user_parameter'):
+         for name,entry in settings.parameters.iteritems():
+             proclist.update_user_parameter(
+                 getattr(proclist,name.lower()),
+                 evaluate_rate_expression(
+                 # FIXME Take first item of lists
+                 # to support for deprecated 'lattice_size' parameter
+                     str(entry['value']).split(' ')[0],
+                                          parameters))
+
+    if hasattr(proclist,'update_chempot'):
+         for chempot in settings.chemical_potentials:
+             proclist.update_chempot(
+                 getattr(proclist,chempot.lower()),
+                 evaluate_rate_expression(chempot,parameters))
+
+    if hasattr(proclist,'recalculate_rates_matrix'):
+         proclist.recalculate_rates_matrix()
 
 
 def import_ase():

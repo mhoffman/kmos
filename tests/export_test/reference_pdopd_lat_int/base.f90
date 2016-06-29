@@ -136,7 +136,7 @@ real(kind=rdouble), dimension(:), allocatable :: integ_rates
 !   rate constants, :math:`\mathbf{n}_i` the number of available sites
 !   during kMC-time interval i,  :math:`\{\Delta t_i\}` the corresponding
 !   timesteps then :math:`a_{i}(t)` at the time :math:`t=\sum_{i=1}\Delta t_i`
-!   is calculated according to :math:`a_{i}(t)=\sum_{i=1}} c_{i} n_{i}\Delta t_i`.
+!   is calculated according to :math:`a_{i}(t)=\sum_{i=1} c_{i} n_{i}\Delta t_i`.
 !
 !******
 !------ S. Matera 09/18/2012------
@@ -183,6 +183,8 @@ real(kind=rdouble) :: kmc_time_step
 !   The time increment of the current kMC step.
 !******
 
+
+integer(kind=iint), dimension(25, 0:3), public :: coverage = 0
 
 
 !--- Local copies of variables

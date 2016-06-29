@@ -10,9 +10,13 @@ from fnmatch import fnmatch
 # numpy
 import numpy as np
 
+
 # XML handling
-from lxml import etree as ET
-#Need to pretty print XML
+try:
+    from lxml import etree as ET
+except:
+    ET = None
+# Need to pretty print XML
 from xml.dom import minidom
 
 # kmos own modules
@@ -21,10 +25,12 @@ from kmos.config import APP_ABS_PATH
 
 kmcproject_v0_1_dtd = '/kmc_project_v0.1.dtd'
 kmcproject_v0_2_dtd = '/kmc_project_v0.2.dtd'
-xml_api_version = (0, 2)
+kmcproject_v0_3_dtd = '/kmc_project_v0.3.dtd'
+xml_api_version = (0, 3)
 
 
 class FixedObject(object):
+
     """Handy class that easily allows to define data structures
     that can only hold a well-defined set of fields
     """
@@ -44,8 +50,8 @@ class FixedObject(object):
         if attrname in self.attributes + ['__doc__']:
             self.__dict__[attrname] = value
         else:
-            raise AttributeError('Tried to set illegal attribute %s' \
-                                                            % attrname)
+            raise AttributeError('Tried to set illegal attribute %s'
+                                 % attrname)
 
     def __hash__(self):
         """Since python-kiwi update to 1.9.32 it requires all objecst in
@@ -57,6 +63,7 @@ class FixedObject(object):
 
 
 class Project(object):
+
     """A Project is where (almost) everything comes together.
     A Project holds all other elements needed to describe one
     kMC Project ready to be manipulated, exported, or imported.
@@ -85,11 +92,11 @@ class Project(object):
         # Quick'n'dirty define access functions
         # needed in context with GTKProject
         self.get_layers = lambda: sorted(self.layer_list,
-                                          key=lambda x: x.name)
+                                         key=lambda x: x.name)
 
         self.add_output = lambda output: self.output_list.append(output)
         self.get_outputs = lambda: sorted(self.output_list,
-                                           key=lambda x: x.name)
+                                          key=lambda x: x.name)
 
     def get_speciess(self, pattern=None):
         """Return list of species in Project.
@@ -98,8 +105,8 @@ class Project(object):
         :type pattern: str
         """
         return sorted([item for item in self.species_list
-                if pattern is None or fnmatch(item.name, pattern)
-               ], key=lambda x: x.name)
+                       if pattern is None or fnmatch(item.name, pattern)
+                       ], key=lambda x: x.name)
 
     def get_parameters(self, pattern=None):
         """Return list of parameters in Project.
@@ -108,8 +115,8 @@ class Project(object):
         :type pattern: str
         """
         return sorted([item for item in self.parameter_list
-                if pattern is None or fnmatch(item.name, pattern)
-               ], key=lambda x: x.name)
+                       if pattern is None or fnmatch(item.name, pattern)
+                       ], key=lambda x: x.name)
 
     def get_processes(self, pattern=None):
         """Return list of processes.
@@ -118,8 +125,8 @@ class Project(object):
         :type pattern: str
         """
         return sorted([item for item in self.process_list
-                if pattern is None or fnmatch(item.name, pattern)
-               ], key=lambda x: x.name)
+                       if pattern is None or fnmatch(item.name, pattern)
+                       ], key=lambda x: x.name)
 
     def add_parameter(self, *parameters, **kwargs):
         """Add a parameter to the project. A Parameter,
@@ -295,12 +302,121 @@ class Project(object):
         layer.add_site(**kwargs)
 
     def __repr__(self):
-        return self._get_xml_string()
+        try:
+            return self._get_xml_string()
+        except (TypeError, AttributeError):
+            return self._get_ini_string()
 
     def _get_xml_string(self):
         """Produces an XML representation of the project data
         """
         return prettify_xml(self._get_etree_xml())
+
+    def _get_ini_string(self):
+        """Return representation of model as can be written into a *.ini File.
+
+        """
+        from ConfigParser import ConfigParser
+        from StringIO import StringIO
+
+        config = ConfigParser()
+        config.optionxform = str
+        # Meta
+        config.add_section('Meta')
+        config.set('Meta', 'author', self.meta.author)
+        config.set('Meta', 'email', self.meta.email)
+        config.set('Meta', 'model_name', self.meta.model_name)
+        config.set('Meta', 'model_dimension', self.meta.model_dimension)
+        config.set('Meta', 'debug', self.meta.debug)
+
+        config.add_section('SpeciesList')
+        if hasattr(self.species_list, 'default_species'):
+            config.set('SpeciesList', 'default_species',
+                       self.species_list.default_species)
+        else:
+            config.set('SpeciesList', 'default_species', '')
+
+        for species in self.get_speciess():
+            section_name = 'Species %s' % species.name
+            config.add_section(section_name)
+            if hasattr(species, 'representation'):
+                config.set(section_name,
+                           'representation', species.representation)
+            if hasattr(species, 'color'):
+                config.set(section_name, 'color', species.color)
+            config.set(section_name, 'tags', getattr(species, 'tags'))
+
+        for parameter in self.get_parameters():
+            section_name = 'Parameter %s' % parameter.name
+            config.add_section(section_name)
+            config.set(section_name, 'value', parameter.value)
+            config.set(section_name, 'adjustable', str(parameter.adjustable))
+            config.set(section_name, 'min', str(parameter.min))
+            config.set(section_name, 'max', str(parameter.max))
+            if hasattr(parameter, 'scale'):
+                config.set(section_name, 'scale', str(parameter.scale))
+            else:
+                config.set(section_name, 'scale', 'linear')
+
+        config.add_section('Lattice')
+        if hasattr(self.layer_list, 'cell'):
+            config.set('Lattice', 'cell_size', ' '.join(
+                [str(i) for i in self.layer_list.cell.flatten()]))
+
+            if hasattr(self.layer_list, 'default_layer'):
+                config.set(
+                    'Lattice', 'default_layer', self.layer_list.default_layer)
+
+            if hasattr(self.layer_list, 'substrate_layer'):
+                config.set('Lattice',
+                           'substrate_layer',
+                           self.layer_list.substrate_layer)
+
+        if hasattr(self.layer_list, 'representation'):
+            config.set('Lattice',
+                       'representation',
+                       self.layer_list.representation)
+
+        for layer in self.get_layers():
+            section_name = 'Layer %s' % layer.name
+            config.add_section(section_name)
+            config.set(section_name, 'color', layer.color)
+
+            for site in layer.sites:
+                config.set(section_name, 'site %s' % site.name,
+                           '%s; %s; %s' %
+                           (tuple(site.pos),
+                            site.default_species,
+                            site.tags,
+                            ))
+
+        for process in self.get_processes():
+            section_name = 'Process %s' % process.name
+            config.add_section(section_name)
+            config.set(section_name, 'rate_constant', process.rate_constant)
+            config.set(section_name, 'otf_rate', process.otf_rate)
+            config.set(section_name, 'enabled', str(process.enabled))
+            if process.bystander_list:
+                bystanders = [bystander._shorthand()
+                              for bystander in process.bystander_list]
+                print(process.name)
+                print(bystanders)
+                config.set(section_name, 'bystanders', ' + '.join(bystanders))
+            if process.tof_count:
+                config.set(section_name, 'tof_count', str(process.tof_count))
+            conditions = [condition._shorthand()
+                          for condition in process.condition_list]
+            config.set(section_name, 'conditions',
+                       ' + '.join(conditions))
+
+            actions = [action._shorthand() for action in process.action_list]
+            config.set(section_name, 'actions',
+                       ' + '.join(actions))
+
+        f = StringIO()
+        config.write(f)
+
+        return f.getvalue()
 
     def _get_etree_xml(self):
         """Produces an ElemenTree object
@@ -351,7 +467,8 @@ class Project(object):
         if hasattr(self.layer_list, 'cell'):
             lattice_elem.set('cell_size',
                              ' '.join([str(i)
-                                   for i in self.layer_list.cell.flatten()]))
+                                       for i in
+                                       self.layer_list.cell.flatten()]))
             if hasattr(self.layer_list, 'default_layer'):
                 lattice_elem.set('default_layer',
                                  self.layer_list.default_layer)
@@ -376,6 +493,8 @@ class Project(object):
         for process in self.get_processes():
             process_elem = ET.SubElement(process_list, 'process')
             process_elem.set('rate_constant', process.rate_constant)
+            if process.otf_rate:
+                process_elem.set('otf_rate', process.otf_rate)
             process_elem.set('name', process.name)
             process_elem.set('enabled', str(process.enabled))
             if process.tof_count:
@@ -386,14 +505,26 @@ class Project(object):
                 condition_elem.set('coord_layer', condition.coord.layer)
                 condition_elem.set('coord_name', condition.coord.name)
                 condition_elem.set('coord_offset',
-                    ' '.join([str(i) for i in condition.coord.offset]))
+                                   ' '.join([str(i) for i in condition.coord.offset]))
             for action in process.action_list:
                 action_elem = ET.SubElement(process_elem, 'action')
                 action_elem.set('species', action.species)
                 action_elem.set('coord_layer', action.coord.layer)
                 action_elem.set('coord_name', action.coord.name)
                 action_elem.set('coord_offset',
-                    ' '.join([str(i) for i in action.coord.offset]))
+                                ' '.join([str(i) for i in action.coord.offset]))
+            if hasattr(process, 'bystander_list'):
+                for bystander in process.bystander_list:
+                    bystander_elem = ET.SubElement(process_elem, 'bystander')
+                    bystander_elem.set(
+                        'allowed_species', ' '.join(bystander.allowed_species))
+                    bystander_elem.set('coord_layer', bystander.coord.layer)
+                    bystander_elem.set('coord_name', bystander.coord.name)
+                    bystander_elem.set('coord_offset',
+                                       ' '.join([str(i) for i in bystander.coord.offset]))
+                    if bystander.flag:
+                        bystander_elem.set('flag', bystander.flag)
+
         output_list = ET.SubElement(root, 'output_list')
         for output in self.get_outputs():
             if output.output:
@@ -401,20 +532,303 @@ class Project(object):
                 output_elem.set('item', output.name)
         return root
 
-    def save(self, filename=None):
-        if filename is not None:
-            self.export_xml_file(filename)
-        elif hasattr(self, 'filename'):
-            self.export_xml_file(self.filename)
-        else:
-            print('Not saved because filename is not set.')
+    def shorten_names(self, max_length=15):
+        if max_length < 5 :
+            raise UserWarning("Max variable length has to be at least 5.")
+        if max_length < 0 :
+            max_length > 9999
 
-    def export_xml_file(self, filename):
+        import pprint
+        digits = 4
+        abbreviation_map = {}
+        fullform_map = {}
+        stub_map = {}
+
+        for process in self.process_list:
+            if len(process.name) > max_length - digits:
+                long_name = process.name
+                stub = process.name[:max_length - digits]
+                short_number = len(stub_map.get(stub, []))
+                short_name = '{stub}{short_number:04d}'.format(**locals())
+                stub_map.setdefault(stub, []).append((short_name, long_name))
+                abbreviation_map[short_name] = long_name
+                fullform_map[long_name] = short_name
+
+                process.name = short_name
+
+        with open('abbreviations_{self.meta.model_name}.dat'.format(**locals()), 'w') as outfile:
+            outfile.write(pprint.pformat(stub_map))
+
+    def save(self, filename=None, validate=True):
+        if filename is None:
+            filename = self.filename
+        if filename.endswith('.xml'):
+            self.export_xml_file(filename, validate=validate)
+        elif filename.endswith('.ini'):
+            with open(filename, 'w') as outfile:
+                outfile.write(self._get_ini_string())
+        else:
+            raise UserWarning('Cannot export to file suffix %s' %
+                              os.path.splitext(filename)[-1])
+
+    def export_xml_file(self, filename, validate=True):
         f = file(filename, 'w')
         f.write(str(self))
         f.close()
 
-        self.validate_model()
+        if validate:
+            self.validate_model()
+
+    def import_file(self, filename):
+        if filename.endswith('.ini'):
+            self.import_ini_file(filename)
+        elif filename.endswith('.xml'):
+            self.import_xml_file(filename)
+
+        else:
+            raise UserWarning(
+                'Don\'t know what to do with this file ending %s' % filename)
+
+        self.filename = filename
+
+    def import_ini_file(self, filename):
+        from ConfigParser import ConfigParser
+        from kmos.utils import evaluate_template
+        from StringIO import StringIO
+
+        config = ConfigParser()
+        config.optionxform = str
+        if type(filename) is str:
+            with open(filename) as infile:
+                inputtxt = infile.read()
+        else:
+            inputtxt = filename.read()
+
+        infile = StringIO()
+        infile.write(evaluate_template(inputtxt, escape_python=True, pt=self))
+        infile.seek(0)
+        config.readfp(infile)
+
+        for section in config.sections():
+            if section == 'Lattice':
+                options = config.options(section)
+                for option in options:
+                    value = config.get(section, option)
+                    if option == 'cell_size':
+                        cell = np.array([float(i)
+                                         for i in
+                                         value.split()])
+                        if len(cell) == 3:
+                            self.layer_list.cell = np.diag(cell)
+                        elif len(cell) == 9:
+                            self.layer_list.cell = cell.reshape(3, 3)
+                        else:
+                            raise UserWarning('%s not understood' % cell)
+                    elif option == 'default_layer':
+                        self.layer_list.default_layer = value
+                if 'default_layer' in options:
+                    self.layer_list.default_layer = config.get(
+                        section, 'default_layer')
+
+                if 'substrate_layer' in options:
+                    self.layer_list.substrate_layer = config.get(
+                        section, 'substrate_layer')
+
+                if 'representation' in options:
+                    self.layer_list.representation = config.get(
+                        section, 'representation')
+
+            elif section.startswith('Layer '):
+                options = config.options(section)
+                layer_name = section.split()[-1]
+                if 'color' in options:
+                    layer = self.add_layer(Layer(name=layer_name,
+                                                 color=config.get(section, 'color')))
+                else:
+                    layer = self.add_layer(Layer(name=layer_name))
+
+                if not hasattr(self.layer_list, 'default_layer'):
+                    self.layer_list.default_layer = layer_name
+                if not hasattr(self.layer_list, 'substrate_layer'):
+                    self.layer_list.substrate_layer = layer_name
+
+                for option in options:
+                    if option.startswith('site'):
+                        name = option.split()[-1]
+                        pos_line = config.get(section, option).split(';')
+                        if len(pos_line) == 3:
+                            pos, default_species, tags = pos_line
+                            pos = tuple(eval(pos))
+                            site = Site(name=name.strip(),
+                                        pos=pos,
+                                        default_species=default_species.strip(),
+                                        tags=tags.strip())
+                        elif len(pos_line) == 2:
+                            pos, default_species = pos_line
+                            pos = tuple(eval(pos))
+                            tags = ''
+                            site = Site(name=name.strip(),
+                                        pos=pos,
+                                        default_species=default_species.strip(),)
+                        elif len(pos_line) == 1:
+                            pos = tuple(eval(pos_line[0]))
+
+                            if hasattr(self.species_list, 'default_species'):
+                                default_species = self.species_list.default_species
+                                site = Site(name=name.strip(),
+                                            pos=pos,
+                                            default_species=default_species.strip(),)
+                            else:
+                                site = Site(name=name.strip(),
+                                            pos=pos,)
+
+                        layer.sites.append(site)
+            elif section == 'Meta':
+                options = config.options(section)
+                for option in options:
+                    value = config.get(section, option)
+                    self.meta.add({option: value})
+            elif section.startswith('Parameter '):
+                options = config.options(section)
+                name = section.split()[-1]
+                min = config.getfloat(section, 'min') if 'min' in options else 0.
+                max = config.getfloat(section, 'max') if 'max' in options else 0.
+                value = config.get(section, 'value') if 'value' in options else None
+                scale = config.get(section, 'scale') if 'scale' in options else 'linear'
+                adjustable = config.getboolean(section, 'adjustable') if 'adjustable' in options else None
+                self.add_parameter(Parameter(name=name,
+                                             value=value,
+                                             min=min,
+                                             max=max,
+                                             scale=scale,
+                                             adjustable=adjustable,))
+
+            elif section.startswith('Process '):
+                options = config.options(section)
+                name = section.split()[-1]
+                rate_constant = config.get(section, 'rate_constant')
+                if 'otf_rate' in options:
+                    otf_rate = config.get(section, 'otf_rate')
+                    if otf_rate.strip() == 'None':
+                        otf_rate = None
+                else:
+                    otf_rate = None
+
+                if 'tof_count' in options:
+                    tof_count = config.get(section, 'tof_count')
+                    if not tof_count: tof_count = {}
+                else:
+                    tof_count = None
+
+                if 'enabled' in options:
+                    enabled = config.getboolean(section, 'enabled')
+                else:
+                    enabled = True
+
+                process = self.add_process(Process(name=name,
+                                                   rate_constant=rate_constant,
+                                                   tof_count=tof_count,
+                                                   otf_rate=otf_rate,
+                                                   enabled=enabled))
+
+                for action in [x.strip() for x in config.get(section, 'actions').split('+')]:
+                    try:
+                        species, coord = action.split('@')
+                    except:
+                        print(action)
+                        print(action.split('@'))
+                        raise
+                    coord = coord.split('.')
+                    if len(coord) == 3:
+                        name, offset, layer = coord
+                        offset = eval(offset)
+                    elif len(coord) == 2:
+                        name, offset = coord
+                        offset = eval(offset)
+                        layer = [
+                            x.split()[-1] for x in config.sections() if x.startswith('Layer')][0]
+                    else:
+                        name = coord[0]
+                        offset = (0, 0, 0)
+                        layer = [
+                            x.split()[-1] for x in config.sections() if x.startswith('Layer')][0]
+
+                    process.add_action(Action(
+                        species=species,
+                        coord=Coord(name=name,
+                                    offset=offset,
+                                    layer=layer)))
+
+                for condition in [x.strip() for x in config.get(section, 'conditions').split('+')]:
+                    species, coord = condition.split('@')
+                    coord = coord.split('.')
+                    if len(coord) == 3:
+                        name, offset, layer = coord
+                        offset = eval(offset)
+                    elif len(coord) == 2:
+                        name, offset = coord
+                        offset = eval(offset)
+                        layer = [
+                            x.split()[-1] for x in config.sections() if x.startswith('Layer')][0]
+                    else:
+                        name = coord[0]
+                        offset = (0, 0, 0)
+                        layer = [
+                            x.split()[-1] for x in config.sections() if x.startswith('Layer')][0]
+
+                    process.add_condition(Condition(
+                        species=species,
+                        coord=Coord(name=name,
+                                    offset=offset,
+                                    layer=layer)))
+
+                if 'bystanders' in config.options(section):
+                    for bystander in [x.strip() for x in config.get(section, 'bystanders').split('+')]:
+                        allowed_species, coord = bystander.split('@')
+                        allowed_species = eval(allowed_species)
+
+                        coord, flag = coord.split('|')
+                        coord = coord.split('.')
+                        if len(coord) == 3:
+                            name, offset, layer = coord
+                            offset = eval(offset)
+                        elif len(coord) == 2:
+                            name, offset = coord
+                            offset = eval(offset)
+                            layer = [
+                                x.split()[-1] for x in config.sections() if x.startswith('Layer')][0]
+                        else:
+                            name = coord[0]
+                            offset = (0, 0, 0)
+                            layer = [
+                                x.split()[-1] for x in config.sections() if x.startswith('Layer')][0]
+
+                        process.add_bystander(Bystander(
+                            allowed_species=allowed_species,
+                            flag=flag,
+                            coord=Coord(name=name,
+                                        offset=offset,
+                                        layer=layer)))
+
+            elif section == 'SpeciesList':
+                self.species_list.default_species = \
+                    config.get(section, 'default_species') \
+                    if 'default_species' in config.options(section) \
+                    else ''
+
+            elif section.startswith('Species '):
+                name = section.split()[-1]
+                options = config.options(section)
+                color = config.get(section, 'color') \
+                    if 'color' in options else ''
+                representation = config.get(section, 'representation') \
+                    if 'representation' in options else ''
+                tags = config.get(section, 'tags') \
+                    if 'tags' in options else ''
+                self.add_species(Species(name=name,
+                                         color=color,
+                                         representation=representation,
+                                         tags=tags))
 
     def import_xml_file(self, filename):
         """Takes a filename, validates the content against kmc_project.dtd
@@ -423,22 +837,28 @@ class Project(object):
         # TODO: catch XML version first and convert if necessary
         self.filename = filename
         #xmlparser = ET.XMLParser(remove_comments=True)
-        #! FIXME : automatic removal of comment not supported in
+        #  FIXME : automatic removal of comment not supported in
         # stdlib version of ElementTree
+
+        supported_versions = [(0, 2), (0, 3)]
+
         xmlparser = ET.XMLParser()
-        try:
-            root = ET.parse(filename, parser=xmlparser).getroot()
-        except:
-            raise Exception(('Could not parse file %s. Are you sure this'
-                             ' a kmos project file?\n')
-                            % os.path.abspath(filename))
+        if os.path.exists(filename):
+            try:
+                root = ET.parse(filename, parser=xmlparser).getroot()
+            except:
+                raise Exception(('Could not parse file %s. Are you sure this'
+                                 ' is a kmos project file?\n')
+                                % os.path.abspath(filename))
+        else:
+            raise IOError('File not found: %s' % os.path.abspath(filename))
 
         if 'version' in root.attrib:
             self.version = eval(root.attrib['version'])
         else:
             self.version = (0, 1)
 
-        if self.version == (0, 1):
+        if not self.version in supported_versions:
             dtd = ET.DTD(APP_ABS_PATH + kmcproject_v0_1_dtd)
             if not dtd.validate(root):
                 print(dtd.error_log.filter_from_errors()[0])
@@ -446,15 +866,22 @@ class Project(object):
             nroot = ET.Element('kmc')
             nroot.set('version', '0.2')
             raise Exception('No legacy support!')
-        elif self.version == (0, 2):
-            dtd = ET.DTD(APP_ABS_PATH + kmcproject_v0_2_dtd)
+        else:
+            if self.version == (0, 2):
+                dtd = ET.DTD(APP_ABS_PATH + kmcproject_v0_2_dtd)
+            elif self.version == (0, 3):
+                dtd = ET.DTD(APP_ABS_PATH + kmcproject_v0_3_dtd)
+            else:
+                raise Exception(
+                    'xml file version not supported. Is your kmos too old?')
             if not dtd.validate(root):
                 print(dtd.error_log.filter_from_errors()[0])
                 return
             for child in root:
                 if child.tag == 'lattice':
                     cell = np.array([float(i)
-                        for i in child.attrib['cell_size'].split()])
+                                     for i in
+                                     child.attrib['cell_size'].split()])
                     if len(cell) == 3:
                         self.layer_list.cell = np.diag(cell)
                     elif len(cell) == 9:
@@ -470,8 +897,8 @@ class Project(object):
                         self.layer_list.substrate_layer = \
                             self.layer_list.default_layer
                     if 'representation' in child.attrib:
-                        self.layer_list.representation = child.attrib[
-                                                             'representation']
+                        self.layer_list.representation = \
+                            child.attrib['representation']
                     else:
                         self.layer_list.representation = ''
 
@@ -493,21 +920,21 @@ class Project(object):
                                 else:
                                     tags = ''
                                 if 'default_species' in site.attrib:
-                                    default_species = site.attrib[
-                                                         'default_species']
+                                    default_species = \
+                                        site.attrib['default_species']
                                 else:
                                     default_species = 'default_species'
                                 site_elem = Site(name=name,
-                                    pos=pos,
-                                    tags=tags,
-                                    default_species=default_species)
+                                                 pos=pos,
+                                                 tags=tags,
+                                                 default_species=default_species)
                                 layer.sites.append(site_elem)
                 elif child.tag == 'meta':
                     for attrib in ['author',
-                                    'debug',
-                                    'email',
-                                    'model_dimension',
-                                    'model_name']:
+                                   'debug',
+                                   'email',
+                                   'model_dimension',
+                                   'model_name']:
                         if attrib in child.attrib:
                             self.meta.add({attrib: child.attrib[attrib]})
                 elif child.tag == 'parameter_list':
@@ -517,7 +944,7 @@ class Project(object):
 
                         if 'adjustable' in parameter.attrib:
                             adjustable = bool(eval(
-                                            parameter.attrib['adjustable']))
+                                              parameter.attrib['adjustable']))
                         else:
                             adjustable = False
 
@@ -543,6 +970,10 @@ class Project(object):
                             tof_count = process.attrib['tof_count']
                         else:
                             tof_count = None
+                        if 'otf_rate' in process.attrib:
+                            otf_rate = process.attrib['otf_rate']
+                        else:
+                            otf_rate = None
                         if 'enabled' in process.attrib:
                             try:
                                 proc_enabled = bool(
@@ -552,31 +983,48 @@ class Project(object):
                         else:
                             proc_enabled = True
                         process_elem = Process(name=name,
-                            rate_constant=rate_constant,
-                            enabled=proc_enabled,
-                            tof_count=tof_count)
+                                               rate_constant=rate_constant,
+                                               enabled=proc_enabled,
+                                               tof_count=tof_count,
+                                               otf_rate=otf_rate)
                         for sub in process:
-                            if sub.tag == 'action' or sub.tag == 'condition':
-                                species = sub.attrib['species']
-                                implicit = (sub.attrib.get('implicit', '') == 'True')
+                            # if sub.tag == 'action' or sub.tag == 'condition':
+                            if sub.tag in ['action', 'condition', 'bystander']:
                                 coord_layer = sub.attrib['coord_layer']
                                 coord_name = sub.attrib['coord_name']
                                 coord_offset = tuple(
                                     [int(i) for i in
-                                    sub.attrib['coord_offset'].split()])
+                                     sub.attrib['coord_offset'].split()])
                                 coord = Coord(layer=coord_layer,
                                               name=coord_name,
                                               offset=coord_offset,
                                               )
-                                condition_action = \
-                                    ConditionAction(species=species,
-                                                    coord=coord,
-                                                    implicit=implicit)
-                                if sub.tag == 'action':
-                                    process_elem.add_action(condition_action)
-                                elif sub.tag == 'condition':
-                                    process_elem.add_condition(
-                                                            condition_action)
+                                if sub.tag == 'bystander':
+                                    allowed_species = sub.attrib[
+                                        'allowed_species'].split()
+                                    if 'flag' in sub.attrib:
+                                        flag = sub.attrib['flag']
+                                        byst =\
+                                            Bystander(allowed_species=allowed_species,
+                                                      coord=coord, flag=flag)
+                                    else:
+                                        byst = Bystander(allowed_species=allowed_species,
+                                                         coord=coord)
+                                    process_elem.add_bystander(byst)
+                                else:
+                                    implicit = (
+                                        sub.attrib.get('implicit', '') == 'True')
+                                    species = sub.attrib['species']
+                                    condition_action = \
+                                        ConditionAction(species=species,
+                                                        coord=coord,
+                                                        implicit=implicit)
+                                    if sub.tag == 'action':
+                                        process_elem.add_action(
+                                            condition_action)
+                                    elif sub.tag == 'condition':
+                                        process_elem.add_condition(
+                                            condition_action)
                         self.add_process(process_elem)
                 elif child.tag == 'species_list':
                     self.species_list.default_species = \
@@ -599,8 +1047,8 @@ class Project(object):
                         output_elem = OutputItem(name=item.attrib['item'],
                                                  output=True)
                         self.add_output(output_elem)
-        elif self.version == (0, 3):
-            pass
+#        elif self.version == (0, 3):
+#            pass
             # import new XML definition
             # everything tagged and not Output
 
@@ -623,8 +1071,8 @@ class Project(object):
             raise UserWarning('No layer defined.')
 
         # if a least one site if defined
-        if not len([x  for layer in self.get_layers()
-                       for x in layer.sites]) >= 1:
+        if not len([x for layer in self.get_layers()
+                    for x in layer.sites]) >= 1:
             raise UserWarning('No site defined.')
         # check if all  lattice sites are unique
         for layer in self.get_layers():
@@ -641,12 +1089,13 @@ class Project(object):
 
             # check if all lattice have a valid name
             if not variable_regex.match(layer.name):
-                raise UserWarning('Lattice %s is not a valid variable name.\n'
-                                  'Only letters, numerals and "_" allowed.\n'
-                                  'First character has to be a letter.\n')
+                raise UserWarning(('Lattice %s is not a valid variable name.\n'
+                                   'Only letters, numerals and "_" allowed.\n'
+                                   'First character has to be a letter.\n'.format(
+                                       layer.name)))
 
         # check if the default layer is actually defined
-        if len(self.get_layers()) > 1  and \
+        if len(self.get_layers()) > 1 and \
            self.layer_list.default_layer not in [layer.name
                                                  for layer
                                                  in self.get_layers()]:
@@ -683,15 +1132,16 @@ class Project(object):
         for species in self.get_speciess():
             # if species names are valid variable names
             if not variable_regex.match(species.name):
-                raise UserWarning('Species %s is not a valid variable name.\n'
-                                  'Only letters, numerals and "_" allowed.\n'
-                                  'First character has to be a letter.\n')
+                raise UserWarning(('Species %s is not a valid variable name.\n'
+                                   'Only letters, numerals and "_" allowed.\n'
+                                   'First character has to be a letter.\n'.format(
+                                       species.name)))
 
         # check if all species have a unique name
         for x in self.get_speciess():
             if [y.name for y in self.get_speciess()].count(x.name) > 1:
                 raise UserWarning('Species %s has no unique name!' %
-                                      x.name)
+                                  x.name)
 
         #################
         # PROCESSES
@@ -706,7 +1156,7 @@ class Project(object):
                 raise UserWarning(('Model %s is not a valid variable name.\n'
                                    'Only letters, numerals and "_" allowed.\n'
                                    'First character has to be a letter.\n')
-                                   % x.name)
+                                  % x.name)
 
         # check if all process names are unique
         for x in self.get_processes():
@@ -728,13 +1178,30 @@ class Project(object):
             for x in process.condition_list:
                 if len([y for y in process.condition_list if x == y]) > 1:
                     raise UserWarning('%s of process %s is not unique!\n\n%s' %
-                                        (x, process.name, process))
+                                      (x, process.name, process))
         # check if actions for each process are unique
         for process in self.get_processes():
             for x in process.action_list:
                 if len([y for y in process.action_list if x == y]) > 1:
                     raise UserWarning('%s of process %s is not unique!' %
-                                        (x, process.name))
+                                      (x, process.name))
+
+        # check if bystanders for each process are unique and
+        # do not coincide with conditions or actions
+        for process in self.get_processes():
+            for x in process.bystander_list:
+                if len([y for y in process.bystander_list
+                        if x.coord == y.coord]) > 1:
+                    raise UserWarning(('Found more than one bystander for %s\n'
+                                       % x.coord) +
+                                      ('on process %s' % process.name))
+                if len([y for y in process.condition_list if x.coord == y.coord]) > 0:
+                    raise UserWarning('Process %s has both a condition and a bystander\n'
+                                      'on %s!' % (process.name, x.coord))
+                if len([y for y in process.action_list if x.coord == y.coord]) > 0:
+                    raise UserWarning('Process %s has an action and a bystander\n on %s!' %
+                                      (process.name, x.coord))
+
         # check if all processes have a rate expression
         for x in self.get_processes():
             if not x.rate_constant:
@@ -743,17 +1210,30 @@ class Project(object):
         # check if all rate expressions are valid
         # check if all species used in condition_action are defined
         # after stripping ^ and $ operators
+        # check if all species used in bystander are defined
         species_names = [x.name for x in self.get_speciess()]
         for x in self.get_processes():
             for y in x.condition_list + x.action_list:
                 stripped_speciess = y.species.replace('$', '').replace('^', '')
-                stripped_speciess = map(lambda x: x.strip(), stripped_speciess.split(' or '))
+                stripped_speciess = map(
+                    lambda x: x.strip(), stripped_speciess.split(' or '))
 
                 for stripped_species in stripped_speciess:
                     if not stripped_species in species_names:
                         raise UserWarning(('Species %s used by %s in process %s'
                                            'is not defined') %
-                                           (y.species, y, x.name))
+                                          (y.species, y, x.name))
+            if hasattr(x, 'bystander_list'):
+                for y in x.bystander_list:
+                    stripped_speciess = [
+                        species.replace('$', '').replace('^', '').strip()
+                        for species in y.allowed_species]
+                    for stripped_species in stripped_speciess:
+                        if not stripped_species in species_names:
+                            raise UserWarning(
+                                ('Species %s used by %s\n'
+                                 ' in process %s is not defined') %
+                                (stripped_species, y, x.name))
 
         # check if all sites in processes are defined: actions, conditions
         return True
@@ -764,12 +1244,14 @@ class Project(object):
         print('Statistics\n=============')
         print('Parameters: %s' % len(self.get_parameters()))
         print('Species: %s' % len(self.get_speciess()))
+        print('Sites: %s' % sum([len(layer.sites)
+                                 for layer in self.layer_list]))
 
         names = [get_name(x) for x in self.get_processes()]
         names = list(set(names))
         nrates = len(set([x.rate_constant for x in self.get_processes()]))
         print('Processes (%s/%s/%s)\n-------------' %
-               (len(names), nrates, len(self.get_processes())))
+              (len(names), nrates, len(self.get_processes())))
 
         for process_type in sorted(names):
             nprocs = len([x for x in self.get_processes()
@@ -802,7 +1284,6 @@ class Project(object):
         shutil.rmtree(dir)
         return model
 
-
     def set_meta(self,
                  author=None,
                  email=None,
@@ -822,6 +1303,7 @@ class Project(object):
 
 
 class Meta(object):
+
     """Class holding the meta-information about the kMC project
     """
     name = 'Meta'
@@ -850,6 +1332,7 @@ class Meta(object):
 
 
 class ParameterList(FixedObject, list):
+
     """A list of parameters
     """
     attributes = ['name']
@@ -862,6 +1345,7 @@ class ParameterList(FixedObject, list):
 
 
 class Parameter(FixedObject, CorrectlyNamed):
+
     """A parameter that can be used in a rate constant expression
     and defined via some init file.
 
@@ -902,6 +1386,7 @@ class Parameter(FixedObject, CorrectlyNamed):
 
 
 class LayerList(FixedObject, list):
+
     """A list of layers
 
     :param cell: Size of unit-cell.
@@ -952,7 +1437,7 @@ class LayerList(FixedObject, list):
             self.representation = '[%s]' % get_ase_constructor(images)
         else:
             raise UserWarning("Data type %s of %s not understood." %
-                (type(images), images))
+                              (type(images), images))
 
     def __setattr__(self, key, value):
         if key == 'representation':
@@ -960,15 +1445,15 @@ class LayerList(FixedObject, list):
                 from kmos.utils import get_ase_constructor
                 from ase.atoms import Atoms
                 value = eval(value)
-                if (not hasattr(self, 'representation') or \
-                   not self.representation):
+                if (not hasattr(self, 'representation') or
+                        not self.representation):
                     self.cell = value[0].cell
                 value = '[%s]' % get_ase_constructor(value)
             self.__dict__[key] = '%s' % value
         else:
             self.__dict__[key] = value
 
-    def generate_coord_set(self, size=[1, 1, 1], layer_name='default'):
+    def generate_coord_set(self, size=[1, 1, 1], layer_name='default', site_name=None):
         """Generates a set of coordinates around unit cell of any
         desired size. By default it includes exactly all sites in
         the unit cell. By setting size=[2,1,1] one gets an additional
@@ -984,13 +1469,27 @@ class LayerList(FixedObject, list):
         else:
             raise UserWarning('No Layer named %s found.' % layer_name)
 
-        return [
-            self.generate_coord('%s.(%s, %s, %s).%s' % (site.name, i, j, k,
-                                                        layer_name))
-                    for i in drange(size[0])
-                    for j in drange(size[1])
-                    for k in drange(size[2])
-                    for site in layer.sites]
+        if site_name is not None and not any(map(lambda x: re.search(site_name, x), ['_'.join(x.name.split('_')) for x in layer.sites])):
+            raise UserWarning('Layer {layer_name} has no site matching {site_name}. Please check spelling and try again.'.format(**locals()))
+
+        if site_name is None:
+            return [
+                self.generate_coord('%s.(%s, %s, %s).%s' % (site.name, i, j, k,
+                                                            layer_name))
+                for i in drange(size[0])
+                for j in drange(size[1])
+                for k in drange(size[2])
+                for site in layer.sites]
+        else:
+            selected_site_names = [site.name for site in layer.sites if re.search(site_name, '_'.join(site.name.split('_')[:]))]
+            return [
+                self.generate_coord('%s.(%s, %s, %s).%s' % (site, i, j, k,
+                                                            layer_name))
+                for i in drange(size[0])
+                for j in drange(size[1])
+                for k in drange(size[2])
+                for site in selected_site_names
+            ]
 
     def generate_coord(self, terms):
         """Expecting something of the form site_name.offset.layer
@@ -999,23 +1498,23 @@ class LayerList(FixedObject, list):
         term = terms.split('.')
         if len(term) == 3:
             coord = Coord(name=term[0],
-                offset=eval(term[1]),
-                layer=term[2])
+                          offset=eval(term[1]),
+                          layer=term[2])
         elif len(term) == 2:
             coord = Coord(name=term[0],
-                offset=eval(term[1]),
-                layer=self.default_layer)
+                          offset=eval(term[1]),
+                          layer=self.default_layer)
         elif len(term) == 1:
             coord = Coord(name=term[0],
-                offset=(0, 0, 0),
-                layer=self.default_layer)
+                          offset=(0, 0, 0),
+                          layer=self.default_layer)
         else:
             raise UserWarning("Cannot parse coord description")
 
         offset = np.array(coord.offset)
         cell = self.cell
         layer = filter(lambda x: x.name == coord.layer, list(self))[0]
-        sites = [x for x in layer.sites  if x.name == coord.name]
+        sites = [x for x in layer.sites if x.name == coord.name]
         if not sites:
             raise UserWarning('No site names %s in %s found!' %
                               (coord.name, layer.name))
@@ -1029,6 +1528,7 @@ class LayerList(FixedObject, list):
 
 
 class Layer(FixedObject, CorrectlyNamed):
+
     """Represents one layer in a possibly multi-layer geometry.
 
     :param name: Name of layer.
@@ -1074,6 +1574,7 @@ class Layer(FixedObject, CorrectlyNamed):
 
 
 class Site(FixedObject):
+
     """Represents one lattice site.
 
     :param name: Name of site.
@@ -1112,6 +1613,7 @@ class Site(FixedObject):
 
 
 class ProcessFormSite(Site):
+
     """This is just a little varient of the site object,
     with the sole difference that it has a layer attribute
     and is meant to be used in the process form. This separation was chosen,
@@ -1129,6 +1631,7 @@ class ProcessFormSite(Site):
 
 
 class Coord(FixedObject):
+
     """Class that holds exactly one coordinate as used in the description
     of a process. The distinction between a Coord and a Site may seem
     superfluous but it is made to avoid data duplication.
@@ -1162,7 +1665,7 @@ class Coord(FixedObject):
                                     self.offset[2]])
 
         self.pos = np.array([float(i) for i in kwargs['pos'].split()]) \
-                   if 'pos' in kwargs else np.array([0., 0., 0.])
+            if 'pos' in kwargs else np.array([0., 0., 0.])
 
         self.tags = kwargs.get('tags', '')
 
@@ -1171,6 +1674,11 @@ class Coord(FixedObject):
                                      tuple(self.offset),
                                      self.layer)
 
+    def _get_genstring(self):
+        return '%s.%s.%s' % (self.name,
+                             tuple(self.offset),
+                             self.layer)
+
     def eq_mod_offset(self, other):
         """Compares wether to coordinates are the same up to (modulo)
         a cell offset.
@@ -1178,14 +1686,51 @@ class Coord(FixedObject):
         return (self.layer, self.name) == (other.layer, other.name)
 
     def __eq__(self, other):
-        return ((self.layer, self.name) == \
-               (other.layer, other.name)) and (self.offset == other.offset).all()
+        return ((self.layer, self.name) ==
+                (other.layer, other.name)) and (self.offset == other.offset).all()
 
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    def __lt__(self, other):
+        return ((self.layer,
+                 self.name,
+                 self.offset[0],
+                 self.offset[1],
+                 self.offset[2]) <
+                (other.layer,
+                 other.name,
+                 other.offset[0],
+                 other.offset[1],
+                 other.offset[2]))
+
+    def __le__(self, other):
+        return any(self == other, self < other)
+
+    def __gt__(self, other):
+        return ((self.layer,
+                 self.name,
+                 self.offset[0],
+                 self.offset[1],
+                 self.offset[2]) >
+                (other.layer,
+                 other.name,
+                 other.offset[0],
+                 other.offset[1],
+                 other.offset[2]))
+
+    def __ge__(self, other):
+        return any(self == other, self < other)
+
+
     def __hash__(self):
         return hash(self.__repr__())
+
+    def __cmp__(self, other):
+        return cmp(
+            (self.layer, tuple(self.offset), self.name),
+            (other.layer, tuple(other.offset), other.name)
+        )
 
     def __sub__(a, b):
         """When subtracting two lattice coordinates from each other,
@@ -1226,7 +1771,7 @@ class Coord(FixedObject):
             return 'site(1), site(2), site(3), site(4)'
         else:
             return 'site(1) + (%s), site(2) + (%s), site(3) + (%s), site(4) + (%s)' % \
-                    (self.offset[0], self.offset[1], self.offset[2], self.name)
+                (self.offset[0], self.offset[1], self.offset[2], self.name)
 
     def radd_ff(self):
         """Build term as if adding on the right, omit '+' if 0 anyway
@@ -1255,6 +1800,7 @@ class Coord(FixedObject):
             return "(/%s, %s, %s, %s/)" % (self.offset[0], self.offset[1],
                                            self.offset[2], self.name, )
 
+
 def cmp_coords(self, other):
     if self.layer != other.layer:
         return cmp(self.layer, other.layer)
@@ -1267,6 +1813,7 @@ def cmp_coords(self, other):
 
 
 class Species(FixedObject):
+
     """Class that represent a species such as oxygen, empty, ... .
     Note: `empty` is treated just like a species.
 
@@ -1296,6 +1843,7 @@ class Species(FixedObject):
 
 
 class SpeciesList(FixedObject, list):
+
     """A list of species
     """
     attributes = ['default_species', 'name']
@@ -1309,6 +1857,7 @@ class SpeciesList(FixedObject, list):
 
 
 class ProcessList(FixedObject, list):
+
     """A list of processes
     """
     attributes = ['name']
@@ -1324,31 +1873,104 @@ class ProcessList(FixedObject, list):
 
 
 class Process(FixedObject):
+
     """One process in a kMC process list
 
     :param name: Name of process.
     :type name: str
     :param rate_constant: Expression for rate constant.
     :type rate_constant: str
+    :param otf_rate: Expression used to calculate rate on the fly using bystander's configuration, otf backend only!.
+    :type otf_rate: str
     :param condition_list: List of conditions (class Condition).
     :type condition_list: list.
     :param action_list: List of conditions (class Action).
     :type action_list: list.
+    :param bystander_list: List of bystanders (class Bystander), otf backend only!.
+    :type bystander_list: list.
     :param enabled: Switch this process on or of.
     :type enabled: bool.
     :param chemical_expression: Chemical expression (i.e: A@site1 + B@site2 -> empty@site1 + AB@site2) to generate process from.
     :type chemical_expression: str.
-    :param tof_count: Stoichiometric factor for observable products {'NH3': 1, 'H2O(gas)': 2}. Hint: avoid space in keys.
+    :param tof_count: Stoichiometric factor for observable products {'NH3': 1, 'H2Ogas': 2}. Hint: avoid space in keys.
     :type tof_count: dict.
-
-
-
 
     """
     attributes = ['name',
                   'rate_constant',
+                  'otf_rate',
                   'condition_list',
                   'action_list',
+                  'bystander_list',
+                  'enabled',
+                  'chemical_expression',
+                  'tof_count']
+
+    def __init__(self, **kwargs):
+        FixedObject.__init__(self, **kwargs)
+        self.name = kwargs.get('name', '')
+        self.rate_constant = kwargs.get('rate_constant', '0.')
+        self.otf_rate = kwargs.get('otf_rate', None)
+        self.condition_list = kwargs.get('condition_list', [])
+        self.action_list = kwargs.get('action_list', [])
+        self.bystander_list = kwargs.get('bystander_list', [])
+        self.tof_count = kwargs.get('tof_count', None)
+        self.enabled = kwargs.get('enabled', True)
+
+    def __repr__(self):
+        repr_str = ('[PROCESS] Name:%s\n'
+                    '     Rate: %s\n'
+                    'Conditions: %s\n'
+                    'Actions: %s') \
+            % (self.name, self.rate_constant,
+               self.condition_list, self.action_list,)
+        if self.bystander_list:
+            repr_str += '\nBystanders: %s' % self.bystander_list
+        return repr_str
+
+    def add_condition(self, condition):
+        """Adds a conditions to a process"""
+        self.condition_list.append(condition)
+
+    def add_action(self, action):
+        """Adds an action to a process"""
+        self.action_list.append(action)
+
+    def add_bystander(self, bystander):
+        """Adds a bystander to a process"""
+        self.bystander_list.append(bystander)
+
+    def executing_coord(self):
+        return sorted(self.action_list,
+                      key=lambda action: action.coord.sort_key())[0].coord
+
+    def get_info(self):
+        return self.rate_constant
+
+    def _get_max_d(self):
+        max_d = 0
+        for condition in self.condition_list + self.action_list + self.bystander_list :
+            d = max(np.abs(condition.coord.offset))
+            if d > max_d:
+                max_d = d
+        return max_d
+
+    def evaluate_rate_expression(self, parameters={}):
+        import kmos.evaluate_rate_expression
+        return kmos.evaluate_rate_expression(self.rate_constant, parameters)
+
+
+class SingleLatIntProcess(Process):
+
+    """A process that corresponds to a single lateral interaction
+    configuration. This is conceptually the same as the old
+    condition/action model, just some conditions are now called
+    bystanders."""
+    attributes = ['name',
+                  'rate_constant',
+                  'condition_list',
+                  'action_list',
+                  'bystanders',
                   'enabled',
                   'chemical_expression',
                   'tof_count']
@@ -1363,46 +1985,10 @@ class Process(FixedObject):
         self.enabled = kwargs.get('enabled', True)
 
     def __repr__(self):
-        return '[PROCESS] Name:%s\n     Rate: %s\nConditions: %s\nActions: %s' \
-            % (self.name, self.rate_constant,
-               self.condition_list, self.action_list)
-
-    def add_condition(self, condition):
-        """Adds a conditions to a process"""
-        self.condition_list.append(condition)
-
-    def add_action(self, action):
-        """Adds an action to a process"""
-        self.action_list.append(action)
-
-    def executing_coord(self):
-        return sorted(self.action_list,
-                      key=lambda action: action.coord.sort_key())[0].coord
-
-    def get_info(self):
-        return self.rate_constant
-
-    def evaluate_rate_expression(self, parameters={}):
-        import kmos.evaluate_rate_expression
-        return kmos.evaluate_rate_expression(self.rate_constant, parameters)
-
-
-class SingleLatIntProcess(Process):
-    """A process that corresponds to a single lateral interaction
-    configuration. This is conceptually the same as the old
-    condition/action model, just some conditions are now called
-    bystanders."""
-    attributes = ['name',
-                  'rate_constant',
-                  'condition_list',
-                  'action_list',
-                  'bystanders',
-                  'enabled',
-                  'chemical_expression',
-                  'tof_count']
-
-    def __repr__(self):
-        return '[PROCESS] Name:%s Rate: %s\nConditions: %s\nActions: %s\nBystanders: %s' \
+        return ('[PROCESS] Name:%s Rate: %s\n'
+                'Conditions: %s\n'
+                'Actions: %s\n'
+                'Bystanders: %s') \
             % (self.name,
                self.rate_constant,
                self.condition_list,
@@ -1411,6 +1997,7 @@ class SingleLatIntProcess(Process):
 
 
 class LatIntProcess(Process):
+
     """A process which directly includes lateral interactions.
     In this model a bystander just defines a set of allowed
     species so, it allows for additional degrees of freedom
@@ -1429,19 +2016,38 @@ class LatIntProcess(Process):
 
 
 class Bystander(FixedObject):
-    attributes = ['coord', 'allowed_species', 'counter']
+    attributes = ['coord', 'allowed_species', 'flag']
+
+    def __init__(self, **kwargs):
+        kwargs['flag'] = kwargs.get('flag', '')
+        FixedObject.__init__(self, **kwargs)
+
     def __repr__(self):
-        return ("[BYSTANDER] Coord:%s Allowed species: %s, Counter: %s\n" %
-               (self.coord, self.allowed_species, self.counter))
+        return ("[BYSTANDER] Coord:%s Allowed species: (%s)" %
+                (self.coord, ','.join([spec for spec in self.allowed_species])))
+
+    def _shorthand(self):
+        if self.coord.offset.any():
+            return '%s@%s.%s|%s' % (self.allowed_species,
+                                    self.coord.name,
+                                    tuple(self.coord.offset),
+                                    self.flag)
+        else:
+            return '%s@%s|%s' % (self.allowed_species,
+                                 self.coord.name,
+                                 self.flag)
+
 
 class ConditionAction(FixedObject):
+
     """Represents either a condition or an action. Since both
     have the same attributes we use the same class here, and just
     store them in different lists, depending on its role. For better
     readability one can also use `Condition` or `Action` which are
     just aliases.
 
-    :param coord: Relative Coord (generated by :meth:`LayerList.generate_coord` or :meth:`Lattice.generate_coord_set`).
+    :param coord: Relative Coord (generated by :meth:`LayerList.generate_coord`
+                                  or :meth:`Lattice.generate_coord_set`).
     :type coord: Coord
     :param species: Name of species.
     :type species: str
@@ -1461,9 +2067,18 @@ class ConditionAction(FixedObject):
 
     def __repr__(self):
         return ("[COND_ACT] Species: %s Coord:%s%s\n" %
-               (self.species,
-                self.coord,
-                ' (implicit)' if self.implicit else ''))
+                (self.species,
+                 self.coord,
+                 ' (implicit)' if self.implicit else ''))
+
+    def _shorthand(self):
+        if self.coord.offset.any():
+            return '%s@%s.%s' % (self.species,
+                                 self.coord.name,
+                                 tuple(self.coord.offset))
+        else:
+            return '%s@%s' % (self.species,
+                              self.coord.name)
 
     def __hash__(self):
         return hash(self.__repr__())
@@ -1476,6 +2091,7 @@ Action = ConditionAction
 
 
 class OutputList(FixedObject, list):
+
     """A dummy class, that will hold the values which are to be
     printed to logfile.
     """
@@ -1486,6 +2102,7 @@ class OutputList(FixedObject, list):
 
 
 class OutputItem(FixedObject):
+
     """Not implemented yet
     """
     attributes = ['name', 'output']
@@ -1577,18 +2194,18 @@ def parse_chemical_expression(eq, process, project_tree):
     # check if species is defined
     for term in left + right:
         if term[0][0] in ['$', '^'] and term[0][1:]:
-            if not  filter(lambda x: x.name == term[0][1:], \
-                                     project_tree.get_speciess()):
+            if not filter(lambda x: x.name == term[0][1:],
+                          project_tree.get_speciess()):
                 raise UserWarning('Species %s unknown ' % term[0:])
-        elif not filter(lambda x: x.name == term[0], \
-                                  project_tree.get_speciess()):
+        elif not filter(lambda x: x.name == term[0],
+                        project_tree.get_speciess()):
             raise UserWarning('Species %s unknown ' % term[0])
 
     condition_list = []
     action_list = []
 
     for i, term in enumerate(left + right):
-        #parse coordinate
+        # parse coordinate
         coord_term = term[1].split('.')
         if len(coord_term) == 1:
             coord_term.append('(0,0)')
@@ -1596,7 +2213,7 @@ def parse_chemical_expression(eq, process, project_tree):
         if len(coord_term) == 2:
             name = coord_term[0]
             active_layers = filter(lambda x: x.active,
-                                          project_tree.get_layers())
+                                   project_tree.get_layers())
             if len(active_layers) == 1:
                 layer = active_layers[0].name
             else:  # if more than one active try to guess layer from name
@@ -1617,8 +2234,8 @@ def parse_chemical_expression(eq, process, project_tree):
                     layer = possible_sites[0][1]
                 else:
                     raise UserWarning("Site %s is ambiguous because it" +
-                        "exists on the following lattices: %" %
-                        (name, [x[1] for x  in possible_sites]))
+                                      "exists on the following lattices: %" %
+                                      (name, [x[1] for x in possible_sites]))
             coord_term.append(layer)
 
         if len(coord_term) == 3:
@@ -1631,7 +2248,7 @@ def parse_chemical_expression(eq, process, project_tree):
                                   % (layer, layer_names))
             else:
                 layer_instance = filter(lambda x: x.name == layer,
-                                              project_tree.get_layers())[0]
+                                        project_tree.get_layers())[0]
                 site_names = [x.name for x in layer_instance.sites]
                 if name not in site_names:
                     raise UserWarning("Site %s not known, must be one of %s"
@@ -1657,8 +2274,8 @@ def parse_chemical_expression(eq, process, project_tree):
     # the same coordinate gets complemented with a 'default_species'
     # condition
     for action in action_list:
-        if not filter(lambda x: x.coord == action.coord, condition_list)\
-            and not action.species[0] in ['^', '$']:
+        if not filter(lambda x: x.coord == action.coord, condition_list) \
+                and not action.species[0] in ['^', '$']:
             condition_list.append(ConditionAction(species=default_species,
                                                   coord=action.coord))
 
@@ -1672,21 +2289,22 @@ def parse_chemical_expression(eq, process, project_tree):
         #      the left side, the condition will be added with the same
         #      species as the annihilated one.
         if action.species[0] == '$':
-            corresponding_condition = filter(lambda x: x.coord
-                                                        == action.coord,
-                                            condition_list)
+            corresponding_condition = filter(lambda x:
+                                             x.coord == action.coord,
+                                             condition_list)
             if action.species[1:]:
                 if not corresponding_condition:
                     condition_list.append(
-                            ConditionAction(
-                                species=action.species[1:],
-                                coord=action.coord))
+                        ConditionAction(
+                            species=action.species[1:],
+                            coord=action.coord))
                 else:
                     if corresponding_condition[0].species \
                        != action.species[1:]:
                         raise UserWarning(
-                        'When annihilating a site, species must be the same' +
-                        'for condition\n  and action.\n')
+                            'When annihilating a site,'
+                            ' species must be the same'
+                            'for condition\n  and action.\n')
             else:
                 if corresponding_condition:
                     action.species = '$%s' % corresponding_condition[0].species
