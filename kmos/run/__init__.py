@@ -784,6 +784,9 @@ class KMC_Model(Process):
         if show_progress:
             progress_bar = kmos.utils.progressbar.ProgressBar()
 
+        # reset sampling starting point
+        _ = self.get_atoms(geometry = False, reset_time_overrun = False)
+
         # sample over trajectory
         for sample in xrange(samples):
             self.do_steps(sample_size/samples)
