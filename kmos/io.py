@@ -1799,11 +1799,11 @@ def export_source(project_tree, export_dir=None, code_generator=None, options=No
     elif code_generator == 'lat_int':
         writer.write_template(filename='base_lat_int', target='base', options=options)
      
-    if options.acf:
+    if options is not None and options.acf:
         writer.write_template(filename='base_acf', options=options)      
     writer.write_template(filename='lattice', options=options)
     writer.write_proclist(code_generator=code_generator)
-    if options.acf:
+    if options is not None and options.acf:
        writer.write_proclist_acf(code_generator=code_generator) 
     writer.write_settings()
     project_tree.validate_model()
