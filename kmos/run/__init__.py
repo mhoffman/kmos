@@ -97,6 +97,11 @@ except:
     proclist_pars = None
 
 try:
+    from kmc_model import base_acf, proclist_acf
+except:
+    base_acf = proclist_acf = None
+
+try:
     import kmc_settings as settings
 except Exception, e:
     settings = None
@@ -193,9 +198,9 @@ class KMC_Model(Process):
         self.lattice = lattice
         self.proclist = ProclistProxy()
         self.settings = settings
-        if hasattr(kmc_model, 'base_acf'):
+        if base_acf is not None:
             self.base_acf = kmc_model.base_acf
-        if hasattr(kmc_model, 'proclist_acf'):
+        if proclist_acf is not None:
             self.proclist_acf = kmc_model.proclist_acf
 
         if hasattr(self.base, 'null_species'):

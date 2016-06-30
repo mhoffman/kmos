@@ -2628,7 +2628,7 @@ def export_source(project_tree, export_dir=None, code_generator=None, options=No
         class Struct:
              def __init__(self, **entries):
                  self.__dict__.update(entries)
-        options = Struct(backend=code_generator)
+        options = Struct(backend=code_generator, acf=False)
 
     if export_dir is None:
         export_dir = project_tree.meta.model_name
