@@ -282,10 +282,11 @@ def evaluate_kind_values(infile, outfile):
                         extra_args='--fcompiler=%s' % fcompiler)
             try:
                 import f2py_selected_kind
-            except:
-                raise Exception('Could create selected_kind module\n'
+            except Exception as e:
+                raise Exception('Could not create selected_kind module\n'
                                 + '%s\n' % os.path.abspath(os.curdir)
-                                + '%s\n' % os.listdir('.'))
+                                + '%s\n' % os.listdir('.')
+                                + '%s\n' % e)
         return f2py_selected_kind.kind
 
     def parse_args(args):
@@ -368,7 +369,11 @@ def build(options):
     src_files.append('lattice.f90')
     if isfile('proclist_constants.f90'):
         src_files.append('proclist_constants.f90')
+    if isfile('proclist_pars.f90'):
+        src_files.append('proclist_pars.f90')
+
     src_files.extend(glob('nli_*.f90'))
+    # src_files.extend(glob('get_rate_*.f90'))
     src_files.extend(glob('run_proc_*.f90'))
     src_files.append('proclist.f90')
     if isfile('proclist_acf.f90'):
@@ -378,14 +383,16 @@ def build(options):
 
     if options.no_optimize:
         extra_flags['gfortran'] = ('-ffree-line-length-none -ffree-form'
-                                   ' -xf95-cpp-input -Wall -fimplicit-none')
+                                   ' -xf95-cpp-input -Wall -fimplicit-none'
+                                   ' -time  -fmax-identifier-length=63 ')
         extra_flags['gnu95'] = extra_flags['gfortran']
         extra_flags['intel'] = '-fpp -Wall -I/opt/intel/fc/10.1.018/lib'
         extra_flags['intelem'] = '-fpp -Wall'
 
     else:
         extra_flags['gfortran'] = ('-ffree-line-length-none -ffree-form'
-                                   ' -xf95-cpp-input -Wall -O3 -fimplicit-none')
+                                   ' -xf95-cpp-input -Wall -O3 -fimplicit-none'
+                                   ' -time -fmax-identifier-length=63 ')
         extra_flags['gnu95'] = extra_flags['gfortran']
         extra_flags['intel'] = '-fast -fpp -Wall -I/opt/intel/fc/10.1.018/lib'
         extra_flags['intelem'] = '-fast -fpp -Wall'
