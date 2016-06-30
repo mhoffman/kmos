@@ -500,9 +500,53 @@
 #@ print *, "|Extending factor number of bins|", extending_factor
 #@ print *, "+------------------------------------------------------------+"
 #@
-#@
 #@ end subroutine allocate_config_bin_acf
+#@
+#@ !------ A. Garhammer 2016------
+#@ subroutine set_acf_to_zero()
+#@ !****f* base_acf/set_acf_to_zero
+#@ ! FUNCTION
+#@ !    Sets all acf arrays and parameters to initial state.
+#@ !    After this, the calculation of ACF can start from new.
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    * ``None``.
+#@ !******
+#@ !---------------I/O variables---------------
+#@ real(kind = rdouble) :: kmc_time
 #@ 
+#@ call get_kmc_time(kmc_time)
+#@ call update_nr_of_ions_before_kmc_step_acf() 
+#@ call update_property_and_buffer_acf()  
+#@
+#@ config_bin = 0
+#@ counter_write_in_bin = 0
+#@ bin_index = 0
+#@ wrap_count = 0
+#@ nr_of_annhilations = 0
+#@ t_o = kmc_time
+#@ 
+#@ end subroutine set_acf_to_zero
+#@
+#@
+#@ !------ A. Garhammer 2016------
+#@ subroutine set_displacement_to_zero()
+#@ !****f* base_acf/set_displacement_to_zero
+#@ ! FUNCTION
+#@ !    Sets displacement vector to zero.
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    * ``None``.
+#@ !******
+#@ !---------------I/O variables---------------
+#@ 
+#@ displacement = 0
+#@ 
+#@ end subroutine set_displacement_to_zero
+#@
+#@
 #@ !------ A. Garhammer 2016------
 #@ subroutine get_config_bin_acf(bin_index,return_config_bin)
 #@ !****f* base_acf/get_config_bin_acf
@@ -912,7 +956,7 @@
 #@ 
 #@ 
 #@ return_acf = config_bin(bin_index)/(wrap_count*t_bin)
-#@ print *, wrap_count
+#@ 
 #@ 
 #@ 
 #@ end subroutine calc_acf

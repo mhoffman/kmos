@@ -618,6 +618,7 @@ class ProcListWriter():
                   '    integer(kind=iint), dimension(4) :: lsite\n'
                   '    integer(kind=iint), dimension(4) :: lsite_new\n'
                   '    integer(kind=iint), dimension(4) :: lsite_old\n'
+                  '    integer(kind=iint) :: exit_site, entry_site\n'
                   '    real(kind=rdouble), dimension(3), intent(out) :: displace_coord\n\n'
                   '    lsite = nr2lattice(nr_site, :)\n\n'
                   '    select case(proc)\n')

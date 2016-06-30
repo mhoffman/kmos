@@ -117,10 +117,8 @@ def calc_msd():
 def set_property_acf(layer_site_name,property_type):
     for i in range((kmc_model.base.get_volume())): 
        if ((i + 1) % kmc_model.lattice.spuck) + kmc_model.lattice.spuck == getattr(kmc_model.lattice,layer_site_name.lower()):
-           print i + 1
            kmc_model.base_acf.set_property_acf(i + 1,property_type)
        if (i + 1) % kmc_model.lattice.spuck == getattr(kmc_model.lattice,layer_site_name.lower()):
-           print i + 1
            kmc_model.base_acf.set_property_acf(i + 1,property_type)
 
 def get_acf(normalization = False):
@@ -130,4 +128,9 @@ def get_acf(normalization = False):
     if normalization == True:
        acf = acf/acf[0]
     return acf
-   
+
+def set_acf_to_zero():
+    kmc_model.base_acf.set_acf_to_zero()
+
+def set_displacement_to_zero():
+    kmc_model.base_acf.set_displacement_to_zero() 
