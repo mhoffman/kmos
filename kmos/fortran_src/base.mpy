@@ -689,11 +689,13 @@ else:
             for process in default_species_creating_processes[default_creating]:
                 process_i = process_names.index(process) + 1
                 #@        else if(default_coverage.ge.(active_volume - {default_creating} - 1).and.(i.eq.{process_i}) \\
+                # @        else if((i.eq.{process_i}) \\
                 for species_name in removing_species.get(process, {}):
-                    #@         .and.{species_name}_coverage .le.1 \\
+                    n_change = removing_species[process][species_name]
+                    #@         .and.{species_name}_coverage .le. {n_change} \\
                 #@        )then
                 # Rational: subtract '1' to ensure that at least 2 particles are present on the surface at any time.
-                #@            ! {process}
+                #@            ! skip {process}
     #@        else
     #@            accum_rates(i) = accum_rates(i) + nr_of_sites(i)*rates(i)
     #@        endif
