@@ -648,6 +648,7 @@ class KMC_Model(Process):
             else:
                 atoms.tof_data = np.dot(self.tof_matrix, np.zeros_like(atoms.integ_rates))
                 atoms.tof_integ = np.dot(self.tof_matrix, np.zeros_like(atoms.integ_rates))
+                atoms.occupation_integ = np.dot(self.tof_matrix, np.zeros_like(atoms.integ_rates))
 
         atoms.delta_t = delta_t
 
@@ -727,11 +728,12 @@ class KMC_Model(Process):
             delta_ts.append(atoms.delta_t)
             step_ts.append(self.base.get_kmc_time_step())
 
-            occs.append(list(atoms.occupation.flatten()))
             if tof_method == 'procrates':
                 tofs.append(atoms.tof_data.flatten())
+                occs.append(list(atoms.occupation.flatten()))
             elif tof_method == 'integ':
                 tofs.append(atoms.tof_integ.flatten())
+                occs.append(atoms.occupation_integ.flatten())
             else:
                 raise NotImplementedError('tof_method="{tof_method}" not supported. Can be either procrates or integ.'.format(**locals()))
 
