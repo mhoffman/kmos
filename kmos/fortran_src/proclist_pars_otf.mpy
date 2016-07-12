@@ -1,0 +1,42 @@
+import os
+gpl = self._gpl_message()
+#@ {gpl}!****h* kmos/proclist
+#@ ! FUNCTION
+#@ !    Implements the kMC process list.
+#@ !
+#@ !******
+#@
+#@
+#@ module {module_name}
+#@ use kind_values
+#@ use lattice, only: &
+site_params = []
+for layer in data.layer_list:
+    #@     {layer.name}, &
+    for site in layer.sites:
+        site_params.append((site.name, layer.name))
+
+for i, (site, layer) in enumerate(site_params):
+    #@     {layer}_{site}, &
+#@     get_species
+#@ 
+#@ 
+#@ implicit none
+#@ 
+#@ 
+#@ 
+
+# initialize various parameter kind of data
+#@  ! User Parameters
+#@
+for i, parameter in enumerate(sorted(data.parameter_list, key=lambda x: x.name)):
+    #@ real(kind=rdouble), public :: {parameter.name} = 0.0
+
+#@
+#@ !  Defaul rate constants
+#@
+for i, process in enumerate(self.data.process_list):
+    ip1 = i + 1
+    #@ real(kind=rdouble), parameter, public :: defrate_{process.name} = 0.0
+#@
+#@ end module {module_name}

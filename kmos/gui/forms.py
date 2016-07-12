@@ -1106,6 +1106,39 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                                   tooltip=tooltip,
                                   )
 
+        # For otf backend only
+        if self.process.bystander_list:
+            for elem in self.process.bystander_list:
+                species_color = '#d3d3d3'
+                pos = [x.pos
+                    for layer in self.project_tree.get_layers()
+                    for x in layer.sites
+                    if x.name == elem.coord.name
+                        ][0]
+
+                center = toscrn(pos[0] * atoms.cell[0]
+                                + pos[1] * atoms.cell[1]
+                                + elem.coord.offset[0] * atoms.cell[0]
+                                + elem.coord.offset[1] * atoms.cell[1]
+                                + offset)
+                tooltip = 'Bystander (%s): %s@%s.%s.%s' % (elem.flag,
+                                                              elem.allowed_species,
+                                                              elem.coord.name,
+                                                              tuple(elem.coord.offset),
+                                                              elem.coord.layer)  # for tooltip
+                bystander_size_factor = 1.2
+                o = goocanvas.Rect(parent=root,
+                                    x=center[0]-0.6*radius,
+                                    y=center[1]-0.6*radius,
+                                    width=bystander_size_factor*radius,
+                                    height=bystander_size_factor*radius,
+                                    stroke_color='black',
+                                    fill_color_rgba=eval('0x' + species_color[1:] + 'ff' ),
+                                    tooltip=tooltip,
+                                    )
+
+
+
     def _get_atoms(self, layer_nr=0):
         if self.project_tree.lattice.representation:
             representations = eval(self.project_tree.lattice.representation)

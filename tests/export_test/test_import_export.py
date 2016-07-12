@@ -10,9 +10,12 @@ def test_import_export():
 
     import kmos.types
     import kmos.io
+    import kmos.cli
 
     cwd = os.path.abspath(os.curdir)
     os.chdir(os.path.abspath(os.path.dirname(__file__)))
+
+    options, _ = kmos.cli.get_options('help')
 
     TEST_DIR = 'test_export'
     REFERENCE_DIR = 'reference_export'
@@ -21,7 +24,7 @@ def test_import_export():
 
     pt = kmos.types.Project()
     pt.import_xml_file('default.xml')
-    kmos.io.export_source(pt, TEST_DIR)
+    kmos.io.export_source(pt, TEST_DIR, options=options)
     for filename in ['base', 'lattice', 'proclist']:
         print(filename)
         assert filecmp.cmp(os.path.join(REFERENCE_DIR, '%s.f90' % filename),
@@ -60,10 +63,44 @@ def test_import_export_lat_int():
 
     os.chdir(cwd)
 
+def test_import_export_otf():
+
+    import kmos.types
+    import kmos.io
+    import kmos
+
+    cwd = os.path.abspath(os.curdir)
+    os.chdir(os.path.abspath(os.path.dirname(__file__)))
+
+    TEST_DIR = 'test_export_otf'
+    REFERENCE_DIR = 'reference_export_otf'
+    #if os.path.exists(TEST_DIR):
+        #shutil.rmtree(TEST_DIR)
+
+    print(sys.path)
+    print(kmos.__file__)
+
+    pt = kmos.types.Project()
+    pt.import_xml_file('default.xml')
+    pt.shorten_names(max_length = 35)
+    kmos.io.export_source(pt, TEST_DIR, code_generator='otf')
+    for filename in ['base', 'lattice', 'proclist', 'proclist_pars', 'proclist_constants'] \
+        + [os.path.basename(os.path.splitext(x)[0]) for x in glob(os.path.join(TEST_DIR, 'run_proc*.f90'))]:
+        print(filename)
+        assert filecmp.cmp(os.path.join(REFERENCE_DIR, '%s.f90' % filename),
+                          os.path.join(TEST_DIR, '%s.f90' % filename)),\
+             '%s changed.' % filename
+
+    os.chdir(cwd)
+
+
 def test_import_export_pdopd_local_smart():
 
     import kmos.types
     import kmos.io
+    import kmos.cli
+
+    options, _ = kmos.cli.get_options('help')
 
     cwd = os.path.abspath(os.curdir)
     os.chdir(os.path.abspath(os.path.dirname(__file__)))
@@ -75,7 +112,7 @@ def test_import_export_pdopd_local_smart():
 
     pt = kmos.types.Project()
     pt.import_xml_file('pdopd.xml')
-    kmos.io.export_source(pt, TEST_DIR, code_generator='local_smart')
+    kmos.io.export_source(pt, TEST_DIR, code_generator='local_smart', options=options)
     for filename in ['base', 'lattice', 'proclist']:
         print(filename)
         assert filecmp.cmp(os.path.join(REFERENCE_DIR, '%s.f90' % filename),
@@ -113,6 +150,35 @@ def test_import_export_pdopd_lat_int():
 
     os.chdir(cwd)
 
+def test_import_export_intZGB_otf():
+
+    import kmos.types
+    import kmos.io
+    import kmos
+
+    cwd = os.path.abspath(os.curdir)
+    os.chdir(os.path.abspath(os.path.dirname(__file__)))
+
+    TEST_DIR = 'test_export_intZGB_otf'
+    REFERENCE_DIR = 'reference_export_intZGB_otf'
+    #if os.path.exists(TEST_DIR):
+        #shutil.rmtree(TEST_DIR)
+
+    print(sys.path)
+    print(kmos.__file__)
+
+    pt = kmos.types.Project()
+    pt.import_xml_file('intZGB_otf.xml')
+    kmos.io.export_source(pt, TEST_DIR, code_generator='otf')
+    for filename in ['base', 'lattice', 'proclist','proclist_pars','proclist_constants'] \
+        + [os.path.basename(os.path.splitext(x)[0]) for x in glob(os.path.join(TEST_DIR, 'run_proc*.f90'))]:
+        print(filename)
+        assert filecmp.cmp(os.path.join(REFERENCE_DIR, '%s.f90' % filename),
+                          os.path.join(TEST_DIR, '%s.f90' % filename)),\
+             '%s changed.' % filename
+    os.chdir(cwd)
+
+
 def off_compare_import_variants():
     import kmos.gui
     import kmos.types
@@ -133,8 +199,10 @@ def test_ml_export():
 
 
     import kmos.io
+    import kmos.cli
+    options, _ = kmos.cli.get_options('help')
     pt = kmos.io.import_xml_file('pdopd.xml')
-    kmos.io.export_source(pt)
+    kmos.io.export_source(pt, options=options)
     import shutil
     shutil.rmtree('sqrt5PdO')
 

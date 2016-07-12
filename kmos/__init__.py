@@ -50,9 +50,11 @@ or it may be used as an API via the *kmos* module.
 #import kmos.types
 #import kmos.io
 
-__version__ = "0.3.16"
+__version__ = "0.3.17"
 VERSION = __version__
 
+
+rate_aliases = { 'beta' : '(1/(kboltzmann*T))'}
 
 def evaluate_rate_expression(rate_expr, parameters={}):
     """Evaluates an expression for a typical kMC rate constant.
@@ -82,7 +84,8 @@ def evaluate_rate_expression(rate_expr, parameters={}):
         replaced_tokens = []
 
         # replace some aliases
-        rate_expr = rate_expr.replace('beta', '(1./(kboltzmann*T))')
+        for old, new in rate_aliases.iteritems():
+            rate_expr = rate_expr.replace(old, new)
         try:
             input = StringIO.StringIO(rate_expr).readline
             tokens = list(tokenize.generate_tokens(input))

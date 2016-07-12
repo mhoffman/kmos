@@ -325,6 +325,8 @@ def main(args=None):
         project = kmos.types.Project()
         project.import_file(xml_file)
 
+        project.shorten_names(max_length=options.variable_length)
+
         kmos.io.export_source(project,
                               export_dir,
                               options=options)
