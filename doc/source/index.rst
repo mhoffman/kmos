@@ -1,7 +1,7 @@
 Welcome to kmos's documentation!
 ================================
 
-.. figure:: img/kmos_workflows.png
+.. figure:: img/kmos_structure.png
   :align: center
 
   Things you can do with kmos.
