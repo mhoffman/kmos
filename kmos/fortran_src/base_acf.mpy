@@ -525,7 +525,7 @@
 #@ !****f* base_acf/set_acf_to_zero
 #@ ! FUNCTION
 #@ !    Sets all acf arrays and parameters to initial state.
-#@ !    After this, the calculation of ACF can start from new.
+#@ !    After this, the sampling of the ACF can start from new.
 #@ !
 #@ ! ARGUMENTS
 #@ !
@@ -552,6 +552,8 @@
 #@ !****f* base_acf/set_displacement_to_zero
 #@ ! FUNCTION
 #@ !    Sets displacement vector to zero.
+#@ !    After this, the recording of the displacement can start
+#@ !    from new.
 #@ !
 #@ ! ARGUMENTS
 #@ !
