@@ -210,8 +210,8 @@ class ProcListWriter():
         out.close()
     
     def write_proclist_acf(self, smart=True, code_generator='local_smart'):
-        """Write the proclist.f90 module, i.e. the rules which make up
-        the kMC process list.
+        """Write the proclist_acf.f90 module, i.e. the routines to run the
+        calculation of the autocorrelation function or to record the displacment..
         """
         # make long lines a little shorter
         data = self.data
@@ -447,17 +447,9 @@ class ProcListWriter():
         out.write('end subroutine run_proc_nr\n\n')
 
     def write_proclist_get_diff_sites_acf_smart(self, data, out):
-        # run_proc_nr runs the process selected by determine_procsite
-        # for sake of simplicity each process is formulated in terms
-        # of take and put operations. This is due to the fact that
-        # in surface science type of models the default species,
-        # i.e. 'empty' has a special meaning. So instead of just
-        # 'setting' new species, which would be more general
-        # we say we 'take' and 'put' atoms. So a take is equivalent
-        # to a set_empty.
-        # While this looks more readable on paper, I am not sure
-        # if this make code maintainability a lot worse. So this
-        # should probably change.
+        # get_diff_sites_acf gives the site ``init_site``, which is occupied by the particle before the diffusion process
+        # and also the site ``fin_site`` after the diffusion process.
+        
 
         out.write('subroutine get_diff_sites_acf(proc,nr_site,init_site,fin_site)\n\n'
                   '!****f* proclist_acf/get_diff_sites_acf\n'
@@ -613,17 +605,10 @@ class ProcListWriter():
         out.write('end subroutine get_diff_sites_acf\n\n')
     
     def write_proclist_get_diff_sites_displacement_smart(self, data, out):
-        # run_proc_nr runs the process selected by determine_procsite
-        # for sake of simplicity each process is formulated in terms
-        # of take and put operations. This is due to the fact that
-        # in surface science type of models the default species,
-        # i.e. 'empty' has a special meaning. So instead of just
-        # 'setting' new species, which would be more general
-        # we say we 'take' and 'put' atoms. So a take is equivalent
-        # to a set_empty.
-        # While this looks more readable on paper, I am not sure
-        # if this make code maintainability a lot worse. So this
-        # should probably change.
+        # get_diff_sites_displacement gives the site ``init_site``, which is occupied by the particle before the diffusion process
+        # and also the site ``fin_site`` after the diffusion process.
+        # Additionally, the displacement of the jumping particle will be saved.
+ 
 
         out.write('subroutine get_diff_sites_displacement(proc,nr_site,init_site,fin_site,displace_coord)\n\n'
                   '!****f* proclist_acf/get_diff_sites_displacement\n'

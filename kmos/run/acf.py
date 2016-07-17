@@ -103,7 +103,7 @@ def allocate_trajectory(kmc_model, nr_of_steps):
 
 
 def set_types_acf(kmc_model, site_property):
-    types = get_types_acf()
+    types = get_types_acf(kmc_model)
     for i in range(len(types)):
         if types[i] == 0:
             kmc_model.base_acf.set_types(i + 1, site_property)
@@ -111,7 +111,7 @@ def set_types_acf(kmc_model, site_property):
 
 
 def calc_product_property(kmc_model, ):
-    types = get_types_acf()
+    types = get_types_acf(kmc_model)
     for i in range(kmc_model.base_acf.nr_of_types):
         for j in range(kmc_model.base_acf.nr_of_types):
             kmc_model.base_acf.set_product_property(

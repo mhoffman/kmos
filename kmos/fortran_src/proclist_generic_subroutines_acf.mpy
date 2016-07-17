@@ -3,16 +3,19 @@
 #@ !****f* proclist_acf/do_kmc_steps_acf
 #@ ! FUNCTION
 #@ !    Performs ``n`` kMC step for the on the fly calculation of the autocorrelation function (ACF).
-#@ !    If one has to run many steps without evaluation
-#@ !    do_kmc_steps might perform a little better.
+#@ !    If one want to record the trajectory of the tracked species, it is possible to turn this on 
+#@ !    and off with the boolean traj_on.
 #@ !    * first update clock
 #@ !    * then configuration sampling step
-#@ !    * last execute process
-#@ !
+#@ !    * then ACF sampling step
+#@ !    * then tracking process
+#@ !    * then execute process
+#@ !    * last recording of trajectory(optional)
+#@ !      
 #@ ! ARGUMENTS
 #@ !
 #@ !    ``n`` : Number of steps to run
-#@ !    ``traj_on`` : writeable boolean, turn record of trajectory on and off
+#@ !    ``traj_on`` : boolean, turn the recording of trajectory on and off
 #@ !******
 #@     integer(kind=ilong), intent(in) :: n
 #@     logical, intent(in) :: traj_on
@@ -99,9 +102,11 @@ if data.meta.debug > 0:
 #@ !****f* proclist_acf/do_kmc_step_acf
 #@ ! FUNCTION
 #@ !    Performs exactly one kMC step for the on the fly calculation of the autocorrelation function (ACF).
-#@ !    *  first update clock
-#@ !    *  then configuration sampling step
-#@ !    *  last execute process
+#@ !    * first update clock
+#@ !    * then configuration sampling step
+#@ !    * then ACF sampling step
+#@ !    * then tracking process
+#@ !    * last execute process
 #@ !
 #@ ! ARGUMENTS
 #@ !
@@ -140,16 +145,19 @@ if data.meta.debug > 0:
 #@ !****f* proclist_acf/do_kmc_displacement
 #@ ! FUNCTION
 #@ !    Performs ``n`` kMC step for the calculation of mean squared displacement.
-#@ !    If one has to run many steps without evaluation
-#@ !    do_kmc_steps might perform a little better.
+#@ !    If one want to record the trajectory of the tracked species, it is possible to turn this on 
+#@ !    and off with the boolean traj_on.
 #@ !    * first update clock
 #@ !    * then configuration sampling step
-#@ !    * last execute process
+#@ !    * then tracking process
+#@ !    * then updating displacment
+#@ !    * then execute process
+#@ !    * last recording of trajectory(optional)
 #@ !
 #@ ! ARGUMENTS
 #@ !
 #@ !    ``n`` : Number of steps to run
-#@ !    ``traj_on`` : writeable boolean, turn record of trajectory on and off
+#@ !    ``traj_on`` : boolean, turn the recording of trajectory on and off
 #@ !******
 #@     integer(kind=ilong), intent(in) :: n
 #@     logical, intent(in) :: traj_on
@@ -221,9 +229,11 @@ if data.meta.debug > 0:
 #@ !****f* proclist_acf/do_kmc_step_displacement
 #@ ! FUNCTION
 #@ !    Performs exactly one kMC step for the calculation of mean squared displacement.
-#@ !    *  first update clock
-#@ !    *  then configuration sampling step
-#@ !    *  last execute process
+#@ !    * first update clock
+#@ !    * then configuration sampling step
+#@ !    * then tracking process
+#@ !    * then updating displacement
+#@ !    * last execute process
 #@ !
 #@ ! ARGUMENTS
 #@ !
