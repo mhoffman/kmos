@@ -206,14 +206,14 @@ O = Species(ase.atoms.Atoms('O',
     ),
     name='O')
 
-O2gas = Species(ase.atoms.Atoms('O2',
-    [[0, 0, 0],
-    [0, 0, 1.2]],
-    cell=[10, 10, 10],
-    ),
+O2gas = Species(molecule('O2'),
     gas=True,
     janaf_file='O-029.txt',
-    name='O2gas')
+    name='O2gas',
+    frequencies=[1580],
+    geometry='linear',
+    symmetrynumber=2,
+    spin=1)
 
 NOgas = Species(ase.atoms.Atoms('NO',
     [[0, 0, 0], [0, 0, 1.2]],
