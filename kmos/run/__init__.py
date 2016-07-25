@@ -390,6 +390,11 @@ class KMC_Model(Process):
             lattice.deallocate_system()
         else:
             print("Model is not allocated.")
+        if base_acf is not None :
+            base_acf.deallocate_acf()
+
+
+
 
     def do_steps(self, n=10000, progress=False):
         """Propagate the model `n` steps.

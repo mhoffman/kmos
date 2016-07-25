@@ -1229,6 +1229,76 @@
 #@ return_kmc_step_acf = kmc_step_acf
 #@ 
 #@ end subroutine get_kmc_step_acf
+#@
+#@ !------ A. Garhammer 2016------
+#@ subroutine deallocate_acf()
+#@ !****f* base_acf/deallocate_acf
+#@ ! FUNCTION
+#@ !    Deallocate all allocatable arrays: id_arr, site_arr, displacement,
+#@ !    property_acf, property_o, types, product_property, trajectory,
+#@ !    buffer_acf, config_bin, counter_write_in_bin
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    ``none``
+#@ !******
+#@ if(allocated(id_arr))then
+#@     deallocate(id_arr)
+#@ else
+#@     print *,"Warning: id_arr was not allocated, tried to deallocate."
+#@ endif
+#@ if(allocated(site_arr))then
+#@     deallocate(site_arr)
+#@ else
+#@     print *,"Warning: site_arr was not allocated, tried to deallocate."
+#@ endif
+#@ if(allocated(displacement))then
+#@     deallocate(displacement)
+#@ else
+#@     print *,"Warning: displacement was not allocated, tried to deallocate."
+#@ endif
+#@ if(allocated(property_acf))then
+#@     deallocate(property_acf)
+#@ else
+#@     print *,"Warning: property_acf was not allocated, tried to deallocate."
+#@ endif
+#@ if(allocated(property_o))then
+#@     deallocate(property_o)
+#@ else
+#@     print *,"Warning: property_o was not allocated, tried to deallocate."
+#@ endif
+#@ if(allocated(types))then
+#@     deallocate(types)
+#@ else
+#@     print *,"Warning: types was not allocated, tried to deallocate."
+#@ endif
+#@ if(allocated(product_property))then
+#@     deallocate(product_property)
+#@ else
+#@     print *,"Warning: product_property was not allocated, tried to deallocate."
+#@ endif
+#@ if(allocated(trajectory))then
+#@     deallocate(trajectory)
+#@ else
+#@     print *,"Warning: trajectory was not allocated, tried to deallocate."
+#@ endif
+#@ if(allocated(buffer_acf))then
+#@     deallocate(buffer_acf)
+#@ else
+#@     print *,"Warning: buffer_acf was not allocated, tried to deallocate."
+#@ endif
+#@ if(allocated(config_bin))then
+#@     deallocate(config_bin)
+#@ else
+#@     print *,"Warning: config_bin was not allocated, tried to deallocate."
+#@ endif
+#@ if(allocated(counter_write_in_bin))then
+#@     deallocate(counter_write_in_bin)
+#@ else
+#@     print *,"Warning: counter_write_in_bin was not allocated, tried to deallocate."
+#@ endif
+#@
+#@ end subroutine deallocate_acf
 #@ 
 #@ 
 #@ end module base_acf

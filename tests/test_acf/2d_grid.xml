@@ -1,0 +1,94 @@
+<?xml version="1.0" ?>
+<kmc version="(0, 3)">
+    <meta author="Andreas Garhammer" debug="0" email="andreas-garhammer@t-online.de" model_dimension="2" model_name="2d_auto"/>
+    <species_list default_species="empty">
+        <species name="empty" representation="Atoms('He')" tags=""/>
+        <species name="ion" representation="Atoms('F')" tags=""/>
+    </species_list>
+    <parameter_list>
+        <parameter adjustable="True" max="1000000.0" min="0" name="k" scale="linear" value="100"/>
+    </parameter_list>
+    <lattice cell_size="3.5 3.5 10.0" default_layer="default" representation="" substrate_layer="default">
+        <layer color="#ffffff" name="default">
+            <site default_species="ion" pos="0.25 0.25 0.5" tags="" type="a_1"/>
+            <site default_species="ion" pos="0.75 0.25 0.5" tags="" type="a_2"/>
+            <site default_species="empty" pos="0.25 0.75 0.5" tags="" type="b_1"/>
+            <site default_species="empty" pos="0.75 0.75 0.5" tags="" type="b_2"/>
+        </layer>
+    </lattice>
+    <process_list>
+        <process enabled="True" name="a_1_a_2" rate_constant="k">
+            <condition coord_layer="default" coord_name="a_1" coord_offset="0 0 0" species="ion"/>
+            <condition coord_layer="default" coord_name="a_2" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="default" coord_name="a_2" coord_offset="0 0 0" species="ion"/>
+            <action coord_layer="default" coord_name="a_1" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="a_1_b_1" rate_constant="k">
+            <condition coord_layer="default" coord_name="a_1" coord_offset="0 0 0" species="ion"/>
+            <condition coord_layer="default" coord_name="b_1" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="default" coord_name="b_1" coord_offset="0 0 0" species="ion"/>
+            <action coord_layer="default" coord_name="a_1" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="a_1_b_2" rate_constant="k">
+            <condition coord_layer="default" coord_name="a_1" coord_offset="0 0 0" species="ion"/>
+            <condition coord_layer="default" coord_name="b_2" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="default" coord_name="b_2" coord_offset="0 0 0" species="ion"/>
+            <action coord_layer="default" coord_name="a_1" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="a_2_a_1" rate_constant="k">
+            <condition coord_layer="default" coord_name="a_2" coord_offset="0 0 0" species="ion"/>
+            <condition coord_layer="default" coord_name="a_1" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="default" coord_name="a_1" coord_offset="0 0 0" species="ion"/>
+            <action coord_layer="default" coord_name="a_2" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="a_2_b_1" rate_constant="k">
+            <condition coord_layer="default" coord_name="a_2" coord_offset="0 0 0" species="ion"/>
+            <condition coord_layer="default" coord_name="b_1" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="default" coord_name="b_1" coord_offset="0 0 0" species="ion"/>
+            <action coord_layer="default" coord_name="a_2" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="a_2_b_2" rate_constant="k">
+            <condition coord_layer="default" coord_name="a_2" coord_offset="0 0 0" species="ion"/>
+            <condition coord_layer="default" coord_name="b_2" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="default" coord_name="b_2" coord_offset="0 0 0" species="ion"/>
+            <action coord_layer="default" coord_name="a_2" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="b_1_a_1" rate_constant="k">
+            <condition coord_layer="default" coord_name="b_1" coord_offset="0 0 0" species="ion"/>
+            <condition coord_layer="default" coord_name="a_1" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="default" coord_name="a_1" coord_offset="0 0 0" species="ion"/>
+            <action coord_layer="default" coord_name="b_1" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="b_1_a_2" rate_constant="k">
+            <condition coord_layer="default" coord_name="b_1" coord_offset="0 0 0" species="ion"/>
+            <condition coord_layer="default" coord_name="a_2" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="default" coord_name="a_2" coord_offset="0 0 0" species="ion"/>
+            <action coord_layer="default" coord_name="b_1" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="b_1_b_2" rate_constant="k">
+            <condition coord_layer="default" coord_name="b_1" coord_offset="0 0 0" species="ion"/>
+            <condition coord_layer="default" coord_name="b_2" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="default" coord_name="b_2" coord_offset="0 0 0" species="ion"/>
+            <action coord_layer="default" coord_name="b_1" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="b_2_a_1" rate_constant="k">
+            <condition coord_layer="default" coord_name="b_2" coord_offset="0 0 0" species="ion"/>
+            <condition coord_layer="default" coord_name="a_1" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="default" coord_name="a_1" coord_offset="0 0 0" species="ion"/>
+            <action coord_layer="default" coord_name="b_2" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="b_2_a_2" rate_constant="k">
+            <condition coord_layer="default" coord_name="b_2" coord_offset="0 0 0" species="ion"/>
+            <condition coord_layer="default" coord_name="a_2" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="default" coord_name="a_2" coord_offset="0 0 0" species="ion"/>
+            <action coord_layer="default" coord_name="b_2" coord_offset="0 0 0" species="empty"/>
+        </process>
+        <process enabled="True" name="b_2_b_1" rate_constant="k">
+            <condition coord_layer="default" coord_name="b_2" coord_offset="0 0 0" species="ion"/>
+            <condition coord_layer="default" coord_name="b_1" coord_offset="0 0 0" species="empty"/>
+            <action coord_layer="default" coord_name="b_1" coord_offset="0 0 0" species="ion"/>
+            <action coord_layer="default" coord_name="b_2" coord_offset="0 0 0" species="empty"/>
+        </process>
+    </process_list>
+    <output_list/>
+</kmc>
