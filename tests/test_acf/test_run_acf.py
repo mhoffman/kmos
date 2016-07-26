@@ -21,14 +21,13 @@ def test_build_model():
         print(os.getcwd())
         print(os.listdir('.'))
 
-        kmos.cli.main('export 2d_grid.xml {export_dir} --acf -b {backend}'.format(**locals()))
+        kmos.cli.main('export 2d_grid.xml {export_dir} -o --acf -b {backend}'.format(**locals()))
 
         os.chdir('..')
 
         print(os.getcwd())
         print(os.listdir('.'))
 
-        #os.chdir(export_dir)
         sys.path.insert(0, os.path.abspath('.'))
 
         import kmos.run
@@ -38,19 +37,17 @@ def test_build_model():
             import kmc_settings as settings
             kmos.run.settings = settings
 
-        import kmc_model
-        reload(kmc_model)
-        println(kmc_model.__file__)
-        #if kmos.run.lattice is None:
-        #    from kmc_model import base, lattice, proclist
-        #    kmos.run.base = base
-        #    kmos.run.lattice = lattice
-        #    kmos.run.proclist = proclist
-
+        if kmos.run.lattice is None:
+            from kmc_model import base, lattice, proclist, base_acf, proclist_acf
+            kmos.run.base = base
+            kmos.run.lattice = lattice
+            kmos.run.proclist = proclist
+            kmos.run.base_acf = base_acf
+            kmos.run.proclist_acf = proclist_acf
 
         with kmos.run.KMC_Model(print_rates=False, banner=False) as model:
             print("Model compilation successfull")
-            nr_of_steps = 10
+            nr_of_steps = 100
             trace_species = 'ion'
 
             acf.initialize_msd(model,trace_species)
@@ -65,22 +62,25 @@ def test_build_model():
             #outfile.write(pprint.pformat(traj))
 
         with open('test_traj_{backend}.log'.format(**locals()), 'w') as outfile:
-            outfile.write(pprint.pformat(traj))
+            #outfile.write(pprint.pformat(traj))
+            outfile.write(pprint.pformat(list(traj.flatten())))
 
         # check if both trajectories are equal
         assert filecmp.cmp(
             'test_traj_{backend}.log'.format(**locals()),
             'ref_traj_{backend}.log'.format(**locals()),
         )
+
+        for src_filename in ['base_acf', 'proclist_acf']:
+            assert filecmp.cmp('src/{src_filename}.f90'.format(**locals()),
+                               'ref_src/{src_filename}.f90'.format(**locals()))
         # Clean-up action
         os.chdir('..')
 
-        kmos.run.lattice = None
-        kmos.run.settings = None
+        #kmos.run.lattice = None
+        #kmos.run.settings = None
 
     os.chdir(old_path)
-
-
 
 if __name__ == '__main__':
     test_build_model()
