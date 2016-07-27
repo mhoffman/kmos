@@ -149,7 +149,8 @@ def get_trajectory(kmc_model):
     from trajectory.
     """
     trajectory = np.zeros(
-        (1, kmc_model.base_acf.nr_of_ions, kmc_model.base_acf.nr_of_steps + 1))
+        (1, kmc_model.base_acf.nr_of_ions, kmc_model.base_acf.nr_of_steps + 1),
+        'int')
     for i in range(kmc_model.base_acf.nr_of_ions):
         for j in range(kmc_model.base_acf.nr_of_steps + 1):
             trajectory[0, i, j] = kmc_model.base_acf.get_trajectory(

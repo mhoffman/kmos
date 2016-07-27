@@ -39,6 +39,8 @@ def test_build_model():
 
         if kmos.run.lattice is None:
             from kmc_model import base, lattice, proclist, base_acf, proclist_acf
+            import kmc_model
+            kmos.run.kmc_model = kmc_model
             kmos.run.base = base
             kmos.run.lattice = lattice
             kmos.run.proclist = proclist

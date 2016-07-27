@@ -451,6 +451,8 @@
 #@ do i = 1 , nr_of_ions
 #@ trajectory(i,1) = site_arr(i)
 #@ enddo
+#@
+#@ kmc_step_acf = 0
 #@ 
 #@ end subroutine allocate_trajectory
 #@ 
