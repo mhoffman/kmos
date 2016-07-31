@@ -5,10 +5,10 @@ number of ways you can help:
 
 ## Git and Pull requests
 * Contributions are submitted, reviewed, and accepted using Github pull requests. [Read this article](https://help.github.com/articles/using-pull-requests) for some details. We use the _Fork and Pull_ model, as described there.
-* The latest changes are in the `develop` branch.
+* The latest changes are in the `develop https://github.com/mhoffman/kmos/tree/develop`_ branch.
 * Make a new branch for every feature `feature_<...>` you're working on.
 * Try to make clean commits that are easily readable (including descriptive commit messages!)
-* Test before you push. Get familiar with `Nosetest <http://nose.readthedocs.io/en/latest/>`_, our test suite. Ideally create your own free account on [Travis](https://travis-ci.org/) and test your branch on it.
+* Test before you push. Get familiar with `Nosetest <http://nose.readthedocs.io/en/latest/>`_ , our test suite. Ideally create your own free account on [Travis](https://travis-ci.org/) and test your branch on it.
 * Make small pull requests that are easy to review but make sure they do add value by themselves.
 
 ## Coding style
