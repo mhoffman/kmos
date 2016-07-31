@@ -11,6 +11,7 @@ develop
 Auto-correlation function (acf) and root-mean-square displacement
 features contributed by Andreas Garhammer. Documentation to
 follow. Technical demo in <PROJECT_ROOT>/tests/test_acf/test_run_acf.py
+TODO: ACF & RMSD Documentation
 
 0.3.19
 =======
