@@ -18,7 +18,7 @@ from the top project directory ::
 
 
 To make testing and comparison even easier it would be helpful if you
-create an account with [Travis CI](https://travis-ci.org/) and run your
+create an account with `Travis CI <https://travis-ci.org/>`_ and run your
 commits through the test suite.
 
-Have a look at Google's Pythons style guide as far as style questions go.
+Have a look at Google's Python `style guide <https://google.github.io/styleguide/pyguide.html>`_ as far as style questions go.

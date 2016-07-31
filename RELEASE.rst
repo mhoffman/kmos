@@ -5,6 +5,16 @@ RELEASE NOTES
 develop
 =======
 
+0.3.19
+=======
+
+Added .github/ contributor information
+
+0.3.18
+======
+
+Fixed bug in get_std_sampled_data not resetting sampling,
+discussed `here <https://github.com/mhoffman/kmos/pull/51>`_
 
 0.3.17
 =======
