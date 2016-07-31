@@ -5,6 +5,11 @@ RELEASE NOTES
 develop
 =======
 
+0.3.19
+=======
+
+Added .github/ contributor information
+
 0.3.18
 ======
 
