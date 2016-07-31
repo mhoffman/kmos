@@ -5,13 +5,11 @@ number of ways you can help:
 
 ## Git and Pull requests
 * Contributions are submitted, reviewed, and accepted using Github pull requests. [Read this article](https://help.github.com/articles/using-pull-requests) for some details. We use the _Fork and Pull_ model, as described there.
-* To help keep track of [your assigned issues](https://github.com/dashboard/issues/assigned), simply open an issue to be added as an [Outside Collaborator](https://github.com/orgs/drush-ops/outside-collaborators). A maintainer can now assign any issue to you at your request.
-* The latest changes are in the `master` branch.
-* Make a new branch for every feature you're working on.
+* The latest changes are in the `develop` branch.
+* Make a new branch for every feature `feature_<...>` you're working on.
 * Try to make clean commits that are easily readable (including descriptive commit messages!)
-* Test before you push. Get familiar with Nosetest, our test suite. Ideally create your own free account on [Travis](https://travis-ci.org/) and test your branch on it.
+* Test before you push. Get familiar with `Nosetest <http://nose.readthedocs.io/en/latest/>`_, our test suite. Ideally create your own free account on [Travis](https://travis-ci.org/) and test your branch on it.
 * Make small pull requests that are easy to review but make sure they do add value by themselves.
-* We maintain branches named 7.x, 6.x, etc. These are release branches. From these branches, we make new tags for patch and minor versions.
 
 ## Coding style
 * Do write comments. You don't have to comment every line, but if you come up with something thats a bit complex/weird, just leave a comment. Bear in mind that you will probably leave the project at some point and that other people will read your code. Undocumented huge amounts of code are nearly worthless!
@@ -79,7 +77,7 @@ waste because your vision doesn't align with the project's.
 Create a feature branch and start hacking:
 
 ```text
-% git checkout -b feature-branch
+% git checkout -b feature_<name>
 ```
 
 We practice HEAD-based development, which means all changes are applied
