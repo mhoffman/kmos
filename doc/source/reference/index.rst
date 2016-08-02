@@ -211,6 +211,7 @@ lat_int
 
 .. include:: robodoc/lat_int_base.rst
 .. include:: robodoc/lat_int_lattice.rst
+.. include:: robodoc/lat_int_proclist_constants.rst
 .. include:: robodoc/lat_int_proclist.rst
 
 otf
@@ -218,4 +219,5 @@ otf
 
 .. include:: robodoc/otf_base.rst
 .. include:: robodoc/otf_lattice.rst
+.. include:: robodoc/otf_proclist_constants.rst
 .. include:: robodoc/otf_proclist.rst
