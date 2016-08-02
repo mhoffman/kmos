@@ -205,6 +205,7 @@ local_smart
 .. include:: robodoc/local_smart_base.rst
 .. include:: robodoc/local_smart_lattice.rst
 .. include:: robodoc/local_smart_proclist.rst
+.. include:: robodoc/local_smart_kind_values.rst
 
 lat_int
 ^^^^^^^
@@ -213,6 +214,7 @@ lat_int
 .. include:: robodoc/lat_int_lattice.rst
 .. include:: robodoc/lat_int_proclist_constants.rst
 .. include:: robodoc/lat_int_proclist.rst
+.. include:: robodoc/lat_int_kind_values.rst
 
 otf
 ^^^
@@ -221,3 +223,4 @@ otf
 .. include:: robodoc/otf_lattice.rst
 .. include:: robodoc/otf_proclist_constants.rst
 .. include:: robodoc/otf_proclist.rst
+.. include:: robodoc/otf_kind_values.rst
