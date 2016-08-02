@@ -46,11 +46,11 @@ from kmos import evaluate_rate_expression
 from kmos.utils import OrderedDict
 import kmos.run.acf
 import kmos.utils.progressbar
-import kmos.run.png
 try:
     import kmos.run.png
 except:
     # quickly create a mock-class
+    # keeping this here is important for kmos.run autodocs to build
     class Struct:
         def __init__(self, **entries):
             self.__dict__.update(entries)
@@ -61,6 +61,7 @@ except:
 from math import log
 try:
     import kmos.run.png
+    # keeping this here is important for kmos.run autodocs to build
 except:
    # quickly create a mock-class
    class Struct:
@@ -112,11 +113,8 @@ except Exception, e:
     Hint: are you in a directory containing a compiled kMC model?
     """ % e)
 
-
 INTERACTIVE = hasattr(sys, 'ps1') or hasattr(sys, 'ipcompleter')
 INTERACTIVE = True  # Turn it off for now because it doesn work reliably
-
-
 
 class ProclistProxy(object):
 
@@ -134,7 +132,6 @@ class ProclistProxy(object):
             return eval('proclist_pars.%s' % attr)
         else:
             raise AttributeError('%s not found' % attr)
-
 
 class KMC_Model(Process):
     """API Front-end to initialize and run a kMC model using python bindings.
@@ -210,7 +207,6 @@ class KMC_Model(Process):
         else:
             self.null_species = -1
 
-
         self.proclist.seed = np.array(getattr(self.settings, 'random_seed', 1))
         self.reset()
 
@@ -279,7 +275,6 @@ class KMC_Model(Process):
             self.species_tags = settings.species_tags
         else:
             self.species_tags = None
-
 
         if len(settings.lattice_representation):
             if hasattr(settings, 'substrate_layer'):
@@ -393,9 +388,6 @@ class KMC_Model(Process):
         if base_acf is not None :
             base_acf.deallocate_acf()
 
-
-
-
     def do_steps(self, n=10000, progress=False):
         """Propagate the model `n` steps.
 
@@ -413,7 +405,6 @@ class KMC_Model(Process):
                 proclist.do_kmc_steps(n/100)
                 progress_bar.render(i+1)
             progress_bar.clear()
-
 
     def run(self):
         """Runs the model indefinitely. To control the
@@ -513,7 +504,7 @@ class KMC_Model(Process):
         :param skip: Number of kMC steps between frames (Default: 1).
         :type skip: int
         :param prefix: Prefix for filename (Default: movie).
-        :type 
+        :type
 #@ !------ A. Garhammer 2015------
 #@ !subroutine update_clocks_acf(ran_time)
 #@ !****f* base/update_clocks_acf
@@ -526,18 +517,18 @@ class KMC_Model(Process):
 #@ !******
 #@ !real(kind=rsingle), intent(in) :: ran_time
 #@ !real(kind=rsingle) :: runtime
-#@ 
-#@ 
+#@
+#@
 #@ ! Make sure ran_time is in the right interval
 #@ !ASSERT(ran_time.ge.0.,"base/update_clocks: ran_time variable has to be positive.")
 #@ !ASSERT(ran_time.le.1.,"base/update_clocks: ran_time variable has to be less than 1.")
-#@ 
+#@
 #@ !kmc_time_step = -log(ran_time)/accum_rates(nr_of_proc)
 #@ ! Make sure the difference is not so small, that it is rounded off
 #@ ! ASSERT(kmc_time+kmc_time_step>kmc_time,"base/update_clocks: precision of kmc_time is not sufficient")
-#@ 
+#@
 #@ !call CPU_TIME(runtime)
-#@ 
+#@
 #@ ! Make sure we are not dividing by zeroprefix: str
         :param rotation: Angle from which movie is recorded
                          (only useful if suffix is png).
@@ -642,7 +633,6 @@ class KMC_Model(Process):
                post-processing
         `procstat` holds the number of times each process was executed since
                    last `get_atoms()` call.
-
 
         :param geometry: Return ASE object of current configuration
                          (Default: True).
@@ -1536,7 +1526,6 @@ class KMC_Model(Process):
         self._set_configuration(config)
         self._adjust_database()
 
-
 class Model_Parameters(object):
     """Holds all user defined parameters of a model in
     concise form. All user defined parameters can be
@@ -1608,7 +1597,6 @@ class Model_Parameters(object):
             print(res)
         else:
             return res
-
 
 class Model_Rate_Constants(object):
     """Holds all rate constants currently associated with the model.
@@ -1789,7 +1777,6 @@ class Model_Rate_Constants_OTF(Model_Rate_Constants):
         else:
             return res
 
-
 class ModelParameter(object):
     """A model parameter to be scanned. If instantiated with only
     one value this parameter will be fixed at this value.
@@ -1819,7 +1806,6 @@ class ModelParameter(object):
     def get_grid(self):
         pass
 
-
 class PressureParameter(ModelParameter):
     """Create a grid of p \in [p_min, p_max] such
     that ln({p}) is a regular grid.
@@ -1834,7 +1820,6 @@ class PressureParameter(ModelParameter):
     def get_grid(self):
         from kmos.utils import p_grid
         return p_grid(self.min, self.max, self.steps)
-
 
 class TemperatureParameter(ModelParameter):
     """Create a grid of p \in [T_min, T_max] such
@@ -1851,7 +1836,6 @@ class TemperatureParameter(ModelParameter):
         from kmos.utils import T_grid
         return T_grid(self.min, self.max, self.steps)
 
-
 class LogParameter(ModelParameter):
     """Create a log grid  between 10^min and 10^max
     (like np.logspace)
@@ -1865,7 +1849,6 @@ class LogParameter(ModelParameter):
     def get_grid(self):
         return np.logspace(self.min, self.max, self.steps)
 
-
 class LinearParameter(ModelParameter):
     """Create a regular grid between min and max.
 
@@ -1877,7 +1860,6 @@ class LinearParameter(ModelParameter):
 
     def get_grid(self):
         return np.linspace(self.min, self.max, self.steps)
-
 
 class _ModelRunner(type):
 
@@ -1893,7 +1875,6 @@ class _ModelRunner(type):
 
         return obj
 
-
 class ModelRunner(object):
     """
 Setup and initiate many runs in parallel over a regular grid
@@ -1906,13 +1887,11 @@ and <classname>.lock should be moved out of the way ::
 
     from kmos.run import ModelRunner, PressureParameter, TemperatureParameter
 
-
     class ScanKinetics(ModelRunner):
         p_O2gas = PressureParameter(1)
         T = TemperatureParameter(600)
         p_COgas = PressureParameter(min=1, max=10, steps=40)
         # ... other parameters to scan
-
 
     ScanKinetics().run(init_steps=1e7, sample_steps=1e7, cores=4)
 
@@ -1982,7 +1961,6 @@ and <classname>.lock should be moved out of the way ::
             input_line = format_string % arguments
 
             outfile = os.path.abspath('%s.dat' % (self.runner_name))
-
 
             #============================
             # lockfile mechanism
@@ -2058,7 +2036,6 @@ and <classname>.lock should be moved out of the way ::
         # a script and superfluous warning tends to confuse users
         from matplotlib import pyplot as plt
 
-
         inches_per_pt = 1.0 / 72.27               # Convert pt to inches
         golden_mean = (np.sqrt(5)-1.0) / 2.0         # Aesthetic ratio
         fig_width = fig_width_pt * inches_per_pt  # width in inches
@@ -2128,8 +2105,6 @@ and <classname>.lock should be moved out of the way ::
 
             variable_parameters = vparams
 
-
-
         ######################
         # plot coverages     #
         ######################
@@ -2148,7 +2123,6 @@ and <classname>.lock should be moved out of the way ::
             legend.get_frame().set_alpha(0.5)
             plt.ylim([0, 1])
 
-
         elif len(variable_parameters) == 2:
             print("Two variable parameters. Doing a surface plot.")
         else:
@@ -2165,7 +2139,6 @@ and <classname>.lock should be moved out of the way ::
                     plt.savefig('%s_coverages.%s' % (label, suffix), bbox_inces='tight')
                 else:
                     plt.savefig('%s_%s_coverages.%s' % (label, sublabel, suffix), bbox_inces='tight')
-
 
         ######################
         # plot TOFs          #
@@ -2240,7 +2213,6 @@ and <classname>.lock should be moved out of the way ::
                                                          ))
             p.start()
 
-
 def set_rate_constants(parameters=None, print_rates=None):
     """Tries to evaluate the supplied expression for a rate constant
     to a simple real number and sets it for the corresponding process.
@@ -2305,7 +2277,6 @@ def set_rate_constants(parameters=None, print_rates=None):
     if hasattr(proclist,'recalculate_rates_matrix'):
          proclist.recalculate_rates_matrix()
 
-
 def import_ase():
     """Wrapper for import ASE."""
     try:
@@ -2316,7 +2287,6 @@ def import_ase():
         print('https://wiki.fysik.dtu.dk/ase/')
     return ase
 
-
 def get_tof_names():
     """Return names turn-over-frequencies (TOF) previously defined in model."""
     tofs = []
@@ -2325,7 +2295,6 @@ def get_tof_names():
             if tof not in tofs:
                 tofs.append(tof)
     return sorted(tofs)
-
 
 class ProcInt(int):
 
@@ -2338,7 +2307,6 @@ class ProcInt(int):
     def __repr__(self):
         name = self.procnames[self.__int__() - 1]
         return 'Process model.proclist.%s (%s)' % (name.lower(), self.__int__())
-
 
 class SiteInt(int):
 
