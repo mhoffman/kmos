@@ -43,7 +43,6 @@ def test_build_model():
             kmos.run.lattice = lattice
             kmos.run.proclist = proclist
 
-
         procs_sites = []
         with kmos.run.KMC_Model(print_rates=False, banner=False) as model:
             print("Model compilation successfull")
@@ -64,7 +63,7 @@ def test_build_model():
         assert filecmp.cmp(
             'test_procs_sites_{backend}.log'.format(**locals()),
             'ref_procs_sites_{backend}.log'.format(**locals()),
-        )
+        ), 'Trajectories differ for backend {backend}'.format(**locals())
         # Clean-up action
         os.chdir('..')
 
@@ -72,8 +71,6 @@ def test_build_model():
         kmos.run.settings = None
 
     os.chdir(old_path)
-
-
 
 if __name__ == '__main__':
     test_build_model()
