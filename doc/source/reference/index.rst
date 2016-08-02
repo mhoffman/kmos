@@ -7,7 +7,6 @@ Command Line Interface (CLI)
 
 .. include:: cli.rst
 
-
 Data Types
 ==========
 
@@ -58,10 +57,8 @@ kmos.forms
              LatticeForm, LayerEditor, SiteForm, ProcessForm,
              parse_chemical_expression, BatchProcessForm
 
-
 Runtime frontend
 ================
-
 
 kmos.run
 ^^^^^^^^
@@ -126,7 +123,6 @@ kmos.run
             view,
             xml,
 
-
 .. autoclass:: kmos.run.Model_Rate_Constants
    :members: __call__,
              by_name,
@@ -168,8 +164,7 @@ the DTD below.
 
 .. literalinclude:: kmc_project_v0.2.dtd
 
-
-Backend
+Backends
 ========
 
 In general the backend includes all functions that are implemented in Fortran90,
@@ -193,7 +188,6 @@ in the backend at all, since in the physical sense they are too high-level
 to justify encoding and compilation at the Fortran level and so they
 are typical read and parsed from a python script.
 
-
 The `kmos.run.KMC_Model` class implements a convenient interface for most of
 these functions, however all public methods (in Fortran called subroutines)
 and variables can also be accessed directly like so ::
@@ -206,8 +200,22 @@ and variables can also be accessed directly like so ::
 
 which works best in conjunction with `ipython <ipython.org>`_.
 
-.. include:: base.rst
+local_smart
+^^^^^^^^^^^^
+.. include:: robodoc/local_smart_base.rst
+.. include:: robodoc/local_smart_lattice.rst
+.. include:: robodoc/local_smart_proclist.rst
 
-.. include:: lattice.rst
+lat_int
+^^^^^^^
 
-.. include:: proclist.rst
+.. include:: robodoc/lat_int_base.rst
+.. include:: robodoc/lat_int_lattice.rst
+.. include:: robodoc/lat_int_proclist.rst
+
+otf
+^^^
+
+.. include:: robodoc/otf_base.rst
+.. include:: robodoc/otf_lattice.rst
+.. include:: robodoc/otf_proclist.rst
