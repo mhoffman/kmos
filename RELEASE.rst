@@ -5,6 +5,11 @@ RELEASE NOTES
 develop
 =======
 
+0.3.21
+=======
+
+Doc improvements
+
 0.3.20
 ======
 
