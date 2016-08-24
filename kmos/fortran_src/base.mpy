@@ -53,6 +53,7 @@
 #@     replace_species, &
 #@     get_accum_rate, &
 #@     get_integ_rate, &
+#@     get_integ_event, &
 #@     get_integ_coverage, &
 #@     get_avail_site, &
 #@     get_kmc_step, &
@@ -130,6 +131,7 @@
 #@ !******
 #@ !------ S. Matera 09/18/2012------
 #@ real(kind=rdouble), dimension(:), allocatable :: integ_rates
+#@ real(kind=ilong), dimension(:), allocatable :: integ_events
 #@ !****v* base/integ_rates
 #@ ! FUNCTION
 #@ !   Stores the time-integrated rates (non-normalized to surface area)
@@ -642,6 +644,8 @@ else:
         if not species.name.endswith('_') and not species.name == data.species_list.default_species:
             nr_species = sorted([x.name for x in data.species_list]).index(species.name)
             #@     {species.name}_coverage = sum(coverage(:, {nr_species}))
+            ##DEBUGGING
+            ##@     print *, "{species.name}", {species.name}_coverage
             active_species.append(species.name)
     #@     ! active_species = {active_species}
     #@
@@ -650,7 +654,9 @@ else:
         if species_name.endswith('_'):
             #@     active_volume = active_volume - sum(coverage(:, {i})) ! {species_name}
     #@
+    ##DEBUGGING
     ##@     print *, "Default Coverage", default_coverage
+    ##@     print *, "Active Volume", active_volume
     #@     i = 0
     #@     do
     #@         i = i + 1
@@ -683,19 +689,45 @@ else:
         elif default_creating == 0:
             for process in default_species_creating_processes[default_creating]:
                 process_i = process_names.index(process) + 1
-                #@        else if(default_coverage.eq.(active_volume - 1).and.(i.eq.{process_i}))then
+                if '_1p_' in process:
+                    continue
+                #@        else if((i.eq.{process_i}).and.default_coverage.eq.(active_volume - 1))then
                 #@            ! single particle diffusion {process}
-        else:
+        #else:
+        elif default_creating == 1 :
             for process in default_species_creating_processes[default_creating]:
+                #rsp = removing_species[process]; l = len(removing_species[process])
+                ##@            ! {rsp} => {l}
                 process_i = process_names.index(process) + 1
-                #@        else if(default_coverage.ge.(active_volume - {default_creating} - 1).and.(i.eq.{process_i}) \\
-                # @        else if((i.eq.{process_i}) \\
+                #@        else if((i.eq.{process_i}) .and. default_coverage.ge.(active_volume - {default_creating} - 1) \\
                 for species_name in removing_species.get(process, {}):
                     n_change = removing_species[process][species_name]
                     #@         .and.{species_name}_coverage .le. {n_change} \\
                 #@        )then
-                # Rational: subtract '1' to ensure that at least 2 particles are present on the surface at any time.
                 #@            ! skip {process}
+    one_particle_processes = [process for process in data.process_list if '1p' in process.name and not 'default' in process.name]
+    for one_particle_process in one_particle_processes:
+        process_i = process_names.index(one_particle_process.name) + 1
+        #@        else if(i.eq.{process_i})then
+        #@            if(default_coverage.ge.(active_volume - 1))then
+        #@                ! allowing 1p process {one_particle_process.name} for low coverage
+        #@                accum_rates(i) = accum_rates(i) + nr_of_sites(i)*rates(i)
+        #@            endif
+        one_particle_default = one_particle_process.name + '_default'
+        process_i_default = process_names.index(one_particle_default) + 1
+        #@        else if(i.eq.{process_i_default})then
+        #@            if(default_coverage.ge.(active_volume - 1))then
+        #@                ! allowing 1p process {one_particle_default} for low coverage
+        #@                accum_rates(i) = accum_rates(i) + nr_of_sites(i)*rates(i)
+        #@            endif
+
+        one_particle_normal = one_particle_process.name.split('_1p_')[0]
+        process_i_normal = process_names.index(one_particle_normal) + 1
+        #@        else if(i.eq.{process_i_normal})then
+        #@            if(default_coverage.lt.(active_volume - 1))then
+        #@                ! allowing 1p process {one_particle_normal} for high coverage
+        #@                accum_rates(i) = accum_rates(i) + nr_of_sites(i)*rates(i)
+        #@            endif
     #@        else
     #@            accum_rates(i) = accum_rates(i) + nr_of_sites(i)*rates(i)
     #@        endif
@@ -724,6 +756,7 @@ else:
 #@
 #@     do i = 1, nr_of_proc
 #@         integ_rates(i)=integ_rates(i)+nr_of_sites(i)*rates(i)*kmc_time_step
+#@         integ_events(i)=integ_rates(i)+nr_of_sites(i)
 #@     enddo
 #@
 #@     ASSERT(accum_rates(nr_of_proc).gt.0.,"base/update_accum_rate found" // &
@@ -796,6 +829,10 @@ else:
 #@         system_allocated = .true.
 #@     endif
 #@ !------ S. Matera 09/18/2012------
+#@     if(allocated(integ_events))then
+#@         print *,"kmos/base/allocate_system: Tried to allocate integ_events twice, please deallocate first"
+#@         system_allocated = .true.
+#@     endif
 #@     if(allocated(procstat))then
 #@         print *,"kmos/base/allocate_system: Tried to allocate procstat twice, please deallocate first"
 #@         system_allocated = .true.
@@ -828,6 +865,8 @@ else:
 #@         allocate(integ_rates(nr_of_proc))
 #@         integ_rates = 0
 #@ !------ S. Matera 09/18/2012------
+#@         allocate(integ_events(nr_of_proc))
+#@         integ_events = 0
 #@         allocate(procstat(nr_of_proc))
 #@         procstat = 0
 #@
@@ -847,7 +886,7 @@ else:
 #@     !****f* base/deallocate_system
 #@     ! FUNCTION
 #@     !    Deallocate all allocatable arrays: avail_sites, lattice, rates,
-#@     !    accum_rates, integ_rates, procstat.
+#@     !    accum_rates, integ_rates, integ_events, procstat.
 #@     !
 #@     ! ARGUMENTS
 #@     !
@@ -885,6 +924,11 @@ else:
 #@         print *,"Warning: integ_rates was not allocated, tried to deallocate."
 #@     endif
 #@ !------ S. Matera 09/18/2012------
+#@     if(allocated(integ_events))then
+#@         deallocate(integ_events)
+#@     else
+#@         print *,"Warning: integ_events was not allocated, tried to deallocate."
+#@     endif
 #@     if(allocated(procstat))then
 #@         deallocate(procstat)
 #@     else
@@ -1120,6 +1164,29 @@ else:
 #@ end subroutine get_integ_coverage
 #@
 #@
+#@ subroutine get_integ_event(proc_nr, return_integ_event)
+#@     !****f* base/get_integ_rate
+#@     ! FUNCTION
+#@     !    Return integrated rate at a given process.
+#@     !
+#@     ! ARGUMENTS
+#@     !
+#@     !    * ``proc_nr`` integer representing the requested process.
+#@     !    * ``return_integ_event`` writeable real, where the requested integrated rate will be stored.
+#@     !******
+#@     !---------------I/O variables---------------
+#@     integer(kind=iint), intent(in), optional :: proc_nr
+#@     real(kind=rdouble), intent(out) :: return_integ_event
+#@
+#@     if(.not. present(proc_nr) .or. proc_nr.eq.0) then
+#@       return_integ_event=integ_events(nr_of_proc)
+#@     else
+#@       return_integ_event=integ_events(proc_nr)
+#@     endif
+#@
+#@ end subroutine get_integ_event
+#@
+#@
 #@ subroutine get_rate(proc_nr, return_rate)
 #@     !****f* base/get_rate
 #@     ! FUNCTION
@@ -1258,6 +1325,8 @@ else:
 #@     ! cap it with min(...)
 #@     site =  avail_sites(proc, &
 #@         min(nr_of_sites(proc),int(1+ran_site*(nr_of_sites(proc)))),1)
+##DEBUGGING
+##@     print *, "DETERMINE proc", proc, "site", site
 #@
 #@
 #@     ASSERT(nr_of_sites(proc).gt.0,"base/determine_procsite: chosen process is invalid &
