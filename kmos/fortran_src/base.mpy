@@ -131,7 +131,7 @@
 #@ !******
 #@ !------ S. Matera 09/18/2012------
 #@ real(kind=rdouble), dimension(:), allocatable :: integ_rates
-#@ real(kind=ilong), dimension(:), allocatable :: integ_events
+#@ integer(kind=ilong), dimension(:), allocatable :: integ_events
 #@ !****v* base/integ_rates
 #@ ! FUNCTION
 #@ !   Stores the time-integrated rates (non-normalized to surface area)
@@ -756,7 +756,7 @@ else:
 #@
 #@     do i = 1, nr_of_proc
 #@         integ_rates(i)=integ_rates(i)+nr_of_sites(i)*rates(i)*kmc_time_step
-#@         integ_events(i)=integ_rates(i)+nr_of_sites(i)
+#@         integ_events(i)=integ_events(i)+nr_of_sites(i)
 #@     enddo
 #@
 #@     ASSERT(accum_rates(nr_of_proc).gt.0.,"base/update_accum_rate found" // &
@@ -1176,7 +1176,7 @@ else:
 #@     !******
 #@     !---------------I/O variables---------------
 #@     integer(kind=iint), intent(in), optional :: proc_nr
-#@     real(kind=rdouble), intent(out) :: return_integ_event
+#@     integer(kind=rdouble), intent(out) :: return_integ_event
 #@
 #@     if(.not. present(proc_nr) .or. proc_nr.eq.0) then
 #@       return_integ_event=integ_events(nr_of_proc)

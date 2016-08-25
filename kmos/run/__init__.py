@@ -247,6 +247,7 @@ class KMC_Model(Process):
         self.procstat = np.zeros((proclist.nr_of_proc), dtype=np.int64)
         # prepare integ_rates (S.Matera 09/25/2012)
         self.integ_rates = np.zeros((proclist.nr_of_proc, ))
+        self.integ_events = np.zeros((proclist.nr_of_proc, ), dtype=int)
         self.time = 0.
         self.integ_coverage = np.zeros((lattice.spuck, proclist.nr_of_species))
         self.steps = 0
@@ -687,6 +688,10 @@ class KMC_Model(Process):
             for i in range(proclist.nr_of_proc):
                     atoms.integ_rates[i] = base.get_integ_rate(i + 1)
         # S. Matera 09/25/2012
+        if hasattr(self.base, 'get_integ_event'):
+            atoms.integ_events = np.zeros((proclist.nr_of_proc,), dtype=int)
+            for i in range(proclist.nr_of_proc):
+                    atoms.integ_events[i] = base.get_integ_event(i + 1)
         if hasattr(self.base, 'get_integ_coverage'):
             atoms.integ_coverage = np.zeros((lattice.spuck, proclist.nr_of_species))
             for i in range(lattice.spuck):
@@ -719,6 +724,9 @@ class KMC_Model(Process):
                                     (atoms.integ_rates - self.integ_rates)
                                     / delta_t / size)
                 # S. Matera 09/25/2012
+                if hasattr(self.base, 'get_integ_event'):
+                    atoms.event_integ = (atoms.integ_events - self.integ_events).T
+
                 if hasattr(self.base, 'get_integ_coverage'):
                     atoms.occupation_integ = (atoms.integ_coverage - self.integ_coverage).T / delta_t / size
 
@@ -734,6 +742,8 @@ class KMC_Model(Process):
         # S. Matera 09/25/2012
         if hasattr(self.base, 'get_integ_rate'):
             self.integ_rates[:] = atoms.integ_rates
+        if hasattr(self.base, 'get_integ_event'):
+            self.integ_events[:] = atoms.integ_events
         if hasattr(self.base, 'get_integ_coverage'):
             self.integ_coverage[:] = atoms.integ_coverage
         # S. Matera 09/25/2012
