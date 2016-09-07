@@ -715,7 +715,7 @@ class Project(object):
                     otf_rate = None
 
                 if 'tof_count' in options:
-                    tof_count = config.get(section, 'tof_count')
+                    tof_count = eval(config.get(section, 'tof_count'))
                     if not tof_count: tof_count = {}
                 else:
                     tof_count = None
@@ -834,29 +834,17 @@ class Project(object):
         """Takes a filename, validates the content against kmc_project.dtd
         and import all fields into the current project tree
         """
+
+        supported_versions = [(0, 2), (0, 3)]
         # TODO: catch XML version first and convert if necessary
         if string:
             root = ET.fromstring(filename)
-        self.filename = filename
-        #xmlparser = ET.XMLParser(remove_comments=True)
-        #  FIXME : automatic removal of comment not supported in
-        # stdlib version of ElementTree
-
-        supported_versions = [(0, 2), (0, 3)]
-
-        xmlparser = ET.XMLParser()
-        if os.path.exists(filename):
-            try:
-                root = ET.parse(filename, parser=xmlparser).getroot()
-            except:
-                raise Exception(('Could not parse file %s. Are you sure this'
-                                 ' is a kmos project file?\n')
-                                % os.path.abspath(filename))
         else:
             self.filename = filename
             #xmlparser = ET.XMLParser(remove_comments=True)
-            #! FIXME : automatic removal of comment not supported in
+            #  FIXME : automatic removal of comment not supported in
             # stdlib version of ElementTree
+
             xmlparser = ET.XMLParser()
             if os.path.exists(filename):
                 try:
@@ -866,7 +854,20 @@ class Project(object):
                                      ' is a kmos project file?\n')
                                     % os.path.abspath(filename))
             else:
-                raise IOError('File not found: %s' % os.path.abspath(filename))
+                self.filename = filename
+                #xmlparser = ET.XMLParser(remove_comments=True)
+                #! FIXME : automatic removal of comment not supported in
+                # stdlib version of ElementTree
+                xmlparser = ET.XMLParser()
+                if os.path.exists(filename):
+                    try:
+                        root = ET.parse(filename, parser=xmlparser).getroot()
+                    except:
+                        raise Exception(('Could not parse file %s. Are you sure this'
+                                         ' is a kmos project file?\n')
+                                        % os.path.abspath(filename))
+                else:
+                    raise IOError('File not found: %s' % os.path.abspath(filename))
 
         if 'version' in root.attrib:
             self.version = eval(root.attrib['version'])
@@ -1255,6 +1256,7 @@ class Project(object):
 
     def print_statistics(self):
         get_name = lambda x: '_'.join(x.name.split('_')[:-1])
+        get_name = lambda x: x.name
         ml = len(self.get_layers()) > 1
         print('Statistics\n=============')
         print('Parameters: %s' % len(self.get_parameters()))

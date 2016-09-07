@@ -338,7 +338,6 @@ def _tee(string, filename=None, mode='a'):
             outfile.write(string + '\n')
 
 
-
 def _dict_to_str(data, header):
     return ' '.join(format(data[key.replace('#', '')], '.5e') for key in header.split()) + '\n'
 
