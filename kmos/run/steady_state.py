@@ -355,6 +355,15 @@ def find_pairs(project):
                     pairs.append((p1, p2))
     return pairs
 
+def find_tof_pairs(model):
+    pairs = []
+    for p1 in sorted(model.tofs):
+        for p2 in sorted(model.tofs):
+            if p1 == '_2_'.join(reversed(p2.split('_2_'))):
+                if not (p1, p2) in pairs and not (p2, p1) in pairs:
+                    pairs.append((p1, p2))
+    return pairs
+
 def report_equilibration(model, skip_diffusion=False):
     """Iterate over pairs of reverse proceses and print
         rate1 * rho1 / rate2 * rho2
@@ -371,30 +380,59 @@ def report_equilibration(model, skip_diffusion=False):
         project.import_ini_file(StringIO.StringIO(model.settings.xml))
 
     pairs = find_pairs(project)
+    tof_pairs = find_tof_pairs(model)
+
+    # CONTINUE HERE
 
     atoms = model.get_atoms(geometry=False)
 
     procstat = dict(zip(sorted(model.settings.rate_constants), atoms.procstat))
+    integ_procstat = dict(zip(sorted(model.settings.rate_constants), atoms.integ_events))
     rate_constants = dict(zip(sorted(model.settings.rate_constants), (model.base.get_rate(i+1) for i in range(len(procstat)))))
+    reduced_procstat = np.dot(model.tof_matrix, atoms.procstat)
+    reduced_procstat_named = dict(zip(sorted(model.tofs), np.dot(model.tof_matrix, atoms.procstat)))
+    reduced_procstat_integ = dict(zip(sorted(model.tofs), np.dot(model.tof_matrix, atoms.integ_events)))
+
+    procstat = np.dot(reduced_procstat, model.tof_matrix)
 
     report = ''
     data = []
-    for pair in pairs:
-        #if 'mft' in pair[0].name or 'mft' in pair[1].name:
-            #continue
-        if skip_diffusion:
-            # skip diffusion processes in equilibration report
-            if pair[0].rate_constant.startswith('diff') or pair[1].rate_constant.startswith('diff'):
-                continue
-        pn1, pn2 = pair[0].name, pair[1].name
-        left = procstat[pn1] #* rate_constants[pn1]
-        right = procstat[pn2] # * rate_constants[pn2]
+    reported = {}
+    for pn1, pn2 in tof_pairs:
+        left = reduced_procstat_named[pn1]
+        right = reduced_procstat_named[pn2]
         ratio = abs(left/right - 1.)
         left_right_sum = left + right
-        report += ('{pn1} : {pn2} => {left:.2f}/{right:.2f} = {ratio:.4e}\n'.format(**locals()))
-        data.append([
-            ratio, pn1, pn2, left_right_sum, pair
-        ])
+        left_integ = reduced_procstat_integ[pn1]
+        right_integ = reduced_procstat_integ[pn2]
+
+        #report += ('{pn1} : {pn2} => {left:.2f}/{right:.2f} = {ratio:.4e}\n'.format(**locals()))
+        for i, process in enumerate(sorted(project.process_list)):
+            if pn1 in process.tof_count or pn2 in process.tof_count:
+                data.append([
+                    ratio, pn1, left_right_sum, (process, process), left_integ, right_integ
+                ])
+
+
+
+    #for pair in pairs:
+        ##if 'mft' in pair[0].name or 'mft' in pair[1].name:
+            ##continue
+        #if skip_diffusion:
+            ## skip diffusion processes in equilibration report
+            #if pair[0].rate_constant.startswith('diff') or pair[1].rate_constant.startswith('diff'):
+                #continue
+        #pn1, pn2 = pair[0].name, pair[1].name
+        #left = procstat[pn1] #* rate_constants[pn1]
+        #right = procstat[pn2] # * rate_constants[pn2]
+        #left_integ = integ_procstat[pn1]
+        #right_integ = integ_procstat[pn2]
+        #ratio = abs(left/right - 1.)
+        #left_right_sum = left + right
+        #report += ('{pn1} : {pn2} => {left:.2f}/{right:.2f} = {ratio:.4e}\n'.format(**locals()))
+        #data.append([
+            #ratio, pn1, pn2, left_right_sum, pair, left_integ, right_integ
+        #])
     return report, data
 
 
