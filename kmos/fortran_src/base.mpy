@@ -654,12 +654,14 @@ else:
         if species_name.endswith('_'):
             #@     active_volume = active_volume - sum(coverage(:, {i})) ! {species_name}
     #@
-    ##DEBUGGING
+    ## DEBUGGING
     ##@     print *, "Default Coverage", default_coverage
     ##@     print *, "Active Volume", active_volume
     #@     i = 0
     #@     do
     #@         i = i + 1
+    ## DEBUGGING
+    ##@         print *, i
     #@         if(i == 1)then
     #@             accum_rates(1) = 0
     #@         else
@@ -680,7 +682,7 @@ else:
             if n_change < 0:
                 removing_species.setdefault(process.name, {})[species_name] = - n_change
 
-    #@     ! removing_species = {removing_species}
+    ##@     ! removing_species = {removing_species}
     ##@     ! {default_species_creating_processes}
     #@        if(.false.)then
     for default_creating in default_species_creating_processes:
@@ -691,7 +693,7 @@ else:
                 process_i = process_names.index(process) + 1
                 if '_1p_' in process:
                     continue
-                #@        else if((i.eq.{process_i}).and.default_coverage.eq.(active_volume - 1))then
+                #@        else if((i=={process_i}).and.default_coverage.eq.(active_volume - 1))then
                 #@            ! single particle diffusion {process}
         #else:
         elif default_creating == 1 :
@@ -699,35 +701,50 @@ else:
                 #rsp = removing_species[process]; l = len(removing_species[process])
                 ##@            ! {rsp} => {l}
                 process_i = process_names.index(process) + 1
-                #@        else if((i.eq.{process_i}) .and. default_coverage.ge.(active_volume - {default_creating} - 1) \\
+                #@        else if((i=={process_i}) .and. default_coverage.ge.(active_volume - {default_creating}) \\
                 for species_name in removing_species.get(process, {}):
                     n_change = removing_species[process][species_name]
                     #@         .and.{species_name}_coverage .le. {n_change} \\
                 #@        )then
                 #@            ! skip {process}
-    one_particle_processes = [process for process in data.process_list if '1p' in process.name and not 'default' in process.name]
+    #one_particle_processes = [process for process in data.process_list if '1p' in process.name and not 'default' in process.name]
+    one_particle_processes = [process for process in data.process_list if '1p' in process.name]
     for one_particle_process in one_particle_processes:
         process_i = process_names.index(one_particle_process.name) + 1
-        #@        else if(i.eq.{process_i})then
-        #@            if(default_coverage.ge.(active_volume - 1))then
+        #@        else if(i=={process_i})then
+        #@            if(default_coverage==(active_volume - 1))then
         #@                ! allowing 1p process {one_particle_process.name} for low coverage
         #@                accum_rates(i) = accum_rates(i) + nr_of_sites(i)*rates(i)
+        ##DEBUGGING
+        ##@                print *, "{one_particle_process.name}", nr_of_sites(i), rates(i)
         #@            endif
+        #
         one_particle_default = one_particle_process.name + '_default'
-        process_i_default = process_names.index(one_particle_default) + 1
-        #@        else if(i.eq.{process_i_default})then
-        #@            if(default_coverage.ge.(active_volume - 1))then
-        #@                ! allowing 1p process {one_particle_default} for low coverage
-        #@                accum_rates(i) = accum_rates(i) + nr_of_sites(i)*rates(i)
-        #@            endif
+        #process_i_default = process_names.index(one_particle_default) + 1
+        ##@        else if(i=={process_i_default})then
+        ##@            if(default_coverage==(active_volume - 1))then
+        ##@                ! allowing 1p process {process_i_default} for low coverage
+        ##DEBUGGING
+        ##@                print *, "{one_particle_default}", nr_of_sites(i), rates(i)
+        ##@                accum_rates(i) = accum_rates(i) + nr_of_sites(i)*rates(i)
+        ##@            endif
 
         one_particle_normal = one_particle_process.name.split('_1p_')[0]
         process_i_normal = process_names.index(one_particle_normal) + 1
-        #@        else if(i.eq.{process_i_normal})then
-        #@            if(default_coverage.lt.(active_volume - 1))then
-        #@                ! allowing 1p process {one_particle_normal} for high coverage
+        #@        else if(i=={process_i_normal})then
+        #@            if(default_coverage/=(active_volume - 1))then
+        #@                ! allowing 1p process {one_particle_normal} for high coverage or 0
+        ##DEBUGGING
+        ##@                print *, "{one_particle_normal}", nr_of_sites(i), rates(i)
         #@                accum_rates(i) = accum_rates(i) + nr_of_sites(i)*rates(i)
         #@            endif
+    mft_processes = [process for process in data.process_list if 'mft' in process.name.lower()]
+    for mft_process in mft_processes:
+        process_i = process_names.index(mft_process.name) + 1
+        #@        else if((i=={process_i}).and.(default_coverage==(active_volume - 1)))then
+        #@              ! skipping MFT process {mft_process.name} for low coverage
+        ##DEBUGGING
+        ##@              print *, "skipping {mft_process.name}", nr_of_sites(i), rates(i)
     #@        else
     #@            accum_rates(i) = accum_rates(i) + nr_of_sites(i)*rates(i)
     #@        endif
