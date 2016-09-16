@@ -364,7 +364,7 @@ def find_tof_pairs(model):
                     pairs.append((p1, p2))
     return pairs
 
-def report_equilibration(model, skip_diffusion=False):
+def report_equilibration(model, skip_diffusion=False, debug=False):
     """Iterate over pairs of reverse proceses and print
         rate1 * rho1 / rate2 * rho2
 
@@ -397,6 +397,7 @@ def report_equilibration(model, skip_diffusion=False):
 
     report = ''
     data = []
+    debug_data = []
     reported = {}
     for pn1, pn2 in tof_pairs:
         left = reduced_procstat_named[pn1]
@@ -412,6 +413,10 @@ def report_equilibration(model, skip_diffusion=False):
                 data.append([
                     ratio, pn1, left_right_sum, (process, process), left_integ, right_integ
                 ])
+                if debug:
+                    debug_data.append([
+                        process.name, ratio, pn1, pn2, left, right, left_right_sum, left_integ, right_integ
+                        ])
 
 
 
@@ -433,7 +438,10 @@ def report_equilibration(model, skip_diffusion=False):
         #data.append([
             #ratio, pn1, pn2, left_right_sum, pair, left_integ, right_integ
         #])
-    return report, data
+    if debug:
+        return report, data, debug_data
+    else:
+        return report, data
 
 
 if __name__ == '__main__':
