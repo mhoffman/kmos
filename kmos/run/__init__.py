@@ -972,13 +972,17 @@ class KMC_Model(Process):
         else:
             return res
 
-    def print_procstat(self, to_stdout=True):
+    def print_procstat(self, to_stdout=True, integ=False):
         entries = []
         longest_name = 0
         for i, process_name in enumerate(
                                sorted(
                                self.settings.rate_constants)):
-            procstat = self.base.get_procstat(i + 1)
+            if integ == True:
+                procstat = self.base.get_integ_event(i + 1)
+            else:
+                procstat = self.base.get_procstat(i + 1)
+
             namelength = len(process_name)
             if namelength > longest_name:
                 longest_name = namelength
@@ -1055,7 +1059,7 @@ class KMC_Model(Process):
         else:
             return res
 
-    def print_accum_rate_summation(self, order='-rate', to_stdout=True):
+    def print_accum_rate_summation(self, order='-rate', to_stdout=True, return_dict=False):
         """Shows rate individual processes contribute to the total rate
 
         The optional argument order can be one of: name, rate, rate_constant,
@@ -1073,12 +1077,20 @@ class KMC_Model(Process):
             nrofsites = self.base.get_nrofsites(i + 1)
             if nrofsites:
                 rate = self.base.get_rate(i + 1)
-                prod = nrofsites * rate
+                #prod = nrofsites * rate
+                if i == 0:
+                    prod = self.base.get_accum_rate(1)
+                else:
+                    prod = self.base.get_accum_rate(i + 1) - self.base.get_accum_rate(i)
+                if prod == 0. :
+                    nrofsites = 0
+
                 if self.get_backend() in ['otf',]:
                     accum_rate += rate
                 else:
                     accum_rate += prod
-                entries.append((nrofsites, rate, prod, process_name))
+                if nrofsites:
+                    entries.append((nrofsites, rate, prod, process_name))
 
         # reorder
         if order == 'name':
@@ -1097,6 +1109,11 @@ class KMC_Model(Process):
             entries = reversed(sorted(entries, key=lambda x: x[1]))
         elif order == '-nrofsites':
             entries = reversed(sorted(entries, key=lambda x: x[0]))
+
+        if return_dict:
+            #return entries
+            entries = list(entries)
+            return dict(zip([x[3] for x in entries], entries))
 
         # print
         res = ''
