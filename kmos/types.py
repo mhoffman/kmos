@@ -983,7 +983,7 @@ class Project(object):
                         name = process.attrib['name']
                         rate_constant = process.attrib['rate_constant']
                         if 'tof_count' in process.attrib:
-                            tof_count = process.attrib['tof_count']
+                            tof_count = eval(process.attrib['tof_count'])
                         else:
                             tof_count = None
                         if 'otf_rate' in process.attrib:
