@@ -61,6 +61,7 @@
 #@     set_kmc_time, &
 #@     set_kmc_step, &
 #@     set_procstat, &
+#@     set_integ_rate, &
 #@     set_system_name, &
 #@     get_kmc_time_step, &
 #@     get_nrofsites, &
@@ -771,10 +772,25 @@ else:
 #@     integer(kind=iint) :: i, j
 #@
 #@
-#@     do i = 1, nr_of_proc
-#@         integ_rates(i)=integ_rates(i)+nr_of_sites(i)*rates(i)*kmc_time_step
-#@         integ_events(i)=integ_events(i)+nr_of_sites(i)
-#@     enddo
+if options is None or options.avoid_default_state == False:
+    #@     do i = 1, nr_of_proc
+    #@         integ_rates(i)=integ_rates(i)+nr_of_sites(i)*rates(i)*kmc_time_step
+    #@         integ_events(i)=integ_events(i)+nr_of_sites(i)
+    #@     enddo
+else:
+    #@     do i = 1, nr_of_proc
+    #@         if (i==1)then
+    #@             if(accum_rates(i) > 0) then
+    #@                 integ_rates(i)=integ_rates(i)+nr_of_sites(i)*rates(i)*kmc_time_step
+    #@                 integ_events(i)=integ_events(i)+nr_of_sites(i)
+    #@             endif
+    #@         else
+    #@             if(accum_rates(i) > accum_rates(i-1))then
+    #@                 integ_rates(i)=integ_rates(i)+nr_of_sites(i)*rates(i)*kmc_time_step
+    #@                 integ_events(i)=integ_events(i)+nr_of_sites(i)
+    #@             endif
+    #@         endif
+    #@     enddo
 #@
 #@     ASSERT(accum_rates(nr_of_proc).gt.0.,"base/update_accum_rate found" // &
 #@         "accum_rates(nr_of_proc)=0, so no process is available at all")
@@ -1136,6 +1152,26 @@ else:
 #@     endif
 #@
 #@ end subroutine get_accum_rate
+#@
+#@
+#@ subroutine set_integ_rate(proc_nr, integ_rate)
+#@     !****f* base/get_integ_rate
+#@     ! FUNCTION
+#@     !    Set integrated rate at a given process.
+#@     !
+#@     ! ARGUMENTS
+#@     !
+#@     !    * ``proc_nr`` integer representing the requested process.
+#@     !    * ``integ_rate`` real, with the rate to be set.
+#@     !******
+#@     !---------------I/O variables---------------
+#@     integer(kind=iint), intent(in) :: proc_nr
+#@     real(kind=rdouble), intent(in) :: integ_rate
+#@
+#@     integ_rates(proc_nr) = integ_rate
+#@
+#@ end subroutine set_integ_rate
+#@
 #@
 #@ !------ S. Matera 09/18/2012------
 #@ subroutine get_integ_rate(proc_nr, return_integ_rate)
