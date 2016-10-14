@@ -187,13 +187,16 @@ def sample_steady_state(model, batch_size=1000000,
             :type check_frequency: int
     """
     hist = {}
+    if tof_method == 'both':
+        hist_procrates = {}
     procstat_hist = {}
+    if tof_method == 'both':
+        procstat_hist_procrates = {}
 
     # Temporarily change TOF matrix to reflect slowing down of fast processes
     renormalizations = np.ones([model.proclist.nr_of_proc]) if renormalizations == None else renormalizations
     tof_matrix0 = model.tof_matrix.copy()
     model.tof_matrix *= renormalizations
-
 
     batch_doubling = 0
 
@@ -203,9 +206,13 @@ def sample_steady_state(model, batch_size=1000000,
 
     for batch in itertools.count(start_batch):
         try:
-            data = model.get_std_sampled_data(
+            full_data = model.get_std_sampled_data(
                 sub_batches, batch_size, tof_method=tof_method, output='dict', reset_time_overrun=False,
                 )
+            if tof_method == 'both':
+                data = full_data['integ']
+            else:
+                data = full_data
         except ZeroDivisionError:
             import sys
             import traceback
@@ -232,9 +239,14 @@ def sample_steady_state(model, batch_size=1000000,
 
         for key, data_point in data.items():
             hist.setdefault(key, []).append(data_point)
+            if tof_method == 'both':
+                hist_procrates.setdefault(key, []).append(full_data['procrates'][key])
+
 
         for proc_nr in range(model.proclist.nr_of_proc) :
-            procstat_hist.setdefault(proc_nr, []).append(model.base.get_procstat(proc_nr + 1))
+            procstat_hist.setdefault(proc_nr, []).append(model.base.get_integ_rate(proc_nr + 1))
+            if tof_method == 'both':
+                procstat_hist_procrates.setdefault(proc_nr, []).append(model.base.get_procstat(proc_nr + 1))
 
         max_scrap = 0.
         critical_key = ''
@@ -290,38 +302,70 @@ def sample_steady_state(model, batch_size=1000000,
     steady_state_procstat = np.array([
         procstat_hist[i][-1] - procstat_hist[i][steady_state_start] for i in range(model.proclist.nr_of_proc)
     ])
+    if tof_method == 'both':
+        steady_state_procstat_procrates = np.array([
+            procstat_hist_procrates[i][-1] - procstat_hist_procrates[i][steady_state_start] for i in range(model.proclist.nr_of_proc)
+        ])
+
+
     steady_state_rates = np.dot(tof_matrix0, steady_state_procstat) \
         / (hist['simulated_time'][-1] - hist['simulated_time'][steady_state_start]) \
         / model.lattice.system_size.prod()
+    if tof_method == 'both':
+        steady_state_rates_procrates = np.dot(tof_matrix0, steady_state_procstat_procrates) \
+            / (hist_procrates['simulated_time'][-1] - hist_procrates['simulated_time'][steady_state_start]) \
+            / model.lattice.system_size.prod()
+
     steady_state_rates_dict = {}
     for i, _proc_name in enumerate(model.tofs):
-        steady_state_rates_dict[_proc_name] = steady_state_rates[i]
+        #if 'mft' in _proc_name.lower() or '1p' in _proc_name.lower() :
+        #if 'mft' in _proc_name.lower():
+        #if steady_state_procstat_procrates[i] > 100:
+        if False:
+            steady_state_rates_dict[_proc_name] = steady_state_rates_procrates[i]
+        else:
+            steady_state_rates_dict[_proc_name] = steady_state_rates[i]
+
+    if tof_method == 'both':
+        steady_state_rates_dict_procrates = {}
+        for i, _proc_name in enumerate(model.tofs):
+            steady_state_rates_dict_procrates[_proc_name] = steady_state_rates_procrates[i]
 
     for key, value in hist.items():
         hist[key] = np.array(value[steady_state_start:])
+        if tof_method == 'both':
+            hist_procrates[key] = np.array(hist_procrates[key][steady_state_start:])
 
 
     data = {}
+    if tof_method == 'both':
+        data_procrates = {}
     for key, values in hist.items():
         if len(values) == 0 :
             continue
         if 'time' in key:
             data[key] = values[-1]
-            #data['debug_{key}'.format(**locals())] = values
+            if tof_method == 'both':
+                data_procrates[key] = hist_procrates[key][-1]
         elif 'step' in key:
             data[key] = sum(values)
+            if tof_method == 'both':
+                data_procrates[key] = sum(hist_procrates[key])
         else:
             if sum(hist['kmc_time']) == 0.:
                 data[key] = 0.
+                if tof_method == 'both':
+                    data_procrates[key] = 0.
             else:
                 data[key] = np.average(values, weights=hist['kmc_time'])
-
+                if tof_method == 'both':
+                    data_procrates[key] = np.average(hist_procrates[key], weights=hist_procrates['kmc_time'])
 
     # Change TOF matrix back to original value
     model.tof_matrix = tof_matrix0
 
-    #data['steady_state_rates'] = steady_state_rates_dict
     data.update(steady_state_rates_dict)
+    #data.update(steady_state_rates_dict_procrates)
 
     if output == 'dict':
         return data
@@ -386,12 +430,16 @@ def report_equilibration(model, skip_diffusion=False, debug=False):
 
     atoms = model.get_atoms(geometry=False)
 
+    event_integ = np.zeros((model.proclist.nr_of_proc, ), dtype=int)
+    for i in range(model.proclist.nr_of_proc):
+        event_integ[i] = model.base.get_integ_event(i + 1)
+
     procstat = dict(zip(sorted(model.settings.rate_constants), atoms.procstat))
-    integ_procstat = dict(zip(sorted(model.settings.rate_constants), atoms.integ_events))
+    integ_procstat = dict(zip(sorted(model.settings.rate_constants), event_integ))
     rate_constants = dict(zip(sorted(model.settings.rate_constants), (model.base.get_rate(i+1) for i in range(len(procstat)))))
     reduced_procstat = np.dot(model.tof_matrix, atoms.procstat)
     reduced_procstat_named = dict(zip(sorted(model.tofs), np.dot(model.tof_matrix, atoms.procstat)))
-    reduced_procstat_integ = dict(zip(sorted(model.tofs), np.dot(model.tof_matrix, atoms.integ_events)))
+    reduced_procstat_integ = dict(zip(sorted(model.tofs), np.dot(model.tof_matrix, event_integ)))
 
     procstat = np.dot(reduced_procstat, model.tof_matrix)
 

@@ -83,6 +83,9 @@ except Exception, e:
     kmos export <xml-file>
     Hint: are you in a directory containing a compiled kMC model?\n\n
     """ % e)
+    for p in sys.path:
+        print(p)
+
 
 try:
     from kmc_model import proclist_constants
@@ -104,6 +107,8 @@ except Exception, e:
     and descriptions for the representation on screen.
     Hint: are you in a directory containing a compiled kMC model?
     """ % e)
+    for p in sys.path:
+        print(p)
 
 
 INTERACTIVE = hasattr(sys, 'ps1') or hasattr(sys, 'ipcompleter')
@@ -705,6 +710,7 @@ class KMC_Model(Process):
             # if we haven't done any steps, return the last TOF again
             atoms.tof_data = self.tof_data if hasattr(self, 'tof_data') else np.zeros_like(self.tof_matrix[:, 0])
             atoms.tof_integ = self.tof_integ  if hasattr(self, 'tof_integ') else np.zeros_like(self.tof_matrix[:, 0])
+            atoms.event_integ = np.zeros((proclist.nr_of_proc, ), dtype=int)
         elif delta_t == 0. and atoms.kmc_time > 0 and reset_time_overrun :
             print(
                 'Warning: numerical precision too low, to resolve time-steps'
@@ -713,6 +719,7 @@ class KMC_Model(Process):
             base.set_kmc_time(0.0)
             atoms.tof_data = np.zeros_like(self.tof_matrix[:, 0])
             atoms.tof_integ = np.zeros_like(self.tof_matrix[:, 0])
+            atoms.event_integ = np.zeros((proclist.nr_of_proc, ), dtype=int)
 
         else:
             if delta_t > 0:
@@ -734,6 +741,7 @@ class KMC_Model(Process):
                 atoms.tof_data = np.dot(self.tof_matrix, np.zeros_like(atoms.integ_rates))
                 atoms.tof_integ = np.dot(self.tof_matrix, np.zeros_like(atoms.integ_rates))
                 atoms.occupation_integ = np.dot(self.tof_matrix, np.zeros_like(atoms.integ_rates))
+                atoms.event_integ = np.zeros((proclist.nr_of_proc, ), dtype=int)
 
         atoms.delta_t = delta_t
 
@@ -801,8 +809,11 @@ class KMC_Model(Process):
         """
 
         # initialize lists for averages
-        occs = []
-        tofs = []
+        #occs = []
+        #tofs = []
+        occs = {'procrates': [], 'integ': []}
+        tofs = {'procrates': [], 'integ': []}
+
         delta_ts = []
         step_ts = []
         t0 = self.base.get_kmc_time()
@@ -821,28 +832,45 @@ class KMC_Model(Process):
             delta_ts.append(atoms.delta_t)
             step_ts.append(self.base.get_kmc_time_step())
 
-            if tof_method == 'procrates':
-                tofs.append(atoms.tof_data.flatten())
-                occs.append(list(atoms.occupation.flatten()))
-            elif tof_method == 'integ':
-                tofs.append(atoms.tof_integ.flatten())
-                occs.append(atoms.occupation_integ.flatten())
-            else:
-                raise NotImplementedError('tof_method="{tof_method}" not supported. Can be either procrates or integ.'.format(**locals()))
+            #if tof_method == 'procrates':
+                #tofs.append(atoms.tof_data.flatten())
+                #occs.append(list(atoms.occupation.flatten()))
+            #elif tof_method == 'integ':
+                #tofs.append(atoms.tof_integ.flatten())
+                #occs.append(atoms.occupation_integ.flatten())
+
+            tofs['procrates'].append(atoms.tof_data.flatten())
+            occs['procrates'].append(list(atoms.occupation.flatten()))
+            tofs['integ'].append(atoms.tof_integ.flatten())
+            occs['integ'].append(atoms.occupation_integ.flatten())
+
+            if tof_method not in ['procrates', 'integ', 'both']:
+                raise NotImplementedError('tof_method="{tof_method}" not supported. Can be either procrates, integ, or both.'.format(**locals()))
 
             if show_progress:
                 progress_bar.render(1+int(float(sample)/samples*100), 'Sampling')
 
         # calculate time averages
         if sum(step_ts) == 0.:
-            occs_mean = np.zeros_like(occs[0])
+            occs_mean = {'procrates': np.zeros_like(occs['procrates'][0]),
+                    'integ':  np.zeros_like(occs['integ'][0]),}
         else:
-            occs_mean = np.average(occs, axis=0, weights=step_ts)
+            occs_mean = {
+                    'procrates': np.average(occs['procrates'], axis=0, weights=step_ts),
+                    'integ': np.average(occs['integ'], axis=0, weights=step_ts)
+                    }
         try:
             if sum(delta_ts) == 0.:
-                tof_mean = np.zeros_like(tofs[0])
+                tof_mean = {
+                        'procrates': np.zeros_like(tofs['procrates'][0]),
+                        'integ': np.zeros_like(tofs['integ'][0]),
+                }
+
             else:
-                tof_mean = np.average(tofs, axis=0, weights=delta_ts)
+                tof_mean ={
+                    'procrates': np.average(tofs['procrates'], axis=0, weights=delta_ts),
+                    'integ': np.average(tofs['integ'], axis=0, weights=delta_ts)
+                }
         except ZeroDivisionError:
             print(tofs)
             print(delta_ts)
@@ -856,17 +884,41 @@ class KMC_Model(Process):
         #return tofs, delta_ts
 
         # write out averages
-        outdata = tuple(atoms.params
-                        + list(tof_mean.flatten())
-                        + list(occs_mean.flatten())
+        outdata = {
+            'procrates':tuple(atoms.params
+                        + list(tof_mean['procrates'].flatten())
+                        + list(occs_mean['procrates'].flatten())
                         + [total_time,
                            simulated_time,
-                           total_steps])
+                           total_steps]),
+            'integ':tuple(atoms.params
+                        + list(tof_mean['integ'].flatten())
+                        + list(occs_mean['integ'].flatten())
+                        + [total_time,
+                           simulated_time,
+                           total_steps]),
+        }
+
         if output == 'str':
-            return ((' '.join(['%.5e'] * len(outdata)) + '\n') % outdata)
+            if tof_method in ['procrates', 'integ']:
+                return ((' '.join(['%.5e'] * len(outdata[tof_method])) + '\n') % outdata[tof_method])
+            elif tof_method == 'both':
+                return {
+                    'procrates':  ((' '.join(['%.5e'] * len(outdata['procrates'])) + '\n') % outdata['procrates']),
+                    'integ':  ((' '.join(['%.5e'] * len(outdata['integ'])) + '\n') % outdata['integ']),
+                    }
+
         elif output == 'dict':
             header = self.get_std_header()[1:].split()
-            return dict(zip(header, outdata))
+            return {
+                'procrates': dict(zip(header, outdata['procrates'])),
+                'integ': dict(zip(header, outdata['integ']))
+                }
+        elif output == 'both':
+            return {
+                    'procrates': (dict(zip(header, outdata['procrates'])) ,((' '.join(['%.5e'] * len(outdata['procrates'])) + '\n') % outdata['procrates'])) ,
+                    'integ': (dict(zip(header, outdata['integ'])) ,((' '.join(['%.5e'] * len(outdata['integ'])) + '\n') % outdata['integ'])) ,
+                    }
         else:
             raise UserWarning(
                 "Output format {output} not defined. I only know 'str' and 'dict'")
