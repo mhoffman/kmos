@@ -689,9 +689,13 @@ else:
             if not species.name.endswith('_') and not species.name == data.species_list.default_species:
                 n = [x.species for x in process.action_list].count(species.name) - [x.species for x in process.condition_list].count(species.name)
                 species_creating_processes.setdefault(species.name, {}).setdefault(n, []).append(process.name)
+    #import pprint
+    #pprint.pprint(species_creating_processes)
+    #exit()
     ##@     ! removing_species = {removing_species}
     ##@     ! {default_species_creating_processes}
     #@        if(.false.)then
+    #@      ! avoid the fully poisoned state from being created
     for default_creating in default_species_creating_processes:
         if default_creating < 0:
             continue
@@ -715,16 +719,18 @@ else:
                 #@        )then
                 #@            ! skip {process}
     for species in species_creating_processes:
+        if '2' in species:
+            continue
         for species_creating in species_creating_processes[species]:
             if species_creating == 1:
                 for process in species_creating_processes[species][species_creating]:
                     process_i = process_names.index(process) + 1
-                    #@         else if(i=={process_i}.and.{species}_coverage.eq.(active_volume - 1))then
+                    #@         else if(i=={process_i}.and.{species}_coverage==(active_volume - 1))then
                     #@             ! skip {process}
             elif species_creating == 0:
                 for process in species_creating_processes[species][species_creating]:
                     process_i = process_names.index(process) + 1
-                    #@         else if(i=={process_i}.and.{species}_coverage.eq.(active_volume - 1))then
+                    #@         else if(i=={process_i}.and.{species}_coverage==(active_volume - 1))then
                     #@             ! skip {process}
 
 
