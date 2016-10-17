@@ -695,6 +695,16 @@ else:
     ##@     ! removing_species = {removing_species}
     ##@     ! {default_species_creating_processes}
     #@        if(.false.)then
+    # EXPERIMENTAL: skip CO MFT diffusion completely
+    mft_processes = [process for process in data.process_list if 'mft' in process.name.lower()]
+    for mft_process in mft_processes:
+        process_i = process_names.index(mft_process.name) + 1
+        speciess = [ca.species for ca in mft_process.condition_list] \
+                   + [ca.species for ca in mft_process.action_list]
+        if 'CO' in speciess:
+            #@        else if(i=={process_i})then
+            #@              ! skipping MFT process {mft_process.name} because CO ...
+            ##@              print *, "! skipping MFT process {mft_process.name} because CO ..."
     #@      ! avoid the fully poisoned state from being created
     for default_creating in default_species_creating_processes:
         if default_creating < 0:
@@ -718,6 +728,7 @@ else:
                     #@         .and.{species_name}_coverage .le. {n_change} \\
                 #@        )then
                 #@            ! skip {process}
+                ##@            print *, "! skip {process}"
     for species in species_creating_processes:
         #if '2' in species:
         if species != 'CO':
@@ -728,11 +739,13 @@ else:
                     process_i = process_names.index(process) + 1
                     #@         else if(i=={process_i}.and.{species}_coverage==(active_volume - 1))then
                     #@             ! skip {process}
+                    ##@             print *, "! skip {process}"
             elif species_creating == 0:
                 for process in species_creating_processes[species][species_creating]:
                     process_i = process_names.index(process) + 1
                     #@         else if(i=={process_i}.and.{species}_coverage==(active_volume - 1))then
                     #@             ! skip {process}
+                    ##@             print *, "! skip {process}"
 
 
     #one_particle_processes = [process for process in data.process_list if '1p' in process.name and not 'default' in process.name]
@@ -771,16 +784,7 @@ else:
         process_i = process_names.index(mft_process.name) + 1
         #@        else if((i=={process_i}).and.(default_coverage==(active_volume - 1)))then
         #@              ! skipping MFT process {mft_process.name} for low coverage
-        ##DEBUGGING
-        ##@              print *, "skipping {mft_process.name}", nr_of_sites(i), rates(i)
-    # EXPERIMENTAL: skip CO MFT diffusion completely
-    for mft_process in mft_processes:
-        process_i = process_names.index(mft_process.name) + 1
-        speciess = [ca.species for ca in mft_process.condition_list] \
-                   + [ca.species for ca in mft_process.action_list]
-        if 'CO' in speciess:
-            #@        else if(i=={process_i})then
-            #@              ! skipping MFT process {mft_process.name} because CO ...
+        ##@              print *, "! skipping MFT process {mft_process.name} for low coverage"
 
 
     #@        else
