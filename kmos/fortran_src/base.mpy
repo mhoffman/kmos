@@ -719,7 +719,8 @@ else:
                 #@        )then
                 #@            ! skip {process}
     for species in species_creating_processes:
-        if '2' in species:
+        #if '2' in species:
+        if species != 'CO':
             continue
         for species_creating in species_creating_processes[species]:
             if species_creating == 1:
@@ -772,6 +773,16 @@ else:
         #@              ! skipping MFT process {mft_process.name} for low coverage
         ##DEBUGGING
         ##@              print *, "skipping {mft_process.name}", nr_of_sites(i), rates(i)
+    # EXPERIMENTAL: skip CO MFT diffusion completely
+    for mft_process in mft_processes:
+        process_i = process_names.index(mft_process.name) + 1
+        speciess = [ca.species for ca in mft_process.condition_list] \
+                   + [ca.species for ca in mft_process.action_list]
+        if 'CO' in speciess:
+            #@        else if(i=={process_i})then
+            #@              ! skipping MFT process {mft_process.name} because CO ...
+
+
     #@        else
     #@            accum_rates(i) = accum_rates(i) + nr_of_sites(i)*rates(i)
     #@        endif
