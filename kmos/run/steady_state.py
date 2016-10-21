@@ -212,7 +212,7 @@ def sample_steady_state(model, batch_size=1000000,
             if tof_method == 'both':
                 data = full_data['integ']
             else:
-                data = full_data
+                data = full_data[tof_method]
         except ZeroDivisionError:
             import sys
             import traceback
@@ -273,8 +273,8 @@ def sample_steady_state(model, batch_size=1000000,
                     if scrap_fraction > max_scrap:
                         max_scrap = scrap_fraction
                         critical_key = key
-                completed_percent = float(
-                    1 - max_scrap) / (1 - bias_threshold) * 100.
+                completed_percent = min(100, float(
+                    1 - max_scrap) / (1 - bias_threshold) * 100.)
 
                 if make_plots and batch % 100 == 0:
                     # remove existing EWMA plots to reduce hard-drive space
@@ -374,6 +374,8 @@ def sample_steady_state(model, batch_size=1000000,
     elif output == 'both':
         data_str = ' '.join(format(data[key.replace('#', '')], '.5e') for key in model.get_std_header().split()) + '\n'
         return data, data_str
+    else:
+        raise UserWarning("Unrecognized choice output = {output}, should be either dict, str, or both".format(**locals()))
 
 def _tee(string, filename=None, mode='a'):
     print(string)
@@ -408,7 +410,7 @@ def find_tof_pairs(model):
                     pairs.append((p1, p2))
     return pairs
 
-def report_equilibration(model, skip_diffusion=False, debug=False):
+def report_equilibration(model, skip_diffusion=False, debug=False, tof_method='integ'):
     """Iterate over pairs of reverse proceses and print
         rate1 * rho1 / rate2 * rho2
 
@@ -458,13 +460,24 @@ def report_equilibration(model, skip_diffusion=False, debug=False):
         #report += ('{pn1} : {pn2} => {left:.2f}/{right:.2f} = {ratio:.4e}\n'.format(**locals()))
         for i, process in enumerate(sorted(project.process_list)):
             if pn1 in process.tof_count or pn2 in process.tof_count:
-                data.append([
-                    ratio, pn1, left_right_sum, (process, process), left_integ, right_integ
-                ])
-                if debug:
-                    debug_data.append([
-                        process.name, ratio, pn1, pn2, left, right, left_right_sum, left_integ, right_integ
-                        ])
+                if tof_method == 'integ':
+                    data.append([
+                        ratio, pn1, left_right_sum, (process, process), left_integ, right_integ
+                    ])
+                    if debug:
+                        debug_data.append([
+                            process.name, ratio, pn1, pn2, left, right, left_right_sum, left_integ, right_integ
+                            ])
+                elif tof_method == 'procrates':
+                    data.append([
+                        ratio, pn1, left_right_sum, (process, process), left, right
+                    ])
+                    if debug:
+                        debug_data.append([
+                            process.name, ratio, pn1, pn2, left, right, left_right_sum, left, right
+                            ])
+                else:
+                    raise UserWarning("TOF Method {tof_method}, unknown, should be either procrates or integ.".format(**locals()))
 
 
 
