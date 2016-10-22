@@ -695,17 +695,17 @@ else:
     ##@     ! removing_species = {removing_species}
     ##@     ! {default_species_creating_processes}
     #@        if(.false.)then
-    # EXPERIMENTAL: skip CO MFT diffusion completely
-    mft_processes = [process for process in data.process_list if 'mft' in process.name.lower()]
-    for mft_process in mft_processes:
-        process_i = process_names.index(mft_process.name) + 1
-        speciess = [ca.species for ca in mft_process.condition_list] \
-                   + [ca.species for ca in mft_process.action_list]
-        if 'CO' in speciess:
-            #@        else if(i=={process_i})then
-            #@              ! skipping MFT process {mft_process.name} because CO ...
-            ##@              print *, "! skipping MFT process {mft_process.name} because CO ..."
-    #@      ! avoid the fully poisoned state from being created
+    ## EXPERIMENTAL: skip CO MFT diffusion completely
+    #mft_processes = [process for process in data.process_list if 'mft' in process.name.lower()]
+    #for mft_process in mft_processes:
+        #process_i = process_names.index(mft_process.name) + 1
+        #speciess = [ca.species for ca in mft_process.condition_list] \
+                   #+ [ca.species for ca in mft_process.action_list]
+        #if 'CO' in speciess:
+            ##@        else if(i=={process_i})then
+            ##@              ! skipping MFT process {mft_process.name} because CO ...
+            ###@              print *, "! skipping MFT process {mft_process.name} because CO ..."
+    ##@      ! avoid the fully poisoned state from being created
     for default_creating in default_species_creating_processes:
         if default_creating < 0:
             continue
