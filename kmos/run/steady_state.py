@@ -491,7 +491,7 @@ def report_equilibration(model, skip_diffusion=False, debug=False, tof_method='i
                             ])
                 elif tof_method == 'procrates':
                     data.append([
-                        ratio, process.name, left_right_sum, (process, process), left, right
+                        ratio, pn1, left_right_sum, (process, process), left, right
                         #ratio, pn1, left_right_sum, (process, process),
                     ])
                     if debug:
