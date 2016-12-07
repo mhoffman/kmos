@@ -411,9 +411,7 @@ def find_pairs_dict(project):
         for p2 in sorted(project.process_list):
             if p1.condition_list == p2.action_list \
                 and p2.condition_list == p1.action_list \
-                and '_1p_' not in p2.name \
-                and '_mft' not in p2.name \
-                :
+                and  (('_1p_' not in p2.name  and '_mft' not in p2.name ) or p1.name not in pairs):
                 pairs[p1.name] = p2.name
                 #pairs[p2.name] = p1.name
     return pairs
