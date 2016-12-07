@@ -409,9 +409,13 @@ def find_pairs_dict(project):
     pairs = {}
     for p1 in sorted(project.process_list):
         for p2 in sorted(project.process_list):
-            if p1.condition_list == p2.action_list and p2.condition_list == p1.action_list:
+            if p1.condition_list == p2.action_list \
+                and p2.condition_list == p1.action_list \
+                and '_1p_' not in p2.name \
+                and '_mft' not in p2.name \
+                :
                 pairs[p1.name] = p2.name
-                pairs[p2.name] = p1.name
+                #pairs[p2.name] = p1.name
     return pairs
 
 def find_tof_pairs(model):
