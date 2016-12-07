@@ -401,6 +401,19 @@ def find_pairs(project):
                     pairs.append((p1, p2))
     return pairs
 
+def find_pairs_dict(project):
+    """Find pairs of elementary processes that are reverse processes with respect
+    to each others from a kmos.types.Project
+
+    """
+    pairs = {}
+    for p1 in sorted(project.process_list):
+        for p2 in sorted(project.process_list):
+            if p1.condition_list == p2.action_list and p2.condition_list == p1.action_list:
+                pairs[p1.name] = p2.name
+                pairs[p2.name] = p1.name
+    return pairs
+
 def find_tof_pairs(model):
     pairs = []
     for p1 in sorted(model.tofs):
@@ -449,6 +462,7 @@ def report_equilibration(model, skip_diffusion=False, debug=False, tof_method='i
     data = []
     debug_data = []
     reported = {}
+    pn_index = dict(tuple([(x, y) for (y, x) in enumerate(sorted(model.settings.rate_constants))]))
     for pn1, pn2 in tof_pairs:
         left = reduced_procstat_named[pn1]
         right = reduced_procstat_named[pn2]
@@ -456,6 +470,7 @@ def report_equilibration(model, skip_diffusion=False, debug=False, tof_method='i
         left_right_sum = left + right
         left_integ = reduced_procstat_integ[pn1]
         right_integ = reduced_procstat_integ[pn2]
+        left_right_integ = left_integ + right_integ
 
         #report += ('{pn1} : {pn2} => {left:.2f}/{right:.2f} = {ratio:.4e}\n'.format(**locals()))
         for i, process in enumerate(sorted(project.process_list)):
@@ -470,7 +485,8 @@ def report_equilibration(model, skip_diffusion=False, debug=False, tof_method='i
                             ])
                 elif tof_method == 'procrates':
                     data.append([
-                        ratio, pn1, left_right_sum, (process, process), left, right
+                        #ratio, pn1, left_right_sum, (process, process), left, right
+                        ratio, pn1, left_right_sum, (process, process), atoms.procstat[pn_index[process.name]], left_right_integ
                     ])
                     if debug:
                         debug_data.append([
