@@ -467,10 +467,10 @@ def report_equilibration(model, skip_diffusion=False, debug=False, tof_method='i
     reported = {}
     pn_index = dict(tuple([(x, y) for (y, x) in enumerate(sorted(model.settings.rate_constants))]))
     for pn1, pn2 in tof_pairs:
-        #left = reduced_procstat_named[pn1]
-        #right = reduced_procstat_named[pn2]
-        #ratio = abs(left/right - 1.)
-        #left_right_sum = left + right
+        left = reduced_procstat_named[pn1]
+        right = reduced_procstat_named[pn2]
+        ratio = abs(left/right - 1.)
+        left_right_sum = left + right
         left_integ = reduced_procstat_integ[pn1]
         right_integ = reduced_procstat_integ[pn2]
         left_right_integ = left_integ + right_integ
@@ -478,10 +478,10 @@ def report_equilibration(model, skip_diffusion=False, debug=False, tof_method='i
         #report += ('{pn1} : {pn2} => {left:.2f}/{right:.2f} = {ratio:.4e}\n'.format(**locals()))
         for i, process in enumerate(sorted(project.process_list)):
             if pn1 in process.tof_count or pn2 in process.tof_count:
-                left = atoms.procstat[pn_index[process.name]]
-                right = atoms.procstat[pn_index[pairs_dict[process.name]]]
-                ratio = abs(float(left)/right - 1.)
-                left_right_sum = left + right
+                #left = atoms.procstat[pn_index[process.name]]
+                #right = atoms.procstat[pn_index[pairs_dict[process.name]]]
+                #ratio = abs(float(left)/right - 1.)
+                #left_right_sum = left + right
 
                 if tof_method == 'integ':
                     data.append([
@@ -533,6 +533,10 @@ if __name__ == '__main__':
     import kmos.run
     with kmos.run.KMC_Model(banner=False, print_rates=False) as model:
         hist = sample_steady_state(
-            model, 100000, tof_method='integ', show_progress=True, make_plots=True)
+            model,
+            100000,
+            tof_method='integ',
+            show_progress=True,
+            make_plots=True)
     print(model.get_std_header())
     print(hist)
