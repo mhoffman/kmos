@@ -331,6 +331,11 @@ def main(args=None):
                               export_dir,
                               options=options)
 
+        if not options.avoid_default_state:
+            print("\n\nInfo: using default behavior of not avoiding the empty state for backwards compatibility.")
+            print("\t\tWhen expecting system state with very low coverage significant speed-up can be achieved by")
+            print("\t\texporting with kmos export .. -a/--avoid-default-state")
+
         if ((os.name == 'posix'
            and os.uname()[0] in ['Linux', 'Darwin'])
            or os.name == 'nt') \
@@ -352,6 +357,8 @@ def main(args=None):
                         print('Skipping {out}'.format(**locals()))
                 else:
                     shutil.move(out, '..')
+
+
 
     elif args[0] == 'settings-export':
         import kmos.io
