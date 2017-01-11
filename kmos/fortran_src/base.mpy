@@ -705,7 +705,8 @@ else:
                 #@        else if((i=={process_i}) .and. default_coverage.ge.(active_volume - {default_creating}) \\
                 for species_name in removing_species.get(process, {}):
                     n_change = removing_species[process][species_name]
-                    #@         .and.{species_name}_coverage .le. {n_change} \\
+                    ## EXPERIMENTAL Thu Dec 22 06:18:02 PST 2016
+                    ##@         .and.{species_name}_coverage .le. {n_change} \\
                 #@        )then
                 #@            ! skip {process}
     #one_particle_processes = [process for process in data.process_list if '1p' in process.name and not 'default' in process.name]
