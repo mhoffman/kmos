@@ -54,6 +54,7 @@
 #@     get_accum_rate, &
 #@     get_integ_rate, &
 #@     get_integ_event, &
+#@     set_integ_event, &
 #@     get_integ_coverage, &
 #@     get_avail_site, &
 #@     get_kmc_step, &
@@ -1218,8 +1219,27 @@ else:
 #@ end subroutine get_integ_coverage
 #@
 #@
+#@ subroutine set_integ_event(proc_nr, integ_event)
+#@     !****f* base/set_integ_event
+#@     ! FUNCTION
+#@     !    Return integrated rate at a given process.
+#@     !
+#@     ! ARGUMENTS
+#@     !
+#@     !    * ``proc_nr`` integer representing the requested process.
+#@     !    * ``integ_event`` The new value for integ_event
+#@     !******
+#@     !---------------I/O variables---------------
+#@     integer(kind=iint), intent(in), optional :: proc_nr
+#@     integer(kind=rdouble), intent(in) :: integ_event
+#@
+#@     integ_events(proc_nr) = integ_event
+#@
+#@ end subroutine set_integ_event
+#@
+#@
 #@ subroutine get_integ_event(proc_nr, return_integ_event)
-#@     !****f* base/get_integ_rate
+#@     !****f* base/get_integ_event
 #@     ! FUNCTION
 #@     !    Return integrated rate at a given process.
 #@     !
