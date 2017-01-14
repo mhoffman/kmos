@@ -1230,8 +1230,8 @@ else:
 #@     !    * ``integ_event`` The new value for integ_event
 #@     !******
 #@     !---------------I/O variables---------------
-#@     integer(kind=iint), intent(in), optional :: proc_nr
-#@     integer(kind=rdouble), intent(in) :: integ_event
+#@     integer(kind=iint), intent(in) :: proc_nr
+#@     integer(kind=ilong), intent(in) :: integ_event
 #@
 #@     integ_events(proc_nr) = integ_event
 #@
