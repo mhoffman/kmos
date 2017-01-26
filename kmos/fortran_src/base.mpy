@@ -695,8 +695,18 @@ else:
                 process_i = process_names.index(process) + 1
                 if '_1p_' in process:
                     continue
+                #elif 'mft' not in process:
+                    #process_object = [x for x in data.process_list if x.name == process][0]
+                    #diffusing_species = list(set(
+                        #[x.species for x in process_object.condition_list if x.species != default_species ]
+                        #+ [x.species for x in process_object.action_list if x.species != default_species ]
+                    #))[0]
+                    ##@        else if((i=={process_i}) .and. {diffusing_species}_coverage >= (active_volume - 1))then
+                    ##@            ! avoid internal diffusion when there is only one vacancy
+                    ##@            ! {process}
                 #@        else if((i=={process_i}).and.default_coverage.eq.(active_volume - 1))then
                 #@            ! single particle diffusion {process}
+
         #else:
         elif default_creating == 1 :
             for process in default_species_creating_processes[default_creating]:
@@ -1249,14 +1259,10 @@ else:
 #@     !    * ``return_integ_event`` writeable real, where the requested integrated rate will be stored.
 #@     !******
 #@     !---------------I/O variables---------------
-#@     integer(kind=iint), intent(in), optional :: proc_nr
-#@     integer(kind=rdouble), intent(out) :: return_integ_event
+#@     integer(kind=iint), intent(in) :: proc_nr
+#@     integer(kind=ilong), intent(out) :: return_integ_event
 #@
-#@     if(.not. present(proc_nr) .or. proc_nr.eq.0) then
-#@       return_integ_event=integ_events(nr_of_proc)
-#@     else
-#@       return_integ_event=integ_events(proc_nr)
-#@     endif
+#@     return_integ_event=integ_events(proc_nr)
 #@
 #@ end subroutine get_integ_event
 #@

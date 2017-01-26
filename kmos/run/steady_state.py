@@ -337,6 +337,8 @@ def sample_steady_state(model, batch_size=1000000,
             hist_procrates[key] = np.array(hist_procrates[key][steady_state_start:])
 
 
+    rkmc_time = repr(hist['kmc_time'])
+    #_tee('kmc_times {rkmc_time}'.format(**locals()), log_filename)
     data = {}
     if tof_method == 'both':
         data_procrates = {}
@@ -357,7 +359,10 @@ def sample_steady_state(model, batch_size=1000000,
                 if tof_method == 'both':
                     data_procrates[key] = 0.
             else:
+                rvalues = repr(values)
+                #_tee('{key}: {rvalues}'.format(**locals()), log_filename)
                 data[key] = np.average(values, weights=hist['kmc_time'])
+
                 if tof_method == 'both':
                     data_procrates[key] = np.average(hist_procrates[key], weights=hist_procrates['kmc_time'])
 
