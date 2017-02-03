@@ -428,6 +428,12 @@ def find_tof_pairs(model):
             if p1 == '_2_'.join(reversed(p2.split('_2_'))):
                 if not (p1, p2) in pairs and not (p2, p1) in pairs:
                     pairs.append((p1, p2))
+            #elif ('_mft_' in p1
+                    #and '_mft_' in p2
+                    #and
+                    #):
+                #if not (p1, p2) in pairs and not (p2, p1) in pairs:
+                    #pairs.append((p1, p2))
     return pairs
 
 def report_equilibration(model, skip_diffusion=False, debug=False, tof_method='integ'):
