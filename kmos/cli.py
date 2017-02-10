@@ -195,7 +195,7 @@ def get_options(args=None, get_parser=False):
 
     parser.add_option('-l', '--variable-length',
                       dest='variable_length',
-                      default=95,
+                      default=30,
                       type='int')
 
     parser.add_option('-c', '--catmap',

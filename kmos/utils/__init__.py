@@ -424,6 +424,8 @@ def build(options):
     call.append('--f90flags="%s"' % extra_flags)
     call.append('-m')
     call.append(module_name)
+    call.append('--build-dir')
+    call.append('./f2py.builddir.tmp')
     call += src_files
 
     print(call)
