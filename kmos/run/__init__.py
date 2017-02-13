@@ -743,6 +743,8 @@ class KMC_Model(Process):
 
                 if hasattr(self.base, 'get_integ_coverage'):
                     atoms.occupation_integ = (atoms.integ_coverage - self.integ_coverage).T / delta_t / size
+                else:
+                    atoms.occupation_integ = np.array([])
 
             else:
                 atoms.tof_data = np.dot(self.tof_matrix, np.zeros_like(atoms.integ_rates))
