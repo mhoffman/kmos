@@ -57,6 +57,7 @@ public :: add_proc, &
   get_kmc_step, &
   get_kmc_time, &
   set_kmc_time, &
+  set_kmc_step, &
   set_system_name, &
   get_kmc_time_step, &
   get_nrofsites, &
@@ -1177,6 +1178,24 @@ subroutine get_walltime(return_walltime)
   return_walltime = walltime
 
 end subroutine get_walltime
+
+
+subroutine set_kmc_step(new_kmc_step)
+    !****f* base/set_kmc_step
+    ! FUNCTION
+    !    Set the current kmc_step
+    !
+    ! ARGUMENTS
+    !
+    !    * ``kmc_step`` Readable integer
+    !******
+    !---------------I/O variables---------------
+    integer(kind=ilong), intent(in) :: new_kmc_step
+
+    kmc_step = new_kmc_step
+
+end subroutine set_kmc_step
+
 
 subroutine get_volume(return_volume)
   !****f* base/get_kmc_volume

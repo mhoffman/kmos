@@ -254,7 +254,14 @@ class KMC_Model(Process):
         self.integ_rates = np.zeros((proclist.nr_of_proc, ))
         self.integ_events = np.zeros((proclist.nr_of_proc, ), dtype=int)
         self.time = 0.
-        self.integ_coverage = np.zeros((lattice.spuck, proclist.nr_of_species))
+        if hasattr(proclist, 'nr_of_species'):
+            self.integ_coverage = np.zeros((lattice.spuck, proclist.nr_of_species))
+        elif hasattr(proclist_constants, 'nr_of_species'):
+            self.integ_coverage = np.zeros((lattice.spuck, proclist_constants.nr_of_species))
+        else:
+            self.integ_coverage = np.zeros((lattice.spuck, 10))
+            print('Warning: Cannot find `nr_of_species` integ coverages won\'t work reliably.')
+
         self.steps = 0
 
         self.species_representation = {}
