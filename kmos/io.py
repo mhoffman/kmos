@@ -2212,7 +2212,7 @@ def export_source(project_tree, export_dir=None, code_generator=None, options=No
                     ]
     elif code_generator == 'otf':
         cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
-                    (os.path.join('fortran_src', 'base_otf.f90'), 'base.f90'),
+                    #(os.path.join('fortran_src', 'base_otf.f90'), 'base.f90'),
                     (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
                     (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
                     ]
@@ -2237,6 +2237,8 @@ def export_source(project_tree, export_dir=None, code_generator=None, options=No
         writer.write_template(filename='base', options=options)
     elif code_generator == 'lat_int':
         writer.write_template(filename='base_lat_int', target='base', options=options)
+    elif code_generator == 'otf':
+        writer.write_template(filename='base_otf', target='base', options=options)
 
     writer.write_template(filename='lattice', options=options)
     writer.write_proclist(code_generator=code_generator)
