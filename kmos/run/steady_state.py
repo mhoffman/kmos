@@ -242,6 +242,11 @@ def sample_steady_state(model, batch_size=1000000,
             if tof_method == 'both':
                 hist_procrates.setdefault(key, []).append(full_data['procrates'][key])
 
+        for key, data_point in full_data['procrates'].items():
+            if key not in data:
+                hist.setdefault(key, []).append(full_data['procrates'][key])
+
+
 
         for proc_nr in range(model.proclist.nr_of_proc) :
             procstat_hist.setdefault(proc_nr, []).append(model.base.get_integ_rate(proc_nr + 1))

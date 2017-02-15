@@ -704,10 +704,17 @@ class KMC_Model(Process):
             atoms.integ_events = np.zeros((proclist.nr_of_proc,), dtype=int)
             for i in range(proclist.nr_of_proc):
                     atoms.integ_events[i] = base.get_integ_event(i + 1)
-        if hasattr(self.base, 'get_integ_coverage'):
-            atoms.integ_coverage = np.zeros((lattice.spuck, proclist.nr_of_species))
+        if hasattr(self.base, 'get_integ_coverage') and \
+                (hasattr(proclist, 'nr_of_species') or hasattr(proclist_constants, 'nr_of_species')):
+
+            if hasattr(proclist, 'nr_of_species'):
+                nr_of_species = proclist.nr_of_species
+            else:
+                nr_of_species = proclist_constants.nr_of_species
+
+            atoms.integ_coverage = np.zeros((lattice.spuck, nr_of_species))
             for i in range(lattice.spuck):
-                for j in range(proclist.nr_of_species):
+                for j in range(nr_of_species):
                     atoms.integ_coverage[i, j] = base.get_integ_coverage(i + 1, j)
         delta_t = (atoms.kmc_time - self.time)
         delta_steps = atoms.kmc_step - self.steps
