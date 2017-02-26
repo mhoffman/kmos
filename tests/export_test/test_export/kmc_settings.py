@@ -89,7 +89,7 @@ tof_count = {
     }
 
 xml = """<?xml version="1.0" ?>
-<kmc version="(0, 2)">
+<kmc version="(0, 3)">
     <meta author="Max J. Hoffmann" debug="0" email="mjhoffmann@gmail.com" model_dimension="2" model_name="my_model"/>
     <species_list default_species="empty">
         <species color="#000000" name="co" representation="" tags=""/>

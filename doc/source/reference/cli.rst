@@ -66,6 +66,10 @@ List of commands
             Turn on assertion statements in F90 code.
             (Only active in compile step)
 
+           --acf
+            Build the modules base_acf.f90 and proclist_acf.f90. Default is false.
+            This both modules contain functions to calculate ACF (autocorrelation function) and MSD (mean squared displacement).
+
         -n/--no-compiler-optimization
             Do not send optimizing flags to compiler.
 

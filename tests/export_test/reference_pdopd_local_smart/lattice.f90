@@ -62,20 +62,64 @@ use base, only: &
 implicit none
 
 integer(kind=iint), dimension(3), public :: system_size
+!****v* lattice/system_size
+! FUNCTION
+!   Stores the current size of the allocated system lattice (x, y, z)
+!   in an integer array. In low-dimensional system, corresponding entries will be set to 1.
+!   Note that this should be thought of as a read-only variable. Changing its value at model
+!   runtime will not the indented effect of actually changing the simulated lattice.
+!   The definitive location for custom lattice size is `simulation_size` in `kmc_settings.py`.
+!
+!   If the system size shall be changed programmatically, it needs to happen before the `KMC_Model`
+!   is instantiated and Fortran array are allocated accordingly, like to
+!
+!       #!/usr/bin/env python
+!
+!       import kmc_settings
+!       import kmos.run
+!
+!       kmc_settings.simulation_size = 9, 9, 4
+!
+!       with kmos.run.KMC_Model() as model:
+!           print(model.lattice.system_size)))`
+!
+!******
 integer(kind=iint), parameter, public :: nr_of_layers = 2
+!****v* lattice/nr_of_layers
+! FUNCTION
+!   Constant storing the number of layers (for multi-lattice models > 1)
+!******
 
  ! Layer constants
 
 integer(kind=iint), parameter, public :: model_dimension = 2
+!****v* lattice/model_dimension
+! FUNCTION
+!   Store the number of dimensions of this model: 1, 2, or 3
+!******
 integer(kind=iint), parameter, public :: Pd100 = 0
 integer(kind=iint), parameter, public :: PdO = 1
 integer(kind=iint), public :: default_layer = PdO
+!****v* lattice/default_layer
+! FUNCTION
+!   The layer in which the model is initially in by default (only relevant for multi-lattice models).
+!******
 integer(kind=iint), public :: substrate_layer = PdO
 
  ! Site constants
 
 real(kind=rsingle), dimension(3,3), public :: unit_cell_size = 0.
+!****v* lattice/unit_cell_size
+! FUNCTION
+!   The dimensions of the unit cell (e.g. in Angstrom) of the
+!   unit cell.
+!******
 real(kind=rsingle), dimension(25, 3), public :: site_positions
+!****v* lattice/site_positions
+! FUNCTION
+!   The positions of (adsorption) site in the unit cell in
+!   fractional coordinates.
+!******
 integer(kind=iint), parameter, public :: Pd100_h1 = 1
 integer(kind=iint), parameter, public :: Pd100_h2 = 2
 integer(kind=iint), parameter, public :: Pd100_h4 = 3
@@ -102,11 +146,26 @@ integer(kind=iint), parameter, public :: PdO_hollow3 = 23
 integer(kind=iint), parameter, public :: PdO_hollow4 = 24
 integer(kind=iint), parameter, public :: PdO_Pd1 = 25
 
- ! spuck = Sites Per Unit Cell Konstant
 integer(kind=iint), parameter, public :: spuck = 25
+!****v* lattice/spuck
+! FUNCTION
+!   spuck = Sites Per Unit Cell Konstant
+!   The number of sites per unit cell, i.e. for coordinate
+!   notation (x, y, n) this is the maximum value of `n`.
+!******
  ! lookup tables
 integer(kind=iint), dimension(:, :), allocatable, public :: nr2lattice
+!****v* lattice/nr2lattice
+! FUNCTION
+!   Caching array holding the mapping from index to lattice
+!   coordinate: i -> (x, y, z, n).
+!******
 integer(kind=iint), dimension(:,:,:,:), allocatable, public :: lattice2nr
+!****v* lattice/lattice2nr
+! FUNCTION
+!   Caching array holding the mapping from index to lattice
+!   coordinate:  (x, y, z, n) -> i.
+!******
 
 
 

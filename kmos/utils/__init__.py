@@ -362,8 +362,11 @@ def build(options):
     import sys
     from glob import glob
 
-    src_files = ['kind_values_f2py.f90', 'base.f90', 'lattice.f90']
-
+    src_files = ['kind_values_f2py.f90', 'base.f90']
+    
+    if isfile('base_acf.f90'):
+        src_files.append('base_acf.f90')
+    src_files.append('lattice.f90')
     if isfile('proclist_constants.f90'):
         src_files.append('proclist_constants.f90')
     if isfile('proclist_pars.f90'):
@@ -373,6 +376,8 @@ def build(options):
     # src_files.extend(glob('get_rate_*.f90'))
     src_files.extend(glob('run_proc_*.f90'))
     src_files.append('proclist.f90')
+    if isfile('proclist_acf.f90'):
+        src_files.append('proclist_acf.f90')
 
     extra_flags = {}
 

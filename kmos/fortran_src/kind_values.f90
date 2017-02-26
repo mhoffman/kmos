@@ -1,6 +1,6 @@
 !/* ROBODOC this makes robodoc to document this file */
 module kind_values
-!****h* libkmc/kind_values
+!****h* kmos/kind_values
 ! FUNCTION
 !    This module offers kind_values for commonly
 !    used intrinsic types in a platform independent way.

@@ -1,0 +1,271 @@
+#@ subroutine do_kmc_steps_acf(n,traj_on)
+#@
+#@ !****f* proclist_acf/do_kmc_steps_acf
+#@ ! FUNCTION
+#@ !    Performs ``n`` kMC step for the on the fly calculation of the autocorrelation function (ACF).
+#@ !    If one want to record the trajectory of the tracked species, it is possible to turn this on 
+#@ !    and off with the boolean traj_on.
+#@ !    * first update clock
+#@ !    * then configuration sampling step
+#@ !    * then ACF sampling step
+#@ !    * then tracking process
+#@ !    * then execute process
+#@ !    * last recording of trajectory(optional)
+#@ !      
+#@ ! ARGUMENTS
+#@ !
+#@ !    ``n`` : Number of steps to run
+#@ !    ``traj_on`` : boolean, turn the recording of trajectory on and off
+#@ !******
+#@     integer(kind=ilong), intent(in) :: n
+#@     logical, intent(in) :: traj_on
+#@     integer(kind=ilong) :: i, kmc_step_acf
+#@     real(kind=rsingle) :: ran_proc, ran_time, ran_site
+#@     integer(kind=iint) :: nr_site, proc_nr, particle, init_site, fin_site
+#@
+#@     if (traj_on .eqv. .True.) then
+#@         do i = 1, n
+#@         call random_number(ran_time)
+#@         call random_number(ran_proc)
+#@         call random_number(ran_site)
+if data.meta.debug > 0:
+    #@ print *, "PROCLIST/DO_KMC_STEP"
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_TIME",ran_time
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_site",ran_site
+#@
+#@         call update_accum_rate
+#@         call update_clocks(ran_time)
+#@         call update_kmc_step_acf()
+#@
+#@         call update_integ_rate
+#@         call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
+if data.meta.debug > 0:
+    #@ print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr
+    #@ print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site
+#@         call update_config_bin()
+#@         call get_diff_sites_acf(proc_nr, nr_site, init_site, fin_site)
+#@         call assign_particle_id(init_site, particle)
+#@         call update_id_arr(particle,init_site, fin_site)
+#@         call update_after_wrap_acf
+#@         call run_proc_nr(proc_nr, nr_site)
+#@         call update_buffer_acf(particle)
+#@         call get_kmc_step_acf(kmc_step_acf)
+#@         call update_trajectory(particle,kmc_step_acf)
+#@         enddo
+#@         print *, "Number of annhilations", nr_of_annhilations
+#@         print *, "Number of wraps", wrap_count
+#@         if(nr_of_annhilations/wrap_count.ge.1 )then
+#@             print *, "Number of kmc steps was too small for a good statistic of the ACF!"
+#@         endif
+#@
+#@     else
+#@         do i = 1, n
+#@         call random_number(ran_time)
+#@         call random_number(ran_proc)
+#@         call random_number(ran_site)
+if data.meta.debug > 0:
+    #@ print *, "PROCLIST/DO_KMC_STEP"
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_TIME",ran_time
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_site",ran_site
+
+#@         call update_accum_rate
+#@         call update_clocks(ran_time)
+#@
+#@         call update_integ_rate
+#@         call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
+if data.meta.debug > 0:
+    #@ print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr
+    #@ print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site
+#@         call update_config_bin()
+#@         call get_diff_sites_acf(proc_nr, nr_site, init_site, fin_site)
+#@         call assign_particle_id(init_site, particle)
+#@         call update_id_arr(particle,init_site, fin_site)
+#@         call update_after_wrap_acf
+#@         call run_proc_nr(proc_nr, nr_site)
+#@         call update_buffer_acf(particle)
+#@         enddo
+#@         print *, "Number of annhilations", nr_of_annhilations
+#@         print *, "Number of wraps", wrap_count
+#@         if(nr_of_annhilations/wrap_count.ge.1 )then
+#@             print *, "Number of kmc steps was too small for a good statistic of the ACF!"
+#@         endif
+#@ 
+#@     endif
+#@
+#@ end subroutine do_kmc_steps_acf
+#@
+
+#@ subroutine do_kmc_step_acf()
+#@
+#@ !****f* proclist_acf/do_kmc_step_acf
+#@ ! FUNCTION
+#@ !    Performs exactly one kMC step for the on the fly calculation of the autocorrelation function (ACF).
+#@ !    * first update clock
+#@ !    * then configuration sampling step
+#@ !    * then ACF sampling step
+#@ !    * then tracking process
+#@ !    * last execute process
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    ``none``
+#@ !******
+#@     real(kind=rsingle) :: ran_proc, ran_time, ran_site
+#@     integer(kind=iint) :: nr_site, proc_nr, particle, init_site, fin_site
+#@
+#@     call random_number(ran_time)
+#@     call random_number(ran_proc)
+#@     call random_number(ran_site)
+if data.meta.debug > 0:
+    #@ print *, "PROCLIST/DO_KMC_STEP"
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_TIME",ran_time
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_site",ran_site
+#@     call update_accum_rate
+#@     call update_clocks(ran_time)
+#@
+#@     call update_integ_rate
+#@     call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
+if data.meta.debug > 0:
+    #@ print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr
+    #@ print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site
+#@     call update_config_bin()
+#@     call get_diff_sites_acf(proc_nr, nr_site, init_site, fin_site)
+#@     call assign_particle_id(init_site, particle)
+#@     call update_id_arr(particle,init_site, fin_site)
+#@     call update_after_wrap_acf
+#@     call run_proc_nr(proc_nr, nr_site)
+#@     call update_buffer_acf(particle)
+#@ end subroutine do_kmc_step_acf
+#@
+#@ subroutine do_kmc_steps_displacement(n,traj_on)
+#@
+#@ !****f* proclist_acf/do_kmc_displacement
+#@ ! FUNCTION
+#@ !    Performs ``n`` kMC step for the calculation of mean squared displacement.
+#@ !    If one want to record the trajectory of the tracked species, it is possible to turn this on 
+#@ !    and off with the boolean traj_on.
+#@ !    * first update clock
+#@ !    * then configuration sampling step
+#@ !    * then tracking process
+#@ !    * then updating displacment
+#@ !    * then execute process
+#@ !    * last recording of trajectory(optional)
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    ``n`` : Number of steps to run
+#@ !    ``traj_on`` : boolean, turn the recording of trajectory on and off
+#@ !******
+#@     integer(kind=ilong), intent(in) :: n
+#@     logical, intent(in) :: traj_on
+#@     integer(kind=ilong) :: i, kmc_step_acf
+#@     real(kind=rsingle) :: ran_proc, ran_time, ran_site
+#@     integer(kind=iint) :: nr_site, proc_nr, particle, init_site, fin_site
+#@     real(kind=rdouble), dimension(3) :: displace_coord
+#@
+#@     if (traj_on .eqv. .True.) then
+#@         do i = 1, n
+#@         call random_number(ran_time)
+#@         call random_number(ran_proc)
+#@         call random_number(ran_site)
+if data.meta.debug > 0:
+    #@ print *, "PROCLIST/DO_KMC_STEP"
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_TIME",ran_time
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_site",ran_site
+#@
+#@         call update_accum_rate
+#@         call update_clocks(ran_time)
+#@         call update_kmc_step_acf()
+#@
+#@         call update_integ_rate
+#@         call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
+if data.meta.debug > 0:
+    #@ print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr
+    #@ print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site
+#@         call get_diff_sites_displacement(proc_nr, nr_site, init_site, fin_site,displace_coord)
+#@         call assign_particle_id(init_site, particle)
+#@         call update_displacement(particle,displace_coord)
+#@         call update_id_arr(particle,init_site, fin_site)
+#@         call run_proc_nr(proc_nr, nr_site)
+#@         call get_kmc_step_acf(kmc_step_acf)
+#@         call update_trajectory(particle,kmc_step_acf)
+#@         enddo
+#@
+#@     else
+#@         do i = 1, n
+#@         call random_number(ran_time)
+#@         call random_number(ran_proc)
+#@         call random_number(ran_site)
+if data.meta.debug > 0:
+    #@ print *, "PROCLIST/DO_KMC_STEP"
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_TIME",ran_time
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_site",ran_site
+
+#@         call update_accum_rate
+#@         call update_clocks(ran_time)
+#@
+#@         call update_integ_rate
+#@         call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
+if data.meta.debug > 0:
+    #@ print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr
+    #@ print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site
+#@         call get_diff_sites_displacement(proc_nr, nr_site, init_site, fin_site,displace_coord)
+#@         call assign_particle_id(init_site, particle)
+#@         call update_displacement(particle,displace_coord)
+#@         call update_id_arr(particle,init_site, fin_site)
+#@         call run_proc_nr(proc_nr, nr_site)
+#@         enddo
+#@     endif
+#@
+#@ end subroutine do_kmc_steps_displacement
+#@
+#@ subroutine do_kmc_step_displacement()
+#@
+#@ !****f* proclist_acf/do_kmc_step_displacement
+#@ ! FUNCTION
+#@ !    Performs exactly one kMC step for the calculation of mean squared displacement.
+#@ !    * first update clock
+#@ !    * then configuration sampling step
+#@ !    * then tracking process
+#@ !    * then updating displacement
+#@ !    * last execute process
+#@ !
+#@ ! ARGUMENTS
+#@ !
+#@ !    ``none``
+#@ 
+#@     real(kind=rsingle) :: ran_proc, ran_time, ran_site
+#@     integer(kind=iint) :: nr_site, proc_nr, particle, init_site, fin_site
+#@     real(kind=rdouble), dimension(3) :: displace_coord
+#@     call random_number(ran_time)
+#@     call random_number(ran_proc)
+#@     call random_number(ran_site)
+if data.meta.debug > 0:
+    #@ print *, "PROCLIST/DO_KMC_STEP"
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_TIME",ran_time
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_PROC",ran_proc
+    #@ print *,"    PROCLIST/DO_KMC_STEP/RAN_site",ran_site
+#@     call update_accum_rate
+#@     call update_clocks(ran_time)
+#@
+#@     call update_integ_rate
+#@     call determine_procsite(ran_proc, ran_site, proc_nr, nr_site)
+if data.meta.debug > 0:
+    #@ print *,"PROCLIST/DO_KMC_STEP/PROC_NR", proc_nr
+    #@ print *,"PROCLIST/DO_KMC_STEP/SITE", nr_site
+#@     call get_diff_sites_displacement(proc_nr, nr_site, init_site,fin_site,displace_coord)
+#@     call assign_particle_id(init_site, particle)
+#@     call update_displacement(particle,displace_coord)
+#@     call update_id_arr(particle,init_site, fin_site)
+#@     call run_proc_nr(proc_nr, nr_site)
+#@  
+#@ end subroutine do_kmc_step_displacement
+#@
+
+#useful for debugging
+

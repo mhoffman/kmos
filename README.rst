@@ -1,4 +1,4 @@
-.. image:: https://travis-ci.org/mhoffman/kmos.png?branch=master  
+.. image:: https://travis-ci.org/mhoffman/kmos.png?branch=master
     :target: https://travis-ci.org/mhoffman/kmos
 .. image:: https://img.shields.io/badge/license-GPLv3-brightgreen.svg?style=flat-square)
     :target COPYING
@@ -8,7 +8,6 @@
 .. image:: https://badges.gitter.im/mhoffman/kmos.svg
    :alt: Join the chat at https://gitter.im/mhoffman/kmos
    :target: https://gitter.im/mhoffman/kmos?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-
 
 kmos: kMC modelling on steroids
 =====================================
@@ -27,7 +26,6 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
 this program; if not, see `http://www.gnu.org/licenses/ <http://www.gnu.org/licenses/>`_.
-
 
 QUICKSTART
 ##########
@@ -100,11 +98,16 @@ Please refer to
 * https://www.th4.ch.tum.de/index.php?id=1321
 * http://mhoffman.github.io/kmos/
 * http://kmos.readthedocs.org/
+* https://github.com/jmlorenzi/intro2kmos
 
 or links therein for tutorials, user guide, reference, and troubleshooting hints.
 
+BUGS, ISSUES, TROUBLE
+#####################
 
-
+This code is research code for scientists by scientists. If you
+believe you have hit a bug, have a feature request get in touch
+with us either via the `mailing list <https://groups.google.com/forum/#!forum/kmos-users>`_, `Gitter <https://gitter.im/mhoffman/kmos?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge>`_, or open an `issue <https://github.com/mhoffman/kmos/issues/new>`_ .
 
 THANKS
 ######

@@ -87,10 +87,14 @@ usage['export'] = """kmos export <xml-file> [<export-path>]
             Turn on assertion statements in F90 code.
             (Only active in compile step)
 
+           --acf
+            Build the modules base_acf.f90 and proclist_acf.f90. Default is false.
+            This both modules contain functions to calculate ACF (autocorrelation function) and MSD (mean squared displacement). 
+            
         -n/--no-compiler-optimization
             Do not send optimizing flags to compiler.
                     """ % ('pyd' if os.name == 'nt' else 'so')
-
+          
 usage['settings-export'] = """kmos settings-export <xml-file> [<export-path>]
     Take a kmos xml-file and export kmc_settings.py
     to the export-path.
@@ -201,7 +205,13 @@ def get_options(args=None, get_parser=False):
     parser.add_option('-c', '--catmap',
                       default=False,
                       action='store_true')
-
+    
+    parser.add_option('--acf',
+                      dest='acf',
+                      action='store_true',
+                      default=False,
+                      )
+   
     try:
         from numpy.distutils.fcompiler import get_default_fcompiler
         from numpy.distutils import log
