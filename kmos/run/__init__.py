@@ -1000,6 +1000,85 @@ class KMC_Model(Process):
         else:
             return res
 
+    def print_configuration(self, to_stdout=True, default_species=' ', symbol_length=2, show_keys=True, show_frame=True, show_angle=True, separator=' '):
+        """Show a ASCII representation of current lattice configuration.
+
+        :param to_stdout: if False return string, otherwise print to STDOUT, default True
+        :type to_stdout: bool
+        :param default_species: Character used for representin default species i.e. empty
+        :type default_species: str (should be length 1)
+        :param symbol_length: How many character to use to represent one field, default 2
+        :type symbol_length: int
+
+        Warning: only works on 2D models, and one site per unit cell.
+                 Makes no effort to represent non-orthogonal unit cells.
+        """
+
+
+        # get unit-cell lattice vector
+        if self.lattice_representation and hasattr(self.lattice_representation,'cell'):
+            x_axis, y_axis, _ = self.lattice_representation.cell
+            proj = np.dot(x_axis, y_axis) / \
+                   np.linalg.norm(x_axis) / \
+                   np.linalg.norm(y_axis)
+        else:
+            proj = 0
+        import itertools
+        res = ''
+        species_names = sorted(self.settings.representations)
+        abbreviations = {}
+        legend = {}
+        # build map for abbreviations
+        for species_index, species_name in enumerate(sorted(self.settings.representations)):
+            if species_index == self.proclist.default_species and default_species is not None:
+                abbreviations[species_index] = ' ' * symbol_length
+                legend[' ' * symbol_length] = species_name
+            elif len(species_name) >= symbol_length:
+                for abbreviation in itertools.combinations(species_name, symbol_length):
+                    if abbreviation not in abbreviations.values():
+                        abbreviations[species_index] = ''.join(list(abbreviation))
+                        legend[''.join(list(abbreviation))] = species_name
+                        break
+
+            else:
+                abbreviations[species_index] = (('%{symbol_length}s'.format(**locals())) % species_name)
+                legend[(('%{symbol_length}s'.format(**locals())) % species_name)] = species_name
+
+        # create a function that operates on np.array
+        letterize = np.vectorize(lambda x: abbreviations[x])
+
+
+        # add a x/y-axis
+        len_x, len_y, _ = self.lattice.system_size
+        inner = letterize(self._get_configuration()[:, :, 0, 0])
+        with_abscissa = np.vstack((map(lambda x: '%2d' % x, range(len_x)), inner))
+        with_ordinate = np.vstack((map(lambda x: '%2d' % x, range(-1, len_y)), with_abscissa.T)).T
+        both = np.flipud(with_ordinate.T)
+
+
+        # concatenate for output
+        if show_frame:
+            if show_angle:
+                res = '\n'.join([('|' + ' '.join(l) + '|') for l in both])
+                res = ''
+                for i, line in enumerate(both):
+                    res += ('\n' if i > 0 else '') + (int((len_y - i)*proj*27./39.*3.) * ' ') + '|' + separator.join(line) + '|'
+            else:
+                res = '\n'.join([('|' + separator.join(l) + '|') for l in both])
+            hline = '-' * ((symbol_length + 1)  * (len_x + 1) + 1)
+            res = ((int((len_y)*proj*27./39.*3.) * ' ' if show_angle else '')  ) \
+                  + '{hline}\n{res}\n{hline}'.format(**locals())
+        else:
+            res = '\n'.join([' '.join(l) for l in both])
+
+        if show_keys:
+            res += '\n\nLegend:\n\n    {legend}\n'.format(**locals())
+
+        if to_stdout:
+            print(res)
+        else:
+            return res
+
     def print_coverages(self, to_stdout=True):
         """Show coverages (per unit cell) for each species
         and site type for current configurations.
