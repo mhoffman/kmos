@@ -53,10 +53,16 @@
 #@   replace_species, &
 #@   get_accum_rate, &
 #@   get_integ_rate, &
+#@   get_integ_event, &
+#@   set_integ_event, &
+#@   get_integ_coverage, &
 #@   get_avail_site, &
 #@   get_kmc_step, &
 #@   get_kmc_time, &
 #@   set_kmc_time, &
+#@   set_kmc_step, &
+#@   set_procstat, &
+#@   set_integ_rate, &
 #@   set_system_name, &
 #@   get_kmc_time_step, &
 #@   get_nrofsites, &
@@ -127,6 +133,7 @@
 #@ !******
 #@ !------ S. Matera 09/18/2012------
 #@ real(kind=rdouble), dimension(:), allocatable :: integ_rates
+#@ integer(kind=ilong), dimension(:), allocatable :: integ_events
 #@ !****v* base/integ_rates
 #@ ! FUNCTION
 #@ !   Stores the time-integrated rates (non-normalized to surface area)
@@ -190,7 +197,7 @@ nr_of_species = len(data.species_list)
 nr_of_species_m1 =  nr_of_species - 1
 #@
 #@ integer(kind=iint), dimension({len_site_params}, 0:{nr_of_species_m1}), public :: coverage = 0
-#@
+#@ real(kind=rdouble), dimension({len_site_params}, 0:{nr_of_species_m1}), public :: integ_coverage = 0.
 #@
 #@ !--- Local copies of variables
 #@ integer(kind=iint) :: nr_of_proc
@@ -623,10 +630,145 @@ nr_of_species_m1 =  nr_of_species - 1
 #@
 #@   integer(kind=iint) :: i
 #@
-#@   accum_rates(1)=nr_of_sites(1)*rates(1)
-#@   do i = 2, nr_of_proc
-#@     accum_rates(i)=accum_rates(i-1)+nr_of_sites(i)*rates(i)
-#@   enddo
+
+if options is None or options.avoid_default_state == False:
+    #@     accum_rates(1)=nr_of_sites(1)*rates(1)
+    #@     do i = 2, nr_of_proc
+    #@         accum_rates(i)=accum_rates(i-1)+nr_of_sites(i)*rates(i)
+    #@     enddo
+else:
+    nr_default_species = sorted([x.name for x in data.species_list]).index(data.species_list.default_species)
+    #@     integer(kind=iint) :: default_coverage, active_volume
+    for species in data.species_list:
+        if not species.name.endswith('_') and not species.name == data.species_list.default_species:
+            nr_species = sorted([x.name for x in data.species_list]).index(species.name)
+            #@     integer(kind=iint) :: {species.name}_coverage
+    #@
+    #@
+    #@     default_coverage = sum(coverage(:, {nr_default_species}))
+    active_species = []
+    for species in data.species_list:
+        if not species.name.endswith('_') and not species.name == data.species_list.default_species:
+            nr_species = sorted([x.name for x in data.species_list]).index(species.name)
+            #@     {species.name}_coverage = sum(coverage(:, {nr_species}))
+            ##DEBUGGING
+            ##@     print *, "{species.name}", {species.name}_coverage
+            active_species.append(species.name)
+    #@     ! active_species = {active_species}
+    #@
+    #@     active_volume = volume
+    for i, species_name in enumerate(sorted([x.name for x in data.species_list])):
+        if species_name.endswith('_'):
+            #@     active_volume = active_volume - sum(coverage(:, {i})) ! {species_name}
+    #@
+    ## DEBUGGING
+    ##@     print *, "Default Coverage", default_coverage
+    ##@     print *, "Active Volume", active_volume
+    #@     i = 0
+    #@     do
+    #@         i = i + 1
+    ## DEBUGGING
+    ##@         print *, i
+    #@         if(i == 1)then
+    #@             accum_rates(1) = 0
+    #@         else
+    #@             accum_rates(i) = accum_rates(i-1)
+    #@         endif
+    # sort processes into 'empty-site-creating ones'
+    # skip over those that lead directly to empty states
+    default_species = data.species_list.default_species
+    #@        ! {nr_default_species} = default_species = {default_species}
+    process_names = sorted([process.name for process in data.process_list])
+    default_species_creating_processes = {}
+    removing_species = {}
+    for process in data.process_list:
+        n = [x.species for x in process.action_list].count(default_species) - [x.species for x in process.condition_list].count(default_species)
+        default_species_creating_processes.setdefault(n, []).append(process.name)
+        for species_name in active_species:
+            n_change = [x.species for x in process.action_list].count(species_name) - [x.species for x in process.condition_list].count(species_name)
+            if n_change < 0:
+                removing_species.setdefault(process.name, {})[species_name] = - n_change
+
+    ##@     ! removing_species = {removing_species}
+    ##@     ! {default_species_creating_processes}
+    #@        if(.false.)then
+    for default_creating in default_species_creating_processes:
+        if default_creating < 0:
+            continue
+        elif default_creating == 0:
+            for process in default_species_creating_processes[default_creating]:
+                process_i = process_names.index(process) + 1
+                if '_1p_' in process:
+                    continue
+                #elif 'mft' not in process:
+                    #process_object = [x for x in data.process_list if x.name == process][0]
+                    #diffusing_species = list(set(
+                        #[x.species for x in process_object.condition_list if x.species != default_species ]
+                        #+ [x.species for x in process_object.action_list if x.species != default_species ]
+                    #))[0]
+                    ##@        else if((i=={process_i}) .and. {diffusing_species}_coverage >= (active_volume - 1))then
+                    ##@            ! avoid internal diffusion when there is only one vacancy
+                    ##@            ! {process}
+                #@        else if((i=={process_i}).and.default_coverage.eq.(active_volume - 1))then
+                #@            ! single particle diffusion {process}
+
+        #else:
+        elif default_creating == 1 :
+            for process in default_species_creating_processes[default_creating]:
+                #rsp = removing_species[process]; l = len(removing_species[process])
+                ##@            ! {rsp} => {l}
+                process_i = process_names.index(process) + 1
+                #@        else if((i=={process_i}) .and. default_coverage.ge.(active_volume - {default_creating}) \\
+                for species_name in removing_species.get(process, {}):
+                    n_change = removing_species[process][species_name]
+                    ## EXPERIMENTAL Thu Dec 22 06:18:02 PST 2016
+                    ##@         .and.{species_name}_coverage .le. {n_change} \\
+                #@        )then
+                #@            ! skip {process}
+    #one_particle_processes = [process for process in data.process_list if '1p' in process.name and not 'default' in process.name]
+    one_particle_processes = [process for process in data.process_list if '1p' in process.name]
+    for one_particle_process in one_particle_processes:
+        process_i = process_names.index(one_particle_process.name) + 1
+        #@        else if(i=={process_i})then
+        #@            if(default_coverage==(active_volume - 1))then
+        #@                ! allowing 1p process {one_particle_process.name} for low coverage
+        #@                accum_rates(i) = accum_rates(i) + nr_of_sites(i)*rates(i)
+        ##DEBUGGING
+        ##@                print *, "{one_particle_process.name}", nr_of_sites(i), rates(i)
+        #@            endif
+        #
+        one_particle_default = one_particle_process.name + '_default'
+        #process_i_default = process_names.index(one_particle_default) + 1
+        ##@        else if(i=={process_i_default})then
+        ##@            if(default_coverage==(active_volume - 1))then
+        ##@                ! allowing 1p process {process_i_default} for low coverage
+        ##DEBUGGING
+        ##@                print *, "{one_particle_default}", nr_of_sites(i), rates(i)
+        ##@                accum_rates(i) = accum_rates(i) + nr_of_sites(i)*rates(i)
+        ##@            endif
+
+        one_particle_normal = one_particle_process.name.split('_1p_')[0]
+        process_i_normal = process_names.index(one_particle_normal) + 1
+        #@        else if(i=={process_i_normal})then
+        #@            if(default_coverage/=(active_volume - 1))then
+        #@                ! allowing 1p process {one_particle_normal} for high coverage or 0
+        ##DEBUGGING
+        ##@                print *, "{one_particle_normal}", nr_of_sites(i), rates(i)
+        #@                accum_rates(i) = accum_rates(i) + nr_of_sites(i)*rates(i)
+        #@            endif
+    mft_processes = [process for process in data.process_list if 'mft' in process.name.lower()]
+    for mft_process in mft_processes:
+        process_i = process_names.index(mft_process.name) + 1
+        #@        else if((i=={process_i}).and.(default_coverage==(active_volume - 1)))then
+        #@              ! skipping MFT process {mft_process.name} for low coverage
+        ##DEBUGGING
+        ##@              print *, "skipping {mft_process.name}", nr_of_sites(i), rates(i)
+    #@        else
+    #@            accum_rates(i) = accum_rates(i) + nr_of_sites(i)*rates(i)
+    #@        endif
+    #@        if (i == nr_of_proc)  exit
+    #@    enddo
+
 #@
 #@   ASSERT(accum_rates(nr_of_proc).gt.0.,"base/update_accum_rate found &
 #@     accum_rates(nr_of_proc)=0, so no process is available at all")
@@ -644,15 +786,37 @@ nr_of_species_m1 =  nr_of_species - 1
 #@     !    ``none``
 #@     !******
 #@
-#@     integer(kind=iint) :: i
+#@     integer(kind=iint) :: i, j
 #@
 #@
+if options is None or options.avoid_default_state == False:
+    #@     do i = 1, nr_of_proc
+    #@         integ_rates(i)=integ_rates(i)+nr_of_sites(i)*rates(i)*kmc_time_step
+    #@         integ_events(i)=integ_events(i)+nr_of_sites(i)
+    #@     enddo
+else:
+    #@     do i = 1, nr_of_proc
+    #@         if (i==1)then
+    #@             if(accum_rates(i) > 0) then
+    #@                 integ_rates(i)=integ_rates(i)+nr_of_sites(i)*rates(i)*kmc_time_step
+    #@                 integ_events(i)=integ_events(i)+nr_of_sites(i)
+    #@             endif
+    #@         else
+    #@             if(accum_rates(i) > accum_rates(i-1))then
+    #@                 integ_rates(i)=integ_rates(i)+nr_of_sites(i)*rates(i)*kmc_time_step
+    #@                 integ_events(i)=integ_events(i)+nr_of_sites(i)
 #@     do i = 1, nr_of_proc
 #@         integ_rates(i)=integ_rates(i)+nr_of_sites(i)*rates(i)*kmc_time_step
 #@     enddo
 #@
 #@     ASSERT(accum_rates(nr_of_proc).gt.0.,"base/update_accum_rate found"// &
 #@         "accum_rates(nr_of_proc)=0, so no process is available at all")
+#@
+#@     do i = 1, {len_site_params}
+#@         do j = 0, {nr_of_species_m1}
+#@             integ_coverage(i, j) = integ_coverage(i, j) + coverage(i, j) * kmc_time_step
+#@         enddo
+#@     enddo
 #@
 #@ end subroutine update_integ_rate
 #@ !------ S. Matera 09/18/2012------
@@ -715,6 +879,10 @@ nr_of_species_m1 =  nr_of_species - 1
 #@         system_allocated = .true.
 #@     endif
 #@ !------ S. Matera 09/18/2012------
+#@     if(allocated(integ_events))then
+#@         print *,"kmos/base/allocate_system: Tried to allocate integ_events twice, please deallocate first"
+#@         system_allocated = .true.
+#@     endif
 #@   if(allocated(procstat))then
 #@     print *,"kmos/base/allocate_system: Tried to allocate procstat twice, please deallocate first"
 #@     system_allocated = .true.
@@ -747,6 +915,8 @@ nr_of_species_m1 =  nr_of_species - 1
 #@         allocate(integ_rates(nr_of_proc))
 #@         integ_rates = 0
 #@ !------ S. Matera 09/18/2012------
+#@         allocate(integ_events(nr_of_proc))
+#@         integ_events = 0
 #@     allocate(procstat(nr_of_proc))
 #@     procstat = 0
 #@
@@ -766,7 +936,7 @@ nr_of_species_m1 =  nr_of_species - 1
 #@   !****f* base/deallocate_system
 #@   ! FUNCTION
 #@   !    Deallocate all allocatable arrays: avail_sites, lattice, rates,
-#@   !    accum_rates, procstat.
+#@   !    accum_rates, integ_rates, integ_events, procstat.
 #@   !
 #@   ! ARGUMENTS
 #@   !
@@ -804,6 +974,11 @@ nr_of_species_m1 =  nr_of_species - 1
 #@         print *,"Warning: integ_rates was not allocated, tried to deallocate."
 #@     endif
 #@ !------ S. Matera 09/18/2012------
+#@     if(allocated(integ_events))then
+#@         deallocate(integ_events)
+#@     else
+#@         print *,"Warning: integ_events was not allocated, tried to deallocate."
+#@     endif
 #@   if(allocated(procstat))then
 #@     deallocate(procstat)
 #@   else
@@ -897,6 +1072,25 @@ nr_of_species_m1 =  nr_of_species - 1
 #@ end subroutine get_kmc_time_step
 #@
 #@
+#@ subroutine set_procstat(proc, new_procstat)
+#@     !****f* base/set_procstat
+#@     ! FUNCTION
+#@     !    Set process counter for process proc as integer.
+#@     !
+#@     ! ARGUMENTS
+#@     !
+#@     !    * ``proc`` integer representing the requested process.
+#@     !    * ``return_procstat`` writeable integer, where the process counter will be stored.
+#@     !******
+#@     !---------------I/O variables---------------
+#@     integer(kind=iint),intent(in) :: proc
+#@     integer(kind=ilong),intent(in) :: new_procstat
+#@
+#@     procstat(proc) = new_procstat
+#@
+#@ end subroutine set_procstat
+#@
+#@
 #@ subroutine get_procstat(proc, return_procstat)
 #@   !****f* base/get_procstat
 #@   ! FUNCTION
@@ -977,6 +1171,27 @@ nr_of_species_m1 =  nr_of_species - 1
 #@ end subroutine get_accum_rate
 #@
 #@ !------ S. Matera 09/18/2012------
+#@
+#@ subroutine set_integ_rate(proc_nr, integ_rate)
+#@     !****f* base/get_integ_rate
+#@     ! FUNCTION
+#@     !    Set integrated rate at a given process.
+#@     !
+#@     ! ARGUMENTS
+#@     !
+#@     !    * ``proc_nr`` integer representing the requested process.
+#@     !    * ``integ_rate`` real, with the rate to be set.
+#@     !******
+#@     !---------------I/O variables---------------
+#@     integer(kind=iint), intent(in) :: proc_nr
+#@     real(kind=rdouble), intent(in) :: integ_rate
+#@
+#@     integ_rates(proc_nr) = integ_rate
+#@
+#@ end subroutine set_integ_rate
+#@
+#@
+#@ !------ S. Matera 09/18/2012------
 #@ subroutine get_integ_rate(proc_nr, return_integ_rate)
 #@     !****f* base/get_integ_rate
 #@     ! FUNCTION
@@ -999,6 +1214,64 @@ nr_of_species_m1 =  nr_of_species - 1
 #@
 #@ end subroutine get_integ_rate
 #@ !------ S. Matera 09/18/2012------
+#@
+#@ subroutine get_integ_coverage(site, species, return_integ_coverage)
+#@     !****f* base/get_integ_coverage
+#@     ! FUNCTION
+#@     !    Return integrated coverage at a given site and species.
+#@     !
+#@     ! ARGUMENTS
+#@     !
+#@     !    * ``site`` integer representing the requested site.
+#@     !    * ``species`` integer representing the requested species.
+#@     !    * ``return_integ_coverage`` writeable real, where the requested integrated coverage will be stored.
+#@     !******
+#@     !---------------I/O variables---------------
+#@     integer(kind=iint), intent(in) :: site, species
+#@     real(kind=rdouble), intent(out) :: return_integ_coverage
+#@
+#@     return_integ_coverage = integ_coverage(site, species)
+#@
+#@ end subroutine get_integ_coverage
+#@
+#@
+#@ subroutine set_integ_event(proc_nr, integ_event)
+#@     !****f* base/set_integ_event
+#@     ! FUNCTION
+#@     !    Return integrated rate at a given process.
+#@     !
+#@     ! ARGUMENTS
+#@     !
+#@     !    * ``proc_nr`` integer representing the requested process.
+#@     !    * ``integ_event`` The new value for integ_event
+#@     !******
+#@     !---------------I/O variables---------------
+#@     integer(kind=iint), intent(in) :: proc_nr
+#@     integer(kind=ilong), intent(in) :: integ_event
+#@
+#@     integ_events(proc_nr) = integ_event
+#@
+#@ end subroutine set_integ_event
+#@
+#@
+#@ subroutine get_integ_event(proc_nr, return_integ_event)
+#@     !****f* base/get_integ_event
+#@     ! FUNCTION
+#@     !    Return integrated rate at a given process.
+#@     !
+#@     ! ARGUMENTS
+#@     !
+#@     !    * ``proc_nr`` integer representing the requested process.
+#@     !    * ``return_integ_event`` writeable real, where the requested integrated rate will be stored.
+#@     !******
+#@     !---------------I/O variables---------------
+#@     integer(kind=iint), intent(in) :: proc_nr
+#@     integer(kind=ilong), intent(out) :: return_integ_event
+#@
+#@     return_integ_event=integ_events(proc_nr)
+#@
+#@ end subroutine get_integ_event
+#@
 #@
 #@ subroutine get_rate(proc_nr, return_rate)
 #@   !****f* base/get_rate
@@ -1066,6 +1339,23 @@ nr_of_species_m1 =  nr_of_species - 1
 #@   return_volume = volume
 #@
 #@ end subroutine get_volume
+#@
+#@ subroutine set_kmc_step(new_kmc_step)
+#@     !****f* base/set_kmc_step
+#@     ! FUNCTION
+#@     !    Set the current kmc_step
+#@     !
+#@     ! ARGUMENTS
+#@     !
+#@     !    * ``kmc_step`` Readable integer
+#@     !******
+#@     !---------------I/O variables---------------
+#@     integer(kind=ilong), intent(in) :: new_kmc_step
+#@
+#@     kmc_step = new_kmc_step
+#@
+#@ end subroutine set_kmc_step
+#@
 #@
 #@ subroutine get_kmc_step(return_kmc_step)
 #@   !****f* base/get_kmc_step
