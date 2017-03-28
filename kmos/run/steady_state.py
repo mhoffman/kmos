@@ -238,7 +238,11 @@ def sample_steady_state(model, batch_size=1000000,
             continue
 
         for key, data_point in data.items():
-            hist.setdefault(key, []).append(data_point)
+            if 'default' in key:
+                hist.setdefault(key, []).append(full_data['procrates'][key])
+            else:
+                hist.setdefault(key, []).append(data_point)
+
             if tof_method == 'both':
                 hist_procrates.setdefault(key, []).append(full_data['procrates'][key])
 
