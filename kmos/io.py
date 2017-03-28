@@ -1733,8 +1733,9 @@ class ProcListWriter():
 
             if data.meta.debug > 0:
                 out.write(('print *,"PROCLIST/RUN_PROC_NR/NAME","%s"\n'
-                           'print *,"PROCLIST/RUN_PROC_NR/LSITE",lsite\n'
-                           'print *,"PROCLIST/RUN_PROC_NR/SITE",nr_site\n')
+                           'print *,"PROCLIST/RUN_PROC_NR/PROC",proc\n'
+                           'print *,"PROCLIST/RUN_PROC_NR/CELL",cell\n'
+                           'print *,"PROCLIST/RUN_PROC_NR/NR_CELL",nr_cell\n')
                            % process.name)
             out.write('        call run_proc_%s(cell)\n' % process.name)
 
