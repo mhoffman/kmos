@@ -428,6 +428,7 @@ def build(options):
     call.append('./f2py.builddir.tmp')
     call += src_files
 
+    print("F2PY CALL")
     print(call)
     from copy import deepcopy
     true_argv = deepcopy(sys.argv)  # save for later
