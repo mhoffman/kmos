@@ -97,6 +97,8 @@ class Project(object):
         self.add_output = lambda output: self.output_list.append(output)
         self.get_outputs = lambda: sorted(self.output_list,
                                           key=lambda x: x.name)
+        self.abbreviation_map = {}
+        self.fullform_map = {}
 
     def get_speciess(self, pattern=None):
         """Return list of species in Project.
@@ -558,6 +560,10 @@ class Project(object):
 
         with open('abbreviations_{self.meta.model_name}.dat'.format(**locals()), 'w') as outfile:
             outfile.write(pprint.pformat(stub_map))
+
+        self.abbreviation_map = abbreviation_map
+        self.fullform_map = fullform_map
+
 
     def save(self, filename=None, validate=True):
         if filename is None:

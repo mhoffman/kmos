@@ -767,16 +767,16 @@ else:
     # skip over those that lead directly to empty states
     default_species = data.species_list.default_species
     #@        ! {nr_default_species} = default_species = {default_species}
-    process_names = sorted([process.name for process in data.process_list])
+    process_names = sorted([data.abbreviation_map.get(process.name, process.name)  for process in data.process_list])
     default_species_creating_processes = {}
     removing_species = {}
     for process in data.process_list:
         n = [x.species for x in process.action_list].count(default_species) - [x.species for x in process.condition_list].count(default_species)
-        default_species_creating_processes.setdefault(n, []).append(process.name)
+        default_species_creating_processes.setdefault(n, []).append(data.abbreviation_map.get(process.name, process.name))
         for species_name in active_species:
             n_change = [x.species for x in process.action_list].count(species_name) - [x.species for x in process.condition_list].count(species_name)
             if n_change < 0:
-                removing_species.setdefault(process.name, {})[species_name] = - n_change
+                removing_species.setdefault(data.abbreviation_map.get(process.name, process.name), {})[species_name] = - n_change
 
     ##@     ! removing_species = {removing_species}
     ##@     ! {default_species_creating_processes}
@@ -815,22 +815,23 @@ else:
                 #@        )then
                 #@            ! skip {process}
     #one_particle_processes = [process for process in data.process_list if '1p' in process.name and not 'default' in process.name]
-    one_particle_processes = [process for process in data.process_list if '1p' in process.name]
+    one_particle_processes = [process for process in data.process_list if '1p' in data.abbreviation_map.get(process.name, process.name)]
     for one_particle_process in one_particle_processes:
-        process_i = process_names.index(one_particle_process.name) + 1
+        process_i = process_names.index(data.abbreviation_map.get(one_particle_process.name, one_particle_process.name)) + 1
+        one_particle_process_name  = data.abbreviation_map.get(one_particle_process.name, one_particle_process.name)
         #@        else if(i=={process_i})then
         #@            if(default_coverage==(active_volume - 1))then
-        #@                ! allowing 1p process {one_particle_process.name} for low coverage
-        ##@                accum_rates(i) = accum_rates(i) + nr_of_sites(i)*rates(i)
+        #@                ! allowing 1p process {one_particle_process_name} for low coverage
         #@                rates_matrix(i,volume+1) = 0.0
         #@                do j = 1, nr_of_sites(i)
         #@                   rates_matrix(i,volume+1) = rates_matrix(i,volume+1) + rates_matrix(i,j)
         #@                enddo
+        #@                accum_rates(i) = accum_rates(i) + rates_matrix(i,volume+1)
         ##DEBUGGING
-        ##@                print *, "{one_particle_process.name}", nr_of_sites(i), rates(i)
+        ##@                print *, "{one_particle_process_name}", nr_of_sites(i), rates(i)
         #@            endif
         #
-        one_particle_default = one_particle_process.name + '_default'
+        one_particle_default = one_particle_process_name + '_default'
         #process_i_default = process_names.index(one_particle_default) + 1
         ##@        else if(i=={process_i_default})then
         ##@            if(default_coverage==(active_volume - 1))then
@@ -840,33 +841,33 @@ else:
         ##@                accum_rates(i) = accum_rates(i) + nr_of_sites(i)*rates(i)
         ##@            endif
 
-        one_particle_normal = one_particle_process.name.split('_1p_')[0]
+        one_particle_normal = one_particle_process_name.split('_1p_')[0]
         process_i_normal = process_names.index(one_particle_normal) + 1
         #@        else if(i=={process_i_normal})then
         #@            if(default_coverage/=(active_volume - 1))then
         #@                ! allowing 1p process {one_particle_normal} for high coverage or 0
         ##DEBUGGING
         ##@                print *, "{one_particle_normal}", nr_of_sites(i), rates(i)
-        ##@                accum_rates(i) = accum_rates(i) + nr_of_sites(i)*rates(i)
         #@                rates_matrix(i,volume+1) = 0.0
         #@                do j = 1, nr_of_sites(i)
         #@                   rates_matrix(i,volume+1) = rates_matrix(i,volume+1) + rates_matrix(i,j)
         #@                enddo
-        #@                accum_rates(i) = rates_matrix(i,volume+1)
+        #@                accum_rates(i) = accum_rates(i) + rates_matrix(i,volume+1)
         #@            endif
-    mft_processes = [process for process in data.process_list if 'mft' in process.name.lower()]
+    mft_processes = [process for process in data.process_list if 'mft' in data.abbreviation_map.get(process.name, process.name).lower()]
     for mft_process in mft_processes:
-        process_i = process_names.index(mft_process.name) + 1
+        process_i = process_names.index(data.abbreviation_map.get(mft_process.name, mft_process.name)) + 1
+        mft_process_name = data.abbreviation_map.get(mft_process.name, mft_process.name)
         #@        else if((i=={process_i}).and.(default_coverage==(active_volume - 1)))then
-        #@              ! skipping MFT process {mft_process.name} for low coverage
+        #@              ! skipping MFT process {mft_process_name} for low coverage
         ##DEBUGGING
-        ##@              print *, "skipping {mft_process.name}", nr_of_sites(i), rates(i)
+        ##@              print *, "skipping {mft_process_name}", nr_of_sites(i), rates(i)
     #@        else
     #@            rates_matrix(i,volume+1) = 0.0
     #@            do j = 1, nr_of_sites(i)
     #@               rates_matrix(i,volume+1) = rates_matrix(i,volume+1) + rates_matrix(i,j)
     #@            enddo
-    #@            accum_rates(i) = rates_matrix(i,volume+1)
+    #@            accum_rates(i) = accum_rates(i) + rates_matrix(i,volume+1)
     #@        endif
     #@        if (i == nr_of_proc)  exit
     #@    enddo
