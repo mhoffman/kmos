@@ -17,6 +17,7 @@ gpl = self._gpl_message()
 #@ use base, only: &
 #@     assertion_fail, &
 #@     base_deallocate_system => deallocate_system, &
+#@     coverage, &
 #@     get_kmc_step, &
 #@     get_kmc_time, &
 #@     get_kmc_time_step, &
@@ -37,6 +38,7 @@ if options.backend in ['otf',]:
 #@     save_system, &
 #@     assertion_fail, &
 #@     set_rate_const, &
+#@     null_species, &
 #@     update_accum_rate, &
 #@     update_clocks
 #@
@@ -61,6 +63,9 @@ for i, layer in enumerate(data.layer_list):
 #@ real(kind=rsingle), dimension(3,3), public :: unit_cell_size = 0.
 site_params = self._get_site_params()
 len_site_params = len(site_params)
+len_site_params_m1 = len_site_params - 1
+nr_of_species = len(data.species_list)
+nr_of_species_m1 =  nr_of_species - 1
 #@ real(kind=rsingle), dimension({len_site_params}, 3), public :: site_positions
 for i, (site, layer, _) in enumerate(site_params):
     ip1 = i + 1
@@ -395,9 +400,25 @@ if data.meta.debug > 1:
     #@    print *,"LATTICE/REPLACE_SPECIES/OLD_SPECIES ",old_species
     #@    print *,"LATTICE/REPLACE_SPECIES/NEW_SPECIES ",new_species
 #@     call base_replace_species(nr, old_species, new_species)
+#@     if(old_species.ne.null_species)then
+#@         coverage(site(4), old_species) = coverage(site(4), old_species) - 1
+#@     endif
+#@
+#@     if(new_species.ne.null_species)then
+#@         coverage(site(4), new_species) = coverage(site(4), new_species) + 1
+#@     endif
 #@
 #@ end subroutine replace_species
 #@
+
+#@ subroutine get_coverage(site, species, out_coverage)
+#@
+#@     integer(kind=iint), intent(in) :: site, species
+#@     integer(kind=iint), intent(out) :: out_coverage
+#@
+#@     out_coverage = coverage(site, species)
+#@
+#@ end subroutine get_coverage
 
 if data.meta.debug > 0:
     #@ function get_species(site)
