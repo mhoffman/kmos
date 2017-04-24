@@ -5,6 +5,15 @@ import os.path, shutil
 import filecmp
 from glob import glob
 #import gazpacho.loader.loader
+import difflib
+
+def get_diff(file1, file2):
+    return '\n'.join(list(
+            difflib.unified_diff(
+                open(file1).readlines(),
+                open(file2).readlines()
+                )
+            ))
 
 def test_import_export():
 
@@ -109,6 +118,13 @@ def test_import_export_pdopd_local_smart():
     kmos.io.export_source(pt, TEST_DIR, code_generator='local_smart')
     for filename in ['base', 'lattice', 'proclist']:
         print(filename)
+        diff = get_diff(
+                "{REFERENCE_DIR}/{filename}.f90".format(**locals()),
+                "{TEST_DIR}/{filename}.f90".format(**locals())
+                )
+        if diff:
+            print("DIFF BETWEEN {REFERENCE_DIR}/{filename}.f90 and {TEST_DIR}/{filename}.f90".format(**locals()))
+            print(diff)
         assert filecmp.cmp(os.path.join(REFERENCE_DIR, '%s.f90' % filename),
                           os.path.join(TEST_DIR, '%s.f90' % filename)),\
              '%s changed.' % filename
