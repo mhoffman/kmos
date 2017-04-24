@@ -125,6 +125,8 @@ def test_import_export_pdopd_local_smart():
         if diff:
             print("DIFF BETWEEN {REFERENCE_DIR}/{filename}.f90 and {TEST_DIR}/{filename}.f90".format(**locals()))
             print(diff)
+            print("PROJECT")
+            print(pt)
         assert filecmp.cmp(os.path.join(REFERENCE_DIR, '%s.f90' % filename),
                           os.path.join(TEST_DIR, '%s.f90' % filename)),\
              '%s changed.' % filename
@@ -154,6 +156,15 @@ def test_import_export_pdopd_lat_int():
         + [os.path.basename(os.path.splitext(x)[0]) for x in glob(os.path.join(TEST_DIR, 'nli*.f90'))]:
 
         print(filename)
+        diff = get_diff(
+                "{REFERENCE_DIR}/{filename}.f90".format(**locals()),
+                "{TEST_DIR}/{filename}.f90".format(**locals())
+                )
+        if diff:
+            print("DIFF BETWEEN {REFERENCE_DIR}/{filename}.f90 and {TEST_DIR}/{filename}.f90".format(**locals()))
+            print(diff)
+            print("PROJECT")
+            print(pt)
         assert filecmp.cmp(os.path.join(REFERENCE_DIR, '%s.f90' % filename),
                           os.path.join(TEST_DIR, '%s.f90' % filename)),\
              '%s changed.' % filename
