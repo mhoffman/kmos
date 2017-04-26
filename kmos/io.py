@@ -34,6 +34,7 @@ from kmos.types import ConditionAction, SingleLatIntProcess, Coord
 from kmos.config import APP_ABS_PATH
 from kmos.types import cmp_coords
 from kmos.utils import evaluate_template
+import collections
 
 
 def _casetree_dict(dictionary, indent='', out=None):
@@ -150,7 +151,7 @@ class ProcListWriter():
         with open(os.path.join(self.dir, '{target}.f90'.format(**locals())), 'w') as out:
             out.write(evaluate_template(template,  self=self, data=self.data, options=options))
 
-    def write_proclist(self, smart=True, code_generator='local_smart'):
+    def write_proclist(self, smart=True, code_generator='local_smart', accelerated=False):
         """Write the proclist.f90 module, i.e. the rules which make up
         the kMC process list.
         """
@@ -161,7 +162,7 @@ class ProcListWriter():
         out = open('%s/proclist.f90' % self.dir, 'w')
 
         if code_generator == 'local_smart':
-            self.write_proclist_generic_part(data, out, code_generator=code_generator)
+            self.write_proclist_generic_part(data, out, code_generator=code_generator, accelerated=accelerated)
             self.write_proclist_run_proc_nr_smart(data, out)
             self.write_proclist_put_take(data, out)
             self.write_proclist_touchup(data, out)
@@ -177,7 +178,7 @@ class ProcListWriter():
                                           module_name='proclist_constants',
                                           )
             constants_out.close()
-            self.write_proclist_lat_int(data, out)
+            self.write_proclist_lat_int(data, out, accelerated=accelerated)
             self.write_proclist_end(out)
 
         elif code_generator == 'otf':
@@ -280,12 +281,19 @@ class ProcListWriter():
     def write_proclist_constants(self, data, out,
                                  code_generator='local_smart',
                                  close_module=False,
-                                 module_name='proclist'):
+                                 module_name='proclist',
+                                 accelerated=False):
 
-        with open(os.path.join(os.path.dirname(__file__),
-                               'fortran_src',
-                               'proclist_constants.mpy')) as infile:
-            template = infile.read()
+        if accelerated:
+            with open(os.path.join(os.path.dirname(__file__),
+                                'fortran_src',
+                                'proclist_constants_acc.mpy')) as infile:
+                template = infile.read()
+        else:
+            with open(os.path.join(os.path.dirname(__file__),
+                                'fortran_src',
+                                'proclist_constants.mpy')) as infile:
+                template = infile.read()
 
         out.write(evaluate_template(template,
                                     self=self,
@@ -295,18 +303,24 @@ class ProcListWriter():
                                     module_name=module_name))
 
 
-    def write_proclist_generic_part(self, data, out, code_generator='local_smart'):
-        self.write_proclist_constants(data, out, close_module=False)
+    def write_proclist_generic_part(self, data, out, code_generator='local_smart', accelerated=False):
+        self.write_proclist_constants(data, out, close_module=False, accelerated=accelerated)
         out.write('\n\ncontains\n\n')
-        self.write_proclist_generic_subroutines(data, out, code_generator=code_generator)
+        self.write_proclist_generic_subroutines(data, out, code_generator=code_generator, accelerated=accelerated)
 
-    def write_proclist_generic_subroutines(self, data, out, code_generator='local_smart'):
+    def write_proclist_generic_subroutines(self, data, out, code_generator='local_smart', accelerated=False):
         from kmos.utils import evaluate_template
 
-        with open(os.path.join(os.path.dirname(__file__),
-                               'fortran_src',
-                               'proclist_generic_subroutines.mpy')) as infile:
-            template = infile.read()
+        if accelerated:
+            with open(os.path.join(os.path.dirname(__file__),
+                                'fortran_src',
+                                'proclist_generic_subroutines_acc.mpy')) as infile:
+                template = infile.read()
+        else:
+            with open(os.path.join(os.path.dirname(__file__),
+                                'fortran_src',
+                                'proclist_generic_subroutines.mpy')) as infile:
+                template = infile.read()
 
         out.write(evaluate_template(template,
                                     self=self,
@@ -1302,7 +1316,7 @@ class ProcListWriter():
 
         return lat_int_groups
 
-    def write_proclist_lat_int(self, data, out, debug=False):
+    def write_proclist_lat_int(self, data, out, debug=False, accelerated=False):
         """
         This a dumber version f the run_proc_nr routine. Though
         the source code it generates might be quite a bit smaller.
@@ -1331,8 +1345,20 @@ class ProcListWriter():
             out.write('    null_species, &\n')
         else:
             out.write('    set_null_species, &\n')
-        out.write('    increment_procstat\n\n'
-                  'use lattice, only: &\n')
+        if not accelerated:
+            out.write('    increment_procstat\n\n')
+        else:
+            out.write(('    increment_procstat, &\n'
+                      '    update_integ_rate_sb, &\n'
+                      '    update_eq_proc, &\n'
+                      '    check_proc_eq, &\n'
+                      '    unscale_reactions, &\n'
+                      '    scale_reactions, &\n'
+                      '    update_sum_sf, &\n'
+                      '    get_save_limit, &\n'
+                      '    save_execution, &\n'
+                      '    reset_saved_execution_data\n\n'))
+        out.write('use lattice, only: &\n')
         site_params = []
         for layer in data.layer_list:
             out.write('    %s, &\n' % layer.name)
@@ -1370,7 +1396,10 @@ class ProcListWriter():
         out.write('integer(kind=iint), public, dimension(:), allocatable :: seed_arr ! random seed\n')
         out.write('\n\ninteger(kind=iint), parameter, public :: nr_of_proc = %s\n'\
             % (len(data.process_list)))
-
+        if accelerated:
+            out.write('\ninteger(kind=iint), public :: counter_sp\n'
+                      'integer(kind=iint), public :: counter_ini\n'
+                      'integer(kind=ishort), public :: debug\n')
         code_generator = 'lat_int'
         if code_generator == 'lat_int':
             out.write('\ncharacter(len=%s), parameter, public :: backend = "%s"\n'
@@ -1384,7 +1413,7 @@ class ProcListWriter():
         # write out the process list
         self.write_proclist_lat_int_run_proc_nr(data, lat_int_groups, progress_bar, out)
         self.write_proclist_lat_int_touchup(lat_int_groups, out)
-        self.write_proclist_generic_subroutines(data, out, code_generator='lat_int')
+        self.write_proclist_generic_subroutines(data, out, code_generator='lat_int', accelerated=accelerated)
         self.write_proclist_lat_int_run_proc(data, lat_int_groups, progress_bar)
         self.write_proclist_lat_int_nli_casetree(data, lat_int_groups, progress_bar)
 
@@ -2876,7 +2905,7 @@ class ProcListWriter():
             # the RECURSION II
             self._write_optimal_iftree_otf(items, indent, out)
 
-    def write_settings(self, code_generator='lat_int'):
+    def write_settings(self, code_generator='lat_int', accelerated=False):
         """Write the kmc_settings.py. This contains all parameters, which
         can be changed on the fly and without recompilation of the Fortran 90
         modules.
@@ -2888,6 +2917,12 @@ class ProcListWriter():
         out = open(os.path.join(self.dir, 'kmc_settings.py'), 'w')
         out.write('model_name = \'%s\'\n' % self.data.meta.model_name)
         out.write('simulation_size = 20\n')
+        if accelerated:
+            out.write('buffer_parameter = 1000\n')
+            out.write('threshold_parameter = 0.2\n')
+            out.write('sampling_steps = 20\n')
+            out.write('execution_steps = 200\n')
+            out.write('save_limit = 1000\n')
         out.write('random_seed = 1\n\n')
 
         # stub for setup function
@@ -2913,6 +2948,36 @@ class ProcListWriter():
                                           parameter.max,
                                           parameter.scale))
         out.write('    }\n\n')
+
+        #In acceleration scheme, sort processes so that they occur pair-wise
+        #This requires that all processes have been defined with actions/
+        #conditions that match pair-wise. If that is not the case, an error 
+        #will be raised.
+        if accelerated:
+            #write proc_pair_indices
+            compare = lambda x, y: collections.Counter(x) == collections.Counter(y)
+            assert (len(data.process_list) % 2 == 0), 'the total number of processes must be an even number'
+            proc_pair_indices = [0]*len(data.process_list)
+            k=1
+            for n,process1 in enumerate(data.process_list):
+                for m,process2 in enumerate(data.process_list):
+                    if n < m:
+                        if compare(process1.condition_list, process2.action_list) and compare(process2.condition_list, process1.action_list):
+                            proc_pair_indices[n] = k
+                            proc_pair_indices[m] = -k
+                            k += 1
+            assert (k - 1 == len(data.process_list)/2), 'not all processes could be paired'
+            out.write('proc_pair_indices = %s\n' %proc_pair_indices)
+            out.write('\n')
+            #write is_diff_proc
+            is_diff_proc = []
+            for process in data.process_list:
+                if 'diff' in process.name:
+                    is_diff_proc.append(True)
+                else:
+                    is_diff_proc.append(False)
+            out.write('is_diff_proc = %s\n' %is_diff_proc)
+            out.write('\n')
 
         # Rate constants
         out.write('rate_constants = {\n')
@@ -3018,7 +3083,7 @@ class ProcListWriter():
         return out
 
 
-def export_source(project_tree, export_dir=None, code_generator=None, options=None, ):
+def export_source(project_tree, export_dir=None, code_generator=None, options=None, accelerated=False):
     """Export a kmos project into Fortran 90 code that can be readily
     compiled using f2py.  The model contained in project_tree
     will be stored under the directory export_dir. export_dir will
@@ -3052,15 +3117,29 @@ def export_source(project_tree, export_dir=None, code_generator=None, options=No
     # copy static files
     # each file is tuple (source, target)
     if code_generator == 'local_smart':
-        cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
-                    (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
-                    (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
-                    ]
+        if not accelerated:
+            cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
+                        (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
+                        (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
+                        ]
+        else:
+            cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
+                        (os.path.join('fortran_src', 'base_acc.f90'), 'base.f90'),
+                        (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
+                        (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
+                        ]
     elif code_generator == 'lat_int':
-        cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
-                    (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
-                    (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
-                    ]
+        if not accelerated:
+            cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
+                        (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
+                        (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
+                        ]
+        else:
+            cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
+                        (os.path.join('fortran_src', 'base_lat_int_acc.f90'), 'base.f90'),
+                        (os.path.join('fortran_src', 'kind_values.f90'), 'kind_values.f90'),
+                        (os.path.join('fortran_src', 'main.f90'), 'main.f90'),
+                        ]
     elif code_generator == 'otf':
         cp_files = [(os.path.join('fortran_src', 'assert.ppc'), 'assert.ppc'),
                     (os.path.join('fortran_src', 'base_otf.f90'), 'base.f90'),
@@ -3084,18 +3163,21 @@ def export_source(project_tree, export_dir=None, code_generator=None, options=No
     # SECOND
     # produce those source files that are written on the fly
     writer = ProcListWriter(project_tree, export_dir)
-    if code_generator == 'local_smart':
+    if not accelerated and code_generator == 'local_smart':
         writer.write_template(filename='base', options=options)
-    elif code_generator == 'lat_int':
+    elif not accelerated and code_generator == 'lat_int':
         writer.write_template(filename='base_lat_int', target='base', options=options)
      
     if options is not None and options.acf:
-        writer.write_template(filename='base_acf', options=options)      
-    writer.write_template(filename='lattice', options=options)
-    writer.write_proclist(code_generator=code_generator)
+        writer.write_template(filename='base_acf', options=options)
+    if not accelerated:
+        writer.write_template(filename='lattice', options=options)
+    else:
+        writer.write_template(filename='lattice_acc', target='lattice', options=options)
+    writer.write_proclist(code_generator=code_generator, accelerated=accelerated)
     if options is not None and options.acf:
        writer.write_proclist_acf(code_generator=code_generator) 
-    writer.write_settings(code_generator=code_generator)
+    writer.write_settings(code_generator=code_generator, accelerated=accelerated)
     project_tree.validate_model()
     return True
 

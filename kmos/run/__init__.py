@@ -148,7 +148,12 @@ class KMC_Model(Process):
                        autosend=True,
                        steps_per_frame=50000,
                        random_seed=None,
-                       cache_file=None):
+                       cache_file=None,
+                       buffer_parameter=None,
+                       threshold_parameter=None,
+                       sampling_steps=None,
+                       execution_steps=None,
+                       save_limit=None):
 
         # initialize multiprocessing.Process hooks
         super(KMC_Model, self).__init__()
@@ -168,6 +173,33 @@ class KMC_Model(Process):
             self.rate_constants = Model_Rate_Constants()
         else:
             self.rate_constants = Model_Rate_Constants_OTF()
+
+        # check if the model has been compiled using the temporal acceleration
+        #scheme
+        try:
+            settings.buffer_parameter
+        except:
+            self.can_accelerate = False
+        else:
+            self.can_accelerate = True
+
+        # initialize parameters for the temporal acceleration scheme
+        if self.can_accelerate:
+            if buffer_parameter is not None:
+                settings.buffer_parameter = buffer_parameter
+                print 'buffer_parameter set to: ',settings.buffer_parameter
+            if threshold_parameter is not None:
+                settings.threshold_parameter = threshold_parameter
+                print 'threshold_parameter set to: ',settings.threshold_parameter
+            if sampling_steps is not None:
+                settings.sampling_steps = sampling_steps
+                print 'sampling_steps set to: ',settings.sampling_steps
+            if execution_steps is not None:
+                settings.execution_steps = execution_steps
+                print 'execution_steps set to: ',settings.execution_steps
+            if save_limit is not None:
+                settings.save_limit = save_limit
+                print 'save_limit set to: ',settings.save_limit
 
         if random_seed is not None:
             settings.random_seed = random_seed
@@ -228,18 +260,39 @@ class KMC_Model(Process):
     def reset(self):
         self.size = np.array(self.size)
         try:
-            proclist.init(self.size,
-                self.system_name,
-                lattice.default_layer,
-                self.settings.random_seed,
-                not self.banner)
+            if self.can_accelerate:
+                proclist.init(self.size,
+                    self.system_name,
+                    lattice.default_layer,
+                    self.settings.random_seed,
+                    self.settings.buffer_parameter,
+                    self.settings.threshold_parameter,
+                    self.settings.execution_steps,
+                    self.settings.save_limit,
+                    not self.banner)
+            else:
+                proclist.init(self.size,
+                    self.system_name,
+                    lattice.default_layer,
+                    self.settings.random_seed,
+                    not self.banner)
         except:
             # fallback if API
             # does not support random seed.
-            proclist.init(self.size,
-                self.system_name,
-                lattice.default_layer,
-                not self.banner)
+            if self.can_accelerate:
+                proclist.init(self.size,
+                    self.system_name,
+                    lattice.default_layer,
+                    self.settings.buffer_parameter,
+                    self.settings.threshold_parameter,
+                    self.settings.execution_steps,
+                    self.settings.save_limit,
+                    not self.banner)
+            else:
+                proclist.init(self.size,
+                    self.system_name,
+                    lattice.default_layer,
+                    not self.banner)
         self.cell_size = np.dot(np.diag(lattice.system_size), lattice.unit_cell_size)
 
         # prepare structures for TOF evaluation
@@ -254,6 +307,8 @@ class KMC_Model(Process):
         self.procstat = np.zeros((proclist.nr_of_proc), dtype=np.int64)
          # prepare integ_rates (S.Matera 09/25/2012)
         self.integ_rates = np.zeros((proclist.nr_of_proc, ))
+        # prepare integ_counter
+        self.integ_counter = np.zeros((proclist.nr_of_proc, ))
         self.time = 0.
         self.steps = 0
 
@@ -292,12 +347,35 @@ class KMC_Model(Process):
         else:
             self.lattice_representation = Atoms()
 
-        set_rate_constants(settings.parameters, self.print_rates)
+        set_rate_constants(settings.parameters, self.print_rates, self.can_accelerate)
 
         self.base.update_accum_rate()
         # S. matera 09/25/2012
         if hasattr(self.base, 'update_integ_rate'):
             self.base.update_integ_rate()
+        if hasattr(self.base, 'update_integ_counter'):
+            self.base.update_integ_counter()
+
+        if self.can_accelerate:
+            #initialize base.proc_pair_indices
+            ppi = settings.proc_pair_indices
+            for proc in range(proclist.nr_of_proc):
+                self.base.initialize_proc_pair_index(proc+1,ppi[proc])
+            #initialize base.reverse_indices
+            for proc in range(proclist.nr_of_proc):
+                f_index = ppi[proc]
+                r_index = ppi.index(-f_index)
+                self.base.initialize_reverse_index(proc+1,r_index+1)
+            #initialize base.is_diff_proc
+            diff = settings.is_diff_proc
+            for proc in range(proclist.nr_of_proc):
+                self.base.initialize_is_diff_proc(proc+1,diff[proc])
+            #initialize base.pair_is_eq: If proc pair is a diffusion
+            #process it should be set as equilibrated.
+            for n,ppi in enumerate(settings.proc_pair_indices):
+                if ppi > 0:
+                    is_diff = diff[n]
+                    self.base.initialize_pair_is_eq(ppi,is_diff)
 
         # # for otf backend only
         # print('kmos.run : Updating proclist_pars!')
@@ -388,6 +466,213 @@ class KMC_Model(Process):
         if base_acf is not None :
             base_acf.deallocate_acf()
 
+    def set_buffer_parameter(self, value=1000):
+        """
+        :param value: The value of the buffer parameter
+        determines how many times faster equilibrated reaction 
+        steps will be than the non-equilibrated steps after
+        scaling.
+        It could also be called the target timescale disparity.
+        (Default: 1000)
+        :type value: int > 1
+        """
+        assert (self.can_accelerate), 'This model has not been compiled using the acceleration flag -t'
+        self.settings.buffer_parameter = value
+        self.base.set_buffer_parameter(value)
+
+    def get_buffer_parameter(self):
+        """
+        :return value: See set function.
+        """
+        assert (self.can_accelerate), 'This model has not been compiled using the acceleration flag -t'
+        return self.base.get_buffer_parameter()
+
+    def set_threshold_parameter(self, value=0.2):
+        """
+        :param value: A pair of processes are flagged as
+        equilibrated if within the last `execution_steps` 
+        the absolute value of the number of forward minus
+        reverse executions divided by `execution_steps` is
+        less than the threshold parameter.
+        (Default: 0.2)
+        :type value: float > 0
+        """
+        assert (self.can_accelerate), 'This model has not been compiled using the acceleration flag -t'
+        self.settings.threshold_parameter = value
+        self.base.set_threshold_parameter(value)
+
+    def get_threshold_parameter(self):
+        """
+        :return value: See set function.
+        """
+        assert (self.can_accelerate), 'This model has not been compiled using the acceleration flag -t'
+        return self.base.get_threshold_parameter()
+
+    def set_sampling_steps(self, value=1000):
+        """
+        :param value: The number of steps to sample 
+        before scaling the rate constants of equilibrated
+        processes.
+        Note that everytime a non-equilibrated process is
+        executed the counter of sampling steps is reset to 0.
+        (Default: 1000)
+        :type value: int > 1
+        """
+        assert (self.can_accelerate), 'This model has not been compiled using the acceleration flag -t'
+        self.settings.sampling_steps = value
+
+    def get_sampling_steps(self):
+        """
+        :return value: See set function.
+        """
+        assert (self.can_accelerate), 'This model has not been compiled using the acceleration flag -t'
+        return self.settings.sampling_steps
+
+    def set_execution_steps(self, value=200):
+        """
+        :param value: The number of steps to sample during
+        the full simulation period before assessing the
+        equilibrium of a process. See also `threshold_parameter`.
+        This is also the number of steps of either the forward
+        or the reverse reaction that must have been executed
+        within the current superbasin in order for the scaling 
+        of the rate constant to be carried out.
+        Note that changing this parameter will lead to the model
+        being reset.
+        (Default: 200)
+        :type value: int > 1
+        """
+        assert (self.can_accelerate), 'This model has not been compiled using the acceleration flag -t'
+        self.settings.execution_steps = value
+        self.deallocate()
+        self.reset()
+
+    def get_execution_steps(self):
+        """
+        :return value: See set function.
+        """
+        assert (self.can_accelerate), 'This model has not been compiled using the acceleration flag -t'
+        return self.base.get_execution_steps()
+
+    def set_save_limit(self, value=1000):
+        """
+        :param value: The number of executions following a target
+        execution to save.
+        Note that changing this parameter will lead to the model
+        being reset.
+        (Default: 1000)
+        :type value: int > 1
+        """
+        assert (self.can_accelerate), 'This model has not been compiled using the acceleration flag -t'
+        self.settings.save_limit = value
+        self.deallocate()
+        self.reset()
+
+    def get_save_limit(self):
+        """
+        :return value: See set function.
+        """
+        assert (self.can_accelerate), 'This model has not been compiled using the acceleration flag -t'
+        return self.base.get_save_limit()
+
+    def print_scaling_factors(self):
+        """
+        Prints the names of the forward and reverse process in each pair
+        along with the scaling factor for that pair.
+        """
+        assert (self.can_accelerate), 'This model has not been compiled using the acceleration flag -t'
+        for m,i in enumerate(settings.proc_pair_indices):
+            if i > 0:
+                for n,j in enumerate(settings.proc_pair_indices):
+                    if i == -j:
+                        f = self.base.get_scaling_factor(i)
+                        f_name = sorted(self.settings.rate_constants.keys())[m]
+                        r_name = sorted(self.settings.rate_constants.keys())[n]
+                        print('%s / %s: %.4e' % (f_name, r_name, f))
+
+    def print_scaling_stats(self):
+        """Print the average used and last set (=0 if never set) value of the 
+        scaling factor for each process pair in the temporal acceleration 
+        scheme.
+        """
+        assert (self.can_accelerate), 'This model has not been compiled using the acceleration flag -t'
+        for m,i in enumerate(settings.proc_pair_indices):
+            if i > 0:
+                for n,j in enumerate(settings.proc_pair_indices):
+                    if i == -j:
+                        f_ave = self.base.get_ave_scaling_factor(i)
+                        f_last = self.base.get_last_set_scaling_factor(i)
+                        f_name = sorted(self.settings.rate_constants.keys())[m]
+                        r_name = sorted(self.settings.rate_constants.keys())[n]
+                        print('%s / %s: %.4e, %.4e' % (f_name, r_name, f_ave, f_last))
+
+    def get_scaling_stats(self):
+        """Returns the names of the process pairs that the scaling factors refer to, the
+        average used value of the scaling factor, and the last set (=0 if never set) 
+        value of the scaling factor for each process pair in the temporal acceleration 
+        scheme.
+        """
+        assert (self.can_accelerate), 'This model has not been compiled using the acceleration flag -t'
+        pair_names = []
+        ave_sf = []
+        last_sf = []
+        for m,i in enumerate(settings.proc_pair_indices):
+            if i > 0:
+                for n,j in enumerate(settings.proc_pair_indices):
+                    if i == -j:
+                        f_ave = self.base.get_ave_scaling_factor(i)
+                        ave_sf.append(f_ave)
+                        f_last = self.base.get_last_set_scaling_factor(i)
+                        last_sf.append(f_last)
+                        f_name = sorted(self.settings.rate_constants.keys())[m]
+                        r_name = sorted(self.settings.rate_constants.keys())[n]
+                        pair_names.append([f_name,r_name])
+        return pair_names, ave_sf, last_sf
+
+    def print_proc_pair_eq(self):
+        """Prints the names of the forward and reverse process in each pair
+        along with a logical for the pair that is True if the process pair 
+        is equilibrated and False if the process pair is non-equilibrated.
+        """
+        assert (self.can_accelerate), 'This model has not been compiled using the acceleration flag -t'
+        for m,i in enumerate(settings.proc_pair_indices):
+            if i > 0:
+                for n,j in enumerate(settings.proc_pair_indices):
+                    if i == -j:
+                        is_eq = self.base.check_proc_eq(m+1)
+                        f_name = sorted(self.settings.rate_constants.keys())[m]
+                        r_name = sorted(self.settings.rate_constants.keys())[n]
+                        print('%s / %s: %s' % (f_name, r_name, is_eq))
+
+    def get_saved_executions(self):
+        """Returns a list with names and scaling factors of the processes
+        executed after the target process in order of execution.
+        """
+        assert (self.can_accelerate), 'This model has not been compiled using the acceleration flag -t'
+        execution_list = []
+        for i in range(self.settings.save_limit):
+            proc = self.base.get_saved_execution(i+1)
+            if proc != 0:
+                proc_name = sorted(self.settings.rate_constants.keys())[proc-1]
+            else:
+                proc_name = ''
+            sf = self.base.get_saved_scaling_factor(i+1)
+            execution_list.append([proc_name,sf])
+        return execution_list
+
+    def set_debug_level(self, value=0):
+        """
+        Set the debug level in the acceleration scheme. If a value larger than 0 is set, 
+        certain variables in base.f90 will be printed. For a value of 1 variables will 
+        be printed every time reactions are scaled or unscaled. For a value of 2 
+        variables will be printed for every accelerated kmc step.
+        Possible values: 0, 1, 2
+        """
+        assert (self.can_accelerate), 'This model has not been compiled using the acceleration flag -t'
+        assert (value in [0,1,2,3]), 'Only acceptable values are 0, 1, 2, 3'
+        self.base.set_debug_level(value)
+        proclist.set_debug_level(value)
+
     def do_steps(self, n=10000, progress=False):
         """Propagate the model `n` steps.
 
@@ -405,6 +690,27 @@ class KMC_Model(Process):
                 proclist.do_kmc_steps(n/100)
                 progress_bar.render(i+1)
             progress_bar.clear()
+
+    def do_acc_steps(self, n=10000, stats=True, save_exe=False, save_proc=0):
+        """Propagate the model `n` steps using the temporal
+        acceleration scheme.
+
+        :param n: Number of steps to run (Default: 10000)
+        :type n: int
+
+        :param stats: Calculate statistics for the scaling factors
+        :type stats: logical
+
+        :param save_exe: Track 'save_limit' number of  executions following the execution of the
+        :target process 'save_proc'
+        :type save_exe: logical
+
+        :param save_proc: Process to be tracked
+        :type save_proc: integer
+
+        """
+        assert (self.can_accelerate), 'This model has not been compiled using the acceleration flag -t'
+        proclist.do_acc_kmc_steps(n, self.settings.sampling_steps, stats, save_exe, save_proc)
 
     def run(self):
         """Runs the model indefinitely. To control the
@@ -466,7 +772,7 @@ class KMC_Model(Process):
                 while not self.parameter_queue.empty():
                     parameters = self.parameter_queue.get()
                     settings.parameters.update(parameters)
-                set_rate_constants(parameters, self.print_rates)
+                set_rate_constants(parameters, self.print_rates, self.can_accelerate)
 
     def export_movie(self,
                     frames=30,
@@ -717,6 +1023,10 @@ class KMC_Model(Process):
             for i in range(proclist.nr_of_proc):
                     atoms.integ_rates[i] = base.get_integ_rate(i + 1)
         # S. Matera 09/25/2012
+        if hasattr(self.base, 'get_integ_counter'):
+            atoms.integ_counter = np.zeros((proclist.nr_of_proc,))
+            for i in range(proclist.nr_of_proc):
+                atoms.integ_counter[i] = base.get_integ_counter(i + 1)
         delta_t = (atoms.kmc_time - self.time)
         delta_steps = atoms.kmc_step - self.steps
         atoms.delta_t = delta_t
@@ -742,6 +1052,9 @@ class KMC_Model(Process):
                                 (atoms.integ_rates - self.integ_rates)
                                 / delta_t / size)
             # S. Matera 09/25/2012
+            if hasattr(self.base, 'get_integ_counter'):
+                atoms.norm_counter = ((atoms.integ_counter - self.integ_counter)
+                                      / delta_t / size)
 
         atoms.delta_t = delta_t
 
@@ -751,6 +1064,9 @@ class KMC_Model(Process):
         if hasattr(self.base, 'get_integ_rate'):
             self.integ_rates[:] = atoms.integ_rates
         # S. Matera 09/25/2012
+        if hasattr(self.base, 'get_integ_counter'):
+            self.integ_counter[:] = atoms.integ_counter
+
         self.time = atoms.kmc_time
         self.step = atoms.kmc_step
         self.tof_data = atoms.tof_data
@@ -900,7 +1216,7 @@ class KMC_Model(Process):
                 self.base.set_rate_const(i + 1, .0)
 
     def switch_surface_processes_on(self):
-        set_rate_constants(settings.parameters, self.print_rates)
+        set_rate_constants(settings.parameters, self.print_rates, self.can_accelerate)
 
     def print_adjustable_parameters(self, match=None, to_stdout=True):
         """Print those methods that are adjustable via the GUI.
@@ -1538,14 +1854,20 @@ class Model_Parameters(object):
         object.__init__(self)
         self.__dict__.update(settings.parameters)
         self.print_rates = print_rates
+        try:
+            settings.buffer_parameter
+        except:
+            self.can_accelerate = False
+        else:
+            self.can_accelerate = True
 
     def __setattr__(self, attr, value):
         if not attr in settings.parameters \
-           and not attr in ['print_rates']:
+           and not attr in ['print_rates','can_accelerate']:
             print("Warning: don't know parameter '%s'." % attr)
         if attr in settings.parameters:
             settings.parameters[attr]['value'] = value
-            set_rate_constants(print_rates=self.print_rates)
+            set_rate_constants(print_rates=self.print_rates, can_accelerate=self.can_accelerate)
         else:
             self.__dict__[attr] = value
 
@@ -1722,6 +2044,25 @@ class Model_Rate_Constants(object):
         for i, proc in enumerate(sorted(settings.rate_constants.keys())):
             if pattern is None or fnmatch(proc, pattern):
                 base.set_rate_const(i + 1, rate_constant)
+
+        #For acceleration scheme
+        try:
+            settings.buffer_parameter
+        except:
+            can_accelerate = False
+        else:
+            can_accelerate = True
+
+        if can_accelerate:
+            for i, proc in enumerate(sorted(settings.rate_constants.keys())):
+                if pattern is None or fnmatch(proc, pattern):
+                    try:
+                        base.set_original_rate_const(i + 1, rate_constant)
+
+                    except Exception, e:
+                        raise UserWarning(
+                            "Could not set original rate %s for process %s!\nException: %s" \
+                                % (rate_constant, proc, e))
 
 class Model_Rate_Constants_OTF(Model_Rate_Constants):
     """
@@ -2213,7 +2554,7 @@ and <classname>.lock should be moved out of the way ::
                                                          ))
             p.start()
 
-def set_rate_constants(parameters=None, print_rates=None):
+def set_rate_constants(parameters=None, print_rates=None, can_accelerate=False):
     """Tries to evaluate the supplied expression for a rate constant
     to a simple real number and sets it for the corresponding process.
     For the evaluation it draws on predefined natural constants, user defined
@@ -2253,6 +2594,16 @@ def set_rate_constants(parameters=None, print_rates=None):
             raise UserWarning(
                 "Could not set %s for process %s!\nException: %s" \
                     % (rate_expr, proc, e))
+
+        if can_accelerate:
+            try:
+                base.set_original_rate_const(getattr(proclist, proc.lower()),
+                                                                   rate_const)
+            except Exception, e:
+                raise UserWarning(
+                    "Could not set %s for process %s!\nException: %s" \
+                        % (rate_expr, proc, e))
+
     if print_rates:
         print('-------------------')
 
