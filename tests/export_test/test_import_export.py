@@ -115,6 +115,8 @@ def test_import_export_pdopd_local_smart():
 
     pt = kmos.types.Project()
     pt.import_xml_file('pdopd.xml')
+    print("PROJECT")
+    print(pt)
     kmos.io.export_source(pt, TEST_DIR, code_generator='local_smart')
     for filename in ['base', 'lattice', 'proclist']:
         print(filename)
@@ -125,8 +127,6 @@ def test_import_export_pdopd_local_smart():
         if diff:
             print("DIFF BETWEEN {REFERENCE_DIR}/{filename}.f90 and {TEST_DIR}/{filename}.f90".format(**locals()))
             print(diff)
-            print("PROJECT")
-            print(pt)
         assert filecmp.cmp(os.path.join(REFERENCE_DIR, '%s.f90' % filename),
                           os.path.join(TEST_DIR, '%s.f90' % filename)),\
              '%s changed.' % filename
@@ -150,6 +150,8 @@ def test_import_export_pdopd_lat_int():
     print(kmos.__file__)
     pt = kmos.types.Project()
     pt.import_xml_file('pdopd.xml')
+    print("PROJECT")
+    print(pt)
     kmos.io.export_source(pt, TEST_DIR, code_generator='lat_int')
     for filename in ['base', 'lattice', 'proclist', 'proclist_constants'] \
         + [os.path.basename(os.path.splitext(x)[0]) for x in glob(os.path.join(TEST_DIR, 'run_proc*.f90'))] \
@@ -163,8 +165,6 @@ def test_import_export_pdopd_lat_int():
         if diff:
             print("DIFF BETWEEN {REFERENCE_DIR}/{filename}.f90 and {TEST_DIR}/{filename}.f90".format(**locals()))
             print(diff)
-            print("PROJECT")
-            print(pt)
         assert filecmp.cmp(os.path.join(REFERENCE_DIR, '%s.f90' % filename),
                           os.path.join(TEST_DIR, '%s.f90' % filename)),\
              '%s changed.' % filename

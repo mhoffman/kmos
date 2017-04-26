@@ -879,15 +879,21 @@ class Project(object):
                 return
             for child in root:
                 if child.tag == 'lattice':
+                    print("READING CELL SIZE")
+                    print(child.attrib['cell_size'])
                     cell = np.array([float(i)
                                      for i in
                                      child.attrib['cell_size'].split()])
+                    print("CELL")
+                    print(cell)
                     if len(cell) == 3:
                         self.layer_list.cell = np.diag(cell)
                     elif len(cell) == 9:
                         self.layer_list.cell = cell.reshape(3, 3)
                     else:
                         raise UserWarning('%s not understood' % cell)
+                    print("LAYER LIST CELL")
+                    print(self.layer_list.cell)
                     self.layer_list.default_layer = \
                         child.attrib['default_layer']
                     if 'substrate_layer' in child.attrib:
