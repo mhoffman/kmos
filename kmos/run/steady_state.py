@@ -445,7 +445,7 @@ def find_tof_pairs(model):
                     #pairs.append((p1, p2))
     return pairs
 
-def report_equilibration(model, skip_diffusion=False, debug=False, tof_method='integ'):
+def report_equilibration(model, skip_diffusion=False, debug=False, tof_method='integ', atoms=None, return_atoms=False):
     """Iterate over pairs of reverse proceses and print
         rate1 * rho1 / rate2 * rho2
 
@@ -466,7 +466,8 @@ def report_equilibration(model, skip_diffusion=False, debug=False, tof_method='i
 
     # CONTINUE HERE
 
-    atoms = model.get_atoms(geometry=False)
+    if atoms is None:
+        atoms = model.get_atoms(geometry=False)
 
     event_integ = np.zeros((model.proclist.nr_of_proc, ), dtype=int)
     for i in range(model.proclist.nr_of_proc):
@@ -543,8 +544,12 @@ def report_equilibration(model, skip_diffusion=False, debug=False, tof_method='i
         #data.append([
             #ratio, pn1, pn2, left_right_sum, pair, left_integ, right_integ
         #])
-    if debug:
+    if debug and return_atoms:
+        return report, data, debug_data, atoms
+    elif debug:
         return report, data, debug_data
+    elif return_atoms:
+        return report, data, atoms
     else:
         return report, data
 
