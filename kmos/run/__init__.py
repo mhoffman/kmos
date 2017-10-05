@@ -43,6 +43,7 @@ from ase.atoms import Atoms
 from copy import deepcopy
 from fnmatch import fnmatch
 from kmos import evaluate_rate_expression
+from kmos import evaluate_param_expression
 from kmos.utils import OrderedDict
 import kmos.run.acf
 import kmos.utils.progressbar
@@ -415,6 +416,10 @@ class KMC_Model(Process):
         return ' '.join(param_name
                        for param_name in sorted(self.settings.parameters)
             if self.settings.parameters[param_name].get('adjustable', False))
+
+    def get_param_value(self,param):
+        """Return the evaluated value of a parameter"""
+        return evaluate_param_expression(param, settings.parameters)
 
     def get_occupation_header(self):
         """Return the names of the fields returned by
