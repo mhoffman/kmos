@@ -8,9 +8,14 @@ Temporal acceleration
 This implementation of a temporal acceleration algortihm attempts to deal 
 with the low barrier problem often encountered in kinetic Monte Carlo 
 simuations. It is based on the acceleration algorithm developed by 
-Eric Christopher Dybeck, Craig Patrick Plaisance and Matthew Neurock,
-Journal of Chemical Theory and Computation (just accepted),
-DOI: 10.1021/acs.jctc.6b00859
+Eric Christopher Dybeck, Craig Plaisance and Matthew Neurock,
+Journal of Chemical Theory and Computation, 13, 1525 (2017),
+http://pubs.acs.org/doi/abs/10.1021/acs.jctc.6b00859
+
+The implementation in kmos is published in:
+Mie Andersen, Craig Plaisance and Karsten Reuter
+Journal of Chemical Physics, 147, 152705 (2017),
+http://aip.scitation.org/doi/full/10.1063/1.4989511
 
 In order for the scheme to work, it needs to be able to pair all processes 
 into forward/reverse reactions. This is done according to the 
