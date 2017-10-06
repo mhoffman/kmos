@@ -1,33 +1,32 @@
-#!/bin/bash -eu
+#!/bin/bash
 
 # The kmos dependency list is horribly wrong
-# and right now even depends on a repository
-# which is outside the Ubuntu repositories
+# and right now even depends on two repositories
+# which are outside the Ubuntu repositories
 # let's hope that this changes soon
 # and let's see how we can cut down on this
-# list. 
+# list.
 # The goal will be to reduce this list to
 
 # python-dev gfortran python-numpy python-pygoocanvas
 
 # or something like that
 
-print "Simple wrapping script that resolves"
-print "dependency within the APT system"
+echo "Simple wrapping script that resolves"
+echo "dependency within the APT system"
 
-
-
-sudo add-apt-repository ppa:campos-dev/campos
 sudo apt-get update
+sudo apt-get install \
+     gfortran \
+     python-dev \
+     python-pip \
+     python-glade2 \
+     python-pygoocanvas \
+     python-kiwi
 
-sudo apt-get install\
-                     gazpacho \
-                     gfortran \
-                     python-ase \
-                     python-dev \
-                     python-glade2 \
-                     python-kiwi \
-                     python-lxml \
-                     python-matplotlib \
-                     python-numpy \
-                     python-pygoocanvas
+wget http://ftp.de.debian.org/debian/pool/main/p/python-support/python-support_1.0.15_all.deb
+sudo dpkg -i python-support*.deb
+wget https://gist.github.com/mhoffman/d2a9466c22f33a9e046b/raw/4c73c5029f3c01e656f161c7459f720aff331705/gazpacho_0.7.2-3_all.deb
+sudo dpkg -i gazpacho*.deb
+
+pip install -r ../requirements.txt
