@@ -5,6 +5,22 @@ You can fetch the current version of kmos using *git* ::
 
     git clone http://www.github.com/mhoffman/kmos
 
+and install it using *setuptools* ::
+
+    cd kmos/
+    ./setup.py install [--user]
+
+To use the core functionality
+(programmatic model setup, code generation, model execution)
+kmos has a fairly modest depedency foot-print. You will need ::
+
+    python-numpy, a Fortran compiler, python-lxml
+
+In order to watch the model run on screen you will additionally
+need ::
+
+    python-matplotlib, python-ase
+
 Finally in order to use all features, in particular the GUI
 model editor of kmos you have to install
 a number of dependencies. This should not be very difficult
@@ -13,7 +29,6 @@ on Ubuntu it suffices to call::
 
     sudo apt-get install gfortran python-dev python-pip \
                          python-glade2 python-kiwi python-pygoocanvas
-
 
 Unfortunately Debian/Ubuntu have discontinued maintaining the `gazpacho` package
 which I find very unfortunate since it eased gtk GUI building a lot and I
@@ -27,24 +42,17 @@ Therefore for the moment I can only suggest to fetch the latest `python-support`
     sudo dpkg -i python-support*.deb
     sudo dpkg -i gazpacho_*.deb
 
-After that there are some python requirements you have to install via pip::
+The remaining python dependencies are installed with pip::
 
-    cd kmos/
     pip install -r requirements.txt
 
 To ease the installation of requirements on Ubuntu one can simply run (this is tested with clean installations of *Ubuntu 16.04.3 LTS* and *Ubuntu 17.04*)::
 
-    cd tools/
-    ./kmos-install-dependencies-ubuntu.sh
+    .tools/kmos-install-dependencies-ubuntu.sh
 
-If you plan to use a specific branch (other than master) perform a `git checkout`. 
-As there a many new features in the `develop` branch currently, we use it as an example::
+If you plan to use a specific branch (for example `develop`) perform a `git checkout` and run *setuptools* again::
 
     git checkout develop
-
-Afterwards install kmos with *setuptools* ::
-
-    cd ..
     ./setup.py install [--user]
 
 If you think this dependency list hurts. Yes, it does!
