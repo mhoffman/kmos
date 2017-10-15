@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -eu
 
 # The kmos dependency list is horribly wrong
 # and right now even depends on two repositories
