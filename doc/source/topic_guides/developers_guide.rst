@@ -64,13 +64,8 @@ interactions* if there is one or more groups of processes with the
 following characteristics:
 
 a. their actions are all identical
-
-b. the conditions occurring on the same sites as the actions are
-identical
-
-c. there is a group of additional sites in which these processes have
-conditions, but these conditions are different for each process in the
-group
+b. the conditions occurring on the same sites as the actions are identical
+c. there is a group of additional sites in which these processes have conditions, but these conditions are different for each process in the group
 
 These processes represent the same change in the lattice, but under a
 difference state of the rest of the sites. These groups of processes are
@@ -180,7 +175,7 @@ description, as it is the basis for the others and the one that contains
 the fewest different files. For the other backends, we will only explain
 the differences with ``local_smart``.
 
-The three main routines in kmos are split in 3 main files: ``base.f90``,
+All kmos models contain train main source files: ``base.f90``,
 ``lattice.f90`` and ``proclist.f90``. Each of these source files defines
 a module of the same name. These modules are exposed to Python
 interface.
@@ -191,10 +186,7 @@ Files for the ``local_smart`` backend
 ``base.f90``
 ^^^^^^^^^^^^
 
-As it name suggests, ``base.f90`` contains the lowest-level elements of
-the model. It implements the kMC method in a 1D lattice. The ``base``
-module contains all the bookkeeping arrays described in `Key
-data-structures <#org6fd85f6>`__ and the routines used to
+As it name suggests, ``base.f90`` contains the lowest-level elements of the model. It implements the kMC method in a 1D lattice. The ``base`` module contains all the bookkeeping arrays described in :ref:`Key data-structures <data-structs>` and the routines used to
 
 -  allocate and deallocate memory
 -  update of the bookkeeping arrays for lattice configuration and
@@ -211,6 +203,8 @@ the lattice (i.e. the ND lattice of the problem, flattened).
 
 The contents of ``base.f90`` are (mostly) fixed, i.e. it is (almost) the
 same file for all kmos models (as long as they use the same backend).
+
+.. _lattice:
 
 ``lattice.f90``
 ^^^^^^^^^^^^^^^
@@ -334,13 +328,15 @@ subroutine each. These routines contain the decision trees that figure
 out which events need to be activated or deactivated and call the
 corresponding functions from ``base`` (``add_proc`` and ``del_proc``).
 
+.. _data-structs:
+
 Key data-structures
 -------------------
 
 Here we describe the most important arrays required for bookkeeping in
 kmos. Understanding what information these arrays contain is crucial to
 understand how kmos selects the next kMC process to be executed. This is
-explained in `One kmc step in kmos <#sec:kmc-step>`__. All these data
+explained in :ref:`One kmc step in kmos <kmc-step>`. All these data
 structures are declared in the ``base`` module and their dimensions are
 based on the "flattened" representation of the lattice in 1 dimension.
 
@@ -365,8 +361,7 @@ during the execution of the kMC algorithm, and is only to be changed
 through the Python interface.
 
 In the ``otf`` backend, rate constants are obtained on-the-fly during
-the execution of the kMC algorithm and stored in the
-```rates_matrix`` <#sec:rates-matrix>`__ array and the ``rates`` arrays
+the execution of the kMC algorithm and stored in the ``rates_matrix`` array and the ``rates`` arrays
 contains simply a set of "default" rate constant values. These values
 can optionally (but not necessarily) be used to help with the
 calculation of the rates.
@@ -404,10 +399,8 @@ according to process index. In ``local_smart`` and ``lat_int``, thanks
 to the fact that all copies of a process have an equal rate constant,
 the values of this array can be calculated according to
 
-.. math::
-
-
-   \text{\texttt{accum\_rates(i)}} = \sum_{j=1}^{\text{\texttt{i}}} \text{\texttt{rates(j)}} \, * \, \text{\texttt{nr\_of\_sites(j)}}
+.. math:: \text{\texttt{accum\_rates(i)}} = \sum_{j=1}^{\text{\texttt{i}}} \text{\texttt{rates(j)}} \, * \, \text{\texttt{nr\_of\_sites(j)}}
+   :label: accum-rates-summation
 
 In ``otf`` rate constants for a given process are different for a given
 site. Therefore, evaluation is more involved, namely
@@ -456,8 +449,11 @@ of ``avail_sites( :, :, 1)``. Given ``1 <= i <= nr_of_proc`` and
 on site ``j``, then ``avail_sites(i, j, 2) = 0`` and no element in
 ``avail_sites(i, :, 1)`` will be equal to ``j``.
 
-An example of a small ``avail_sites`` array is presented in figure
-`79 <#orgccb21c7>`__.
+
+.. figure:: ../img/avail_sites_example.png
+   :align: center
+
+   A example of an `avail_sites` array for a model with 5 processes and 10 sites.
 
 ``procstat``
 ^^^^^^^^^^^^
@@ -500,21 +496,27 @@ This matrix stores the rate for each current active event. The entries
 of this matrix are sorted in the same order as the elements of
 ``avail_sites(:, :, 1)`` and used to update the ``accum_rates`` array.
 
+.. _kmc-step:
+
 One kmc step in kmos
 --------------------
+
+.. figure:: ../img/step_local_smart.png
+   :align: center
+
+   A kMC step using kmos' ``local_smart`` backend. Subroutines are represented by labeled boxes. The content of a given box summarizes the operations performed by the subroutine or the subroutines called by it. Variables (scalar or arrays) are indicated by gray boxes. An arrow pointing to a variable indicates that a subroutine updates it (or defines it). Arrows pointing to a subroutine indicate that the routine uses the variable. In kmos, the passing of information occurs both through subroutine arguments and through module-wide shared variables; this distinction is not present in the diagram.
 
 The main role of the bookkeeping arrays from last section, specially
 ``avail_sites`` and ``nr_of_sites``, is to make kMC steps execute fast
 and without the need to query the full lattice state. The routines
 ``do_kmc_step`` and ``do_kmc_steps`` from the ``proclist`` module
-execute such steps. A diagram representing the functions called by these
-routines is presented in figure `100 <#org730f9da>`__.
+execute such steps. The diagram above represents the functions called by these
+routines.
 
 During system initialization, the current state of the system is written
 into the ``lattice`` array and the ``avail_sites`` and ``nr_of_sites``
 arrays are initialized according to this. With these arrays in sync, it
-is possible to evaluate ``accum_rates`` according to eq.
-(`75 <#org7664920>`__). With this information, and using two random
+is possible to evaluate ``accum_rates`` according to eq. :eq:`accum-rates-summation`. With this information, and using two random
 numbers :math:`0 < \texttt{ran\_proc}, \texttt{ran\_site} < 1`, the
 routine ``base/determine_procsite`` can select the next event to
 execute. This subroutine first selects a process according to the
@@ -525,15 +527,11 @@ implements a `binary
 search <http://en.wikipedia.org/wiki/Binary_search_algorithm>`__ to find
 the index ``proc`` such that
 
-\\[
-
-| \\begin{aligned}
-| \\texttt{accum\_rates(proc -1)} \\le \\
-| \\texttt{ran\_proc \* accum\_rates(nr\_of\_proc)} \\le \\
-| \\texttt{accum\_rates(proc)}.
-| \\end{aligned}
-
-\\]
+.. math::
+   
+   \texttt{accum\_rates(proc -1)} \le \\
+   \texttt{ran\_proc \* accum\_rates(nr\_of\_proc)} \le \\
+   \texttt{accum\_rates(proc)}.
 
 This step scales O(\ :math:`\log` (``nr_of_proc``)). Then, a site is
 selected with uniform probability from the (non-zero) items of
@@ -547,7 +545,7 @@ After this, the ``proclist/run_proc_nr`` subroutine is called with
 ``base/increment_procstat`` with ``proc`` as argument to keep track of
 the times each process is executed. Next, it uses the ``nr2lattice``
 look-up table to transform the *scalar* ``site`` variable into the 4D
-representation (see ```lattice.f90`` <#sec:lattice>`__). Finally, this
+representation (see :ref:`lattice.f90 <lattice>`). Finally, this
 functions calls the methods which actually update the the lattice state
 and, consistent with this, the bookkeeping arrays. These are the
 ``proclist/take_<species>_<layer>_<site>`` and
@@ -566,17 +564,16 @@ call ``lattice/add_proc`` and/or ``lattice/del_proc`` to update
 ``avail_sites`` and ``nr_of_sites`` in correspondence with the change in
 the lattice they are effecting. To do this they need to query the
 current state of the lattice. The structure of these routines is
-described under `The ``put`` and ``take`` routines <#sec:put-take>`__.
+described :ref:`below <put-take>`.
 
 The actual update of ``avail_sites`` and ``nr_of_proc`` is done by the
-``base/add_proc`` and ``base/del_proc`` functions. Under `Updating
-``avail_sites`` <#sec:updating-avail-sites>`__ below, we explain how
+``base/add_proc`` and ``base/del_proc`` functions. Under :ref:`Updating avail_sites <updating-avail-sites>` below, we explain how
 these functions make use of the structure of ``avail_sites`` to make
 updates take constant. Once these arrays have been updated, the
 bookkeeping arrays are again in sync with the lattice state. Therefore,
-it is possible to reevaluate ``accum_rates`` using eq.
-(`75 <#org7664920>`__) and start the process for the selection of the
-next step.
+it is possible to reevaluate ``accum_rates`` using eq.  :eq:`accum-rates-summation` and start the process for the selection of the next step.
+
+.. _put-take:
 
 The ``put`` and ``take`` routines
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -603,9 +600,8 @@ case, it is necessary to check the lattice state to find out whether or
 not such events have all other conditions fulfilled. A straightforward
 of accomplishing this is to sequentially look at each event, i.e.:
 
-.. raw:: html
-
-   <div class="VERBATIM">
+::
+   
    FOR each candidate event E
        TurnOn = True
        FOR each condition C of E
@@ -618,8 +614,6 @@ of accomplishing this is to sequentially look at each event, i.e.:
        Activate E
        ENDIF
    ENDFOR
-
-   </div>
 
 However, chances are that many of the candidate events will have
 conditions on the same site. Therefore, a routine like the above would
@@ -638,11 +632,17 @@ prioritizing the sites that are more likely to reduce the number of
 processes that need activation. Such decision trees are implemented as
 select-case trees in the put/take routines and typically occupy the bulk
 of the code of ``proclist.f90``. A more detailed description on how this
-is done is discussed under
-```write_proclist_put_take`` <#sec:write-proclist-put-take>`__.
+is done is discussed :ref:`below <write-put-take>`.
+
+.. _updating-avail-sites
 
 Updating ``avail_sites``
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. figure:: ../img/add_proc.png
+   :align: center
+
+   Adding an process to the =avail_sites= array. Pseudocode for the addition of a process is also indicated.
 
 The ``avail_sites`` and ``nr_of_sites`` arrays are only updated through
 the ``base/add_proc`` and ``base/del_proc`` subroutines, which take a
@@ -652,7 +652,13 @@ Adding events is programmatically easier. As the rows of
 added by changing the first zero item of the corresponding row, i.e.
 ``avail_sites(proc, nr_of_sites(proc) + 1, 1)``, to ``site`` and
 updating ``avail_sites( :, :, 2)`` and ``nr_of_procs`` accordingly. An
-example of this procedure is given in figure `115 <#org3482080>`__.
+example of this procedure is presented in the figure above.
+
+.. figure:: ../img/del_proc.png
+   :align: center
+
+   Deleting an process from =avail_sites= array. Pseudocode for the deletion of a process is also indicated.
+
 
 Deleting an event is slightly more involved, as non-zero elements in
 ``avail_sites(:, :, 1)`` rows need to remain contiguous and on the left
@@ -661,10 +667,8 @@ side of the array. To ensure this, the element that would be deleted
 last non-zero element of the row, which is later deleted. To keep the
 arrays in sync, ``avail_sites(. , . , 2)`` is also updated, by updating
 the index of the moved site to reflect its new position. Finally,
-``avail_sites(site, proc, 2)`` is set to zero. Figure
-`117 <#org941fb80>`__ shows an example and presents pseudocode for such
-an update.
-
+``avail_sites(site, proc, 2)`` is set to zero. The figure
+above shows an example and presents pseudocode for such an update.
 Having the information in ``avail_sites(:,:,1)`` duplicated (but
 restructures) in ``avail_sites(:,:,2)`` allows these update operations
 to be performed in constant time, instead of needing to perform updates
@@ -672,6 +676,11 @@ that scale with the system size.
 
 A kmc step with the ``lat_int`` backend
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. figure:: ../img/step_lat_int.png
+   :align: center
+
+   A kMC step using kmos' ``lat_int`` backend. Subroutines are represented by labeled boxes. The content of a given box summarizes the operations performed by the subroutine or the subroutines called by it. Variables (scalar or arrays) are indicated by gray boxes. An arrow pointing to a variable indicates that a subroutine updates it (or defines it). Arrows pointing to a subroutine indicate that the routine uses the variable. In kmos, the passing of information occurs both through subroutine arguments and through module-wide shared variables; this distinction is not present in the diagram.
 
 The process of executing a kMC step with the ``lat_int`` backend is very
 similar as that of the ``local_smart`` backend. In particular, the way
@@ -718,6 +727,12 @@ this leads to the functions simply not adding or deleting any process to
 A kmc step with the ``otf`` backend
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. figure:: ../img/step_otf.png
+   :align: center
+
+   A kMC step in with the ``otf`` backend. Subroutines are represented by labeled boxed, located inside the box corresponding to the calling function. Variables (scalar or arrays) are indicated by gray boxes. An arrow pointing to a variable indicates that a subroutine updates it (or defines it). An arrows pointing to a subroutine indicates that the routine uses the variable or the output of the function. The passing of information occurs both through subroutine arguments and through module-wide shared variables; this distinction is not present in the diagram.
+
+   
 As expected, the algorithm for running a kMC step with ``otf`` differs
 considerably from ``local_smart`` and ``lat_int``. Firstly, the update
 of the ``accum_rates`` is more involved, as different copies of the
@@ -727,7 +742,6 @@ rate constants for all active events. The ``accum_rates`` array is
 updated according to
 
 .. math::
-
 
    \text{\texttt{accum\_rates(i)}} = \sum_{j=1}^{\text{\texttt{i}}} \sum_{k=1}^{
    \texttt{nr\_of\_sites(j)}}   \text{\texttt{rates\_matrix(j, k)}}
@@ -750,7 +764,6 @@ first necessary to evaluate
 
 .. math::
 
-
    \texttt{accum\_rates\_proc}(i) = \sum_{k=1}^{
    i}   \text{\texttt{rates\_matrix(proc, k)}},
 
@@ -758,17 +771,13 @@ i.e. the partial sums of rates for the different events associated to
 process ``proc``. Then a second binary search can be performed on
 ``accum_rates_proc`` to find ``s`` such that
 
-\\[
+.. math::
 
-| \\begin{aligned}
-| \\texttt{accum\_rates\_proc(s -1)} \\le \\
-| \\texttt{ran\_site \* accum\_rates\_proc(nr\_of\_sites(proc))} \\le \\
-| \\texttt{accum\_rates\_proc(s)}.
-| \\end{aligned}
+   \texttt{accum\_rates\_proc(s -1)} \le \\
+   \texttt{ran\_site \* accum\_rates\_proc(nr\_of\_sites(proc))} \le \\
+   \texttt{accum\_rates\_proc(s)}.
 
-\\]
-
-Therefore, s corresponds to the index of the selected site according to
+Therefore, ``s`` corresponds to the index of the selected site according to
 the current order of the ``avail_sites(:, :, 1)`` array. The site index
 as ``site = avail_sites(proc, s, 1)``.
 
@@ -784,14 +793,11 @@ these routines are built for executing full processes instead of
 elemental changes to individual sites. These functions need to look into
 the state of lattice and determine:
 
-a) which events get one or more of their conditions unfulfilled by the
-executed event
-
-b) which events get one or more of their condition fulfilled by the
-executed event and also have all other conditions fulfilled
-
-| c) which events are affected by a change in one of their bystanders
-| For events in (a), ``run_proc_<proc_nr>/run_proc_<proc_name>`` run
+a) which events get one or more of their conditions unfulfilled by the executed event
+b) which events get one or more of their condition fulfilled by the executed event and also have all other conditions fulfilled
+c) which events are affected by a change in one of their bystanders
+   
+For events in (a), ``run_proc_<proc_nr>/run_proc_<proc_name>`` run
 ``lattice/del_proc``. For events in (b) and (c), rate constants are
 needed. This is done using functions from ``proclist_pars`` module, as
 described below. With the know rate constants,
@@ -988,6 +994,8 @@ over the processes and then over the actions of such process. The only
 tricky part is to input correctly the relative coordinate for which the
 ``take`` and ``put`` routines need to be called. This is done with the
 help of the ``kmos.types.Coord.radd_ff`` method.
+
+.. _write-put-take:
 
 ``write_proclist_put_take``
 '''''''''''''''''''''''''''
