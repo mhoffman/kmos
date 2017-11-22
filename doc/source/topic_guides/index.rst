@@ -19,6 +19,7 @@ kmos.
   otf_backend
   proc_syntax
   coord_syntax
+  developers_guide
 
 ..  Convergence Tests
 ..  The Editor Frontend
