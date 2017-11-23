@@ -747,8 +747,8 @@ updated according to
    \texttt{nr\_of\_sites(j)}}   \text{\texttt{rates\_matrix(j, k)}}
 
 The computational time to perform this summation now scales as
-:math:`O \left( \texttt{nr\_of\_procs} \times \texttt{volume} \right) `,
-instead of the :math:`O \left( \texttt{nr\_of\_procs}\right) ` for
+:math:`O \left( \texttt{nr\_of\_procs} \times \texttt{volume} \right)`,
+instead of the :math:`O \left( \texttt{nr\_of\_procs}\right)` for
 ``local_smart``. Though this might seem like a disadvantage, it is
 important to notice that the value of ``nr_of_procs`` in ``otf`` can be
 smaller (potentially by several orders of magnitude) than in
@@ -825,12 +825,19 @@ and the next kMC step can start with the evaluation of ``accum_rates``.
 The code generation routines
 ----------------------------
 
+.. _fig-export-proc:
+
+.. figure:: ../img/export_procedure.png
+   :align: center
+
+   Routines called during the export of a kmos model
+   
+
 As most of the source code described in the previous sections is
 generated automatically, it is crucial to also understand how this
 works. Code generation are contained in the ``kmos.io`` Python
 submodule. The normal way to use this module is through the command
-line, i.e. invoking the ``kmos export`` command. Figure
-`139 <#orgefeada6>`__ shows the subroutines/functions which are called
+line, i.e. invoking the ``kmos export`` command. The figure :ref:`above <fig-export-proc>` shows the subroutines/functions which are called
 when this is done. The command line call itself is handled by the
 ``kmos.cli`` submodule. Furthermore, the export procedure relies on the
 classes from the ``kmos.types`` submodule, which define the abstract
@@ -855,8 +862,7 @@ source code, these methods are named according to the pattern
 ``kmos.io.ProcListWriter.write_proclist_*``. Exactly which of these
 methods are called depends on the backend being used. Some of such
 functions are specific to a certain backend, while other work for more
-than one backend. This is detailed under `The ``write_proclist``
-method <#sec:proclist-writer>`__.
+than one backend. This is detailed under :ref:`The write_proclist method <sec-write-proclist>`.
 
 The source file template
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -898,6 +904,8 @@ otherwise mostly static file. For example, in the
 
 is used to hard-coded the name constants used throughout the code to
 reference a process' index.
+
+.. _sec-write-proclist:
 
 The ``write_proclist`` method
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -983,6 +991,8 @@ routines not directly related with the tree search of process update,
 namely: ``do_kmc_steps``, ``do_kmc_step``, ``get_next_kmc_step``,
 ``get_occupation``, ``init``, ``initialize_state`` and (only for
 ``otf``) ``recalculate_rates_matrix``.
+
+.. _sec-write-run-proc-nr-smart:
 
 ``write_proclist_run_proc_nr_smart``
 ''''''''''''''''''''''''''''''''''''
@@ -1113,7 +1123,7 @@ They first delete all possible events with executing coordinate in the
 current site. Then, they collect a list of all processes with executing
 coordinate matching the current site type. The list is built with the
 same structure as the ``enabled_procs`` list described in section (see
-`here <#sec:write-proclist-put-take>`__). This is then fed to the
+:ref:`here <write-put-take>`). This is then fed to the
 ``_write_optimal_subtree`` method, to build a decision tree that can
 decide which of those process are to be turned-on given the current
 state of the lattice.
@@ -1146,7 +1156,7 @@ when sorted alphabetically).
 ''''''''''''''''''''''''''''''''''''''
 
 This functions is similar to its ``local_smart`` counterpart (see
-`here <#sec:write-proclist-run-proc-nr-smart>`__). The only difference
+:ref:`here <sec-write-run-proc-nr-smart>`). The only difference
 is that this routine needs to decide between lateral interaction groups
 instead of individual processes, as selecting the individual process
 within the group is done by the ``nli_*`` subroutines. For this reason,
@@ -1241,8 +1251,7 @@ bookkeeping arrays at the start of a simulation. For this, it calls the
 ``_write_optimal_iftree_otf`` with all possible events associated to the
 current site (i.e. with all processes). The routine
 ``_write_optimal_iftree_otf`` is very similar to the
-``_write_optimal_iftree`` routine described under
-```write_proclist_run_proc_nr_smart`` <#sec:write-proclist-put-take>`__.
+``_write_optimal_iftree`` routine described used by ``local_smart``'s  ``write_proclist_run_proc_nr_smart`` (see :ref:`here <write-put-take>`).
 The most remarkable difference is that in otf the ``add_proc`` routine
 needs to be called with the result of a ``gr_<proc_name>`` routine as an
 argument (to evaluate the current value of the event's rate constant).
