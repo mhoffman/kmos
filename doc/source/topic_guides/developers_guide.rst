@@ -171,8 +171,8 @@ The structure of the FORTRAN code.
 
 Here we present a description of the different files in which the source
 code is split. We use the ``local_smart`` backend as a basis for this
-description, as it is the basis for the others and the one that contains
-the fewest different files. For the other backends, we will only explain
+description, as it is the original backend and contains
+the fewest files. For the other backends, we will only explain
 the differences with ``local_smart``.
 
 All kmos models contain train main source files: ``base.f90``,
@@ -424,7 +424,7 @@ kMC step.
 This is arguably the most important bookkeeping array for kmos, which
 keeps track of which processes can be executed each sites on the
 lattice, i.e. keeps track of all active events. To accelerate the update
-time of these arrays (see `here <#sec:updating-avail-sites>`__), the
+time of these arrays (see :ref:`here <updating-avail-sites>`), the
 information this array contains is duplicated. In practice,
 ``avail_sites`` can be considered as two 2D arrays of size
 ``nr_of_proc * volume``.
@@ -546,7 +546,7 @@ After this, the ``proclist/run_proc_nr`` subroutine is called with
 the times each process is executed. Next, it uses the ``nr2lattice``
 look-up table to transform the *scalar* ``site`` variable into the 4D
 representation (see :ref:`lattice.f90 <lattice>`). Finally, this
-functions calls the methods which actually update the the lattice state
+function calls the methods which actually update the the lattice state
 and, consistent with this, the bookkeeping arrays. These are the
 ``proclist/take_<species>_<layer>_<site>`` and
 ``proclist/put_<species>_<layer>_<site>`` methods. Given a lattice site,
@@ -569,7 +569,7 @@ described :ref:`below <put-take>`.
 The actual update of ``avail_sites`` and ``nr_of_proc`` is done by the
 ``base/add_proc`` and ``base/del_proc`` functions. Under :ref:`Updating avail_sites <updating-avail-sites>` below, we explain how
 these functions make use of the structure of ``avail_sites`` to make
-updates take constant. Once these arrays have been updated, the
+updates take constant time. Once these arrays have been updated, the
 bookkeeping arrays are again in sync with the lattice state. Therefore,
 it is possible to reevaluate ``accum_rates`` using eq.  :eq:`accum-rates-summation` and start the process for the selection of the next step.
 
@@ -634,7 +634,7 @@ select-case trees in the put/take routines and typically occupy the bulk
 of the code of ``proclist.f90``. A more detailed description on how this
 is done is discussed :ref:`below <write-put-take>`.
 
-.. _updating-avail-sites
+.. _updating-avail-sites:
 
 Updating ``avail_sites``
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -910,42 +910,11 @@ reference a process' index.
 The ``write_proclist`` method
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. raw:: html
+.. figure:: ../img/write_proclist.png
+   :align: center
 
-   <div class="LATEX">
-   \dirtree{%
-   .1 ProcListWriter.write\\<sub>proclist</sub>.
-   .2 if code\\<sub>generator</sub> = 'local\\<sub>smart</sub>'.
-   .3 ProcListWriter.write\\<sub>proclist</sub>\\<sub>generic</sub>\\<sub>part</sub>.
-   .4 ProcListWriter.write\\<sub>proclist</sub>\\<sub>constants</sub>.
-   .4 ProcListWriter.write\\<sub>proclist</sub>\\<sub>generic</sub>\\<sub>subroutines</sub>.
-   .3 ProcListWriter.write\\<sub>proclist</sub>\\<sub>run</sub>\\<sub>proc</sub>\\<sub>nr</sub>\\<sub>smart</sub>.
-   .3 ProcListWriter.write\\<sub>proclist</sub>\\<sub>put</sub>\\<sub>take</sub>.
-   .3 ProcListWriter.write\\<sub>proclist</sub>\\<sub>touchup</sub>.
-   .3 ProcListWriter.write\\<sub>proclist</sub>\\<sub>multilattice</sub>.
-   .3 ProcListWriter.write\\<sub>proclist</sub>\\<sub>end</sub>.
-   .2 if code\\<sub>generator</sub> = 'lat\\<sub>int</sub>'.
-   .3 ProcListWriter.write\\<sub>proclist</sub>\\<sub>constants</sub>.
-   .3 ProcListWriter.write\\<sub>proclist</sub>\\<sub>lat</sub>\\<sub>int</sub>.
-   .4 ProcListWriter.\\<sub>get</sub>\\<sub>lat</sub>\\<sub>int</sub>\\<sub>groups</sub>.
-   .4 ProcListWriter.write\\<sub>proclist</sub>\\<sub>lat</sub>\\<sub>int</sub>\\<sub>run</sub>\\<sub>proc</sub>\\<sub>nr</sub>.
-   .4 ProcListWriter.write\\<sub>proclist</sub>\\<sub>lat</sub>\\<sub>int</sub>\\<sub>touchup</sub>.
-   .4 ProcListWriter.write\\<sub>proclist</sub>\\<sub>generic</sub>\\<sub>subroutines</sub>.
-   .4 ProcListWriter.write\\<sub>proclist</sub>\\<sub>lat</sub>\\<sub>int</sub>\\<sub>run</sub>\\<sub>proc</sub>.
-   .4 ProcListWriter.write\\<sub>proclist</sub>\\<sub>lat</sub>\\<sub>int</sub>\\<sub>nli</sub>\\<sub>casetree</sub>.
-   .3 ProcListWriter.write\\<sub>proclist</sub>\\<sub>end</sub>.
-   .2 if code\\<sub>generator</sub> = 'otf'.
-   .3 ProcListWriter.write\\<sub>proclist</sub>\\<sub>pars</sub>\\<sub>otf</sub>.
-   .3 ProcListWriter.write\\<sub>proclist</sub>\\<sub>otf</sub>.
-   .4 ProcListWriter.write\\<sub>proclist</sub>\\<sub>generic</sub>\\<sub>subroutines</sub>.
-   .4 ProcListWriter.write\\<sub>proclist</sub>\\<sub>touchup</sub>\\<sub>otf</sub>.
-   .4 ProcListWriter.write\\<sub>proclist</sub>\\<sub>run</sub>\\<sub>proc</sub>\\<sub>nr</sub>\\<sub>otf</sub>.
-   .4 ProcListWriter.write\\<sub>proclist</sub>\\<sub>run</sub>\\<sub>proc</sub>\\<sub>name</sub>\\<sub>otf</sub>.
-   .3 ProcListWriter.write\\<sub>proclist</sub>\\<sub>end</sub>.
-   }
-
-   </div>
-
+   Routines used to write ``proclist`` and associated modules for the different backends.
+	   
 The scheme above shows the methods called by
 ``kmos.io.ProcListWriter.write_proclist`` to write ``proclist.f90`` and,
 for ``lat_int`` and ``otf``, related files (``proclist_constants.f90``,
