@@ -46,7 +46,7 @@ install:
   - sudo touch tmp/usr/share/pyshared/gazpacho/loader/__init__.py
   - sudo cp -rv tmp/usr/share/pyshared/gazpacho/ /home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages
   - ls -R tmp | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
-  - ls -R  /home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
+  - ls -R  /home/travis/virtualenv/python2.7_with_system_site_packages/local/lib/python2.7/site-packages | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
   - python setup.py install #install kmos
 
 script:
