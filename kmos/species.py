@@ -307,3 +307,20 @@ H2Oliquid = Species(ase.atoms.Atoms(),
                     janaf_file='H-063.txt',
                     name='H2Oliquid',)
 
+CH3CHOgas = Species(molecule('CH3CHO'),
+    gas=True,
+    name='CH3CHOgas',
+    frequencies=[3014,2923,2716,1743,1433,1395,1352,1114,867,509,2964,1431,1102,764,150],
+    geometry='nonlinear',
+    symmetrynumber=1,
+    spin=0)
+
+CH3CH2OHgas = Species(molecule('CH3CH2OH'),
+    gas=True,
+    name='CH3CH2OHgas',
+    frequencies=[3653,2984,2939,2900,1490,1464,1412,1371,1256,1091,1028,888,417,2991,2910,1446,1275,1161,812],
+    geometry='nonlinear',
+    symmetrynumber=1,
+    spin=0)
+
+
