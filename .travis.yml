@@ -44,7 +44,7 @@ install:
   - sudo dpkg-deb -x  gazpacho_0.7.2-3_all.deb tmp
   #- sudo tree tmp
   - sudo touch tmp/usr/share/pyshared/gazpacho/loader/__init__.py
-  - sudo cp -rv tmp/usr/share/pyshared/gazpacho/ /home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages
+  - sudo cp -rv tmp/usr/share/pyshared/gazpacho/ /home/travis/virtualenv/python2.7_with_system_site_packages/local/lib/python2.7/site-packages
   - ls -R tmp | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
   - ls -R  /home/travis/virtualenv/python2.7_with_system_site_packages/local/lib/python2.7/site-packages | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
   - python setup.py install #install kmos
@@ -52,6 +52,6 @@ install:
 script:
     - export PYTHONPATH=/usr/share/pyshared/:${PYTHONPATH}
     - export PYTHONPATH=/usr/lib/python2.7/dist-packages/:${PYTHONPATH}
-    - export PYTHONPATH=/home/travis/virtualenv/python2.7.9/lib/python2.7/site-packages:${PYTHONPATH} # pip packages go here
+    - export PYTHONPATH=/home/travis/virtualenv/python2.7_with_system_site_packages/local/lib/python2.7/site-packages:${PYTHONPATH} # pip packages go here
     - python -c "import sys; import pprint; pprint.pprint(sys.path)"
     - nosetests --process-restartworker --processes=1 --process-timeout=60
