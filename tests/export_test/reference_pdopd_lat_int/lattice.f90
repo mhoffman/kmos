@@ -284,15 +284,15 @@ subroutine allocate_system(nr_of_proc, input_system_size, system_name)
 
     call base_allocate_system(nr_of_proc, volume, system_name)
 
-    unit_cell_size(1, 1) = 1.0
+    unit_cell_size(1, 1) = 0.0
     unit_cell_size(1, 2) = 0.0
     unit_cell_size(1, 3) = 0.0
     unit_cell_size(2, 1) = 0.0
-    unit_cell_size(2, 2) = 1.0
+    unit_cell_size(2, 2) = 0.0
     unit_cell_size(2, 3) = 0.0
     unit_cell_size(3, 1) = 0.0
     unit_cell_size(3, 2) = 0.0
-    unit_cell_size(3, 3) = 1.0
+    unit_cell_size(3, 3) = 0.0
     site_positions(1,:) = (/0.1, 0.1, 0.0/)
     site_positions(2,:) = (/0.3, 0.5, 0.0/)
     site_positions(3,:) = (/0.9, 0.7, 0.0/)
