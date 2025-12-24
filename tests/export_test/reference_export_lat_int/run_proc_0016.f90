@@ -39,7 +39,7 @@ use nli_0035
 use proclist_constants
 implicit none
 contains
-subroutine run_proc_co_diffusion_bridge_bridge_up(cell)
+subroutine run_proc_oxygen_desorption_bridge_bridge(cell)
 
     integer(kind=iint), dimension(4), intent(in) :: cell
 
@@ -106,8 +106,8 @@ subroutine run_proc_co_diffusion_bridge_bridge_up(cell)
     call del_proc(nli_reaction_oxygen_cus_co_bridge_right(cell + (/-1, +1, +0, 0/)), cell + (/-1, +1, +0, 1/))
 
     ! update lattice
-    call replace_species(cell + (/0, 0, 0, ruo2_bridge/), co, empty)
-    call replace_species(cell + (/0, 1, 0, ruo2_bridge/), empty, co)
+    call replace_species(cell + (/0, 0, 0, ruo2_bridge/), oxygen, empty)
+    call replace_species(cell + (/0, 1, 0, ruo2_bridge/), oxygen, empty)
 
     ! enable processes that have to be enabled
     call add_proc(nli_co_adsorption_bridge(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
@@ -171,6 +171,6 @@ subroutine run_proc_co_diffusion_bridge_bridge_up(cell)
     call add_proc(nli_reaction_oxygen_cus_co_bridge_right(cell + (/-1, +0, +0, 0/)), cell + (/-1, +0, +0, 1/))
     call add_proc(nli_reaction_oxygen_cus_co_bridge_right(cell + (/-1, +1, +0, 0/)), cell + (/-1, +1, +0, 1/))
 
-end subroutine run_proc_co_diffusion_bridge_bridge_up
+end subroutine run_proc_oxygen_desorption_bridge_bridge
 
 end module

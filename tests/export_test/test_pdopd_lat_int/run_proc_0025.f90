@@ -49,23 +49,21 @@ use nli_0045
 use proclist_constants
 implicit none
 contains
-subroutine run_proc_m_COads_b7(cell)
+subroutine run_proc_m_COdes_b4(cell)
 
     integer(kind=iint), dimension(4), intent(in) :: cell
 
     ! disable processes that have to be disabled
-    call del_proc(nli_m_COads_b7(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call del_proc(nli_m_COdes_b7(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call del_proc(nli_oxidize1(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
+    call del_proc(nli_m_COads_b4(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
+    call del_proc(nli_m_COdes_b4(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
 
     ! update lattice
-    call replace_species(cell + (/0, 0, 0, Pd100_b7/), empty, CO)
+    call replace_species(cell + (/0, 0, 0, Pd100_b4/), CO, empty)
 
     ! enable processes that have to be enabled
-    call add_proc(nli_m_COads_b7(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call add_proc(nli_m_COdes_b7(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call add_proc(nli_oxidize1(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
+    call add_proc(nli_m_COads_b4(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
+    call add_proc(nli_m_COdes_b4(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
 
-end subroutine run_proc_m_COads_b7
+end subroutine run_proc_m_COdes_b4
 
 end module

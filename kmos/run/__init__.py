@@ -75,10 +75,11 @@ import numpy as np
 import os
 import random
 import sys
+import types
 try:
     from kmc_model import base, lattice, proclist
     import kmc_model
-except Exception, e:
+except Exception as e:
     base = lattice = proclist = None
     print("""Error: %s
     Could not find the kmc module. The kmc implements the actual
@@ -104,7 +105,7 @@ except:
 
 try:
     import kmc_settings as settings
-except Exception, e:
+except Exception as e:
     settings = None
     print("""Error %s
     Could import settings file
@@ -211,10 +212,7 @@ class KMC_Model(Process):
         self.reset()
 
         if hasattr(settings, 'setup_model'):
-            import new
-            self.setup_model = new.instancemethod(settings.setup_model,
-                                                  self,
-                                                  KMC_Model)
+            self.setup_model = types.MethodType(settings.setup_model, self)
             self.setup_model()
 
     def __enter__(self, *args, **kwargs):
@@ -245,9 +243,9 @@ class KMC_Model(Process):
         # prepare structures for TOF evaluation
         self.tofs = tofs = get_tof_names()
         self.tof_matrix = np.zeros((len(tofs), proclist.nr_of_proc))
-        for process, tof_count in sorted(settings.tof_count.iteritems()):
+        for process, tof_count in sorted(settings.tof_count.items()):
             process_nr = getattr(self.proclist, process.lower())
-            for tof, tof_factor in tof_count.iteritems():
+            for tof, tof_factor in tof_count.items():
                 self.tof_matrix[tofs.index(tof), process_nr - 1] += tof_factor
 
         # prepare procstat
@@ -263,7 +261,7 @@ class KMC_Model(Process):
                 try:
                     self.species_representation[len(self.species_representation)] \
                     = eval(settings.representations[species])
-                except Exception, e:
+                except Exception as e:
                     print('Trouble with representation %s'
                            % settings.representations[species])
                     print(e)
@@ -353,7 +351,7 @@ class KMC_Model(Process):
         Useful for the header line of an ASCII output.
         """
         tofs = []
-        for _, value in settings.tof_count.iteritems():
+        for _, value in settings.tof_count.items():
             for name in value:
                 if name not in tofs:
                     tofs.append(name)
@@ -413,16 +411,16 @@ class KMC_Model(Process):
         if not base.is_allocated():
             self.reset()
         while True:
-            for _ in xrange(self.steps_per_frame):
+            for _ in range(self.steps_per_frame):
                 proclist.do_kmc_step()
-            if self.autosend and not self.image_queue.full():
+            if self.autosend and self.image_queue is not None and not self.image_queue.full():
                 atoms = self.get_atoms()
                 # attach other quantities need to plot
                 # to the atoms object and let it travel
                 # piggy-back through the queue
                 atoms.size = self.size
                 self.image_queue.put(atoms)
-            if not self.signal_queue.empty():
+            if self.signal_queue is not None and not self.signal_queue.empty():
                 signal = self.signal_queue.get()
                 if signal.upper() == 'STOP':
                     self.deallocate()
@@ -434,7 +432,8 @@ class KMC_Model(Process):
                 elif signal.upper() == 'START':
                     pass
                 elif signal.upper() == 'ATOMS':
-                    self.image_queue.put(self.get_atoms())
+                    if self.image_queue is not None:
+                        self.image_queue.put(self.get_atoms())
                 elif signal.upper() == 'DOUBLE':
                     print('Doubling model size')
                     self.double()
@@ -462,7 +461,7 @@ class KMC_Model(Process):
                 elif signal.upper() == 'COVERAGE':
                     self.print_coverages()
 
-            if not self.parameter_queue.empty():
+            if self.parameter_queue is not None and not self.parameter_queue.empty():
                 while not self.parameter_queue.empty():
                     parameters = self.parameter_queue.get()
                     settings.parameters.update(parameters)
@@ -543,7 +542,7 @@ class KMC_Model(Process):
         import ase.data.colors
         jmol_colors = ase.data.colors.jmol_colors
 
-        for i in xrange(frames):
+        for i in range(frames):
             atoms = self.get_atoms(reset_time_overrun=False)
             filename = '{prefix:s}_{i:06d}.{suffix:s}'.format(**locals())
             #write('%s_%06i.%s' % (prefix, i, suffix),
@@ -644,10 +643,10 @@ class KMC_Model(Process):
             kmos_tags = {}
             ase = import_ase()
             atoms = ase.atoms.Atoms()
-            for i in xrange(lattice.system_size[0]):
-                for j in xrange(lattice.system_size[1]):
-                    for k in xrange(lattice.system_size[2]):
-                        for n in xrange(1, 1 + lattice.spuck):
+            for i in range(lattice.system_size[0]):
+                for j in range(lattice.system_size[1]):
+                    for k in range(lattice.system_size[2]):
+                        for n in range(1, 1 + lattice.spuck):
                             species = lattice.get_species([i, j, k, n])
                             if species == self.null_species:
                                 continue
@@ -680,7 +679,7 @@ class KMC_Model(Process):
                                                       - len(ad_atoms),
                                                       len(atoms)):
                                         kmos_tags[atom] = \
-                                        self.species_tags.values()[species]
+                                        list(self.species_tags.values())[species]
 
                         if self.lattice_representation:
                             lattice_repr = deepcopy(self.lattice_representation)
@@ -819,7 +818,7 @@ class KMC_Model(Process):
         _ = self.get_atoms(geometry = False, reset_time_overrun = False)
 
         # sample over trajectory
-        for sample in xrange(samples):
+        for sample in range(samples):
             self.do_steps(sample_size/samples)
             atoms = self.get_atoms(geometry=False, reset_time_overrun=False)
             delta_ts.append(atoms.delta_t)
@@ -1269,7 +1268,7 @@ class KMC_Model(Process):
                 if self.base.get_avail_site(process, site, 2):
                     avail.append(ProcInt(process, self.settings))
 
-        except Exception, e:
+        except Exception as e:
             # if is not iterable, interpret as process
             for x in range(self.lattice.system_size[0]):
                 for y in range(self.lattice.system_size[1]):
@@ -1752,7 +1751,7 @@ class Model_Rate_Constants_OTF(Model_Rate_Constants):
                           ).split()
         if nr_vars:
             input_array = np.zeros([len(nr_vars)],int)
-            for nr_var, value in kwargs.iteritems():
+            for nr_var, value in kwargs.items():
                 if nr_var in nr_vars:
                     input_array[nr_vars.index(nr_var)] = int(value)
 
@@ -2112,7 +2111,7 @@ and <classname>.lock should be moved out of the way ::
         if len(variable_parameters) == 0:
             print("No variable parameter. Nothing to plot.")
         elif len(variable_parameters) == 1:
-            xvar = variable_parameters.keys()[0]
+            xvar = list(variable_parameters.keys())[0]
             data.sort(order=xvar)
             for occ in plot_occs:
                 occs = [data[name] for name in data.dtype.names if name.startswith(occ)]
@@ -2147,8 +2146,8 @@ and <classname>.lock should be moved out of the way ::
         if len(variable_parameters) == 0:
             print("No variable parameter. Nothing to plot.")
         elif len(variable_parameters) == 1:
-            xvar = variable_parameters.keys()[0]
-            param = variable_parameters.values()[0]
+            xvar = list(variable_parameters.keys())[0]
+            param = list(variable_parameters.values())[0]
             data.sort(order=xvar)
             for tof in plot_tofs:
                 tof = tof.replace(')', '').replace('(', '')
@@ -2249,7 +2248,7 @@ def set_rate_constants(parameters=None, print_rates=None):
             if print_rates:
                 n = int(4 * log(rate_const))
                 print('%30s: %.3e s^{-1}: %s' % (proc, rate_const, '#' * n))
-        except Exception, e:
+        except Exception as e:
             raise UserWarning(
                 "Could not set %s for process %s!\nException: %s" \
                     % (rate_expr, proc, e))
@@ -2259,7 +2258,7 @@ def set_rate_constants(parameters=None, print_rates=None):
     # FIXME
     # update chemical potentials (works for otf backend only)
     if hasattr(proclist,'update_user_parameter'):
-         for name,entry in settings.parameters.iteritems():
+         for name,entry in settings.parameters.items():
              proclist.update_user_parameter(
                  getattr(proclist,name.lower()),
                  evaluate_rate_expression(
@@ -2290,7 +2289,7 @@ def import_ase():
 def get_tof_names():
     """Return names turn-over-frequencies (TOF) previously defined in model."""
     tofs = []
-    for process, tof_count in settings.tof_count.iteritems():
+    for process, tof_count in settings.tof_count.items():
         for tof in tof_count:
             if tof not in tofs:
                 tofs.append(tof)

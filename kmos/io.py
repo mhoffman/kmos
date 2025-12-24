@@ -25,6 +25,7 @@ import shutil
 import os
 import sys
 import copy
+import functools
 import numpy as np
 
 from pprint import pformat
@@ -40,9 +41,9 @@ def _casetree_dict(dictionary, indent='', out=None):
     """ Recursively prints nested dictionaries."""
     # Fortran90 always expects the default branch
     # at the end of a 'select case' statement.
-    # Thus we use reversed() to move the 'default'
-    # branch from the beginning to the end.
-    for key, value in reversed(list(dictionary.iteritems())):
+    # In Python 3.7+, dict maintains insertion order, and 'default'
+    # is inserted first, so we need to iterate normally to get the right order
+    for key, value in dictionary.items():
         if isinstance(value, dict):
             if isinstance(key, Coord):
                 out.write('%sselect case(get_species(cell%s))\n' % (indent, key.radd_ff()))
@@ -63,7 +64,7 @@ def _casetree_dict(dictionary, indent='', out=None):
 def _print_dict(dictionary, indent = ''):
     """ Recursively prints nested dictionaries."""
 
-    for key, value in dictionary.iteritems():
+    for key, value in dictionary.items():
         if isinstance(value, dict):
             print('%s%s:' % (indent, key) )
             _print_dict(value, indent+'    ')
@@ -374,7 +375,7 @@ class ProcListWriter():
                     relative_coord = 'lsite%s' % (action.coord - process.executing_coord()).radd_ff()
 
                 try:
-                    previous_species = filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list)[0].species
+                    previous_species = list(filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list))[0].species
                 except:
                     UserWarning("""Process %s seems to be ill-defined.
                                    Every action needs a corresponding condition
@@ -482,7 +483,7 @@ class ProcListWriter():
                     
 
                 try:
-                    previous_species = filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list)[0].species
+                    previous_species = list(filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list))[0].species
                 except:
                     UserWarning("""Process %s seems to be ill-defined.
                                    Every action needs a corresponding condition
@@ -498,7 +499,7 @@ class ProcListWriter():
                     relative_coord = 'lsite%s' % (action.coord - process.executing_coord()).radd_ff()
 
                 try:
-                    previous_species = filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list)[0].species
+                    previous_species = list(filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list))[0].species
                 except:
                     UserWarning("""Process %s seems to be ill-defined.
                                    Every action needs a corresponding condition
@@ -644,7 +645,7 @@ class ProcListWriter():
                     
 
                 try:
-                    previous_species = filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list)[0].species
+                    previous_species = list(filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list))[0].species
                 except:
                     UserWarning("""Process %s seems to be ill-defined.
                                    Every action needs a corresponding condition
@@ -660,7 +661,7 @@ class ProcListWriter():
                     relative_coord = 'lsite%s' % (action.coord - process.executing_coord()).radd_ff()
 
                 try:
-                    previous_species = filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list)[0].species
+                    previous_species = list(filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list))[0].species
                 except:
                     UserWarning("""Process %s seems to be ill-defined.
                                    Every action needs a corresponding condition
@@ -806,7 +807,7 @@ class ProcListWriter():
             for action in process.action_list:
                 
                 try:
-                    previous_species = filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list)[0].species
+                    previous_species = list(filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list))[0].species
                 except:
                     UserWarning("""Process %s seems to be ill-defined.
                                    Every action needs a corresponding condition
@@ -826,7 +827,7 @@ class ProcListWriter():
                 process_exec = process.action_list[1-i_action].coord.radd_ff()                 
     
                 try:
-                    previous_species = filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list)[0].species
+                    previous_species = list(filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list))[0].species
                 except:
                     UserWarning("""Process %s seems to be ill-defined.
                                    Every action needs a corresponding condition
@@ -1022,7 +1023,7 @@ class ProcListWriter():
             for action in process.action_list:
                 
                 try:
-                    previous_species = filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list)[0].species
+                    previous_species = list(filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list))[0].species
                 except:
                     UserWarning("""Process %s seems to be ill-defined.
                                    Every action needs a corresponding condition
@@ -1042,7 +1043,7 @@ class ProcListWriter():
                 process_exec = process.action_list[1-i_action].coord.radd_ff()                 
     
                 try:
-                    previous_species = filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list)[0].species
+                    previous_species = list(filter(lambda x: x.coord.ff() == action.coord.ff(), process.condition_list))[0].species
                 except:
                     UserWarning("""Process %s seems to be ill-defined.
                                    Every action needs a corresponding condition
@@ -1267,21 +1268,21 @@ class ProcListWriter():
         ################################################################
         lat_int_groups = {}
         for process in process_list:
-            for lat_int_group, processes in lat_int_groups.iteritems():
+            for lat_int_group, processes in lat_int_groups.items():
                 p0 = processes[0]
                 same = True
                 # check if conditions are identical
-                if sorted(p0.condition_list, key=lambda x: x.coord, cmp=cmp_coords) \
-                   != sorted(process.condition_list, key=lambda x: x.coord, cmp=cmp_coords):
+                if sorted(p0.condition_list, key=functools.cmp_to_key(lambda a, b: cmp_coords(a.coord, b.coord))) \
+                   != sorted(process.condition_list, key=functools.cmp_to_key(lambda a, b: cmp_coords(a.coord, b.coord))):
                     same = False
                 # check if actions are identical
-                if sorted(p0.action_list, key=lambda x: x.coord, cmp=cmp_coords) \
-                   != sorted(process.action_list, key=lambda x: x.coord, cmp=cmp_coords):
+                if sorted(p0.action_list, key=functools.cmp_to_key(lambda a, b: cmp_coords(a.coord, b.coord))) \
+                   != sorted(process.action_list, key=functools.cmp_to_key(lambda a, b: cmp_coords(a.coord, b.coord))):
                     same = False
 
                 # check if coords of bystanders are identical
-                if [x.coord for x in sorted(p0.bystanders, key=lambda x: x.coord, cmp=cmp_coords)] \
-                   != [x.coord for x in sorted(process.bystanders, key=lambda x: x.coord, cmp=cmp_coords)]:
+                if [x.coord for x in sorted(p0.bystanders, key=functools.cmp_to_key(lambda a, b: cmp_coords(a.coord, b.coord)))] \
+                   != [x.coord for x in sorted(process.bystanders, key=functools.cmp_to_key(lambda a, b: cmp_coords(a.coord, b.coord)))]:
                     same = False
 
                 if same:
@@ -1413,7 +1414,7 @@ class ProcListWriter():
             out.write('    print *, "  PROCLIST/RUN_PROC_NR/NR_CELL", nr_cell\n')
             out.write('    print *, "  PROCLIST/RUN_PROC_NR/CELL", cell\n')
         out.write('    select case(proc)\n')
-        for lat_int_group, processes in lat_int_groups.iteritems():
+        for lat_int_group, processes in lat_int_groups.items():
             proc_names = ', '.join([proc.name for proc in processes])
             out.write('    case(%s)\n' % _chop_line(proc_names, line_length=60))
             out.write('        call run_proc_%s(cell)\n' % lat_int_group)
@@ -1445,7 +1446,7 @@ class ProcListWriter():
         out.write('        endif\n')
         out.write('    end do\n\n')
 
-        for lat_int_group, process in lat_int_groups.iteritems():
+        for lat_int_group, process in lat_int_groups.items():
             out.write('    call add_proc(nli_%s(cell), site)\n' % (lat_int_group))
         out.write('end subroutine touchup_cell\n\n')
 
@@ -1458,7 +1459,7 @@ class ProcListWriter():
         for a given process.
         """
 
-        for lat_int_loop, (lat_int_group, processes) in enumerate(lat_int_groups.iteritems()):
+        for lat_int_loop, (lat_int_group, processes) in enumerate(lat_int_groups.items()):
             out = open('%s/run_proc_%04d.f90' % (self.dir, lat_int_loop), 'w')
             self._db_print('PROCESS: %s' % lat_int_group)
             # initialize needed data structure
@@ -1482,7 +1483,7 @@ class ProcListWriter():
             # add "another process" to the processes to be modified/updated.
             for action in process0.action_list:
                 self._db_print('    ACTION: %s' % action)
-                for _, other_processes in lat_int_groups.iteritems():
+                for _, other_processes in lat_int_groups.items():
                     other_process = other_processes[0]
                     self._db_print('      OTHER PROCESS %s' % (pformat(other_process, indent=12)))
                     other_conditions = other_process.condition_list + other_process.bystanders
@@ -1512,7 +1513,7 @@ class ProcListWriter():
                 try:
                     action = [action for action in process0.action_list
                                             if condition.coord == action.coord][0]
-                except Exception, e:
+                except Exception as e:
                     print(e)
                     print('Trouble with process %s' % process.name)
                     print('And condition %s' % condition)
@@ -1608,7 +1609,7 @@ class ProcListWriter():
 
         """
 
-        for lat_int_loop, (lat_int_group, processes) in enumerate(lat_int_groups.iteritems()):
+        for lat_int_loop, (lat_int_group, processes) in enumerate(lat_int_groups.items()):
             out = open('%s/nli_%04d.f90' % (self.dir, lat_int_loop), 'w')
             out.write('module nli_%04d\n' % lat_int_loop)
             out.write('use kind_values\n')
@@ -1642,7 +1643,7 @@ class ProcListWriter():
             case_tree = {}
             for process in processes:
                 conditions = [y for y in sorted(process.condition_list + process.bystanders,
-                                                 key=lambda x: x.coord, cmp=cmp_coords)
+                                                 key=functools.cmp_to_key(lambda a, b: cmp_coords(a.coord, b.coord)))
                                                  if not y.implicit]
                 node = case_tree
                 for condition in conditions:
@@ -1681,14 +1682,14 @@ class ProcListWriter():
 
         """
 
-        for lat_int_loop, (lat_int_group, processes) in enumerate(lat_int_groups.iteritems()):
+        for lat_int_loop, (lat_int_group, processes) in enumerate(lat_int_groups.items()):
             process0 = processes[0]
 
             # put together the bystander conditions and true conditions,
             # sort them in a unique way and throw out those that are
             # implicit
             conditions0 = [y for y in sorted(process0.condition_list + process0.bystanders,
-                                             key=lambda x: x.coord, cmp=cmp_coords)
+                                             key=functools.cmp_to_key(lambda a, b: cmp_coords(a.coord, b.coord)))
                                              if not y.implicit]
             # DEBUGGING
             self._db_print(process0.name, conditions0)
@@ -1718,7 +1719,7 @@ class ProcListWriter():
                 else:
                     nr_of_species = len(data.species_list)
                 conditions = [y for y in sorted(process.condition_list + process.bystanders,
-                                                key=lambda x: x.coord, cmp=cmp_coords)
+                                                key=functools.cmp_to_key(lambda a, b: cmp_coords(a.coord, b.coord)))
                                                 if not y.implicit]
 
                 for j, bystander in enumerate(conditions):
@@ -1743,7 +1744,7 @@ class ProcListWriter():
             # use generator object to save memory
             if USE_ARRAY:
                 compression_index = (compression_map.get(i, 0) for
-                                     i in xrange(nr_of_species**len(conditions0)))
+                                     i in range(nr_of_species**len(conditions0)))
                 out.write('    integer, dimension(%s), parameter :: lat_int_index_%s = (/ &\n'
                           % (len(compression_index), lat_int_group))
                 outstr = ', '.join(map(str, compression_index))
@@ -1767,7 +1768,7 @@ class ProcListWriter():
                           % (lat_int_group, lat_int_group))
             else:
                 out.write('\n    select case(n)\n')
-                for i, proc_name in sorted(compression_map.iteritems()):
+                for i, proc_name in sorted(compression_map.items()):
                     if proc_name:
                         out.write('    case(%s)\n' % i)
                         out.write('        nli_%s = %s\n' %
@@ -1853,7 +1854,7 @@ class ProcListWriter():
 
                                         # filter out the current condition, because we know we set it to true
                                         # right now
-                                        other_conditions = filter(lambda x: x.coord != condition.coord, process.condition_list)
+                                        other_conditions = list(filter(lambda x: x.coord != condition.coord, process.condition_list))
                                         # note how '-' operation is defined for Coord class !
                                         # we change the coordinate part to already point at
                                         # the right relative site
@@ -2006,7 +2007,7 @@ class ProcListWriter():
                 out.write('%scall del_proc(%s, %s)\n' % (' ' * indent, item[1][0], item[1][1]))
 
         # and only keep those that have conditions
-        items = filter(lambda x: x[0], items)
+        items = list(filter(lambda x: x[0], items))
         if not items:
             return
 
@@ -2016,7 +2017,9 @@ class ProcListWriter():
 
         # filter out list of uniq answers for this site
         answers = [y.species for y in filter(lambda x: x.coord == most_common_coord, _flatten([x[0] for x in items]))]
-        uniq_answers = list(set(answers))
+        # Remove duplicates and sort alphabetically for deterministic output
+        # Python 2 used hash-based set() ordering which was non-deterministic
+        uniq_answers = sorted(list(set(answers)))
 
         if self.data.meta.debug > 1:
             out.write('print *,"    LATTICE/GET_SPECIES/VSITE","%s"\n' % most_common_coord)
@@ -2028,18 +2031,18 @@ class ProcListWriter():
             out.write('%scase(%s)\n' % ((indent) * ' ', answer))
             # this very crazy expression matches at items that contain
             # a question for the same coordinate and have the same answer here
-            nested_items = filter(
+            nested_items = list(filter(
                 lambda x: (most_common_coord in [y.coord for y in x[0]]
-                and answer == filter(lambda y: y.coord == most_common_coord, x[0])[0].species),
-                items)
+                and answer == list(filter(lambda y: y.coord == most_common_coord, x[0]))[0].species),
+                items))
             # pruned items are almost identical to nested items, except the have
             # the one condition removed, that we just met
             pruned_items = []
             for nested_item in nested_items:
-                conditions = filter(lambda x: most_common_coord != x.coord, nested_item[0])
+                conditions = list(filter(lambda x: most_common_coord != x.coord, nested_item[0]))
                 pruned_items.append((conditions, nested_item[1]))
 
-            items = filter(lambda x: x not in nested_items, items)
+            items = list(filter(lambda x: x not in nested_items, items))
             self._write_optimal_iftree(pruned_items, indent + 4, out)
         out.write('%send select\n\n' % (indent * ' ',))
 
@@ -2055,7 +2058,7 @@ class ProcListWriter():
         handles rate constants update at fortran level'''
 
         import tokenize
-        import StringIO
+        from io import StringIO
         import itertools
         from kmos import evaluate_rate_expression
         from kmos import rate_aliases
@@ -2160,13 +2163,13 @@ class ProcListWriter():
             specs_dict = {}
             for byst in process.bystander_list:
                 for flg in byst.flag.split():
-                    if specs_dict.has_key(flg):
+                    if flg in specs_dict:
                         specs_dict[flg].extend(byst.allowed_species)
                     else:
                         specs_dict[flg] = copy.deepcopy(byst.allowed_species)
                     flags.append(flg)
             flags = sorted(list(set(flags)))
-            for flg,spclist in specs_dict.iteritems():
+            for flg,spclist in specs_dict.items():
                 specs_dict[flg] = sorted(spclist)
 
 
@@ -2291,7 +2294,7 @@ class ProcListWriter():
 
 
     def _otf_get_auxilirary_params(self,data):
-        import StringIO
+        from io import StringIO
         import tokenize
         from kmos import units, rate_aliases
         units_list = []
@@ -2302,10 +2305,10 @@ class ProcListWriter():
             if process.otf_rate:
                 exprs.append(process.otf_rate)
             for expr in exprs:
-                for old, new in rate_aliases.iteritems():
+                for old, new in rate_aliases.items():
                     expr=expr.replace(old, new)
                 try:
-                    tokenize_input = StringIO.StringIO(expr).readline
+                    tokenize_input = StringIO(expr).readline
                     tokens = list(tokenize.generate_tokens(tokenize_input))
                 except:
                     raise Exception('Could not tokenize expression: %s' % expr)
@@ -2378,7 +2381,8 @@ class ProcListWriter():
         returning the processed line and a list of the
         nr_<species>_<flag> encountered
         """
-        import StringIO, tokenize
+        from io import StringIO
+        import tokenize
         from kmos import units, rate_aliases
 
         param_names = [param.name for param in data.parameter_list]
@@ -2393,12 +2397,12 @@ class ProcListWriter():
         expr = expr.replace('otf_rate','gr_{}'.format(procname))
 
         # And all aliases need to be replaced
-        for old, new in rate_aliases.iteritems():
+        for old, new in rate_aliases.items():
             expr = expr.replace(old,new)
 
         # Then time to tokenize:
         try:
-            tokenize_input = StringIO.StringIO(expr).readline
+            tokenize_input = StringIO(expr).readline
             tokens = list(tokenize.generate_tokens(tokenize_input))
         except:
             raise Exception('kmos.io: Could not tokenize expression: %s' % expr)
@@ -2616,7 +2620,7 @@ class ProcListWriter():
                 out2.write('use lattice\n')
                 out2.write('use proclist_pars\n')
                 if self.separate_proclist_pars:
-                    for i in xrange(nprocs):
+                    for i in range(nprocs):
                         out2.write('use gr_{0:04d}\n'.format(i+1))
                 ## TODO Finish with use statments
 
@@ -2632,7 +2636,7 @@ class ProcListWriter():
             # We will sort out all processes that are (potentially) influenced
             # (inhibited, activated or changed rate)
             # by the executing process
-            inh_procs = [copy.copy([]) for i in xrange(nprocs)]
+            inh_procs = [copy.copy([]) for i in range(nprocs)]
             enh_procs = copy.deepcopy(inh_procs)
             aff_procs = copy.deepcopy(enh_procs)
             # And look into how each of its actions...
@@ -2669,9 +2673,9 @@ class ProcListWriter():
                 print('  ')
 
             ## Get rid of repetition
-            for ip in xrange(nprocs):
+            for ip in range(nprocs):
                 inh_procs[ip] = [rel_pos for rel_pos in set(inh_procs[ip])]
-            for ip in xrange(nprocs):
+            for ip in range(nprocs):
                 enh_procs[ip] = [rel_pos for rel_pos in set(enh_procs[ip]) if not
                                  (rel_pos in inh_procs[ip])]
                 aff_procs[ip] = [rel_pos for rel_pos in set(aff_procs[ip]) if not
@@ -2811,7 +2815,7 @@ class ProcListWriter():
                 out.write('%scall del_proc(%s, %s)\n' % (' ' * indent, item[1][0], rel_site))
 
         # and only keep those that have conditions
-        items = filter(lambda x: x[0], items)
+        items = list(filter(lambda x: x[0], items))
         if not items:
             return
 
@@ -2821,7 +2825,9 @@ class ProcListWriter():
 
         # filter out list of uniq answers for this site
         answers = [y.species for y in filter(lambda x: x.coord == most_common_coord, _flatten([x[0] for x in items]))]
-        uniq_answers = list(set(answers))
+        # Remove duplicates and sort alphabetically for deterministic output
+        # Python 2 used hash-based set() ordering which was non-deterministic
+        uniq_answers = sorted(list(set(answers)))
 
         if self.data.meta.debug > 1:
             out.write('print *,"    IFTREE/GET_SPECIES/VSITE","%s"\n' % most_common_coord)
@@ -2849,11 +2855,11 @@ class ProcListWriter():
             # print('for most_common_coord: %s' % most_common_coord)
             # print(' ')
 
-            nested_items = filter(
+            nested_items = list(filter(
                 lambda x:
                 (most_common_coord in [y.coord for y in x[0]]
-                and answer == filter(lambda y: y.coord == most_common_coord, x[0])[0].species),
-                items)
+                and answer == list(filter(lambda y: y.coord == most_common_coord, x[0]))[0].species),
+                items))
 
             # print('nested items resulted in:')
             # print(nested_items)
@@ -2864,10 +2870,10 @@ class ProcListWriter():
             pruned_items = []
             for nested_item in nested_items:
 
-                conditions = filter(lambda x: most_common_coord != x.coord, nested_item[0])
+                conditions = list(filter(lambda x: most_common_coord != x.coord, nested_item[0]))
                 pruned_items.append((conditions, nested_item[1]))
 
-            items = filter(lambda x: x not in nested_items, items)
+            items = list(filter(lambda x: x not in nested_items, items))
             self._write_optimal_iftree_otf(pruned_items, indent + 4, out)
         out.write('%send select\n\n' % (indent * ' ',))
 
@@ -2924,13 +2930,13 @@ class ProcListWriter():
                 parameters = {}
                 for param in data.parameter_list:
                     parameters[param.name] = {'value': param.value}
-            except Exception, e:
+            except Exception as e:
                 raise UserWarning('Parameter ill-defined(%s)\n%s\nProcess: %s'
                                   % (param, e, process.name))
 
             try:
                 evaluate_rate_expression(process.rate_constant, parameters)
-            except Exception, e:
+            except Exception as e:
                 raise UserWarning('Could not evaluate (%s)\n%s\nProcess: %s'
                                   % (process.rate_constant, e, process.name))
         out.write('    }\n\n')
@@ -3079,7 +3085,7 @@ def export_source(project_tree, export_dir=None, code_generator=None, options=No
 
     for filename in exec_files:
         shutil.copy(os.path.join(APP_ABS_PATH, filename), export_dir)
-        os.chmod(os.path.join(export_dir, filename), 0755)
+        os.chmod(os.path.join(export_dir, filename), 0o755)
 
     # SECOND
     # produce those source files that are written on the fly

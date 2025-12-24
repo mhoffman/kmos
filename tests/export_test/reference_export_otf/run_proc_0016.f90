@@ -14,17 +14,17 @@ subroutine run_proc_oxygen_adsorption_cus_cus(cell)
 
 ! Disable processes
 
-    if(can_do(co_adsorption_cus,cell + (/ 0, 1, 0, 1/))) then
-        call del_proc(co_adsorption_cus,cell + (/ 0, 1, 0, 1/))
-    end if
     if(can_do(co_adsorption_cus,cell + (/ 0, 0, 0, 1/))) then
         call del_proc(co_adsorption_cus,cell + (/ 0, 0, 0, 1/))
     end if
-    if(can_do(co_desorption_cus,cell + (/ 0, 1, 0, 1/))) then
-        call del_proc(co_desorption_cus,cell + (/ 0, 1, 0, 1/))
+    if(can_do(co_adsorption_cus,cell + (/ 0, 1, 0, 1/))) then
+        call del_proc(co_adsorption_cus,cell + (/ 0, 1, 0, 1/))
     end if
     if(can_do(co_desorption_cus,cell + (/ 0, 0, 0, 1/))) then
         call del_proc(co_desorption_cus,cell + (/ 0, 0, 0, 1/))
+    end if
+    if(can_do(co_desorption_cus,cell + (/ 0, 1, 0, 1/))) then
+        call del_proc(co_desorption_cus,cell + (/ 0, 1, 0, 1/))
     end if
     if(can_do(co_diffusion_bridge_cus_left,cell + (/ 1, 0, 0, 1/))) then
         call del_proc(co_diffusion_bridge_cus_left,cell + (/ 1, 0, 0, 1/))
@@ -32,35 +32,32 @@ subroutine run_proc_oxygen_adsorption_cus_cus(cell)
     if(can_do(co_diffusion_bridge_cus_left,cell + (/ 1, 1, 0, 1/))) then
         call del_proc(co_diffusion_bridge_cus_left,cell + (/ 1, 1, 0, 1/))
     end if
-    if(can_do(co_diffusion_bridge_cus_right,cell + (/ 0, 1, 0, 1/))) then
-        call del_proc(co_diffusion_bridge_cus_right,cell + (/ 0, 1, 0, 1/))
-    end if
     if(can_do(co_diffusion_bridge_cus_right,cell + (/ 0, 0, 0, 1/))) then
         call del_proc(co_diffusion_bridge_cus_right,cell + (/ 0, 0, 0, 1/))
     end if
-    if(can_do(co_diffusion_cus_bridge_left,cell + (/ 0, 1, 0, 1/))) then
-        call del_proc(co_diffusion_cus_bridge_left,cell + (/ 0, 1, 0, 1/))
+    if(can_do(co_diffusion_bridge_cus_right,cell + (/ 0, 1, 0, 1/))) then
+        call del_proc(co_diffusion_bridge_cus_right,cell + (/ 0, 1, 0, 1/))
     end if
     if(can_do(co_diffusion_cus_bridge_left,cell + (/ 0, 0, 0, 1/))) then
         call del_proc(co_diffusion_cus_bridge_left,cell + (/ 0, 0, 0, 1/))
     end if
-    if(can_do(co_diffusion_cus_bridge_right,cell + (/ 0, 1, 0, 1/))) then
-        call del_proc(co_diffusion_cus_bridge_right,cell + (/ 0, 1, 0, 1/))
+    if(can_do(co_diffusion_cus_bridge_left,cell + (/ 0, 1, 0, 1/))) then
+        call del_proc(co_diffusion_cus_bridge_left,cell + (/ 0, 1, 0, 1/))
     end if
     if(can_do(co_diffusion_cus_bridge_right,cell + (/ 0, 0, 0, 1/))) then
         call del_proc(co_diffusion_cus_bridge_right,cell + (/ 0, 0, 0, 1/))
     end if
+    if(can_do(co_diffusion_cus_bridge_right,cell + (/ 0, 1, 0, 1/))) then
+        call del_proc(co_diffusion_cus_bridge_right,cell + (/ 0, 1, 0, 1/))
+    end if
     if(can_do(co_diffusion_cus_cus_down,cell + (/ 0, 2, 0, 1/))) then
         call del_proc(co_diffusion_cus_cus_down,cell + (/ 0, 2, 0, 1/))
-    end if
-    if(can_do(co_diffusion_cus_cus_down,cell + (/ 0, 1, 0, 1/))) then
-        call del_proc(co_diffusion_cus_cus_down,cell + (/ 0, 1, 0, 1/))
     end if
     if(can_do(co_diffusion_cus_cus_down,cell + (/ 0, 0, 0, 1/))) then
         call del_proc(co_diffusion_cus_cus_down,cell + (/ 0, 0, 0, 1/))
     end if
-    if(can_do(co_diffusion_cus_cus_up,cell + (/ 0, 1, 0, 1/))) then
-        call del_proc(co_diffusion_cus_cus_up,cell + (/ 0, 1, 0, 1/))
+    if(can_do(co_diffusion_cus_cus_down,cell + (/ 0, 1, 0, 1/))) then
+        call del_proc(co_diffusion_cus_cus_down,cell + (/ 0, 1, 0, 1/))
     end if
     if(can_do(co_diffusion_cus_cus_up,cell + (/ 0, 0, 0, 1/))) then
         call del_proc(co_diffusion_cus_cus_up,cell + (/ 0, 0, 0, 1/))
@@ -68,20 +65,20 @@ subroutine run_proc_oxygen_adsorption_cus_cus(cell)
     if(can_do(co_diffusion_cus_cus_up,cell + (/ 0, -1, 0, 1/))) then
         call del_proc(co_diffusion_cus_cus_up,cell + (/ 0, -1, 0, 1/))
     end if
+    if(can_do(co_diffusion_cus_cus_up,cell + (/ 0, 1, 0, 1/))) then
+        call del_proc(co_diffusion_cus_cus_up,cell + (/ 0, 1, 0, 1/))
+    end if
     if(can_do(oxygen_adsorption_bridge_cus_le0000,cell + (/ 1, 0, 0, 1/))) then
         call del_proc(oxygen_adsorption_bridge_cus_le0000,cell + (/ 1, 0, 0, 1/))
     end if
     if(can_do(oxygen_adsorption_bridge_cus_le0000,cell + (/ 1, 1, 0, 1/))) then
         call del_proc(oxygen_adsorption_bridge_cus_le0000,cell + (/ 1, 1, 0, 1/))
     end if
-    if(can_do(oxygen_adsorption_bridge_cus_ri0000,cell + (/ 0, 1, 0, 1/))) then
-        call del_proc(oxygen_adsorption_bridge_cus_ri0000,cell + (/ 0, 1, 0, 1/))
-    end if
     if(can_do(oxygen_adsorption_bridge_cus_ri0000,cell + (/ 0, 0, 0, 1/))) then
         call del_proc(oxygen_adsorption_bridge_cus_ri0000,cell + (/ 0, 0, 0, 1/))
     end if
-    if(can_do(oxygen_adsorption_cus_cus,cell + (/ 0, 1, 0, 1/))) then
-        call del_proc(oxygen_adsorption_cus_cus,cell + (/ 0, 1, 0, 1/))
+    if(can_do(oxygen_adsorption_bridge_cus_ri0000,cell + (/ 0, 1, 0, 1/))) then
+        call del_proc(oxygen_adsorption_bridge_cus_ri0000,cell + (/ 0, 1, 0, 1/))
     end if
     if(can_do(oxygen_adsorption_cus_cus,cell + (/ 0, 0, 0, 1/))) then
         call del_proc(oxygen_adsorption_cus_cus,cell + (/ 0, 0, 0, 1/))
@@ -89,17 +86,20 @@ subroutine run_proc_oxygen_adsorption_cus_cus(cell)
     if(can_do(oxygen_adsorption_cus_cus,cell + (/ 0, -1, 0, 1/))) then
         call del_proc(oxygen_adsorption_cus_cus,cell + (/ 0, -1, 0, 1/))
     end if
+    if(can_do(oxygen_adsorption_cus_cus,cell + (/ 0, 1, 0, 1/))) then
+        call del_proc(oxygen_adsorption_cus_cus,cell + (/ 0, 1, 0, 1/))
+    end if
     if(can_do(oxygen_diffusion_bridge_cus_lef0000,cell + (/ 1, 0, 0, 1/))) then
         call del_proc(oxygen_diffusion_bridge_cus_lef0000,cell + (/ 1, 0, 0, 1/))
     end if
     if(can_do(oxygen_diffusion_bridge_cus_lef0000,cell + (/ 1, 1, 0, 1/))) then
         call del_proc(oxygen_diffusion_bridge_cus_lef0000,cell + (/ 1, 1, 0, 1/))
     end if
-    if(can_do(oxygen_diffusion_bridge_cus_rig0000,cell + (/ 0, 1, 0, 1/))) then
-        call del_proc(oxygen_diffusion_bridge_cus_rig0000,cell + (/ 0, 1, 0, 1/))
-    end if
     if(can_do(oxygen_diffusion_bridge_cus_rig0000,cell + (/ 0, 0, 0, 1/))) then
         call del_proc(oxygen_diffusion_bridge_cus_rig0000,cell + (/ 0, 0, 0, 1/))
+    end if
+    if(can_do(oxygen_diffusion_bridge_cus_rig0000,cell + (/ 0, 1, 0, 1/))) then
+        call del_proc(oxygen_diffusion_bridge_cus_rig0000,cell + (/ 0, 1, 0, 1/))
     end if
     if(can_do(oxygen_diffusion_cus_cus_down,cell + (/ 0, 2, 0, 1/))) then
         call del_proc(oxygen_diffusion_cus_cus_down,cell + (/ 0, 2, 0, 1/))
@@ -119,11 +119,11 @@ subroutine run_proc_oxygen_adsorption_cus_cus(cell)
     if(can_do(reaction_oxygen_bridge_co_cus_l0000,cell + (/ 1, 1, 0, 1/))) then
         call del_proc(reaction_oxygen_bridge_co_cus_l0000,cell + (/ 1, 1, 0, 1/))
     end if
-    if(can_do(reaction_oxygen_bridge_co_cus_r0000,cell + (/ 0, 1, 0, 1/))) then
-        call del_proc(reaction_oxygen_bridge_co_cus_r0000,cell + (/ 0, 1, 0, 1/))
-    end if
     if(can_do(reaction_oxygen_bridge_co_cus_r0000,cell + (/ 0, 0, 0, 1/))) then
         call del_proc(reaction_oxygen_bridge_co_cus_r0000,cell + (/ 0, 0, 0, 1/))
+    end if
+    if(can_do(reaction_oxygen_bridge_co_cus_r0000,cell + (/ 0, 1, 0, 1/))) then
+        call del_proc(reaction_oxygen_bridge_co_cus_r0000,cell + (/ 0, 1, 0, 1/))
     end if
     if(can_do(reaction_oxygen_cus_co_cus_down,cell + (/ 0, 2, 0, 1/))) then
         call del_proc(reaction_oxygen_cus_co_cus_down,cell + (/ 0, 2, 0, 1/))
@@ -166,15 +166,6 @@ subroutine run_proc_oxygen_adsorption_cus_cus(cell)
         call add_proc(oxygen_desorption_bridge_cus_le0000, cell + (/ 1, 1, 0, 1/), gr_oxygen_desorption_bridge_cus_le0000(cell + (/ 1, 1, 0, 0/)))
     end select
 
-    select case(get_species(cell + (/0, 1, 0, ruo2_bridge/)))
-    case(co)
-        call add_proc(reaction_oxygen_cus_co_bridge_l0000, cell + (/ 0, 1, 0, 1/), gr_reaction_oxygen_cus_co_bridge_l0000(cell + (/ 0, 1, 0, 0/)))
-    case(empty)
-        call add_proc(oxygen_diffusion_cus_bridge_lef0000, cell + (/ 0, 1, 0, 1/), gr_oxygen_diffusion_cus_bridge_lef0000(cell + (/ 0, 1, 0, 0/)))
-    case(oxygen)
-        call add_proc(oxygen_desorption_bridge_cus_ri0000, cell + (/ 0, 1, 0, 1/), gr_oxygen_desorption_bridge_cus_ri0000(cell + (/ 0, 1, 0, 0/)))
-    end select
-
     select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
     case(co)
         call add_proc(reaction_oxygen_cus_co_bridge_l0000, cell + (/ 0, 0, 0, 1/), gr_reaction_oxygen_cus_co_bridge_l0000(cell + (/ 0, 0, 0, 0/)))
@@ -184,13 +175,13 @@ subroutine run_proc_oxygen_adsorption_cus_cus(cell)
         call add_proc(oxygen_desorption_bridge_cus_ri0000, cell + (/ 0, 0, 0, 1/), gr_oxygen_desorption_bridge_cus_ri0000(cell + (/ 0, 0, 0, 0/)))
     end select
 
-    select case(get_species(cell + (/0, 2, 0, ruo2_cus/)))
+    select case(get_species(cell + (/0, 1, 0, ruo2_bridge/)))
     case(co)
-        call add_proc(reaction_oxygen_cus_co_cus_up, cell + (/ 0, 1, 0, 1/), gr_reaction_oxygen_cus_co_cus_up(cell + (/ 0, 1, 0, 0/)))
+        call add_proc(reaction_oxygen_cus_co_bridge_l0000, cell + (/ 0, 1, 0, 1/), gr_reaction_oxygen_cus_co_bridge_l0000(cell + (/ 0, 1, 0, 0/)))
     case(empty)
-        call add_proc(oxygen_diffusion_cus_cus_up, cell + (/ 0, 1, 0, 1/), gr_oxygen_diffusion_cus_cus_up(cell + (/ 0, 1, 0, 0/)))
+        call add_proc(oxygen_diffusion_cus_bridge_lef0000, cell + (/ 0, 1, 0, 1/), gr_oxygen_diffusion_cus_bridge_lef0000(cell + (/ 0, 1, 0, 0/)))
     case(oxygen)
-        call add_proc(oxygen_desorption_cus_cus, cell + (/ 0, 1, 0, 1/), gr_oxygen_desorption_cus_cus(cell + (/ 0, 1, 0, 0/)))
+        call add_proc(oxygen_desorption_bridge_cus_ri0000, cell + (/ 0, 1, 0, 1/), gr_oxygen_desorption_bridge_cus_ri0000(cell + (/ 0, 1, 0, 0/)))
     end select
 
     select case(get_species(cell + (/0, -1, 0, ruo2_cus/)))
@@ -200,6 +191,15 @@ subroutine run_proc_oxygen_adsorption_cus_cus(cell)
         call add_proc(oxygen_diffusion_cus_cus_down, cell + (/ 0, 0, 0, 1/), gr_oxygen_diffusion_cus_cus_down(cell + (/ 0, 0, 0, 0/)))
     case(oxygen)
         call add_proc(oxygen_desorption_cus_cus, cell + (/ 0, -1, 0, 1/), gr_oxygen_desorption_cus_cus(cell + (/ 0, -1, 0, 0/)))
+    end select
+
+    select case(get_species(cell + (/0, 2, 0, ruo2_cus/)))
+    case(co)
+        call add_proc(reaction_oxygen_cus_co_cus_up, cell + (/ 0, 1, 0, 1/), gr_reaction_oxygen_cus_co_cus_up(cell + (/ 0, 1, 0, 0/)))
+    case(empty)
+        call add_proc(oxygen_diffusion_cus_cus_up, cell + (/ 0, 1, 0, 1/), gr_oxygen_diffusion_cus_cus_up(cell + (/ 0, 1, 0, 0/)))
+    case(oxygen)
+        call add_proc(oxygen_desorption_cus_cus, cell + (/ 0, 1, 0, 1/), gr_oxygen_desorption_cus_cus(cell + (/ 0, 1, 0, 0/)))
     end select
 
 

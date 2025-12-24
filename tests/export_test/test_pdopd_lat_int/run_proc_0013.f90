@@ -49,55 +49,21 @@ use nli_0045
 use proclist_constants
 implicit none
 contains
-subroutine run_proc_o_COads_hollow2(cell)
+subroutine run_proc_m_COads_b2(cell)
 
     integer(kind=iint), dimension(4), intent(in) :: cell
 
     ! disable processes that have to be disabled
-    call del_proc(nli_destruct1(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call del_proc(nli_destruct10(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call del_proc(nli_destruct11(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call del_proc(nli_destruct2(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call del_proc(nli_destruct3(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call del_proc(nli_destruct4(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call del_proc(nli_destruct5(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call del_proc(nli_destruct6(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call del_proc(nli_destruct7(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call del_proc(nli_destruct8(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call del_proc(nli_destruct9(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call del_proc(nli_o_COads_hollow2(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call del_proc(nli_o_COdes_hollow2(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call del_proc(nli_o_COdif_h1h2down(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call del_proc(nli_o_COdif_h1h2up(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call del_proc(nli_o_O2ads_h1h2(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call del_proc(nli_o_O2ads_h2h1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call del_proc(nli_o_O2des_h1h2(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call del_proc(nli_o_O2des_h2h1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
+    call del_proc(nli_m_COads_b2(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
+    call del_proc(nli_m_COdes_b2(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
 
     ! update lattice
-    call replace_species(cell + (/0, 0, 0, PdO_hollow2/), empty, CO)
+    call replace_species(cell + (/0, 0, 0, Pd100_b2/), empty, CO)
 
     ! enable processes that have to be enabled
-    call add_proc(nli_destruct1(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call add_proc(nli_destruct10(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call add_proc(nli_destruct11(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call add_proc(nli_destruct2(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call add_proc(nli_destruct3(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call add_proc(nli_destruct4(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call add_proc(nli_destruct5(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call add_proc(nli_destruct6(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call add_proc(nli_destruct7(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call add_proc(nli_destruct8(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call add_proc(nli_destruct9(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call add_proc(nli_o_COads_hollow2(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call add_proc(nli_o_COdes_hollow2(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call add_proc(nli_o_COdif_h1h2down(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
-    call add_proc(nli_o_COdif_h1h2up(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call add_proc(nli_o_O2ads_h1h2(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call add_proc(nli_o_O2ads_h2h1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call add_proc(nli_o_O2des_h1h2(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call add_proc(nli_o_O2des_h2h1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
+    call add_proc(nli_m_COads_b2(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
+    call add_proc(nli_m_COdes_b2(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
 
-end subroutine run_proc_o_COads_hollow2
+end subroutine run_proc_m_COads_b2
 
 end module

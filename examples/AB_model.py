@@ -40,7 +40,7 @@ def main():
     parameters['E_react'] = {'value': 0.9}
 
 
-    for key, value in parameters.iteritems():
+    for key, value in parameters.items():
         pt.add_parameter(name=key, **value)
 
 

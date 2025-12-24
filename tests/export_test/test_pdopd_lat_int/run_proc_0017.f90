@@ -49,7 +49,7 @@ use nli_0045
 use proclist_constants
 implicit none
 contains
-subroutine run_proc_m_COdes_b6(cell)
+subroutine run_proc_m_COads_b6(cell)
 
     integer(kind=iint), dimension(4), intent(in) :: cell
 
@@ -58,12 +58,12 @@ subroutine run_proc_m_COdes_b6(cell)
     call del_proc(nli_m_COdes_b6(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
 
     ! update lattice
-    call replace_species(cell + (/0, 0, 0, Pd100_b6/), CO, empty)
+    call replace_species(cell + (/0, 0, 0, Pd100_b6/), empty, CO)
 
     ! enable processes that have to be enabled
     call add_proc(nli_m_COads_b6(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
     call add_proc(nli_m_COdes_b6(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
 
-end subroutine run_proc_m_COdes_b6
+end subroutine run_proc_m_COads_b6
 
 end module

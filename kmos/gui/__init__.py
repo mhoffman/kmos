@@ -19,7 +19,7 @@
 
 # standard modules
 import optparse
-import StringIO
+from io import StringIO
 import sys
 import os
 
@@ -77,17 +77,17 @@ menu_layout = """\
 def verbose(func):
     """Debugging helper that allows to track input and output of function
     via decoration"""
-    print >> sys.stderr, "monitor %r" % (func.func_name)
+    print("monitor %r" % (func.__name__), file=sys.stderr)
 
     def wrapper_func(*args, **kwargs):
         """The wrapping function
         """
-        print >> sys.stderr, "call(\033[0;31m%s.%s\033[0;30m): %r\n" % \
-                (type(args[0]).__name__, func.func_name, args[1:]), \
-                sys.stderr.flush()
+        print("call(\033[0;31m%s.%s\033[0;30m): %r\n" %
+                (type(args[0]).__name__, func.__name__, args[1:]), file=sys.stderr)
+        sys.stderr.flush()
         ret = func(*args, **kwargs)
-        print >> sys.stderr, "    ret(%s): \033[0;32m%r\033[0;30m\n" % \
-                 (func.func_name, ret)
+        print("    ret(%s): \033[0;32m%r\033[0;30m\n" %
+                 (func.__name__, ret), file=sys.stderr)
         return ret
     return wrapper_func
 
@@ -484,7 +484,7 @@ class Editor(GladeDelegate):
         self.menubar.insert_action_group(actions, 0)
         try:
             mergeid = self.menubar.add_ui_from_string(menu_layout)
-        except gobject.GError, error:
+        except gobject.GError as error:
             print('Building menu failed: %s, %s' % (error, mergeid))
 
         # Initialize the project tree, passing in the menu bar

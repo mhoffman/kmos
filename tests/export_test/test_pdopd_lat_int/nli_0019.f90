@@ -4,17 +4,17 @@ use lattice
 use proclist_constants
 implicit none
 contains
-pure function nli_o_COads_hollow1(cell)
+pure function nli_m_COads_b8(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
-    integer(kind=iint) :: nli_o_COads_hollow1
+    integer(kind=iint) :: nli_m_COads_b8
 
-    select case(get_species(cell + (/0, 0, 0, PdO_hollow1/)))
+    select case(get_species(cell + (/0, 0, 0, Pd100_b8/)))
       case(empty)
-        nli_o_COads_hollow1 = o_COads_hollow1; return
+        nli_m_COads_b8 = m_COads_b8; return
       case default
-        nli_o_COads_hollow1 = 0; return
+        nli_m_COads_b8 = 0; return
     end select
 
-end function nli_o_COads_hollow1
+end function nli_m_COads_b8
 
 end module

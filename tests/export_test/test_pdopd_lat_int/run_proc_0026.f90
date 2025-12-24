@@ -49,21 +49,21 @@ use nli_0045
 use proclist_constants
 implicit none
 contains
-subroutine run_proc_m_COads_b6(cell)
+subroutine run_proc_m_COdes_b5(cell)
 
     integer(kind=iint), dimension(4), intent(in) :: cell
 
     ! disable processes that have to be disabled
-    call del_proc(nli_m_COads_b6(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call del_proc(nli_m_COdes_b6(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
+    call del_proc(nli_m_COads_b5(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
+    call del_proc(nli_m_COdes_b5(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
 
     ! update lattice
-    call replace_species(cell + (/0, 0, 0, Pd100_b6/), empty, CO)
+    call replace_species(cell + (/0, 0, 0, Pd100_b5/), CO, empty)
 
     ! enable processes that have to be enabled
-    call add_proc(nli_m_COads_b6(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call add_proc(nli_m_COdes_b6(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
+    call add_proc(nli_m_COads_b5(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
+    call add_proc(nli_m_COdes_b5(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
 
-end subroutine run_proc_m_COads_b6
+end subroutine run_proc_m_COdes_b5
 
 end module

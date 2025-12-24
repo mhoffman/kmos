@@ -29,11 +29,11 @@ subroutine run_proc_CO_ads(cell)
     if(can_do(CO_oxidation_03,cell + (/ 0, 1, 0, 1/))) then
         call del_proc(CO_oxidation_03,cell + (/ 0, 1, 0, 1/))
     end if
-    if(can_do(O2_des_right,cell + (/ -1, 0, 0, 1/))) then
-        call del_proc(O2_des_right,cell + (/ -1, 0, 0, 1/))
-    end if
     if(can_do(O2_des_right,cell + (/ 0, 0, 0, 1/))) then
         call del_proc(O2_des_right,cell + (/ 0, 0, 0, 1/))
+    end if
+    if(can_do(O2_des_right,cell + (/ -1, 0, 0, 1/))) then
+        call del_proc(O2_des_right,cell + (/ -1, 0, 0, 1/))
     end if
     if(can_do(O2_des_up,cell + (/ 0, 0, 0, 1/))) then
         call del_proc(O2_des_up,cell + (/ 0, 0, 0, 1/))
@@ -41,11 +41,11 @@ subroutine run_proc_CO_ads(cell)
     if(can_do(O2_des_up,cell + (/ 0, -1, 0, 1/))) then
         call del_proc(O2_des_up,cell + (/ 0, -1, 0, 1/))
     end if
-    if(can_do(O_ads_00,cell + (/ -1, 0, 0, 1/))) then
-        call del_proc(O_ads_00,cell + (/ -1, 0, 0, 1/))
-    end if
     if(can_do(O_ads_00,cell + (/ 0, 0, 0, 1/))) then
         call del_proc(O_ads_00,cell + (/ 0, 0, 0, 1/))
+    end if
+    if(can_do(O_ads_00,cell + (/ -1, 0, 0, 1/))) then
+        call del_proc(O_ads_00,cell + (/ -1, 0, 0, 1/))
     end if
     if(can_do(O_ads_01,cell + (/ 0, 0, 0, 1/))) then
         call del_proc(O_ads_01,cell + (/ 0, 0, 0, 1/))
@@ -65,32 +65,41 @@ subroutine run_proc_CO_ads(cell)
     if(can_do(CO_ads,cell + (/ -1, 0, 0, 1/))) then
         call update_rates_matrix(CO_ads,cell + (/ -1, 0, 0, 1/),gr_CO_ads(cell + (/ -1, 0, 0, 0/)))
     end if
-    if(can_do(CO_ads,cell + (/ 0, 1, 0, 1/))) then
-        call update_rates_matrix(CO_ads,cell + (/ 0, 1, 0, 1/),gr_CO_ads(cell + (/ 0, 1, 0, 0/)))
-    end if
     if(can_do(CO_ads,cell + (/ 0, -1, 0, 1/))) then
         call update_rates_matrix(CO_ads,cell + (/ 0, -1, 0, 1/),gr_CO_ads(cell + (/ 0, -1, 0, 0/)))
     end if
-    if(can_do(CO_oxidation_00,cell + (/ -1, 1, 0, 1/))) then
-        call update_rates_matrix(CO_oxidation_00,cell + (/ -1, 1, 0, 1/),gr_CO_oxidation_00(cell + (/ -1, 1, 0, 0/)))
-    end if
-    if(can_do(CO_oxidation_00,cell + (/ 1, 0, 0, 1/))) then
-        call update_rates_matrix(CO_oxidation_00,cell + (/ 1, 0, 0, 1/),gr_CO_oxidation_00(cell + (/ 1, 0, 0, 0/)))
-    end if
-    if(can_do(CO_oxidation_00,cell + (/ -1, -1, 0, 1/))) then
-        call update_rates_matrix(CO_oxidation_00,cell + (/ -1, -1, 0, 1/),gr_CO_oxidation_00(cell + (/ -1, -1, 0, 0/)))
-    end if
-    if(can_do(CO_oxidation_00,cell + (/ 0, -1, 0, 1/))) then
-        call update_rates_matrix(CO_oxidation_00,cell + (/ 0, -1, 0, 1/),gr_CO_oxidation_00(cell + (/ 0, -1, 0, 0/)))
-    end if
-    if(can_do(CO_oxidation_00,cell + (/ -2, 0, 0, 1/))) then
-        call update_rates_matrix(CO_oxidation_00,cell + (/ -2, 0, 0, 1/),gr_CO_oxidation_00(cell + (/ -2, 0, 0, 0/)))
+    if(can_do(CO_ads,cell + (/ 0, 1, 0, 1/))) then
+        call update_rates_matrix(CO_ads,cell + (/ 0, 1, 0, 1/),gr_CO_ads(cell + (/ 0, 1, 0, 0/)))
     end if
     if(can_do(CO_oxidation_00,cell + (/ 0, 1, 0, 1/))) then
         call update_rates_matrix(CO_oxidation_00,cell + (/ 0, 1, 0, 1/),gr_CO_oxidation_00(cell + (/ 0, 1, 0, 0/)))
     end if
+    if(can_do(CO_oxidation_00,cell + (/ 0, -1, 0, 1/))) then
+        call update_rates_matrix(CO_oxidation_00,cell + (/ 0, -1, 0, 1/),gr_CO_oxidation_00(cell + (/ 0, -1, 0, 0/)))
+    end if
+    if(can_do(CO_oxidation_00,cell + (/ 1, 0, 0, 1/))) then
+        call update_rates_matrix(CO_oxidation_00,cell + (/ 1, 0, 0, 1/),gr_CO_oxidation_00(cell + (/ 1, 0, 0, 0/)))
+    end if
+    if(can_do(CO_oxidation_00,cell + (/ -2, 0, 0, 1/))) then
+        call update_rates_matrix(CO_oxidation_00,cell + (/ -2, 0, 0, 1/),gr_CO_oxidation_00(cell + (/ -2, 0, 0, 0/)))
+    end if
+    if(can_do(CO_oxidation_00,cell + (/ -1, 1, 0, 1/))) then
+        call update_rates_matrix(CO_oxidation_00,cell + (/ -1, 1, 0, 1/),gr_CO_oxidation_00(cell + (/ -1, 1, 0, 0/)))
+    end if
+    if(can_do(CO_oxidation_00,cell + (/ -1, -1, 0, 1/))) then
+        call update_rates_matrix(CO_oxidation_00,cell + (/ -1, -1, 0, 1/),gr_CO_oxidation_00(cell + (/ -1, -1, 0, 0/)))
+    end if
+    if(can_do(CO_oxidation_01,cell + (/ 0, 1, 0, 1/))) then
+        call update_rates_matrix(CO_oxidation_01,cell + (/ 0, 1, 0, 1/),gr_CO_oxidation_01(cell + (/ 0, 1, 0, 0/)))
+    end if
+    if(can_do(CO_oxidation_01,cell + (/ 0, -2, 0, 1/))) then
+        call update_rates_matrix(CO_oxidation_01,cell + (/ 0, -2, 0, 1/),gr_CO_oxidation_01(cell + (/ 0, -2, 0, 0/)))
+    end if
     if(can_do(CO_oxidation_01,cell + (/ 1, 0, 0, 1/))) then
         call update_rates_matrix(CO_oxidation_01,cell + (/ 1, 0, 0, 1/),gr_CO_oxidation_01(cell + (/ 1, 0, 0, 0/)))
+    end if
+    if(can_do(CO_oxidation_01,cell + (/ -1, 0, 0, 1/))) then
+        call update_rates_matrix(CO_oxidation_01,cell + (/ -1, 0, 0, 1/),gr_CO_oxidation_01(cell + (/ -1, 0, 0, 0/)))
     end if
     if(can_do(CO_oxidation_01,cell + (/ 1, -1, 0, 1/))) then
         call update_rates_matrix(CO_oxidation_01,cell + (/ 1, -1, 0, 1/),gr_CO_oxidation_01(cell + (/ 1, -1, 0, 0/)))
@@ -98,20 +107,11 @@ subroutine run_proc_CO_ads(cell)
     if(can_do(CO_oxidation_01,cell + (/ -1, -1, 0, 1/))) then
         call update_rates_matrix(CO_oxidation_01,cell + (/ -1, -1, 0, 1/),gr_CO_oxidation_01(cell + (/ -1, -1, 0, 0/)))
     end if
-    if(can_do(CO_oxidation_01,cell + (/ 0, -2, 0, 1/))) then
-        call update_rates_matrix(CO_oxidation_01,cell + (/ 0, -2, 0, 1/),gr_CO_oxidation_01(cell + (/ 0, -2, 0, 0/)))
-    end if
-    if(can_do(CO_oxidation_01,cell + (/ -1, 0, 0, 1/))) then
-        call update_rates_matrix(CO_oxidation_01,cell + (/ -1, 0, 0, 1/),gr_CO_oxidation_01(cell + (/ -1, 0, 0, 0/)))
-    end if
-    if(can_do(CO_oxidation_01,cell + (/ 0, 1, 0, 1/))) then
-        call update_rates_matrix(CO_oxidation_01,cell + (/ 0, 1, 0, 1/),gr_CO_oxidation_01(cell + (/ 0, 1, 0, 0/)))
-    end if
     if(can_do(CO_oxidation_02,cell + (/ 1, 1, 0, 1/))) then
         call update_rates_matrix(CO_oxidation_02,cell + (/ 1, 1, 0, 1/),gr_CO_oxidation_02(cell + (/ 1, 1, 0, 0/)))
     end if
-    if(can_do(CO_oxidation_02,cell + (/ 1, -1, 0, 1/))) then
-        call update_rates_matrix(CO_oxidation_02,cell + (/ 1, -1, 0, 1/),gr_CO_oxidation_02(cell + (/ 1, -1, 0, 0/)))
+    if(can_do(CO_oxidation_02,cell + (/ 0, 1, 0, 1/))) then
+        call update_rates_matrix(CO_oxidation_02,cell + (/ 0, 1, 0, 1/),gr_CO_oxidation_02(cell + (/ 0, 1, 0, 0/)))
     end if
     if(can_do(CO_oxidation_02,cell + (/ 0, -1, 0, 1/))) then
         call update_rates_matrix(CO_oxidation_02,cell + (/ 0, -1, 0, 1/),gr_CO_oxidation_02(cell + (/ 0, -1, 0, 0/)))
@@ -119,65 +119,65 @@ subroutine run_proc_CO_ads(cell)
     if(can_do(CO_oxidation_02,cell + (/ -1, 0, 0, 1/))) then
         call update_rates_matrix(CO_oxidation_02,cell + (/ -1, 0, 0, 1/),gr_CO_oxidation_02(cell + (/ -1, 0, 0, 0/)))
     end if
-    if(can_do(CO_oxidation_02,cell + (/ 0, 1, 0, 1/))) then
-        call update_rates_matrix(CO_oxidation_02,cell + (/ 0, 1, 0, 1/),gr_CO_oxidation_02(cell + (/ 0, 1, 0, 0/)))
-    end if
     if(can_do(CO_oxidation_02,cell + (/ 2, 0, 0, 1/))) then
         call update_rates_matrix(CO_oxidation_02,cell + (/ 2, 0, 0, 1/),gr_CO_oxidation_02(cell + (/ 2, 0, 0, 0/)))
     end if
-    if(can_do(CO_oxidation_03,cell + (/ -1, 1, 0, 1/))) then
-        call update_rates_matrix(CO_oxidation_03,cell + (/ -1, 1, 0, 1/),gr_CO_oxidation_03(cell + (/ -1, 1, 0, 0/)))
-    end if
-    if(can_do(CO_oxidation_03,cell + (/ 0, 2, 0, 1/))) then
-        call update_rates_matrix(CO_oxidation_03,cell + (/ 0, 2, 0, 1/),gr_CO_oxidation_03(cell + (/ 0, 2, 0, 0/)))
+    if(can_do(CO_oxidation_02,cell + (/ 1, -1, 0, 1/))) then
+        call update_rates_matrix(CO_oxidation_02,cell + (/ 1, -1, 0, 1/),gr_CO_oxidation_02(cell + (/ 1, -1, 0, 0/)))
     end if
     if(can_do(CO_oxidation_03,cell + (/ 1, 1, 0, 1/))) then
         call update_rates_matrix(CO_oxidation_03,cell + (/ 1, 1, 0, 1/),gr_CO_oxidation_03(cell + (/ 1, 1, 0, 0/)))
     end if
-    if(can_do(CO_oxidation_03,cell + (/ 1, 0, 0, 1/))) then
-        call update_rates_matrix(CO_oxidation_03,cell + (/ 1, 0, 0, 1/),gr_CO_oxidation_03(cell + (/ 1, 0, 0, 0/)))
+    if(can_do(CO_oxidation_03,cell + (/ 0, 2, 0, 1/))) then
+        call update_rates_matrix(CO_oxidation_03,cell + (/ 0, 2, 0, 1/),gr_CO_oxidation_03(cell + (/ 0, 2, 0, 0/)))
     end if
     if(can_do(CO_oxidation_03,cell + (/ 0, -1, 0, 1/))) then
         call update_rates_matrix(CO_oxidation_03,cell + (/ 0, -1, 0, 1/),gr_CO_oxidation_03(cell + (/ 0, -1, 0, 0/)))
     end if
+    if(can_do(CO_oxidation_03,cell + (/ 1, 0, 0, 1/))) then
+        call update_rates_matrix(CO_oxidation_03,cell + (/ 1, 0, 0, 1/),gr_CO_oxidation_03(cell + (/ 1, 0, 0, 0/)))
+    end if
     if(can_do(CO_oxidation_03,cell + (/ -1, 0, 0, 1/))) then
         call update_rates_matrix(CO_oxidation_03,cell + (/ -1, 0, 0, 1/),gr_CO_oxidation_03(cell + (/ -1, 0, 0, 0/)))
     end if
-    if(can_do(O_ads_00,cell + (/ -1, 1, 0, 1/))) then
-        call update_rates_matrix(O_ads_00,cell + (/ -1, 1, 0, 1/),gr_O_ads_00(cell + (/ -1, 1, 0, 0/)))
-    end if
-    if(can_do(O_ads_00,cell + (/ 1, 0, 0, 1/))) then
-        call update_rates_matrix(O_ads_00,cell + (/ 1, 0, 0, 1/),gr_O_ads_00(cell + (/ 1, 0, 0, 0/)))
-    end if
-    if(can_do(O_ads_00,cell + (/ -1, -1, 0, 1/))) then
-        call update_rates_matrix(O_ads_00,cell + (/ -1, -1, 0, 1/),gr_O_ads_00(cell + (/ -1, -1, 0, 0/)))
-    end if
-    if(can_do(O_ads_00,cell + (/ 0, -1, 0, 1/))) then
-        call update_rates_matrix(O_ads_00,cell + (/ 0, -1, 0, 1/),gr_O_ads_00(cell + (/ 0, -1, 0, 0/)))
-    end if
-    if(can_do(O_ads_00,cell + (/ -2, 0, 0, 1/))) then
-        call update_rates_matrix(O_ads_00,cell + (/ -2, 0, 0, 1/),gr_O_ads_00(cell + (/ -2, 0, 0, 0/)))
+    if(can_do(CO_oxidation_03,cell + (/ -1, 1, 0, 1/))) then
+        call update_rates_matrix(CO_oxidation_03,cell + (/ -1, 1, 0, 1/),gr_CO_oxidation_03(cell + (/ -1, 1, 0, 0/)))
     end if
     if(can_do(O_ads_00,cell + (/ 0, 1, 0, 1/))) then
         call update_rates_matrix(O_ads_00,cell + (/ 0, 1, 0, 1/),gr_O_ads_00(cell + (/ 0, 1, 0, 0/)))
     end if
+    if(can_do(O_ads_00,cell + (/ 0, -1, 0, 1/))) then
+        call update_rates_matrix(O_ads_00,cell + (/ 0, -1, 0, 1/),gr_O_ads_00(cell + (/ 0, -1, 0, 0/)))
+    end if
+    if(can_do(O_ads_00,cell + (/ 1, 0, 0, 1/))) then
+        call update_rates_matrix(O_ads_00,cell + (/ 1, 0, 0, 1/),gr_O_ads_00(cell + (/ 1, 0, 0, 0/)))
+    end if
+    if(can_do(O_ads_00,cell + (/ -2, 0, 0, 1/))) then
+        call update_rates_matrix(O_ads_00,cell + (/ -2, 0, 0, 1/),gr_O_ads_00(cell + (/ -2, 0, 0, 0/)))
+    end if
+    if(can_do(O_ads_00,cell + (/ -1, 1, 0, 1/))) then
+        call update_rates_matrix(O_ads_00,cell + (/ -1, 1, 0, 1/),gr_O_ads_00(cell + (/ -1, 1, 0, 0/)))
+    end if
+    if(can_do(O_ads_00,cell + (/ -1, -1, 0, 1/))) then
+        call update_rates_matrix(O_ads_00,cell + (/ -1, -1, 0, 1/),gr_O_ads_00(cell + (/ -1, -1, 0, 0/)))
+    end if
+    if(can_do(O_ads_01,cell + (/ 0, 1, 0, 1/))) then
+        call update_rates_matrix(O_ads_01,cell + (/ 0, 1, 0, 1/),gr_O_ads_01(cell + (/ 0, 1, 0, 0/)))
+    end if
+    if(can_do(O_ads_01,cell + (/ 0, -2, 0, 1/))) then
+        call update_rates_matrix(O_ads_01,cell + (/ 0, -2, 0, 1/),gr_O_ads_01(cell + (/ 0, -2, 0, 0/)))
+    end if
     if(can_do(O_ads_01,cell + (/ 1, 0, 0, 1/))) then
         call update_rates_matrix(O_ads_01,cell + (/ 1, 0, 0, 1/),gr_O_ads_01(cell + (/ 1, 0, 0, 0/)))
+    end if
+    if(can_do(O_ads_01,cell + (/ -1, 0, 0, 1/))) then
+        call update_rates_matrix(O_ads_01,cell + (/ -1, 0, 0, 1/),gr_O_ads_01(cell + (/ -1, 0, 0, 0/)))
     end if
     if(can_do(O_ads_01,cell + (/ 1, -1, 0, 1/))) then
         call update_rates_matrix(O_ads_01,cell + (/ 1, -1, 0, 1/),gr_O_ads_01(cell + (/ 1, -1, 0, 0/)))
     end if
     if(can_do(O_ads_01,cell + (/ -1, -1, 0, 1/))) then
         call update_rates_matrix(O_ads_01,cell + (/ -1, -1, 0, 1/),gr_O_ads_01(cell + (/ -1, -1, 0, 0/)))
-    end if
-    if(can_do(O_ads_01,cell + (/ 0, -2, 0, 1/))) then
-        call update_rates_matrix(O_ads_01,cell + (/ 0, -2, 0, 1/),gr_O_ads_01(cell + (/ 0, -2, 0, 0/)))
-    end if
-    if(can_do(O_ads_01,cell + (/ -1, 0, 0, 1/))) then
-        call update_rates_matrix(O_ads_01,cell + (/ -1, 0, 0, 1/),gr_O_ads_01(cell + (/ -1, 0, 0, 0/)))
-    end if
-    if(can_do(O_ads_01,cell + (/ 0, 1, 0, 1/))) then
-        call update_rates_matrix(O_ads_01,cell + (/ 0, 1, 0, 1/),gr_O_ads_01(cell + (/ 0, 1, 0, 0/)))
     end if
 
 ! Enable processes

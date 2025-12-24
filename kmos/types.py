@@ -316,8 +316,8 @@ class Project(object):
         """Return representation of model as can be written into a *.ini File.
 
         """
-        from ConfigParser import ConfigParser
-        from StringIO import StringIO
+        from configparser import ConfigParser
+        from io import StringIO
 
         config = ConfigParser()
         config.optionxform = str
@@ -326,8 +326,8 @@ class Project(object):
         config.set('Meta', 'author', self.meta.author)
         config.set('Meta', 'email', self.meta.email)
         config.set('Meta', 'model_name', self.meta.model_name)
-        config.set('Meta', 'model_dimension', self.meta.model_dimension)
-        config.set('Meta', 'debug', self.meta.debug)
+        config.set('Meta', 'model_dimension', str(self.meta.model_dimension))
+        config.set('Meta', 'debug', str(self.meta.debug))
 
         config.add_section('SpeciesList')
         if hasattr(self.species_list, 'default_species'):
@@ -344,12 +344,12 @@ class Project(object):
                            'representation', species.representation)
             if hasattr(species, 'color'):
                 config.set(section_name, 'color', species.color)
-            config.set(section_name, 'tags', getattr(species, 'tags'))
+            config.set(section_name, 'tags', str(getattr(species, 'tags')))
 
         for parameter in self.get_parameters():
             section_name = 'Parameter %s' % parameter.name
             config.add_section(section_name)
-            config.set(section_name, 'value', parameter.value)
+            config.set(section_name, 'value', str(parameter.value))
             config.set(section_name, 'adjustable', str(parameter.adjustable))
             config.set(section_name, 'min', str(parameter.min))
             config.set(section_name, 'max', str(parameter.max))
@@ -383,9 +383,11 @@ class Project(object):
             config.set(section_name, 'color', layer.color)
 
             for site in layer.sites:
+                # Use tolist() if numpy array to get Python native types
+                pos = tuple(site.pos.tolist()) if hasattr(site.pos, 'tolist') else tuple(site.pos)
                 config.set(section_name, 'site %s' % site.name,
                            '%s; %s; %s' %
-                           (tuple(site.pos),
+                           (pos,
                             site.default_species,
                             site.tags,
                             ))
@@ -394,7 +396,8 @@ class Project(object):
             section_name = 'Process %s' % process.name
             config.add_section(section_name)
             config.set(section_name, 'rate_constant', process.rate_constant)
-            config.set(section_name, 'otf_rate', process.otf_rate)
+            # Write 'None' as string to match Python 2 behavior (ConfigParser requires strings)
+            config.set(section_name, 'otf_rate', str(process.otf_rate) if process.otf_rate is not None else 'None')
             config.set(section_name, 'enabled', str(process.enabled))
             if process.bystander_list:
                 bystanders = [bystander._shorthand()
@@ -572,7 +575,7 @@ class Project(object):
                               os.path.splitext(filename)[-1])
 
     def export_xml_file(self, filename, validate=True):
-        f = file(filename, 'w')
+        f = open(filename, 'w')
         f.write(str(self))
         f.close()
 
@@ -592,9 +595,9 @@ class Project(object):
         self.filename = filename
 
     def import_ini_file(self, filename):
-        from ConfigParser import ConfigParser
+        from configparser import ConfigParser
         from kmos.utils import evaluate_template
-        from StringIO import StringIO
+        from io import StringIO
 
         config = ConfigParser()
         config.optionxform = str
@@ -607,7 +610,7 @@ class Project(object):
         infile = StringIO()
         infile.write(evaluate_template(inputtxt, escape_python=True, pt=self))
         infile.seek(0)
-        config.readfp(infile)
+        config.read_file(infile)
 
         for section in config.sections():
             if section == 'Lattice':
@@ -1447,7 +1450,14 @@ class LayerList(FixedObject, list):
                 value = eval(value)
                 if (not hasattr(self, 'representation') or
                         not self.representation):
-                    self.cell = value[0].cell
+                    # Only set cell from Atoms object if we don't already have a valid cell
+                    # (i.e., not already set from XML cell_size attribute)
+                    if not hasattr(self, 'cell') or not hasattr(self.cell, 'any') or not self.cell.any():
+                        self.cell = value[0].cell
+                    # If we have a valid cell, apply it to all Atoms objects before generating representation
+                    if hasattr(self, 'cell') and hasattr(self.cell, 'any') and self.cell.any():
+                        for atoms in value:
+                            atoms.set_cell(self.cell)
                 value = '[%s]' % get_ase_constructor(value)
             self.__dict__[key] = '%s' % value
         else:
@@ -1513,7 +1523,7 @@ class LayerList(FixedObject, list):
 
         offset = np.array(coord.offset)
         cell = self.cell
-        layer = filter(lambda x: x.name == coord.layer, list(self))[0]
+        layer = list(filter(lambda x: x.name == coord.layer, list(self)))[0]
         sites = [x for x in layer.sites if x.name == coord.name]
         if not sites:
             raise UserWarning('No site names %s in %s found!' %
@@ -1560,8 +1570,8 @@ class Layer(FixedObject, CorrectlyNamed):
             self.sites.append(site)
 
     def get_site(self, site_name):
-        sites = filter(lambda site: site.name == site_name,
-                       self.sites)
+        sites = list(filter(lambda site: site.name == site_name,
+                       self.sites))
         if not sites:
             raise Exception('Site not found')
         return sites[0]
@@ -1686,6 +1696,8 @@ class Coord(FixedObject):
         return (self.layer, self.name) == (other.layer, other.name)
 
     def __eq__(self, other):
+        if not isinstance(other, Coord):
+            return False
         return ((self.layer, self.name) ==
                 (other.layer, other.name)) and (self.offset == other.offset).all()
 
@@ -1693,6 +1705,8 @@ class Coord(FixedObject):
         return not self.__eq__(other)
 
     def __lt__(self, other):
+        if not isinstance(other, Coord):
+            return NotImplemented
         return ((self.layer,
                  self.name,
                  self.offset[0],
@@ -1708,6 +1722,8 @@ class Coord(FixedObject):
         return any(self == other, self < other)
 
     def __gt__(self, other):
+        if not isinstance(other, Coord):
+            return NotImplemented
         return ((self.layer,
                  self.name,
                  self.offset[0],
@@ -1802,12 +1818,17 @@ class Coord(FixedObject):
 
 
 def cmp_coords(self, other):
+    # Python 3 compatible comparison (cmp was removed)
+    def _cmp(a, b):
+        # Convert to int to avoid numpy boolean subtraction issues
+        return int(a > b) - int(a < b)
+
     if self.layer != other.layer:
-        return cmp(self.layer, other.layer)
+        return _cmp(self.layer, other.layer)
     elif (self.offset != other.offset).any():
         for i in range(3):
             if self.offset[i] != other.offset[i]:
-                return cmp(self.offset[i], other.offset[i])
+                return _cmp(self.offset[i], other.offset[i])
     else:
         return 0
 
@@ -2028,9 +2049,10 @@ class Bystander(FixedObject):
 
     def _shorthand(self):
         if self.coord.offset.any():
+            # Use tolist() to convert numpy types to Python native types
             return '%s@%s.%s|%s' % (self.allowed_species,
                                     self.coord.name,
-                                    tuple(self.coord.offset),
+                                    tuple(self.coord.offset.tolist()),
                                     self.flag)
         else:
             return '%s@%s|%s' % (self.allowed_species,
@@ -2073,9 +2095,10 @@ class ConditionAction(FixedObject):
 
     def _shorthand(self):
         if self.coord.offset.any():
+            # Use tolist() to convert numpy types to Python native types
             return '%s@%s.%s' % (self.species,
                                  self.coord.name,
-                                 tuple(self.coord.offset))
+                                 tuple(self.coord.offset.tolist()))
         else:
             return '%s@%s' % (self.species,
                               self.coord.name)
@@ -2111,10 +2134,26 @@ class OutputItem(FixedObject):
         FixedObject.__init__(self, **kwargs)
 
 
+def sort_xml_attributes(elem):
+    """Sort all attributes alphabetically in an XML element tree for deterministic output."""
+    # Sort attributes of current element
+    # Note: lxml's attrib is not writable, so we need to clear and re-add
+    if elem.attrib:
+        sorted_items = sorted(elem.attrib.items())
+        elem.attrib.clear()
+        for key, value in sorted_items:
+            elem.attrib[key] = value
+    # Recursively sort attributes of all children
+    for child in elem:
+        sort_xml_attributes(child)
+
+
 def prettify_xml(elem):
     """This function takes an XML document, which can have one or many lines
     and turns it into a well-breaked, nicely-indented string
     """
+    # Sort all attributes alphabetically for deterministic output
+    sort_xml_attributes(elem)
     rough_string = ET.tostring(elem, encoding='utf-8')
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent='    ')
@@ -2212,8 +2251,8 @@ def parse_chemical_expression(eq, process, project_tree):
 
         if len(coord_term) == 2:
             name = coord_term[0]
-            active_layers = filter(lambda x: x.active,
-                                   project_tree.get_layers())
+            active_layers = list(filter(lambda x: x.active,
+                                   project_tree.get_layers()))
             if len(active_layers) == 1:
                 layer = active_layers[0].name
             else:  # if more than one active try to guess layer from name
@@ -2247,8 +2286,8 @@ def parse_chemical_expression(eq, process, project_tree):
                 raise UserWarning("Layer %s not known, must be one of %s"
                                   % (layer, layer_names))
             else:
-                layer_instance = filter(lambda x: x.name == layer,
-                                        project_tree.get_layers())[0]
+                layer_instance = list(filter(lambda x: x.name == layer,
+                                        project_tree.get_layers()))[0]
                 site_names = [x.name for x in layer_instance.sites]
                 if name not in site_names:
                     raise UserWarning("Site %s not known, must be one of %s"
@@ -2289,9 +2328,9 @@ def parse_chemical_expression(eq, process, project_tree):
         #      the left side, the condition will be added with the same
         #      species as the annihilated one.
         if action.species[0] == '$':
-            corresponding_condition = filter(lambda x:
+            corresponding_condition = list(filter(lambda x:
                                              x.coord == action.coord,
-                                             condition_list)
+                                             condition_list))
             if action.species[1:]:
                 if not corresponding_condition:
                     condition_list.append(

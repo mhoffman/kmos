@@ -73,7 +73,7 @@ def evaluate_rate_expression(rate_expr, parameters={}):
         parameters = [Parameter(), ... ]
      """
     import tokenize
-    import StringIO
+    from io import StringIO
     import math
     from kmos import units
 
@@ -90,10 +90,10 @@ def evaluate_rate_expression(rate_expr, parameters={}):
         replaced_tokens = []
 
         # replace some aliases
-        for old, new in rate_aliases.iteritems():
+        for old, new in rate_aliases.items():
             rate_expr = rate_expr.replace(old, new)
         try:
-            input = StringIO.StringIO(rate_expr).readline
+            input = StringIO(rate_expr).readline
             tokens = list(tokenize.generate_tokens(input))
         except:
             raise Exception('Could not tokenize expression: %s' % input)
@@ -103,7 +103,7 @@ def evaluate_rate_expression(rate_expr, parameters={}):
             elif token in dir(units):
                 replaced_tokens.append((i, str(eval('units.' + token))))
             elif token.startswith('m_'):
-                from ase.atoms import string2symbols
+                from ase.symbols import string2symbols
                 from ase.data import atomic_masses
                 from ase.data import atomic_numbers
                 species_name = '_'.join(token.split('_')[1:])
@@ -146,7 +146,7 @@ def evaluate_rate_expression(rate_expr, parameters={}):
         rate_expr = tokenize.untokenize(replaced_tokens)
         try:
             rate_const = eval(rate_expr)
-        except Exception, e:
+        except Exception as e:
             raise UserWarning(
             "Could not evaluate rate expression: %s\nException: %s" \
                 % (rate_expr, e))

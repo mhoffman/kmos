@@ -123,7 +123,7 @@ function rate_CO_ads(nr_vars)
 
     real(kind=rdouble) :: rate_CO_ads
     rate_CO_ads = rates (CO_ads ) * (userpar(J_O_CO) ** nr_vars(2) ) * (&
-    &userpar(J_CO_CO)  ** nr_vars(1) )  
+    &userpar(J_CO_CO)  ** nr_vars(1) )   
 
     return
 
@@ -205,7 +205,7 @@ function rate_CO_oxidation_00(nr_vars)
     real(kind=rdouble) :: rate_CO_oxidation_00
     rate_CO_oxidation_00 = rates (CO_oxidation_00 ) * (userpar(J_O_O) &
     &**  (- nr_vars(4) ) ) * (userpar(J_CO_CO) ** (- nr_vars(1) ) ) * (&
-    &userpar(J_O_CO)  ** (- nr_vars(2) - nr_vars(3) ) )  
+    &userpar(J_O_CO)  ** (- nr_vars(2) - nr_vars(3) ) )   
 
     return
 
@@ -267,7 +267,7 @@ function rate_CO_oxidation_01(nr_vars)
     real(kind=rdouble) :: rate_CO_oxidation_01
     rate_CO_oxidation_01 = rates (CO_oxidation_01 ) * (userpar(J_O_O) &
     &**  (- nr_vars(4) ) ) * (userpar(J_CO_CO) ** (- nr_vars(1) ) ) * (&
-    &userpar(J_O_CO)  ** (- nr_vars(2) - nr_vars(3) ) )  
+    &userpar(J_O_CO)  ** (- nr_vars(2) - nr_vars(3) ) )   
 
     return
 
@@ -329,7 +329,7 @@ function rate_CO_oxidation_02(nr_vars)
     real(kind=rdouble) :: rate_CO_oxidation_02
     rate_CO_oxidation_02 = rates (CO_oxidation_02 ) * (userpar(J_O_O) &
     &**  (- nr_vars(4) ) ) * (userpar(J_CO_CO) ** (- nr_vars(1) ) ) * (&
-    &userpar(J_O_CO)  ** (- nr_vars(2) - nr_vars(3) ) )  
+    &userpar(J_O_CO)  ** (- nr_vars(2) - nr_vars(3) ) )   
 
     return
 
@@ -391,7 +391,7 @@ function rate_CO_oxidation_03(nr_vars)
     real(kind=rdouble) :: rate_CO_oxidation_03
     rate_CO_oxidation_03 = rates (CO_oxidation_03 ) * (userpar(J_O_O) &
     &**  (- nr_vars(4) ) ) * (userpar(J_CO_CO) ** (- nr_vars(1) ) ) * (&
-    &userpar(J_O_CO)  ** (- nr_vars(2) - nr_vars(3) ) )  
+    &userpar(J_O_CO)  ** (- nr_vars(2) - nr_vars(3) ) )   
 
     return
 
@@ -492,7 +492,7 @@ function rate_O_ads_00(nr_vars)
 
     real(kind=rdouble) :: rate_O_ads_00
     rate_O_ads_00 = rates (O_ads_00 ) * (userpar(J_O_O) ** nr_vars(2) ) &
-    &*  (userpar(J_O_CO) ** nr_vars(1) )  
+    &*  (userpar(J_O_CO) ** nr_vars(1) )   
 
     return
 
@@ -553,7 +553,7 @@ function rate_O_ads_01(nr_vars)
 
     real(kind=rdouble) :: rate_O_ads_01
     rate_O_ads_01 = rates (O_ads_01 ) * (userpar(J_O_O) ** nr_vars(2) ) &
-    &*  (userpar(J_O_CO) ** nr_vars(1) )  
+    &*  (userpar(J_O_CO) ** nr_vars(1) )   
 
     return
 

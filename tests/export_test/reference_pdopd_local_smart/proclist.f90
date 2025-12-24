@@ -6613,17 +6613,6 @@ subroutine touchup_PdO_hollow1(site)
             call add_proc(o_COdif_h1h2up, site)
         end select
 
-    case(oxygen)
-        select case(get_species(site + (/0, 0, 0, PdO_hollow2 - PdO_hollow1/)))
-        case(oxygen)
-            call add_proc(o_O2des_h1h2, site)
-        end select
-
-        select case(get_species(site + (/0, -1, 0, PdO_hollow2 - PdO_hollow1/)))
-        case(oxygen)
-            call add_proc(o_O2des_h2h1, site)
-        end select
-
     case(empty)
         call add_proc(o_COads_hollow1, site)
         select case(get_species(site + (/0, 0, 0, PdO_hollow2 - PdO_hollow1/)))
@@ -6634,6 +6623,17 @@ subroutine touchup_PdO_hollow1(site)
         select case(get_species(site + (/0, -1, 0, PdO_hollow2 - PdO_hollow1/)))
         case(empty)
             call add_proc(o_O2ads_h2h1, site)
+        end select
+
+    case(oxygen)
+        select case(get_species(site + (/0, 0, 0, PdO_hollow2 - PdO_hollow1/)))
+        case(oxygen)
+            call add_proc(o_O2des_h1h2, site)
+        end select
+
+        select case(get_species(site + (/0, -1, 0, PdO_hollow2 - PdO_hollow1/)))
+        case(oxygen)
+            call add_proc(o_O2des_h2h1, site)
         end select
 
     end select
@@ -8609,17 +8609,6 @@ subroutine create_PdO_hollow1(site, species)
             call add_proc(o_COdif_h1h2up, site)
         end select
 
-    case(oxygen)
-        select case(get_species(site + (/0, 0, 0, PdO_hollow2 - PdO_hollow1/)))
-        case(oxygen)
-            call add_proc(o_O2des_h1h2, site)
-        end select
-
-        select case(get_species(site + (/0, -1, 0, PdO_hollow2 - PdO_hollow1/)))
-        case(oxygen)
-            call add_proc(o_O2des_h2h1, site)
-        end select
-
     case(empty)
         call add_proc(o_COads_hollow1, site)
         select case(get_species(site + (/0, -1, 0, PdO_hollow2 - PdO_hollow1/)))
@@ -8667,6 +8656,17 @@ subroutine create_PdO_hollow1(site, species)
         select case(get_species(site + (/0, 0, 0, PdO_hollow2 - PdO_hollow1/)))
         case(empty)
             call add_proc(o_O2ads_h1h2, site)
+        end select
+
+    case(oxygen)
+        select case(get_species(site + (/0, 0, 0, PdO_hollow2 - PdO_hollow1/)))
+        case(oxygen)
+            call add_proc(o_O2des_h1h2, site)
+        end select
+
+        select case(get_species(site + (/0, -1, 0, PdO_hollow2 - PdO_hollow1/)))
+        case(oxygen)
+            call add_proc(o_O2des_h2h1, site)
         end select
 
     end select
@@ -8797,17 +8797,6 @@ subroutine create_PdO_hollow2(site, species)
 
         end select
 
-    case(oxygen)
-        select case(get_species(site + (/0, 0, 0, PdO_hollow1 - PdO_hollow2/)))
-        case(oxygen)
-            call add_proc(o_O2des_h1h2, site + (/0, 0, 0, PdO_hollow1 - PdO_hollow2/))
-        end select
-
-        select case(get_species(site + (/0, 1, 0, PdO_hollow1 - PdO_hollow2/)))
-        case(oxygen)
-            call add_proc(o_O2des_h2h1, site + (/0, 1, 0, PdO_hollow1 - PdO_hollow2/))
-        end select
-
     case(empty)
         call add_proc(o_COads_hollow2, site)
         select case(get_species(site + (/0, 1, 0, PdO_hollow1 - PdO_hollow2/)))
@@ -8858,6 +8847,17 @@ subroutine create_PdO_hollow2(site, species)
             call add_proc(o_COdif_h1h2up, site + (/0, 0, 0, PdO_hollow1 - PdO_hollow2/))
         case(empty)
             call add_proc(o_O2ads_h1h2, site + (/0, 0, 0, PdO_hollow1 - PdO_hollow2/))
+        end select
+
+    case(oxygen)
+        select case(get_species(site + (/0, 0, 0, PdO_hollow1 - PdO_hollow2/)))
+        case(oxygen)
+            call add_proc(o_O2des_h1h2, site + (/0, 0, 0, PdO_hollow1 - PdO_hollow2/))
+        end select
+
+        select case(get_species(site + (/0, 1, 0, PdO_hollow1 - PdO_hollow2/)))
+        case(oxygen)
+            call add_proc(o_O2des_h2h1, site + (/0, 1, 0, PdO_hollow1 - PdO_hollow2/))
         end select
 
     end select
