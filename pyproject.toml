@@ -4,15 +4,37 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kmos"
-version = "0.1.0"
+version = "0.4.0"  # Managed by bump-my-version
 description = "kMC modeling on steroids"
 readme = "README.md"
 requires-python = ">=3.9"
+license = {text = "GPL-3.0-or-later"}
 authors = [
     {name = "Max J. Hoffmann", email = "mjhoffmann@gmail.com"}
 ]
 maintainers = [
     {name = "Max J. Hoffmann", email = "mjhoffmann@gmail.com"}
+]
+keywords = ["kmc", "kinetic monte carlo", "lattice", "chemistry", "physics", "surface science"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Natural Language :: English",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Fortran",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Education",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Visualization",
 ]
 dependencies = [
     "ase",
@@ -21,6 +43,10 @@ dependencies = [
     "numpy>=2.0.2",
     "pytest>=8.4.2",
 ]
+
+[project.urls]
+Homepage = "https://github.com/mhoffman/kmos"
+Repository = "https://github.com/mhoffman/kmos"
 
 [project.scripts]
 kmos = "kmos.cli:main"

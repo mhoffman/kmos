@@ -50,7 +50,13 @@ or it may be used as an API via the *kmos* module.
 #import kmos.types
 #import kmos.io
 
-__version__ = "0.3.21"
+# Version is managed in pyproject.toml and read from package metadata
+try:
+    from importlib.metadata import version
+    __version__ = version("kmos")
+except Exception:
+    # Fallback for development installations
+    __version__ = "0.0.0+unknown"
 VERSION = __version__
 
 
