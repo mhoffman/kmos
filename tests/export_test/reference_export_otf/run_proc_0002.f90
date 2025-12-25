@@ -65,11 +65,11 @@ subroutine run_proc_co_adsorption_cus(cell)
     if(can_do(oxygen_diffusion_cus_bridge_rig0000,cell + (/ 0, 0, 0, 1/))) then
         call del_proc(oxygen_diffusion_cus_bridge_rig0000,cell + (/ 0, 0, 0, 1/))
     end if
-    if(can_do(oxygen_diffusion_cus_cus_down,cell + (/ 0, 1, 0, 1/))) then
-        call del_proc(oxygen_diffusion_cus_cus_down,cell + (/ 0, 1, 0, 1/))
-    end if
     if(can_do(oxygen_diffusion_cus_cus_down,cell + (/ 0, 0, 0, 1/))) then
         call del_proc(oxygen_diffusion_cus_cus_down,cell + (/ 0, 0, 0, 1/))
+    end if
+    if(can_do(oxygen_diffusion_cus_cus_down,cell + (/ 0, 1, 0, 1/))) then
+        call del_proc(oxygen_diffusion_cus_cus_down,cell + (/ 0, 1, 0, 1/))
     end if
     if(can_do(oxygen_diffusion_cus_cus_up,cell + (/ 0, 0, 0, 1/))) then
         call del_proc(oxygen_diffusion_cus_cus_up,cell + (/ 0, 0, 0, 1/))
@@ -100,31 +100,31 @@ subroutine run_proc_co_adsorption_cus(cell)
 
     call add_proc(co_desorption_cus, cell + (/ 0, 0, 0, 1/), gr_co_desorption_cus(cell + (/ 0, 0, 0, 0/)))
     select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
-    case(oxygen)
-        call add_proc(reaction_oxygen_bridge_co_cus_r0000, cell + (/ 0, 0, 0, 1/), gr_reaction_oxygen_bridge_co_cus_r0000(cell + (/ 0, 0, 0, 0/)))
     case(empty)
         call add_proc(co_diffusion_cus_bridge_left, cell + (/ 0, 0, 0, 1/), gr_co_diffusion_cus_bridge_left(cell + (/ 0, 0, 0, 0/)))
+    case(oxygen)
+        call add_proc(reaction_oxygen_bridge_co_cus_r0000, cell + (/ 0, 0, 0, 1/), gr_reaction_oxygen_bridge_co_cus_r0000(cell + (/ 0, 0, 0, 0/)))
     end select
 
     select case(get_species(cell + (/1, 0, 0, ruo2_bridge/)))
-    case(oxygen)
-        call add_proc(reaction_oxygen_bridge_co_cus_l0000, cell + (/ 1, 0, 0, 1/), gr_reaction_oxygen_bridge_co_cus_l0000(cell + (/ 1, 0, 0, 0/)))
     case(empty)
         call add_proc(co_diffusion_cus_bridge_right, cell + (/ 0, 0, 0, 1/), gr_co_diffusion_cus_bridge_right(cell + (/ 0, 0, 0, 0/)))
+    case(oxygen)
+        call add_proc(reaction_oxygen_bridge_co_cus_l0000, cell + (/ 1, 0, 0, 1/), gr_reaction_oxygen_bridge_co_cus_l0000(cell + (/ 1, 0, 0, 0/)))
     end select
 
     select case(get_species(cell + (/0, -1, 0, ruo2_cus/)))
-    case(oxygen)
-        call add_proc(reaction_oxygen_cus_co_cus_up, cell + (/ 0, -1, 0, 1/), gr_reaction_oxygen_cus_co_cus_up(cell + (/ 0, -1, 0, 0/)))
     case(empty)
         call add_proc(co_diffusion_cus_cus_down, cell + (/ 0, 0, 0, 1/), gr_co_diffusion_cus_cus_down(cell + (/ 0, 0, 0, 0/)))
+    case(oxygen)
+        call add_proc(reaction_oxygen_cus_co_cus_up, cell + (/ 0, -1, 0, 1/), gr_reaction_oxygen_cus_co_cus_up(cell + (/ 0, -1, 0, 0/)))
     end select
 
     select case(get_species(cell + (/0, 1, 0, ruo2_cus/)))
-    case(oxygen)
-        call add_proc(reaction_oxygen_cus_co_cus_down, cell + (/ 0, 1, 0, 1/), gr_reaction_oxygen_cus_co_cus_down(cell + (/ 0, 1, 0, 0/)))
     case(empty)
         call add_proc(co_diffusion_cus_cus_up, cell + (/ 0, 0, 0, 1/), gr_co_diffusion_cus_cus_up(cell + (/ 0, 0, 0, 0/)))
+    case(oxygen)
+        call add_proc(reaction_oxygen_cus_co_cus_down, cell + (/ 0, 1, 0, 1/), gr_reaction_oxygen_cus_co_cus_down(cell + (/ 0, 1, 0, 0/)))
     end select
 
 

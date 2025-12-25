@@ -23,40 +23,124 @@ import numpy as np
 from numpy import interp as interp1d
 from math import log
 import os
+import sys
+
+# List of all supported JANAF data files
+SUPPORTED_JANAF_FILES = [
+    'C-067.txt',  # CO2
+    'C-093.txt',  # CH4
+    'C-095.txt',  # CO
+    'C-128.txt',  # CH3OH
+    'Cl-026.txt', # Cl2
+    'Cl-073.txt', # HCl
+    'H-050.txt',  # H2
+    'H-063.txt',  # H2O2
+    'H-064.txt',  # HNO3
+    'H-083.txt',  # H2O
+    'N-005.txt',  # N2
+    'N-007.txt',  # NH3
+    'N-009.txt',  # NO
+    'O-029.txt',  # O2
+]
+
+def download_janaf_data():
+    """Download all supported JANAF data files from NIST website."""
+    import urllib.request
+
+    # Create janaf_data directory in user's home directory (~/.kmos/janaf_data)
+    kmos_dir = os.path.expanduser('~/.kmos')
+    janaf_dir = os.path.join(kmos_dir, 'janaf_data')
+
+    if not os.path.exists(janaf_dir):
+        os.makedirs(janaf_dir)
+        print(f"Created directory: {janaf_dir}")
+
+    # Create __init__.py to make it a Python module
+    init_file = os.path.join(janaf_dir, '__init__.py')
+    if not os.path.exists(init_file):
+        with open(init_file, 'w') as f:
+            f.write("# JANAF Thermochemical Tables data directory\n")
+        print(f"Created {init_file}")
+
+    # Download each file
+    base_url = "https://janaf.nist.gov/tables/"
+    success_count = 0
+
+    for filename in SUPPORTED_JANAF_FILES:
+        filepath = os.path.join(janaf_dir, filename)
+
+        # Skip if file already exists
+        if os.path.exists(filepath):
+            print(f"  {filename} (already exists)")
+            success_count += 1
+            continue
+
+        url = base_url + filename
+        try:
+            print(f"  Downloading {filename}...", end=' ')
+            urllib.request.urlretrieve(url, filepath)
+            print("done")
+            success_count += 1
+        except Exception as e:
+            print(f"failed (Error: {e})")
+
+    print(f"\nDownloaded {success_count}/{len(SUPPORTED_JANAF_FILES)} JANAF data files to {janaf_dir}")
+
+    # Add .kmos directory to sys.path if not already there
+    if kmos_dir not in sys.path:
+        sys.path.insert(0, kmos_dir)
+
+    return janaf_dir
 
 janaf_data = None
+
+# Add ~/.kmos to sys.path to find janaf_data
+kmos_dir = os.path.expanduser('~/.kmos')
+if os.path.exists(kmos_dir) and kmos_dir not in sys.path:
+    sys.path.insert(0, kmos_dir)
+
 try:
     import janaf_data
-except:
-    raise Exception("""
+except ImportError:
+    # Ask user if they want to download JANAF data automatically
+    print("""
     Error: Could not import JANAF data
-    Installing JANAF Thermochemical Tables
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    You can conveniently use gas phase chemical potentials
-    inserted in rate constant expressions using
-    JANAF Thermochemical Tables. A couple of molecules
-    are automatically supported. If you need support
-    for more gas-phase species, drop me a line.
+    JANAF Thermochemical Tables are needed for gas phase chemical potentials.
+    The data files can be automatically downloaded from the NIST website.
+    """)
 
-    The tabulated values are not distributed since
-    the terms of distribution do not permit this.
-    Fortunately manual installation is easy.
-    Just create a directory called `janaf_data`
-    anywhere on your python path. To see the directories on your python
-    path run ::
+    response = input("Would you like to download JANAF data now? [Y/n]: ").strip().lower()
 
-        python -c"import sys; print(sys.path)"
+    if response in ['', 'y', 'yes']:
+        print("\nDownloading JANAF Thermochemical Tables...")
+        try:
+            janaf_dir = download_janaf_data()
+            # Try to import again
+            import janaf_data
+            print("\nJANAF data successfully installed!")
+        except Exception as e:
+            print(f"\nFailed to download JANAF data: {e}")
+            print("""
+    Manual Installation
+    ^^^^^^^^^^^^^^^^^^^
 
-        Inside the `janaf_data` directory has to be a file
-        named `__init__.py`, so that python recognizes it as a module ::
+    You can manually install JANAF data by:
+    1. Creating a directory: mkdir -p ~/.kmos/janaf_data
+    2. Creating an __init__.py file inside: touch ~/.kmos/janaf_data/__init__.py
+    3. Downloading data files from https://janaf.nist.gov/tables/
+       (Files needed: {})
+    """.format(', '.join(SUPPORTED_JANAF_FILES)))
+    else:
+        print("""
+    Skipping JANAF data download.
 
-            touch __init__.py
-
-            Then copy all needed data files from the
-            `NIST website <http://kinetics.nist.gov/janaf/>`_
-            in the tab-delimited text format
-            to the `janaf_data` directory.""")
+    Note: You can manually install JANAF data later by:
+    1. Creating a directory: mkdir -p ~/.kmos/janaf_data
+    2. Creating an __init__.py file inside: touch ~/.kmos/janaf_data/__init__.py
+    3. Downloading data files from https://janaf.nist.gov/tables/
+       (Files needed: {})
+    """.format(', '.join(SUPPORTED_JANAF_FILES)))
 
 
 class Species(object):
@@ -86,13 +170,18 @@ class Species(object):
         """Expecting T in Kelvin, p in bar"""
         if self.gas:
             kboltzmann_in_eVK = 8.6173324e-5
+            # Check if JANAF data was loaded
+            if not hasattr(self, 'T_grid') or not hasattr(self, 'G_grid'):
+                raise Exception(f'JANAF thermochemical data not available for {self.name}. '
+                               f'The required JANAF table file could not be loaded or downloaded. '
+                               f'Please check if the file "{self.janaf_file}" is available or can be downloaded.')
             # interpolate given grid
             try:
                 val = interp1d(T, self.T_grid, self.G_grid) + \
                        kboltzmann_in_eVK * T * log(p)
-            except Exception:
-                raise Exception('Could not find JANAF tables for %s.'
-                                % self.name)
+            except Exception as e:
+                raise Exception(f'Could not interpolate JANAF data for {self.name} at T={T}K, p={p}bar. '
+                               f'Error: {e}')
             else:
                 return val
 
@@ -106,13 +195,49 @@ class Species(object):
         try:
             data = np.loadtxt(filename, skiprows=2, usecols=(0, 2, 4))
         except IOError:
-            print('Warning: JANAF table %s not installed' % filename)
-            return
+            # Try to download the missing JANAF file
+            print(f'Warning: JANAF table {filename} not found, attempting to download...')
+            janaf_filename = os.path.basename(filename)
+
+            if self._download_single_janaf_file(janaf_filename, filename):
+                # Retry loading after download
+                try:
+                    data = np.loadtxt(filename, skiprows=2, usecols=(0, 2, 4))
+                except IOError:
+                    print(f'Error: Failed to load JANAF table {filename} even after download')
+                    return
+            else:
+                print(f'Error: Could not download JANAF table for {self.name}')
+                return
 
         # define data
         self.T_grid = data[:, 0]
         self.G_grid = (1000 * (data[:, 2] - data[0, 2])
                                - data[:, 0] * data[:, 1]) * Jmol_in_eV
+
+    def _download_single_janaf_file(self, janaf_filename, dest_path):
+        """Download a single JANAF file if it's in the supported list."""
+        import urllib.request
+
+        # Check if this file is in the supported list
+        if janaf_filename not in SUPPORTED_JANAF_FILES:
+            print(f'  {janaf_filename} is not in the list of supported JANAF files')
+            return False
+
+        # Ensure directory exists
+        dest_dir = os.path.dirname(dest_path)
+        if not os.path.exists(dest_dir):
+            os.makedirs(dest_dir)
+
+        url = f"https://janaf.nist.gov/tables/{janaf_filename}"
+        try:
+            print(f'  Downloading {janaf_filename}...', end=' ')
+            urllib.request.urlretrieve(url, dest_path)
+            print('done')
+            return True
+        except Exception as e:
+            print(f'failed (Error: {e})')
+            return False
 
     def __eq__(self, other):
         return self.atoms == other.atoms and self.gas == other.gas

@@ -135,7 +135,7 @@ class ModelBuilder(object):
                                     4. + z),
                             'tags': "hollow oxygen"}
 
-        for name, data in sites.iteritems():
+        for name, data in sites.items():
             tags = data['tags']
             site = Site(name=name,
                         default_species='empty',

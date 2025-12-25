@@ -4,22 +4,22 @@ use lattice
 use proclist_constants
 implicit none
 contains
-pure function nli_co_diffusion_cus_cus_down(cell)
+pure function nli_oxygen_adsorption_bridge_cus_right(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
-    integer(kind=iint) :: nli_co_diffusion_cus_cus_down
+    integer(kind=iint) :: nli_oxygen_adsorption_bridge_cus_right
 
-    select case(get_species(cell + (/0, -1, 0, ruo2_cus/)))
+    select case(get_species(cell + (/0, 0, 0, ruo2_bridge/)))
       case(empty)
         select case(get_species(cell + (/0, 0, 0, ruo2_cus/)))
-          case(co)
-            nli_co_diffusion_cus_cus_down = co_diffusion_cus_cus_down; return
+          case(empty)
+            nli_oxygen_adsorption_bridge_cus_right = oxygen_adsorption_bridge_cus_right; return
           case default
-            nli_co_diffusion_cus_cus_down = 0; return
+            nli_oxygen_adsorption_bridge_cus_right = 0; return
         end select
       case default
-        nli_co_diffusion_cus_cus_down = 0; return
+        nli_oxygen_adsorption_bridge_cus_right = 0; return
     end select
 
-end function nli_co_diffusion_cus_cus_down
+end function nli_oxygen_adsorption_bridge_cus_right
 
 end module

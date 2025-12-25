@@ -39,9 +39,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import with_statement
+import logging
 import os
 import shutil
+
+logger = logging.getLogger(__name__)
 
 usage = {}
 usage['all'] = """kmos help all
@@ -212,13 +214,19 @@ def get_options(args=None, get_parser=False):
                       default=False,
                       )
    
-    try:
-        from numpy.distutils.fcompiler import get_default_fcompiler
-        from numpy.distutils import log
-        log.set_verbosity(-1, True)
-        fcompiler = get_default_fcompiler()
-    except:
-        fcompiler = 'gfortran'
+    # Detect available Fortran compiler
+    # Note: numpy.distutils is deprecated and removed in Python >= 3.12
+    # Using direct detection instead
+    import shutil
+    fcompiler = 'gnu95'  # Default: gnu95 is the f2py name for gfortran
+
+    # Try to detect available Fortran compiler
+    if shutil.which('gfortran'):
+        fcompiler = 'gnu95'
+    elif shutil.which('ifort'):
+        fcompiler = 'intel'
+    elif shutil.which('ifx'):
+        fcompiler = 'intelem'
 
     parser.add_option('-f', '--fcompiler',
                       dest='fcompiler',
@@ -287,9 +295,9 @@ def main(args=None):
             model.do_steps(nsteps)
 
         needed_time = time() - time0
-        print('Using the [%s] backend.' % model.get_backend())
-        print('%s steps took %.2f seconds' % (nsteps, needed_time))
-        print('Or %.2e steps/s' % (1e6 / needed_time))
+        logger.info('Using the [%s] backend.' % model.get_backend())
+        logger.info('%s steps took %.2f seconds' % (nsteps, needed_time))
+        logger.info('Or %.2e steps/s' % (1e6 / needed_time))
         model.deallocate()
     elif args[0] == 'build':
         from kmos.utils import build
@@ -306,7 +314,7 @@ def main(args=None):
             parser.error('XML file and export path expected.')
         if len(args) < 3:
             out_dir = '%s_%s' % (os.path.splitext(args[1])[0], options.backend)
-            print('No export path provided. Exporting to %s' % out_dir)
+            logger.info('No export path provided. Exporting to %s' % out_dir)
             args.append(out_dir)
 
         xml_file = args[1]
@@ -326,7 +334,7 @@ def main(args=None):
         if len(args) < 3:
             out_dir = '%s_%s' % (os.path.splitext(args[1])[0], options.backend)
 
-            print('No export path provided. Exporting to %s' % out_dir)
+            logger.info('No export path provided. Exporting to %s' % out_dir)
             args.append(out_dir)
 
         xml_file = args[1]
@@ -352,14 +360,14 @@ def main(args=None):
                     if options.overwrite :
                         overwrite = 'y'
                     else:
-                        overwrite = raw_input(('Should I overwrite existing %s ?'
+                        overwrite = input(('Should I overwrite existing %s ?'
                                                '[y/N]  ') % out).lower()
                     if overwrite.startswith('y') :
-                        print('Overwriting {out}'.format(**locals()))
+                        logger.info('Overwriting {out}'.format(**locals()))
                         os.remove('../%s' % out)
                         shutil.move(out, '..')
                     else :
-                        print('Skipping {out}'.format(**locals()))
+                        logger.info('Skipping {out}'.format(**locals()))
                 else:
                     shutil.move(out, '..')
 
@@ -368,7 +376,7 @@ def main(args=None):
         pt = kmos.io.import_file(args[1])
         if len(args) < 3:
             out_dir = os.path.splitext(args[1])[0]
-            print('No export path provided. Exporting kmc_settings.py to %s'
+            logger.info('No export path provided. Exporting kmc_settings.py to %s'
                   % out_dir)
             args.append(out_dir)
 
@@ -384,12 +392,12 @@ def main(args=None):
             parser.error('Which help do you  want?')
         if args[1] == 'all':
             for command in sorted(usage):
-                print(usage[command])
+                logger.info(usage[command])
         elif args[1] in usage:
-            print('Usage: %s\n' % usage[args[1]])
+            logger.info('Usage: %s\n' % usage[args[1]])
         else:
             arg = match_keys(args[1], usage, parser)
-            print('Usage: %s\n' % usage[arg])
+            logger.info('Usage: %s\n' % usage[arg])
 
     elif args[0] == 'import':
         import kmos.io
@@ -403,10 +411,10 @@ def main(args=None):
 
     elif args[0] == 'rebuild':
         from time import sleep
-        print('Will rebuild model from kmc_settings.py in current directory')
-        print('Please do not interrupt,'
+        logger.info('Will rebuild model from kmc_settings.py in current directory')
+        logger.info('Please do not interrupt,'
               ' build process, as you will most likely')
-        print('loose the current model files.')
+        logger.info('loose the current model files.')
         sleep(2.)
         from sys import path
         path.append(os.path.abspath(os.curdir))
@@ -456,17 +464,17 @@ def main(args=None):
         try:
             model = KMC_Model(print_rates=False)
         except:
-            print("Warning: could not import kmc_model!"
+            logger.info("Warning: could not import kmc_model!"
                   " Please make sure you are in the right directory")
         sh(banner='Note: model = KMC_Model(print_rates=False){catmap_message}'.format(**locals()))
         try:
             model.deallocate()
         except:
-            print("Warning: could not deallocate model. Was is allocated?")
+            logger.info("Warning: could not deallocate model. Was is allocated?")
 
     elif args[0] == 'version':
         from kmos import VERSION
-        print(VERSION)
+        logger.info(VERSION)
 
     elif args[0] == 'view':
         from sys import path
@@ -479,7 +487,7 @@ def main(args=None):
         path.append(os.path.abspath(os.curdir))
         from kmos.run import KMC_Model
         model = KMC_Model(banner=False, print_rates=False)
-        print(model.xml())
+        logger.info(model.xml())
 
     else:
         parser.error('Command "%s" not understood.' % args[0])

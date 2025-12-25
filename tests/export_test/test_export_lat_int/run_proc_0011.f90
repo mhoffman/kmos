@@ -39,7 +39,7 @@ use nli_0035
 use proclist_constants
 implicit none
 contains
-subroutine run_proc_oxygen_adsorption_cus_cus(cell)
+subroutine run_proc_co_diffusion_cus_cus_up(cell)
 
     integer(kind=iint), dimension(4), intent(in) :: cell
 
@@ -106,8 +106,8 @@ subroutine run_proc_oxygen_adsorption_cus_cus(cell)
     call del_proc(nli_reaction_oxygen_cus_co_cus_up(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
 
     ! update lattice
-    call replace_species(cell + (/0, 0, 0, ruo2_cus/), empty, oxygen)
-    call replace_species(cell + (/0, 1, 0, ruo2_cus/), empty, oxygen)
+    call replace_species(cell + (/0, 0, 0, ruo2_cus/), co, empty)
+    call replace_species(cell + (/0, 1, 0, ruo2_cus/), empty, co)
 
     ! enable processes that have to be enabled
     call add_proc(nli_co_adsorption_cus(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
@@ -171,6 +171,6 @@ subroutine run_proc_oxygen_adsorption_cus_cus(cell)
     call add_proc(nli_reaction_oxygen_cus_co_cus_up(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
     call add_proc(nli_reaction_oxygen_cus_co_cus_up(cell + (/+0, +1, +0, 0/)), cell + (/+0, +1, +0, 1/))
 
-end subroutine run_proc_oxygen_adsorption_cus_cus
+end subroutine run_proc_co_diffusion_cus_cus_up
 
 end module

@@ -49,7 +49,7 @@ use nli_0045
 use proclist_constants
 implicit none
 contains
-subroutine run_proc_destruct4(cell)
+subroutine run_proc_destruct8(cell)
 
     integer(kind=iint), dimension(4), intent(in) :: cell
 
@@ -93,14 +93,14 @@ subroutine run_proc_destruct4(cell)
     call del_proc(nli_oxidize1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
 
     ! update lattice
-    call replace_species(cell + (/0, 0, 0, PdO_hollow1/), empty, null_species)
-    call replace_species(cell + (/0, -1, 0, PdO_hollow2/), CO, null_species)
+    call replace_species(cell + (/0, 0, 0, PdO_hollow1/), CO, null_species)
+    call replace_species(cell + (/0, -1, 0, PdO_hollow2/), empty, null_species)
     call replace_species(cell + (/0, 0, 0, PdO_bridge1/), empty, null_species)
     call replace_species(cell + (/0, -1, 0, PdO_bridge2/), empty, null_species)
     call replace_species(cell + (/0, 0, 0, Pd100_h1/), null_species, empty)
-    call replace_species(cell + (/0, 0, 0, Pd100_b1/), null_species, empty)
+    call replace_species(cell + (/0, 0, 0, Pd100_b1/), null_species, CO)
     call replace_species(cell + (/0, 0, 0, Pd100_b9/), null_species, empty)
-    call replace_species(cell + (/0, -1, 0, Pd100_b10/), null_species, CO)
+    call replace_species(cell + (/0, -1, 0, Pd100_b10/), null_species, empty)
     call replace_species(cell + (/0, -1, 0, Pd100_b7/), null_species, empty)
 
     ! enable processes that have to be enabled
@@ -142,6 +142,6 @@ subroutine run_proc_destruct4(cell)
     call add_proc(nli_o_O2des_h2h1(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
     call add_proc(nli_oxidize1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
 
-end subroutine run_proc_destruct4
+end subroutine run_proc_destruct8
 
 end module

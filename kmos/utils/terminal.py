@@ -46,21 +46,27 @@ def setup():
     curses.setupterm()
     # Get the color escape sequence template or '' if not supported
     # setab and setaf are for ANSI escape sequences
-    bgColorSeq = curses.tigetstr('setab') or curses.tigetstr('setb') or ''
-    fgColorSeq = curses.tigetstr('setaf') or curses.tigetstr('setf') or ''
+    bgColorSeq = curses.tigetstr('setab') or curses.tigetstr('setb') or b''
+    fgColorSeq = curses.tigetstr('setaf') or curses.tigetstr('setf') or b''
+
+    def _decode(value):
+        """Decode bytes to str for Python 3 compatibility."""
+        if isinstance(value, bytes):
+            return value.decode('ascii', errors='replace')
+        return value
 
     for color in COLORS:
         # Get the color index from curses
         colorIndex = getattr(curses, 'COLOR_%s' % color)
         # Set the color escape sequence after filling the template with index
-        setattr(MODULE, color, curses.tparm(fgColorSeq, colorIndex))
+        setattr(MODULE, color, _decode(curses.tparm(fgColorSeq, colorIndex)))
         # Set background escape sequence
         setattr(
-            MODULE, 'BG_%s' % color, curses.tparm(bgColorSeq, colorIndex)
+            MODULE, 'BG_%s' % color, _decode(curses.tparm(bgColorSeq, colorIndex))
         )
     for control in CONTROLS:
         # Set the control escape sequence
-        setattr(MODULE, control, curses.tigetstr(CONTROLS[control]) or '')
+        setattr(MODULE, control, _decode(curses.tigetstr(CONTROLS[control]) or ''))
     for value in VALUES:
         # Set terminal related values
         setattr(MODULE, value, curses.tigetnum(VALUES[value]))
@@ -75,7 +81,7 @@ def render(text):
 try:
     import curses
     setup()
-except Exception, e:
+except Exception as e:
     # There is a failure; set all attributes to default
-    print 'Warning: %s' % e
+    print('Warning: %s' % e)
     default()

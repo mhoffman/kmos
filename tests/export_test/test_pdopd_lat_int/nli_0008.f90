@@ -4,9 +4,9 @@ use lattice
 use proclist_constants
 implicit none
 contains
-pure function nli_destruct5(cell)
+pure function nli_destruct7(cell)
     integer(kind=iint), dimension(4), intent(in) :: cell
-    integer(kind=iint) :: nli_destruct5
+    integer(kind=iint) :: nli_destruct7
 
     select case(get_species(cell + (/0, -1, 0, PdO_hollow2/)))
       case(CO)
@@ -15,21 +15,21 @@ pure function nli_destruct5(cell)
             select case(get_species(cell + (/0, 0, 0, PdO_hollow1/)))
               case(empty)
                 select case(get_species(cell + (/0, 0, 0, PdO_bridge1/)))
-                  case(empty)
-                    nli_destruct5 = destruct5; return
+                  case(CO)
+                    nli_destruct7 = destruct7; return
                   case default
-                    nli_destruct5 = 0; return
+                    nli_destruct7 = 0; return
                 end select
               case default
-                nli_destruct5 = 0; return
+                nli_destruct7 = 0; return
             end select
           case default
-            nli_destruct5 = 0; return
+            nli_destruct7 = 0; return
         end select
       case default
-        nli_destruct5 = 0; return
+        nli_destruct7 = 0; return
     end select
 
-end function nli_destruct5
+end function nli_destruct7
 
 end module

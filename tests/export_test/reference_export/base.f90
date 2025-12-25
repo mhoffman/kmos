@@ -640,8 +640,7 @@ subroutine update_integ_rate()
         integ_rates(i)=integ_rates(i)+nr_of_sites(i)*rates(i)*kmc_time_step
     enddo
 
-    ASSERT(accum_rates(nr_of_proc).gt.0.,"base/update_accum_rate found" // &
-        "accum_rates(nr_of_proc)=0, so no process is available at all")
+    ASSERT(accum_rates(nr_of_proc).gt.0.,"base/update_accum_rate: no process available")
 
 end subroutine update_integ_rate
 !------ S. Matera 09/18/2012------
@@ -802,20 +801,20 @@ subroutine deallocate_system()
 end subroutine deallocate_system
 
 
-pure function get_system_name()
+subroutine get_system_name(output_system_name)
     !****f* base/get_system_name
     ! FUNCTION
     !    Return the systems name, that was specified with base/allocate_system
     !
     ! ARGUMENTS
     !
-    !    * ``system_name`` Writeable string of type character(len=200).
+    !    * ``output_system_name`` Writeable string of type character(len=200).
     !******
     !---------------I/O variables---------------
-    character(len=200) :: get_system_name
+    character(len=200), intent(out) :: output_system_name
 
-    get_system_name = system_name
-end function get_system_name
+    output_system_name = system_name
+end subroutine get_system_name
 
 
 subroutine set_system_name(input_system_name)

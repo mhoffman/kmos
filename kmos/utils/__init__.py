@@ -18,17 +18,20 @@
 #    You should have received a copy of the GNU General Public License
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import with_statement
+import logging
 import re
+import os
 from time import time
-from StringIO import StringIO
+from io import StringIO
 from kmos.utils.ordered_dict import OrderedDict
+
+logger = logging.getLogger(__name__)
 
 ValidationError = UserWarning
 try:
     from kiwi.datatypes import ValidationError
 except:
-    print('kiwi Validation not working.')
+    logger.info('kiwi Validation not working.')
 
 FCODE = """module kind
 implicit none
@@ -114,12 +117,14 @@ def write_py(fileobj, images, **kwargs):
         else:
             chemical_formula = image.get_name()
 
+        # Handle ASE Cell object (ASE 3.x) vs numpy array (older ASE)
+        cell_repr = repr(image.cell.array if hasattr(image.cell, 'array') else image.cell)
         fileobj.write("    Atoms(symbols='%s',\n"
                       "          pbc=np.%s,\n"
                       "          cell=np.array(\n      %s,\n" % (
                           chemical_formula,
                           repr(image.pbc),
-                          repr(image.cell)[6:]))
+                          cell_repr[6:]))
 
         if not scaled_positions:
             fileobj.write("          positions=np.array(\n      %s),\n"
@@ -127,7 +132,7 @@ def write_py(fileobj, images, **kwargs):
         else:
             fileobj.write("          scaled_positions=np.array(\n      %s),\n"
                           % repr(list((np.around(image.get_scaled_positions(), decimals=7)).tolist())))
-        print(image.get_scaled_positions())
+        logger.info(image.get_scaled_positions())
         fileobj.write('),\n')
 
     fileobj.write(']')
@@ -135,7 +140,7 @@ def write_py(fileobj, images, **kwargs):
 
 def get_ase_constructor(atoms):
     """Return the ASE constructor string for `atoms`."""
-    if isinstance(atoms, basestring):
+    if isinstance(atoms, str):
         #return atoms
         atoms = eval(atoms)
     if type(atoms) is list:
@@ -191,13 +196,10 @@ def download(project):
     response = HttpResponse(mimetype='application/x-zip-compressed')
     response['Content-Disposition'] = 'attachment; filename="kmos_export.zip"'
 
-    if isinstance(project, basestring):
+    if isinstance(project, str):
         project = import_xml(project)
 
-    try:
-        from cStringIO import StringIO
-    except:
-        from StringIO import StringIO
+    from io import StringIO
     stringio = StringIO()
     zfile = zipfile.ZipFile(stringio, 'w')
 
@@ -236,6 +238,7 @@ def evaluate_kind_values(infile, outfile):
     import os
     import sys
     import shutil
+    import subprocess
     sys.path.append(os.path.abspath(os.curdir))
 
     with open(infile) as infh:
@@ -258,7 +261,6 @@ def evaluate_kind_values(infile, outfile):
         try:
             import f2py_selected_kind
         except:
-            from numpy.f2py import compile
             # quick'n'dirty workaround for windoze
             if os.name == 'nt':
                 f = open('f2py_selected_kind.f90', 'w')
@@ -276,10 +278,15 @@ def evaluate_kind_values(infile, outfile):
 
                 sys.argv = true_argv
             else:
+                with open('f2py_selected_kind.f90', 'w') as f:
+                    f.write(FCODE)
                 fcompiler = os.environ.get('F2PY_FCOMPILER', 'gfortran')
-                compile(FCODE, source_fn='f2py_selected_kind.f90',
-                        modulename='f2py_selected_kind',
-                        extra_args='--fcompiler=%s' % fcompiler)
+                f2py_command = [sys.executable, "-m", "numpy.f2py", "-c", "f2py_selected_kind.f90", "-m", "f2py_selected_kind"]
+                print('%s\n' % os.path.abspath(os.curdir))
+                result = subprocess.run(f2py_command, capture_output=True, text=True,
+                                        env=dict(os.environ, **{"LIBRARY_PATH": os.environ.get("LIBRARY_PATH", "") + ":/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"})
+                                        )
+                print(result.stdout)
             try:
                 import f2py_selected_kind
             except Exception as e:
@@ -322,8 +329,8 @@ def evaluate_kind_values(infile, outfile):
         args, kwargs = parse_args(args)
         return import_selected_kind().real_kind(*args, **kwargs)
 
-    infile = file(infile)
-    outfile = file(outfile, 'w')
+    infile = open(infile)
+    outfile = open(outfile, 'w')
     int_pattern = re.compile((r'(?P<before>.*)selected_int_kind'
                               '\((?P<args>.*)\)(?P<after>.*)'),
                              flags=re.IGNORECASE)
@@ -382,17 +389,17 @@ def build(options):
     extra_flags = {}
 
     if options.no_optimize:
-        extra_flags['gfortran'] = ('-ffree-line-length-none -ffree-form'
+        extra_flags['gfortran'] = ('-ffree-line-length-0 -ffree-form'
                                    ' -xf95-cpp-input -Wall -fimplicit-none'
-                                   ' -time  -fmax-identifier-length=63 ')
+                                   ' -time  -fmax-identifier-length=63')
         extra_flags['gnu95'] = extra_flags['gfortran']
         extra_flags['intel'] = '-fpp -Wall -I/opt/intel/fc/10.1.018/lib'
         extra_flags['intelem'] = '-fpp -Wall'
 
     else:
-        extra_flags['gfortran'] = ('-ffree-line-length-none -ffree-form'
+        extra_flags['gfortran'] = ('-ffree-line-length-0 -ffree-form'
                                    ' -xf95-cpp-input -Wall -O3 -fimplicit-none'
-                                   ' -time -fmax-identifier-length=63 ')
+                                   ' -time -fmax-identifier-length=63')
         extra_flags['gnu95'] = extra_flags['gfortran']
         extra_flags['intel'] = '-fast -fpp -Wall -I/opt/intel/fc/10.1.018/lib'
         extra_flags['intelem'] = '-fast -fpp -Wall'
@@ -426,16 +433,17 @@ def build(options):
 
     if options.debug:
         extra_flags += ' -DDEBUG'
-    call.append('--f90flags="%s"' % extra_flags)
+    call.append('--f90flags=%s' % extra_flags)
     call.append('-m')
     call.append(module_name)
     call += src_files
 
-    print(call)
+    logger.info(call)
     from copy import deepcopy
     true_argv = deepcopy(sys.argv)  # save for later
     from numpy import f2py
     sys.argv = call
+    os.environ["LIBRARY_PATH"] = os.environ.get("LIBRARY_PATH", "") + ":/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
     f2py.main()
     sys.argv = true_argv
 
@@ -486,7 +494,7 @@ def timeit(func):
     def wrapper(*args, **kwargs):
         time0 = time()
         func(*args, **kwargs)
-        print('Executing %s took %.3f s' % (func.__name__, time() - time0))
+        logger.info('Executing %s took %.3f s' % (func.__name__, time() - time0))
     return wrapper
 
 
@@ -546,9 +554,10 @@ def evaluate_template(template, escape_python=False, **kwargs):
         #@ Hello World {i}
 
     """
-    locals().update(kwargs)
+    # Create a namespace dict for exec() - Python 3 requires this for variable modification
+    namespace = dict(kwargs)
+    namespace['result'] = ''
 
-    result = ''
     NEWLINE = '\n'
     PREFIX = '#@'
     lines = [line + NEWLINE for line in template.split(NEWLINE)]
@@ -567,7 +576,7 @@ def evaluate_template(template, escape_python=False, **kwargs):
         # just return the original
         if not matched:
             return template
-        exec(python_lines)
+        exec(python_lines, namespace)
 
         # second turn literary lines into write statements
         python_lines = ''
@@ -584,7 +593,7 @@ def evaluate_template(template, escape_python=False, **kwargs):
                 python_lines += '%sresult += ("""%s""".format(**dict(locals())))\n' \
                     % (' ' * (len(line.expandtabs(4)) - len(line.lstrip())),  line.lstrip())
 
-        exec(python_lines)
+        exec(python_lines, namespace)
 
     else:
         # first just replace verbose lines by pass to check syntax
@@ -601,7 +610,7 @@ def evaluate_template(template, escape_python=False, **kwargs):
                 python_lines += line
         if not matched:
             return template
-        exec(python_lines)
+        exec(python_lines, namespace)
 
         # second turn literary lines into write statements
         python_lines = ''
@@ -616,6 +625,6 @@ def evaluate_template(template, escape_python=False, **kwargs):
             else:
                 python_lines += line
 
-        exec(python_lines)
+        exec(python_lines, namespace)
 
-    return result
+    return namespace['result']

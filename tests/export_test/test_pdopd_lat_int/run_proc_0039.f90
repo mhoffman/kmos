@@ -49,7 +49,7 @@ use nli_0045
 use proclist_constants
 implicit none
 contains
-subroutine run_proc_destruct10(cell)
+subroutine run_proc_o_COdif_h1h2down(cell)
 
     integer(kind=iint), dimension(4), intent(in) :: cell
 
@@ -65,20 +65,8 @@ subroutine run_proc_destruct10(cell)
     call del_proc(nli_destruct7(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
     call del_proc(nli_destruct8(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
     call del_proc(nli_destruct9(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call del_proc(nli_m_COads_b1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call del_proc(nli_m_COads_b10(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
-    call del_proc(nli_m_COads_b7(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
-    call del_proc(nli_m_COads_b9(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call del_proc(nli_m_COdes_b1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call del_proc(nli_m_COdes_b10(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
-    call del_proc(nli_m_COdes_b7(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
-    call del_proc(nli_m_COdes_b9(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call del_proc(nli_o_COads_bridge1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call del_proc(nli_o_COads_bridge2(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
     call del_proc(nli_o_COads_hollow1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
     call del_proc(nli_o_COads_hollow2(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
-    call del_proc(nli_o_COdes_bridge1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call del_proc(nli_o_COdes_bridge2(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
     call del_proc(nli_o_COdes_hollow1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
     call del_proc(nli_o_COdes_hollow2(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
     call del_proc(nli_o_COdif_h1h2down(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
@@ -90,18 +78,10 @@ subroutine run_proc_destruct10(cell)
     call del_proc(nli_o_O2des_h1h2(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
     call del_proc(nli_o_O2des_h1h2(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
     call del_proc(nli_o_O2des_h2h1(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
-    call del_proc(nli_oxidize1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
 
     ! update lattice
-    call replace_species(cell + (/0, 0, 0, PdO_hollow1/), CO, null_species)
-    call replace_species(cell + (/0, -1, 0, PdO_hollow2/), empty, null_species)
-    call replace_species(cell + (/0, 0, 0, PdO_bridge1/), CO, null_species)
-    call replace_species(cell + (/0, -1, 0, PdO_bridge2/), empty, null_species)
-    call replace_species(cell + (/0, 0, 0, Pd100_h1/), null_species, empty)
-    call replace_species(cell + (/0, 0, 0, Pd100_b1/), null_species, CO)
-    call replace_species(cell + (/0, 0, 0, Pd100_b9/), null_species, CO)
-    call replace_species(cell + (/0, -1, 0, Pd100_b10/), null_species, empty)
-    call replace_species(cell + (/0, -1, 0, Pd100_b7/), null_species, empty)
+    call replace_species(cell + (/0, 0, 0, PdO_hollow1/), CO, empty)
+    call replace_species(cell + (/0, -1, 0, PdO_hollow2/), empty, CO)
 
     ! enable processes that have to be enabled
     call add_proc(nli_destruct1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
@@ -115,20 +95,8 @@ subroutine run_proc_destruct10(cell)
     call add_proc(nli_destruct7(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
     call add_proc(nli_destruct8(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
     call add_proc(nli_destruct9(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call add_proc(nli_m_COads_b1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call add_proc(nli_m_COads_b10(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
-    call add_proc(nli_m_COads_b7(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
-    call add_proc(nli_m_COads_b9(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call add_proc(nli_m_COdes_b1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call add_proc(nli_m_COdes_b10(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
-    call add_proc(nli_m_COdes_b7(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
-    call add_proc(nli_m_COdes_b9(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call add_proc(nli_o_COads_bridge1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call add_proc(nli_o_COads_bridge2(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
     call add_proc(nli_o_COads_hollow1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
     call add_proc(nli_o_COads_hollow2(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
-    call add_proc(nli_o_COdes_bridge1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
-    call add_proc(nli_o_COdes_bridge2(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
     call add_proc(nli_o_COdes_hollow1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
     call add_proc(nli_o_COdes_hollow2(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
     call add_proc(nli_o_COdif_h1h2down(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
@@ -140,8 +108,7 @@ subroutine run_proc_destruct10(cell)
     call add_proc(nli_o_O2des_h1h2(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
     call add_proc(nli_o_O2des_h1h2(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
     call add_proc(nli_o_O2des_h2h1(cell + (/+0, -1, +0, 0/)), cell + (/+0, -1, +0, 1/))
-    call add_proc(nli_oxidize1(cell + (/+0, +0, +0, 0/)), cell + (/+0, +0, +0, 1/))
 
-end subroutine run_proc_destruct10
+end subroutine run_proc_o_COdif_h1h2down
 
 end module
