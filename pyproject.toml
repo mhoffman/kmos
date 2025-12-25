@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kmos"
-version = "0.4.0"  # Managed by bump-my-version
+version = "0.4.1"  # Managed by bump-my-version
 description = "kMC modeling on steroids"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -51,6 +51,11 @@ Repository = "https://github.com/mhoffman/kmos"
 [project.scripts]
 kmos = "kmos.cli:main"
 
+[project.optional-dependencies]
+dev = [
+    "bump-my-version",
+]
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["kmos*"]
@@ -69,3 +74,24 @@ kmos = [
 [tool.pytest.ini_options]
 # Tests now run deterministically without requiring PYTHONHASHSEED=0
 # Example: PYTHONPATH=. uv run pytest tests/
+
+[tool.bumpversion]
+current_version = "0.4.1"
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
+serialize = ["{major}.{minor}.{patch}"]
+search = "{current_version}"
+replace = "{new_version}"
+regex = false
+ignore_missing_version = false
+tag = true
+sign_tags = false
+tag_name = "v{new_version}"
+tag_message = "Bump version: {current_version} → {new_version}"
+allow_dirty = false
+commit = true
+message = "Bump version: {current_version} → {new_version}"
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
