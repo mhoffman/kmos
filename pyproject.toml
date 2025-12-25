@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kmos"
+version = "0.1.0"
+description = "kMC modeling on steroids"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+    {name = "Max J. Hoffmann", email = "mjhoffmann@gmail.com"}
+]
+maintainers = [
+    {name = "Max J. Hoffmann", email = "mjhoffmann@gmail.com"}
+]
+dependencies = [
+    "ase",
+    "ipython",
+    "lxml",
+    "numpy>=2.0.2",
+    "pytest>=8.4.2",
+]
+
+[project.scripts]
+kmos = "kmos.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["kmos*"]
+
+[tool.setuptools.package-data]
+kmos = [
+    "fortran_src/*.f90",
+    "fortran_src/*.mpy",
+    "kmc_editor.glade",
+    "fortran_src/assert.ppc",
+    "kmc_project_v0.1.dtd",
+    "kmc_project_v0.2.dtd",
+    "kmc_project_v0.3.dtd"
+]
+
+[tool.pytest.ini_options]
+# Tests now run deterministically without requiring PYTHONHASHSEED=0
+# Example: PYTHONPATH=. uv run pytest tests/
