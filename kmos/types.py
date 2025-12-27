@@ -2156,7 +2156,10 @@ def prettify_xml(elem):
     sort_xml_attributes(elem)
     rough_string = ET.tostring(elem, encoding='utf-8')
     reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent='    ')
+    pretty_xml = reparsed.toprettyxml(indent='    ')
+    # Unescape &#10; to newlines for consistency across Python versions
+    # (Python >= 3.14 escapes newlines in attributes, older versions don't)
+    return pretty_xml.replace('&#10;', '\n')
 
 
 def parse_chemical_expression(eq, process, project_tree):
