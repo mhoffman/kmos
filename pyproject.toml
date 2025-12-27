@@ -31,6 +31,8 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Education",
     "Topic :: Scientific/Engineering :: Chemistry",
     "Topic :: Scientific/Engineering :: Physics",
@@ -42,6 +44,8 @@ dependencies = [
     "lxml",
     "numpy>=2.0.2",
     "pytest>=8.4.2",
+    "meson>=1.2.0",
+    "meson-python>=0.15.0",
 ]
 
 [project.urls]

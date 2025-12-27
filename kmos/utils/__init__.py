@@ -388,21 +388,28 @@ def build(options):
 
     extra_flags = {}
 
+    # Add include path for src directory (needed for meson backend in Python >= 3.12)
+    # Use absolute path so meson can find include files from its temp build directory
+    if os.path.isdir('src'):
+        src_include = '-I' + os.path.abspath('src')
+    else:
+        src_include = '-I' + os.path.abspath('.')
+
     if options.no_optimize:
         extra_flags['gfortran'] = ('-ffree-line-length-0 -ffree-form'
                                    ' -xf95-cpp-input -Wall -fimplicit-none'
-                                   ' -time  -fmax-identifier-length=63')
+                                   ' -time  -fmax-identifier-length=63 ' + src_include)
         extra_flags['gnu95'] = extra_flags['gfortran']
-        extra_flags['intel'] = '-fpp -Wall -I/opt/intel/fc/10.1.018/lib'
-        extra_flags['intelem'] = '-fpp -Wall'
+        extra_flags['intel'] = '-fpp -Wall -I/opt/intel/fc/10.1.018/lib ' + src_include
+        extra_flags['intelem'] = '-fpp -Wall ' + src_include
 
     else:
         extra_flags['gfortran'] = ('-ffree-line-length-0 -ffree-form'
                                    ' -xf95-cpp-input -Wall -O3 -fimplicit-none'
-                                   ' -time -fmax-identifier-length=63')
+                                   ' -time -fmax-identifier-length=63 ' + src_include)
         extra_flags['gnu95'] = extra_flags['gfortran']
-        extra_flags['intel'] = '-fast -fpp -Wall -I/opt/intel/fc/10.1.018/lib'
-        extra_flags['intelem'] = '-fast -fpp -Wall'
+        extra_flags['intel'] = '-fast -fpp -Wall -I/opt/intel/fc/10.1.018/lib ' + src_include
+        extra_flags['intelem'] = '-fast -fpp -Wall ' + src_include
 
     # FIXME
     extra_libs = ''
@@ -444,6 +451,14 @@ def build(options):
     from numpy import f2py
     sys.argv = call
     os.environ["LIBRARY_PATH"] = os.environ.get("LIBRARY_PATH", "") + ":/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
+
+    # Set FC for meson backend (Python >= 3.12) to compiler name only
+    # Meson has issues with FC containing full paths
+    if sys.version_info >= (3, 12):
+        fc_map = {'gfortran': 'gfortran', 'gnu95': 'gfortran', 'intel': 'ifort', 'intelem': 'ifort'}
+        if options.fcompiler in fc_map:
+            os.environ['FC'] = fc_map[options.fcompiler]
+
     f2py.main()
     sys.argv = true_argv
 
