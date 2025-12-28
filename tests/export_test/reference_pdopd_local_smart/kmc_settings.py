@@ -1,92 +1,204 @@
-model_name = 'sqrt5PdO'
+model_name = "sqrt5PdO"
 simulation_size = 20
 random_seed = 1
+
 
 def setup_model(model):
     """Write initialization steps here.
        e.g. ::
     model.put([0,0,0,model.lattice.default_a], model.proclist.species_a)
     """
-    #from setup_model import setup_model
-    #setup_model(model)
+    # from setup_model import setup_model
+    # setup_model(model)
     pass
+
 
 # Default history length in graph
 hist_length = 30
 
 parameters = {
-    "E_adsorption_o2_bridge_bridge":{"value":"1.9", "adjustable":False, "min":"0.0", "max":"0.0","scale":"linear"},
-    "E_co_bridge":{"value":"", "adjustable":False, "min":"0.0", "max":"0.0","scale":"linear"},
-    "E_co_hollow":{"value":"", "adjustable":False, "min":"0.0", "max":"0.0","scale":"linear"},
-    "E_diff_co_bridge_bridge":{"value":"", "adjustable":False, "min":"0.0", "max":"0.0","scale":"linear"},
-    "E_diff_co_hollow_hollow":{"value":"", "adjustable":False, "min":"0.0", "max":"0.0","scale":"linear"},
-    "E_diff_o_bridge_bridge":{"value":"", "adjustable":False, "min":"0.0", "max":"0.0","scale":"linear"},
-    "E_diff_o_bridge_hollow":{"value":"", "adjustable":False, "min":"0.0", "max":"0.0","scale":"linear"},
-    "E_diff_o_hollow_hollow":{"value":"", "adjustable":False, "min":"0.0", "max":"0.0","scale":"linear"},
-    "E_o_bridge":{"value":"", "adjustable":False, "min":"0.0", "max":"0.0","scale":"linear"},
-    "E_o_hollow":{"value":"", "adjustable":False, "min":"0.0", "max":"0.0","scale":"linear"},
-    "lattice_size":{"value":"10 10 1", "adjustable":False, "min":"0.0", "max":"0.0","scale":"linear"},
-    "T":{"value":"600", "adjustable":True, "min":"500.0", "max":"600.0","scale":"linear"},
-    "p_co":{"value":"1.", "adjustable":True, "min":"0.0", "max":"0.0","scale":"linear"},
-    "p_o2":{"value":"1.", "adjustable":True, "min":"0.0", "max":"0.0","scale":"linear"},
-    }
+    "E_adsorption_o2_bridge_bridge": {
+        "value": "1.9",
+        "adjustable": False,
+        "min": "0.0",
+        "max": "0.0",
+        "scale": "linear",
+    },
+    "E_co_bridge": {
+        "value": "",
+        "adjustable": False,
+        "min": "0.0",
+        "max": "0.0",
+        "scale": "linear",
+    },
+    "E_co_hollow": {
+        "value": "",
+        "adjustable": False,
+        "min": "0.0",
+        "max": "0.0",
+        "scale": "linear",
+    },
+    "E_diff_co_bridge_bridge": {
+        "value": "",
+        "adjustable": False,
+        "min": "0.0",
+        "max": "0.0",
+        "scale": "linear",
+    },
+    "E_diff_co_hollow_hollow": {
+        "value": "",
+        "adjustable": False,
+        "min": "0.0",
+        "max": "0.0",
+        "scale": "linear",
+    },
+    "E_diff_o_bridge_bridge": {
+        "value": "",
+        "adjustable": False,
+        "min": "0.0",
+        "max": "0.0",
+        "scale": "linear",
+    },
+    "E_diff_o_bridge_hollow": {
+        "value": "",
+        "adjustable": False,
+        "min": "0.0",
+        "max": "0.0",
+        "scale": "linear",
+    },
+    "E_diff_o_hollow_hollow": {
+        "value": "",
+        "adjustable": False,
+        "min": "0.0",
+        "max": "0.0",
+        "scale": "linear",
+    },
+    "E_o_bridge": {
+        "value": "",
+        "adjustable": False,
+        "min": "0.0",
+        "max": "0.0",
+        "scale": "linear",
+    },
+    "E_o_hollow": {
+        "value": "",
+        "adjustable": False,
+        "min": "0.0",
+        "max": "0.0",
+        "scale": "linear",
+    },
+    "lattice_size": {
+        "value": "10 10 1",
+        "adjustable": False,
+        "min": "0.0",
+        "max": "0.0",
+        "scale": "linear",
+    },
+    "T": {
+        "value": "600",
+        "adjustable": True,
+        "min": "500.0",
+        "max": "600.0",
+        "scale": "linear",
+    },
+    "p_co": {
+        "value": "1.",
+        "adjustable": True,
+        "min": "0.0",
+        "max": "0.0",
+        "scale": "linear",
+    },
+    "p_o2": {
+        "value": "1.",
+        "adjustable": True,
+        "min": "0.0",
+        "max": "0.0",
+        "scale": "linear",
+    },
+}
 
 rate_constants = {
-    "destruct1":("10E15", False),
-    "destruct10":("10E15", False),
-    "destruct11":("10E15", False),
-    "destruct2":("10E15", False),
-    "destruct3":("10E15", False),
-    "destruct4":("10E15", False),
-    "destruct5":("10E15", False),
-    "destruct6":("10E15", False),
-    "destruct7":("10E15", False),
-    "destruct8":("10E15", False),
-    "destruct9":("10E15", False),
-    "m_COads_b1":("10E8*p_co", True),
-    "m_COads_b10":("10E8*p_co", True),
-    "m_COads_b2":("10E8*p_co", True),
-    "m_COads_b3":("10E8*p_co", True),
-    "m_COads_b4":("10E8*p_co", True),
-    "m_COads_b5":("10E8*p_co", True),
-    "m_COads_b6":("10E8*p_co", True),
-    "m_COads_b7":("10E8*p_co", True),
-    "m_COads_b8":("10E8*p_co", True),
-    "m_COads_b9":("10E8*p_co", True),
-    "m_COdes_b1":("10E8", True),
-    "m_COdes_b10":("10E8", True),
-    "m_COdes_b2":("10E8", True),
-    "m_COdes_b3":("10E8", True),
-    "m_COdes_b4":("10E8", True),
-    "m_COdes_b5":("10E8", True),
-    "m_COdes_b6":("10E8", True),
-    "m_COdes_b7":("10E8", True),
-    "m_COdes_b8":("10E8", True),
-    "m_COdes_b9":("10E8", True),
-    "o_COads_bridge1":("10E8", True),
-    "o_COads_bridge2":("10E8", True),
-    "o_COads_hollow1":("10E8", True),
-    "o_COads_hollow2":("10E8", True),
-    "o_COdes_bridge1":("10E8", True),
-    "o_COdes_bridge2":("10E8", True),
-    "o_COdes_hollow1":("10E8", True),
-    "o_COdes_hollow2":("10E8", True),
-    "o_COdif_h1h2down":("10E8", True),
-    "o_COdif_h1h2up":("10E8", True),
-    "o_O2ads_h1h2":("10E12*p_o2", False),
-    "o_O2ads_h2h1":("10E12*p_o2", False),
-    "o_O2des_h1h2":("10E8", True),
-    "o_O2des_h2h1":("10E8", True),
-    "oxidize1":("10E15", True),
-    }
+    "destruct1": ("10E15", False),
+    "destruct10": ("10E15", False),
+    "destruct11": ("10E15", False),
+    "destruct2": ("10E15", False),
+    "destruct3": ("10E15", False),
+    "destruct4": ("10E15", False),
+    "destruct5": ("10E15", False),
+    "destruct6": ("10E15", False),
+    "destruct7": ("10E15", False),
+    "destruct8": ("10E15", False),
+    "destruct9": ("10E15", False),
+    "m_COads_b1": ("10E8*p_co", True),
+    "m_COads_b10": ("10E8*p_co", True),
+    "m_COads_b2": ("10E8*p_co", True),
+    "m_COads_b3": ("10E8*p_co", True),
+    "m_COads_b4": ("10E8*p_co", True),
+    "m_COads_b5": ("10E8*p_co", True),
+    "m_COads_b6": ("10E8*p_co", True),
+    "m_COads_b7": ("10E8*p_co", True),
+    "m_COads_b8": ("10E8*p_co", True),
+    "m_COads_b9": ("10E8*p_co", True),
+    "m_COdes_b1": ("10E8", True),
+    "m_COdes_b10": ("10E8", True),
+    "m_COdes_b2": ("10E8", True),
+    "m_COdes_b3": ("10E8", True),
+    "m_COdes_b4": ("10E8", True),
+    "m_COdes_b5": ("10E8", True),
+    "m_COdes_b6": ("10E8", True),
+    "m_COdes_b7": ("10E8", True),
+    "m_COdes_b8": ("10E8", True),
+    "m_COdes_b9": ("10E8", True),
+    "o_COads_bridge1": ("10E8", True),
+    "o_COads_bridge2": ("10E8", True),
+    "o_COads_hollow1": ("10E8", True),
+    "o_COads_hollow2": ("10E8", True),
+    "o_COdes_bridge1": ("10E8", True),
+    "o_COdes_bridge2": ("10E8", True),
+    "o_COdes_hollow1": ("10E8", True),
+    "o_COdes_hollow2": ("10E8", True),
+    "o_COdif_h1h2down": ("10E8", True),
+    "o_COdif_h1h2up": ("10E8", True),
+    "o_O2ads_h1h2": ("10E12*p_o2", False),
+    "o_O2ads_h2h1": ("10E12*p_o2", False),
+    "o_O2des_h1h2": ("10E8", True),
+    "o_O2des_h2h1": ("10E8", True),
+    "oxidize1": ("10E15", True),
+}
 
-site_names = ['Pd100_h1', 'Pd100_h2', 'Pd100_h4', 'Pd100_h5', 'Pd100_b1', 'Pd100_b2', 'Pd100_b3', 'Pd100_b4', 'Pd100_b5', 'Pd100_b6', 'Pd100_b7', 'Pd100_b8', 'Pd100_b9', 'Pd100_b10', 'Pd100_h3', 'PdO_bridge2', 'PdO_hollow1', 'PdO_hollow2', 'PdO_bridge1', 'PdO_Pd2', 'PdO_Pd3', 'PdO_Pd4', 'PdO_hollow3', 'PdO_hollow4', 'PdO_Pd1']
+site_names = [
+    "Pd100_h1",
+    "Pd100_h2",
+    "Pd100_h4",
+    "Pd100_h5",
+    "Pd100_b1",
+    "Pd100_b2",
+    "Pd100_b3",
+    "Pd100_b4",
+    "Pd100_b5",
+    "Pd100_b6",
+    "Pd100_b7",
+    "Pd100_b8",
+    "Pd100_b9",
+    "Pd100_b10",
+    "Pd100_h3",
+    "PdO_bridge2",
+    "PdO_hollow1",
+    "PdO_hollow2",
+    "PdO_bridge1",
+    "PdO_Pd2",
+    "PdO_Pd3",
+    "PdO_Pd4",
+    "PdO_hollow3",
+    "PdO_hollow4",
+    "PdO_Pd1",
+]
 representations = {
-    "CO":"""Atoms('CO',[[0,0,0],[0,0,1.2]])""",
-    "Pd":"""Atoms('Pd',[[0,0,0]])""",
-    "empty":"""""",
-    "oxygen":"""Atoms('O',[[0,0,0]])""",
-    }
+    "CO": """Atoms('CO',[[0,0,0],[0,0,1.2]])""",
+    "Pd": """Atoms('Pd',[[0,0,0]])""",
+    "empty": """""",
+    "oxygen": """Atoms('O',[[0,0,0]])""",
+}
 
 lattice_representation = """[Atoms(symbols='Pd15',
           pbc=np.array([False, False, False]),
@@ -99,14 +211,13 @@ lattice_representation = """[Atoms(symbols='Pd15',
 ),]"""
 
 species_tags = {
-    "CO":"""""",
-    "Pd":"""""",
-    "empty":"""""",
-    "oxygen":"""""",
-    }
+    "CO": """""",
+    "Pd": """""",
+    "empty": """""",
+    "oxygen": """""",
+}
 
-tof_count = {
-    }
+tof_count = {}
 
 xml = """<?xml version="1.0" ?>
 <kmc version="(0, 3)">

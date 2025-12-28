@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.9', '3.14']
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13', '3.14']
       fail-fast: false
 
     steps:
@@ -30,7 +30,7 @@ jobs:
         enable-cache: true
 
     - name: Install dependencies
-      run: uv sync
+      run: uv sync --extra dev
 
     - name: Run tests
       run: PYTHONPATH=. uv run pytest tests/

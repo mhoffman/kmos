@@ -1,0 +1,31 @@
+# Pre-commit hooks for kmos
+# Install: uv run pre-commit install
+# Run manually: uv run pre-commit run --all-files
+# Update hooks: uv run pre-commit autoupdate
+
+repos:
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^tests/
+      - id: end-of-file-fixer
+        exclude: ^tests/
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: debug-statements
+      - id: mixed-line-ending
+
+  # Ruff - Fast Python linter and formatter (replaces black, isort, flake8, etc.)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      # Linter
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      # Formatter
+      - id: ruff-format

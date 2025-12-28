@@ -1,13 +1,74 @@
-# Bit compiled files
-*.pyc
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
 
-tags
-dist
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 MANIFEST
-/build
 
-# emacs backup files
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
 *~
+tags
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Type checking
+.mypy_cache/
+.pytype/
+.pyre/
+.pyright/
+
+# Linting
+.ruff_cache/
+
+# Documentation builds
+doc/build/
+docs/_build/
+docs/_static/
+docs/_templates/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
 
 # Ignore test export folders
 tests/export_test/test_export*

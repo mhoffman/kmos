@@ -18,10 +18,11 @@ import os
 #    along with kmos.  If not, see <http://www.gnu.org/licenses/>.
 
 APP_ABS_PATH = os.path.dirname(os.path.abspath(__file__))
-GLADEFILE = os.path.join(APP_ABS_PATH, 'kmc_editor.glade')
-GLADEFILE = 'kmos/kmc_editor.glade'
+GLADEFILE = os.path.join(APP_ABS_PATH, "kmc_editor.glade")
+GLADEFILE = "kmos/kmc_editor.glade"
 try:
     import kiwi
-    kiwi.environ.environ.add_resource('glade', APP_ABS_PATH)
-except:
+
+    kiwi.environ.environ.add_resource("glade", APP_ABS_PATH)
+except (ImportError, ModuleNotFoundError, AttributeError):
     pass
