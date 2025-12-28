@@ -6,6 +6,7 @@ In the language of underlying MVC (Model-View-Controller) pattern these
 classes form the controller. The view is defined through a *.glade XML file
 and the models are instances of kmos.types.*
 """
+
 #    Copyright 2009-2013 Max J. Hoffmann (mjhoffmann@gmail.com)
 #    This file is part of kmos.
 #
@@ -24,37 +25,58 @@ and the models are instances of kmos.types.*
 # Standard library imports
 import re
 import copy
-#gtk import
-import pygtk
-pygtk.require('2.0')
-import gtk
-import goocanvas
 
-#kiwi imports
-from kiwi.ui.delegates import ProxySlaveDelegate, GladeDelegate, \
-                              SlaveDelegate, ProxyDelegate
-
-from kiwi.ui.views import SlaveView
-from kiwi.datatypes import ValidationError
-from kiwi.ui.objectlist import Column
-
-# own modules
-from kmos.config import GLADEFILE
-from kmos.utils import CorrectlyNamed, \
-                       get_ase_constructor, \
-                       col_str2tuple, \
-                       jmolcolor_in_hex
-
-from kmos.types import ProcessFormSite, Process, OutputItem, Coord, \
-                       ConditionAction, Site
-
-from kmos import evaluate_rate_expression
-from kmos.types import parse_chemical_expression
-
-# ASE import
+# Third-party imports
 import numpy as np
 from ase.atoms import Atoms
 from ase.data import covalent_radii
+
+# kmos imports (imported before gtk to avoid E402)
+from kmos.config import GLADEFILE
+from kmos.utils import (
+    CorrectlyNamed,
+    get_ase_constructor,
+    col_str2tuple,
+    jmolcolor_in_hex,
+)
+from kmos.types import (
+    ProcessFormSite,
+    Process,
+    OutputItem,
+    Coord,
+    ConditionAction,
+    Site,
+)
+from kmos import evaluate_rate_expression
+from kmos.types import parse_chemical_expression
+
+# GUI imports - pygtk.require must be called before importing gtk
+import pygtk
+
+pygtk.require("2.0")
+import gtk  # noqa: E402
+import goocanvas  # noqa: E402
+
+# Note: Canvas* classes may not be directly importable, suppressing warnings
+from goocanvas import (  # noqa: E402, F401
+    Canvas,
+    CanvasLayer,
+    CanvasLine,
+    CanvasOval,
+    CanvasRect,
+    CanvasText,
+)
+
+# Kiwi imports (after gtk)
+from kiwi.ui.delegates import (  # noqa: E402
+    ProxySlaveDelegate,
+    GladeDelegate,
+    SlaveDelegate,
+    ProxyDelegate,
+)
+from kiwi.ui.views import SlaveView  # noqa: E402
+from kiwi.datatypes import ValidationError  # noqa: E402
+from kiwi.ui.objectlist import Column  # noqa: E402
 
 
 class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
@@ -65,31 +87,43 @@ class MetaForm(ProxySlaveDelegate, CorrectlyNamed):
     Increasing the debug level makes the kmos backed create a lot of
     output but is typically not needed.
     """
+
     gladefile = GLADEFILE
-    toplevel_name = 'meta_form'
-    widgets = ['author', 'email', 'model_name', 'model_dimension', 'debug', ]
+    toplevel_name = "meta_form"
+    widgets = [
+        "author",
+        "email",
+        "model_name",
+        "model_dimension",
+        "debug",
+    ]
 
     def __init__(self, model, project_tree):
         ProxySlaveDelegate.__init__(self, model)
-        #self.model_dimension.set_sensitive(False)
+        # self.model_dimension.set_sensitive(False)
         self.project_tree = project_tree
         self.author.set_tooltip_text(
-            'Give a name so people know who to credit for the model.')
+            "Give a name so people know who to credit for the model."
+        )
         self.email.set_tooltip_text(
-            'Enter an email address so people can get in touch with you.')
+            "Enter an email address so people can get in touch with you."
+        )
         self.model_name.set_tooltip_text(
-            'Give a clear unique name, to identify the model.')
+            "Give a clear unique name, to identify the model."
+        )
         self.model_dimension.set_tooltip_text(
-            'The source code export function can generate ' +
-            '1d, 2d, and 3d programs. However this GUI currently only ' +
-            'supports 2d. 3d is still possible ' +
-            'by manipulating the project XML file by hand. The algorithm ' +
-            'though is fast but very memory consuming ' +
-            'so a 3d simulation might require considerably more RAM.')
+            "The source code export function can generate "
+            + "1d, 2d, and 3d programs. However this GUI currently only "
+            + "supports 2d. 3d is still possible "
+            + "by manipulating the project XML file by hand. The algorithm "
+            + "though is fast but very memory consuming "
+            + "so a 3d simulation might require considerably more RAM."
+        )
         self.debug.set_tooltip_text(
-            'Increasing the debug level might give hints if one suspects ' +
-            'errors in kmos itself. It does not help to debug your model. ' +
-            'So usually one wants to keep it a 0.')
+            "Increasing the debug level might give hints if one suspects "
+            + "errors in kmos itself. It does not help to debug your model. "
+            + "So usually one wants to keep it a 0."
+        )
         self.author.grab_focus()
 
     def on_model_name__validate(self, widget, model_name):
@@ -107,9 +141,10 @@ class SpeciesListForm(ProxySlaveDelegate):
     system will be globally initialized with this species if
     nothing else is set on a per site basis.
     """
+
     gladefile = GLADEFILE
-    toplevel_name = 'species_list_form'
-    widgets = ['default_species']
+    toplevel_name = "species_list_form"
+    widgets = ["default_species"]
 
     def __init__(self, model, project_tree):
         # this _ugly_ implementation is due to an apparent catch 22 bug in
@@ -119,15 +154,16 @@ class SpeciesListForm(ProxySlaveDelegate):
         default_species = model.default_species
         model.default_species = None
         ProxySlaveDelegate.__init__(self, model)
-        self.default_species.prefill([x.name
-                                      for x in project_tree.get_speciess()],
-                                      sort=True)
+        self.default_species.prefill(
+            [x.name for x in project_tree.get_speciess()], sort=True
+        )
         self.default_species.select(default_species)
         self.default_species.set_tooltip_text(
-            'The lattice will be initialized with this species by default\n'
-            + 'but also every unspecified condition or action wil be'
-            + 'completed with this choice.\n'
-            + 'So better only change this once at the begining if at all!')
+            "The lattice will be initialized with this species by default\n"
+            + "but also every unspecified condition or action wil be"
+            + "completed with this choice.\n"
+            + "So better only change this once at the begining if at all!"
+        )
 
 
 class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
@@ -137,22 +173,26 @@ class SpeciesForm(ProxySlaveDelegate, CorrectlyNamed):
     The representation string is meant to be a ASE ase.atoms.Atoms constructor
     that will show up in the ASE visualization.
     """
+
     gladefile = GLADEFILE
-    toplevel_name = 'species_form'
-    widgets = ['name', 'color', 'representation']
+    toplevel_name = "species_form"
+    widgets = ["name", "color", "representation"]
 
     def __init__(self, model, project_tree):
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, model)
         self.name.grab_focus()
         self.name.set_tooltip_text(
-        'The name here is arbitrary but you will have to type it many times.'
-        + 'So you might want to use e.g. CO instead carbon_monoxide')
+            "The name here is arbitrary but you will have to type it many times."
+            + "So you might want to use e.g. CO instead carbon_monoxide"
+        )
         self.color.set_tooltip_text(
-            'Choose a color a represent this species in the process editor')
+            "Choose a color a represent this species in the process editor"
+        )
         self.representation.set_tooltip_text(
-        'Set an ASE Atoms(\n\'...\') like string to representation in the '
-        + 'auto-generated movie. Please only use \'\' for quotation')
+            "Set an ASE Atoms(\n'...') like string to representation in the "
+            + "auto-generated movie. Please only use '' for quotation"
+        )
 
     def on_name__content_changed(self, _text):
         self.project_tree.update(self.model)
@@ -166,13 +206,16 @@ class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
     If 'adjustable' is activated then they maybe be changed via
     the `kmos view` front end while watching the model run.
     """
+
     gladefile = GLADEFILE
-    toplevel_name = 'parameter_form'
-    widgets = ['parameter_name',
-               'value',
-               'parameter_adjustable',
-               'parameter_min',
-               'parameter_max']
+    toplevel_name = "parameter_form"
+    widgets = [
+        "parameter_name",
+        "value",
+        "parameter_adjustable",
+        "parameter_min",
+        "parameter_max",
+    ]
 
     def __init__(self, model, project_tree):
         self.project_tree = project_tree
@@ -182,15 +225,16 @@ class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
         self.parameter_min.set_sensitive(value)
         self.name.grab_focus()
         self.parameter_adjustable.set_tooltip_text(
-        'Settings this adjustable will create a bar in the auto-generated ' +
-        'movie. Dragging this bar will adapt the barrier and recalculate ' +
-        'all rate constants. This only makes sense for physical ' +
-        'parameters such a partial pressure but not for e.g. lattice size')
+            "Settings this adjustable will create a bar in the auto-generated "
+            + "movie. Dragging this bar will adapt the barrier and recalculate "
+            + "all rate constants. This only makes sense for physical "
+            + "parameters such a partial pressure but not for e.g. lattice size"
+        )
         self.parameter_name.set_tooltip_text(
-        'Choose a sensible name that you remember later when typing rate ' +
-        'constant formulae. This should not contain spaces')
-        self.value.set_tooltip_text(
-            'This defines the initial value for the parameter.')
+            "Choose a sensible name that you remember later when typing rate "
+            + "constant formulae. This should not contain spaces"
+        )
+        self.value.set_tooltip_text("This defines the initial value for the parameter.")
 
     def on_parameter_adjustable__content_changed(self, _form):
         value = self.parameter_adjustable.get_active()
@@ -202,7 +246,7 @@ class ParameterForm(ProxySlaveDelegate, CorrectlyNamed):
 
     def on_parameter_name__content_changed(self, _text):
         self.project_tree.update(self.model)
-        self.project_tree.project_data.sort_by_attribute('name')
+        self.project_tree.project_data.sort_by_attribute("name")
 
 
 class LatticeForm(ProxySlaveDelegate):
@@ -210,36 +254,42 @@ class LatticeForm(ProxySlaveDelegate):
     a ASE representation string, and the default layer. The program will
     be initialized using the default layer.
     """
+
     gladefile = GLADEFILE
-    toplevel_name = 'lattice_form'
-    widgets = ['default_layer',
-               'lattice_representation']
+    toplevel_name = "lattice_form"
+    widgets = ["default_layer", "lattice_representation"]
 
     def __init__(self, model, dimension, project_tree):
         default_layer = model.default_layer
         model.default_layer = None
         ProxySlaveDelegate.__init__(self, model)
-        self.default_layer.prefill([x.name
-                                    for x in project_tree.get_layers()],
-                                   sort=True)
+        self.default_layer.prefill(
+            [x.name for x in project_tree.get_layers()], sort=True
+        )
         self.default_layer.select(default_layer)
         self.default_layer.set_tooltip_text(
-        'By default the system will be initialized with this layer.'
-        + 'This only matters if using using more than one layer'
-        + '(multi-lattice kMC).')
+            "By default the system will be initialized with this layer."
+            + "This only matters if using using more than one layer"
+            + "(multi-lattice kMC)."
+        )
 
     def on_add_structure__clicked(self, _):
         try:
             import ase.io
-        except:
-            print('Need ASE to do this.')
+        except (ImportError, ModuleNotFoundError):
+            print("Need ASE to do this.")
             return
 
         filechooser = gtk.FileChooserDialog(
-            title='Open structure file',
+            title="Open structure file",
             action=gtk.FILE_CHOOSER_ACTION_OPEN,
-            buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                     gtk.STOCK_OK, gtk.RESPONSE_OK))
+            buttons=(
+                gtk.STOCK_CANCEL,
+                gtk.RESPONSE_CANCEL,
+                gtk.STOCK_OK,
+                gtk.RESPONSE_OK,
+            ),
+        )
         resp = filechooser.run()
         filename = filechooser.get_filename()
         filechooser.destroy()
@@ -248,31 +298,32 @@ class LatticeForm(ProxySlaveDelegate):
                 structure = ase.io.read(filename)
                 if structure is list:
                     structure = structure[-1]
-            except:
-                print('Could not open this file. Please choose')
-                print('a format that ASE can understand')
+            except Exception as e:
+                print(f"Could not open this file: {e}. Please choose")
+                print("a format that ASE can understand")
                 return
             cur_text = self.lattice_representation.get_buffer().get_text(
                 self.lattice_representation.get_buffer().get_start_iter(),
-                self.lattice_representation.get_buffer().get_end_iter())
+                self.lattice_representation.get_buffer().get_end_iter(),
+            )
             if not cur_text:
                 structures = []
             else:
                 structures = eval(cur_text)
             structures.append(structure)
             self.lattice_representation.get_buffer().set_text(
-                '[%s]' % (
-                ', '.join(
-                        [get_ase_constructor(x) for x in structures])))
+                "[%s]" % (", ".join([get_ase_constructor(x) for x in structures]))
+            )
 
 
 class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
     """Widget to define a lattice through the sites
     in the unit cell (i.e. the `basis` in solid state language).
     """
+
     gladefile = GLADEFILE
-    toplevel_name = 'layer_form'
-    widgets = ['layer_name', 'layer_color']
+    toplevel_name = "layer_form"
+    widgets = ["layer_name", "layer_color"]
 
     def __init__(self, model, project_tree):
         self.project_tree = project_tree
@@ -281,7 +332,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.root = self.canvas.get_root_item()
         self.canvas.set_size_request(400, 400)
         self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
-        self.canvas.connect('button-press-event', self.on_button_press)
+        self.canvas.connect("button-press-event", self.on_button_press)
 
         self.layer_nr = self.project_tree.get_layers().index(model)
 
@@ -293,8 +344,9 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         self.redraw()
 
         self.layer_name.set_tooltip_text(
-            'A name is only relevant if you are using more than one\n'
-            + 'layer in your model.')
+            "A name is only relevant if you are using more than one\n"
+            + "layer in your model."
+        )
 
     def _get_atoms(self):
         if self.project_tree.lattice.representation:
@@ -309,56 +361,65 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
 
     def redraw(self):
         """Draw the current lattice with unit cell
-           and sites defined on it.
+        and sites defined on it.
         """
 
         # draw atoms in background
         atoms = self._get_atoms()
 
-        self.lower_left = (self.offset[0],
-                           self.offset[1]
-                           + self.scale * atoms.cell[1, 1])
-        self.upper_right = (self.offset[0]
-                           + self.scale * atoms.cell[0, 0],
-                           self.offset[1])
+        self.lower_left = (
+            self.offset[0],
+            self.offset[1] + self.scale * atoms.cell[1, 1],
+        )
+        self.upper_right = (
+            self.offset[0] + self.scale * atoms.cell[0, 0],
+            self.offset[1],
+        )
         big_atoms = atoms * (3, 3, 1)
         for atom in sorted(big_atoms, key=lambda x: x.position[2]):
             i = atom.number
             radius = self.radius_scale * covalent_radii[i]
             color = jmolcolor_in_hex(i)
             X = atom.position[0]
-            Y = - atom.position[1]
-            goocanvas.Ellipse(parent=self.root,
-                              center_x=(self.offset[0] + self.scale * X),
-                              center_y=(self.offset[1] + self.scale * Y),
-                              radius_x=radius,
-                              radius_y=radius,
-                              stroke_color='black',
-                              fill_color_rgba=color,
-                              line_width=1.0)
+            Y = -atom.position[1]
+            goocanvas.Ellipse(
+                parent=self.root,
+                center_x=(self.offset[0] + self.scale * X),
+                center_y=(self.offset[1] + self.scale * Y),
+                radius_x=radius,
+                radius_y=radius,
+                stroke_color="black",
+                fill_color_rgba=color,
+                line_width=1.0,
+            )
 
         # draw unit cell
         A = tuple(self.offset[:2])
-        B = (self.offset[0] + self.scale * (atoms.cell[0, 0]),
-             self.offset[1] + self.scale * (atoms.cell[0, 1]))
+        B = (
+            self.offset[0] + self.scale * (atoms.cell[0, 0]),
+            self.offset[1] + self.scale * (atoms.cell[0, 1]),
+        )
 
-        C = (self.offset[0] + self.scale * (atoms.cell[0, 0]
-                                       + atoms.cell[1, 0]),
-             self.offset[1] - self.scale * (atoms.cell[0, 1]
-                                       + atoms.cell[1, 1]))
+        C = (
+            self.offset[0] + self.scale * (atoms.cell[0, 0] + atoms.cell[1, 0]),
+            self.offset[1] - self.scale * (atoms.cell[0, 1] + atoms.cell[1, 1]),
+        )
 
-        D = (self.offset[0] + self.scale * (atoms.cell[1, 0]),
-             self.offset[1] - self.scale * (atoms.cell[1, 1]))
-        goocanvas.Polyline(parent=self.root,
-                           close_path=True,
-                           points=goocanvas.Points([A, B, C, D]),
-                           stroke_color='black',)
+        D = (
+            self.offset[0] + self.scale * (atoms.cell[1, 0]),
+            self.offset[1] - self.scale * (atoms.cell[1, 1]),
+        )
+        goocanvas.Polyline(
+            parent=self.root,
+            close_path=True,
+            points=goocanvas.Points([A, B, C, D]),
+            stroke_color="black",
+        )
 
         # draw sites
         for x in range(3):
             for y in range(3):
                 for site in self.model.sites:
-
                     # convert to screen coordinates
                     pos = np.dot(site.pos + np.array([x, y, 0]), atoms.cell)
                     pos *= np.array([1, -1, 1])
@@ -367,17 +428,19 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
                     X = pos[0]
                     Y = pos[1]
 
-                    o = goocanvas.Ellipse(parent=self.root,
-                                          center_x=X,
-                                          center_y=Y,
-                                          radius_x=.3 * self.radius_scale,
-                                          radius_y=.3 * self.radius_scale,
-                                          stroke_color='black',
-                                          fill_color='white',
-                                          line_width=1.0,)
+                    o = goocanvas.Ellipse(
+                        parent=self.root,
+                        center_x=X,
+                        center_y=Y,
+                        radius_x=0.3 * self.radius_scale,
+                        radius_y=0.3 * self.radius_scale,
+                        stroke_color="black",
+                        fill_color="white",
+                        line_width=1.0,
+                    )
 
                     o.site = site
-                    o.connect('query-tooltip', self.query_tooltip)
+                    o.connect("query-tooltip", self.query_tooltip)
                 self.canvas.hide()
                 self.canvas.show()
 
@@ -387,7 +450,7 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
 
     def on_button_press(self, _item, event):
         atoms = self._get_atoms()
-        pos = (np.array([event.x, event.y, 0]) - self.offset)
+        pos = np.array([event.x, event.y, 0]) - self.offset
 
         # convert from screen coordinates
         pos *= [1, -1, 1]
@@ -395,14 +458,13 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
         pos = np.linalg.solve(atoms.cell.T, pos)
 
         for site in self.model.sites:
-            d = np.sqrt((pos[0] - site.pos[0]) ** 2 +
-                        (pos[1] - site.pos[1]) ** 2)
+            d = np.sqrt((pos[0] - site.pos[0]) ** 2 + (pos[1] - site.pos[1]) ** 2)
             if d < 0.10:
                 SiteForm(site, self, self.project_tree, self.model)
                 break
         else:
             new_site = Site()
-            new_site.name = ''
+            new_site.name = ""
             new_site.pos = pos
 
             # Put z position slightly above
@@ -439,13 +501,11 @@ class LayerEditor(ProxySlaveDelegate, CorrectlyNamed):
 
 
 class SiteForm(ProxyDelegate, CorrectlyNamed):
-    """Allows to create or modify a site when setting up a unit cell.
-    """
+    """Allows to create or modify a site when setting up a unit cell."""
+
     gladefile = GLADEFILE
-    toplevel_name = 'site_form'
-    widgets = ['site_name',
-               'default_species',
-               'site_tags']
+    toplevel_name = "site_form"
+    widgets = ["site_name", "default_species", "site_tags"]
 
     def __init__(self, site, parent, project_tree, layer):
         self.saved_state = copy.deepcopy(site)
@@ -455,13 +515,13 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
         ProxyDelegate.__init__(self, site)
 
         # fill species dialog with correct available choices
-        self.site_default_species.prefill([x.name
-                                            for x in
-                                            project_tree.get_speciess()],
-                                            sort=True)
-        if default_species == 'default_species':
+        self.site_default_species.prefill(
+            [x.name for x in project_tree.get_speciess()], sort=True
+        )
+        if default_species == "default_species":
             self.site_default_species.select(
-                        self.project_tree.species_list.default_species)
+                self.project_tree.species_list.default_species
+            )
         else:
             self.site_default_species.select(default_species)
         self.model.default_species = self.site_default_species.get_selected()
@@ -479,11 +539,12 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
         self.layer = layer
         self.show_all()
         self.site_name.set_tooltip_text(
-            'The site name has to be uniquely identify a site (at least '
-            'within each layer for multi-lattice mode). You may have to '
-            'type this name a lot, so keep '
-            'it short but unambiguous. '
-            'To delete a site, erase name.')
+            "The site name has to be uniquely identify a site (at least "
+            "within each layer for multi-lattice mode). You may have to "
+            "type this name a lot, so keep "
+            "it short but unambiguous. "
+            "To delete a site, erase name."
+        )
 
     def on_sitevect_x__activate(self, _):
         self.on_site_ok__clicked(_)
@@ -501,7 +562,7 @@ class SiteForm(ProxyDelegate, CorrectlyNamed):
         """check if other site already has the name"""
         if [x for x in self.layer.sites if x.name == site_name]:
             self.site_ok.set_sensitive(False)
-            return ValidationError('Site name needs to be unique')
+            return ValidationError("Site name needs to be unique")
         else:
             self.site_ok.set_sensitive(True)
 
@@ -534,18 +595,21 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
     Rate constants can be entered directly using all defined parameters.
     The tooltip shows the current value if all is entered correctly.
     """
+
     gladefile = GLADEFILE
-    toplevel_name = 'process_form'
-    widgets = ['process_name',
-               'rate_constant',
-               'process_enabled',
-               'chemical_expression']
+    toplevel_name = "process_form"
+    widgets = [
+        "process_name",
+        "rate_constant",
+        "process_enabled",
+        "chemical_expression",
+    ]
     z = 5  # z as in zoom
-    l = 500  # l as in length
-    r_cond = 15.
-    r_act = 10.
-    r_reservoir = 5.
-    r_site = 5.  # where the center unit cell is in the drawing
+    canvas_size = 500  # canvas size in pixels
+    r_cond = 15.0
+    r_act = 10.0
+    r_reservoir = 5.0
+    r_site = 5.0  # where the center unit cell is in the drawing
     X = 2
     Y = 2
 
@@ -554,7 +618,9 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.project_tree = project_tree
         ProxySlaveDelegate.__init__(self, process)
         expression = self.generate_expression()
-        self.chemical_expression.update(expression, )
+        self.chemical_expression.update(
+            expression,
+        )
 
         self.radius_scale = 20
         self.scale = 20
@@ -562,67 +628,73 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         self.draw_from_data()
 
         self.process_name.set_tooltip_text(
-        'This name has to uniquely identify the process e.g. co_diff_right')
+            "This name has to uniquely identify the process e.g. co_diff_right"
+        )
         self.chemical_expression.set_tooltip_text(
-        'This is a fast way to define a process e.g. CO@cus->CO@bridge ' +
-        'to declare a CO diffusion from site br to site cus or ' +
-        'CO@cus->CO@cus.(0,1) for a CO diffusion in the up direction. Hit ' +
-        'ENTER to update the graphical representation.')
+            "This is a fast way to define a process e.g. CO@cus->CO@bridge "
+            + "to declare a CO diffusion from site br to site cus or "
+            + "CO@cus->CO@cus.(0,1) for a CO diffusion in the up direction. Hit "
+            + "ENTER to update the graphical representation."
+        )
 
         self.rate_constant.curr_value = 0.0
         expr = self.rate_constant.get_text()
         if not expr:
             # if nothing entered show explanation
-            self.rate_constant.set_tooltip_text((
-                'Python has to be able to evaluate this expression to a ' +
-                'plain real number. One can use standard mathematical ' +
-                'functions, parameters that are defined under "Parameters"' +
-                'or constants and conversion factor such as c, h, e, ' +
-                'kboltzmann, pi, bar, angstrom'))
+            self.rate_constant.set_tooltip_text(
+                (
+                    "Python has to be able to evaluate this expression to a "
+                    + "plain real number. One can use standard mathematical "
+                    + 'functions, parameters that are defined under "Parameters"'
+                    + "or constants and conversion factor such as c, h, e, "
+                    + "kboltzmann, pi, bar, angstrom"
+                )
+            )
         else:
             try:
                 self.rate_constant.set_tooltip_text(
-                    'Current value: %.5e s^{-1}' %
-                    evaluate_rate_expression(expr,
-                        self.project_tree.get_parameters()))
+                    "Current value: %.5e s^{-1}"
+                    % evaluate_rate_expression(
+                        rate_expr=expr, parameters=self.project_tree.get_parameters()
+                    )
+                )
             except Exception as e:
                 self.rate_constant.set_tooltip_text(str(e))
-        rate_constant_terms = ['bar',
-                               'beta',
-                               'eV',
-                               'exp',
-                               'h',
-                               'kboltzmann',
-                               'umass']
+        rate_constant_terms = ["bar", "beta", "eV", "exp", "h", "kboltzmann", "umass"]
         for param in self.project_tree.get_parameters():
             rate_constant_terms.append(param.name)
         self.rate_constant.prefill(rate_constant_terms)
 
-        chem_exp_terms = ['->', ]
+        chem_exp_terms = [
+            "->",
+        ]
         for species in self.project_tree.get_speciess():
             chem_exp_terms.append(species.name)
         self.chemical_expression.prefill(chem_exp_terms)
 
     def generate_expression(self):
-        expr = ''
+        expr = ""
         if not self.process.condition_list + self.process.action_list:
             return expr
         for i, condition in enumerate(self.process.condition_list):
             if i > 0:
-                expr += ' + '
-            expr += '%s@%s' % (condition.species, condition.coord.name)
-        expr += ' -> '
+                expr += " + "
+            expr += "%s@%s" % (condition.species, condition.coord.name)
+        expr += " -> "
         for i, action in enumerate(self.process.action_list):
             if i > 0:
-                expr += ' + '
-            expr += '%s@%s' % (action.species, action.coord.name)
+                expr += " + "
+            expr += "%s@%s" % (action.species, action.coord.name)
         return expr
 
     def on_rate_constant__validate(self, _widget, expr):
         try:
-            self.rate_constant.set_tooltip_text('Current value: %.2e s^{-1}' %
-                evaluate_rate_expression(expr,
-                    self.project_tree.get_parameters()))
+            self.rate_constant.set_tooltip_text(
+                "Current value: %.2e s^{-1}"
+                % evaluate_rate_expression(
+                    rate_expr=expr, parameters=self.project_tree.get_parameters()
+                )
+            )
         except Exception as e:
             return ValidationError(e)
 
@@ -634,34 +706,34 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             self.traw_from_data()
             return
         # Delete trailing plusses
-        text = re.sub(r'\s*\+\s', '', text)
+        text = re.sub(r"\s*\+\s", "", text)
         # default to empty right-hand side if not existent
-        while text and text[-1] in '-.':
+        while text and text[-1] in "-.":
             text = text[:-1]
-        if not '->' in text:
-            text += '->'
+        if "->" not in text:
+            text += "->"
         try:
-            parse_chemical_expression(eq=text,
-                                      process=self.process,
-                                      project_tree=self.project_tree)
+            parse_chemical_expression(
+                eq=text, process=self.process, project_tree=self.project_tree
+            )
             self.process.condition_list = []
             self.process.action_list = []
-            parse_chemical_expression(eq=text,
-                                      process=self.process,
-                                      project_tree=self.project_tree)
-        except Exception as e:
+            parse_chemical_expression(
+                eq=text, process=self.process, project_tree=self.project_tree
+            )
+        except Exception:
             # first remove last term and try again
             try:
                 print("Error ...")
-                text = re.sub(r'+[^+]*$', '', text)
-                parse_chemical_expression(eq=text,
-                                          process=self.process,
-                                          project_tree=self.project_tree)
+                text = re.sub(r"+[^+]*$", "", text)
+                parse_chemical_expression(
+                    eq=text, process=self.process, project_tree=self.project_tree
+                )
                 self.process.condition_list = []
                 self.process.action_list = []
-                parse_chemical_expression(eq=text,
-                                          process=self.process,
-                                          project_tree=self.project_tree)
+                parse_chemical_expression(
+                    eq=text, process=self.process, project_tree=self.project_tree
+                )
 
             except Exception as e:
                 print("Fatal Error ... %s" % e)
@@ -675,19 +747,17 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         return True
 
     def on_lattice(self, x, y):
-        """Returns True if (x, y) is in lattice box
-        """
+        """Returns True if (x, y) is in lattice box"""
         return 10 < x < 510 and 80 < y < 580
 
     def button_press(self, _, item, dummy):
         coords = item.get_coords()
-        if item.state == 'reservoir':
-            o = CanvasOval(self.motion_layer,
-                           *coords, filled=True, bg=item.bg)
-            o.connect('button-press-event', self.button_press)
-            o.connect('motion-notify-event', self.drag_motion)
-            o.connect('button-release-event', self.button_release)
-            o.state = 'from_reservoir'
+        if item.state == "reservoir":
+            o = CanvasOval(self.motion_layer, *coords, filled=True, bg=item.bg)
+            o.connect("button-press-event", self.button_press)
+            o.connect("motion-notify-event", self.drag_motion)
+            o.connect("button-release-event", self.button_release)
+            o.state = "from_reservoir"
             o.species = item.species
             self.item = o
             self.item.clicked = True
@@ -701,42 +771,37 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
             self.item.move(*d)
             self.prev_pos = event.x, event.y
 
-    #@verbose
+    # @verbose
     def button_release(self, _, dummy, event):
         self.item.clicked = False
-        if self.item.state == 'from_reservoir':
+        if self.item.state == "from_reservoir":
             if not self.on_lattice(event.x, event.y):
                 self.item.delete()
             else:
                 close_sites = self.site_layer.find_closest(
-                                               event.x,
-                                               event.y,
-                                               halo=(.2 * self.l) / self.z)
+                    event.x, event.y, halo=(0.2 * self.canvas_size) / self.z
+                )
                 if close_sites:
-                    closest_site = min(close_sites,
-                                       key=lambda i:
-                                        (i.get_center()[0] - event.x) ** 2
-                                        + (i.get_center()[1] - event.y) ** 2)
+                    closest_site = min(
+                        close_sites,
+                        key=lambda i: (i.get_center()[0] - event.x) ** 2
+                        + (i.get_center()[1] - event.y) ** 2,
+                    )
                     coord = closest_site.get_center()
                     self.item.set_center(*coord)
-                    if not self.process.condition_list \
-                           + self.process.action_list:
-                    # if no condition or action is defined yet,
-                    # we need to set the center of the editor
+                    if not self.process.condition_list + self.process.action_list:
+                        # if no condition or action is defined yet,
+                        # we need to set the center of the editor
                         self.X = closest_site.i
                         self.Y = closest_site.j
                     species = self.item.species
                     offset = closest_site.i - self.X, closest_site.j - self.Y
                     name = closest_site.name
                     layer = closest_site.layer
-                    kmc_coord = Coord(offset=offset,
-                                  name=name,
-                                  layer=layer)
-                    condition_action = ConditionAction(species=species,
-                                                       coord=kmc_coord)
+                    kmc_coord = Coord(offset=offset, name=name, layer=layer)
+                    condition_action = ConditionAction(species=species, coord=kmc_coord)
 
-                    if [x for x in self.condition_layer
-                        if x.get_center() == coord]:
+                    if [x for x in self.condition_layer if x.get_center() == coord]:
                         self.item.new_parent(self.action_layer)
                         self.item.set_radius(self.r_act)
                         self.process.action_list.append(condition_action)
@@ -747,7 +812,9 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                 else:
                     self.item.delete()
 
-        self.chemical_expression.update(self.generate_expression(), )
+        self.chemical_expression.update(
+            self.generate_expression(),
+        )
         self.canvas.redraw()
 
     def draw_from_data_old(self):
@@ -756,12 +823,13 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         """
 
         def get_species_color(species):
-            return [x for x in self.project_tree.get_speciess()
-                    if x.name == species][0].color
+            return [x for x in self.project_tree.get_speciess() if x.name == species][
+                0
+            ].color
 
-        white = col_str2tuple('#ffffff')
-        black = col_str2tuple('#000000')
-        if hasattr(self, 'canvas'):
+        white = col_str2tuple("#ffffff")
+        black = col_str2tuple("#000000")
+        if hasattr(self, "canvas"):
             self.process_pad.remove(self.canvas)
         self.canvas = Canvas(bg=white, fg=white)
         self.canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
@@ -783,92 +851,108 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 
         # draw lattice
         for i in range(self.z):
-            CanvasLine(self.lattice_layer,
-                       0, i * (self.l / self.z),
-                       500, i * (self.l / self.z),
-                       line_width=1, fg=(.6, .6, .6))
+            CanvasLine(
+                self.lattice_layer,
+                0,
+                i * (self.canvas_size / self.z),
+                500,
+                i * (self.canvas_size / self.z),
+                line_width=1,
+                fg=(0.6, 0.6, 0.6),
+            )
         for i in range(self.z):
-            CanvasLine(self.lattice_layer,
-                       i * (self.l / self.z), 0,
-                       i * (self.l / self.z), 500,
-                       line_width=1, fg=(.6, .6, .6))
-        active_layers = [x for x in self.project_tree.get_layers()
-                         if x.active]
+            CanvasLine(
+                self.lattice_layer,
+                i * (self.canvas_size / self.z),
+                0,
+                i * (self.canvas_size / self.z),
+                500,
+                line_width=1,
+                fg=(0.6, 0.6, 0.6),
+            )
+        active_layers = [x for x in self.project_tree.get_layers() if x.active]
         site_list = []
         for active_layer in active_layers:
             for site in active_layer.sites:
-                form_site = ProcessFormSite(name=site.name,
-                                            pos=site.pos,
-                                            layer=active_layer.name,
-                                            color=active_layer.color)
+                form_site = ProcessFormSite(
+                    name=site.name,
+                    pos=site.pos,
+                    layer=active_layer.name,
+                    color=active_layer.color,
+                )
                 site_list.append(form_site)
         for i in range(self.z + 1):
             for j in range(self.z + 1):
                 for site in site_list:
                     color = col_str2tuple(site.color)
                     if i == self.X and j == self.Y:
-                        l_site = CanvasOval(self.site_layer, 0, 0, 10, 10,
-                                                                    fg=color)
+                        l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=color)
                     else:
-                        l_site = CanvasOval(self.site_layer, 0, 0, 10, 10,
-                                                                    fg=color)
+                        l_site = CanvasOval(self.site_layer, 0, 0, 10, 10, fg=color)
 
-                    l_site.set_center(self.l /
-                                      self.z * (i + float(site.pos[0])),
-                                      500 - self.l /
-                                      self.z * (j + float(site.pos[1])))
-                    l_site.connect('query-tooltip', self.query_tooltip)
+                    l_site.set_center(
+                        self.canvas_size / self.z * (i + float(site.pos[0])),
+                        500 - self.canvas_size / self.z * (j + float(site.pos[1])),
+                    )
+                    l_site.connect("query-tooltip", self.query_tooltip)
                     # 500 - ... for having scientific coordinates
                     # and not screen coordinates
                     l_site.set_radius(5)
                     l_site.i = i
                     l_site.j = j
                     if len(active_layers) > 1:
-                        l_site.tooltip_text = '%s.(%s,%s).%s' % (site.name,
-                                                                 i - self.X,
-                                                                 j - self.Y,
-                                                                 site.layer)
+                        l_site.tooltip_text = "%s.(%s,%s).%s" % (
+                            site.name,
+                            i - self.X,
+                            j - self.Y,
+                            site.layer,
+                        )
                     else:
-                        l_site.tooltip_text = '%s.(%s,%s)' % (site.name,
-                                                              i - self.X,
-                                                              j - self.Y)
+                        l_site.tooltip_text = "%s.(%s,%s)" % (
+                            site.name,
+                            i - self.X,
+                            j - self.Y,
+                        )
                     l_site.name = site.name
                     l_site.offset = (i - self.X, j - self.Y)
                     l_site.layer = site.layer
 
         # draw frame
-        frame_col = (.21, .35, .42)
-        CanvasRect(self.frame_layer, 0, 0, 520, 80, fg=frame_col,
-                                                    bg=frame_col,
-                                                    filled=True)
-        CanvasRect(self.frame_layer, 0, 0, 10, 580, fg=frame_col,
-                                                    bg=frame_col,
-                                                    filled=True)
-        CanvasRect(self.frame_layer, 510, 0, 520, 580, fg=frame_col,
-                                                       bg=frame_col,
-                                                       filled=True)
-        CanvasRect(self.frame_layer, 0, 580, 520, 590, fg=frame_col,
-                                                       bg=frame_col,
-                                                       filled=True)
-        CanvasText(self.frame_layer, 10, 10, size=8, text='Reservoir Area')
-        CanvasText(self.frame_layer, 10, 570, size=8, text='Lattice Area')
+        frame_col = (0.21, 0.35, 0.42)
+        CanvasRect(
+            self.frame_layer, 0, 0, 520, 80, fg=frame_col, bg=frame_col, filled=True
+        )
+        CanvasRect(
+            self.frame_layer, 0, 0, 10, 580, fg=frame_col, bg=frame_col, filled=True
+        )
+        CanvasRect(
+            self.frame_layer, 510, 0, 520, 580, fg=frame_col, bg=frame_col, filled=True
+        )
+        CanvasRect(
+            self.frame_layer, 0, 580, 520, 590, fg=frame_col, bg=frame_col, filled=True
+        )
+        CanvasText(self.frame_layer, 10, 10, size=8, text="Reservoir Area")
+        CanvasText(self.frame_layer, 10, 570, size=8, text="Lattice Area")
 
         # draw reservoir circles
         for k, species in enumerate(self.project_tree.get_speciess()):
             color = col_str2tuple(species.color)
-            o = CanvasOval(self.frame_layer,
-                           30 + k * 50,
-                           30, 50 + k * 50,
-                           50,
-                           filled=True,
-                           bg=color)
+            o = CanvasOval(
+                self.frame_layer,
+                30 + k * 50,
+                30,
+                50 + k * 50,
+                50,
+                filled=True,
+                bg=color,
+            )
             o.species = species.name
             o.tooltip_text = species.name  # for tooltip
-            o.connect('button-press-event', self.button_press)
-            #o.connect('motion-notify-event', self.drag_motion)
-            o.connect('button-release-event', self.button_release)
-            o.connect('query-tooltip', self.query_tooltip)
-            o.state = 'reservoir'
+            o.connect("button-press-event", self.button_press)
+            # o.connect('motion-notify-event', self.drag_motion)
+            o.connect("button-release-event", self.button_release)
+            o.connect("query-tooltip", self.query_tooltip)
+            o.state = "reservoir"
 
         self.lattice_layer.move_all(10, 80)
         self.site_layer.move_all(10, 80)
@@ -876,46 +960,50 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
         # attributes need for moving objects
         self.item = None
         self.prev_pos = None
-        black = col_str2tuple('#003333')
+        black = col_str2tuple("#003333")
         for elem in self.process.condition_list:
-            matching_sites = [x for x in self.site_layer
-                              if isinstance(x, CanvasOval)
-                              and x.i == self.X + elem.coord.offset[0]
-                              and x.j == self.Y + elem.coord.offset[1]
-                              and x.name == elem.coord.name
-                              and x.layer == elem.coord.layer]
+            matching_sites = [
+                x
+                for x in self.site_layer
+                if isinstance(x, CanvasOval)
+                and x.i == self.X + elem.coord.offset[0]
+                and x.j == self.Y + elem.coord.offset[1]
+                and x.name == elem.coord.name
+                and x.layer == elem.coord.layer
+            ]
             if matching_sites:
                 coords = matching_sites[0].get_coords()
                 color = get_species_color(elem.species)
                 color = col_str2tuple(color)
-                o = CanvasOval(self.condition_layer,
-                               bg=color,
-                               fg=black,
-                               filled=True, outline=True)
+                o = CanvasOval(
+                    self.condition_layer, bg=color, fg=black, filled=True, outline=True
+                )
                 o.coords = coords
-                o.connect('button-press-event',
-                          self.on_condition_action_clicked)
+                o.connect("button-press-event", self.on_condition_action_clicked)
                 o.set_radius(self.r_cond)
-                o.type = 'condition'
+                o.type = "condition"
                 o.condition = elem
-                o.tooltip_text = '%s@%s' % (elem.species, elem.coord)  # for tooltip
-                o.connect('query-tooltip', self.query_tooltip)
+                o.tooltip_text = "%s@%s" % (elem.species, elem.coord)  # for tooltip
+                o.connect("query-tooltip", self.query_tooltip)
 
         for elem in self.process.action_list:
-            matching_sites = [x for x in self.site_layer
-                              if isinstance(x, CanvasOval)
-                              and x.i == self.X + elem.coord.offset[0]
-                              and x.j == self.Y + elem.coord.offset[1]
-                              and x.name == elem.coord.name
-                              and x.layer == elem.coord.layer]
+            matching_sites = [
+                x
+                for x in self.site_layer
+                if isinstance(x, CanvasOval)
+                and x.i == self.X + elem.coord.offset[0]
+                and x.j == self.Y + elem.coord.offset[1]
+                and x.name == elem.coord.name
+                and x.layer == elem.coord.layer
+            ]
             if matching_sites:
                 coords = matching_sites[0].get_coords()
-                if elem.species[0] == '^':
+                if elem.species[0] == "^":
                     color = get_species_color(elem.species[1:])
                     layer = self.action_layer
                     radius = self.r_act
                     line_width = 2.0
-                elif elem.species[0] == '$':
+                elif elem.species[0] == "$":
                     color = get_species_color(elem.species[1:])
                     layer = self.condition_layer
                     radius = self.r_cond
@@ -926,52 +1014,58 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
                     radius = self.r_act
                     line_width = 1.0
                 color = col_str2tuple(color)
-                o = CanvasOval(layer,
-                               bg=color,
-                               fg=black,
-                               line_width=line_width,
-                               filled=True,
-                               outline=True)
+                o = CanvasOval(
+                    layer,
+                    bg=color,
+                    fg=black,
+                    line_width=line_width,
+                    filled=True,
+                    outline=True,
+                )
                 o.coords = coords
-                o.connect('button-press-event',
-                          self.on_condition_action_clicked)
+                o.connect("button-press-event", self.on_condition_action_clicked)
                 o.set_radius(radius)
-                o.type = 'action'
+                o.type = "action"
                 o.action = elem
-                o.tooltip_text = '%s@%s' % (elem.species, elem.coord)  # for tooltip
-                o.connect('query-tooltip', self.query_tooltip)
+                o.tooltip_text = "%s@%s" % (elem.species, elem.coord)  # for tooltip
+                o.connect("query-tooltip", self.query_tooltip)
 
     def draw_from_data(self):
         atoms = self._get_atoms()
-        def toscrn(coord,
-                   screen_size=(500, 500),
-                   scale=None,
-                   offset=None):
 
+        def toscrn(coord, screen_size=(500, 500), scale=None, offset=None):
             if scale is None:
-                scale = min(screen_size[0]/(atoms.cell[0] + atoms.cell[1])[0],
-                            screen_size[1]/(atoms.cell[0] + atoms.cell[1])[1])
-                scale /= (zoom + 1)
+                scale = min(
+                    screen_size[0] / (atoms.cell[0] + atoms.cell[1])[0],
+                    screen_size[1] / (atoms.cell[0] + atoms.cell[1])[1],
+                )
+                scale /= zoom + 1
 
             if offset is None:
-                offset = ((screen_size[0] - zoom*scale*(atoms.cell[0] + atoms.cell[1])[0])/2,
-                          (screen_size[1] - zoom*scale*(atoms.cell[0] + atoms.cell[1])[1])/2,)
-            return (scale * coord[0] + offset[0],
-                    screen_size[1] - (scale * coord[1] + offset[1]))
+                offset = (
+                    (screen_size[0] - zoom * scale * (atoms.cell[0] + atoms.cell[1])[0])
+                    / 2,
+                    (screen_size[1] - zoom * scale * (atoms.cell[0] + atoms.cell[1])[1])
+                    / 2,
+                )
+            return (
+                scale * coord[0] + offset[0],
+                screen_size[1] - (scale * coord[1] + offset[1]),
+            )
 
         # automatically determine zoom from process list
         zoom = 2 * self.process._get_max_d() + 3
 
         center_x = zoom / 2
         center_y = zoom / 2
-        if hasattr(self, 'canvas'):
+        if hasattr(self, "canvas"):
             self.process_pad.remove(self.canvas)
         canvas = goocanvas.Canvas()
         self.canvas = canvas
         root = canvas.get_root_item()
         canvas.set_flags(gtk.HAS_FOCUS | gtk.CAN_FOCUS)
-        canvas.set_property('has-tooltip', True)
-        #canvas.grab_focus()
+        canvas.set_property("has-tooltip", True)
+        # canvas.grab_focus()
         canvas.show()
         self.process_pad.add(canvas)
 
@@ -979,165 +1073,196 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 
         # draw lattice
         for i in range(zoom + 1):
-            for _0, _1, _2, _3 in [[i, i, 0, zoom],
-                                   [0, zoom, i, i]]:
-                points = goocanvas.Points([
-                    toscrn(atoms.cell[0]*_0 + atoms.cell[1]*_2),
-                    toscrn(atoms.cell[0]*_1 + atoms.cell[1]*_3),
-                ])
-                goocanvas.Polyline(parent=root,
-                                  points=points,
-                                  stroke_color='black',
-                                  fill_color='white',
-                                  line_width=1.0)
+            for _0, _1, _2, _3 in [[i, i, 0, zoom], [0, zoom, i, i]]:
+                points = goocanvas.Points(
+                    [
+                        toscrn(atoms.cell[0] * _0 + atoms.cell[1] * _2),
+                        toscrn(atoms.cell[0] * _1 + atoms.cell[1] * _3),
+                    ]
+                )
+                goocanvas.Polyline(
+                    parent=root,
+                    points=points,
+                    stroke_color="black",
+                    fill_color="white",
+                    line_width=1.0,
+                )
         # emphasize central cell
-        points = goocanvas.Points([
-            toscrn(atoms.cell[0]*center_x + atoms.cell[1]*center_x),
-            toscrn(atoms.cell[0]*center_x + atoms.cell[1]*(center_x + 1)),
-            toscrn(atoms.cell[0]*(center_x + 1) + atoms.cell[1]*(center_x + 1)),
-            toscrn(atoms.cell[0]*(center_x + 1) + atoms.cell[1]*center_x),
-            toscrn(atoms.cell[0]*center_x + atoms.cell[1]*center_x),
-        ])
-        goocanvas.Polyline(parent=root,
-                          points=points,
-                          stroke_color='black',
-                          fill_color='white',
-                          line_width=2.0)
+        points = goocanvas.Points(
+            [
+                toscrn(atoms.cell[0] * center_x + atoms.cell[1] * center_x),
+                toscrn(atoms.cell[0] * center_x + atoms.cell[1] * (center_x + 1)),
+                toscrn(atoms.cell[0] * (center_x + 1) + atoms.cell[1] * (center_x + 1)),
+                toscrn(atoms.cell[0] * (center_x + 1) + atoms.cell[1] * center_x),
+                toscrn(atoms.cell[0] * center_x + atoms.cell[1] * center_x),
+            ]
+        )
+        goocanvas.Polyline(
+            parent=root,
+            points=points,
+            stroke_color="black",
+            fill_color="white",
+            line_width=2.0,
+        )
         # draw sites
         for x in range(zoom):
             for y in range(zoom):
                 sites = self.project_tree.get_layers()[0].sites
                 for site in sites:
-                    X, Y = toscrn(x*atoms.cell[0]
-                                  + y*atoms.cell[1]
-                                  + atoms.cell[0] * site.pos[0]
-                                  + atoms.cell[1] * site.pos[1]
-                                  #+ np.inner(atoms.cell.T, site.pos)
-                                  )
-                    tooltip = '%s.(%s, %s, 0).%s' % (site.name,
-                                                     x-center_x, y-center_y,
-                                                     self.project_tree.get_layers()[0].name
-                                                     )
+                    X, Y = toscrn(
+                        x * atoms.cell[0]
+                        + y * atoms.cell[1]
+                        + atoms.cell[0] * site.pos[0]
+                        + atoms.cell[1] * site.pos[1]
+                        # + np.inner(atoms.cell.T, site.pos)
+                    )
+                    tooltip = "%s.(%s, %s, 0).%s" % (
+                        site.name,
+                        x - center_x,
+                        y - center_y,
+                        self.project_tree.get_layers()[0].name,
+                    )
 
-                    o = goocanvas.Ellipse(parent=root,
-                                          center_x=X,
-                                          center_y=Y,
-                                          radius_x=.4 * radius,
-                                          radius_y=.4 * radius,
-                                          stroke_color='black',
-                                          fill_color='white',
-                                          line_width=1.0,
-                                          tooltip=tooltip,
-                                          )
+                    goocanvas.Ellipse(
+                        parent=root,
+                        center_x=X,
+                        center_y=Y,
+                        radius_x=0.4 * radius,
+                        radius_y=0.4 * radius,
+                        stroke_color="black",
+                        fill_color="white",
+                        line_width=1.0,
+                        tooltip=tooltip,
+                    )
 
         # draw reservoir circles
         offset = np.array([1, 1, 0])
         offset = atoms.cell[0] * center_x + atoms.cell[1] * center_y
         for k, species in enumerate(self.project_tree.get_speciess()):
-            color = col_str2tuple(species.color)
-            o = goocanvas.Ellipse(parent=root,
-                           center_x=30 + k * 50,
-                           center_y=30,
-                           radius_x=0.8*radius,
-                           radius_y=0.8*radius,
-                           stroke_color='black',
-                           fill_color_rgba=eval('0x' + species.color[1:] + 'ff' ),
-                           tooltip=species.name,
-                           )
+            goocanvas.Ellipse(
+                parent=root,
+                center_x=30 + k * 50,
+                center_y=30,
+                radius_x=0.8 * radius,
+                radius_y=0.8 * radius,
+                stroke_color="black",
+                fill_color_rgba=eval("0x" + species.color[1:] + "ff"),
+                tooltip=species.name,
+            )
 
         for elem in self.process.condition_list:
-            pos = [x.pos
-                   for layer in self.project_tree.get_layers()
-                   for x in layer.sites
-                   if x.name == elem.coord.name
-                      ][0]
-            species_color = [x.color for x in self.project_tree.get_speciess()
-                             if x.name == elem.species.split(' or ')[0]][0]
-            center = toscrn(pos[0] * atoms.cell[0]
-                            + pos[1] * atoms.cell[1]
-                            #np.inner(atoms.cell, pos)
-                            + elem.coord.offset[0] * atoms.cell[0]
-                            + elem.coord.offset[1] * atoms.cell[1]
-                            + offset)
+            pos = [
+                x.pos
+                for layer in self.project_tree.get_layers()
+                for x in layer.sites
+                if x.name == elem.coord.name
+            ][0]
+            species_color = [
+                x.color
+                for x in self.project_tree.get_speciess()
+                if x.name == elem.species.split(" or ")[0]
+            ][0]
+            center = toscrn(
+                pos[0] * atoms.cell[0]
+                + pos[1] * atoms.cell[1]
+                # np.inner(atoms.cell, pos)
+                + elem.coord.offset[0] * atoms.cell[0]
+                + elem.coord.offset[1] * atoms.cell[1]
+                + offset
+            )
 
-            tooltip = 'Condition: %s@%s.%s.%s' % (elem.species,
-                                       elem.coord.name,
-                                       tuple(elem.coord.offset),
-                                       elem.coord.layer,
-                                       )  # for tooltip
-            o = goocanvas.Ellipse(parent=root,
-                                  center_x=center[0],
-                                  center_y=center[1],
-                                  radius_x=0.8*radius,
-                                  radius_y=0.8*radius,
-                                  stroke_color='black',
-                                  fill_color_rgba=eval('0x' + species_color[1:] + 'ff' ),
-                                  tooltip=tooltip,
-                                  )
-
+            tooltip = "Condition: %s@%s.%s.%s" % (
+                elem.species,
+                elem.coord.name,
+                tuple(elem.coord.offset),
+                elem.coord.layer,
+            )  # for tooltip
+            goocanvas.Ellipse(
+                parent=root,
+                center_x=center[0],
+                center_y=center[1],
+                radius_x=0.8 * radius,
+                radius_y=0.8 * radius,
+                stroke_color="black",
+                fill_color_rgba=eval("0x" + species_color[1:] + "ff"),
+                tooltip=tooltip,
+            )
 
         for elem in self.process.action_list:
-            species_color = [x.color for x in self.project_tree.get_speciess()
-                             if x.name == elem.species][0]
-            pos = [x.pos
-                   for layer in self.project_tree.get_layers()
-                   for x in layer.sites
-                   if x.name == elem.coord.name
-                      ][0]
+            species_color = [
+                x.color
+                for x in self.project_tree.get_speciess()
+                if x.name == elem.species
+            ][0]
+            pos = [
+                x.pos
+                for layer in self.project_tree.get_layers()
+                for x in layer.sites
+                if x.name == elem.coord.name
+            ][0]
 
-            center = toscrn(pos[0] * atoms.cell[0]
-                            + pos[1] * atoms.cell[1]
-                            + elem.coord.offset[0] * atoms.cell[0]
-                            + elem.coord.offset[1] * atoms.cell[1]
-                            + offset)
+            center = toscrn(
+                pos[0] * atoms.cell[0]
+                + pos[1] * atoms.cell[1]
+                + elem.coord.offset[0] * atoms.cell[0]
+                + elem.coord.offset[1] * atoms.cell[1]
+                + offset
+            )
 
-            tooltip = 'Action: %s@%s.%s.%s' % (elem.species,
-                                       elem.coord.name,
-                                       tuple(elem.coord.offset),
-                                       elem.coord.layer)  # for tooltip
+            tooltip = "Action: %s@%s.%s.%s" % (
+                elem.species,
+                elem.coord.name,
+                tuple(elem.coord.offset),
+                elem.coord.layer,
+            )  # for tooltip
 
-            o = goocanvas.Ellipse(parent=root,
-                                  center_x=center[0],
-                                  center_y=center[1],
-                                  radius_x=0.4*radius,
-                                  radius_y=0.4*radius,
-                                  stroke_color='black',
-                                  fill_color_rgba=eval('0x' + species_color[1:] + 'ff' ),
-                                  tooltip=tooltip,
-                                  )
+            goocanvas.Ellipse(
+                parent=root,
+                center_x=center[0],
+                center_y=center[1],
+                radius_x=0.4 * radius,
+                radius_y=0.4 * radius,
+                stroke_color="black",
+                fill_color_rgba=eval("0x" + species_color[1:] + "ff"),
+                tooltip=tooltip,
+            )
 
         # For otf backend only
         if self.process.bystander_list:
             for elem in self.process.bystander_list:
-                species_color = '#d3d3d3'
-                pos = [x.pos
+                species_color = "#d3d3d3"
+                pos = [
+                    x.pos
                     for layer in self.project_tree.get_layers()
                     for x in layer.sites
                     if x.name == elem.coord.name
-                        ][0]
+                ][0]
 
-                center = toscrn(pos[0] * atoms.cell[0]
-                                + pos[1] * atoms.cell[1]
-                                + elem.coord.offset[0] * atoms.cell[0]
-                                + elem.coord.offset[1] * atoms.cell[1]
-                                + offset)
-                tooltip = 'Bystander (%s): %s@%s.%s.%s' % (elem.flag,
-                                                              elem.allowed_species,
-                                                              elem.coord.name,
-                                                              tuple(elem.coord.offset),
-                                                              elem.coord.layer)  # for tooltip
+                center = toscrn(
+                    pos[0] * atoms.cell[0]
+                    + pos[1] * atoms.cell[1]
+                    + elem.coord.offset[0] * atoms.cell[0]
+                    + elem.coord.offset[1] * atoms.cell[1]
+                    + offset
+                )
+                tooltip = "Bystander (%s): %s@%s.%s.%s" % (
+                    elem.flag,
+                    elem.allowed_species,
+                    elem.coord.name,
+                    tuple(elem.coord.offset),
+                    elem.coord.layer,
+                )  # for tooltip
                 bystander_size_factor = 1.2
-                o = goocanvas.Rect(parent=root,
-                                    x=center[0]-0.6*radius,
-                                    y=center[1]-0.6*radius,
-                                    width=bystander_size_factor*radius,
-                                    height=bystander_size_factor*radius,
-                                    stroke_color='black',
-                                    fill_color_rgba=eval('0x' + species_color[1:] + 'ff' ),
-                                    tooltip=tooltip,
-                                    )
-
-
+                goocanvas.Rect(
+                    parent=root,
+                    x=center[0] - 0.6 * radius,
+                    y=center[1] - 0.6 * radius,
+                    width=bystander_size_factor * radius,
+                    height=bystander_size_factor * radius,
+                    stroke_color="black",
+                    fill_color_rgba=eval("0x" + species_color[1:] + "ff"),
+                    tooltip=tooltip,
+                )
 
     def _get_atoms(self, layer_nr=0):
         if self.project_tree.lattice.representation:
@@ -1152,14 +1277,14 @@ class ProcessForm(ProxySlaveDelegate, CorrectlyNamed):
 
     def on_condition_action_clicked(self, _canvas, widget, event):
         if event.button == 2:
-            if widget.type == 'action':
+            if widget.type == "action":
                 self.process.action_list.remove(widget.action)
-            elif widget.type == 'condition':
+            elif widget.type == "condition":
                 self.process.condition_list.remove(widget.condition)
             widget.delete()
 
     def on_process_name__content_changed(self, _text):
-        self.project_tree.project_data.sort_by_attribute('name')
+        self.project_tree.project_data.sort_by_attribute("name")
         self.project_tree.update(self.process)
 
     def on_rate_constant__content_changed(self, _text):
@@ -1174,8 +1299,9 @@ class BatchProcessForm(SlaveDelegate):
 
     One can omit the fields but not the semicolon.
     """
+
     gladefile = GLADEFILE
-    toplevel_name = 'batch_process_form'
+    toplevel_name = "batch_process_form"
 
     def __init__(self, project_tree):
         self.project_tree = project_tree
@@ -1185,64 +1311,67 @@ class BatchProcessForm(SlaveDelegate):
         batch_buffer = self.batch_processes.get_buffer()
         bounds = batch_buffer.get_bounds()
         text = batch_buffer.get_text(*bounds)
-        text = text.split('\n')
+        text = text.split("\n")
         for i, line in enumerate(text):
             # Ignore empty lines
-            if not line.count(';'):
+            if not line.count(";"):
                 continue
-            if not line.count(';'):
+            if not line.count(";"):
                 raise UserWarning(
-                    ("Line %s: the number of fields you entered is %s, " \
-                     "but I expected 3") % (i, line.count(';') + 1))
-            line = line.split(';')
+                    (
+                        "Line %s: the number of fields you entered is %s, "
+                        "but I expected 3"
+                    )
+                    % (i, line.count(";") + 1)
+                )
+            line = line.split(";")
             name = line[0]
             if len(line) == 1:
-                rate_constant = ''
+                rate_constant = ""
             elif len(line) == 2:
-                rate_constant = ''
+                rate_constant = ""
             elif len(line) == 3:
                 rate_constant = line[2]
             else:
-                raise UserWarning(
-                    "There are too many ';' in your expression %s" % line)
+                raise UserWarning("There are too many ';' in your expression %s" % line)
             process = Process(name=name, rate_constant=rate_constant)
             try:
-                parse_chemical_expression(eq=line[1],
-                                          process=process,
-                                          project_tree=self.project_tree)
+                parse_chemical_expression(
+                    eq=line[1], process=process, project_tree=self.project_tree
+                )
                 self.draw_from_data()
-            except:
+            except Exception as e:
                 raise Exception(
-                    ("Found an error in your chemical expression(line %s):\n"\
-                    "%s") % (i + 1, line[1]))
+                    ("Found an error in your chemical expression(line %s):\n%s")
+                    % (i + 1, line[1])
+                ) from e
             else:
                 # replace any existing process with identical names
-                for dublette_proc in [x for x in
-                                      self.project_tree.process_list
-                                      if x.name == name]:
+                for dublette_proc in [
+                    x for x in self.project_tree.process_list if x.name == name
+                ]:
                     self.project_tree.process_list.remove(dublette_proc)
-                self.project_tree.append(self.project_tree.process_list_iter,
-                                                                     process)
+                self.project_tree.append(self.project_tree.process_list_iter, process)
         batch_buffer.delete(*bounds)
 
 
 class OutputForm(GladeDelegate):
-    """Not implemented yet
-    """
+    """Not implemented yet"""
+
     gladefile = GLADEFILE
-    toplevel_name = 'output_form'
-    widgets = ['output_list']
+    toplevel_name = "output_form"
+    widgets = ["output_list"]
 
     def __init__(self, output_list, project_tree):
         GladeDelegate.__init__(self)
         self.project_tree = project_tree
         self.output_list_data = output_list
-        self.output_list.set_columns([Column('name',
-                                          data_type=str,
-                                          editable=True, sorted=True),
-                                      Column('output',
-                                          data_type=bool,
-                                          editable=True)])
+        self.output_list.set_columns(
+            [
+                Column("name", data_type=str, editable=True, sorted=True),
+                Column("output", data_type=bool, editable=True),
+            ]
+        )
 
         for item in self.output_list_data:
             self.output_list.append(item)
@@ -1251,22 +1380,24 @@ class OutputForm(GladeDelegate):
         self.output_list.grab_focus()
 
     def on_add_output__clicked(self, _):
-        output_form = gtk.MessageDialog(parent=None,
-                                      flags=gtk.DIALOG_MODAL,
-                                      type=gtk.MESSAGE_QUESTION,
-                                      buttons=gtk.BUTTONS_OK_CANCEL,
-                                      message_format='Please enter a new ' \
-                                         + 'output: examples are a species ' \
-                                         + 'or species@site')
+        output_form = gtk.MessageDialog(
+            parent=None,
+            flags=gtk.DIALOG_MODAL,
+            type=gtk.MESSAGE_QUESTION,
+            buttons=gtk.BUTTONS_OK_CANCEL,
+            message_format="Please enter a new "
+            + "output: examples are a species "
+            + "or species@site",
+        )
         output_form.set_flags(gtk.CAN_DEFAULT | gtk.CAN_FOCUS)
         output_form.set_default_response(gtk.RESPONSE_OK)
-        output_form.set_default(
-                        output_form.get_widget_for_response(gtk.RESPONSE_OK))
+        output_form.set_default(output_form.get_widget_for_response(gtk.RESPONSE_OK))
         form_entry = gtk.Entry()
 
         def activate_default(_):
             output_form.activate_default()
-        form_entry.connect('activate', activate_default)
+
+        form_entry.connect("activate", activate_default)
         output_form.vbox.pack_start(form_entry)
         output_form.vbox.show_all()
         res = output_form.run()
@@ -1279,12 +1410,12 @@ class OutputForm(GladeDelegate):
 
 
 class InlineMessage(SlaveView):
-    """Return a nice little field with a text message on it
-    """
-    gladefile = GLADEFILE
-    toplevel_name = 'inline_message'
-    widgets = ['message_label']
+    """Return a nice little field with a text message on it"""
 
-    def __init__(self, message=''):
+    gladefile = GLADEFILE
+    toplevel_name = "inline_message"
+    widgets = ["message_label"]
+
+    def __init__(self, message=""):
         SlaveView.__init__(self)
         self.message_label.set_text(message)

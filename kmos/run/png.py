@@ -1,21 +1,22 @@
-
 from ase.io.png import PNG
 from ase.data.colors import jmol_colors
 from ase.data import covalent_radii
 from ase.utils import rotate
-from math import sqrt
 import numpy as np
 
-class MyPNG(PNG):
-    def __init__(self, atoms,
-                 rotation='',
-                 show_unit_cell=False,
-                 radii=None,
-                 bbox=None,
-                 colors=None,
-                 model=None,
-                 scale=20) :
 
+class MyPNG(PNG):
+    def __init__(
+        self,
+        atoms,
+        rotation="",
+        show_unit_cell=False,
+        radii=None,
+        bbox=None,
+        colors=None,
+        model=None,
+        scale=20,
+    ):
         self.numbers = atoms.get_atomic_numbers()
         self.colors = colors
         self.model = model
@@ -60,8 +61,10 @@ class MyPNG(PNG):
         r2 = radii**2
         for n in range(nlines):
             d = D[T[n]]
-            if ((((R - L[n] - d)**2).sum(1) < r2) &
-                (((R - L[n] + d)**2).sum(1) < r2)).any():
+            if (
+                (((R - L[n] - d) ** 2).sum(1) < r2)
+                & (((R - L[n] + d) ** 2).sum(1) < r2)
+            ).any():
                 T[n] = -1
 
         X = np.dot(X, rotation)
@@ -76,9 +79,9 @@ class MyPNG(PNG):
             M = (X1 + X2) / 2
             S = 1.05 * (X2 - X1)
             w = scale * S[0]
-            #if w > 500:
-                #w = 500
-                #scale = w / S[0]
+            # if w > 500:
+            # w = 500
+            # scale = w / S[0]
             h = scale * S[1]
             offset = np.array([scale * M[0] - w / 2, scale * M[1] - h / 2, 0])
         else:
@@ -127,15 +130,23 @@ class MyPNG(PNG):
                 return float_str
 
         import matplotlib.text
+
         if self.model is not None:
             time = latex_float(self.model.base.get_kmc_time())
 
-            text = matplotlib.text.Text(.05*self.w,
-                                        .9*self.h,
-                                        r'$t = {time}\,{{\rm s}}$'.format(**locals()),
-                                        fontsize=36,
-                                        bbox={'facecolor':'white', 'alpha':0.5, 'ec':'white', 'pad':1, 'lw':0 },
-                                        )
+            text = matplotlib.text.Text(
+                0.05 * self.w,
+                0.9 * self.h,
+                r"$t = {time}\,{{\rm s}}$".format(**locals()),
+                fontsize=36,
+                bbox={
+                    "facecolor": "white",
+                    "alpha": 0.5,
+                    "ec": "white",
+                    "pad": 1,
+                    "lw": 0,
+                },
+            )
             text.figure = self.figure
             text.draw(self.renderer)
 
@@ -154,26 +165,32 @@ class MyPNG(PNG):
         self.figure = Figure()
 
         self.gc = GraphicsContextBase()
-        self.gc.set_linewidth(.2)
+        self.gc.set_linewidth(0.2)
 
     def write_trailer(self, resolution=72):
         renderer = self.renderer
-        if hasattr(renderer._renderer, 'write_png'):
+        if hasattr(renderer._renderer, "write_png"):
             # Old version of matplotlib:
             renderer._renderer.write_png(self.filename)
         else:
             from matplotlib import _png
+
             # buffer_rgba does not accept arguments from version 1.2.0
             # https://github.com/matplotlib/matplotlib/commit/f4fee350f9fbc639853bee76472d8089a10b40bd
             import matplotlib
-            if matplotlib.__version__ < '1.2.0':
-                x = renderer._renderer.buffer_rgba(0, 0)
-                _png.write_png(renderer._renderer.buffer_rgba(0, 0),
-                               renderer.width, renderer.height,
-                               self.filename, resolution)
-            else:
-                x = renderer._renderer.buffer_rgba()
-                _png.write_png(renderer._renderer.buffer_rgba(),
-                               #renderer.width, renderer.height,
-                               self.filename, resolution)
 
+            if matplotlib.__version__ < "1.2.0":
+                _png.write_png(
+                    renderer._renderer.buffer_rgba(0, 0),
+                    renderer.width,
+                    renderer.height,
+                    self.filename,
+                    resolution,
+                )
+            else:
+                _png.write_png(
+                    renderer._renderer.buffer_rgba(),
+                    # renderer.width, renderer.height,
+                    self.filename,
+                    resolution,
+                )

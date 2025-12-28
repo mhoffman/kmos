@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """Several utility functions that do not seem to fit somewhere
-   else.
+else.
 """
 #    Copyright 2009-2013 Max J. Hoffmann (mjhoffmann@gmail.com)
 #    This file is part of kmos.
@@ -23,15 +23,15 @@ import re
 import os
 from time import time
 from io import StringIO
-from kmos.utils.ordered_dict import OrderedDict
+from kmos.utils.ordered_dict import OrderedDict as OrderedDict
 
 logger = logging.getLogger(__name__)
 
 ValidationError = UserWarning
 try:
     from kiwi.datatypes import ValidationError
-except:
-    logger.info('kiwi Validation not working.')
+except (ImportError, ModuleNotFoundError):
+    logger.info("kiwi Validation not working.")
 
 FCODE = """module kind
 implicit none
@@ -75,7 +75,6 @@ end module kind
 
 
 class CorrectlyNamed:
-
     """Syntactic Sugar class for use with kiwi, that makes sure that the name
     field of the class has a name field, that always complys with the rules
     for variables.
@@ -85,63 +84,71 @@ class CorrectlyNamed:
         pass
 
     def on_name__validate(self, _, name):
-        """Called by kiwi upon chaning a string
-        """
-        if ' ' in name:
-            return ValidationError('No spaces allowed')
+        """Called by kiwi upon chaning a string"""
+        if " " in name:
+            return ValidationError("No spaces allowed")
         elif name and not name[0].isalpha():
-            return ValidationError('Need to start with a letter')
+            return ValidationError("Need to start with a letter")
 
 
 def write_py(fileobj, images, **kwargs):
     """Write a ASE atoms construction string for `images`
-       into `fileobj`.
+    into `fileobj`.
     """
     import numpy as np
 
     if isinstance(fileobj, str):
-        fileobj = open(fileobj, 'w')
+        fileobj = open(fileobj, "w")
 
-    scaled_positions = kwargs['scaled_positions'] \
-        if 'scaled_positions' in kwargs else True
-    fileobj.write('from ase import Atoms\n\n')
-    fileobj.write('import numpy as np\n\n')
+    scaled_positions = (
+        kwargs["scaled_positions"] if "scaled_positions" in kwargs else True
+    )
+    fileobj.write("from ase import Atoms\n\n")
+    fileobj.write("import numpy as np\n\n")
 
     if not isinstance(images, (list, tuple)):
         images = [images]
-    fileobj.write('images = [\n')
+    fileobj.write("images = [\n")
 
     for image in images:
-        if hasattr(image, 'get_chemical_formula'):
-            chemical_formula = image.get_chemical_formula(mode='reduce')
+        if hasattr(image, "get_chemical_formula"):
+            chemical_formula = image.get_chemical_formula(mode="reduce")
         else:
             chemical_formula = image.get_name()
 
         # Handle ASE Cell object (ASE 3.x) vs numpy array (older ASE)
-        cell_repr = repr(image.cell.array if hasattr(image.cell, 'array') else image.cell)
-        fileobj.write("    Atoms(symbols='%s',\n"
-                      "          pbc=np.%s,\n"
-                      "          cell=np.array(\n      %s,\n" % (
-                          chemical_formula,
-                          repr(image.pbc),
-                          cell_repr[6:]))
+        cell_repr = repr(
+            image.cell.array if hasattr(image.cell, "array") else image.cell
+        )
+        fileobj.write(
+            "    Atoms(symbols='%s',\n"
+            "          pbc=np.%s,\n"
+            "          cell=np.array(\n      %s,\n"
+            % (chemical_formula, repr(image.pbc), cell_repr[6:])
+        )
 
         if not scaled_positions:
-            fileobj.write("          positions=np.array(\n      %s),\n"
-                          % repr(list(image.positions)))
+            fileobj.write(
+                "          positions=np.array(\n      %s),\n"
+                % repr(list(image.positions))
+            )
         else:
-            fileobj.write("          scaled_positions=np.array(\n      %s),\n"
-                          % repr(list((np.around(image.get_scaled_positions(), decimals=7)).tolist())))
+            fileobj.write(
+                "          scaled_positions=np.array(\n      %s),\n"
+                % repr(
+                    list((np.around(image.get_scaled_positions(), decimals=7)).tolist())
+                )
+            )
         logger.info(image.get_scaled_positions())
-        fileobj.write('),\n')
+        fileobj.write("),\n")
 
-    fileobj.write(']')
+    fileobj.write("]")
 
 
 def get_ase_constructor(atoms):
     """Return the ASE constructor string for `atoms`."""
     if isinstance(atoms, str):
-        #return atoms
+        # return atoms
         atoms = eval(atoms)
     if type(atoms) is list:
         atoms = atoms[0]
@@ -150,7 +157,7 @@ def get_ase_constructor(atoms):
     f.seek(0)
     lines = f.readlines()
     f.close()
-    astr = ''
+    astr = ""
     for i, line in enumerate(lines):
         if i >= 5 and i < len(lines) - 1:
             astr += line
@@ -164,7 +171,7 @@ def product(*args, **kwds):
     of the two lists."""
     # product('ABCD', 'xy') --> Ax Ay Bx By Cx Cy Dx Dy
     # product(range(2), repeat=3) --> 000 001 010 011 100 101 110 111
-    pools = [tuple(arg) for arg in args] * kwds.get('repeat', 1)
+    pools = [tuple(arg) for arg in args] * kwds.get("repeat", 1)
     result = [[]]
     for pool in pools:
         result = [x + [y] for x in result for y in pool]
@@ -174,13 +181,12 @@ def product(*args, **kwds):
 
 def split_sequence(seq, size):
     """Take a list and a number n and return list
-       divided into n sublists of roughly equal size.
+    divided into n sublists of roughly equal size.
     """
     newseq = []
     splitsize = 1.0 / size * len(seq)
     for i in range(size):
-        newseq.append(seq[int(round(i * splitsize)):
-                      int(round((i + 1) * splitsize))])
+        newseq.append(seq[int(round(i * splitsize)) : int(round((i + 1) * splitsize))])
     return newseq
 
 
@@ -193,27 +199,28 @@ def download(project):
     from kmos.io import import_xml, export_source
 
     # return HTTP download response (e.g. via django)
-    response = HttpResponse(mimetype='application/x-zip-compressed')
-    response['Content-Disposition'] = 'attachment; filename="kmos_export.zip"'
+    response = HttpResponse(mimetype="application/x-zip-compressed")
+    response["Content-Disposition"] = 'attachment; filename="kmos_export.zip"'
 
     if isinstance(project, str):
         project = import_xml(project)
 
     from io import StringIO
+
     stringio = StringIO()
-    zfile = zipfile.ZipFile(stringio, 'w')
+    zfile = zipfile.ZipFile(stringio, "w")
 
     # save XML
-    zfile.writestr('project.xml', str(project))
+    zfile.writestr("project.xml", str(project))
 
     # generate source
     tempdir = tempfile.mkdtemp()
-    srcdir = join(tempdir, 'src')
+    srcdir = join(tempdir, "src")
 
     # add kMC project sources
     export_source(project, srcdir)
-    for srcfile in glob(join(srcdir, '*')):
-        zfile.write(srcfile, join('src', basename(srcfile)))
+    for srcfile in glob(join(srcdir, "*")):
+        zfile.write(srcfile, join("src", basename(srcfile)))
 
     # add standalone kmos program
     # TODO
@@ -235,16 +242,17 @@ def evaluate_kind_values(infile, outfile):
 
     """
     import re
-    import os
     import sys
     import shutil
     import subprocess
+
     sys.path.append(os.path.abspath(os.curdir))
 
     with open(infile) as infh:
         intext = infh.read()
-    if not ('selected_int_kind' in intext.lower()
-            or 'selected_real_kind' in intext.lower()):
+    if not (
+        "selected_int_kind" in intext.lower() or "selected_real_kind" in intext.lower()
+    ):
         shutil.copy(infile, outfile)
         return
 
@@ -260,55 +268,79 @@ def evaluate_kind_values(infile, outfile):
         """
         try:
             import f2py_selected_kind
-        except:
+        except (ImportError, ModuleNotFoundError):
             # quick'n'dirty workaround for windoze
-            if os.name == 'nt':
-                f = open('f2py_selected_kind.f90', 'w')
+            if os.name == "nt":
+                f = open("f2py_selected_kind.f90", "w")
                 f.write(FCODE)
                 f.close()
                 from copy import deepcopy
+
                 # save for later
                 true_argv = deepcopy(sys.argv)
-                sys.argv = (('%s -c --fcompiler=gnu95 --compiler=mingw32'
-                             ' -m f2py_selected_kind'
-                             ' f2py_selected_kind.f90')
-                            % sys.executable).split()
+                sys.argv = (
+                    (
+                        "%s -c --fcompiler=gnu95 --compiler=mingw32"
+                        " -m f2py_selected_kind"
+                        " f2py_selected_kind.f90"
+                    )
+                    % sys.executable
+                ).split()
                 from numpy import f2py as f2py2e
+
                 f2py2e.main()
 
                 sys.argv = true_argv
             else:
-                with open('f2py_selected_kind.f90', 'w') as f:
+                with open("f2py_selected_kind.f90", "w") as f:
                     f.write(FCODE)
-                fcompiler = os.environ.get('F2PY_FCOMPILER', 'gfortran')
-                f2py_command = [sys.executable, "-m", "numpy.f2py", "-c", "f2py_selected_kind.f90", "-m", "f2py_selected_kind"]
-                print('%s\n' % os.path.abspath(os.curdir))
-                result = subprocess.run(f2py_command, capture_output=True, text=True,
-                                        env=dict(os.environ, **{"LIBRARY_PATH": os.environ.get("LIBRARY_PATH", "") + ":/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"})
-                                        )
+                f2py_command = [
+                    sys.executable,
+                    "-m",
+                    "numpy.f2py",
+                    "-c",
+                    "f2py_selected_kind.f90",
+                    "-m",
+                    "f2py_selected_kind",
+                ]
+                print("%s\n" % os.path.abspath(os.curdir))
+                result = subprocess.run(
+                    f2py_command,
+                    capture_output=True,
+                    text=True,
+                    env=dict(
+                        os.environ,
+                        **{
+                            "LIBRARY_PATH": os.environ.get("LIBRARY_PATH", "")
+                            + ":/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
+                        },
+                    ),
+                )
                 print(result.stdout)
             try:
                 import f2py_selected_kind
             except Exception as e:
-                raise Exception('Could not create selected_kind module\n'
-                                + '%s\n' % os.path.abspath(os.curdir)
-                                + '%s\n' % os.listdir('.')
-                                + '%s\n' % e)
+                raise Exception(
+                    "Could not create selected_kind module\n"
+                    + "%s\n" % os.path.abspath(os.curdir)
+                    + "%s\n" % os.listdir(".")
+                    + "%s\n" % e
+                )
         return f2py_selected_kind.kind
 
     def parse_args(args):
         """
-            Parse the arguments for selected_(real/int)_kind
-            to pass them on to the Fortran module.
+        Parse the arguments for selected_(real/int)_kind
+        to pass them on to the Fortran module.
 
         """
-        in_args = [x.strip() for x in args.split(',')]
+        in_args = [x.strip() for x in args.split(",")]
         args = []
         kwargs = {}
 
         for arg in in_args:
-            if '=' in arg:
-                symbol, value = arg.split('=')
+            if "=" in arg:
+                symbol, value = arg.split("=")
                 kwargs[symbol] = eval(value)
             else:
                 args.append(eval(arg))
@@ -330,29 +362,33 @@ def evaluate_kind_values(infile, outfile):
         return import_selected_kind().real_kind(*args, **kwargs)
 
     infile = open(infile)
-    outfile = open(outfile, 'w')
-    int_pattern = re.compile((r'(?P<before>.*)selected_int_kind'
-                              '\((?P<args>.*)\)(?P<after>.*)'),
-                             flags=re.IGNORECASE)
-    real_pattern = re.compile((r'(?P<before>.*)selected_real_kind'
-                               '\((?P<args>.*)\)(?P<after>.*)'),
-                              flags=re.IGNORECASE)
+    outfile = open(outfile, "w")
+    int_pattern = re.compile(
+        (r"(?P<before>.*)selected_int_kind" "\((?P<args>.*)\)(?P<after>.*)"),
+        flags=re.IGNORECASE,
+    )
+    real_pattern = re.compile(
+        (r"(?P<before>.*)selected_real_kind" "\((?P<args>.*)\)(?P<after>.*)"),
+        flags=re.IGNORECASE,
+    )
 
     for line in infile:
         real_match = real_pattern.match(line)
         int_match = int_pattern.match(line)
         if int_match:
             match = int_match.groupdict()
-            line = '%s%s%s\n' % (
-                match['before'],
-                int_kind(match['args']),
-                match['after'],)
+            line = "%s%s%s\n" % (
+                match["before"],
+                int_kind(match["args"]),
+                match["after"],
+            )
         elif real_match:
             match = real_match.groupdict()
-            line = '%s%s%s\n' % (
-                match['before'],
-                real_kind(match['args']),
-                match['after'],)
+            line = "%s%s%s\n" % (
+                match["before"],
+                real_kind(match["args"]),
+                match["after"],
+            )
         outfile.write(line)
     infile.close()
     outfile.close()
@@ -365,99 +401,102 @@ def build(options):
     """
 
     from os.path import isfile
-    import os
     import sys
     from glob import glob
 
-    src_files = ['kind_values_f2py.f90', 'base.f90']
-    
-    if isfile('base_acf.f90'):
-        src_files.append('base_acf.f90')
-    src_files.append('lattice.f90')
-    if isfile('proclist_constants.f90'):
-        src_files.append('proclist_constants.f90')
-    if isfile('proclist_pars.f90'):
-        src_files.append('proclist_pars.f90')
+    src_files = ["kind_values_f2py.f90", "base.f90"]
 
-    src_files.extend(glob('nli_*.f90'))
+    if isfile("base_acf.f90"):
+        src_files.append("base_acf.f90")
+    src_files.append("lattice.f90")
+    if isfile("proclist_constants.f90"):
+        src_files.append("proclist_constants.f90")
+    if isfile("proclist_pars.f90"):
+        src_files.append("proclist_pars.f90")
+
+    src_files.extend(glob("nli_*.f90"))
     # src_files.extend(glob('get_rate_*.f90'))
-    src_files.extend(glob('run_proc_*.f90'))
-    src_files.append('proclist.f90')
-    if isfile('proclist_acf.f90'):
-        src_files.append('proclist_acf.f90')
+    src_files.extend(glob("run_proc_*.f90"))
+    src_files.append("proclist.f90")
+    if isfile("proclist_acf.f90"):
+        src_files.append("proclist_acf.f90")
 
     extra_flags = {}
 
     # Add include path for src directory (needed for meson backend in Python >= 3.12)
     # Use absolute path so meson can find include files from its temp build directory
-    if os.path.isdir('src'):
-        src_include = '-I' + os.path.abspath('src')
+    if os.path.isdir("src"):
+        src_include = "-I" + os.path.abspath("src")
     else:
-        src_include = '-I' + os.path.abspath('.')
+        src_include = "-I" + os.path.abspath(".")
 
     if options.no_optimize:
-        extra_flags['gfortran'] = ('-ffree-line-length-0 -ffree-form'
-                                   ' -xf95-cpp-input -Wall -fimplicit-none'
-                                   ' -time  -fmax-identifier-length=63 ' + src_include)
-        extra_flags['gnu95'] = extra_flags['gfortran']
-        extra_flags['intel'] = '-fpp -Wall -I/opt/intel/fc/10.1.018/lib ' + src_include
-        extra_flags['intelem'] = '-fpp -Wall ' + src_include
+        extra_flags["gfortran"] = (
+            "-ffree-line-length-0 -ffree-form"
+            " -xf95-cpp-input -Wall -fimplicit-none"
+            " -time  -fmax-identifier-length=63 " + src_include
+        )
+        extra_flags["gnu95"] = extra_flags["gfortran"]
+        extra_flags["intel"] = "-fpp -Wall -I/opt/intel/fc/10.1.018/lib " + src_include
+        extra_flags["intelem"] = "-fpp -Wall " + src_include
 
     else:
-        extra_flags['gfortran'] = ('-ffree-line-length-0 -ffree-form'
-                                   ' -xf95-cpp-input -Wall -O3 -fimplicit-none'
-                                   ' -time -fmax-identifier-length=63 ' + src_include)
-        extra_flags['gnu95'] = extra_flags['gfortran']
-        extra_flags['intel'] = '-fast -fpp -Wall -I/opt/intel/fc/10.1.018/lib ' + src_include
-        extra_flags['intelem'] = '-fast -fpp -Wall ' + src_include
+        extra_flags["gfortran"] = (
+            "-ffree-line-length-0 -ffree-form"
+            " -xf95-cpp-input -Wall -O3 -fimplicit-none"
+            " -time -fmax-identifier-length=63 " + src_include
+        )
+        extra_flags["gnu95"] = extra_flags["gfortran"]
+        extra_flags["intel"] = (
+            "-fast -fpp -Wall -I/opt/intel/fc/10.1.018/lib " + src_include
+        )
+        extra_flags["intelem"] = "-fast -fpp -Wall " + src_include
 
-    # FIXME
-    extra_libs = ''
-    ccompiler = ''
-    if os.name == 'nt':
-        ccompiler = '--compiler=mingw32'
-        if sys.version_info < (2, 7):
-            extra_libs = ' -lmsvcr71 '
-        else:
-            extra_libs = ' -lmsvcr90 '
+    module_name = "kmc_model"
 
-    module_name = 'kmc_model'
-
-    if not isfile('kind_values_f2py.f90'):
-        evaluate_kind_values('kind_values.f90', 'kind_values_f2py.f90')
+    if not isfile("kind_values_f2py.f90"):
+        evaluate_kind_values("kind_values.f90", "kind_values_f2py.f90")
 
     for src_file in src_files:
         if not isfile(src_file):
-            raise IOError('File %s not found' % src_file)
+            raise IOError("File %s not found" % src_file)
 
     call = []
-    call.append('-c')
-    call.append('-c')
-    call.append('--fcompiler=%s' % options.fcompiler)
-    if os.name == 'nt':
-        call.append('%s' % ccompiler)
-    extra_flags = extra_flags.get(options.fcompiler, '')
+    call.append("-c")
+    call.append("-c")
+    call.append("--fcompiler=%s" % options.fcompiler)
+    extra_flags = extra_flags.get(options.fcompiler, "")
 
     if options.debug:
-        extra_flags += ' -DDEBUG'
-    call.append('--f90flags=%s' % extra_flags)
-    call.append('-m')
+        extra_flags += " -DDEBUG"
+    call.append("--f90flags=%s" % extra_flags)
+    call.append("-m")
     call.append(module_name)
     call += src_files
 
     logger.info(call)
     from copy import deepcopy
+
     true_argv = deepcopy(sys.argv)  # save for later
     from numpy import f2py
+
     sys.argv = call
-    os.environ["LIBRARY_PATH"] = os.environ.get("LIBRARY_PATH", "") + ":/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
+    os.environ["LIBRARY_PATH"] = (
+        os.environ.get("LIBRARY_PATH", "")
+        + ":/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
+    )
 
     # Set FC for meson backend (Python >= 3.12) to compiler name only
     # Meson has issues with FC containing full paths
     if sys.version_info >= (3, 12):
-        fc_map = {'gfortran': 'gfortran', 'gnu95': 'gfortran', 'intel': 'ifort', 'intelem': 'ifort'}
+        fc_map = {
+            "gfortran": "gfortran",
+            "gnu95": "gfortran",
+            "intel": "ifort",
+            "intelem": "ifort",
+        }
         if options.fcompiler in fc_map:
-            os.environ['FC'] = fc_map[options.fcompiler]
+            os.environ["FC"] = fc_map[options.fcompiler]
 
     f2py.main()
     sys.argv = true_argv
@@ -465,23 +504,25 @@ def build(options):
 
 def T_grid(T_min, T_max, n):
     from numpy import linspace, array
+
     """Return a list of n temperatures between
        T_min and T_max such that the grid of T^(-1)
        is evenly spaced.
     """
 
-    T_min1 = T_min ** (-1.)
-    T_max1 = T_max ** (-1.)
+    T_min1 = T_min ** (-1.0)
+    T_max1 = T_max ** (-1.0)
 
     grid = list(linspace(T_max1, T_min1, n))
     grid.reverse()
-    grid = [x ** (-1.) for x in grid]
+    grid = [x ** (-1.0) for x in grid]
 
     return array(grid)
 
 
 def p_grid(p_min, p_max, n):
     from numpy import logspace, log10
+
     """Return a list of n pressures between
        p_min and p_max such that the grid of log(p)
        is evenly spaced.
@@ -505,11 +546,13 @@ def timeit(func):
         def f():
             ...
 
-     """
+    """
+
     def wrapper(*args, **kwargs):
         time0 = time()
         func(*args, **kwargs)
-        logger.info('Executing %s took %.3f s' % (func.__name__, time() - time0))
+        logger.info("Executing %s took %.3f s" % (func.__name__, time() - time0))
+
     return wrapper
 
 
@@ -519,10 +562,10 @@ def col_tuple2str(tup):
     """
     r, g, b = tup
     b *= 255
-    res = '#'
-    res += hex(int(255 * r))[-2:].replace('x', '0')
-    res += hex(int(255 * g))[-2:].replace('x', '0')
-    res += hex(int(255 * b))[-2:].replace('x', '0')
+    res = "#"
+    res += hex(int(255 * r))[-2:].replace("x", "0")
+    res += hex(int(255 * g))[-2:].replace("x", "0")
+    res += hex(int(255 * b))[-2:].replace("x", "0")
 
     return res
 
@@ -532,16 +575,20 @@ def col_str2tuple(hex_string):
     into a tuple of three float between 0 and 1
     """
     import gtk
+
     try:
         color = gtk.gdk.Color(hex_string)
-    except ValueError as e:
-        raise UserWarning('GTK cannot decipher color string {hex_string}: {e}'.format(**locals()))
+    except ValueError:
+        raise UserWarning(
+            "GTK cannot decipher color string {hex_string}: {e}".format(**locals())
+        )
     return (color.red_float, color.green_float, color.blue_float)
 
 
 def jmolcolor_in_hex(i):
     """Return a given jmol color in hexadecimal representation."""
     from ase.data.colors import jmol_colors
+
     color = [int(x) for x in 255 * jmol_colors[i]]
     r, g, b = color
     a = 255
@@ -571,22 +618,22 @@ def evaluate_template(template, escape_python=False, **kwargs):
     """
     # Create a namespace dict for exec() - Python 3 requires this for variable modification
     namespace = dict(kwargs)
-    namespace['result'] = ''
+    namespace["result"] = ""
 
-    NEWLINE = '\n'
-    PREFIX = '#@'
+    NEWLINE = "\n"
+    PREFIX = "#@"
     lines = [line + NEWLINE for line in template.split(NEWLINE)]
 
     if escape_python:
         # first just replace verbose lines by pass to check syntax
-        python_lines = ''
+        python_lines = ""
         matched = False
         for line in lines:
-            if re.match('^\s*%s ?' % PREFIX, line):
+            if re.match("^\s*%s ?" % PREFIX, line):
                 python_lines += line.lstrip()[3:]
                 matched = True
             else:
-                python_lines += 'pass # %s' % line.lstrip()
+                python_lines += "pass # %s" % line.lstrip()
         # if the tempate didn't contain any meta strings
         # just return the original
         if not matched:
@@ -594,31 +641,35 @@ def evaluate_template(template, escape_python=False, **kwargs):
         exec(python_lines, namespace)
 
         # second turn literary lines into write statements
-        python_lines = ''
+        python_lines = ""
         for line in lines:
-            if re.match('^\s*%s ' % PREFIX, line):
+            if re.match("^\s*%s " % PREFIX, line):
                 python_lines += line.lstrip()[3:]
-            elif re.match('^\s*%s$' % PREFIX, line):
+            elif re.match("^\s*%s$" % PREFIX, line):
                 python_lines += '%sresult += "\\n"\n' % (
-                    ' ' * (len(line) - len(line.lstrip())))
-            elif re.match('^$', line):
+                    " " * (len(line) - len(line.lstrip()))
+                )
+            elif re.match("^$", line):
                 # python_lines += 'result += """\n"""\n'
                 pass
             else:
-                python_lines += '%sresult += ("""%s""".format(**dict(locals())))\n' \
-                    % (' ' * (len(line.expandtabs(4)) - len(line.lstrip())),  line.lstrip())
+                python_lines += '%sresult += ("""%s""".format(**dict(locals())))\n' % (
+                    " " * (len(line.expandtabs(4)) - len(line.lstrip())),
+                    line.lstrip(),
+                )
 
         exec(python_lines, namespace)
 
     else:
         # first just replace verbose lines by pass to check syntax
-        python_lines = ''
+        python_lines = ""
         matched = False
         for line in lines:
-            if re.match('\s*%s ?' % PREFIX, line):
-                python_lines += '%spass %s' \
-                    % (' ' * (len(line) - len(line.lstrip())),
-                       line.lstrip())
+            if re.match("\s*%s ?" % PREFIX, line):
+                python_lines += "%spass %s" % (
+                    " " * (len(line) - len(line.lstrip())),
+                    line.lstrip(),
+                )
 
                 matched = True
             else:
@@ -628,18 +679,20 @@ def evaluate_template(template, escape_python=False, **kwargs):
         exec(python_lines, namespace)
 
         # second turn literary lines into write statements
-        python_lines = ''
+        python_lines = ""
         for line in lines:
-            if re.match('\s*%s ' % PREFIX, line):
-                python_lines += '%sresult += ("""%s""".format(**dict(locals())))\n' \
-                    % (' ' * (len(line) - len(line.lstrip())),
-                       line.lstrip()[3:])
-            elif re.match('\s*%s' % PREFIX, line):
+            if re.match("\s*%s " % PREFIX, line):
+                python_lines += '%sresult += ("""%s""".format(**dict(locals())))\n' % (
+                    " " * (len(line) - len(line.lstrip())),
+                    line.lstrip()[3:],
+                )
+            elif re.match("\s*%s" % PREFIX, line):
                 python_lines += '%sresult += "\\n"\n' % (
-                    ' ' * (len(line) - len(line.lstrip())))
+                    " " * (len(line) - len(line.lstrip()))
+                )
             else:
                 python_lines += line
 
         exec(python_lines, namespace)
 
-    return namespace['result']
+    return namespace["result"]

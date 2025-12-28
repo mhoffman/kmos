@@ -100,16 +100,77 @@ Try running `kmos view` to watch the model run, or `kmos shell` to interact with
 
 ## Development
 
+### Quick Start for Contributors
+
 ```bash
 # Clone the repository
 git clone https://github.com/mhoffman/kmos.git
 cd kmos
 
-# Install dependencies with uv
-uv sync
+# Install dev dependencies
+uv sync --all-extras
+
+# Install pre-commit hooks (automatic code formatting & linting)
+uv run pre-commit install
 
 # Run tests
-uv run pytest tests/
+make test
+```
+
+### Available Make Commands
+
+The project includes a Makefile for common development tasks:
+
+```bash
+make help           # Show all available commands
+make test           # Run tests
+make test-coverage  # Run tests with coverage report
+make lint           # Lint code with ruff
+make format         # Format code with ruff
+make clean          # Clean build artifacts and caches
+make docs           # Build documentation
+make all            # Run full CI pipeline locally
+```
+
+### Code Quality Tools
+
+This project uses modern Python tooling:
+
+- **ruff** - Fast linting and formatting (replaces black, isort, flake8)
+- **mypy** - Type checking
+- **pre-commit** - Automatic checks before commits
+- **pytest** - Testing framework
+- **coverage** - Test coverage reporting
+
+After installing pre-commit hooks with `uv run pre-commit install`, your code will automatically be formatted and linted before each commit.
+
+### Running Tests
+
+```bash
+# Quick test run
+make test
+
+# Verbose output
+make test-verbose
+
+# With coverage report
+make test-coverage
+```
+
+### Manual Commands (if not using Make)
+
+```bash
+# Run tests
+PYTHONPATH=. uv run pytest tests/
+
+# Lint code
+uv run ruff check kmos/ tests/
+
+# Format code
+uv run ruff format kmos/ tests/
+
+# Type check
+uv run mypy kmos/
 ```
 
 ## Requirements

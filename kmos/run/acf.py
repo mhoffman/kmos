@@ -18,7 +18,7 @@ The model can be used directly like so::
     t_bin = 0.0005
     t_f = 0.022
     safety_factor = 1
-    extending_factor = 3 
+    extending_factor = 3
 
     types = [0.5,1]
     site_types = [['default_a_1','default_a_2','default_b_1','default_b_2'],[1,1,2,2]]
@@ -45,9 +45,9 @@ which, of course can also be part of a python script.
 #    Copyright 2015-2016 Andreas Garhammer
 #    This file is part of kmos.
 
+
 def get_id_arr(kmc_model):
-    """Return the id's from id_arr.
-    """
+    """Return the id's from id_arr."""
     id_arr = np.zeros((kmc_model.base.get_volume()))
     for i in range(kmc_model.base.get_volume()):
         id_arr[i] = kmc_model.base_acf.get_id_arr(i + 1)
@@ -55,8 +55,7 @@ def get_id_arr(kmc_model):
 
 
 def get_site_arr(kmc_model):
-    """Return the site indices from site_arr.
-    """
+    """Return the site indices from site_arr."""
     site_arr = np.zeros((kmc_model.base.get_volume()))
     for i in range(kmc_model.base.get_volume()):
         site_arr[i] = kmc_model.base_acf.get_site_arr(i + 1)
@@ -74,8 +73,7 @@ def get_property_o(kmc_model):
 
 
 def get_property_acf(kmc_model):
-    """Return the type indices for each site from property_acf.
-    """
+    """Return the type indices for each site from property_acf."""
     property_acf = np.zeros((kmc_model.base.get_volume()))
     for i in range(kmc_model.base.get_volume()):
         property_acf[i] = kmc_model.base_acf.get_property_acf(i + 1)
@@ -93,8 +91,7 @@ def get_buffer_acf(kmc_model):
 
 
 def get_config_bin_acf(kmc_model):
-    """Return the entries for each bin from config_bin.
-    """
+    """Return the entries for each bin from config_bin."""
     config_bin = np.zeros((kmc_model.base_acf.extended_nr_of_bins))
     for i in range(kmc_model.base_acf.extended_nr_of_bins):
         config_bin[i] = kmc_model.base_acf.get_config_bin_acf(i + 1)
@@ -107,18 +104,8 @@ def get_counter_write_in_bin_acf(kmc_model):
     """
     contribution_bin = np.zeros((kmc_model.base_acf.extended_nr_of_bins))
     for i in range(kmc_model.base_acf.extended_nr_of_bins):
-        contribution_bin[
-            i] = kmc_model.base_acf.get_counter_write_in_bin(i + 1)
+        contribution_bin[i] = kmc_model.base_acf.get_counter_write_in_bin(i + 1)
     return contribution_bin
-
-
-def get_acf(kmc_model):
-    """Returns the ACF.
-    """
-    acf = np.zeros((kmc_model.base_acf.nr_of_bins))
-    for i in range(kmc_model.base_acf.nr_of_bins):
-        acf[i] = kmc_model.base_acf.calc_acf(i + 1)
-    return acf
 
 
 def get_types_acf(kmc_model):
@@ -136,11 +123,13 @@ def get_product_property(kmc_model):
     between two properties (g(0)g(t)).
     """
     product_property = np.zeros(
-        (1, kmc_model.base_acf.nr_of_types, kmc_model.base_acf.nr_of_types))
+        (1, kmc_model.base_acf.nr_of_types, kmc_model.base_acf.nr_of_types)
+    )
     for i in range(kmc_model.base_acf.nr_of_types):
         for j in range(kmc_model.base_acf.nr_of_types):
-            product_property[
-                0, i, j] = kmc_model.base_acf.get_product_property(i + 1, j + 1)
+            product_property[0, i, j] = kmc_model.base_acf.get_product_property(
+                i + 1, j + 1
+            )
     return product_property
 
 
@@ -149,12 +138,11 @@ def get_trajectory(kmc_model):
     from trajectory.
     """
     trajectory = np.zeros(
-        (1, kmc_model.base_acf.nr_of_ions, kmc_model.base_acf.nr_of_steps + 1),
-        'int')
+        (1, kmc_model.base_acf.nr_of_ions, kmc_model.base_acf.nr_of_steps + 1), "int"
+    )
     for i in range(kmc_model.base_acf.nr_of_ions):
         for j in range(kmc_model.base_acf.nr_of_steps + 1):
-            trajectory[0, i, j] = kmc_model.base_acf.get_trajectory(
-                i + 1, j + 1)
+            trajectory[0, i, j] = kmc_model.base_acf.get_trajectory(i + 1, j + 1)
     return trajectory
 
 
@@ -168,26 +156,29 @@ def get_displacement(kmc_model):
     return displacement
 
 
-def allocate_acf(kmc_model, nr_of_types, t_bin, t_f, safety_factor=None, extending_factor=None):
+def allocate_acf(
+    kmc_model, nr_of_types, t_bin, t_f, safety_factor=None, extending_factor=None
+):
     """Allocate the whole arrays for the tracking process and for
     the sampling of the ACF.
     """
     kmc_model.base_acf.allocate_tracing_arr(nr_of_types)
     kmc_model.base_acf.allocate_config_bin_acf(
-        t_bin, t_f, safety_factor, extending_factor)
+        t_bin, t_f, safety_factor, extending_factor
+    )
 
 
 def allocate_trajectory(kmc_model, nr_of_steps):
-    """Allocates the trajectory array for the recording of the trajectory 
+    """Allocates the trajectory array for the recording of the trajectory
     of each tracked particle. The user has to specify for how many kMC steps
-    the trajectory should be recorded. 
+    the trajectory should be recorded.
     """
     kmc_model.base_acf.allocate_trajectory(nr_of_steps)
 
 
 def set_types_acf(kmc_model, site_property):
-    """Set the properties, which are given by the user to 
-       a type index.
+    """Set the properties, which are given by the user to
+    a type index.
     """
     types = get_types_acf(kmc_model)
     for i in range(len(types)):
@@ -196,15 +187,16 @@ def set_types_acf(kmc_model, site_property):
             break
 
 
-def calc_product_property(kmc_model, ):
+def calc_product_property(
+    kmc_model,
+):
     """Caculate and set all possible combinations of products
     between two properties(g(0)g(t)).
     """
     types = get_types_acf(kmc_model)
     for i in range(kmc_model.base_acf.nr_of_types):
         for j in range(kmc_model.base_acf.nr_of_types):
-            kmc_model.base_acf.set_product_property(
-                i + 1, j + 1, types[i] * types[j])
+            kmc_model.base_acf.set_product_property(i + 1, j + 1, types[i] * types[j])
 
 
 def do_kmc_steps_acf(kmc_model, n, traj_on=False):
@@ -253,9 +245,13 @@ def set_property_acf(kmc_model, layer_site_name, property_type):
     the site_names are given by the user.
     """
     for i in range((kmc_model.base.get_volume())):
-        if ((i + 1) % kmc_model.lattice.spuck) + kmc_model.lattice.spuck == getattr(kmc_model.lattice, layer_site_name.lower()):
+        if ((i + 1) % kmc_model.lattice.spuck) + kmc_model.lattice.spuck == getattr(
+            kmc_model.lattice, layer_site_name.lower()
+        ):
             kmc_model.base_acf.set_property_acf(i + 1, property_type)
-        if (i + 1) % kmc_model.lattice.spuck == getattr(kmc_model.lattice, layer_site_name.lower()):
+        if (i + 1) % kmc_model.lattice.spuck == getattr(
+            kmc_model.lattice, layer_site_name.lower()
+        ):
             kmc_model.base_acf.set_property_acf(i + 1, property_type)
 
 
@@ -267,7 +263,7 @@ def get_acf(kmc_model, normalization=False):
     acf = np.zeros((kmc_model.base_acf.nr_of_bins))
     for i in range(kmc_model.base_acf.nr_of_bins):
         acf[i] = kmc_model.base_acf.calc_acf(i + 1)
-    if normalization == True:
+    if normalization:
         acf = acf / acf[0]
     return acf
 

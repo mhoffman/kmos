@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 
-import os
-import filecmp
 
 def test_build_model():
     import os
     import sys
     import kmos.cli
-    import time
     import pprint
     import filecmp
 
@@ -15,30 +12,34 @@ def test_build_model():
 
     os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
-    for backend in ['local_smart', 'lat_int']:
-        export_dir = '_tmp_export_{backend}'.format(**locals())
+    for backend in ["local_smart", "lat_int"]:
+        export_dir = "_tmp_export_{backend}".format(**locals())
 
         print(os.getcwd())
-        print(os.listdir('.'))
+        print(os.listdir("."))
 
-        kmos.cli.main('export AB_model.ini {export_dir} -o -b{backend}'.format(**locals()))
+        kmos.cli.main(
+            "export AB_model.ini {export_dir} -o -b{backend}".format(**locals())
+        )
 
-        os.chdir('..')
+        os.chdir("..")
 
         print(os.getcwd())
-        print(os.listdir('.'))
+        print(os.listdir("."))
 
-        #os.chdir(export_dir)
-        sys.path.insert(0, os.path.abspath('.'))
+        # os.chdir(export_dir)
+        sys.path.insert(0, os.path.abspath("."))
 
         import kmos.run
 
         if kmos.run.settings is None:
             import kmc_settings as settings
+
             kmos.run.settings = settings
 
         if kmos.run.lattice is None:
             from kmc_model import base, lattice, proclist
+
             kmos.run.base = base
             kmos.run.lattice = lattice
             kmos.run.proclist = proclist
@@ -53,24 +54,25 @@ def test_build_model():
 
         ## Regenerate reference trajectory files -- comment out
         ## Comment to make test useful
-        #with open('ref_procs_sites_{backend}.log'.format(**locals()), 'w') as outfile:
-            #outfile.write(pprint.pformat(procs_sites))
+        # with open('ref_procs_sites_{backend}.log'.format(**locals()), 'w') as outfile:
+        # outfile.write(pprint.pformat(procs_sites))
 
-        with open('test_procs_sites_{backend}.log'.format(**locals()), 'w') as outfile:
+        with open("test_procs_sites_{backend}.log".format(**locals()), "w") as outfile:
             outfile.write(pprint.pformat(procs_sites))
 
         # check if both trajectories are equal
         assert filecmp.cmp(
-            'test_procs_sites_{backend}.log'.format(**locals()),
-            'ref_procs_sites_{backend}.log'.format(**locals()),
-        ), 'Trajectories differ for backend {backend}'.format(**locals())
+            "test_procs_sites_{backend}.log".format(**locals()),
+            "ref_procs_sites_{backend}.log".format(**locals()),
+        ), "Trajectories differ for backend {backend}".format(**locals())
         # Clean-up action
-        os.chdir('..')
+        os.chdir("..")
 
         kmos.run.lattice = None
         kmos.run.settings = None
 
     os.chdir(old_path)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     test_build_model()
