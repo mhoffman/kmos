@@ -44,8 +44,8 @@ format:  ## Format code with ruff
 format-check:  ## Check code formatting without modifying files
 	uv run ruff format --check kmos/ tests/
 
-type-check:  ## Run type checking with mypy
-	uv run mypy kmos/
+type-check:  ## Run type checking with ty
+	uv run ty check
 
 docs:  ## Build documentation
 	cd doc && uv run make html
