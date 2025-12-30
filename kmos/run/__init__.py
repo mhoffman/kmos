@@ -40,6 +40,7 @@ the model happens through Queues.
 __all__ = ["base", "lattice", "proclist", "KMC_Model"]
 
 from ase.atoms import Atoms
+from ase.io import write
 from copy import deepcopy
 from fnmatch import fnmatch
 from kmos import evaluate_rate_expression
@@ -482,7 +483,6 @@ class KMC_Model(Process):
                 elif signal.upper() == "WRITEOUT":
                     atoms = self.get_atoms()
                     step = self.base.get_kmc_step()
-                    from ase.io import write
 
                     filename = "%s_%s.traj" % (self.settings.model_name, step)
                     print("Wrote snapshot to %s" % filename)
@@ -654,7 +654,7 @@ class KMC_Model(Process):
                     colors=colors2,
                 )
             elif suffix == "traj":
-                write(filename, atoms)  # noqa: F821 - TODO: import write from ase.io
+                write(filename, atoms)
             else:
                 writer = kmos.run.png.MyPNG(
                     atoms, show_unit_cell=True, scale=20, model=self, **kwargs
