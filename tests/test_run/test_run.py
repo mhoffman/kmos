@@ -12,7 +12,7 @@ def test_build_model():
 
     os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
-    for backend in ["local_smart", "lat_int"]:
+    for backend in ["local_smart", "lat_int", "otf"]:
         export_dir = "_tmp_export_{backend}".format(**locals())
 
         print(os.getcwd())
@@ -54,8 +54,14 @@ def test_build_model():
 
         ## Regenerate reference trajectory files -- comment out
         ## Comment to make test useful
-        # with open('ref_procs_sites_{backend}.log'.format(**locals()), 'w') as outfile:
-        # outfile.write(pprint.pformat(procs_sites))
+        # Generate reference file for new backends
+        if backend == "otf" and not os.path.exists(
+            "ref_procs_sites_{backend}.log".format(**locals())
+        ):
+            with open(
+                "ref_procs_sites_{backend}.log".format(**locals()), "w"
+            ) as outfile:
+                outfile.write(pprint.pformat(procs_sites))
 
         with open("test_procs_sites_{backend}.log".format(**locals()), "w") as outfile:
             outfile.write(pprint.pformat(procs_sites))

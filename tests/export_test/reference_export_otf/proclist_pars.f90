@@ -22,7 +22,46 @@ module proclist_pars
 use kind_values
 use base, only: &
     rates
-use proclist_constants
+use proclist_constants, only: &
+    co, &
+    empty, &
+    oxygen, &
+    co_adsorption_bridge, &
+    co_adsorption_cus, &
+    co_desorption_bridge, &
+    co_desorption_cus, &
+    co_diffusion_bridge_bridge_down, &
+    co_diffusion_bridge_bridge_up, &
+    co_diffusion_bridge_cus_left, &
+    co_diffusion_bridge_cus_right, &
+    co_diffusion_cus_bridge_left, &
+    co_diffusion_cus_bridge_right, &
+    co_diffusion_cus_cus_down, &
+    co_diffusion_cus_cus_up, &
+    oxygen_adsorption_bridge_bridge, &
+    oxygen_adsorption_bridge_cus_le0000, &
+    oxygen_adsorption_bridge_cus_ri0000, &
+    oxygen_adsorption_cus_cus, &
+    oxygen_desorption_bridge_bridge, &
+    oxygen_desorption_bridge_cus_le0000, &
+    oxygen_desorption_bridge_cus_ri0000, &
+    oxygen_desorption_cus_cus, &
+    oxygen_diffusion_bridge_bridge_0000, &
+    oxygen_diffusion_bridge_bridge_0001, &
+    oxygen_diffusion_bridge_cus_lef0000, &
+    oxygen_diffusion_bridge_cus_rig0000, &
+    oxygen_diffusion_cus_bridge_lef0000, &
+    oxygen_diffusion_cus_bridge_rig0000, &
+    oxygen_diffusion_cus_cus_down, &
+    oxygen_diffusion_cus_cus_up, &
+    reaction_oxygen_bridge_co_bridg0000, &
+    reaction_oxygen_bridge_co_bridg0001, &
+    reaction_oxygen_bridge_co_cus_l0000, &
+    reaction_oxygen_bridge_co_cus_r0000, &
+    reaction_oxygen_cus_co_bridge_l0000, &
+    reaction_oxygen_cus_co_bridge_r0000, &
+    reaction_oxygen_cus_co_cus_down, &
+    reaction_oxygen_cus_co_cus_up
 use lattice, only: &
     ruo2, &
     ruo2_bridge, &
@@ -30,6 +69,7 @@ use lattice, only: &
     get_species
 
 implicit none
+private :: rate_co_adsorption_bridge, rate_co_adsorption_cus, rate_co_desorption_bridge, rate_co_desorption_cus, rate_co_diffusion_bridge_bridge_down, rate_co_diffusion_bridge_bridge_up, rate_co_diffusion_bridge_cus_left, rate_co_diffusion_bridge_cus_right, rate_co_diffusion_cus_bridge_left, rate_co_diffusion_cus_bridge_right, rate_co_diffusion_cus_cus_down, rate_co_diffusion_cus_cus_up, rate_oxygen_adsorption_bridge_bridge, rate_oxygen_adsorption_bridge_cus_le0000, rate_oxygen_adsorption_bridge_cus_ri0000, rate_oxygen_adsorption_cus_cus, rate_oxygen_desorption_bridge_bridge, rate_oxygen_desorption_bridge_cus_le0000, rate_oxygen_desorption_bridge_cus_ri0000, rate_oxygen_desorption_cus_cus, rate_oxygen_diffusion_bridge_bridge_0000, rate_oxygen_diffusion_bridge_bridge_0001, rate_oxygen_diffusion_bridge_cus_lef0000, rate_oxygen_diffusion_bridge_cus_rig0000, rate_oxygen_diffusion_cus_bridge_lef0000, rate_oxygen_diffusion_cus_bridge_rig0000, rate_oxygen_diffusion_cus_cus_down, rate_oxygen_diffusion_cus_cus_up, rate_reaction_oxygen_bridge_co_bridg0000, rate_reaction_oxygen_bridge_co_bridg0001, rate_reaction_oxygen_bridge_co_cus_l0000, rate_reaction_oxygen_bridge_co_cus_r0000, rate_reaction_oxygen_cus_co_bridge_l0000, rate_reaction_oxygen_cus_co_bridge_r0000, rate_reaction_oxygen_cus_co_cus_down, rate_reaction_oxygen_cus_co_cus_up
 
 ! User parameters
 integer(kind=iint), public :: A = 1

@@ -9,22 +9,12 @@ gpl = self._gpl_message()
 #@
 #@ module {module_name}
 #@ use kind_values
-#@ use lattice, only: &
-site_params = []
-for layer in data.layer_list:
-    #@     {layer.name}, &
-    for site in layer.sites:
-        site_params.append((site.name, layer.name))
-
-for i, (site, layer) in enumerate(site_params):
-    #@     {layer}_{site}, &
-#@     get_species
-#@ 
-#@ 
+#@
+#@
 #@ implicit none
-#@ 
-#@ 
-#@ 
+#@
+#@
+#@
 
 # initialize various parameter kind of data
 #@  ! Species constants

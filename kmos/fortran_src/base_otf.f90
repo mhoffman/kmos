@@ -293,7 +293,7 @@ subroutine add_proc(proc, site, rate)
   ! ARGUMENTS
   !
   !    * ``proc`` positive integer number that represents the process to be added.
-  !    * ``site`` positive integer number that represents the site to be manipulated
+  !    * ``site`` positive integer that represents the site to be manipulated
   !******
   integer(kind=iint), intent(in) :: proc, site
   real(kind=rdouble), intent(in) :: rate

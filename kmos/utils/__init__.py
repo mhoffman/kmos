@@ -304,19 +304,29 @@ def evaluate_kind_values(infile, outfile):
                     "f2py_selected_kind",
                 ]
                 print("%s\n" % os.path.abspath(os.curdir))
+
+                # Find gfortran compiler
+                import shutil
+
+                gfortran_path = shutil.which("gfortran")
+
+                # Set up environment with correct compiler paths
+                env_vars = {
+                    "LIBRARY_PATH": os.environ.get("LIBRARY_PATH", "")
+                    + ":/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
+                }
+                if gfortran_path:
+                    env_vars["FC"] = gfortran_path
+
                 result = subprocess.run(
                     f2py_command,
                     capture_output=True,
                     text=True,
-                    env=dict(
-                        os.environ,
-                        **{
-                            "LIBRARY_PATH": os.environ.get("LIBRARY_PATH", "")
-                            + ":/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
-                        },
-                    ),
+                    env=dict(os.environ, **env_vars),
                 )
                 print(result.stdout)
+                if result.stderr:
+                    print(result.stderr)
             try:
                 import f2py_selected_kind
             except Exception as e:
@@ -489,6 +499,16 @@ def build(options):
     # Set FC for meson backend (Python >= 3.12) to compiler name only
     # Meson has issues with FC containing full paths
     if sys.version_info >= (3, 12):
+        # Ensure gfortran is in PATH for meson to find
+        import shutil
+
+        gfortran_path = shutil.which("gfortran")
+        if gfortran_path:
+            gfortran_dir = os.path.dirname(gfortran_path)
+            current_path = os.environ.get("PATH", "")
+            if gfortran_dir not in current_path:
+                os.environ["PATH"] = f"{gfortran_dir}:{current_path}"
+
         fc_map = {
             "gfortran": "gfortran",
             "gnu95": "gfortran",
