@@ -56,6 +56,7 @@ kmos = "kmos.cli:main"
 [project.optional-dependencies]
 dev = [
     "pytest>=8.4.2",
+    "pytest-cov>=4.0.0",
     "bump-my-version",
     "ruff>=0.8.0",
     "mypy>=1.0.0",
