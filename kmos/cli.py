@@ -521,24 +521,37 @@ def sh(banner):
     """
 
     import IPython
+    import sys
 
-    if hasattr(IPython, "release"):
-        try:
-            from IPython.terminal.embed import InteractiveShellEmbed
+    # Get the calling frame's namespace to preserve variables like 'model'
+    frame = sys._getframe(1)
+    user_ns = {}
+    user_ns.update(frame.f_globals)
+    user_ns.update(frame.f_locals)
 
-            InteractiveShellEmbed(banner1=banner)()
-
-        except ImportError:
+    # Use IPython.embed() for modern IPython (>= 0.11)
+    # This properly supports magic commands like %time, %timeit, etc.
+    try:
+        IPython.embed(banner1=banner, user_ns=user_ns)
+    except AttributeError:
+        # Fallback for older IPython versions
+        if hasattr(IPython, "release"):
             try:
-                from IPython.frontend.terminal.embed import InteractiveShellEmbed
+                from IPython.terminal.embed import InteractiveShellEmbed
 
-                InteractiveShellEmbed(banner1=banner)()
+                InteractiveShellEmbed(banner1=banner, user_ns=user_ns)()
 
             except ImportError:
-                from IPython.Shell import IPShellEmbed
+                try:
+                    from IPython.frontend.terminal.embed import InteractiveShellEmbed
 
-                IPShellEmbed(banner=banner)()
-    else:
-        from IPython.Shell import IPShellEmbed
+                    InteractiveShellEmbed(banner1=banner, user_ns=user_ns)()
 
-        IPShellEmbed(banner=banner)()
+                except ImportError:
+                    from IPython.Shell import IPShellEmbed
+
+                    IPShellEmbed(banner=banner, user_ns=user_ns)()
+        else:
+            from IPython.Shell import IPShellEmbed
+
+            IPShellEmbed(banner=banner, user_ns=user_ns)()
