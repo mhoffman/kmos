@@ -22,13 +22,27 @@ module proclist_pars
 use kind_values
 use base, only: &
     rates
-use proclist_constants
+use proclist_constants, only: &
+    CO, &
+    O, &
+    empty, &
+    CO_ads, &
+    CO_des, &
+    CO_oxidation_00, &
+    CO_oxidation_01, &
+    CO_oxidation_02, &
+    CO_oxidation_03, &
+    O2_des_right, &
+    O2_des_up, &
+    O_ads_00, &
+    O_ads_01
 use lattice, only: &
     square, &
     square_default, &
     get_species
 
 implicit none
+private :: rate_CO_ads, rate_CO_des, rate_CO_oxidation_00, rate_CO_oxidation_01, rate_CO_oxidation_02, rate_CO_oxidation_03, rate_O2_des_right, rate_O2_des_up, rate_O_ads_00, rate_O_ads_01
 
 ! User parameters
 integer(kind=iint), public :: J_CO_CO = 1

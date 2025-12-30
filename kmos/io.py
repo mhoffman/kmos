@@ -2752,7 +2752,19 @@ class ProcListWriter:
         out.write("use kind_values\n")
         out.write("use base, only: &\n")
         out.write("%srates\n" % (" " * indent))
-        out.write("use proclist_constants\n")
+        # Import species and process constants from proclist_constants
+        # Avoid importing species that conflict with user parameter names
+        parameter_names = [p.name for p in data.parameter_list]
+        out.write("use proclist_constants, only: &\n")
+        for i, species in enumerate(data.species_list):
+            # Only import species that don't conflict with user parameters
+            if species.name not in parameter_names:
+                out.write("%s%s, &\n" % (" " * indent, species.name))
+        for i, process in enumerate(data.process_list):
+            if i < len(data.process_list) - 1:
+                out.write("%s%s, &\n" % (" " * indent, process.name))
+            else:
+                out.write("%s%s\n" % (" " * indent, process.name))
         out.write("use lattice, only: &\n")
         site_params = []
         for layer in data.layer_list:
@@ -2762,7 +2774,14 @@ class ProcListWriter:
         for site, layer in site_params:
             out.write("%s%s_%s, &\n" % (" " * indent, layer, site))
         out.write("%sget_species\n" % (" " * indent))
-        out.write("\nimplicit none\n\n")
+        out.write("\nimplicit none\n")
+        # Make rate_* functions private so f2py doesn't try to wrap them
+        out.write("private :: ")
+        for i, process in enumerate(data.process_list):
+            if i < len(data.process_list) - 1:
+                out.write("rate_{0}, ".format(process.name))
+            else:
+                out.write("rate_{0}\n\n".format(process.name))
 
         units_list, masses_list, chempot_list = self._otf_get_auxilirary_params(data)
 
@@ -3235,8 +3254,23 @@ class ProcListWriter:
         )
 
         out.write("    get_species\n")
-        out.write("use proclist_constants\n")
-        out.write("use proclist_pars\n")
+        # Import species and processes from proclist_constants to avoid conflicts
+        out.write("use proclist_constants, only: &\n")
+        out.write("    default_species, &\n")
+        for i, species in enumerate(data.species_list):
+            out.write("    %s, &\n" % species.name)
+        for i, process in enumerate(data.process_list):
+            if i < len(data.process_list) - 1:
+                out.write("    %s, &\n" % process.name)
+            else:
+                out.write("    %s\n" % process.name)
+        # Import only gr_* functions from proclist_pars to avoid conflicts with user parameters
+        out.write("use proclist_pars, only: &\n")
+        for i, process in enumerate(data.process_list):
+            if i < len(data.process_list) - 1:
+                out.write("    gr_%s, &\n" % process.name)
+            else:
+                out.write("    gr_%s\n" % process.name)
         if separate_files and self.separate_proclist_pars:
             for i in range(len(data.process_list)):
                 out.write("use run_proc_{0:04d}; use gr_{0:04d}\n".format(i + 1))
@@ -3394,8 +3428,36 @@ class ProcListWriter:
                 out2 = open("{0}/run_proc_{1:04d}.f90".format(self.dir, iproc + 1), "w")
                 out2.write("module run_proc_{0:04d}\n\n".format(iproc + 1))
                 out2.write("use kind_values\n")
-                out2.write("use lattice\n")
-                out2.write("use proclist_pars\n")
+                # Import lattice manipulation functions from lattice module
+                # (lattice provides wrappers that accept arrays and convert internally)
+                out2.write("use lattice, only: &\n")
+                site_params = []
+                for layer in data.layer_list:
+                    for site in layer.sites:
+                        site_params.append((site.name, layer.name))
+                for i, (site, layer) in enumerate(site_params):
+                    out2.write("%s%s_%s, &\n" % (" " * indent, layer, site))
+                out2.write("%scan_do, &\n" % (" " * indent))
+                out2.write("%sdel_proc, &\n" % (" " * indent))
+                out2.write("%sadd_proc, &\n" % (" " * indent))
+                out2.write("%sreplace_species, &\n" % (" " * indent))
+                out2.write("%sget_species\n" % (" " * indent))
+                # Import species and processes from proclist_constants to avoid conflict with parameter indices
+                out2.write("use proclist_constants, only: &\n")
+                for i, species in enumerate(data.species_list):
+                    out2.write("%s%s, &\n" % (" " * indent, species.name))
+                for i, process in enumerate(data.process_list):
+                    if i < len(data.process_list) - 1:
+                        out2.write("%s%s, &\n" % (" " * indent, process.name))
+                    else:
+                        out2.write("%s%s\n" % (" " * indent, process.name))
+                # Import only gr_* functions from proclist_pars to avoid conflicts with user parameters
+                out2.write("use proclist_pars, only: &\n")
+                for i, process in enumerate(data.process_list):
+                    if i < len(data.process_list) - 1:
+                        out2.write("%sgr_%s, &\n" % (" " * indent, process.name))
+                    else:
+                        out2.write("%sgr_%s\n" % (" " * indent, process.name))
                 if self.separate_proclist_pars:
                     for i in range(nprocs):
                         out2.write("use gr_{0:04d}\n".format(i + 1))

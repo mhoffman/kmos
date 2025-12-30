@@ -27,10 +27,6 @@
 
 module proclist_constants
 use kind_values
-use lattice, only: &
-    square, &
-    square_default, &
-    get_species
 
 
 implicit none

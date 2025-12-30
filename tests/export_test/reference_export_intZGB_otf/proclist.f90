@@ -26,8 +26,32 @@ use lattice, only: &
     update_rates_matrix, &
     spuck, &
     get_species
-use proclist_constants
-use proclist_pars
+use proclist_constants, only: &
+    default_species, &
+    CO, &
+    O, &
+    empty, &
+    CO_ads, &
+    CO_des, &
+    CO_oxidation_00, &
+    CO_oxidation_01, &
+    CO_oxidation_02, &
+    CO_oxidation_03, &
+    O2_des_right, &
+    O2_des_up, &
+    O_ads_00, &
+    O_ads_01
+use proclist_pars, only: &
+    gr_CO_ads, &
+    gr_CO_des, &
+    gr_CO_oxidation_00, &
+    gr_CO_oxidation_01, &
+    gr_CO_oxidation_02, &
+    gr_CO_oxidation_03, &
+    gr_O2_des_right, &
+    gr_O2_des_up, &
+    gr_O_ads_00, &
+    gr_O_ads_01
 use run_proc_0001
 use run_proc_0002
 use run_proc_0003
