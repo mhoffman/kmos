@@ -24,7 +24,6 @@ import itertools
 import operator
 import shutil
 import os
-import sys
 import copy
 import functools
 import numpy as np
@@ -1888,32 +1887,10 @@ class ProcListWriter:
                     condition_species = condition.species
                     action_species = action.species
 
-                if len(condition_species.split(" or ")) > 1:
-                    out.write(
-                        "    select case(get_species((cell%s)))\n"
-                        % (action.coord.radd_ff(),)
-                    )
-                    for condition_species in map(
-                        lambda x: x.strip(), condition_species.split(" or ")
-                    ):
-                        out.write("    case(%s)\n" % condition_species)
-                        out.write(
-                            "    call replace_species(cell%s, %s, %s)\n"
-                            % (
-                                action.coord.radd_ff(),
-                                condition_species,
-                                action_species,
-                            )
-                        )
-                    out.write(
-                        '    case default\n        print *, "ILLEGAL SPECIES ENCOUNTERED"\n        stop\n    end select\n'
-                    )
-
-                else:
-                    out.write(
-                        "    call replace_species(cell%s, %s, %s)\n"
-                        % (action.coord.radd_ff(), condition_species, action_species)
-                    )
+                out.write(
+                    "    call replace_species(cell%s, %s, %s)\n"
+                    % (action.coord.radd_ff(), condition_species, action_species)
+                )
 
             # extra part for multi-lattice action
             # without explicit condition
@@ -1933,36 +1910,14 @@ class ProcListWriter:
                             % (action)
                         )
                     print(condition_species)
-                    if len(condition_species.split(" or ")) > 1:
-                        out.write(
-                            "    select case(get_species((cell%s)))\n"
-                            % (action.coord.radd_ff(),)
+                    out.write(
+                        "    call replace_species(cell%s, %s, %s)\n"
+                        % (
+                            action.coord.radd_ff(),
+                            condition_species,
+                            action_species,
                         )
-                        for condition_species in map(
-                            lambda x: x.strip(), condition_species.split(" or ")
-                        ):
-                            out.write("    case(%s)\n" % condition_species)
-                            out.write(
-                                "            call replace_species(cell%s, %s, %s)\n"
-                                % (
-                                    action.coord.radd_ff(),
-                                    condition_species,
-                                    action_species,
-                                )
-                            )
-                        out.write(
-                            '    case default\n        print *, "ILLEGAL SPECIES ENCOUNTERED"\n        stop    \nend select\n'
-                        )
-
-                    else:
-                        out.write(
-                            "    call replace_species(cell%s, %s, %s)\n"
-                            % (
-                                action.coord.radd_ff(),
-                                condition_species,
-                                action_species,
-                            )
-                        )
+                    )
 
             # write out necessary ADDITION statements
             out.write("\n    ! enable processes that have to be enabled\n")
@@ -2050,166 +2005,6 @@ class ProcListWriter:
             out.write("end module\n")
 
             # update the progress bar
-            if os.name == "posix":
-                progress_bar.render(
-                    int(50 + 50 * float(lat_int_loop) / len(lat_int_groups)),
-                    "nli_%s" % lat_int_group,
-                )
-
-    def write_proclist_lat_int_nli_caselist(
-        self, data, lat_int_groups, progress_bar, out
-    ):
-        """
-        subroutine nli_<processname>
-
-        nli = number of lateral interaction
-        inspect a local enviroment for a set
-        of processes that only differ by lateral
-        interaction and return the process number
-        corrresponding to the present configuration.
-        If no process is applicable an integer "0"
-        is returned.
-
-        This version is the fastest found so far but has the problem
-        that nr_of_species**nr_of_sites quickly runs over sys.max_int
-        or whatever is the largest available integer for your Fortran
-        compiler.
-
-        """
-
-        for lat_int_loop, (lat_int_group, processes) in enumerate(
-            lat_int_groups.items()
-        ):
-            process0 = processes[0]
-
-            # put together the bystander conditions and true conditions,
-            # sort them in a unique way and throw out those that are
-            # implicit
-            conditions0 = [
-                y
-                for y in sorted(
-                    process0.condition_list + process0.bystanders,
-                    key=functools.cmp_to_key(lambda a, b: cmp_coords(a.coord, b.coord)),
-                )
-                if not y.implicit
-            ]
-            # DEBUGGING
-            self._db_print(process0.name, conditions0)
-
-            if data.meta.debug > 0:
-                out.write("function nli_%s(cell)\n" % (lat_int_group))
-            else:
-                # DEBUGGING
-                # out.write('function nli_%s(cell)\n'
-                # % (lat_int_group))
-                out.write("pure function nli_%s(cell)\n" % (lat_int_group))
-            out.write("    integer(kind=iint), dimension(4), intent(in) :: cell\n")
-            out.write("    integer(kind=iint) :: nli_%s\n\n" % lat_int_group)
-
-            # create mapping to map the sparse
-            # representation for lateral interaction
-            # into a contiguous one
-            compression_map = {}
-            # print("# proc %s" % len(processes))
-            for i, process in enumerate(sorted(processes)):
-                # calculate lat. int. nr
-                lat_int_nr = 0
-                if len(data.layer_list) > 1:
-                    nr_of_species = len(data.species_list) + 1
-                else:
-                    nr_of_species = len(data.species_list)
-                conditions = [
-                    y
-                    for y in sorted(
-                        process.condition_list + process.bystanders,
-                        key=functools.cmp_to_key(
-                            lambda a, b: cmp_coords(a.coord, b.coord)
-                        ),
-                    )
-                    if not y.implicit
-                ]
-
-                for j, bystander in enumerate(conditions):
-                    species_nr = [
-                        x
-                        for (x, species) in enumerate(sorted(data.species_list))
-                        if species.name == bystander.species
-                    ][0]
-                    lat_int_nr += species_nr * (nr_of_species**j)
-                    # print(lat_int_nr, species.name, nr_of_species, j)
-                compression_map[lat_int_nr] = process.name
-                if lat_int_nr > sys.maxint:
-                    print(
-                        (
-                            "Warning: Lateral interaction index is too large to compile.\n"
-                            "          Try to reduce the number of (non-implicit conditions\n"
-                            "          or the total number of species.\n\n%s"
-                        )
-                        % process
-                    )
-
-            # use a threshold of 1./3 for very sparse maps
-            if (
-                float(len(compression_map)) / (nr_of_species ** len(conditions))
-                > 1.0 / 3
-            ):
-                USE_ARRAY = True
-            else:
-                USE_ARRAY = False
-
-            # use generator object to save memory
-            if USE_ARRAY:
-                compression_index = (
-                    compression_map.get(i, 0)
-                    for i in range(nr_of_species ** len(conditions0))
-                )
-                out.write(
-                    "    integer, dimension(%s), parameter :: lat_int_index_%s = (/ &\n"
-                    % (len(compression_index), lat_int_group)
-                )
-                outstr = ", ".join(map(str, compression_index))
-
-                outstr = _chop_line(outstr)
-                out.write(outstr)
-                out.write("/)\n")
-            out.write("    integer(kind=ilong) :: n\n\n")
-            out.write("    n = 0\n\n")
-
-            if data.meta.debug > 2:
-                out.write('print *,"PROCLIST/NLI_%s"\n' % lat_int_group.upper())
-                out.write(
-                    'print *,"    PROCLIST/NLI_%s/CELL", cell\n' % lat_int_group.upper()
-                )
-
-            for i, bystander in enumerate(conditions0):
-                out.write(
-                    "    n = n + get_species(cell%s)*nr_of_species**%s\n"
-                    % (bystander.coord.radd_ff(), i)
-                )
-
-            if USE_ARRAY:
-                out.write(
-                    "\n    nli_%s = lat_int_index_%s(n)\n"
-                    % (lat_int_group, lat_int_group)
-                )
-            else:
-                out.write("\n    select case(n)\n")
-                for i, proc_name in sorted(compression_map.items()):
-                    if proc_name:
-                        out.write("    case(%s)\n" % i)
-                        out.write("        nli_%s = %s\n" % (lat_int_group, proc_name))
-                out.write("    case default\n")
-                out.write("        nli_%s = 0\n" % lat_int_group)
-                out.write("    end select\n\n")
-            if data.meta.debug > 2:
-                out.write(
-                    'print *,"    PROCLIST/NLI_%s/N", n\n' % lat_int_group.upper()
-                )
-                out.write(
-                    'print *,"    PROCLIST/NLI_%s/PROC_NR", nli_%s\n'
-                    % (lat_int_group.upper(), lat_int_group)
-                )
-            out.write("\nend function nli_%s\n\n" % (lat_int_group))
             if os.name == "posix":
                 progress_bar.render(
                     int(50 + 50 * float(lat_int_loop) / len(lat_int_groups)),
