@@ -7,10 +7,10 @@ module kind_values
 !******
 implicit none
 
-integer, parameter :: rsingle = SELECTED_REAL_KIND(p=15, r=200)
-integer, parameter :: rdouble = SELECTED_REAL_KIND(p=15, r=200)
-integer, parameter :: ibyte = SELECTED_INT_KIND(p=2)
-integer, parameter :: ishort = SELECTED_INT_KIND(p=4)
-integer, parameter :: iint = SELECTED_INT_KIND(p=9)
-integer, parameter :: ilong = SELECTED_INT_KIND(p=18)
+integer, parameter :: rsingle = SELECTED_REAL_KIND(15, 200)
+integer, parameter :: rdouble = SELECTED_REAL_KIND(15, 200)
+integer, parameter :: ibyte = SELECTED_INT_KIND(2)
+integer, parameter :: ishort = SELECTED_INT_KIND(4)
+integer, parameter :: iint = SELECTED_INT_KIND(9)
+integer, parameter :: ilong = SELECTED_INT_KIND(18)
 end module kind_values
