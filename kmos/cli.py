@@ -80,10 +80,15 @@ usage["export"] = """kmos export <xml-file> [<export-path>]
         -s/--source-only
             Export source only and don't build binary
 
-        -b/--backend (local_smart|lat_int)
+        -b/--backend (local_smart|lat_int|otf)
             Choose backend. Default is "local_smart".
             lat_int is EXPERIMENTAL and not made
             for production, yet.
+
+        -w/--wasm
+            Export and compile for WebAssembly using flang-wasm.
+            This will generate .wasm and .js files instead of native binary.
+            Works with all backends (otf, local_smart, lat_int).
 
         -d/--debug
             Turn on assertion statements in F90 code.
@@ -202,6 +207,15 @@ def get_options(args=None, get_parser=False):
         dest="acf",
         action="store_true",
         default=False,
+    )
+
+    parser.add_option(
+        "-w",
+        "--wasm",
+        dest="wasm",
+        action="store_true",
+        default=False,
+        help="Export and compile for WebAssembly using flang-wasm",
     )
 
     # Detect available Fortran compiler
@@ -327,12 +341,19 @@ def main(args=None):
     elif args[0] == "export":
         import kmos.types
         import kmos.io
-        from kmos.utils import build
+        from kmos.utils import build, build_wasm
 
         if len(args) < 2:
             parser.error("XML file and export path expected.")
         if len(args) < 3:
-            out_dir = "%s_%s" % (os.path.splitext(args[1])[0], options.backend)
+            # Include backend in directory name even for WASM builds
+            backend_suffix = "_%s" % options.backend
+            wasm_suffix = "_wasm" if options.wasm else ""
+            out_dir = "%s%s%s" % (
+                os.path.splitext(args[1])[0],
+                backend_suffix,
+                wasm_suffix,
+            )
 
             logger.info("No export path provided. Exporting to %s" % out_dir)
             args.append(out_dir)
@@ -347,28 +368,120 @@ def main(args=None):
 
         kmos.io.export_source(project, export_dir, options=options)
 
-        if (
-            (os.name == "posix" and os.uname()[0] in ["Linux", "Darwin"])
-            or os.name == "nt"
-        ) and not options.source_only:
+        if not options.source_only:
             os.chdir(export_dir)
-            build(options)
-            for out in glob("kmc_*"):
-                if os.path.exists("../%s" % out):
-                    if options.overwrite:
-                        overwrite = "y"
+
+            if options.wasm:
+                # Build for WebAssembly with enhanced output
+                import time
+
+                logger.info("=" * 64)
+                logger.info("Building for WebAssembly (WASM)")
+                logger.info("=" * 64)
+                logger.info(f"Backend: {options.backend}")
+                logger.info(f"Export directory: {export_dir}")
+                logger.info("")
+                logger.info("This will:")
+                logger.info("  1. Apply WASM-specific code modifications")
+                logger.info("  2. Generate C bindings for browser interface")
+                logger.info("  3. Compile Fortran to WASM using Docker")
+                logger.info("")
+                logger.info("Docker image: ghcr.io/r-wasm/flang-wasm:main")
+                logger.info("=" * 64)
+                logger.info("")
+
+                try:
+                    start_time = time.time()
+                    result = build_wasm(options)
+                    elapsed = time.time() - start_time
+
+                    # Get file sizes
+                    js_size_kb = os.path.getsize("kmc_model.js") / 1024
+                    wasm_size_mb = os.path.getsize("kmc_model.wasm") / 1024 / 1024
+
+                    logger.info("")
+                    logger.info("=" * 64)
+                    logger.info("WASM Build Successful!")
+                    logger.info("=" * 64)
+                    logger.info(f"Completed in {elapsed:.1f} seconds")
+                    logger.info(f"JavaScript:  kmc_model.js ({js_size_kb:.1f} KB)")
+                    logger.info(f"WebAssembly: kmc_model.wasm ({wasm_size_mb:.2f} MB)")
+                    logger.info("")
+                    logger.info("Next steps:")
+                    logger.info("  1. Test the build in browser")
+                    logger.info(
+                        "  2. See kmos-web/test_kmc_wasm.html for example usage"
+                    )
+                    logger.info("=" * 64)
+                    logger.info("")
+
+                    # Move WASM files to parent directory
+                    for out in glob("kmc_model.*"):
+                        if out.endswith((".js", ".wasm")):
+                            target = "../%s" % out
+                            if os.path.exists(target):
+                                if options.overwrite:
+                                    overwrite = "y"
+                                else:
+                                    overwrite = input(
+                                        ("Should I overwrite existing %s ?[y/N]  ")
+                                        % out
+                                    ).lower()
+                                if overwrite.startswith("y"):
+                                    logger.info("Overwriting {out}".format(**locals()))
+                                    os.remove(target)
+                                    shutil.move(out, "..")
+                                else:
+                                    logger.info("Skipping {out}".format(**locals()))
+                            else:
+                                shutil.move(out, "..")
+
+                except RuntimeError as e:
+                    logger.error("")
+                    logger.error("=" * 64)
+                    logger.error("WASM Build Failed")
+                    logger.error("=" * 64)
+                    logger.error(str(e))
+                    logger.error("")
+                    logger.error("Troubleshooting:")
+                    logger.error("  - Ensure Docker is running")
+                    logger.error(
+                        "  - Try pulling the image: docker pull ghcr.io/r-wasm/flang-wasm:main"
+                    )
+                    logger.error("")
+                    logger.error("Alternative: Try source-only export:")
+                    logger.error(f"  kmos export {xml_file} -b {options.backend} -s")
+                    logger.error("=" * 64)
+                    raise
+                except IOError as e:
+                    logger.error("")
+                    logger.error("=" * 64)
+                    logger.error("WASM Build Failed")
+                    logger.error("=" * 64)
+                    logger.error(str(e))
+                    logger.error("=" * 64)
+                    raise
+            elif (
+                os.name == "posix" and os.uname()[0] in ["Linux", "Darwin"]
+            ) or os.name == "nt":
+                # Build native binary
+                build(options)
+                for out in glob("kmc_*"):
+                    if os.path.exists("../%s" % out):
+                        if options.overwrite:
+                            overwrite = "y"
+                        else:
+                            overwrite = input(
+                                ("Should I overwrite existing %s ?[y/N]  ") % out
+                            ).lower()
+                        if overwrite.startswith("y"):
+                            logger.info("Overwriting {out}".format(**locals()))
+                            os.remove("../%s" % out)
+                            shutil.move(out, "..")
+                        else:
+                            logger.info("Skipping {out}".format(**locals()))
                     else:
-                        overwrite = input(
-                            ("Should I overwrite existing %s ?[y/N]  ") % out
-                        ).lower()
-                    if overwrite.startswith("y"):
-                        logger.info("Overwriting {out}".format(**locals()))
-                        os.remove("../%s" % out)
                         shutil.move(out, "..")
-                    else:
-                        logger.info("Skipping {out}".format(**locals()))
-                else:
-                    shutil.move(out, "..")
 
     elif args[0] == "settings-export":
         import kmos.io
