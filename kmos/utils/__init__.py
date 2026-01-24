@@ -21,7 +21,6 @@ else.
 import logging
 import re
 import os
-from time import time
 from io import StringIO
 from kmos.utils.ordered_dict import OrderedDict as OrderedDict
 
@@ -522,6 +521,395 @@ def build(options):
     sys.argv = true_argv
 
 
+def _run_docker_command(cmd, src_dir, operation_name, timeout=300):
+    """Helper to run Docker commands with consistent error handling.
+
+    Args:
+        cmd: Shell command to run inside container
+        src_dir: Source directory to mount
+        operation_name: Human-readable name for the operation (e.g., "Compilation")
+        timeout: Timeout in seconds (default: 300)
+
+    Raises:
+        RuntimeError: If command fails or times out
+    """
+    import subprocess
+
+    docker_cmd = [
+        "docker",
+        "run",
+        "--rm",
+        "--platform",
+        "linux/amd64",
+        "-v",
+        f"{src_dir}:/src",
+        "ghcr.io/r-wasm/flang-wasm:main",
+        "sh",
+        "-c",
+        cmd,
+    ]
+
+    try:
+        result = subprocess.run(
+            docker_cmd, capture_output=True, text=True, check=True, timeout=timeout
+        )
+        if result.stdout:
+            logger.debug(result.stdout)
+        if result.stderr:
+            logger.debug(result.stderr)
+        return result
+
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(
+            f"{operation_name} timed out after {timeout} seconds. "
+            "Try reducing model complexity or increasing timeout."
+        )
+    except subprocess.CalledProcessError as e:
+        logger.error(f"{operation_name} failed with exit code {e.returncode}")
+        if e.stdout:
+            logger.error(f"stdout: {e.stdout}")
+        if e.stderr:
+            logger.error(f"stderr: {e.stderr}")
+        raise RuntimeError(
+            f"{operation_name} failed. Check that Docker is running and "
+            f"the flang-wasm image is available."
+        ) from e
+    except FileNotFoundError:
+        raise RuntimeError(
+            "Docker not found. Please install Docker to build WASM.\n"
+            "See: https://docs.docker.com/get-docker/"
+        )
+
+
+def build_wasm(options):
+    """Build WebAssembly binary from complete set of source files.
+
+    Uses flang-wasm Docker container to compile Fortran to WebAssembly.
+    Applies necessary WASM-specific modifications to source files.
+
+    Args:
+        options: Export options object
+
+    Returns:
+        dict: Paths to generated files {'js': path, 'wasm': path}
+
+    Raises:
+        RuntimeError: If Docker not available or compilation fails
+        IOError: If required source files missing
+    """
+    import shutil
+    from os.path import isfile, abspath
+
+    logger.info("Building WebAssembly binary...")
+
+    # 1. Validate Docker availability
+    if not shutil.which("docker"):
+        raise RuntimeError(
+            "Docker not found. Please install Docker to build WASM.\n"
+            "See: https://docs.docker.com/get-docker/"
+        )
+
+    # Get the current directory (should contain Fortran sources)
+    src_dir = abspath(".")
+
+    # 2. Check for required source files
+    required_files = ["kind_values.f90", "base.f90", "lattice.f90", "proclist.f90"]
+    missing = [f for f in required_files if not isfile(f)]
+    if missing:
+        raise IOError(
+            f"Required source files missing: {', '.join(missing)}\n"
+            f"Make sure you're in a directory with exported Fortran sources."
+        )
+
+    # 3. Apply WASM-specific modifications
+    logger.info("Applying WASM-specific modifications...")
+    modifications_count = apply_wasm_modifications(src_dir)
+    if modifications_count > 0:
+        logger.info(f"Applied {modifications_count} WASM modifications")
+
+    # 4. Create c_bindings.f90 if it doesn't exist
+    if not isfile("c_bindings.f90"):
+        logger.info("Creating c_bindings.f90...")
+        create_c_bindings()
+    else:
+        logger.info("Using existing c_bindings.f90")
+
+    # 5. Compile with flang-wasm
+    logger.info("Compiling Fortran sources with flang-wasm...")
+
+    # First, compile each Fortran file to object files
+    # Use /src (container path) instead of host path
+    compile_cmd = """
+        cd /src &&
+        /opt/flang/host/bin/flang -g -O0 -target wasm32-unknown-emscripten -c kind_values.f90 -o kind_values.o &&
+        /opt/flang/host/bin/flang -g -O0 -target wasm32-unknown-emscripten -c base.f90 -I. -o base.o &&
+        /opt/flang/host/bin/flang -g -O0 -target wasm32-unknown-emscripten -c lattice.f90 -I. -o lattice.o &&
+        /opt/flang/host/bin/flang -g -O0 -target wasm32-unknown-emscripten -c proclist.f90 -I. -o proclist.o &&
+        /opt/flang/host/bin/flang -g -O0 -target wasm32-unknown-emscripten -c c_bindings.f90 -I. -o c_bindings.o
+    """
+
+    _run_docker_command(compile_cmd, src_dir, "Compilation", timeout=1800)
+
+    # 6. Link with emcc
+    logger.info("Linking with emscripten...")
+    logger.info("Note: WASM linking can take several minutes for large models...")
+
+    # Use /src (container path) instead of host path
+    link_cmd = """
+        cd /src &&
+        /opt/emsdk/upstream/emscripten/emcc -g -O0 -sASSERTIONS=2 -sSTACK_SIZE=10MB \
+            -sEXPORTED_FUNCTIONS=_kmc_init,_kmc_do_step,_kmc_get_time,_kmc_get_species,_kmc_get_system_size,_kmc_set_rate,_kmc_get_nr_sites,_kmc_get_accum_rate,_kmc_get_rate,_kmc_update_accum_rate,_kmc_get_nr2lattice,_kmc_get_debug_last_proc,_kmc_get_debug_last_site,_malloc,_free \
+            -sEXPORTED_RUNTIME_METHODS=ccall,cwrap,getValue,setValue \
+            -L/opt/flang/wasm/lib -lFortranRuntime \
+            kind_values.o base.o lattice.o proclist.o c_bindings.o \
+            -o kmc_model.js
+    """
+
+    _run_docker_command(link_cmd, src_dir, "Linking", timeout=1800)
+
+    # 7. Validate output files
+    js_file = abspath("kmc_model.js")
+    wasm_file = abspath("kmc_model.wasm")
+
+    if not isfile(js_file):
+        raise RuntimeError("Build failed: kmc_model.js was not created")
+    if not isfile(wasm_file):
+        raise RuntimeError("Build failed: kmc_model.wasm was not created")
+
+    # Check files are not empty
+    import os
+
+    js_size = os.path.getsize(js_file)
+    wasm_size = os.path.getsize(wasm_file)
+
+    if js_size == 0:
+        raise RuntimeError("Build failed: kmc_model.js is empty")
+    if wasm_size == 0:
+        raise RuntimeError("Build failed: kmc_model.wasm is empty")
+
+    # 8. Log success with file sizes
+    js_size_kb = js_size / 1024
+    wasm_size_mb = wasm_size / 1024 / 1024
+
+    logger.info("WebAssembly build completed successfully!")
+    logger.info(f"Generated kmc_model.js ({js_size_kb:.1f} KB)")
+    logger.info(f"Generated kmc_model.wasm ({wasm_size_mb:.2f} MB)")
+
+    return {"js": js_file, "wasm": wasm_file}
+
+
+def apply_wasm_modifications(src_dir):
+    """Apply WASM-specific modifications to Fortran source files.
+
+    Key modifications:
+    - Replace array slice assignments with explicit element assignments
+
+    Args:
+        src_dir: Directory containing Fortran source files
+
+    Returns:
+        int: Number of modifications applied
+    """
+    import re
+    from os.path import join, isfile
+
+    modifications_count = 0
+
+    # Modify proclist.f90
+    proclist_file = join(src_dir, "proclist.f90")
+    if not isfile(proclist_file):
+        logger.debug(
+            f"proclist.f90 not found in {src_dir}, skipping WASM modifications"
+        )
+        return 0
+
+    with open(proclist_file, "r") as f:
+        content = f.read()
+
+    # Skip if already modified (idempotent)
+    if "! WASM:" in content:
+        logger.debug("proclist.f90 already contains WASM modifications, skipping")
+        return 0
+
+    logger.debug("Scanning proclist.f90 for array slice patterns...")
+
+    # Replace array slice assignments with explicit element assignments
+    # Pattern: lsite = nr2lattice(nr_site, :)
+    slice_pattern = r"(\s+)lsite = nr2lattice\(nr_site, :\)"
+    explicit_replacement = r"\1! WASM: Explicit element assignment instead of array slice\n\1lsite(1) = nr2lattice(nr_site, 1)\n\1lsite(2) = nr2lattice(nr_site, 2)\n\1lsite(3) = nr2lattice(nr_site, 3)\n\1lsite(4) = nr2lattice(nr_site, 4)"
+
+    # Count matches before replacement
+    matches = re.findall(slice_pattern, content)
+    modifications_count = len(matches)
+
+    if modifications_count > 0:
+        modified_content = re.sub(slice_pattern, explicit_replacement, content)
+
+        with open(proclist_file, "w") as f:
+            f.write(modified_content)
+
+        logger.debug(
+            f"Replaced {modifications_count} array slice pattern(s) in proclist.f90"
+        )
+    else:
+        logger.debug("No array slice patterns found in proclist.f90")
+
+    return modifications_count
+
+
+def create_c_bindings():
+    """Create c_bindings.f90 for WebAssembly exports.
+
+    Generates Fortran bindings with C calling convention for JavaScript/WASM interface.
+
+    Exported functions:
+        - kmc_init: Initialize KMC system
+        - kmc_do_step: Perform one KMC step
+        - kmc_get_time: Get current simulation time
+        - kmc_get_species: Get species at a site
+        - kmc_get_system_size: Get total number of sites
+        - kmc_set_rate: Set rate constant for a process
+        - kmc_get_nr_sites: Get number of sites
+        - kmc_get_accum_rate: Get accumulated rate
+        - kmc_get_rate: Get rate for a process
+        - kmc_update_accum_rate: Update accumulated rate
+        - kmc_get_nr2lattice: Get lattice coordinates from site number
+        - kmc_get_debug_last_proc: Get last executed process (debug)
+        - kmc_get_debug_last_site: Get last executed site (debug)
+
+    Returns:
+        str: Absolute path to created c_bindings.f90 file
+    """
+    from os.path import abspath
+
+    c_bindings_code = """module c_bindings
+    use iso_c_binding
+    use kind_values
+    use base, only: get_kmc_time, get_kmc_step
+    use lattice, only: allocate_system, base_get_species => get_species, &
+                       lattice2nr, nr2lattice, spuck, system_size
+    use proclist, only: do_kmc_step, init, &
+                        set_rate_const, avail_sites, nr_of_proc
+
+    implicit none
+
+contains
+
+    subroutine kmc_init(nr_procs, sys_size, sys_name, name_len) bind(C, name="kmc_init")
+        integer(c_int), value :: nr_procs, name_len
+        integer(c_int), dimension(3) :: sys_size
+        character(kind=c_char), dimension(200) :: sys_name
+
+        integer(kind=iint) :: f_nr_procs
+        integer(kind=iint), dimension(2) :: f_sys_size
+        character(len=200) :: f_sys_name
+        integer :: i
+        integer(kind=iint) :: f_layer, f_seed
+
+        f_nr_procs = int(nr_procs, iint)
+        f_sys_size = int(sys_size(1:2), iint)
+
+        do i = 1, min(name_len, 200)
+            f_sys_name(i:i) = sys_name(i)
+        end do
+        if (name_len < 200) f_sys_name(name_len+1:) = ' '
+
+        ! Initialize with default layer (0) and seed
+        f_layer = 0
+        f_seed = 42
+
+        call init(f_sys_size, f_sys_name, f_layer, f_seed, .true.)
+    end subroutine kmc_init
+
+    subroutine kmc_do_step() bind(C, name="kmc_do_step")
+        call do_kmc_step()
+    end subroutine kmc_do_step
+
+    function kmc_get_time() result(time) bind(C, name="kmc_get_time")
+        real(c_double) :: time
+        real(kind=rdouble) :: kmc_time
+        call get_kmc_time(kmc_time)
+        time = real(kmc_time, c_double)
+    end function kmc_get_time
+
+    subroutine kmc_get_species(site_nr, species_out) bind(C, name="kmc_get_species")
+        integer(c_int), value :: site_nr
+        integer(c_int), intent(out) :: species_out
+        integer(kind=iint), dimension(4) :: lattice_coords
+        integer(kind=iint) :: species
+
+        ! Use array access to nr2lattice
+        lattice_coords = nr2lattice(int(site_nr, iint), :)
+        species = base_get_species(lattice_coords)
+        species_out = int(species, c_int)
+    end subroutine kmc_get_species
+
+    function kmc_get_system_size() result(total_size) bind(C, name="kmc_get_system_size")
+        integer(c_int) :: total_size
+        total_size = int(system_size(1) * system_size(2) * system_size(3) * spuck, c_int)
+    end function kmc_get_system_size
+
+    subroutine kmc_set_rate(proc_nr, rate) bind(C, name="kmc_set_rate")
+        integer(c_int), value :: proc_nr
+        real(c_double), value :: rate
+        call set_rate_const(int(proc_nr, iint), real(rate, rsingle))
+    end subroutine kmc_set_rate
+
+    function kmc_get_nr_sites() result(nr_sites) bind(C, name="kmc_get_nr_sites")
+        integer(c_int) :: nr_sites
+        nr_sites = int(system_size(1) * system_size(2) * system_size(3) * spuck, c_int)
+    end function kmc_get_nr_sites
+
+    function kmc_get_accum_rate() result(rate) bind(C, name="kmc_get_accum_rate")
+        real(c_double) :: rate
+        ! Placeholder - implement actual function
+        rate = 0.0d0
+    end function kmc_get_accum_rate
+
+    function kmc_get_rate(proc_nr) result(rate) bind(C, name="kmc_get_rate")
+        integer(c_int), value :: proc_nr
+        real(c_double) :: rate
+        ! Placeholder - implement actual function
+        rate = 0.0d0
+    end function kmc_get_rate
+
+    subroutine kmc_update_accum_rate() bind(C, name="kmc_update_accum_rate")
+        ! Placeholder - implement actual function
+    end subroutine kmc_update_accum_rate
+
+    subroutine kmc_get_nr2lattice(site_nr, coord_idx, coord_out) bind(C, name="kmc_get_nr2lattice")
+        integer(c_int), value :: site_nr, coord_idx
+        integer(c_int), intent(out) :: coord_out
+
+        ! Use array access to nr2lattice
+        coord_out = int(nr2lattice(int(site_nr, iint), coord_idx), c_int)
+    end subroutine kmc_get_nr2lattice
+
+    function kmc_get_debug_last_proc() result(proc_nr) bind(C, name="kmc_get_debug_last_proc")
+        integer(c_int) :: proc_nr
+        ! Debug variables not available in generated code
+        proc_nr = 0
+    end function kmc_get_debug_last_proc
+
+    function kmc_get_debug_last_site() result(site_nr) bind(C, name="kmc_get_debug_last_site")
+        integer(c_int) :: site_nr
+        ! Debug variables not available in generated code
+        site_nr = 0
+    end function kmc_get_debug_last_site
+
+end module c_bindings
+"""
+
+    bindings_file = "c_bindings.f90"
+
+    with open(bindings_file, "w") as f:
+        f.write(c_bindings_code)
+
+    logger.debug(f"Created {bindings_file} with 13 exported C-callable functions")
+
+    return abspath(bindings_file)
+
+
 def T_grid(T_min, T_max, n):
     from numpy import linspace, array
 
@@ -547,95 +935,20 @@ def p_grid(p_min, p_max, n):
        p_min and p_max such that the grid of log(p)
        is evenly spaced.
     """
-    p_minlog = log10(p_min)
-    p_maxlog = log10(p_max)
 
-    grid = logspace(p_minlog, p_maxlog, n)
-
-    return grid
+    return logspace(log10(p_min), log10(p_max), n)
 
 
-def timeit(func):
-    """
-    Generic timing decorator
+def evaluate_template(template, **kwargs):
+    """Generates code from a template with some simple python preprocessing.
 
-    To stop time for function call f
-    just ::
-        from kmos.utils import timeit
-        @timeit
-        def f():
-            ...
-
+    Preprocessor lines are started with #@ and end with @#. Preprocessor
+    lines can use all variables from the calling scope. Result lines
+    can also use local variables defined in preprocessor lines.
     """
 
-    def wrapper(*args, **kwargs):
-        time0 = time()
-        func(*args, **kwargs)
-        logger.info("Executing %s took %.3f s" % (func.__name__, time() - time0))
+    escape_python = kwargs.pop("escape_python", False)
 
-    return wrapper
-
-
-def col_tuple2str(tup):
-    """Convenience function that turns a HTML type color
-    into a tuple of three float between 0 and 1
-    """
-    r, g, b = tup
-    b *= 255
-    res = "#"
-    res += hex(int(255 * r))[-2:].replace("x", "0")
-    res += hex(int(255 * g))[-2:].replace("x", "0")
-    res += hex(int(255 * b))[-2:].replace("x", "0")
-
-    return res
-
-
-def col_str2tuple(hex_string):
-    """Convenience function that turns a HTML type color
-    into a tuple of three float between 0 and 1
-    """
-    import gtk
-
-    try:
-        color = gtk.gdk.Color(hex_string)
-    except ValueError:
-        raise UserWarning(
-            "GTK cannot decipher color string {hex_string}: {e}".format(**locals())
-        )
-    return (color.red_float, color.green_float, color.blue_float)
-
-
-def jmolcolor_in_hex(i):
-    """Return a given jmol color in hexadecimal representation."""
-    from ase.data.colors import jmol_colors
-
-    color = [int(x) for x in 255 * jmol_colors[i]]
-    r, g, b = color
-    a = 255
-    color = (r << 24) | (g << 16) | (b << 8) | a
-    return color
-
-
-def evaluate_template(template, escape_python=False, **kwargs):
-    """Very simple template evaluation function using only exec and str.format()
-
-    There are two flavors of the template language, depending on wether
-    the python parts or the template parts are escaped.
-
-    A template can use the full python syntax. Every line starts with '#@ '
-    is interpreted as a template line. Please use proper indentation before
-    and note the space after '#@'.
-
-    The template lines are converted to TEMPLATE_LINE.format(locals())
-    and thefore every variable in the template line should be escape
-    with {}.
-
-    A valid template could be
-
-    for i in range:
-        #@ Hello World {i}
-
-    """
     # Create a namespace dict for exec() - Python 3 requires this for variable modification
     namespace = dict(kwargs)
     namespace["result"] = ""

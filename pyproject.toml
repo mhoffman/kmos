@@ -44,6 +44,7 @@ dependencies = [
     "numpy>=2.0.2",
     "meson>=1.2.0",
     "meson-python>=0.15.0",
+    "pandas>=2.3.3",
 ]
 
 [project.urls]
@@ -84,6 +85,15 @@ kmos = [
 [tool.pytest.ini_options]
 # Tests now run deterministically without requiring PYTHONHASHSEED=0
 # Example: PYTHONPATH=. uv run pytest tests/
+# Disable setuptools' vendored typeguard plugin to avoid conflicts
+addopts = [
+    "-p", "no:typeguard",
+]
+markers = [
+    "docker: tests requiring Docker (deselect with '-m \"not docker\"')",
+    "slow: slow-running tests",
+    "wasm: WebAssembly-related tests",
+]
 
 [tool.bumpversion]
 current_version = "0.4.2"

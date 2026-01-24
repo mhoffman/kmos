@@ -18,7 +18,7 @@
 #@ ! along with kmos; if not, write to the Free Software
 #@ ! Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 #@ ! USA
-#@ 
+#@
 #@ !****h* kmos/base
 #@ ! FUNCTION
 #@ !    The base kMC module, which implements the kMC method on a :math:`d = 1`
@@ -36,12 +36,12 @@
 #@ use kind_values
 #@ !------ No implicit definition of variables !
 #@ implicit none
-#@ 
+#@
 #@ !------ All variables, function and subroutine are private by default
 #@ private
-#@ 
-#@ 
-#@ 
+#@
+#@
+#@
 #@ ! The following subroutines and functions are made public
 #@ public :: add_proc, &
 #@     allocate_system, &
@@ -79,11 +79,11 @@
 #@     update_accum_rate, &
 #@     update_integ_rate, &
 #@     update_clocks
-#@ 
-#@ 
+#@
+#@
 #@ ! Public constants
 #@ integer(kind=iint) :: null_species = -1
-#@ 
+#@
 #@ !---- Allocatable, module wide, variables
 #@ integer(kind=iint), dimension(:,:,:), allocatable, public :: avail_sites
 #@ !****v* base/avail_sites
@@ -156,7 +156,7 @@
 #@ !   Stores the total number of times each process has been executed
 #@ !   during one simulation.
 #@ !******
-#@ 
+#@
 #@ real(kind=rdouble) :: kmc_time
 #@ !****v* base/kmc_time
 #@ ! FUNCTION
@@ -182,9 +182,9 @@
 #@ ! FUNCTION
 #@ !   The time increment of the current kMC step.
 #@ !******
-#@ 
-#@ 
-#@ 
+#@
+#@
+#@
 #@ !--- Local copies of variables
 #@ integer(kind=iint) :: nr_of_proc
 #@ !****v* base/nr_of_proc
@@ -203,11 +203,11 @@
 #@ !   This name should not contain any characters that you don't want to
 #@ !   have in a filename either, i.e. only [A-Za-z0-9\_-].
 #@ !******
-#@ 
+#@
 #@ !****************
 #@ contains
 #@ !****************
-#@ 
+#@
 #@ subroutine del_proc(proc, site)
 #@     !****f* base/del_proc
 #@     ! FUNCTION
@@ -229,27 +229,27 @@
 #@     !    * ``site`` positive integer that encodes the site to be manipulated
 #@     !******
 #@     integer(kind=iint), intent(in) :: proc, site
-#@ 
+#@
 #@     integer(kind=iint) :: memory_address
-#@ 
+#@
 #@     ! Make sure proc_nr is in the right range
 #@     ASSERT(proc.gt.0,"add_proc: proc has to be positive")
 #@     ASSERT(proc.le.nr_of_proc,"add_proc: proc has to be less or equal nr_of_proc.")
 #@     ! Make sure site is in the right range
 #@     ASSERT(site.gt.0,"add_proc: site has to be positive")
 #@     ASSERT(site.le.volume,"base/add_proc: site needs to be in volume")
-#@ 
+#@
 #@     ! assert consistency
 #@     ASSERT(avail_sites(proc, site, 2) .ne. 0 , "Error: tried to take ability from site that is not there!")
-#@ 
+#@
 #@     memory_address = avail_sites(proc, site, 2)
 #@     if(memory_address .lt. nr_of_sites(proc))then
 #@         ! check if we are deleting the last field
-#@ 
+#@
 #@         ! move last field to deleted field
 #@         avail_sites(proc, memory_address, 1) = avail_sites(proc, nr_of_sites(proc), 1)
 #@         avail_sites(proc, nr_of_sites(proc), 1) = 0
-#@ 
+#@
 #@         ! change address of moved field
 #@         avail_sites(proc, avail_sites(proc, memory_address, 1), 2) = memory_address
 #@     else ! simply deleted last field
@@ -257,14 +257,14 @@
 #@     endif
 #@     ! delete address of deleted field
 #@     avail_sites(proc, site, 2) = 0
-#@ 
-#@ 
-#@ 
+#@
+#@
+#@
 #@     ! decrement nr_of_sites(proc)
 #@     nr_of_sites(proc) = nr_of_sites(proc) - 1
 #@ end subroutine del_proc
-#@ 
-#@ 
+#@
+#@
 #@ subroutine add_proc(proc, site)
 #@     !****f* base/add_proc
 #@     ! FUNCTION
@@ -278,29 +278,29 @@
 #@     !    * ``site`` positive integer number that represents the site to be manipulated
 #@     !******
 #@     integer(kind=iint), intent(in) :: proc, site
-#@ 
+#@
 #@     ! Make sure proc_nr is in the right range
 #@     ASSERT(proc.gt.0,"base/add_proc: proc has to be positive")
 #@     ASSERT(proc.le.nr_of_proc,"base/add_proc: proc has to be less or equal nr_of_proc.")
-#@ 
+#@
 #@     ! Make sure site is in the right range
 #@     ASSERT(site.gt.0,"base/add_proc: site has to be positive")
 #@     ASSERT(site.le.volume,"base/add_proc: site needs to be in volume")
-#@ 
+#@
 #@     ! assert consistency
 #@     ASSERT(avail_sites(proc, site, 2) == 0, "base/add_proc Error: tried to add ability that is already there")
-#@ 
+#@
 #@     ! increment nr_of_sites(proc)
 #@     nr_of_sites(proc) = nr_of_sites(proc) + 1
-#@ 
+#@
 #@     ! store site in nr_of_sites(proc)th slot
 #@     avail_sites(proc, nr_of_sites(proc), 1) = site
-#@ 
+#@
 #@     ! let address of added site point to nr_of_sites(proc)th slot
 #@     avail_sites(proc, site, 2) = nr_of_sites(proc)
-#@ 
+#@
 #@ end subroutine add_proc
-#@ 
+#@
 #@ pure function can_do(proc, site)
 #@     !****f* base/can_do
 #@     ! FUNCTION
@@ -315,12 +315,12 @@
 #@     !---------------I/O variables---------------
 #@     logical :: can_do
 #@     integer(kind=iint), intent(in) :: proc, site
-#@ 
+#@
 #@     can_do = avail_sites(proc,site,2).ne.0
-#@ 
+#@
 #@ end function can_do
-#@ 
-#@ 
+#@
+#@
 #@ subroutine reset_site(site, old_species)
 #@     !****f* base/reset_site
 #@     ! FUNCTION
@@ -338,9 +338,9 @@
 #@     integer(kind=iint), intent(in) :: site, old_species
 #@     !---------------internal variables---------------
 #@     integer(kind=iint) :: proc, species
-#@ 
+#@
 #@     species = get_species(site)
-#@ 
+#@
 #@     ! Reset species if stated correctly
 #@     if(old_species.eq.species)then
 #@         call replace_species(site, species, null_species)
@@ -349,17 +349,17 @@
 #@         print *,'Expected',old_species,'but found',species,'on',site
 #@         stop
 #@     endif
-#@ 
+#@
 #@     ! Strip all available capabilities from this site
 #@     do proc = 1, nr_of_proc
 #@         if(can_do(proc, site))then
 #@             call del_proc(proc, site)
 #@         endif
 #@     enddo
-#@ 
+#@
 #@ end subroutine reset_site
-#@ 
-#@ 
+#@
+#@
 #@ subroutine reload_system(input_system_name, reloaded)
 #@     !****f* base/reload_system
 #@     ! FUNCTION
@@ -375,22 +375,22 @@
 #@     !---------------I/O variables---------------
 #@     character(len=200), intent(in) :: input_system_name
 #@     logical, intent(out) :: reloaded
-#@ 
+#@
 #@     character(len=210) :: filename
 #@     character(len=20) :: label
 #@     character(len=10**6) :: buffer
 #@     integer :: io_state , line, pos, subindex, io
-#@ 
+#@
 #@     integer, parameter :: filehandler = 15
 #@     logical :: file_exists
-#@ 
-#@ 
+#@
+#@
 #@     ! store system name in module variable
 #@     system_name = input_system_name
 #@     ! initialize input/output flag
 #@     io_state = 0
 #@     line = 0
-#@ 
+#@
 #@     write(filename,'(a,a)')TRIM(ADJUSTL(system_name)),'.reload'
 #@     inquire(file=trim(adjustl(filename)),exist=file_exists)
 #@     if(.not.file_exists)then
@@ -400,7 +400,7 @@
 #@     else
 #@         ! Open file
 #@         open(filehandler, file = filename)
-#@ 
+#@
 #@         ! First parse loop: parse scalar values and system size
 #@         ! to allocate appropriate arrays for 2nd loop
 #@         do while(io_state == 0)
@@ -409,10 +409,10 @@
 #@             if(io_state == 0) then
 #@                 ! advance line number
 #@                 line = line + 1
-#@ 
+#@
 #@                 ! Shuffle all non-space characters to the left.
 #@                 buffer = adjustl(buffer)
-#@ 
+#@
 #@                 ! Ignore comment lines
 #@                 if(buffer(1:1) == '#')then
 #@                     cycle
@@ -423,7 +423,7 @@
 #@                 label = buffer(1:pos)
 #@                 ! Everythings else remains in the buffer
 #@                 buffer = buffer(pos+1:)
-#@ 
+#@
 #@                 ! In the first go we are only interested in the variables that
 #@                 ! determine the system's size (in memory)
 #@                 select case(label)
@@ -434,15 +434,15 @@
 #@                 endselect
 #@             endif
 #@         enddo
-#@ 
+#@
 #@         if(io_state>0)then
 #@             print *,"Some read error occured in the first reload loop, investigate!"
 #@             stop
 #@         endif
-#@ 
-#@ 
+#@
+#@
 #@         call allocate_system(nr_of_proc, volume, system_name)
-#@ 
+#@
 #@         ! Second loop: parse the "meat" of data
 #@         rewind(filehandler)
 #@         io_state = 0
@@ -451,9 +451,9 @@
 #@             read(filehandler, '(a)', iostat=io_state) buffer
 #@             if(io_state == 0) then
 #@                 line = line + 1
-#@ 
+#@
 #@                 buffer = adjustl(buffer)
-#@ 
+#@
 #@                 ! Ignore comment lines
 #@                 if(buffer(1:1) == '#')then
 #@                     cycle
@@ -486,10 +486,10 @@
 #@                     label = buffer(1:pos)
 #@                     buffer = buffer(pos+1:)
 #@                     buffer = adjustl(buffer)
-#@ 
+#@
 #@                     read(label, * ,iostat = io_state) subindex
 #@                     read(buffer , *, iostat = io) avail_sites(subindex,:,1)
-#@ 
+#@
 #@                 case('avail_sites_back')
 #@                     buffer = adjustl(buffer)
 #@                     pos = scan(buffer, ' ')
@@ -497,7 +497,7 @@
 #@                     buffer = buffer(pos+1:)
 #@                     read(label, *, iostat = io) subindex
 #@                     read(buffer , *, iostat = io) avail_sites(subindex,:,2)
-#@ 
+#@
 #@                 endselect
 #@             endif
 #@         enddo
@@ -505,15 +505,15 @@
 #@             print *,"Some read error occured in the second reload loop, investigate!"
 #@             stop
 #@         endif
-#@ 
+#@
 #@         close(filehandler)
-#@ 
+#@
 #@         reloaded = .true.
 #@     endif
-#@ 
+#@
 #@ end subroutine reload_system
-#@ 
-#@ 
+#@
+#@
 #@ subroutine save_system()
 #@     !****f* base/save_system
 #@     ! FUNCTION
@@ -537,9 +537,9 @@
 #@     integer, parameter :: filehandler = 15
 #@     character(len=210) :: filename
 #@     integer(kind=iint) :: i, io_state
-#@ 
+#@
 #@     character(len=10) :: dummy_string
-#@ 
+#@
 #@     write(filename,'(2a)',iostat=io_state) trim(adjustl(system_name)),'.reload'
 #@     open(filehandler, file=filename)
 #@     ! Write scalar fields
@@ -550,18 +550,18 @@
 #@     write(filehandler,'(a,i22)')' kmc_step ',kmc_step
 #@     write(filehandler,*)'nr_of_proc ',nr_of_proc
 #@     write(filehandler,*)'volume ',volume
-#@ 
+#@
 #@     ! Write array fields
 #@     write(dummy_string,'(i9)') nr_of_proc
-#@ 
+#@
 #@     write(filehandler,'(a)')"#Vector variables"
 #@     write(filehandler,'(a,'//trim(adjustl(dummy_string))//'i21)')'procstat ',procstat
 #@     write(filehandler,'(a,'//trim(adjustl(dummy_string))//'i9)')'nr_of_sites ',nr_of_sites
 #@     write(filehandler,'(a,'//trim(adjustl(dummy_string))//'es14.7)')'rates ',rates
-#@ 
+#@
 #@     write(dummy_string,'(i9)') volume
 #@     write(filehandler,'(a,'//trim(adjustl(dummy_string))//'i9)')'lattice ',lattice
-#@ 
+#@
 #@     ! Avail_sites need one more field than 'volume' because first one describes the row
 #@     write(dummy_string,'(i9)') volume+1
 #@     do i = 1, nr_of_proc
@@ -570,14 +570,14 @@
 #@     do i = 1, nr_of_proc
 #@         write(filehandler,'(a,'//trim(adjustl(dummy_string))//'i9)')'avail_sites_back ',i,avail_sites(i,:,2)
 #@     enddo
-#@ 
-#@ 
-#@ 
+#@
+#@
+#@
 #@     close(filehandler)
-#@ 
+#@
 #@ end subroutine save_system
-#@ 
-#@ 
+#@
+#@
 #@ subroutine set_rate_const(proc_nr, rate)
 #@     !****f* base/set_rate_const
 #@     ! FUNCTION
@@ -590,16 +590,16 @@
 #@     !******
 #@     integer(kind=iint), intent(in) :: proc_nr
 #@     real(kind=rdouble), intent(in) :: rate
-#@ 
+#@
 #@     ! Make sure proc_nr is in the right range
 #@     ASSERT(proc_nr.gt.0,"base/set_rate_const: proc_nr has to be positive")
 #@     !   * the field within the process, but the meaning differs as explained
 #@     !     under 'switch'
 #@     ASSERT(proc_nr.le.nr_of_proc,"base/set_rate_const: proc_nr less or equal nr_of_proc.")
 #@     rates(proc_nr) = rate
-#@ 
+#@
 #@ end subroutine set_rate_const
-#@ 
+#@
 #@ subroutine update_accum_rate()
 #@     !****f* base/update_accum_rate
 #@     ! FUNCTION
@@ -609,19 +609,19 @@
 #@     !
 #@     !    ``none``
 #@     !******
-#@ 
+#@
 #@     integer(kind=iint) :: i
-#@ 
+#@
 #@     accum_rates(1)=nr_of_sites(1)*rates(1)
 #@     do i = 2, nr_of_proc
 #@         accum_rates(i)=accum_rates(i-1)+nr_of_sites(i)*rates(i)
 #@     enddo
-#@ 
+#@
 #@     ASSERT(accum_rates(nr_of_proc).gt.0.,"base/update_accum_rate found &
 #@         accum_rates(nr_of_proc)=0, so no process is available at all")
-#@ 
+#@
 #@ end subroutine update_accum_rate
-#@ 
+#@
 #@ !------ S. Matera 09/18/2012------
 #@ subroutine update_integ_rate()
 #@     !****f* base/update_integ_rate
@@ -632,19 +632,19 @@
 #@     !
 #@     !    ``none``
 #@     !******
-#@ 
+#@
 #@     integer(kind=iint) :: i
-#@ 
-#@ 
+#@
+#@
 #@     do i = 1, nr_of_proc
 #@         integ_rates(i)=integ_rates(i)+nr_of_sites(i)*rates(i)*kmc_time_step
 #@     enddo
-#@ 
+#@
 #@     ASSERT(accum_rates(nr_of_proc).gt.0.,"base/update_accum_rate: no process available")
-#@ 
+#@
 #@ end subroutine update_integ_rate
 #@ !------ S. Matera 09/18/2012------
-#@ 
+#@
 #@ subroutine allocate_system(input_nr_of_proc, input_volume, input_system_name)
 #@     !****f* base/allocate_system
 #@     ! FUNCTION
@@ -660,22 +660,22 @@
 #@     character(len=200), intent(in) :: input_system_name
 #@     integer(kind=iint), intent(in) :: input_volume, input_nr_of_proc
 #@     logical :: system_allocated
-#@ 
+#@
 #@     system_allocated = .false.
-#@ 
-#@ 
+#@
+#@
 #@     ! Make sure we have at least one process
 #@     if(input_nr_of_proc.le.0)then
 #@         print *,"kmos/base/allocate_system: there needs to be at least one process in a kMC system"
 #@         stop
 #@     endif
-#@ 
+#@
 #@     ! Make sure we have at least one site
 #@     if(input_volume.le.0)then
 #@         print *,"kmos/base/allocate_system: there needs to be at least one site in the system"
 #@         stop
 #@     endif
-#@ 
+#@
 #@     ! Make sure we don't try to allocate twice
 #@     if(allocated(avail_sites))then
 #@         print *,"kmos/base/allocate_system: Tried to allocate avail_sites twice, please deallocate first"
@@ -707,19 +707,19 @@
 #@         print *,"kmos/base/allocate_system: Tried to allocate procstat twice, please deallocate first"
 #@         system_allocated = .true.
 #@     endif
-#@ 
+#@
 #@     if(.not. system_allocated)then
 #@         ! copy arguments to module variables
 #@         nr_of_proc = input_nr_of_proc
 #@         volume = input_volume
 #@         system_name = input_system_name
-#@ 
+#@
 #@         ! Set clocks and step counter to 0
 #@         kmc_time = 0.
 #@         walltime = 0.
 #@         start_time = 0.
 #@         kmc_step = 0
-#@ 
+#@
 #@         ! allocate data structures and initialize with 0
 #@         allocate(avail_sites(nr_of_proc, volume, 2))
 #@         avail_sites = 0
@@ -737,19 +737,19 @@
 #@ !------ S. Matera 09/18/2012------
 #@         allocate(procstat(nr_of_proc))
 #@         procstat = 0
-#@ 
+#@
 #@     endif
-#@ 
-#@ 
+#@
+#@
 #@ end subroutine allocate_system
-#@ 
-#@ 
+#@
+#@
 #@ subroutine is_allocated(result)
 #@     logical, intent(out) :: result
 #@     result = allocated(avail_sites)
 #@ end subroutine is_allocated
-#@ 
-#@ 
+#@
+#@
 #@ subroutine deallocate_system()
 #@     !****f* base/deallocate_system
 #@     ! FUNCTION
@@ -797,10 +797,10 @@
 #@     else
 #@         print *,"Warning: rates was not procstat, tried to deallocate."
 #@     endif
-#@ 
+#@
 #@ end subroutine deallocate_system
-#@ 
-#@ 
+#@
+#@
 #@ subroutine get_system_name(output_system_name)
 #@     !****f* base/get_system_name
 #@     ! FUNCTION
@@ -815,8 +815,8 @@
 #@
 #@     output_system_name = system_name
 #@ end subroutine get_system_name
-#@ 
-#@ 
+#@
+#@
 #@ subroutine set_system_name(input_system_name)
 #@     !****f* base/set_system_name
 #@     ! FUNCTION
@@ -828,12 +828,12 @@
 #@     !    * ``system_name`` Readable string of type character(len=200).
 #@     !******
 #@     character(len=200), intent(in) :: input_system_name
-#@ 
+#@
 #@     system_name = input_system_name
-#@ 
+#@
 #@ end subroutine set_system_name
-#@ 
-#@ 
+#@
+#@
 #@ subroutine set_kmc_time(new_kmc_time)
 #@     !****f* base/set_kmc_time
 #@     ! FUNCTION
@@ -845,12 +845,12 @@
 #@     !******
 #@     !---------------I/O variables---------------
 #@     real(kind=rdouble), intent(in)  :: new_kmc_time
-#@ 
+#@
 #@     kmc_time = new_kmc_time
-#@ 
+#@
 #@ end subroutine set_kmc_time
-#@ 
-#@ 
+#@
+#@
 #@ subroutine get_kmc_time(return_kmc_time)
 #@     !****f* base/get_kmc_time
 #@     ! FUNCTION
@@ -862,12 +862,12 @@
 #@     !******
 #@     !---------------I/O variables---------------
 #@     real(kind=rdouble), intent(out)  :: return_kmc_time
-#@ 
+#@
 #@     return_kmc_time = kmc_time
-#@ 
+#@
 #@ end subroutine get_kmc_time
-#@ 
-#@ 
+#@
+#@
 #@ subroutine get_kmc_time_step(return_kmc_time_step)
 #@     !****f* base/get_kmc_time_step
 #@     ! FUNCTION
@@ -879,12 +879,12 @@
 #@     !******
 #@     !---------------I/O variables---------------
 #@     real(kind=rdouble), intent(out) :: return_kmc_time_step
-#@ 
+#@
 #@     return_kmc_time_step = kmc_time_step
-#@ 
+#@
 #@ end subroutine get_kmc_time_step
-#@ 
-#@ 
+#@
+#@
 #@ subroutine get_procstat(proc, return_procstat)
 #@     !****f* base/get_procstat
 #@     ! FUNCTION
@@ -898,12 +898,12 @@
 #@     !---------------I/O variables---------------
 #@     integer(kind=iint),intent(in) :: proc
 #@     integer(kind=ilong),intent(out) :: return_procstat
-#@ 
+#@
 #@     return_procstat = procstat(proc)
-#@ 
+#@
 #@ end subroutine get_procstat
-#@ 
-#@ 
+#@
+#@
 #@ subroutine get_nrofsites(proc, return_nrofsites)
 #@     !****f* base/get_nrofsites
 #@     ! FUNCTION
@@ -917,11 +917,11 @@
 #@     !******
 #@     integer(kind=iint), intent(in) :: proc
 #@     integer(kind=iint), intent(out) :: return_nrofsites
-#@ 
+#@
 #@     return_nrofsites = nr_of_sites(proc)
 #@ end subroutine get_nrofsites
-#@ 
-#@ 
+#@
+#@
 #@ subroutine get_avail_site(proc_nr, field, switch, return_avail_site)
 #@     !****f* base/get_avail_site
 #@     ! FUNCTION
@@ -936,12 +936,12 @@
 #@     !---------------I/O variables---------------
 #@     integer(kind=iint), intent(in) :: proc_nr, field, switch
 #@     integer(kind=iint), intent(out) :: return_avail_site
-#@ 
+#@
 #@     return_avail_site = avail_sites(proc_nr, field, switch)
-#@ 
+#@
 #@ end subroutine get_avail_site
-#@ 
-#@ 
+#@
+#@
 #@ subroutine get_accum_rate(proc_nr, return_accum_rate)
 #@     !****f* base/get_accum_rate
 #@     ! FUNCTION
@@ -955,15 +955,15 @@
 #@     !---------------I/O variables---------------
 #@     integer(kind=iint), intent(in), optional :: proc_nr
 #@     real(kind=rdouble), intent(out) :: return_accum_rate
-#@ 
+#@
 #@     if(.not. present(proc_nr) .or. proc_nr.eq.0) then
 #@       return_accum_rate=accum_rates(nr_of_proc)
 #@     else
 #@       return_accum_rate=accum_rates(proc_nr)
 #@     endif
-#@ 
+#@
 #@ end subroutine get_accum_rate
-#@ 
+#@
 #@ !------ S. Matera 09/18/2012------
 #@ subroutine get_integ_rate(proc_nr, return_integ_rate)
 #@     !****f* base/get_integ_rate
@@ -978,16 +978,16 @@
 #@     !---------------I/O variables---------------
 #@     integer(kind=iint), intent(in), optional :: proc_nr
 #@     real(kind=rdouble), intent(out) :: return_integ_rate
-#@ 
+#@
 #@     if(.not. present(proc_nr) .or. proc_nr.eq.0) then
 #@       return_integ_rate=integ_rates(nr_of_proc)
 #@     else
 #@       return_integ_rate=integ_rates(proc_nr)
 #@     endif
-#@ 
+#@
 #@ end subroutine get_integ_rate
 #@ !------ S. Matera 09/18/2012------
-#@ 
+#@
 #@ subroutine get_rate(proc_nr, return_rate)
 #@     !****f* base/get_rate
 #@     ! FUNCTION
@@ -1001,12 +1001,12 @@
 #@     !---------------I/O variables---------------
 #@     integer(kind=iint), intent(in) :: proc_nr
 #@     real(kind=rdouble), intent(out) :: return_rate
-#@ 
+#@
 #@     return_rate=rates(proc_nr)
-#@ 
+#@
 #@ end subroutine get_rate
-#@ 
-#@ 
+#@
+#@
 #@ subroutine increment_procstat(proc)
 #@     !****f* base/increment_procstat
 #@     ! FUNCTION
@@ -1017,12 +1017,12 @@
 #@     !    * ``proc`` integer representing the process to be increment.
 #@     !******
 #@     integer(kind=iint),intent(in) :: proc
-#@ 
+#@
 #@     procstat(proc) = procstat(proc) + 1
-#@ 
+#@
 #@ end subroutine increment_procstat
-#@ 
-#@ 
+#@
+#@
 #@ subroutine get_walltime(return_walltime)
 #@     !****f* base/get_walltime
 #@     ! FUNCTION
@@ -1034,11 +1034,11 @@
 #@     !******
 #@     !---------------I/O variables---------------
 #@     real(kind=rsingle), intent(out) :: return_walltime
-#@ 
+#@
 #@     return_walltime = walltime
-#@ 
+#@
 #@ end subroutine get_walltime
-#@ 
+#@
 #@ subroutine get_volume(return_volume)
 #@     !****f* base/get_kmc_volume
 #@     ! FUNCTION
@@ -1050,11 +1050,11 @@
 #@     !******
 #@     !---------------I/O variables---------------
 #@     integer(kind=iint), intent(out) :: return_volume
-#@ 
+#@
 #@     return_volume = volume
-#@ 
+#@
 #@ end subroutine get_volume
-#@ 
+#@
 #@ subroutine get_kmc_step(return_kmc_step)
 #@     !****f* base/get_kmc_step
 #@     ! FUNCTION
@@ -1066,12 +1066,12 @@
 #@     !******
 #@     !---------------I/O variables---------------
 #@     integer(kind=ilong), intent(out) :: return_kmc_step
-#@ 
+#@
 #@     return_kmc_step = kmc_step
-#@ 
+#@
 #@ end subroutine get_kmc_step
-#@ 
-#@ 
+#@
+#@
 #@ subroutine determine_procsite(ran_proc, ran_site, proc, site)
 #@     !****f* base/determine_procsite
 #@     ! FUNCTION
@@ -1092,34 +1092,34 @@
 #@     real(kind=rsingle), intent(in) :: ran_proc, ran_site
 #@     integer(kind=iint), intent(out) :: proc, site
 #@     !---------------internal variables---------------
-#@ 
-#@ 
+#@
+#@
 #@     ASSERT(ran_proc.ge.0,"base/determine_procsite: ran_proc has to be positive")
 #@     ASSERT(ran_proc.le.1,"base/determine_procsite: ran_proc has to be less or equal 1")
 #@     ASSERT(ran_site.ge.0,"base/determine_procsite: ran_site has to be positive")
 #@     ASSERT(ran_site.le.1,"base/determine_procsite: ran_site has to be less or equal 1")
-#@ 
+#@
 #@     ! ran_proc <- [0,1] so we multiply with larger value in accum_rates
 #@     call interval_search_real(accum_rates, ran_proc*accum_rates(nr_of_proc), proc)
-#@ 
-#@ 
+#@
+#@
 #@     ! the result shall be between 1 and  nrofsite(proc) so we have to add 1 the
 #@     ! scaled random number. But if the random number is closer to 1 than machine
 #@     ! precision, e.g. 0.999999999, we would get nrofsits(proc)+1 so we have to
 #@     ! cap it with min(...)
 #@     site =  avail_sites(proc, &
 #@         min(nr_of_sites(proc),int(1+ran_site*(nr_of_sites(proc)))),1)
-#@ 
-#@ 
+#@
+#@
 #@     ASSERT(nr_of_sites(proc).gt.0,"base/determine_procsite: chosen process is invalid &
 #@         because it has no sites available.")
 #@     ASSERT(site.gt.0,"kmos/base/determine_procsite: tries to return invalid site")
 #@     ASSERT(site.le.volume,"base/determine_procsite: tries to return site larger than volume")
-#@ 
-#@ 
+#@
+#@
 #@ end subroutine determine_procsite
-#@ 
-#@ 
+#@
+#@
 #@ subroutine update_clocks(ran_time)
 #@     !****f* base/update_clocks
 #@     ! FUNCTION
@@ -1131,25 +1131,25 @@
 #@     !******
 #@     real(kind=rsingle), intent(in) :: ran_time
 #@     real(kind=rsingle) :: runtime
-#@ 
-#@ 
+#@
+#@
 #@     ! Make sure ran_time is in the right interval
 #@     ASSERT(ran_time.ge.0.,"base/update_clocks: ran_time variable has to be positive.")
 #@     ASSERT(ran_time.le.1.,"base/update_clocks: ran_time variable has to be less than 1.")
-#@ 
+#@
 #@     kmc_time_step = -log(ran_time)/accum_rates(nr_of_proc)
 #@     ! Make sure the difference is not so small, that it is rounded off
 #@     ! ASSERT(kmc_time+kmc_time_step>kmc_time,"base/update_clocks: precision of kmc_time is not sufficient")
-#@ 
+#@
 #@     call CPU_TIME(runtime)
-#@ 
+#@
 #@     ! Make sure we are not dividing by zero
 #@     ASSERT(accum_rates(nr_of_proc).gt.0,"base/update_clocks: total rate was found to be zero")
 #@     kmc_time = kmc_time + kmc_time_step
-#@ 
+#@
 #@     ! Increment kMC steps
 #@     kmc_step = kmc_step + 1
-#@ 
+#@
 #@     ! Walltime is the time of this simulation run plus the walltime
 #@     ! when the simulation was reloaded, so walltime represents the total
 #@     ! walltime across reloads.
@@ -1159,8 +1159,8 @@
 #@     !call update_integ_rate()
 #@     !------ S. Matera 09/18/2012------
 #@ end subroutine update_clocks
-#@ 
-#@ 
+#@
+#@
 #@ pure function get_species(site)
 #@     !****f* base/get_species
 #@     ! FUNCTION
@@ -1173,17 +1173,17 @@
 #@     !---------------I/O variables---------------
 #@     integer(kind=iint) :: get_species
 #@     integer(kind=iint), intent(in) :: site
-#@ 
+#@
 #@     !! DEBUG
 #@     !print *, site
 #@     !ASSERT(site.ge.1,"kmos/base/get_species was asked for a zero or negative site")
 #@     !ASSERT(site.le.volume,"kmos/base/get_species was asked for a site outside the lattice")
-#@ 
+#@
 #@     get_species = lattice(site)
-#@ 
+#@
 #@ end function get_species
-#@ 
-#@ 
+#@
+#@
 #@ subroutine replace_species(site, old_species, new_species)
 #@     !****f* base/replace_species
 #@     ! FUNCTION
@@ -1198,9 +1198,9 @@
 #@     !   * ``new_species`` integer representing the species to be placed
 #@     !******
 #@     integer(kind=iint), intent(in) :: site, old_species, new_species
-#@ 
+#@
 #@     ASSERT(site.le.volume,"kmos/base/replace_species was asked for a site outside the lattice")
-#@ 
+#@
 #@     ! Double-check that we actually remove the atom that we think is there
 #@     if(old_species.ne.lattice(site))then
 #@         print '(a)', "kmos/base/replace_species Tried to remove species from sites which is not there!"
@@ -1222,15 +1222,15 @@
 #@         print '(a,i2,a,i2,a,i2,a,i10,a,i10,a)', &
 #@         "model.post_mortem(err_code=(",old_species,", ",new_species, ", ",  lattice(site), ", ", site, ", ", kmc_step, "))"
 #@         print '(a)', "model.show()"
-#@ 
-#@ 
+#@
+#@
 #@         stop
 #@     endif
-#@ 
+#@
 #@     lattice(site) = new_species
 #@ end subroutine replace_species
-#@ 
-#@ 
+#@
+#@
 #@ subroutine interval_search_real(arr, value, return_field)
 #@     !****f* base/interval_search_real
 #@     ! FUNCTION
@@ -1266,14 +1266,14 @@
 #@     integer(kind=iint), intent(out) :: return_field
 #@     !---------------internal variables---------------
 #@     integer(kind=iint) :: left, mid, right
-#@ 
+#@
 #@     left = 1
 #@     right = size(arr)
-#@ 
+#@
 #@     binarysearch: do
 #@         ! Determine the middle between left and right by bit shifting
 #@         mid = ISHFT(right+left, -1)
-#@ 
+#@
 #@         ! if left and right overlap, we are done for now
 #@         if(left.ge.right)then
 #@             exit binarysearch
@@ -1287,7 +1287,7 @@
 #@         ! So now, we have found a candidate fields, which is great.
 #@         ! We just have to make sure it fullfills all other requirements.
 #@     enddo binarysearch
-#@ 
+#@
 #@     ! If the value turns out to be zero, we do a linear search
 #@     ! to the right until we find a non-zero entry
 #@     if(arr(mid).eq.0.)then
@@ -1309,8 +1309,8 @@
 #@             endif
 #@         enddo nonzerosearch
 #@     endif
-#@ 
-#@ 
+#@
+#@
 #@     ! If we are here, the value is non-zero which is great, but we also
 #@     ! have to make sure we return the left-most field if one or more fields
 #@     ! have the same value.
@@ -1325,18 +1325,18 @@
 #@             ASSERT(arr(mid).gt.arr(mid-1),"interval_search_real did not return a leftmost")
 #@         endif
 #@     enddo leftmostsearch
-#@ 
-#@ 
+#@
+#@
 #@     ASSERT(mid>0,"Returned index has to be at least 1")
 #@     ASSERT(mid<=size(arr),"Returned index can be at most size(arr)")
 #@     ASSERT(arr(mid).gt.0.,"Value of returned field has to be greater then 0")
 #@     ASSERT(value.le.arr(mid),"interval_search_real has an internal error")
-#@ 
+#@
 #@     return_field = mid
-#@ 
-#@ 
+#@
+#@
 #@ end subroutine interval_search_real
-#@ 
+#@
 #@ subroutine assertion_fail(a, r)
 #@     !****f* base/assertion_fail
 #@     ! FUNCTION
@@ -1358,22 +1358,54 @@
 #@         ' walltime: '//trim(wt)// &
 #@         '  kmc_time:'//trim(kt)
 #@     stop
-#@ 
+#@
 #@ end subroutine assertion_fail
-#@ 
+#@
 #@ subroutine set_null_species(input_null_species)
 #@     integer(kind=iint), intent(in) :: input_null_species
-#@ 
+#@
 #@     null_species = input_null_species
-#@ 
+#@
 #@ end subroutine set_null_species
-#@ 
+#@
 #@ subroutine get_null_species(output_null_species)
 #@     integer(kind=iint), intent(out) :: output_null_species
-#@ 
+#@
 #@     output_null_species = null_species
-#@ 
+#@
 #@ end subroutine get_null_species
-#@ 
-#@ 
+#@
+#@ !****f* base/C_WRAPPERS
+#@ ! FUNCTION
+#@ !   C-compatible wrappers for WebAssembly interoperability.
+#@ !   These functions use iso_c_binding to provide a stable C ABI
+#@ !   that can be called from C/JavaScript/WebAssembly.
+#@ !******
+#@
+#@ ! C-compatible wrapper for get_kmc_time
+#@ subroutine base_c_get_kmc_time(return_time) bind(C, name="base_mp_get_kmc_time_")
+#@     use iso_c_binding, only: c_double
+#@     real(c_double), intent(out) :: return_time
+#@     real(kind=rdouble) :: temp_time
+#@
+#@     call get_kmc_time(temp_time)
+#@     return_time = real(temp_time, c_double)
+#@ end subroutine base_c_get_kmc_time
+#@
+#@ ! C-compatible wrapper for get_kmc_step
+#@ subroutine base_c_get_kmc_step(return_step) bind(C, name="base_mp_get_kmc_step_")
+#@     use iso_c_binding, only: c_long
+#@     integer(c_long), intent(out) :: return_step
+#@     integer(kind=ilong) :: temp_step
+#@
+#@     call get_kmc_step(temp_step)
+#@     return_step = int(temp_step, c_long)
+#@ end subroutine base_c_get_kmc_step
+#@
+#@ ! C-compatible wrapper for deallocate_system
+#@ subroutine base_c_deallocate_system() bind(C, name="base_mp_deallocate_system_")
+#@     call deallocate_system()
+#@ end subroutine base_c_deallocate_system
+#@
+#@
 #@ end module base
