@@ -1183,6 +1183,7 @@ def create_c_bindings():
     """Create c_bindings.f90 for WebAssembly exports.
 
     Generates Fortran bindings with C calling convention for JavaScript/WASM interface.
+    Automatically detects the default_layer name from lattice.f90.
 
     Exported functions:
         - kmc_init: Initialize KMC system
@@ -1202,17 +1203,39 @@ def create_c_bindings():
     Returns:
         str: Absolute path to created c_bindings.f90 file
     """
-    from os.path import abspath
+    from os.path import abspath, isfile
+    import re
+
+    # Detect the default_layer name from lattice.f90
+    default_layer_name = "default"  # fallback
+    if isfile("lattice.f90"):
+        with open("lattice.f90", "r") as f:
+            lattice_content = f.read()
+            # Look for: integer(kind=iint), public :: default_layer = <name>
+            match = re.search(
+                r"integer\(kind=iint\),\s*public\s*::\s*default_layer\s*=\s*(\w+)",
+                lattice_content,
+            )
+            if match:
+                default_layer_name = match.group(1)
+                logger.info(f"Detected default_layer: {default_layer_name}")
+            else:
+                logger.warning(
+                    "Could not detect default_layer from lattice.f90, using 'default'"
+                )
+    else:
+        logger.warning("lattice.f90 not found, using 'default' as layer name")
 
     # Use the WORKING c_bindings template from AB_model_wasm
-    c_bindings_code = """! C bindings for kMC functions to enable JavaScript interoperability
+    # Use f-string to insert the detected layer name
+    c_bindings_code = f"""! C bindings for kMC functions to enable JavaScript interoperability
 ! This demonstrates how to make Fortran functions callable from WASM/JavaScript
 
 module c_bindings
     use iso_c_binding
     use kind_values
     use base, only: get_kmc_time, set_rate_const, get_nrofsites, get_accum_rate, get_rate, update_accum_rate
-    use lattice, only: allocate_system, system_size, default, get_species, nr2lattice
+    use lattice, only: allocate_system, system_size, {default_layer_name}, get_species, nr2lattice
     use proclist, only: init, do_kmc_step
     implicit none
 
@@ -1235,7 +1258,7 @@ contains
 
         ! Call allocate_system and initialize_state directly to avoid optional parameter issues
         call allocate_system(nr_of_proc, system_size_f, system_name)
-        call initialize_state(default, seed_in)
+        call initialize_state({default_layer_name}, seed_in)
 
     end subroutine c_init
 
@@ -1252,7 +1275,7 @@ contains
         time = real(kmc_time_val, kind=c_double)
     end function c_get_time
 
-    ! Get species at a site (simplified - assumes default layer)
+    ! Get species at a site (uses detected default layer)
     function c_get_species(x, y, z) bind(C, name="kmc_get_species") result(species)
         integer(c_int), intent(in), value :: x, y, z
         integer(c_int) :: species
@@ -1261,7 +1284,7 @@ contains
         site(1) = int(x, kind=iint)
         site(2) = int(y, kind=iint)
         site(3) = int(z, kind=iint)
-        site(4) = default  ! layer
+        site(4) = {default_layer_name}  ! layer (auto-detected from lattice.f90)
 
         species = int(get_species(site), kind=c_int)
     end function c_get_species
