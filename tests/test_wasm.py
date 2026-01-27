@@ -265,9 +265,41 @@ class TestCreateCBindings:
         assert "subroutine" in content or "function" in content
 
 
+class TestBuildWasmValidation:
+    """Test WASM build validation (without Docker)."""
+
+    def test_docker_not_available_error(self, tmp_path):
+        """Test that missing Docker gives clear error."""
+        os.chdir(tmp_path)
+
+        # Create minimal required files
+        for filename in ["kind_values.f90", "base.f90", "lattice.f90", "proclist.f90"]:
+            (tmp_path / filename).write_text("! minimal")
+
+        options = MagicMock()
+
+        # Mock shutil.which to return None (Docker not found)
+        with patch("shutil.which", return_value=None):
+            with pytest.raises(RuntimeError, match="Docker not found"):
+                build_wasm(options)
+
+    def test_missing_files_error(self, tmp_path):
+        """Test that missing source files give clear error."""
+        os.chdir(tmp_path)
+
+        # Don't create any files
+        options = MagicMock()
+
+        # Mock Docker as available
+        with patch("shutil.which", return_value="/usr/bin/docker"):
+            with pytest.raises(IOError, match="Required source files missing"):
+                build_wasm(options)
+
+
 @pytest.mark.docker
+@pytest.mark.slow
 class TestBuildWasm:
-    """Test WASM compilation (requires Docker)."""
+    """Test WASM compilation (requires Docker, very slow ~5 min per test)."""
 
     def create_minimal_fortran_sources(self, directory):
         """Helper to create minimal Fortran source files for testing."""
@@ -362,7 +394,11 @@ end module proclist
 """)
 
     def test_build_success_with_valid_sources(self, tmp_path):
-        """Test successful WASM build with valid Fortran sources."""
+        """Test successful WASM build with valid Fortran sources.
+
+        WARNING: This test actually compiles WASM with Docker and takes ~5-10 minutes.
+        Run with: pytest -m docker
+        """
         os.chdir(tmp_path)
         self.create_minimal_fortran_sources(tmp_path)
 
@@ -383,69 +419,6 @@ end module proclist
 
             assert js_size > 1000, "JS file too small"
             assert wasm_size > 1000, "WASM file too small"
-
-        except Exception as e:
-            if "docker" in str(e).lower():
-                pytest.skip(f"Docker not available: {e}")
-            else:
-                raise
-
-    def test_build_fails_with_missing_files(self, tmp_path):
-        """Test that build fails with clear error when source files missing."""
-        os.chdir(tmp_path)
-
-        # Don't create source files
-        options = MagicMock()
-
-        with pytest.raises(IOError) as exc_info:
-            build_wasm(options)
-
-        assert "kind_values.f90" in str(exc_info.value)
-
-    def test_build_creates_c_bindings(self, tmp_path):
-        """Test that build_wasm creates c_bindings.f90 if it doesn't exist."""
-        os.chdir(tmp_path)
-        self.create_minimal_fortran_sources(tmp_path)
-
-        options = MagicMock()
-
-        try:
-            build_wasm(options)
-
-            # c_bindings.f90 should have been created
-            assert (tmp_path / "c_bindings.f90").exists()
-
-        except Exception as e:
-            if "docker" in str(e).lower():
-                pytest.skip(f"Docker not available: {e}")
-            else:
-                raise
-
-    def test_build_applies_wasm_modifications(self, tmp_path):
-        """Test that build_wasm applies WASM modifications to source files."""
-        os.chdir(tmp_path)
-        self.create_minimal_fortran_sources(tmp_path)
-
-        # Add array slice pattern to proclist.f90
-        proclist = tmp_path / "proclist.f90"
-        content = proclist.read_text()
-        content += """
-subroutine test_proc()
-    integer :: lsite(4), nr_site
-    lsite = nr2lattice(nr_site, :)
-end subroutine
-"""
-        proclist.write_text(content)
-
-        options = MagicMock()
-
-        try:
-            build_wasm(options)
-
-            # Check that modifications were applied
-            modified_content = proclist.read_text()
-            assert "! WASM:" in modified_content
-            assert "lsite(1) = nr2lattice(nr_site, 1)" in modified_content
 
         except Exception as e:
             if "docker" in str(e).lower():

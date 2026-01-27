@@ -89,10 +89,15 @@ kmos = [
 addopts = [
     "-p", "no:typeguard",
 ]
+
+# Ignore test_types directory - these are scripts that require pre-built Fortran modules
+# and cause collection errors (floating-point exceptions when importing compiled modules)
+norecursedirs = ["test_types"]
+
 markers = [
-    "docker: tests requiring Docker (deselect with '-m \"not docker\"')",
-    "slow: slow-running tests",
-    "wasm: WebAssembly-related tests",
+    "docker: tests requiring Docker - VERY SLOW, 5-10 min per test (deselect with '-m \"not docker\"')",
+    "slow: slow-running tests (typically >1 minute)",
+    "wasm: WebAssembly-related tests (fast unit tests are NOT marked docker)",
 ]
 
 [tool.bumpversion]

@@ -232,7 +232,7 @@ subroutine allocate_system(nr_of_proc, input_system_size, system_name)
         end do
     end do
 
-    do check_nr=1, product(system_size)*spuck
+    do check_nr=1, system_size(1)*system_size(2)*system_size(3)*spuck
         if(.not.check_nr.eq.calculate_lattice2nr(calculate_nr2lattice(check_nr)))then
             print *, "ERROR in Mapping:", check_nr
             print *, "was mapped on", calculate_nr2lattice(check_nr)
@@ -241,12 +241,12 @@ subroutine allocate_system(nr_of_proc, input_system_size, system_name)
         endif
     end do
 
-    allocate(nr2lattice(1:product(system_size)*spuck,4))
+    allocate(nr2lattice(1:system_size(1)*system_size(2)*system_size(3)*spuck,4))
     allocate(lattice2nr(-system_size(1):2*system_size(1)-1, &
         -system_size(2):2*system_size(2)-1, &
         -system_size(3):2*system_size(3)-1, &
          1:spuck))
-    do check_nr=1, product(system_size)*spuck
+    do check_nr=1, system_size(1)*system_size(2)*system_size(3)*spuck
         nr2lattice(check_nr, :) = calculate_nr2lattice(check_nr)
     end do
     do k = -system_size(3), 2*system_size(3)-1

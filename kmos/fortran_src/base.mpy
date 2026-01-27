@@ -1375,37 +1375,5 @@
 #@
 #@ end subroutine get_null_species
 #@
-#@ !****f* base/C_WRAPPERS
-#@ ! FUNCTION
-#@ !   C-compatible wrappers for WebAssembly interoperability.
-#@ !   These functions use iso_c_binding to provide a stable C ABI
-#@ !   that can be called from C/JavaScript/WebAssembly.
-#@ !******
-#@
-#@ ! C-compatible wrapper for get_kmc_time
-#@ subroutine base_c_get_kmc_time(return_time) bind(C, name="base_mp_get_kmc_time_")
-#@     use iso_c_binding, only: c_double
-#@     real(c_double), intent(out) :: return_time
-#@     real(kind=rdouble) :: temp_time
-#@
-#@     call get_kmc_time(temp_time)
-#@     return_time = real(temp_time, c_double)
-#@ end subroutine base_c_get_kmc_time
-#@
-#@ ! C-compatible wrapper for get_kmc_step
-#@ subroutine base_c_get_kmc_step(return_step) bind(C, name="base_mp_get_kmc_step_")
-#@     use iso_c_binding, only: c_long
-#@     integer(c_long), intent(out) :: return_step
-#@     integer(kind=ilong) :: temp_step
-#@
-#@     call get_kmc_step(temp_step)
-#@     return_step = int(temp_step, c_long)
-#@ end subroutine base_c_get_kmc_step
-#@
-#@ ! C-compatible wrapper for deallocate_system
-#@ subroutine base_c_deallocate_system() bind(C, name="base_mp_deallocate_system_")
-#@     call deallocate_system()
-#@ end subroutine base_c_deallocate_system
-#@
 #@
 #@ end module base

@@ -256,7 +256,7 @@ elif data.meta.model_dimension == 1:
 #@         end do
 #@     end do
 #@
-#@     do check_nr=1, product(system_size)*spuck
+#@     do check_nr=1, system_size(1)*system_size(2)*system_size(3)*spuck
 #@         if(.not.check_nr.eq.calculate_lattice2nr(calculate_nr2lattice(check_nr)))then
 #@             print *, "ERROR in Mapping:", check_nr
 #@             print *, "was mapped on", calculate_nr2lattice(check_nr)
@@ -267,14 +267,14 @@ elif data.meta.model_dimension == 1:
 #@
 if data.meta.debug > 1:
     #@     print *, "    LATTICE/ALLOCATE_SYSTEM/MAPPING_OK"
-#@     allocate(nr2lattice(1:product(system_size)*spuck,4))
+#@     allocate(nr2lattice(1:system_size(1)*system_size(2)*system_size(3)*spuck,4))
 #@     allocate(lattice2nr(-system_size(1):2*system_size(1)-1, &
 #@         -system_size(2):2*system_size(2)-1, &
 #@         -system_size(3):2*system_size(3)-1, &
 #@          1:spuck))
 if data.meta.debug > 1:
     #@     print *, "    LATTICE/ALLOCATE_SYSTEM/ALLOCATED_LOOKUP"
-#@     do check_nr=1, product(system_size)*spuck
+#@     do check_nr=1, system_size(1)*system_size(2)*system_size(3)*spuck
 #@         nr2lattice(check_nr, :) = calculate_nr2lattice(check_nr)
 #@     end do
 #@     do k = -system_size(3), 2*system_size(3)-1
