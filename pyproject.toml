@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kmos"
-version = "0.4.3"  # Managed by bump-my-version
+version = "0.4.4"  # Managed by bump-my-version
 description = "kMC modeling on steroids"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -101,7 +101,7 @@ markers = [
 ]
 
 [tool.bumpversion]
-current_version = "0.4.3"
+current_version = "0.4.4"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 search = "{current_version}"
