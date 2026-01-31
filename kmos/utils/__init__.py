@@ -627,12 +627,9 @@ def build_wasm(options):
     if modifications_count > 0:
         logger.info(f"Applied {modifications_count} WASM modifications")
 
-    # 4. Create c_bindings.f90 if it doesn't exist
-    if not isfile("c_bindings.f90"):
-        logger.info("Creating c_bindings.f90...")
-        create_c_bindings()
-    else:
-        logger.info("Using existing c_bindings.f90")
+    # 4. Always regenerate c_bindings.f90 (critical for WASM compatibility)
+    logger.info("Generating c_bindings.f90...")
+    create_c_bindings()
 
     # 5. Compile with flang-wasm
     logger.info("Compiling Fortran sources with flang-wasm...")
@@ -660,7 +657,7 @@ def build_wasm(options):
         cd /src &&
         /opt/emsdk/upstream/emscripten/emcc -O3 -sASSERTIONS=0 -sSTACK_SIZE=10MB \
             -sINITIAL_MEMORY=64MB -sALLOW_MEMORY_GROWTH \
-            -sEXPORTED_FUNCTIONS=_kmc_init,_kmc_do_step,_kmc_get_time,_kmc_get_species,_kmc_get_system_size,_kmc_set_rate,_kmc_get_nr_sites,_kmc_get_accum_rate,_kmc_get_rate,_kmc_update_accum_rate,_kmc_get_nr2lattice,_kmc_get_debug_last_proc,_kmc_get_debug_last_site,_malloc,_free \
+            -sEXPORTED_FUNCTIONS=_kmc_init,_kmc_do_step,_kmc_get_time,_kmc_get_species,_kmc_get_species_by_site,_kmc_get_total_sites,_kmc_get_system_size,_kmc_set_rate,_kmc_get_nr_sites,_kmc_get_accum_rate,_kmc_get_rate,_kmc_get_integ_rate,_kmc_update_accum_rate,_kmc_get_nr2lattice,_kmc_get_debug_last_proc,_kmc_get_debug_last_site,_malloc,_free \
             -sEXPORTED_RUNTIME_METHODS=ccall,cwrap,getValue,setValue \
             -L/opt/flang/wasm/lib -lFortranRuntime \
             kind_values.o base.o lattice.o proclist.o c_bindings.o \
@@ -797,17 +794,19 @@ end subroutine custom_random_seed
 
 subroutine custom_random_number(harvest)
     real(kind=rsingle), intent(out) :: harvest
-    integer(kind=iint), parameter :: a = 1103515245_iint
-    integer(kind=iint), parameter :: c = 12345_iint
-    integer(kind=iint), parameter :: m = 2147483647_iint  ! 2^31 - 1 (Mersenne prime, safer)
-    integer(kind=iint) :: temp
+    ! Numerical Recipes "quick and dirty" LCG - fits in 32-bit integers
+    integer(kind=iint), parameter :: a = 1664525_iint
+    integer(kind=iint), parameter :: c = 1013904223_iint
+    integer(kind=iint), parameter :: m = 2147483647_iint  ! 2^31 - 1
+    integer(kind=ilong) :: temp64  ! Use 64-bit for multiplication
 
-    ! Update state with careful modulo to avoid overflow issues
-    temp = mod(rng_state, m)
-    temp = mod(a * temp, m)
-    temp = mod(temp + c, m)
-    if (temp < 0) temp = temp + m  ! Ensure positive
-    rng_state = temp
+    ! Perform multiplication in 64-bit to avoid overflow
+    temp64 = int(rng_state, kind=ilong) * int(a, kind=ilong)
+    temp64 = temp64 + int(c, kind=ilong)
+    temp64 = mod(temp64, int(m, kind=ilong))
+
+    rng_state = int(temp64, kind=iint)
+    if (rng_state < 0) rng_state = rng_state + m  ! Ensure positive
 
     ! Convert to [0, 1) range
     harvest = real(rng_state, kind=rsingle) / real(m, kind=rsingle)
@@ -1275,7 +1274,25 @@ contains
         time = real(kmc_time_val, kind=c_double)
     end function c_get_time
 
-    ! Get species at a site (uses detected default layer)
+    ! Get species at a site by linear site number (works with multiple sites per unit cell)
+    function c_get_species_by_site(nr_site) bind(C, name="kmc_get_species_by_site") result(species)
+        integer(c_int), intent(in), value :: nr_site
+        integer(c_int) :: species
+        integer(kind=iint) :: site(4)
+        integer(kind=iint) :: nr_site_f
+
+        nr_site_f = int(nr_site, kind=iint)
+
+        ! Get lattice coordinates from site number using nr2lattice
+        site(1) = nr2lattice(nr_site_f, 1)  ! x
+        site(2) = nr2lattice(nr_site_f, 2)  ! y
+        site(3) = nr2lattice(nr_site_f, 3)  ! z
+        site(4) = nr2lattice(nr_site_f, 4)  ! layer/site_type
+
+        species = int(get_species(site), kind=c_int)
+    end function c_get_species_by_site
+
+    ! Get species at a site (uses detected default layer) - DEPRECATED
     function c_get_species(x, y, z) bind(C, name="kmc_get_species") result(species)
         integer(c_int), intent(in), value :: x, y, z
         integer(c_int) :: species
@@ -1289,13 +1306,20 @@ contains
         species = int(get_species(site), kind=c_int)
     end function c_get_species
 
-    ! Get system size
+    ! Get system size (unit cells)
     subroutine c_get_system_size(nx, ny, nz) bind(C, name="kmc_get_system_size")
         integer(c_int), intent(out) :: nx, ny, nz
         nx = int(system_size(1), kind=c_int)
         ny = int(system_size(2), kind=c_int)
         nz = int(system_size(3), kind=c_int)
     end subroutine c_get_system_size
+
+    ! Get total number of sites (accounts for multiple sites per unit cell)
+    function c_get_total_sites() bind(C, name="kmc_get_total_sites") result(total_sites)
+        use lattice, only: spuck
+        integer(c_int) :: total_sites
+        total_sites = int(system_size(1) * system_size(2) * system_size(3) * spuck, kind=c_int)
+    end function c_get_total_sites
 
     ! Set rate constant for a process
     subroutine c_set_rate_const(proc_nr, rate) bind(C, name="kmc_set_rate")
@@ -1330,6 +1354,23 @@ contains
         call get_rate(int(proc_nr, kind=iint), rate_f)
         rate = real(rate_f, kind=c_double)
     end function c_get_rate
+
+    ! Get integrated rate (rate * nr_of_sites) for a process
+    function c_get_integ_rate(proc_nr) bind(C, name="kmc_get_integ_rate") result(integ_rate)
+        integer(c_int), intent(in), value :: proc_nr
+        real(c_double) :: integ_rate
+        real(kind=rdouble) :: integ_rate_f
+        integer(kind=iint) :: nr_sites_f
+
+        ! Get rate constant
+        call get_rate(int(proc_nr, kind=iint), integ_rate_f)
+
+        ! Multiply by number of available sites
+        call get_nrofsites(int(proc_nr, kind=iint), nr_sites_f)
+        integ_rate_f = integ_rate_f * real(nr_sites_f, kind=rdouble)
+
+        integ_rate = real(integ_rate_f, kind=c_double)
+    end function c_get_integ_rate
 
     ! Manually trigger update_accum_rate (for debugging)
     subroutine c_update_accum_rate() bind(C, name="kmc_update_accum_rate")
