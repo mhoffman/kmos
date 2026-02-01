@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "kmos"
+name = "python-kmos"
 version = "0.5.0"  # Managed by bump-my-version
 description = "kMC modeling on steroids"
 readme = "README.md"
